@@ -15,12 +15,12 @@ Rust-Crypto is dual licensed under the MIT and Apache 2.0 licenses, the same lic
 as the Rust compiler.
 
 ## Supported algorithms
-* BLAKE2
-* MD4
-* MD5
-* SHA-1
-* SHA-2
-* SHA-3
-* Streebog (GOST R 34.11-2012)
-* RIPEMD-160
-* Whirlpool
+* [BLAKE2](https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2)
+* [MD4](https://en.wikipedia.org/wiki/MD4)
+* [MD5](https://en.wikipedia.org/wiki/MD5)
+* [SHA-1](https://en.wikipedia.org/wiki/SHA-1)
+* [SHA-2](https://en.wikipedia.org/wiki/SHA-2)
+* [SHA-3](https://en.wikipedia.org/wiki/SHA-3)
+* [Streebog](https://en.wikipedia.org/wiki/Streebog) (GOST R 34.11-2012)
+* [RIPEMD-160](https://en.wikipedia.org/wiki/RIPEMD)
+* [Whirlpool](https://en.wikipedia.org/wiki/Whirlpool_(cryptography))
