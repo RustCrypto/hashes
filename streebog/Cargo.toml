@@ -1,0 +1,18 @@
+[package]
+name = "streebog"
+version = "0.1.0"
+authors = ["The Rust-Crypto Project Developers"]
+license = "MIT/Apache-2.0"
+description = "Streebog (GOST R 34.11-2012) hash function"
+documentation = "https://docs.rs/streebog"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "streebog", "gost", "hash", "digest"]
+
+[dependencies]
+digest-buffer = "0.1"
+byte-tools = "0.1"
+generic-array = "0.5"
+digest = "0.2"
+
+[dev-dependencies]
+crypto-tests = "0.1"

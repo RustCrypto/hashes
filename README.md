@@ -21,5 +21,6 @@ as the Rust compiler.
 * SHA-1
 * SHA-2
 * SHA-3
+* Streebog (GOST R 34.11-2012)
 * RIPEMD-160
 * Whirlpool
