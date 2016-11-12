@@ -2,47 +2,13 @@ use digest::Digest;
 use digest_buffer::DigestBuffer;
 use generic_array::typenum::{Unsigned, U64};
 use generic_array::{GenericArray, ArrayLength};
-use byte_tools::{write_u64_le, copy_memory};
+use byte_tools::{write_u64v_le, copy_memory};
 use core::marker::PhantomData;
 
-use consts::{BLOCK_SIZE, P, T, C};
+use consts::{BLOCK_SIZE, P, C};
 use table::LIN_TABLE;
 
 type Block = [u8; BLOCK_SIZE];
-
-#[inline(always)]
-fn lps(h: &mut Block, n: &Block) {
-    for i in 0..64 {
-        h[i] ^= n[i];
-    }
-
-    let mut block = [0u8; BLOCK_SIZE];
-    for i in 0..64 {
-        block[T[i] as usize] = P[h[i] as usize];
-    }
-
-    let mut k = 0;
-    for chunk in h.chunks_mut(8) {
-        let mut accum: u64 = 0;
-        for val in LIN_TABLE.iter() {
-            accum ^= val[block[k] as usize];
-            k += 1;
-        }
-        write_u64_le(chunk, accum);
-    }
-
-
-    /*
-    let mut buf = [0u64; BLOCK_SIZE/8];
-    read_u64v_le(&mut buf, &output);
-    for b in buf.iter_mut() {
-        *b = A.iter().enumerate().fold(0u64,
-            |acc, (i, x)| acc^(((*b & (1<<i))>>i)*x));
-        write_u64v_le(&mut h[..], &buf);
-    }*/
-}
-
-
 
 struct StreebogState {
     h: Block,
@@ -50,8 +16,26 @@ struct StreebogState {
     sigma: Block,
 }
 
+#[inline(always)]
+fn lps(h: &mut Block, n: &Block) {
+    for i in 0..64 {
+        h[i] ^= n[i];
+    }
+
+    let mut buf = [0u64; 8];
+
+    for i in 0..8 {
+        for j in 0..8 {
+            let b = h[i + 8*j] as usize;
+            let val = P[b] as usize;
+            buf[i] ^= LIN_TABLE[j][val];
+        }
+    }
+
+    write_u64v_le(h, &buf);
+}
+
 impl StreebogState {
-    #[inline(always)]
     fn g(&mut self, n: &Block, m: &[u8]) {
         let mut key = [0u8; BLOCK_SIZE];
         let mut block = [0u8; BLOCK_SIZE];
@@ -66,12 +50,11 @@ impl StreebogState {
             lps(&mut key, &C[i]);
         }
 
-        for (i, h_b) in self.h.iter_mut().enumerate() {
-            *h_b ^= block[i] ^ key[i]  ^ m[i];
+        for i in 0..64 {
+            self.h[i] ^= block[i] ^ key[i]  ^ m[i];
         }
     }
 
-    #[inline(always)]
     fn update_sigma(&mut self, m: &[u8]) {
         let mut over = 0u16;
         for (a, b) in self.sigma.iter_mut().zip(m.iter()) {
@@ -81,7 +64,6 @@ impl StreebogState {
         }
     }
 
-    #[inline(always)]
     fn update_n(&mut self, m_len: u8) {
         let res = (self.n[0] as u16) + ((m_len as u16) << 3);
         self.n[0] = (res & 0xff) as u8;
@@ -95,7 +77,6 @@ impl StreebogState {
         }
     }
 
-    #[inline(always)]
     fn process_block(&mut self, block: &[u8], msg_len: u8) {
         assert!(block.len() == BLOCK_SIZE);
         let n = self.n;
