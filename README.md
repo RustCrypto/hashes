@@ -16,6 +16,7 @@ as the Rust compiler.
 
 ## Supported algorithms
 * [BLAKE2](https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2)
+* [GOST94](https://en.wikipedia.org/wiki/GOST_(hash_function)) (GOST R 34.11-94)
 * [MD4](https://en.wikipedia.org/wiki/MD4)
 * [MD5](https://en.wikipedia.org/wiki/MD5)
 * [SHA-1](https://en.wikipedia.org/wiki/SHA-1)
