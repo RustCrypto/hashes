@@ -1,6 +1,6 @@
-extern crate md4;
+extern crate sha2;
 
-use md4::{Md4, Digest};
+use sha2::{Sha512, Digest};
 use std::env;
 use std::fs;
 use std::io::{self, Read};
@@ -18,7 +18,7 @@ fn print_result(sum: &[u8], name: &str) {
 /// Compute digest value for given `Reader` and print it
 /// On any error simply return without doing anything
 fn process<D: Digest + Default, R: Read>(reader: &mut R, name: &str) {
-    let mut sh: D = Default::default();
+    let mut sh = D::default();
     let mut buffer = [0u8; BUFFER_SIZE];
     loop {
         let n = match reader.read(&mut buffer) {
@@ -40,10 +40,10 @@ fn main() {
     if args.len() > 1 {
         for path in args.skip(1) {
             if let Ok(mut file) = fs::File::open(&path) {
-                process::<Md4, _>(&mut file, &path);
+                process::<Sha512, _>(&mut file, &path);
             }
         }
     } else {
-        process::<Md4, _>(&mut io::stdin(), "-");
+        process::<Sha512, _>(&mut io::stdin(), "-");
     }
 }

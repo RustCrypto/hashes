@@ -40,95 +40,6 @@ use consts::*;
 
 type BlockSize = U64;
 
-#[derive(Copy, Clone)]
-pub struct Whirlpool {
-    bit_length: [u8; 32],
-    buffer: DigestBuffer<BlockSize>,
-    hash: [u64; 8],
-}
-
-impl Whirlpool {
-
-    fn finalize(&mut self) {
-        // padding
-        assert!(self.buffer.remaining() >= 1);
-        let hash = &mut self.hash;
-        self.buffer.input(&[0b10000000], |b| { process_buffer(hash, b); });
-
-        if self.buffer.remaining() < self.bit_length.len() {
-            let size = self.buffer.size();
-            self.buffer.zero_until(size);
-            process_buffer(hash, self.buffer.full_buffer());
-        }
-
-        // length
-        self.buffer.zero_until(32);
-        self.buffer.input(&self.bit_length, |b| { process_buffer(hash, b); });
-        assert!(self.buffer.position() == 0);
-    }
-}
-
-impl Digest for Whirlpool {
-    type R = U64;
-    type B = BlockSize;
-
-    fn new() -> Whirlpool {
-        Whirlpool{
-            bit_length: [0; 32],
-            buffer: Default::default(),
-            hash: [0; 8],
-        }
-    }
-
-    fn input(&mut self, source: &[u8]) {
-        // (byte length * 8) = (bit lenght) converted in a 72 bit uint
-        let len = source.len() as u64;
-        let len_bits = [
-            ((len >> (56 + 5))       ) as u8,
-            ((len >> (48 + 5)) & 0xff) as u8,
-            ((len >> (40 + 5)) & 0xff) as u8,
-            ((len >> (32 + 5)) & 0xff) as u8,
-            ((len >> (24 + 5)) & 0xff) as u8,
-            ((len >> (16 + 5)) & 0xff) as u8,
-            ((len >> ( 8 + 5)) & 0xff) as u8,
-            ((len >> ( 0 + 5)) & 0xff) as u8,
-            ((len << 3) & 0xff) as u8,
-        ];
-
-        // adds the 72 bit len_bits to the 256 bit self.bit_length
-        let mut carry = false;
-        for i in 0..32 {
-            let mut x = self.bit_length[self.bit_length.len() - i - 1] as u16;
-            
-            if i < len_bits.len() {
-                x += len_bits[len_bits.len() - i - 1] as u16;
-            } else if !carry {
-                break;
-            }
-
-            if carry {
-                x += 1;
-            }
-            
-            carry = x > 0xff;
-            let pos = self.bit_length.len() -i - 1;
-            self.bit_length[pos] = (x & 0xff) as u8;
-        }
-
-        // process the data itself
-        let hash = &mut self.hash;
-        self.buffer.input(source, |b| { process_buffer(hash, b); });
-    }
-
-    fn result(mut self) -> GenericArray<u8, Self::R> {
-        self.finalize();
-
-        let mut out = GenericArray::new();
-        write_u64v_be(&mut out, &self.hash[..]);
-        out
-    }
-}
-
 fn process_buffer(hash: &mut[u64; 8], buffer: &[u8]) {
     let mut k: [u64; 8] = unsafe { uninitialized() };
     let mut block: [u64; 8] = unsafe { uninitialized() };
@@ -180,5 +91,97 @@ fn process_buffer(hash: &mut[u64; 8], buffer: &[u8]) {
 
     for i in 0..8 {
         hash[i] ^= state[i] ^ block[i];
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct Whirlpool {
+    bit_length: [u8; 32],
+    buffer: DigestBuffer<BlockSize>,
+    hash: [u64; 8],
+}
+
+impl Whirlpool {
+    pub fn new() -> Whirlpool {
+        Whirlpool{
+            bit_length: [0; 32],
+            buffer: Default::default(),
+            hash: [0; 8],
+        }
+    }
+
+    fn finalize(&mut self) {
+        // padding
+        assert!(self.buffer.remaining() >= 1);
+        let hash = &mut self.hash;
+        self.buffer.input(&[0b10000000], |b| { process_buffer(hash, b); });
+
+        if self.buffer.remaining() < self.bit_length.len() {
+            let size = self.buffer.size();
+            self.buffer.zero_until(size);
+            process_buffer(hash, self.buffer.full_buffer());
+        }
+
+        // length
+        self.buffer.zero_until(32);
+        self.buffer.input(&self.bit_length, |b| { process_buffer(hash, b); });
+        assert!(self.buffer.position() == 0);
+    }
+}
+
+impl Default for Whirlpool {
+    fn default() -> Self { Self::new() }
+}
+
+impl Digest for Whirlpool {
+    type OutputSize = U64;
+    type BlockSize = BlockSize;
+
+    fn input(&mut self, source: &[u8]) {
+        // (byte length * 8) = (bit lenght) converted in a 72 bit uint
+        let len = source.len() as u64;
+        let len_bits = [
+            ((len >> (56 + 5))       ) as u8,
+            ((len >> (48 + 5)) & 0xff) as u8,
+            ((len >> (40 + 5)) & 0xff) as u8,
+            ((len >> (32 + 5)) & 0xff) as u8,
+            ((len >> (24 + 5)) & 0xff) as u8,
+            ((len >> (16 + 5)) & 0xff) as u8,
+            ((len >> ( 8 + 5)) & 0xff) as u8,
+            ((len >> ( 0 + 5)) & 0xff) as u8,
+            ((len << 3) & 0xff) as u8,
+        ];
+
+        // adds the 72 bit len_bits to the 256 bit self.bit_length
+        let mut carry = false;
+        for i in 0..32 {
+            let mut x = self.bit_length[self.bit_length.len() - i - 1] as u16;
+            
+            if i < len_bits.len() {
+                x += len_bits[len_bits.len() - i - 1] as u16;
+            } else if !carry {
+                break;
+            }
+
+            if carry {
+                x += 1;
+            }
+            
+            carry = x > 0xff;
+            let pos = self.bit_length.len() -i - 1;
+            self.bit_length[pos] = (x & 0xff) as u8;
+        }
+
+        // process the data itself
+        let hash = &mut self.hash;
+        self.buffer.input(source, |b| { process_buffer(hash, b); });
+    }
+
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+        self.finalize();
+
+        let mut out = GenericArray::new();
+        write_u64v_be(&mut out, &self.hash[..]);
+        out
     }
 }

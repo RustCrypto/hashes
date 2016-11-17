@@ -66,6 +66,22 @@ macro_rules! round( ($r:expr, $v:expr, $m:expr) => ( {
 ));
 
 impl<N> Blake2s<N> where N: ArrayLength<u8> + Copy {
+    pub fn new() -> Blake2s<N> {
+        assert!(N::to_usize() > 0 && N::to_usize() <= BLAKE2S_OUTBYTES);
+        let default_param = Blake2sParam {
+            key_length: 0,
+            fanout: 1,
+            depth: 1,
+            leaf_length: 0,
+            node_offset: [0; 6],
+            node_depth: 0,
+            inner_length: 0,
+            salt: [0; BLAKE2S_SALTBYTES],
+            personal: [0; BLAKE2S_PERSONALBYTES],
+        };
+        Blake2s::init(default_param, &[])
+    }
+
     fn set_lastnode(&mut self) {
         self.f[1] = 0xFFFFFFFF;
     }
@@ -239,29 +255,17 @@ impl<N> Blake2s<N> where N: ArrayLength<u8> + Copy {
     }
 }
 
-impl<N> Digest for Blake2s<N> where N: ArrayLength<u8> + Copy {
-    type R = N;
-    type B = U32;
+impl<N> Default for Blake2s<N> where N: ArrayLength<u8> + Copy {
+    fn default() -> Self { Self::new() }
+}
 
-    fn new() -> Blake2s<N> {
-        assert!(N::to_usize() > 0 && N::to_usize() <= BLAKE2S_OUTBYTES);
-        let default_param = Blake2sParam {
-            key_length: 0,
-            fanout: 1,
-            depth: 1,
-            leaf_length: 0,
-            node_offset: [0; 6],
-            node_depth: 0,
-            inner_length: 0,
-            salt: [0; BLAKE2S_SALTBYTES],
-            personal: [0; BLAKE2S_PERSONALBYTES],
-        };
-        Blake2s::init(default_param, &[])
-    }
+impl<N> Digest for Blake2s<N> where N: ArrayLength<u8> + Copy {
+    type OutputSize = N;
+    type BlockSize = U32;
 
     fn input(&mut self, input: &[u8]) { self.update(input); }
 
-    fn result(self) -> GenericArray<u8, Self::R> { self.finalize() }
+    fn result(self) -> GenericArray<u8, Self::OutputSize> { self.finalize() }
 }
 
 /*

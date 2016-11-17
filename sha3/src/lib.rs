@@ -80,6 +80,17 @@ pub type Shake256<N> = Sha3<N, U136, U4>;
 impl<N, K, M> Sha3<N, K, M>
     where N: ArrayLength<u8>, K: ArrayLength<u8>, M: ArrayLength<u8> {
 
+    pub fn new() -> Sha3<N, K, M> {
+        Sha3 {
+            state: GenericArray::new(),
+            offset: 0,
+
+            digest_length: Default::default(),
+            rate: Default::default(),
+            ds_len: Default::default(),
+        }
+    }
+
     fn finalize(&mut self) {
         let ds_len = M::to_usize();
 
@@ -133,21 +144,15 @@ impl<N, K, M> Sha3<N, K, M>
     fn rate(&self) -> usize { K::to_usize() }
 }
 
+impl<L, K, M> Default for Sha3<L, K, M>
+        where L: ArrayLength<u8>, K: ArrayLength<u8>, M: ArrayLength<u8> {
+    fn default() -> Self { Self::new() }
+}
+
 impl<L, K, M> Digest for Sha3<L, K, M>
     where L: ArrayLength<u8>, K: ArrayLength<u8>, M: ArrayLength<u8> {
-    type R = L;
-    type B = K;
-
-    fn new() -> Sha3<L, K, M> {
-        Sha3 {
-            state: GenericArray::new(),
-            offset: 0,
-
-            digest_length: Default::default(),
-            rate: Default::default(),
-            ds_len: Default::default(),
-        }
-    }
+    type OutputSize = L;
+    type BlockSize = K;
 
     fn input(&mut self, data: &[u8]) {
         assert!(self.offset < K::to_usize());
@@ -175,16 +180,16 @@ impl<L, K, M> Digest for Sha3<L, K, M>
         }
     }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let r = K::to_usize();
-        let out_len = Self::R::to_usize();
+        let out_len = Self::OutputSize::to_usize();
         assert!(self.offset < out_len);
         assert!(self.offset < r);
 
         let mut out = GenericArray::new();
-        let in_len = Self::R::to_usize();
+        let in_len = Self::OutputSize::to_usize();
         let mut in_pos: usize = 0;
 
         // Squeeze

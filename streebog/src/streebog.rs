@@ -93,11 +93,8 @@ pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
     digest_size: PhantomData<DigestSize>,
 }
 
-impl<N> Digest for Streebog<N>  where N: ArrayLength<u8> + Copy {
-    type R = N;
-    type B = U64;
-
-    fn new() -> Streebog<N> {
+impl<N> Streebog<N> where N: ArrayLength<u8> + Copy {
+    pub fn new() -> Streebog<N> {
         let h = match N::to_usize() {
             64 => [0; BLOCK_SIZE],
             32 => [1; BLOCK_SIZE],
@@ -113,6 +110,16 @@ impl<N> Digest for Streebog<N>  where N: ArrayLength<u8> + Copy {
             digest_size: Default::default(),
         }
     }
+}
+
+impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
+    fn default() -> Self { Self::new() }
+}
+
+
+impl<N> Digest for Streebog<N>  where N: ArrayLength<u8> + Copy {
+    type OutputSize = N;
+    type BlockSize = U64;
 
     fn input(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
@@ -121,7 +128,7 @@ impl<N> Digest for Streebog<N>  where N: ArrayLength<u8> + Copy {
         });
     }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         let self_state = &mut self.state;
         let buf = self.buffer.current_buffer();
 
@@ -138,7 +145,7 @@ impl<N> Digest for Streebog<N>  where N: ArrayLength<u8> + Copy {
 
         let mut out = GenericArray::new();
 
-        let n = BLOCK_SIZE - Self::R::to_usize();
+        let n = BLOCK_SIZE - Self::OutputSize::to_usize();
         copy_memory(&self_state.h[n..], &mut out);
         
         out

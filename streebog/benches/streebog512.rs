@@ -2,6 +2,6 @@
 #![feature(test)]
 #[macro_use]
 extern crate crypto_tests;
-extern crate whirlpool;
+extern crate streebog;
 
-bench_digest!(whirlpool::Whirlpool);
+bench_digest!(streebog::Streebog512);

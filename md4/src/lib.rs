@@ -105,6 +105,14 @@ impl Md4State {
 }
 
 impl Md4 {
+    pub fn new() -> Md4 {
+        Md4 {
+            length_bytes: 0,
+            buffer: Default::default(),
+            state: Md4State::new()
+        }
+    }
+
     fn finalize(&mut self) {
         let self_state = &mut self.state;
         self.buffer.standard_padding(8, |d: &[u8]| { self_state.process_block(d); });
@@ -114,17 +122,13 @@ impl Md4 {
     }
 }
 
-impl Digest for Md4 {
-    type R = U16;
-    type B = BlockSize;
+impl Default for Md4 {
+    fn default() -> Self { Self::new() }
+}
 
-    fn new() -> Md4 {
-        Md4 {
-            length_bytes: 0,
-            buffer: Default::default(),
-            state: Md4State::new()
-        }
-    }
+impl Digest for Md4 {
+    type OutputSize = U16;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, input: &[u8]) {
         // 2^64 - ie: integer overflow is OK.
@@ -134,7 +138,7 @@ impl Digest for Md4 {
         );
     }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::new();

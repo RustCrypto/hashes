@@ -1,6 +1,6 @@
-extern crate md4;
+extern crate whirlpool;
 
-use md4::{Md4, Digest};
+use whirlpool::{Whirlpool, Digest};
 use std::env;
 use std::fs;
 use std::io::{self, Read};
@@ -40,10 +40,10 @@ fn main() {
     if args.len() > 1 {
         for path in args.skip(1) {
             if let Ok(mut file) = fs::File::open(&path) {
-                process::<Md4, _>(&mut file, &path);
+                process::<Whirlpool, _>(&mut file, &path);
             }
         }
     } else {
-        process::<Md4, _>(&mut io::stdin(), "-");
+        process::<Whirlpool, _>(&mut io::stdin(), "-");
     }
 }

@@ -2,6 +2,6 @@
 #![feature(test)]
 #[macro_use]
 extern crate crypto_tests;
-extern crate whirlpool;
+extern crate sha2;
 
-bench_digest!(whirlpool::Whirlpool);
+bench_digest!(sha2::Sha256);

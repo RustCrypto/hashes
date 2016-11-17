@@ -1,6 +1,6 @@
 [package]
 name = "sha2"
-version = "0.1.0"
+version = "0.3.0"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "SHA-2 hash functions"
@@ -11,9 +11,9 @@ keywords = ["crypto", "sha2", "hash", "digest"]
 [dependencies]
 fake-simd = "0.1"
 byte-tools = "0.1"
-digest = "0.2"
+digest = "0.3"
 digest-buffer = "0.1"
 generic-array = "0.5"
 
 [dev-dependencies]
-crypto-tests = "0.1"
+crypto-tests = "0.2"

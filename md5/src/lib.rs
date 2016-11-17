@@ -143,6 +143,15 @@ pub struct Md5 {
 }
 
 impl Md5 {
+    pub fn new() -> Md5 {
+        Md5 {
+            length_bytes: 0,
+            buffer: Default::default(),
+            state: Md5State::new(),
+        }
+    }
+
+
     fn finalize(&mut self) {
         let self_state = &mut self.state;
         self.buffer.standard_padding(8, |d: &[u8]| {
@@ -154,17 +163,13 @@ impl Md5 {
     }
 }
 
-impl Digest for Md5 {
-    type R = U16;
-    type B = BlockSize;
+impl Default for Md5 {
+    fn default() -> Self { Self::new() }
+}
 
-    fn new() -> Md5 {
-        Md5 {
-            length_bytes: 0,
-            buffer: Default::default(),
-            state: Md5State::new(),
-        }
-    }
+impl Digest for Md5 {
+    type OutputSize = U16;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, input: &[u8]) {
         // Unlike Sha1 and Sha2, the length value in MD5 is defined as
@@ -176,7 +181,7 @@ impl Digest for Md5 {
         });
     }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::new();

@@ -78,6 +78,14 @@ pub struct Sha1 {
 }
 
 impl Sha1 {
+    pub fn new() -> Sha1 {
+        Sha1 {
+            h: H,
+            length_bits: 0u64,
+            buffer: Default::default(),
+        }
+    }
+
     fn finalize(&mut self) {
         let st_h = &mut self.h;
         self.buffer
@@ -93,16 +101,8 @@ impl Default for Sha1 {
 }
 
 impl Digest for Sha1 {
-    type R = U20;
-    type B = BlockSize;
-
-    fn new() -> Sha1 {
-        Sha1 {
-            h: H,
-            length_bits: 0u64,
-            buffer: Default::default(),
-        }
-    }
+    type OutputSize = U20;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, msg: &[u8]) {
         // Assumes that msg.len() can be converted to u64 without overflow
@@ -113,7 +113,7 @@ impl Digest for Sha1 {
         });
     }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::new();

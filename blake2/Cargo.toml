@@ -1,6 +1,6 @@
 [package]
 name = "blake2"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "BLAKE2 hash functions"
@@ -10,10 +10,10 @@ keywords = ["crypto", "blake2", "hash", "digest"]
 
 [dependencies]
 byte-tools = "0.1"
-digest = "0.2"
+digest = "0.3"
 generic-array = "0.5"
 crypto-ops = "0.1"
 #crypto-mac = {path = "../../../rust-crypto-decoupled/utils/crypto-mac/"}
 
 [dev-dependencies]
-crypto-tests = "0.1"
+crypto-tests = "0.2"

@@ -74,15 +74,21 @@ pub struct Sha512 {
     engine: Engine512,
 }
 
-impl Digest for Sha512 {
-    type R = U64;
-    type B = BlockSize;
+impl Sha512 {
+    pub fn new() -> Sha512 { Sha512 { engine: Engine512::new(&H512) } }
+}
 
-    fn new() -> Sha512 { Sha512 { engine: Engine512::new(&H512) } }
+impl Default for Sha512 {
+    fn default() -> Self { Self::new() }
+}
+
+impl Digest for Sha512 {
+    type OutputSize = U64;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, msg: &[u8]) { self.engine.input(msg); }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::new();
@@ -100,15 +106,21 @@ pub struct Sha384 {
     engine: Engine512,
 }
 
-impl Digest for Sha384 {
-    type R = U48;
-    type B = BlockSize;
+impl Sha384 {
+    pub fn new() -> Sha384 { Sha384 { engine: Engine512::new(&H384) } }
+}
 
-    fn new() -> Sha384 { Sha384 { engine: Engine512::new(&H384) } }
+impl Default for Sha384 {
+    fn default() -> Self { Self::new() }
+}
+
+impl Digest for Sha384 {
+    type OutputSize = U48;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, d: &[u8]) { self.engine.input(d); }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::new();
@@ -125,17 +137,24 @@ pub struct Sha512Trunc256 {
     engine: Engine512,
 }
 
-impl Digest for Sha512Trunc256 {
-    type R = U32;
-    type B = BlockSize;
-
-    fn new() -> Sha512Trunc256 {
+impl Sha512Trunc256 {
+    pub fn new() -> Sha512Trunc256 {
         Sha512Trunc256 { engine: Engine512::new(&H512_TRUNC_256) }
     }
+}
+
+impl Default for Sha512Trunc256 {
+    fn default() -> Self { Self::new() }
+}
+
+
+impl Digest for Sha512Trunc256 {
+    type OutputSize = U32;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, d: &[u8]) { self.engine.input(d); }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::new();
@@ -152,17 +171,23 @@ pub struct Sha512Trunc224 {
     engine: Engine512,
 }
 
-impl Digest for Sha512Trunc224 {
-    type R = U28;
-    type B = BlockSize;
-
-    fn new() -> Sha512Trunc224 {
+impl Sha512Trunc224 {
+    pub fn new() -> Sha512Trunc224 {
         Sha512Trunc224 { engine: Engine512::new(&H512_TRUNC_224) }
     }
+}
+
+impl Default for Sha512Trunc224 {
+    fn default() -> Self { Self::new() }
+}
+
+impl Digest for Sha512Trunc224 {
+    type OutputSize = U28;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, d: &[u8]) { self.engine.input(d); }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::new();

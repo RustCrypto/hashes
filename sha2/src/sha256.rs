@@ -70,15 +70,21 @@ pub struct Sha256 {
     engine: Engine256,
 }
 
-impl Digest for Sha256 {
-    type R = U32;
-    type B = BlockSize;
+impl Sha256 {
+    pub fn new() -> Sha256 { Sha256 { engine: Engine256::new(&H256) } }
+}
 
-    fn new() -> Sha256 { Sha256 { engine: Engine256::new(&H256) } }
+impl Default for Sha256 {
+    fn default() -> Self { Self::new() }
+}
+
+impl Digest for Sha256 {
+    type OutputSize = U32;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, msg: &[u8]) { self.engine.input(msg); }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::new();
         write_u32v_be(&mut out, &self.engine.state.h);
@@ -93,15 +99,21 @@ pub struct Sha224 {
     engine: Engine256,
 }
 
-impl Digest for Sha224 {
-    type R = U28;
-    type B = BlockSize;
+impl Sha224 {
+    pub fn new() -> Sha224 { Sha224 { engine: Engine256::new(&H224) } }
+}
 
-    fn new() -> Sha224 { Sha224 { engine: Engine256::new(&H224) } }
+impl Default for Sha224 {
+    fn default() -> Self { Self::new() }
+}
+
+impl Digest for Sha224 {
+    type OutputSize = U28;
+    type BlockSize = BlockSize;
 
     fn input(&mut self, msg: &[u8]) { self.engine.input(msg); }
 
-    fn result(mut self) -> GenericArray<u8, Self::R> {
+    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::new();
         write_u32v_be(&mut out[..28], &self.engine.state.h[..7]);

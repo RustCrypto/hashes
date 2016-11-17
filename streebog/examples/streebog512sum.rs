@@ -17,8 +17,8 @@ fn print_result(sum: &[u8], name: &str) {
 
 /// Compute digest value for given `Reader` and print it
 /// On any error simply return without doing anything
-fn process<D: Digest, R: Read>(reader: &mut R, name: &str) {
-    let mut sh = D::new();
+fn process<D: Digest + Default, R: Read>(reader: &mut R, name: &str) {
+    let mut sh = D::default();
     let mut buffer = [0u8; BUFFER_SIZE];
     loop {
         let n = match reader.read(&mut buffer) {
