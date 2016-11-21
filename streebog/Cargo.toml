@@ -1,6 +1,6 @@
 [package]
 name = "streebog"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "Streebog (GOST R 34.11-2012) hash function"
