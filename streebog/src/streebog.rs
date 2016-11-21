@@ -24,10 +24,12 @@ fn lps(h: &mut Block, n: &Block) {
 
     let mut buf = [0u64; 8];
 
-    for i in 0..8 {
+    for i in 0..4 {
         for j in 0..8 {
-            let b = h[i + 8*j] as usize;
-            buf[i] ^= SHUFFLED_LIN_TABLE[j][b];
+            let b = h[2*i + 8*j] as usize;
+            buf[2*i] ^= SHUFFLED_LIN_TABLE[j][b];
+            let b = h[2*i+1 + 8*j] as usize;
+            buf[2*i+1] ^= SHUFFLED_LIN_TABLE[j][b];
         }
     }
 
