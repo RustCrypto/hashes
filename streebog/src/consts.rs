@@ -1,9 +1,13 @@
+//! Constants defined in the Streebog specification
+//!
+//! In the code for optimization purposes `table::SHUFFLED_LIN_TABLE` is used
+//! instead of `A` and `P`
 
 pub const BLOCK_SIZE: usize = 64;
 
-// Precomputed table used instead
-/*
-pub const A:[u64; 64] = [
+/// Linear transformation matrix
+#[cfg(test)]
+pub const A:[u64; BLOCK_SIZE] = [
     0x641c314b2b8ee083, 0xc83862965601dd1b, 0x8d70c431ac02a736, 0x07e095624504536c,
     0x0edd37c48a08a6d8, 0x1ca76e95091051ad, 0x3853dc371220a247, 0x70a6a56e2440598e,
     0xa48b474f9ef5dc18, 0x550b8e9e21f7a530, 0xaa16012142f35760, 0x492c024284fbaec0,
@@ -22,6 +26,8 @@ pub const A:[u64; 64] = [
     0xd8045870ef14980e, 0xad08b0e0c3282d1c, 0x47107ddd9b505a38, 0x8e20faa72ba0b470,
 ];
 
+/// Substitution table
+#[cfg(test)]
 pub const P: [u8; 256] = [
     252, 238, 221, 17, 207, 110, 49, 22, 251, 196, 250, 218, 35, 197, 4, 77,
     233, 119, 240, 219, 147, 46, 153, 186, 23, 54, 241, 187, 20, 205, 95, 193,
@@ -39,9 +45,10 @@ pub const P: [u8; 256] = [
     254, 141, 83, 170, 144, 202, 216, 133, 97, 32,  113, 103, 164, 45, 43, 9,
     91, 203, 155, 37, 208, 190, 229, 108, 82, 89, 166, 116, 210, 230, 244, 180,
     192, 209, 102, 175, 194, 57, 75, 99, 182
-];*/
+];
 
-pub const C: [[u8; 64]; 12] = [
+/// Iteration constants
+pub const C: [[u8; BLOCK_SIZE]; 12] = [
     [
         0x07, 0x45, 0xa6, 0xf2, 0x59, 0x65, 0x80, 0xdd,
         0x23, 0x4d, 0x74, 0xcc, 0x36, 0x74, 0x76, 0x05,

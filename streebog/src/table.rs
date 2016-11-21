@@ -1,25 +1,7 @@
-//! Precomputed, pre-shuffled table for linear transformation using matrix `const::A` and shuffled
-//! using `const::P`
+//! Precomputed, pre-shuffled table for linear transformation using matrix
+//! `const::A` and shuffled using `const::P`
 //!
-//! It was created using the following code:
-//! 
-//! ```ignore
-//! fn gen_table() -> [[u64; 256]; 8] {
-//!     let mut table: [[u64; 256]; 8] = [[0; 256]; 8];
-//!     for i in 0..8 {
-//!         for j in 0..256 {
-//!             let mut accum = 0u64;
-//!             for k in 0..8 {
-//!                 if P[j] & (1<<k) != 0 {
-//!                     accum ^= A[8*i + k];
-//!                 }
-//!             }
-//!             table[i][j] = accum;
-//!         }
-//!     }
-//!     table
-//! }
-//! ```
+//! It was created using `gen_table` function
 
 pub const SHUFFLED_LIN_TABLE: [[u64; 256]; 8] = [
     [
@@ -544,3 +526,35 @@ pub const SHUFFLED_LIN_TABLE: [[u64; 256]; 8] = [
         0x9A494FAF67707E71, 0xB3DBD1ECA9908293, 0x72D14D3493B2E388, 0xD6A30F258C153427,
     ]
 ];
+
+#[cfg(test)]
+mod test {
+    use consts::{A, P};
+    use super::SHUFFLED_LIN_TABLE;
+
+    fn gen_table() -> [[u64; 256]; 8] {
+        let mut table: [[u64; 256]; 8] = [[0; 256]; 8];
+        for i in 0..8 {
+            for j in 0..256 {
+                let mut accum = 0u64;
+                for k in 0..8 {
+                    if P[j] & (1<<k) != 0 {
+                        accum ^= A[8*i + k];
+                    }
+                }
+                table[i][j] = accum;
+            }
+        }
+        table
+    }
+
+    #[test]
+    fn test_table() {
+        let table = gen_table();
+        for i in 0..8 {
+            for j in 0..256 {
+                assert_eq!(SHUFFLED_LIN_TABLE[i][j], table[i][j]);
+            }
+        }
+    }
+}
