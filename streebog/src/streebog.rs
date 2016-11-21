@@ -5,8 +5,8 @@ use generic_array::{GenericArray, ArrayLength};
 use byte_tools::{write_u64v_le, copy_memory};
 use core::marker::PhantomData;
 
-use consts::{BLOCK_SIZE, P, C};
-use table::LIN_TABLE;
+use consts::{BLOCK_SIZE, C};
+use table::SHUFFLED_LIN_TABLE;
 
 type Block = [u8; BLOCK_SIZE];
 
@@ -24,11 +24,12 @@ fn lps(h: &mut Block, n: &Block) {
 
     let mut buf = [0u64; 8];
 
-    for i in 0..8 {
+    for i in 0..4 {
         for j in 0..8 {
-            let b = h[i + 8*j] as usize;
-            let val = P[b] as usize;
-            buf[i] ^= LIN_TABLE[j][val];
+            let b = h[2*i + 8*j] as usize;
+            buf[2*i] ^= SHUFFLED_LIN_TABLE[j][b];
+            let b = h[2*i+1 + 8*j] as usize;
+            buf[2*i+1] ^= SHUFFLED_LIN_TABLE[j][b];
         }
     }
 
