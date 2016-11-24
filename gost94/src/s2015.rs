@@ -21,7 +21,7 @@ pub struct Gost94s2015 {
 
 impl Gost94s2015 {
     pub fn new() -> Self {
-        Self{sh: Gost94::new(S2015, [0; BLOCK_SIZE])}
+        Gost94s2015{sh: Gost94::new(S2015, [0; BLOCK_SIZE])}
     }
 }
 

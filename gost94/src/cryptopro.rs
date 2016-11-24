@@ -20,7 +20,7 @@ pub struct Gost94CryptoPro {
 
 impl Gost94CryptoPro {
     pub fn new() -> Self {
-        Self{sh: Gost94::new(S_CRYPTO_PRO, [0; BLOCK_SIZE])}
+        Gost94CryptoPro{sh: Gost94::new(S_CRYPTO_PRO, [0; BLOCK_SIZE])}
     }
 }
 
