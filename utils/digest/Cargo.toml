@@ -1,0 +1,12 @@
+[package]
+name = "digest"
+version = "0.3.1"
+authors = ["The Rust-Crypto Project Developers"]
+license = "MIT/Apache-2.0"
+description = "Digest trait for cryptographic hash functions"
+documentation = "https://docs.rs/digest"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["digest", "crypto", "hash"]
+
+[dependencies]
+generic-array = "0.5"
