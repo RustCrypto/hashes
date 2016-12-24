@@ -21,6 +21,7 @@ mod consts;
 use consts::{C1, C2, C3, C4, S};
 
 type BlockSize = U64;
+type Block = GenericArray<u8, BlockSize>;
 
 /// A structure that represents that state of a digest computation for the MD5
 /// digest function
@@ -34,7 +35,7 @@ impl Md5State {
         Md5State { s: S }
     }
 
-    fn process_block(&mut self, input: &[u8]) {
+    fn process_block(&mut self, input: &Block) {
         fn f(u: u32, v: u32, w: u32) -> u32 { (u & v) | (!u & w) }
 
         fn g(u: u32, v: u32, w: u32) -> u32 { (u & w) | (v & !w) }
@@ -151,10 +152,9 @@ impl Md5 {
         }
     }
 
-
     fn finalize(&mut self) {
         let self_state = &mut self.state;
-        self.buffer.standard_padding(8, |d: &[u8]| {
+        self.buffer.standard_padding(8, |d: &Block| {
             self_state.process_block(d);
         });
         write_u32_le(self.buffer.next(4), (self.length_bytes << 3) as u32);
@@ -176,7 +176,7 @@ impl Digest for Md5 {
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes += input.len() as u64;
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &[u8]| {
+        self.buffer.input(input, |d: &Block| {
             self_state.process_block(d);
         });
     }
@@ -184,7 +184,7 @@ impl Digest for Md5 {
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u32_le(&mut out[0..4], self.state.s.0);
         write_u32_le(&mut out[4..8], self.state.s.1);
         write_u32_le(&mut out[8..12], self.state.s.2);
