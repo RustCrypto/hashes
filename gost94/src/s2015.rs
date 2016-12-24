@@ -1,4 +1,4 @@
-use gost94::{Gost94, SBox, BLOCK_SIZE};
+use gost94::{Gost94, SBox, Block};
 use generic_array::typenum::U32;
 use digest::Digest;
 use generic_array::GenericArray;
@@ -21,7 +21,7 @@ pub struct Gost94s2015 {
 
 impl Gost94s2015 {
     pub fn new() -> Self {
-        Gost94s2015{sh: Gost94::new(S2015, [0; BLOCK_SIZE])}
+        Gost94s2015{sh: Gost94::new(S2015, Block::default())}
     }
 }
 

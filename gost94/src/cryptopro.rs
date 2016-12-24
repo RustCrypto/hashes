@@ -1,4 +1,4 @@
-use gost94::{Gost94, SBox, BLOCK_SIZE};
+use gost94::{Gost94, SBox, Block};
 use generic_array::typenum::U32;
 use digest::Digest;
 use generic_array::GenericArray;
@@ -20,7 +20,7 @@ pub struct Gost94CryptoPro {
 
 impl Gost94CryptoPro {
     pub fn new() -> Self {
-        Gost94CryptoPro{sh: Gost94::new(S_CRYPTO_PRO, [0; BLOCK_SIZE])}
+        Gost94CryptoPro{sh: Gost94::new(S_CRYPTO_PRO, Block::default())}
     }
 }
 

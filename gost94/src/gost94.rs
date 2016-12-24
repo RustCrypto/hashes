@@ -4,14 +4,11 @@ use generic_array::GenericArray;
 use generic_array::typenum::U32;
 use byte_tools::{read_u32v_le, read_u32_le, write_u32v_le, copy_memory};
 
-
-pub const BLOCK_SIZE: usize = 32;
-
-const C:Block = [0, 255, 0, 255, 0, 255, 0, 255, 255, 0, 255, 0, 255, 0,
-255, 0, 0, 255, 255, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 255, 0, 255];
+const C:[u8; 32] = [0, 255, 0, 255, 0, 255, 0, 255, 255, 0, 255, 0, 255, 0,
+    255, 0, 0, 255, 255, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 255, 0, 255];
 
 pub type SBox = [[u8; 16]; 8];
-type Block = [u8; 32];
+pub type Block = GenericArray<u8, U32>;
 
 
 fn sbox(a: u32, s: &SBox) -> u32 {
@@ -50,7 +47,7 @@ fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
 }
 
 fn x(a: &Block, b: &Block) -> Block {
-    let mut out = [0; 32];
+    let mut out = Block::default();
     for i in 0..32 {
         out[i] = a[i]^b[i];
     }
@@ -65,7 +62,7 @@ fn x_mut(a: &mut Block, b: &Block) {
 
 
 fn a(x: Block) -> Block {
-    let mut out = [0; 32];
+    let mut out = Block::default();
     for i in 0..24 {
         out[i] = x[i+8];
     }
@@ -76,7 +73,7 @@ fn a(x: Block) -> Block {
 }
 
 fn p(y: Block) -> Block {
-    let mut out = [0; 32];
+    let mut out = Block::default();
     for i in 0..4 {
         for k in 0..8 {
             out[i+4*k] = y[8*i+k];
@@ -87,7 +84,7 @@ fn p(y: Block) -> Block {
 
 
 fn psi(block: &mut Block) {
-    let mut out = [0u8; 32];
+    let mut out = Block::default();
     copy_memory(&block[2..], &mut out[..30]);
     copy_memory(&block[..2], &mut out[30..]);
 
@@ -108,7 +105,7 @@ struct Gost94State {
 
 impl Gost94State {
     fn shuffle(&mut self, m: &Block, s: &Block) {
-        let mut res = [0u8; 32];
+        let mut res = Block::default();
         copy_memory(s, &mut res);
         for _ in 0..12 {
             psi(&mut res);
@@ -122,7 +119,7 @@ impl Gost94State {
     }
 
     fn f(&mut self, m: &Block) {
-        let mut s = [0u8; 32];
+        let mut s = Block::default();
         copy_memory(&self.h, &mut s);
         let k = p(x(&self.h, m));
         encrypt(&mut s[0..8], k, &self.s);
@@ -133,7 +130,7 @@ impl Gost94State {
         encrypt(&mut s[8..16], k, &self.s);
 
         let mut u = a(u);
-        x_mut(&mut u, &C);
+        x_mut(&mut u, Block::from_slice(&C));
         let v = a(a(v));
         let k = p(x(&u, &v));
         encrypt(&mut s[16..24], k, &self.s);
@@ -168,10 +165,8 @@ impl Gost94State {
         }
     }
 
-    fn process_block(&mut self, block: &[u8], msg_len: u8) {
-        let mut buf = [0u8; 32];
-        copy_memory(block, &mut buf);
-        self.f(&buf);
+    fn process_block(&mut self, block: &Block, msg_len: u8) {
+        self.f(block);
         self.update_n(msg_len);
         self.update_sigma(block);
     }
@@ -190,8 +185,8 @@ impl Gost94 {
             state: Gost94State{
                 s: s,
                 h: h,
-                n: [0; BLOCK_SIZE],
-                sigma: [0; BLOCK_SIZE],
+                n: Block::default(),
+                sigma: Block::default(),
             }
         }
     }
@@ -203,17 +198,17 @@ impl Digest for Gost94 {
 
     fn input(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &[u8]| {
+        self.buffer.input(input, |d: &Block| {
             self_state.process_block(d, 32);
         });
     }
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn result(mut self) -> GenericArray<u8, U32> {
         let self_state = &mut self.state;
         let buf = self.buffer.current_buffer();
 
         if buf.len() != 0 {
-            let mut block = [0u8; BLOCK_SIZE];
+            let mut block = Block::default();
             copy_memory(&buf, &mut block[..buf.len()]);
             self_state.process_block(&block, buf.len() as u8);
         }
@@ -224,7 +219,7 @@ impl Digest for Gost94 {
         let sigma = self_state.sigma;
         self_state.f(&sigma);
 
-        let mut out = GenericArray::new();
+        let mut out = Block::default();
         copy_memory(&self_state.h, &mut out);
         out
     }

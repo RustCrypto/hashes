@@ -1,6 +1,6 @@
 [package]
 name = "gost94"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "GOST R 34.11-94 hash function"
@@ -9,10 +9,10 @@ repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "gost94", "gost", "hash", "digest"]
 
 [dependencies]
-digest-buffer = "0.1"
+digest-buffer = "0.2"
 byte-tools = "0.1"
-generic-array = "0.5"
-digest = "0.3"
+generic-array = "0.6"
+digest = "0.4"
 
 [dev-dependencies]
-crypto-tests = "0.2"
+crypto-tests = "0.3"
