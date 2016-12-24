@@ -4,6 +4,8 @@ extern crate generic_array;
 use generic_array::{GenericArray, ArrayLength};
 use byte_tools::{copy_memory, zero};
 
+type Block<N> = GenericArray<u8, N>;
+
 #[derive(Clone, Copy)]
 pub struct DigestBuffer<N: ArrayLength<u8>> where N::ArrayType: Copy {
     buffer: GenericArray<u8, N>,
@@ -13,12 +15,12 @@ pub struct DigestBuffer<N: ArrayLength<u8>> where N::ArrayType: Copy {
 impl <N: ArrayLength<u8>> DigestBuffer<N> where N::ArrayType: Copy {
     pub fn new() -> DigestBuffer<N> {
         DigestBuffer::<N> {
-            buffer: GenericArray::new(),
+            buffer: Default::default(),
             buffer_idx: 0,
         }
     }
 
-    pub fn input<F: FnMut(&[u8])>(&mut self, input: &[u8], mut func: F) {
+    pub fn input<F: FnMut(&Block<N>)>(&mut self, input: &[u8], mut func: F) {
         let mut i = 0;
         let size = self.size();
         // If there is already data in the buffer, copy as much as we can
@@ -44,7 +46,8 @@ impl <N: ArrayLength<u8>> DigestBuffer<N> where N::ArrayType: Copy {
         // While we have at least a full buffer size chunks's worth of data,
         // process that data without copying it into the buffer
         while input.len() - i >= size {
-            func(&input[i..i + size]);
+            let block = GenericArray::from_slice(&input[i..i + size]);
+            func(block);
             i += size;
         }
 
@@ -73,10 +76,10 @@ impl <N: ArrayLength<u8>> DigestBuffer<N> where N::ArrayType: Copy {
         &mut self.buffer[self.buffer_idx - len..self.buffer_idx]
     }
 
-    pub fn full_buffer(& mut self) -> &[u8] {
+    pub fn full_buffer(& mut self) -> &Block<N> {
         assert!(self.buffer_idx == self.size());
         self.buffer_idx = 0;
-        &self.buffer[..]
+        &self.buffer
     }
 
     pub fn current_buffer(&mut self) -> &[u8] {
@@ -89,7 +92,7 @@ impl <N: ArrayLength<u8>> DigestBuffer<N> where N::ArrayType: Copy {
 
     pub fn remaining(&self) -> usize { self.size() - self.buffer_idx }
 
-    pub fn standard_padding<F: FnMut(&[u8])>(&mut self, rem: usize, mut func: F) {
+    pub fn standard_padding<F: FnMut(&Block<N>)>(&mut self, rem: usize, mut func: F) {
         let size = self.size();
 
         self.next(1)[0] = 128;
