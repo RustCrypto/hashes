@@ -20,6 +20,7 @@ use generic_array::typenum::{U16, U64};
 const S: u32x4 = u32x4(0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476);
 
 type BlockSize = U64;
+type Block = GenericArray<u8, U64>;
 
 #[derive(Copy, Clone)]
 struct Md4State {
@@ -39,7 +40,7 @@ impl Md4State {
         Md4State { s: S }
     }
 
-    fn process_block(&mut self, input: &[u8]) {
+    fn process_block(&mut self, input: &Block) {
         fn f(x: u32, y: u32, z: u32) -> u32 {
             (x & y) | (!x & z)
         }
@@ -115,7 +116,7 @@ impl Md4 {
 
     fn finalize(&mut self) {
         let self_state = &mut self.state;
-        self.buffer.standard_padding(8, |d: &[u8]| { self_state.process_block(d); });
+        self.buffer.standard_padding(8, |d: &Block| { self_state.process_block(d); });
         write_u32_le(self.buffer.next(4), (self.length_bytes << 3) as u32);
         write_u32_le(self.buffer.next(4), (self.length_bytes >> 29) as u32);
         self_state.process_block(self.buffer.full_buffer());
@@ -134,14 +135,14 @@ impl Digest for Md4 {
         // 2^64 - ie: integer overflow is OK.
         self.length_bytes += input.len() as u64;
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &[u8]| { self_state.process_block(d);}
+        self.buffer.input(input, |d: &Block| { self_state.process_block(d);}
         );
     }
 
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u32_le(&mut out[0..4], self.state.s.0);
         write_u32_le(&mut out[4..8], self.state.s.1);
         write_u32_le(&mut out[8..12], self.state.s.2);

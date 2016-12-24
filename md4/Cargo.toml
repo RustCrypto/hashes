@@ -1,6 +1,6 @@
 [package]
 name = "md4"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "MD4 hash function"
@@ -9,11 +9,11 @@ repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md4", "hash", "digest"]
 
 [dependencies]
-fake-simd = "0.1"
+digest = "0.4"
+digest-buffer = "0.2"
+generic-array = "0.6"
 byte-tools = "0.1"
-digest = "0.3"
-digest-buffer = "0.1"
-generic-array = "0.5"
+fake-simd = "0.1"
 
 [dev-dependencies]
-crypto-tests = "0.2"
+crypto-tests = "0.3"
