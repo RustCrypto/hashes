@@ -1,14 +1,4 @@
 //! An implementation of the RIPEMD-160 cryptographic hash.
-//!
-//! First create a `Ripemd160` object using the `Ripemd160` constructor,
-//! then feed it input using the `input` or `input_str` methods, which
-//! may be called any number of times.
-//!
-//! After the entire input has been fed to the hash read the result using
-//! the `result` or `result_str` methods.
-//!
-//! The `Ripemd160` object may be reused to create multiple hashes by
-//! calling the `reset` method.
 
 #![no_std]
 extern crate generic_array;
@@ -26,6 +16,7 @@ mod block;
 use block::{process_msg_block, DIGEST_BUF_LEN};
 
 type BlockSize = U64;
+type Block = GenericArray<u8, BlockSize>;
 
 /// Structure representing the state of a Ripemd160 computation
 #[derive(Clone, Copy)]
@@ -48,7 +39,7 @@ impl Ripemd160 {
 
     fn finalize(&mut self) {
         let st_h = &mut self.h;
-        self.buffer.standard_padding(8, |d: &[u8]| {
+        self.buffer.standard_padding(8, |d: &Block| {
             process_msg_block(d, &mut *st_h)
         });
 
@@ -71,7 +62,7 @@ impl Digest for Ripemd160 {
         self.length_bits = add_bytes_to_bits(self.length_bits,
                                              input.len() as u64);
         let st_h = &mut self.h;
-        self.buffer.input(input, |d: &[u8]| {
+        self.buffer.input(input, |d: &Block| {
             process_msg_block(d, &mut *st_h);
         });
     }
@@ -79,7 +70,7 @@ impl Digest for Ripemd160 {
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u32_le(&mut out[0..4], self.h[0]);
         write_u32_le(&mut out[4..8], self.h[1]);
         write_u32_le(&mut out[8..12], self.h[2]);

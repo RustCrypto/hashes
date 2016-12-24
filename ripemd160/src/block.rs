@@ -1,4 +1,5 @@
 use byte_tools::{read_u32v_le};
+use ::Block;
 
 pub const DIGEST_BUF_LEN: usize = 5;
 pub const WORK_BUF_LEN: usize = 16;
@@ -107,7 +108,7 @@ macro_rules! process_block(
     });
 );
 
-pub fn process_msg_block(data: &[u8], h: &mut [u32; DIGEST_BUF_LEN]) {
+pub fn process_msg_block(data: &Block, h: &mut [u32; DIGEST_BUF_LEN]) {
     let mut w = [0u32; WORK_BUF_LEN];
     read_u32v_le(&mut w[0..16], data);
     process_block!(h, w[..],
