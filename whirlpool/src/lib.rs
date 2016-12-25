@@ -39,8 +39,9 @@ mod consts;
 use consts::*;
 
 type BlockSize = U64;
+type Block = GenericArray<u8, BlockSize>;
 
-fn process_buffer(hash: &mut[u64; 8], buffer: &[u8]) {
+fn process_buffer(hash: &mut[u64; 8], buffer: &Block) {
     let mut k: [u64; 8] = unsafe { uninitialized() };
     let mut block: [u64; 8] = unsafe { uninitialized() };
     let mut state: [u64; 8] = unsafe { uninitialized() };
@@ -137,9 +138,9 @@ impl Digest for Whirlpool {
     type OutputSize = U64;
     type BlockSize = BlockSize;
 
-    fn input(&mut self, source: &[u8]) {
+    fn input(&mut self, input: &[u8]) {
         // (byte length * 8) = (bit lenght) converted in a 72 bit uint
-        let len = source.len() as u64;
+        let len = input.len() as u64;
         let len_bits = [
             ((len >> (56 + 5))       ) as u8,
             ((len >> (48 + 5)) & 0xff) as u8,
@@ -174,13 +175,13 @@ impl Digest for Whirlpool {
 
         // process the data itself
         let hash = &mut self.hash;
-        self.buffer.input(source, |b| { process_buffer(hash, b); });
+        self.buffer.input(input, |b| { process_buffer(hash, b); });
     }
 
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u64v_be(&mut out, &self.hash[..]);
         out
     }

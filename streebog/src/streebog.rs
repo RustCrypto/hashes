@@ -8,7 +8,7 @@ use core::marker::PhantomData;
 use consts::{BLOCK_SIZE, C};
 use table::SHUFFLED_LIN_TABLE;
 
-type Block = [u8; BLOCK_SIZE];
+type Block = GenericArray<u8, U64>;
 
 struct StreebogState {
     h: Block,
@@ -37,9 +37,9 @@ fn lps(h: &mut Block, n: &Block) {
 }
 
 impl StreebogState {
-    fn g(&mut self, n: &Block, m: &[u8]) {
-        let mut key = [0u8; BLOCK_SIZE];
-        let mut block = [0u8; BLOCK_SIZE];
+    fn g(&mut self, n: &Block, m: &Block) {
+        let mut key = Block::default();
+        let mut block = Block::default();
 
         copy_memory(&self.h, &mut key);
         copy_memory(m, &mut block);
@@ -48,7 +48,7 @@ impl StreebogState {
 
         for i in 0..12 {
             lps(&mut block, &key);
-            lps(&mut key, &C[i]);
+            lps(&mut key, Block::from_slice(&C[i]));
         }
 
         for i in 0..64 {
@@ -56,7 +56,7 @@ impl StreebogState {
         }
     }
 
-    fn update_sigma(&mut self, m: &[u8]) {
+    fn update_sigma(&mut self, m: &Block) {
         let mut over = 0u16;
         for (a, b) in self.sigma.iter_mut().zip(m.iter()) {
             let res = (*a as u16) + (*b as u16) + over;
@@ -78,8 +78,7 @@ impl StreebogState {
         }
     }
 
-    fn process_block(&mut self, block: &[u8], msg_len: u8) {
-        assert!(block.len() == BLOCK_SIZE);
+    fn process_block(&mut self, block: &Block, msg_len: u8) {
         let n = self.n;
         self.g(&n, block);
         self.update_n(msg_len);
@@ -97,16 +96,20 @@ pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
 impl<N> Streebog<N> where N: ArrayLength<u8> + Copy {
     pub fn new() -> Streebog<N> {
         let h = match N::to_usize() {
-            64 => [0; BLOCK_SIZE],
-            32 => [1; BLOCK_SIZE],
+            64 => Block::default(),
+            32 => {
+                let mut block = Block::default();
+                for x in block.iter_mut() { *x = 1 }
+                block
+            },
             _ => panic!("Unexpected block size parameter")
         };
         Streebog {
             buffer: Default::default(),
             state: StreebogState{
                 h: h,
-                n: [0; BLOCK_SIZE],
-                sigma: [0; BLOCK_SIZE],
+                n: Block::default(),
+                sigma: Block::default(),
             },
             digest_size: Default::default(),
         }
@@ -124,31 +127,30 @@ impl<N> Digest for Streebog<N>  where N: ArrayLength<u8> + Copy {
 
     fn input(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &[u8]| {
-            self_state.process_block(d, 64);
+        self.buffer.input(input, |d: &Block| {
+            self_state.process_block(d, BLOCK_SIZE as u8);
         });
     }
 
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         let self_state = &mut self.state;
-        let buf = self.buffer.current_buffer();
 
-        let mut block = [0u8; BLOCK_SIZE];
-        copy_memory(&buf, &mut block[..buf.len()]);
-        block[buf.len()] = 1;
+        let msg_len = self.buffer.position() as u8;
+        self.buffer.next(1)[0] = 1;
+        self.buffer.zero_until(BLOCK_SIZE);
+        let block = self.buffer.full_buffer();
 
-        self_state.process_block(&block, buf.len() as u8);
+        self_state.process_block(block, msg_len);
+
 
         let n = self_state.n;
-        self_state.g(&[0u8; BLOCK_SIZE], &n);
+        self_state.g(&Block::default(), &n);
         let sigma = self_state.sigma;
-        self_state.g(&[0u8; BLOCK_SIZE], &sigma);
+        self_state.g(&Block::default(), &sigma);
 
-        let mut out = GenericArray::new();
-
+        let mut buf = GenericArray::default();
         let n = BLOCK_SIZE - Self::OutputSize::to_usize();
-        copy_memory(&self_state.h[n..], &mut out);
-        
-        out
+        copy_memory(&self_state.h[n..], &mut buf);
+        buf
     }
 }
