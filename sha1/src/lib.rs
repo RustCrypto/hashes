@@ -68,6 +68,7 @@ use consts::{STATE_LEN, H};
 use utils::{sha1_digest_block};
 
 type BlockSize = U64;
+type Block = GenericArray<u8, BlockSize>;
 
 /// Structure representing the state of a Sha1 computation
 #[derive(Clone)]
@@ -89,7 +90,7 @@ impl Sha1 {
     fn finalize(&mut self) {
         let st_h = &mut self.h;
         self.buffer
-            .standard_padding(8, |d: &[u8]| sha1_digest_block(&mut *st_h, d));
+            .standard_padding(8, |d| sha1_digest_block(&mut *st_h, d));
         write_u32_be(self.buffer.next(4), (self.length_bits >> 32) as u32);
         write_u32_be(self.buffer.next(4), self.length_bits as u32);
         sha1_digest_block(st_h, self.buffer.full_buffer());
@@ -108,7 +109,7 @@ impl Digest for Sha1 {
         // Assumes that msg.len() can be converted to u64 without overflow
         self.length_bits = add_bytes_to_bits(self.length_bits, msg.len() as u64);
         let st_h = &mut self.h;
-        self.buffer.input(msg, |d: &[u8]| {
+        self.buffer.input(msg, |d| {
             sha1_digest_block(st_h, d);
         });
     }
@@ -116,7 +117,7 @@ impl Digest for Sha1 {
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u32_be(&mut out[0..4], self.h[0]);
         write_u32_be(&mut out[4..8], self.h[1]);
         write_u32_be(&mut out[8..12], self.h[2]);

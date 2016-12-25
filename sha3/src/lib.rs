@@ -82,7 +82,7 @@ impl<N, K, M> Sha3<N, K, M>
 
     pub fn new() -> Sha3<N, K, M> {
         Sha3 {
-            state: GenericArray::new(),
+            state: GenericArray::default(),
             offset: 0,
 
             digest_length: Default::default(),
@@ -105,7 +105,7 @@ impl<N, K, M> Sha3<N, K, M>
         }
 
         fn set_pad(offset: usize, buf: &mut [u8]) {
-            assert!(buf.len() as f32 >= ((offset + 2) as f32 / 8.0).ceil());
+            //assert!(buf.len() as f32 >= ((offset + 2) as f32 / 8.0).ceil());
             let s = offset / 8;
             let buflen = buf.len();
             buf[s] |= 1 << (offset % 8);
@@ -120,7 +120,7 @@ impl<N, K, M> Sha3<N, K, M>
 
         let p_len = pad_len(ds_len, self.offset * 8, self.rate() * 8);
 
-        // FIXME: check correctness
+        // TODO: check correctness
         const BUF_LEN: usize = 1 << 8;
         assert!(p_len < BUF_LEN);
         let mut buf = [0; BUF_LEN];
@@ -188,7 +188,7 @@ impl<L, K, M> Digest for Sha3<L, K, M>
         assert!(self.offset < out_len);
         assert!(self.offset < r);
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         let in_len = Self::OutputSize::to_usize();
         let mut in_pos: usize = 0;
 

@@ -9,6 +9,7 @@ use consts::{STATE_LEN, H224, H256};
 use sha256_utils::sha256_digest_block;
 
 type BlockSize = U64;
+pub type Block = GenericArray<u8, BlockSize>;
 
 /// A structure that represents that state of a digest computation for the
 /// SHA-2 512 family of digest functions
@@ -20,7 +21,7 @@ struct Engine256State {
 impl Engine256State {
     fn new(h: &[u32; STATE_LEN]) -> Engine256State { Engine256State { h: *h } }
 
-    pub fn process_block(&mut self, data: &[u8]) {
+    pub fn process_block(&mut self, data: &Block) {
         sha256_digest_block(&mut self.h, data);
     }
 }
@@ -49,12 +50,12 @@ impl Engine256 {
                                              input.len() as u64);
         let self_state = &mut self.state;
         self.buffer
-            .input(input, |input: &[u8]| self_state.process_block(input));
+            .input(input, |input| self_state.process_block(input));
     }
 
     fn finish(&mut self) {
         let self_state = &mut self.state;
-        self.buffer.standard_padding(8, |input: &[u8]| {
+        self.buffer.standard_padding(8, |input| {
             self_state.process_block(input)
         });
         write_u32_be(self.buffer.next(4), (self.length_bits >> 32) as u32);
@@ -86,7 +87,7 @@ impl Digest for Sha256 {
 
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u32v_be(&mut out, &self.engine.state.h);
         out
     }
@@ -115,7 +116,7 @@ impl Digest for Sha224 {
 
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u32v_be(&mut out[..28], &self.engine.state.h[..7]);
         out
     }

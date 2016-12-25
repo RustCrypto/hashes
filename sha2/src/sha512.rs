@@ -9,6 +9,7 @@ use consts::{STATE_LEN, H384, H512, H512_TRUNC_224, H512_TRUNC_256};
 use sha512_utils::sha512_digest_block;
 
 type BlockSize = U128;
+pub type Block = GenericArray<u8, BlockSize>;
 
 /// A structure that represents that state of a digest computation for the
 /// SHA-2 512 family of digest functions
@@ -20,7 +21,7 @@ struct Engine512State {
 impl Engine512State {
     fn new(h: &[u64; 8]) -> Engine512State { Engine512State { h: *h } }
 
-    pub fn process_block(&mut self, data: &[u8]) {
+    pub fn process_block(&mut self, data: &Block) {
         sha512_digest_block(&mut self.h, data);
     }
 }
@@ -49,12 +50,12 @@ impl Engine512 {
                                                    input.len() as u64);
         let self_state = &mut self.state;
         self.buffer
-            .input(input, |input: &[u8]| self_state.process_block(input));
+            .input(input, |input| self_state.process_block(input));
     }
 
     fn finish(&mut self) {
         let self_state = &mut self.state;
-        self.buffer.standard_padding(16, |input: &[u8]| {
+        self.buffer.standard_padding(16, |input| {
             self_state.process_block(input)
         });
         match self.length_bits {
@@ -91,7 +92,7 @@ impl Digest for Sha512 {
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u64v_be(&mut out, &self.engine.state.h[..]);
         out
     }
@@ -123,7 +124,7 @@ impl Digest for Sha384 {
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u64v_be(&mut out, &self.engine.state.h[..6]);
         out
     }
@@ -157,7 +158,7 @@ impl Digest for Sha512Trunc256 {
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u64v_be(&mut out, &self.engine.state.h[..4]);
         out
     }
@@ -190,7 +191,7 @@ impl Digest for Sha512Trunc224 {
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         write_u64v_be(&mut out[..24], &self.engine.state.h[..3]);
         write_u32_be(&mut out[24..28], (self.engine.state.h[3] >> 32) as u32);
         out
