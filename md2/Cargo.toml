@@ -1,0 +1,19 @@
+[package]
+name = "md2"
+version = "0.4.0"
+authors = ["The Rust-Crypto Project Developers"]
+license = "MIT/Apache-2.0"
+description = "MD2 hash function"
+documentation = "https://docs.rs/md2"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "md2", "hash", "digest"]
+
+[dependencies]
+digest = "0.4"
+digest-buffer = "0.2"
+generic-array = "0.6"
+byte-tools = "0.1"
+fake-simd = "0.1"
+
+[dev-dependencies]
+crypto-tests = "0.3"
