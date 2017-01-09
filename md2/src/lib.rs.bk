@@ -111,7 +111,7 @@ impl Digest for Md2 {
         self.finalize();
 
         let mut out = GenericArray::default();
-        copy_memory(&self.state.x[0..16], &mut out);
+        copy_memory(&self.state.x[0..16], & mut out);
         out
     }
 }

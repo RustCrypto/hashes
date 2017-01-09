@@ -7,18 +7,10 @@ use std::io::{self, Read};
 
 const BUFFER_SIZE: usize = 1024;
 
-/// Print digest result as hex string and name pair
-fn print_result(sum: &[u8], name: &str) {
-    for byte in sum {
-        print!("{:02x}", byte);
-    }
-    println!("\t{}", name);
-}
-
 /// Compute digest value for given `Reader` and print it
 /// On any error simply return without doing anything
-fn process<D: Digest + Default, R: Read>(reader: &mut R, name: &str) {
-    let mut sh: D = Default::default();
+fn process<R: Read>(reader: &mut R, name: &str) {
+    let mut sh = Md2::new();
     let mut buffer = [0u8; BUFFER_SIZE];
     loop {
         let n = match reader.read(&mut buffer) {
@@ -30,7 +22,7 @@ fn process<D: Digest + Default, R: Read>(reader: &mut R, name: &str) {
             break;
         }
     }
-    print_result(&sh.result(), name);
+    println!("{:x}\t{}", &sh.result(), name);
 }
 
 fn main() {
@@ -40,10 +32,10 @@ fn main() {
     if args.len() > 1 {
         for path in args.skip(1) {
             if let Ok(mut file) = fs::File::open(&path) {
-                process::<Md2, _>(&mut file, &path);
+                process(&mut file, &path);
             }
         }
     } else {
-        process::<Md2, _>(&mut io::stdin(), "-");
+        process(&mut io::stdin(), "-");
     }
 }
