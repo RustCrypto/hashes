@@ -19,6 +19,7 @@ licenses as the Rust compiler.
 | ------------- |:-------------:| :-----:| :-----:|
 | [BLAKE2](https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2) |   | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) |
 | [GOST94](https://en.wikipedia.org/wiki/GOST_(hash_function)) | GOST R 34.11-94  | [![crates.io](https://img.shields.io/crates/v/gost94.svg)](https://crates.io/crates/gost94) |  [![Documentation](https://docs.rs/gost94/badge.svg)](https://docs.rs/gost94) |
+| [MD2](https://en.wikipedia.org/wiki/MD2_(cryptography)) |    | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) |  [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) |
 | [MD4](https://en.wikipedia.org/wiki/MD4) |    | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) |  [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) |
 | [MD5](https://en.wikipedia.org/wiki/MD5) |   | (not published) | (not published) |
 | [RIPEMD-160](https://en.wikipedia.org/wiki/RIPEMD) |    | [![crates.io](https://img.shields.io/crates/v/ripemd160.svg)](https://crates.io/crates/ripemd160) |  [![Documentation](https://docs.rs/ripemd160/badge.svg)](https://docs.rs/ripemd160) |

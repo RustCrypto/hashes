@@ -74,10 +74,7 @@ impl Md2State {
 
 impl Md2 {
     pub fn new() -> Md2 {
-        Md2 {
-            buffer: Default::default(),
-            state: Default::default(),
-        }
+        Default::default()
     }
 
     fn finalize(&mut self) {
