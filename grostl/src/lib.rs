@@ -10,7 +10,7 @@ use digest::Digest;
 use generic_array::{ArrayLength, GenericArray};
 use generic_array::typenum::{
     Cmp, Compare, Greater, Less, Same,
-    U256, U257, U512, U1024,
+    U256, U257, U512, U513, U1024,
 };
 
 pub type GrostlSmall<OutputSize>
@@ -20,7 +20,8 @@ pub type GrostlSmall<OutputSize>
 
 pub type GrostlBig<OutputSize>
     where OutputSize: ArrayLength<u8> + Cmp<U512>,
-          Compare<OutputSize, U256>: Same<Greater>
+          Compare<OutputSize, U256>: Same<Greater>,
+          Compare<OutputSize, U513>: Same<Less>
     = Grostl<OutputSize, U1024>;
 
 pub struct Grostl<OutputSize, BlockSize: ArrayLength<u8>> {
