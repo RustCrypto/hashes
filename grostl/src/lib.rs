@@ -37,19 +37,24 @@ fn xor_generic_array<L: ArrayLength<u8>>(
     res
 }
 
-impl<OutputSize, BlockSize: ArrayLength<u8>> Grostl<OutputSize, BlockSize> {
+impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Grostl<OutputSize, BlockSize> {
     fn new() -> Grostl<OutputSize, BlockSize> {
         // TODO: Use correct initial state
         Grostl { state: GenericArray::default(), phantom: PhantomData }
     }
 
+    fn pad(mut input: Vec<u8>) -> Vec<u8>{
+        // TODO
+        input
+    }
+
     fn compress(
         &self,
-        input_block: GenericArray<u8, BlockSize>,
+        input_block: &GenericArray<u8, BlockSize>,
     ) -> GenericArray<u8, BlockSize> {
         xor_generic_array(
             &xor_generic_array(
-                &self.p(xor_generic_array(&self.state, &input_block)),
+                &self.p(&xor_generic_array(&self.state, input_block)),
                 &self.q(input_block)
             ),
             &self.state,
@@ -58,20 +63,24 @@ impl<OutputSize, BlockSize: ArrayLength<u8>> Grostl<OutputSize, BlockSize> {
 
     fn p(
         &self,
-        input_block: GenericArray<u8, BlockSize>,
+        input_block: &GenericArray<u8, BlockSize>,
     ) -> GenericArray<u8, BlockSize> {
         GenericArray::default()
     }
 
     fn q(
         &self,
-        input_block: GenericArray<u8, BlockSize>,
+        input_block: &GenericArray<u8, BlockSize>,
     ) -> GenericArray<u8, BlockSize> {
+        GenericArray::default()
+    }
+
+    fn finalize(self) -> GenericArray<u8, OutputSize> {
         GenericArray::default()
     }
 }
 
-impl<OutputSize, BlockSize: ArrayLength<u8>> Default for Grostl<OutputSize, BlockSize> {
+impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Default for Grostl<OutputSize, BlockSize> {
     fn default() -> Self { Self::new() }
 }
 
@@ -80,9 +89,21 @@ impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Digest for Grostl<
     type BlockSize = BlockSize;
 
     fn input(&mut self, input: &[u8]) {
+        for chunk in input.chunks(self.block_bytes()) {
+            if chunk.len() < self.block_bytes() {
+                let padded_chunk = Grostl::<OutputSize, BlockSize>::pad(
+                    chunk.to_vec(),
+                );
+                self.state = self.compress(
+                    GenericArray::from_slice(&padded_chunk),
+                );
+            } else {
+                self.state = self.compress(GenericArray::from_slice(chunk));
+            }
+        }
     }
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        GenericArray::default()
+    fn result(self) -> GenericArray<u8, Self::OutputSize> {
+        self.finalize()
     }
 }
