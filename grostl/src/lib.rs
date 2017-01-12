@@ -21,18 +21,57 @@ pub type GrostlBig<OutputSize>
           Compare<OutputSize, U256>: Same<Greater>
     = Grostl<OutputSize, U1024>;
 
-pub struct Grostl<OutputSize, BlockSize> {
-    phantom1: PhantomData<OutputSize>,
-    phantom2: PhantomData<BlockSize>,
+pub struct Grostl<OutputSize, BlockSize: ArrayLength<u8>> {
+    state: GenericArray<u8, BlockSize>,
+    phantom: PhantomData<OutputSize>,
 }
 
-impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize> {
+fn xor_generic_array<L: ArrayLength<u8>>(
+    a1: &GenericArray<u8, L>,
+    a2: &GenericArray<u8, L>,
+) -> GenericArray<u8, L> {
+    let mut res = GenericArray::default();
+    for i in 0..L::to_usize() {
+        res[i] = a1[i] ^ a2[i];
+    }
+    res
+}
+
+impl<OutputSize, BlockSize: ArrayLength<u8>> Grostl<OutputSize, BlockSize> {
     fn new() -> Grostl<OutputSize, BlockSize> {
-        Grostl { phantom1: PhantomData, phantom2: PhantomData }
+        // TODO: Use correct initial state
+        Grostl { state: GenericArray::default(), phantom: PhantomData }
+    }
+
+    fn compress(
+        &self,
+        input_block: GenericArray<u8, BlockSize>,
+    ) -> GenericArray<u8, BlockSize> {
+        xor_generic_array(
+            &xor_generic_array(
+                &self.p(xor_generic_array(&self.state, &input_block)),
+                &self.q(input_block)
+            ),
+            &self.state,
+        )
+    }
+
+    fn p(
+        &self,
+        input_block: GenericArray<u8, BlockSize>,
+    ) -> GenericArray<u8, BlockSize> {
+        GenericArray::default()
+    }
+
+    fn q(
+        &self,
+        input_block: GenericArray<u8, BlockSize>,
+    ) -> GenericArray<u8, BlockSize> {
+        GenericArray::default()
     }
 }
 
-impl<OutputSize, BlockSize> Default for Grostl<OutputSize, BlockSize> {
+impl<OutputSize, BlockSize: ArrayLength<u8>> Default for Grostl<OutputSize, BlockSize> {
     fn default() -> Self { Self::new() }
 }
 
