@@ -79,7 +79,10 @@ impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Grostl<OutputSize,
     }
 
     fn finalize(self) -> GenericArray<u8, OutputSize> {
-        GenericArray::default()
+        let a = xor_generic_array(&self.p(&self.state), &self.state);
+        GenericArray::clone_from_slice(
+            &a[a.len() - (OutputSize::to_usize() / 8)..],
+        )
     }
 }
 
