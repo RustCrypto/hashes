@@ -9,6 +9,7 @@ matrix:
 env:
   - TEST_DIR=blake2
   - TEST_DIR=gost94
+  - TEST_DIR=md2
   - TEST_DIR=md4
   - TEST_DIR=md5
   - TEST_DIR=ripemd160
