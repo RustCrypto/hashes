@@ -9,6 +9,7 @@ repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "grostl", "hash", "digest"]
 
 [dependencies]
+byte-tools = "0.1.2"
 digest = "0.4.0"
 generic-array = "0.6"
 

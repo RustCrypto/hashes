@@ -1,9 +1,11 @@
 // #![no_std]
+extern crate byte_tools;
 extern crate digest;
 extern crate generic_array;
 
 use std::marker::PhantomData;
 
+use byte_tools::write_u64_le;
 use digest::Digest;
 use generic_array::{ArrayLength, GenericArray};
 use generic_array::typenum::{
@@ -39,8 +41,13 @@ fn xor_generic_array<L: ArrayLength<u8>>(
 
 impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Grostl<OutputSize, BlockSize> {
     fn new() -> Grostl<OutputSize, BlockSize> {
-        // TODO: Use correct initial state
-        Grostl { state: GenericArray::default(), phantom: PhantomData }
+        let block_bytes = BlockSize::to_usize() / 8;
+        let mut iv = Vec::with_capacity(block_bytes);
+        write_u64_le(&mut iv, BlockSize::to_usize() as u64);
+        Grostl {
+            state: GenericArray::clone_from_slice(&iv),
+            phantom: PhantomData,
+        }
     }
 
     fn pad(mut input: Vec<u8>) -> Vec<u8>{
