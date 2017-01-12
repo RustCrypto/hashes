@@ -1,0 +1,16 @@
+[package]
+name = "grostl"
+version = "0.3.0"
+authors = ["The Rust-Crypto Project Developers"]
+license = "MIT/Apache-2.0"
+description = "Grostl hash function"
+documentation = "https://docs.rs/md5"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "grostl", "hash", "digest"]
+
+[dependencies]
+digest = "0.4.0"
+generic-array = "0.6"
+
+[dev-dependencies]
+crypto-tests = "0.3"
