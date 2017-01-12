@@ -50,9 +50,24 @@ impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Grostl<OutputSize,
         }
     }
 
-    fn pad(mut input: Vec<u8>) -> Vec<u8>{
-        // TODO
-        input
+    fn get_padding_chunk(input: &[u8]) -> Vec<u8> {
+        let l = input.len();
+        let bs = BlockSize::to_usize();
+
+        let num_padding_bits = -1 * ((8 * l + 64) % bs) as isize;
+        let num_padding_bytes = num_padding_bits as usize / 8;
+        debug_assert!(num_padding_bytes < 512);
+
+        let mut padding_chunk = Vec::with_capacity(bs / 8);
+        padding_chunk.extend(input[l - (l % bs)..].iter());
+        padding_chunk.push(128);
+        for _ in 0..num_padding_bytes - 1 {
+            padding_chunk.push(0)
+        }
+        let num_blocks = (l + num_padding_bytes) / bs;
+        write_u64_le(&mut padding_chunk[bs - 8..], num_blocks as u64);
+
+        padding_chunk
     }
 
     fn compress(
@@ -98,11 +113,10 @@ impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Digest for Grostl<
     fn input(&mut self, input: &[u8]) {
         for chunk in input.chunks(self.block_bytes()) {
             if chunk.len() < self.block_bytes() {
-                let padded_chunk = Grostl::<OutputSize, BlockSize>::pad(
-                    chunk.to_vec(),
-                );
+                let padding_chunk =
+                    Grostl::<OutputSize, BlockSize>::get_padding_chunk(input);
                 self.state = self.compress(
-                    GenericArray::from_slice(&padded_chunk),
+                    GenericArray::from_slice(&padding_chunk),
                 );
             } else {
                 self.state = self.compress(GenericArray::from_slice(chunk));
