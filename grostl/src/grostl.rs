@@ -20,7 +20,10 @@ fn xor_generic_array<L: ArrayLength<u8>>(
     res
 }
 
-impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Grostl<OutputSize, BlockSize> {
+impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
+    where OutputSize: ArrayLength<u8>,
+          BlockSize: ArrayLength<u8>,
+{
     fn new() -> Grostl<OutputSize, BlockSize> {
         let block_bytes = BlockSize::to_usize() / 8;
         let mut iv = Vec::with_capacity(block_bytes);
@@ -86,11 +89,17 @@ impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Grostl<OutputSize,
     }
 }
 
-impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Default for Grostl<OutputSize, BlockSize> {
+impl<OutputSize, BlockSize> Default for Grostl<OutputSize, BlockSize>
+    where OutputSize: ArrayLength<u8>,
+          BlockSize: ArrayLength<u8>,
+{
     fn default() -> Self { Self::new() }
 }
 
-impl<OutputSize: ArrayLength<u8>, BlockSize: ArrayLength<u8>> Digest for Grostl<OutputSize, BlockSize> {
+impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
+    where OutputSize: ArrayLength<u8>,
+          BlockSize: ArrayLength<u8>,
+{
     type OutputSize = OutputSize;
     type BlockSize = BlockSize;
 
