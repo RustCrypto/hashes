@@ -62,7 +62,9 @@ impl<R, C> Matrix<R, C>
             for col in 0..self.cols() {
                 for i in 0..8 {
                     for j in 0..8 {
-                        res[i][col] += a[i][j] * self[row][col];
+                        res[i][col] = res[i][col].wrapping_add(
+                            a[i][j].wrapping_mul(self[row][col]),
+                        );
                     }
                 }
             }
