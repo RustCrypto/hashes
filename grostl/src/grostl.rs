@@ -84,7 +84,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
     where OutputSize: ArrayLength<u8>,
           BlockSize: ArrayLength<u8>,
           BlockSize: Div<U8>,
-          Quot<BlockSize, U8>: ArrayLength<GenericArray<u8, U8>>,
+          Quot<BlockSize, U8>: ArrayLength<u8>,
 {
     fn new() -> Grostl<OutputSize, BlockSize> {
         let block_bytes = BlockSize::to_usize();
@@ -293,7 +293,7 @@ impl<OutputSize, BlockSize> Default for Grostl<OutputSize, BlockSize>
     where OutputSize: ArrayLength<u8>,
           BlockSize: ArrayLength<u8>,
           BlockSize: Div<U8>,
-          Quot<BlockSize, U8>: ArrayLength<GenericArray<u8, U8>>,
+          Quot<BlockSize, U8>: ArrayLength<u8>,
 {
     fn default() -> Self { Self::new() }
 }
@@ -302,7 +302,7 @@ impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
     where OutputSize: ArrayLength<u8>,
           BlockSize: ArrayLength<u8>,
           BlockSize: Div<U8>,
-          Quot<BlockSize, U8>: ArrayLength<GenericArray<u8, U8>>,
+          Quot<BlockSize, U8>: ArrayLength<u8>,
 {
     type OutputSize = OutputSize;
     type BlockSize = BlockSize;
