@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 use std::ops::Div;
 
-use byte_tools::write_u64_le;
+use byte_tools::write_u64_be;
 use digest::Digest;
 use generic_array::{ArrayLength, GenericArray};
 use generic_array::typenum::{Quot, U8};
@@ -90,7 +90,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
         let block_bytes = BlockSize::to_usize();
         let block_bits = block_bytes * 8;
         let mut iv = GenericArray::default();
-        write_u64_le(&mut iv[..8], block_bits as u64);
+        write_u64_be(&mut iv[..8], block_bits as u64);
         let rounds = if block_bytes == 128 {
             14
         } else {
@@ -117,20 +117,22 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 
     fn get_padding_chunk(input: &[u8]) -> Vec<u8> {
         let l = input.len();
-        let bs = BlockSize::to_usize() * 8;
+        let block_bytes = BlockSize::to_usize();
+        let bs = block_bytes * 8;
 
-        let num_padding_bits = -1 * ((8 * l + 64) % bs) as isize;
-        let num_padding_bytes = num_padding_bits as usize / 8;
-        debug_assert!(num_padding_bytes < 512);
+        let num_padding_bits = (-1 * (8 * l + 64) as isize) as usize % bs;
+        let num_padding_bytes = num_padding_bits / 8;
+        //debug_assert!(num_padding_bytes < block_bytes);
 
         let mut padding_chunk = Vec::with_capacity(bs / 8);
         padding_chunk.extend(input[l - (l % bs)..].iter());
         padding_chunk.push(128);
-        for _ in 0..num_padding_bytes - 1 {
+        for _ in 0..num_padding_bytes - 1 + 8 {
             padding_chunk.push(0)
         }
-        let num_blocks = (l + num_padding_bytes) / bs;
-        write_u64_le(&mut padding_chunk[bs - 8..], num_blocks as u64);
+        let num_blocks = (l + num_padding_bytes + 8) / block_bytes;
+        assert_eq!(padding_chunk.len(), block_bytes);
+        write_u64_be(&mut padding_chunk[block_bytes - 8..], num_blocks as u64);
 
         padding_chunk
     }
@@ -358,5 +360,30 @@ mod test {
             ),
         );
         assert_eq!(matrix, expected_matrix);
+    }
+
+    #[test]
+    fn test_padding() {
+        let input = [];
+        let padding_chunk = Grostl::<U32, U64>::get_padding_chunk(&input);
+        let expected: [u8; 64] = [
+            128, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 1,
+        ];
+        assert_eq!(padding_chunk, &expected[..]);
+    }
+
+    #[test]
+    fn test_add_round_constant() {
+    }
+
+    #[test]
+    fn test_mix_bytes() {
     }
 }
