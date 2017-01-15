@@ -54,4 +54,20 @@ impl<R, C> Matrix<R, C>
     pub fn cols(&self) -> usize {
         C::to_usize()
     }
+
+    pub fn mul_array(&self, a: &[[u8; 8]; 8]) -> Self {
+        let mut res = Matrix::default();
+
+        for row in 0..self.rows() {
+            for col in 0..self.cols() {
+                for i in 0..8 {
+                    for j in 0..8 {
+                        res[i][col] += a[i][j] * self[row][col];
+                    }
+                }
+            }
+        }
+
+        res
+    }
 }

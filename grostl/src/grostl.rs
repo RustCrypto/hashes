@@ -47,6 +47,17 @@ const C_Q: [u8; 128] = [
     0xff, 0xef, 0xdf, 0xcf, 0xbf, 0xaf, 0x9f, 0x8f, 0x7f, 0x6f, 0x5f, 0x4f, 0x3f, 0x2f, 0x1f, 0x0f,
 ];
 
+const B: [[u8; 8]; 8] = [
+    [2, 2, 3, 4, 5, 3, 5, 7],
+    [7, 2, 2, 3, 4, 5, 3, 5],
+    [5, 7, 2, 2, 3, 4, 5, 3],
+    [3, 5, 7, 2, 2, 3, 4, 5],
+    [5, 3, 5, 7, 2, 2, 3, 4],
+    [4, 5, 3, 5, 7, 2, 2, 3],
+    [3, 4, 5, 3, 5, 7, 2, 2],
+    [2, 3, 4, 5, 3, 5, 7, 2],
+];
+
 const SHIFTS_P: [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
 const SHIFTS_Q: [u8; 8] = [0, 3, 5, 7, 0, 2, 4, 6];
 const SHIFTS_P_WIDE: [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 11];
@@ -267,17 +278,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
         &self,
         matrix: &Matrix<U8, Quot<BlockSize, U64>>,
     ) -> Matrix<U8, Quot<BlockSize, U64>> {
-        let b = [
-            2, 2, 3, 4, 5, 3, 5, 7,
-            7, 2, 2, 3, 4, 5, 3, 5,
-            5, 7, 2, 2, 3, 4, 5, 3,
-            3, 5, 7, 2, 2, 3, 4, 5,
-            5, 3, 5, 7, 2, 2, 3, 4,
-            4, 5, 3, 5, 7, 2, 2, 3,
-            3, 4, 5, 3, 5, 7, 2, 2,
-            2, 3, 4, 5, 3, 5, 7, 2,
-        ];
-        Matrix::default()
+        matrix.mul_array(&B)
     }
 
     fn finalize(self) -> GenericArray<u8, OutputSize> {
