@@ -9,6 +9,7 @@ use generic_array::typenum::{
 };
 
 mod grostl;
+mod matrix;
 
 pub type GrostlSmall<OutputSize>
     where OutputSize: ArrayLength<u8> + Cmp<U512>,

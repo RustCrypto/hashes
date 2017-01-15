@@ -1,10 +1,11 @@
 use std::marker::PhantomData;
-use std::ops::{Div, Index, IndexMut};
+use std::ops::Div;
 
 use byte_tools::write_u64_le;
 use digest::Digest;
 use generic_array::{ArrayLength, GenericArray};
 use generic_array::typenum::{Quot, U8, U64};
+use matrix::Matrix;
 
 const SBOX: [u8; 256] = [
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -36,52 +37,6 @@ pub struct Grostl<OutputSize, BlockSize: ArrayLength<u8>> {
     phantom: PhantomData<OutputSize>,
 }
 
-struct Matrix<R: ArrayLength<u8>, C: ArrayLength<GenericArray<u8, R>>> {
-    state: GenericArray<GenericArray<u8, R>, C>,
-}
-
-impl<R, C> Index<usize> for Matrix<R, C>
-    where R: ArrayLength<u8>,
-          C: ArrayLength<GenericArray<u8, R>>,
-{
-    type Output = GenericArray<u8, R>;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.state[index]
-    }
-}
-
-impl<R, C> IndexMut<usize> for Matrix<R, C>
-    where R: ArrayLength<u8>,
-          C: ArrayLength<GenericArray<u8, R>>,
-{
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.state[index]
-    }
-}
-
-impl<R, C> Matrix<R, C>
-    where R: ArrayLength<u8>,
-          C: ArrayLength<GenericArray<u8, R>>,
-{
-    fn rows(&self) -> usize {
-        R::to_usize()
-    }
-
-    fn cols(&self) -> usize {
-        C::to_usize()
-    }
-}
-
-impl<R, C> Default for Matrix<R, C>
-    where R: ArrayLength<u8>,
-          C: ArrayLength<GenericArray<u8, R>>,
-{
-    fn default() -> Self {
-        Matrix { state: GenericArray::default() }
-    }
-}
-
 fn xor_generic_array<L: ArrayLength<u8>>(
     a1: &GenericArray<u8, L>,
     a2: &GenericArray<u8, L>,
@@ -100,9 +55,10 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
           Quot<BlockSize, U64>: ArrayLength<GenericArray<u8, U8>>,
 {
     fn new() -> Grostl<OutputSize, BlockSize> {
-        let block_bytes = BlockSize::to_usize() / 8;
-        let mut iv = Vec::with_capacity(block_bytes);
-        write_u64_le(&mut iv, BlockSize::to_usize() as u64);
+        let block_bits = BlockSize::to_usize();
+        let block_bytes = block_bits / 8;
+        let mut iv = GenericArray::default();
+        write_u64_le(&mut iv[..8], block_bits as u64);
         let rounds = if block_bytes == 64 {
             14
         } else {
@@ -111,7 +67,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
         };
 
         Grostl {
-            state: GenericArray::clone_from_slice(&iv),
+            state: iv,
             rounds: rounds,
             phantom: PhantomData,
         }
@@ -232,7 +188,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 
     fn add_round_constant(
         &self,
-        block: &mut Matrix<U8, Quot<BlockSize, U64>>,
+        matrix: &mut Matrix<U8, Quot<BlockSize, U64>>,
         round: u8,
     ) {
     }
@@ -250,14 +206,34 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 
     fn shift_bytes(
         &self,
-        block: &mut Matrix<U8, Quot<BlockSize, U64>>,
+        matrix: &mut Matrix<U8, Quot<BlockSize, U64>>,
         shifts: [u8; 8],
     ) {
+        let cols = matrix.cols();
+        for i in 0..matrix.rows() {
+            let shift = shifts[i] as usize;
+            if shift == 0 {
+                continue;
+            }
+            let num = (cols + shift - 1) / shift;
+            for mut j in (cols - shift..cols).rev() {
+                let mut k = 0;
+                let mut val = matrix[i][j];
+                while k < num {
+                    let pos = j.wrapping_sub(shift) % cols;
+                    let tmp = matrix[i][pos];
+                    matrix[i][pos] = val;
+                    val = tmp;
+                    j = j.wrapping_sub(shift) % cols;
+                    k += 1;
+                }
+            }
+        }
     }
 
     fn mix_bytes(
         &self,
-        block: &Matrix<U8, Quot<BlockSize, U64>>,
+        matrix: &Matrix<U8, Quot<BlockSize, U64>>,
     ) -> Matrix<U8, Quot<BlockSize, U64>> {
         let b = [
             2, 2, 3, 4, 5, 3, 5, 7,
@@ -314,5 +290,40 @@ impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
 
     fn result(self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{Grostl, Matrix, SHIFTS_P};
+    use generic_array::typenum::{U256, U512};
+    use generic_array::GenericArray;
+
+    #[test]
+    fn test_shift_bytes() {
+        let g: Grostl<U256, U512> = Grostl::default();
+        let mut matrix = Matrix::default();
+        for i in 0..matrix.rows() {
+            for j in 0..matrix.cols() {
+                matrix[i][j] = (i * matrix.cols() + j) as u8;
+            }
+        }
+        g.shift_bytes(&mut matrix, SHIFTS_P);
+        let expected_matrix = Matrix::from_generic_array(
+            GenericArray::map_slice(
+                &[
+                    [0, 1, 2, 3, 4, 5, 6, 7],
+                    [9, 10, 11, 12, 13, 14, 15, 8],
+                    [18, 19, 20, 21, 22, 23, 16, 17],
+                    [27, 28, 24, 25, 31, 24, 25, 26],
+                    [36, 37, 38, 39, 32, 33, 34, 35],
+                    [42, 46, 47, 40, 41, 42, 40, 41],
+                    [54, 55, 48, 49, 48, 49, 52, 53],
+                    [63, 56, 56, 58, 59, 60, 61, 62],
+                ],
+                |s: &[u8; 8]| GenericArray::clone_from_slice(s),
+            ),
+        );
+        assert_eq!(matrix, expected_matrix);
     }
 }
