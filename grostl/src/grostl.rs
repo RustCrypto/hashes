@@ -4,7 +4,7 @@ use std::ops::Div;
 use byte_tools::write_u64_le;
 use digest::Digest;
 use generic_array::{ArrayLength, GenericArray};
-use generic_array::typenum::{Quot, U8, U64};
+use generic_array::typenum::{Quot, U8};
 use matrix::Matrix;
 
 const SBOX: [u8; 256] = [
@@ -83,18 +83,18 @@ fn xor_generic_array<L: ArrayLength<u8>>(
 impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
     where OutputSize: ArrayLength<u8>,
           BlockSize: ArrayLength<u8>,
-          BlockSize: Div<U64>,
-          Quot<BlockSize, U64>: ArrayLength<GenericArray<u8, U8>>,
+          BlockSize: Div<U8>,
+          Quot<BlockSize, U8>: ArrayLength<GenericArray<u8, U8>>,
 {
     fn new() -> Grostl<OutputSize, BlockSize> {
-        let block_bits = BlockSize::to_usize();
-        let block_bytes = block_bits / 8;
+        let block_bytes = BlockSize::to_usize();
+        let block_bits = block_bytes * 8;
         let mut iv = GenericArray::default();
         write_u64_le(&mut iv[..8], block_bits as u64);
-        let rounds = if block_bytes == 64 {
+        let rounds = if block_bytes == 128 {
             14
         } else {
-            debug_assert!(block_bytes == 32);
+            debug_assert!(block_bytes == 64);
             10
         };
 
@@ -106,18 +106,18 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
     }
 
     fn wide(&self) -> bool {
-        let block_bytes = BlockSize::to_usize() / 8;
-        if block_bytes == 32 {
+        let block_bytes = BlockSize::to_usize();
+        if block_bytes == 64 {
             false
         } else {
-            debug_assert!(block_bytes == 64);
+            debug_assert!(block_bytes == 128);
             true
         }
     }
 
     fn get_padding_chunk(input: &[u8]) -> Vec<u8> {
         let l = input.len();
-        let bs = BlockSize::to_usize();
+        let bs = BlockSize::to_usize() * 8;
 
         let num_padding_bits = -1 * ((8 * l + 64) % bs) as isize;
         let num_padding_bytes = num_padding_bits as usize / 8;
@@ -151,8 +151,8 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
     fn block_to_matrix(
         &self,
         block: &GenericArray<u8, BlockSize>,
-    ) -> Matrix<U8, Quot<BlockSize, U64>> {
-        let mut matrix = Matrix::<U8, Quot<BlockSize, U64>>::default();
+    ) -> Matrix<U8, Quot<BlockSize, U8>> {
+        let mut matrix = Matrix::<U8, Quot<BlockSize, U8>>::default();
 
         let rows = matrix.rows();
         for i in 0..matrix.cols() {
@@ -166,7 +166,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 
     fn matrix_to_block(
         &self,
-        matrix: &Matrix<U8, Quot<BlockSize, U64>>,
+        matrix: &Matrix<U8, Quot<BlockSize, U8>>,
     ) -> GenericArray<u8, BlockSize> {
         let mut block = GenericArray::default();
 
@@ -220,7 +220,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 
     fn add_round_constant(
         &self,
-        matrix: &mut Matrix<U8, Quot<BlockSize, U64>>,
+        matrix: &mut Matrix<U8, Quot<BlockSize, U8>>,
         c: [u8; 128],
         round: u8,
     ) {
@@ -238,7 +238,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 
     fn sub_bytes(
         &self,
-        matrix: &mut Matrix<U8, Quot<BlockSize, U64>>,
+        matrix: &mut Matrix<U8, Quot<BlockSize, U8>>,
     ) {
         for i in 0..matrix.rows() {
             for j in 0..matrix.cols() {
@@ -249,7 +249,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 
     fn shift_bytes(
         &self,
-        matrix: &mut Matrix<U8, Quot<BlockSize, U64>>,
+        matrix: &mut Matrix<U8, Quot<BlockSize, U8>>,
         shifts: [u8; 8],
     ) {
         let cols = matrix.cols();
@@ -276,15 +276,15 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 
     fn mix_bytes(
         &self,
-        matrix: &Matrix<U8, Quot<BlockSize, U64>>,
-    ) -> Matrix<U8, Quot<BlockSize, U64>> {
+        matrix: &Matrix<U8, Quot<BlockSize, U8>>,
+    ) -> Matrix<U8, Quot<BlockSize, U8>> {
         matrix.mul_array(&B)
     }
 
     fn finalize(self) -> GenericArray<u8, OutputSize> {
         let a = xor_generic_array(&self.p(&self.state), &self.state);
         GenericArray::clone_from_slice(
-            &a[a.len() - (OutputSize::to_usize() / 8)..],
+            &a[a.len() - OutputSize::to_usize()..],
         )
     }
 }
@@ -292,8 +292,8 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 impl<OutputSize, BlockSize> Default for Grostl<OutputSize, BlockSize>
     where OutputSize: ArrayLength<u8>,
           BlockSize: ArrayLength<u8>,
-          BlockSize: Div<U64>,
-          Quot<BlockSize, U64>: ArrayLength<GenericArray<u8, U8>>,
+          BlockSize: Div<U8>,
+          Quot<BlockSize, U8>: ArrayLength<GenericArray<u8, U8>>,
 {
     fn default() -> Self { Self::new() }
 }
@@ -301,8 +301,8 @@ impl<OutputSize, BlockSize> Default for Grostl<OutputSize, BlockSize>
 impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
     where OutputSize: ArrayLength<u8>,
           BlockSize: ArrayLength<u8>,
-          BlockSize: Div<U64>,
-          Quot<BlockSize, U64>: ArrayLength<GenericArray<u8, U8>>,
+          BlockSize: Div<U8>,
+          Quot<BlockSize, U8>: ArrayLength<GenericArray<u8, U8>>,
 {
     type OutputSize = OutputSize;
     type BlockSize = BlockSize;
@@ -329,12 +329,12 @@ impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
 #[cfg(test)]
 mod test {
     use super::{Grostl, Matrix, SHIFTS_P};
-    use generic_array::typenum::{U256, U512};
+    use generic_array::typenum::{U32, U64};
     use generic_array::GenericArray;
 
     #[test]
     fn test_shift_bytes() {
-        let g: Grostl<U256, U512> = Grostl::default();
+        let g: Grostl<U32, U64> = Grostl::default();
         let mut matrix = Matrix::default();
         for i in 0..matrix.rows() {
             for j in 0..matrix.cols() {
