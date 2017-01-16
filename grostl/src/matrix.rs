@@ -4,7 +4,7 @@ use generic_array::{ArrayLength, GenericArray};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Matrix<R: ArrayLength<GenericArray<u8, C>>, C: ArrayLength<u8>> {
-    state: GenericArray<GenericArray<u8, C>, R>,
+    pub state: GenericArray<GenericArray<u8, C>, R>,
 }
 
 impl<R, C> Default for Matrix<R, C>
@@ -36,17 +36,29 @@ impl<R, C> IndexMut<usize> for Matrix<R, C>
     }
 }
 
+fn poly_mul(a: u8, b: usize) -> usize {
+    let mut val = match a {
+        2 => b << 1,
+        3 => b ^ poly_mul(2, b),
+        4 => b << 2,
+        5 => b ^ poly_mul(4, b),
+        7 => b ^ poly_mul(2, b) ^ poly_mul(4, b),
+        _ => unreachable!(),
+    };
+
+    if val >= 512 {
+        val ^= 0x11b << 1;
+    }
+    if val >= 256 {
+        val ^= 0x11b;
+    }
+    val
+}
+
 impl<R, C> Matrix<R, C>
     where R: ArrayLength<GenericArray<u8, C>>,
           C: ArrayLength<u8>,
 {
-    #[cfg(test)]
-    pub fn from_generic_array(
-        state: GenericArray<GenericArray<u8, C>, R>,
-    ) -> Self {
-        Matrix { state: state }
-    }
-
     pub fn rows(&self) -> usize {
         R::to_usize()
     }
@@ -57,15 +69,10 @@ impl<R, C> Matrix<R, C>
 
     pub fn mul_array(&self, a: &[[u8; 8]; 8]) -> Self {
         let mut res = Matrix::default();
-
-        for row in 0..self.rows() {
-            for col in 0..self.cols() {
-                for i in 0..8 {
-                    for j in 0..8 {
-                        res[i][col] = res[i][col].wrapping_add(
-                            a[i][j].wrapping_mul(self[row][col]),
-                        );
-                    }
+        for i in 0..8 {
+            for j in 0..self.cols() {
+                for k in 0..8 {
+                    res[i][j] ^= poly_mul(a[i][k], self[k][j] as usize) as u8;
                 }
             }
         }

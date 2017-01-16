@@ -27,7 +27,7 @@ const SBOX: [u8; 256] = [
 ];
 
 const C_P: [u8; 128] = [
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+    0x00, 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80, 0x90, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -59,7 +59,7 @@ const B: [[u8; 8]; 8] = [
 ];
 
 const SHIFTS_P: [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
-const SHIFTS_Q: [u8; 8] = [0, 3, 5, 7, 0, 2, 4, 6];
+const SHIFTS_Q: [u8; 8] = [1, 3, 5, 7, 0, 2, 4, 6];
 const SHIFTS_P_WIDE: [u8; 8] = [0, 1, 2, 3, 4, 5, 6, 11];
 const SHIFTS_Q_WIDE: [u8; 8] = [1, 3, 5, 11, 0, 2, 4, 6];
 
@@ -80,6 +80,13 @@ fn xor_generic_array<L: ArrayLength<u8>>(
     res
 }
 
+fn gcd(a: usize, b: usize) -> usize {
+    if b == 0 {
+        return a;
+    }
+    gcd(b, a % b)
+}
+
 impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
     where OutputSize: ArrayLength<u8>,
           BlockSize: ArrayLength<u8>,
@@ -88,9 +95,10 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
 {
     fn new() -> Grostl<OutputSize, BlockSize> {
         let block_bytes = BlockSize::to_usize();
-        let block_bits = block_bytes * 8;
+        let output_bytes = OutputSize::to_usize();
+        let output_bits = output_bytes * 8;
         let mut iv = GenericArray::default();
-        write_u64_be(&mut iv[..8], block_bits as u64);
+        write_u64_be(&mut iv[block_bytes - 8..], output_bits as u64);
         let rounds = if block_bytes == 128 {
             14
         } else {
@@ -144,7 +152,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
         xor_generic_array(
             &xor_generic_array(
                 &self.p(&xor_generic_array(&self.state, input_block)),
-                &self.q(input_block)
+                &self.q(input_block),
             ),
             &self.state,
         )
@@ -197,6 +205,8 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
             self.sub_bytes(&mut matrix);
             self.shift_bytes(&mut matrix, shifts);
             matrix = self.mix_bytes(&matrix);
+            // println!("output after round {}", round);
+            // println!("{:?}", matrix.state);
         }
         self.matrix_to_block(&matrix)
     }
@@ -228,10 +238,10 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
     ) {
         for i in 0..matrix.rows() {
             for j in 0..matrix.cols() {
-                matrix[i][j] ^= c[i * 8 + j];
+                matrix[i][j] ^= c[i * 16 + j];
                 if c[0] == 0x00 && i == 0 {
                     matrix[i][j] ^= round;
-                } else if c[0] == 0xff && i == 8 {
+                } else if c[0] == 0xff && i == 7 {
                     matrix[i][j] ^= round;
                 }
             }
@@ -260,18 +270,19 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
             if shift == 0 {
                 continue;
             }
-            let num = (cols + shift - 1) / shift;
-            for mut j in (cols - shift..cols).rev() {
-                let mut k = 0;
-                let mut val = matrix[i][j];
-                while k < num {
-                    let pos = j.wrapping_sub(shift) % cols;
-                    let tmp = matrix[i][pos];
-                    matrix[i][pos] = val;
-                    val = tmp;
-                    j = j.wrapping_sub(shift) % cols;
-                    k += 1;
+            let d = gcd(shift, cols);
+            for j in 0..d {
+                let mut k = j;
+                let tmp = matrix[i][k];
+                loop {
+                    let pos = k.wrapping_add(shift) % cols;
+                    if pos == j {
+                        break
+                    }
+                    matrix[i][k] = matrix[i][pos];
+                    k = pos;
                 }
+                matrix[i][k] = tmp;
             }
         }
     }
@@ -310,6 +321,13 @@ impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
     type BlockSize = BlockSize;
 
     fn input(&mut self, input: &[u8]) {
+        if input.len() == 0 {
+            let padding_chunk =
+                Grostl::<OutputSize, BlockSize>::get_padding_chunk(input);
+            self.state = self.compress(
+                GenericArray::from_slice(&padding_chunk),
+            );
+        }
         for chunk in input.chunks(self.block_bytes()) {
             if chunk.len() < self.block_bytes() {
                 let padding_chunk =
@@ -330,36 +348,31 @@ impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
 
 #[cfg(test)]
 mod test {
-    use super::{Grostl, Matrix, SHIFTS_P};
+    use super::{xor_generic_array, C_P, C_Q, Grostl, SHIFTS_P};
     use generic_array::typenum::{U32, U64};
     use generic_array::GenericArray;
 
     #[test]
     fn test_shift_bytes() {
         let g: Grostl<U32, U64> = Grostl::default();
-        let mut matrix = Matrix::default();
-        for i in 0..matrix.rows() {
-            for j in 0..matrix.cols() {
-                matrix[i][j] = (i * matrix.cols() + j) as u8;
-            }
+        let mut block = GenericArray::default();
+        for i in 0..64 {
+            block[i] = i as u8;
         }
+        let mut matrix = g.block_to_matrix(&block);
         g.shift_bytes(&mut matrix, SHIFTS_P);
-        let expected_matrix = Matrix::from_generic_array(
-            GenericArray::map_slice(
-                &[
-                    [0, 1, 2, 3, 4, 5, 6, 7],
-                    [9, 10, 11, 12, 13, 14, 15, 8],
-                    [18, 19, 20, 21, 22, 23, 16, 17],
-                    [27, 28, 24, 25, 31, 24, 25, 26],
-                    [36, 37, 38, 39, 32, 33, 34, 35],
-                    [42, 46, 47, 40, 41, 42, 40, 41],
-                    [54, 55, 48, 49, 48, 49, 52, 53],
-                    [63, 56, 56, 58, 59, 60, 61, 62],
-                ],
-                |s: &[u8; 8]| GenericArray::clone_from_slice(s),
-            ),
-        );
-        assert_eq!(matrix, expected_matrix);
+        let block = g.matrix_to_block(&matrix);
+        let expected = [
+            0, 9, 18, 27, 36, 45, 54, 63,
+            8, 17, 26, 35, 44, 53, 62, 7,
+            16, 25, 34, 43, 52, 61, 6, 15,
+            24, 33, 42, 51, 60, 5, 14, 23,
+            32, 41, 50, 59, 4, 13, 22, 31,
+            40, 49, 58, 3, 12, 21, 30, 39,
+            48, 57, 2, 11, 20, 29, 38, 47,
+            56, 1, 10, 19, 28, 37, 46, 55,
+        ];
+        assert_eq!(&*block, &expected[..]);
     }
 
     #[test]
@@ -380,10 +393,90 @@ mod test {
     }
 
     #[test]
-    fn test_add_round_constant() {
+    fn test_p() {
+        let input = [];
+        let padding_chunk = Grostl::<U32, U64>::get_padding_chunk(&input);
+        let g: Grostl<U32, U64> = Grostl::default();
+        let block = xor_generic_array(&g.state, GenericArray::from_slice(&padding_chunk));
+        let a = g.p(&block);
+        let expected = [
+            247, 236, 141, 217, 73, 225, 112, 216,
+            1, 155, 85, 192, 152, 168, 174, 72,
+            112, 253, 159, 53, 7, 6, 8, 115,
+            58, 242, 7, 115, 148, 150, 157, 25,
+            18, 220, 11, 5, 178, 10, 110, 94,
+            44, 56, 110, 67, 107, 234, 102, 163,
+            243, 212, 49, 25, 46, 17, 170, 84,
+            5, 76, 239, 51, 4, 107, 94, 20,
+        ];
+        assert_eq!(&*a, &expected[..]);
     }
 
     #[test]
-    fn test_mix_bytes() {
+    fn test_q() {
+        let input = [];
+        let padding_chunk = Grostl::<U32, U64>::get_padding_chunk(&input);
+        let g: Grostl<U32, U64> = Grostl::default();
+        let a = g.q(GenericArray::from_slice(&padding_chunk));
+        let expected = [
+            189, 183, 105, 133, 208, 106, 34, 36,
+            82, 37, 180, 250, 229, 59, 230, 223,
+            215, 245, 53, 117, 167, 139, 150, 186,
+            210, 17, 220, 57, 116, 134, 209, 51,
+            124, 108, 84, 91, 79, 103, 148, 27,
+            135, 183, 144, 226, 59, 242, 87, 81,
+            109, 211, 84, 185, 192, 172, 88, 210,
+            8, 121, 31, 242, 158, 227, 207, 13,
+        ];
+        assert_eq!(&*a, &expected[..]);
+    }
+
+    #[test]
+    fn test_block_to_matrix() {
+        let g: Grostl<U32, U64> = Grostl::default();
+        let mut block1 = GenericArray::default();
+        for i in 0..block1.len() {
+            block1[i] = i as u8;
+        }
+        let m = g.block_to_matrix(&block1);
+        let block2 = g.matrix_to_block(&m);
+        assert_eq!(block1, block2);
+    }
+
+    #[test]
+    fn test_add_round_constant() {
+        let input = [];
+        let padding_chunk = Grostl::<U32, U64>::get_padding_chunk(&input);
+        let g: Grostl<U32, U64> = Grostl::default();
+
+        let mut m = g.block_to_matrix(GenericArray::from_slice(&padding_chunk));
+        g.add_round_constant(&mut m, C_P, 0);
+        let b = g.matrix_to_block(&m);
+        let expected = [
+            128, 0, 0, 0, 0, 0, 0, 0,
+            16, 0, 0, 0, 0, 0, 0, 0,
+            32, 0, 0, 0, 0, 0, 0, 0,
+            48, 0, 0, 0, 0, 0, 0, 0,
+            64, 0, 0, 0, 0, 0, 0, 0,
+            80, 0, 0, 0, 0, 0, 0, 0,
+            96, 0, 0, 0, 0, 0, 0, 0,
+            112, 0, 0, 0, 0, 0, 0, 1,
+        ];
+        assert_eq!(&*b, &expected[..]);
+
+        let mut m = g.block_to_matrix(GenericArray::from_slice(&padding_chunk));
+        g.add_round_constant(&mut m, C_Q, 0);
+        let b = g.matrix_to_block(&m);
+        let expected = [
+            0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xef,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xdf,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xcf,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xbf,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xaf,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x9f,
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x8e,
+        ];
+        assert_eq!(&*b, &expected[..]);
     }
 }
