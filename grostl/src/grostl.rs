@@ -1,5 +1,5 @@
-use std::marker::PhantomData;
-use std::ops::Div;
+use core::marker::PhantomData;
+use core::ops::Div;
 
 use byte_tools::write_u64_be;
 use digest::Digest;
@@ -102,7 +102,7 @@ impl<OutputSize, BlockSize> Grostl<OutputSize, BlockSize>
           BlockSize::ArrayType: Copy,
           Quot<BlockSize, U8>: ArrayLength<u8>,
 {
-    fn new() -> Grostl<OutputSize, BlockSize> {
+    pub fn new() -> Grostl<OutputSize, BlockSize> {
         let block_bytes = BlockSize::to_usize();
         let output_bytes = OutputSize::to_usize();
         let output_bits = output_bytes * 8;
