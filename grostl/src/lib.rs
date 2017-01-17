@@ -1,5 +1,6 @@
 extern crate byte_tools;
 extern crate digest;
+extern crate digest_buffer;
 extern crate generic_array;
 
 use generic_array::ArrayLength;

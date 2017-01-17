@@ -16,7 +16,7 @@ fn grostl_224_main() {
 #[test]
 fn grostl_256_main() {
     let tests = new_tests!(
-        "grostl256/test1"
+        "grostl256/test1",
         "grostl256/test2",
         "grostl256/test3"
     );
