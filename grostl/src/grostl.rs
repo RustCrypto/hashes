@@ -142,28 +142,6 @@ impl<OutputSize, BlockSize> GrostlState<OutputSize, BlockSize>
         }
     }
 
-    fn get_padding_chunk(input: &[u8]) -> Vec<u8> {
-        let l = input.len();
-        let block_bytes = BlockSize::to_usize();
-        let bs = block_bytes * 8;
-
-        let num_padding_bits = (-1 * (8 * l + 64) as isize) as usize % bs;
-        let num_padding_bytes = num_padding_bits / 8;
-        //debug_assert!(num_padding_bytes < block_bytes);
-
-        let mut padding_chunk = Vec::with_capacity(bs / 8);
-        padding_chunk.extend(input[l - (l % bs)..].iter());
-        padding_chunk.push(128);
-        for _ in 0..num_padding_bytes - 1 + 8 {
-            padding_chunk.push(0)
-        }
-        let num_blocks = (l + num_padding_bytes + 8) / block_bytes;
-        assert_eq!(padding_chunk.len(), block_bytes);
-        write_u64_be(&mut padding_chunk[block_bytes - 8..], num_blocks as u64);
-
-        padding_chunk
-    }
-
     fn compress(
         &mut self,
         input_block: &GenericArray<u8, BlockSize>,
@@ -358,6 +336,17 @@ impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
                 write_u64_be(&mut buf, (self.state.num_blocks + 1) as u64);
             }
             self.state.compress(self.buffer.full_buffer());
+        } else {
+            let block_bytes = self.block_bytes();
+            self.buffer.zero_until(block_bytes);
+            self.state.compress(self.buffer.full_buffer());
+
+            self.buffer.zero_until(block_bytes - 8);
+            {
+                let mut buf = self.buffer.next(8);
+                write_u64_be(&mut buf, (self.state.num_blocks + 1) as u64);
+            }
+            self.state.compress(self.buffer.full_buffer());
         }
 
         self.state.finalize()
@@ -366,9 +355,24 @@ impl<OutputSize, BlockSize> Digest for Grostl<OutputSize, BlockSize>
 
 #[cfg(test)]
 mod test {
-    use super::{xor_generic_array, C_P, C_Q, Grostl, GrostlState, SHIFTS_P};
+    use super::{xor_generic_array, C_P, C_Q, Grostl, SHIFTS_P};
     use generic_array::typenum::{U32, U64};
     use generic_array::GenericArray;
+
+    fn get_padding_block() -> GenericArray<u8, U64> {
+        let padding_block: [u8; 64] = [
+            128, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 1,
+        ];
+
+        GenericArray::clone_from_slice(&padding_block)
+    }
 
     #[test]
     fn test_shift_bytes() {
@@ -395,26 +399,8 @@ mod test {
     }
 
     #[test]
-    fn test_padding() {
-        let input = [];
-        let padding_chunk = GrostlState::<U32, U64>::get_padding_chunk(&input);
-        let expected: [u8; 64] = [
-            128, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 1,
-        ];
-        assert_eq!(padding_chunk, &expected[..]);
-    }
-
-    #[test]
     fn test_p() {
-        let input = [];
-        let padding_chunk = GrostlState::<U32, U64>::get_padding_chunk(&input);
+        let padding_chunk = get_padding_block();
         let g: Grostl<U32, U64> = Grostl::default();
         let s = g.state;
         let block = xor_generic_array(
@@ -438,8 +424,7 @@ mod test {
 
     #[test]
     fn test_q() {
-        let input = [];
-        let padding_chunk = GrostlState::<U32, U64>::get_padding_chunk(&input);
+        let padding_chunk = get_padding_block();
         let g: Grostl<U32, U64> = Grostl::default();
         let q_block = g.state.q(GenericArray::from_slice(&padding_chunk));
         let expected = [
@@ -470,8 +455,7 @@ mod test {
 
     #[test]
     fn test_add_round_constant() {
-        let input = [];
-        let padding_chunk = GrostlState::<U32, U64>::get_padding_chunk(&input);
+        let padding_chunk = get_padding_block();
         let g: Grostl<U32, U64> = Grostl::default();
         let s = g.state;
 
