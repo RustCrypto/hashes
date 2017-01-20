@@ -1,12 +1,13 @@
 [package]
 name = "sha3"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "SHA-3 (Keccak) hash function"
 documentation = "https://docs.rs/sha3"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha3", "keccak", "hash", "digest"]
+categories = ["cryptography"]
 
 [dependencies]
 digest = "0.4"
@@ -15,3 +16,6 @@ byte-tools = "0.1"
 
 [dev-dependencies]
 crypto-tests = "0.3"
+
+[badges]
+travis-ci = { repository = "RustCrypto/hashes" }

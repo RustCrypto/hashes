@@ -1,12 +1,13 @@
 [package]
 name = "sha2"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "SHA-2 hash functions"
 #documentation = "https://docs.rs/sha1"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha2", "hash", "digest"]
+categories = ["cryptography"]
 
 [dependencies]
 digest = "0.4"
@@ -17,3 +18,6 @@ fake-simd = "0.1"
 
 [dev-dependencies]
 crypto-tests = "0.3"
+
+[badges]
+travis-ci = { repository = "RustCrypto/hashes" }

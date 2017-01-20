@@ -7,6 +7,7 @@ description = "MD5 hash function"
 documentation = "https://docs.rs/md5"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md5", "hash", "digest"]
+categories = ["cryptography"]
 
 [dependencies]
 digest = "0.4"
@@ -17,3 +18,6 @@ fake-simd = "0.1"
 
 [dev-dependencies]
 crypto-tests = "0.3"
+
+[badges]
+travis-ci = { repository = "RustCrypto/hashes" }
