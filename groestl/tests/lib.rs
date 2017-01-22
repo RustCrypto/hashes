@@ -1,4 +1,5 @@
 #![no_std]
+
 #[macro_use]
 extern crate crypto_tests;
 extern crate generic_array;
