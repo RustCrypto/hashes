@@ -2,7 +2,6 @@ use core::marker::PhantomData;
 use core::ops::Div;
 
 use byte_tools::write_u64_be;
-use digest::Digest;
 use digest_buffer::DigestBuffer;
 use generic_array::{ArrayLength, GenericArray};
 use generic_array::typenum::{Quot, U8};
@@ -22,6 +21,37 @@ pub struct Groestl<OutputSize, BlockSize>
 {
     buffer: DigestBuffer<BlockSize>,
     state: GroestlState<OutputSize, BlockSize>,
+}
+
+impl<OutputSize, BlockSize> Groestl<OutputSize, BlockSize>
+    where OutputSize: ArrayLength<u8>,
+          BlockSize: ArrayLength<u8> + Div<U8>,
+          BlockSize::ArrayType: Copy,
+          Quot<BlockSize, U8>: ArrayLength<u8>,
+{
+    pub fn process(&mut self, input: &[u8]) {
+        let state = &mut self.state;
+        self.buffer.input(
+            input,
+            |b: &GenericArray<u8, BlockSize>| { state.compress(b); },
+        );
+    }
+
+    pub fn finalize(mut self) -> GenericArray<u8, OutputSize> {
+        {
+            let state = &mut self.state;
+            self.buffer.standard_padding(
+                8,
+                |b: &GenericArray<u8, BlockSize>| { state.compress(b); },
+            );
+        }
+        {
+            let mut buf = self.buffer.next(8);
+            write_u64_be(&mut buf, (self.state.num_blocks + 1) as u64);
+        }
+        self.state.compress(self.buffer.full_buffer());
+        self.state.finalize()
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -252,40 +282,6 @@ impl<OutputSize, BlockSize> GroestlState<OutputSize, BlockSize>
         GenericArray::clone_from_slice(
             &a[a.len() - OutputSize::to_usize()..],
         )
-    }
-}
-
-impl<OutputSize, BlockSize> Digest for Groestl<OutputSize, BlockSize>
-    where OutputSize: ArrayLength<u8>,
-          BlockSize: ArrayLength<u8> + Div<U8>,
-          BlockSize::ArrayType: Copy,
-          Quot<BlockSize, U8>: ArrayLength<u8>,
-{
-    type OutputSize = OutputSize;
-    type BlockSize = BlockSize;
-
-    fn input(&mut self, input: &[u8]) {
-        let state = &mut self.state;
-        self.buffer.input(
-            input,
-            |b: &GenericArray<u8, BlockSize>| { state.compress(b); },
-        );
-    }
-
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        {
-            let state = &mut self.state;
-            self.buffer.standard_padding(
-                8,
-                |b: &GenericArray<u8, BlockSize>| { state.compress(b); },
-            );
-        }
-        {
-            let mut buf = self.buffer.next(8);
-            write_u64_be(&mut buf, (self.state.num_blocks + 1) as u64);
-        }
-        self.state.compress(self.buffer.full_buffer());
-        self.state.finalize()
     }
 }
 

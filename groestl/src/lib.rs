@@ -77,11 +77,11 @@ impl<OutputSize> Digest for GroestlSmall<OutputSize>
     type BlockSize = U64;
 
     fn input(&mut self, input: &[u8]) {
-        self.groestl.input(input);
+        self.groestl.process(input);
     }
 
     fn result(self) -> GenericArray<u8, Self::OutputSize> {
-        self.groestl.result()
+        self.groestl.finalize()
     }
 }
 
@@ -113,11 +113,11 @@ impl<OutputSize> Digest for GroestlBig<OutputSize>
     type BlockSize = U128;
 
     fn input(&mut self, input: &[u8]) {
-        self.groestl.input(input);
+        self.groestl.process(input);
     }
 
     fn result(self) -> GenericArray<u8, Self::OutputSize> {
-        self.groestl.result()
+        self.groestl.finalize()
     }
 }
 
