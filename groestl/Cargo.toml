@@ -1,17 +1,17 @@
 [package]
-name = "grostl"
-version = "0.3.0"
+name = "groestl"
+version = "0.1.0"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "Grostl hash function"
-documentation = "https://docs.rs/md5"
+documentation = "https://docs.rs/groestl"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "grostl", "hash", "digest"]
+keywords = ["crypto", "groestl", "grostl", "hash", "digest"]
 
 [dependencies]
-byte-tools = "0.1.2"
-digest = "0.4.0"
-digest-buffer = "0.2.0"
+byte-tools = "0.1"
+digest = "0.4"
+digest-buffer = "0.2"
 generic-array = "0.6"
 
 [dev-dependencies]
