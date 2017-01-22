@@ -273,35 +273,25 @@ impl<OutputSize, BlockSize> Digest for Groestl<OutputSize, BlockSize>
     }
 
     fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        self.buffer.next(1)[0] = 128;
-        if self.buffer.remaining() >= 8 {
-            let block_bytes = self.block_bytes();
-            self.buffer.zero_until(block_bytes - 8);
-            {
-                let mut buf = self.buffer.next(8);
-                write_u64_be(&mut buf, (self.state.num_blocks + 1) as u64);
-            }
-            self.state.compress(self.buffer.full_buffer());
-        } else {
-            let block_bytes = self.block_bytes();
-            self.buffer.zero_until(block_bytes);
-            self.state.compress(self.buffer.full_buffer());
-
-            self.buffer.zero_until(block_bytes - 8);
-            {
-                let mut buf = self.buffer.next(8);
-                write_u64_be(&mut buf, (self.state.num_blocks + 1) as u64);
-            }
-            self.state.compress(self.buffer.full_buffer());
+        {
+            let state = &mut self.state;
+            self.buffer.standard_padding(
+                8,
+                |b: &GenericArray<u8, BlockSize>| { state.compress(b); },
+            );
         }
-
+        {
+            let mut buf = self.buffer.next(8);
+            write_u64_be(&mut buf, (self.state.num_blocks + 1) as u64);
+        }
+        self.state.compress(self.buffer.full_buffer());
         self.state.finalize()
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::{xor_generic_array, C_P, C_Q, Groestl, SHIFTS_P};
+    use super::{xor_generic_array, C_P, C_Q, Groestl, GroestlState, SHIFTS_P};
     use generic_array::typenum::{U32, U64};
     use generic_array::GenericArray;
 
@@ -322,8 +312,7 @@ mod test {
 
     #[test]
     fn test_shift_bytes() {
-        let g: Groestl<U32, U64> = Groestl::default();
-        let s = g.state;
+        let s = GroestlState::<U32, U64>::default();
         let mut block = GenericArray::default();
         for i in 0..64 {
             block[i] = i as u8;
@@ -341,14 +330,13 @@ mod test {
             48, 57, 2, 11, 20, 29, 38, 47,
             56, 1, 10, 19, 28, 37, 46, 55,
         ];
-        assert_eq!(&*block, &expected[..]);
+        assert_eq!(&block[..], &expected[..]);
     }
 
     #[test]
     fn test_p() {
         let padding_chunk = get_padding_block();
-        let g: Groestl<U32, U64> = Groestl::default();
-        let s = g.state;
+        let s = GroestlState::<U32, U64>::default();
         let block = xor_generic_array(
             &s.state,
             GenericArray::from_slice(&padding_chunk),
@@ -365,7 +353,7 @@ mod test {
             243, 212, 49, 25, 46, 17, 170, 84,
             5, 76, 239, 51, 4, 107, 94, 20,
         ];
-        assert_eq!(&*p_block, &expected[..]);
+        assert_eq!(&p_block[..], &expected[..]);
     }
 
     #[test]
@@ -383,7 +371,7 @@ mod test {
             109, 211, 84, 185, 192, 172, 88, 210,
             8, 121, 31, 242, 158, 227, 207, 13,
         ];
-        assert_eq!(&*q_block, &expected[..]);
+        assert_eq!(&q_block[..], &expected[..]);
     }
 
     #[test]
@@ -402,8 +390,7 @@ mod test {
     #[test]
     fn test_add_round_constant() {
         let padding_chunk = get_padding_block();
-        let g: Groestl<U32, U64> = Groestl::default();
-        let s = g.state;
+        let s = GroestlState::<U32, U64>::default();
 
         let mut m = s.block_to_matrix(GenericArray::from_slice(&padding_chunk));
         s.add_round_constant(&mut m, C_P, 0);
@@ -418,7 +405,7 @@ mod test {
             96, 0, 0, 0, 0, 0, 0, 0,
             112, 0, 0, 0, 0, 0, 0, 1,
         ];
-        assert_eq!(&*b, &expected[..]);
+        assert_eq!(&b[..], &expected[..]);
 
         let mut m = s.block_to_matrix(GenericArray::from_slice(&padding_chunk));
         s.add_round_constant(&mut m, C_Q, 0);
@@ -433,6 +420,6 @@ mod test {
             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x9f,
             0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x8e,
         ];
-        assert_eq!(&*b, &expected[..]);
+        assert_eq!(&b[..], &expected[..]);
     }
 }

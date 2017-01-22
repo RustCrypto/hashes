@@ -20,7 +20,7 @@
 //! ```
 //!
 //! ```rust,ignore
-//! use groestl::{Digest, Groestl256};
+//! use groestl::{Digest, GroestlSmall, GroestlBig};
 //! use typenum::{U8, U52};
 //!
 //! let mut hasher = GroestlSmall::<U8>::new();
@@ -30,7 +30,6 @@
 //! let mut hasher = GroestlBig::<U52>::new();
 //! hasher.input(b"my message");
 //! let result = hasher.result();
-//!}
 //! ```
 
 #![no_std]
@@ -50,7 +49,7 @@ mod consts;
 mod groestl;
 mod matrix;
 
-#[derive(Default)]
+#[derive(Copy, Clone, Default)]
 pub struct GroestlSmall<OutputSize>
     where OutputSize: ArrayLength<u8> + Cmp<U0> + Cmp<U33>,
           Compare<OutputSize, U0>: Same<Greater>,
@@ -86,7 +85,7 @@ impl<OutputSize> Digest for GroestlSmall<OutputSize>
     }
 }
 
-#[derive(Default)]
+#[derive(Copy, Clone, Default)]
 pub struct GroestlBig<OutputSize>
     where OutputSize: ArrayLength<u8> + Cmp<U32> + Cmp<U65>,
           Compare<OutputSize, U32>: Same<Greater>,
