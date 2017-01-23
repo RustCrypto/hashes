@@ -7,6 +7,7 @@ description = "Grostl hash function"
 documentation = "https://docs.rs/groestl"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "groestl", "grostl", "hash", "digest"]
+categories = ["cryptography"]
 
 [dependencies]
 byte-tools = "0.1"
@@ -16,3 +17,6 @@ generic-array = "0.6"
 
 [dev-dependencies]
 crypto-tests = "0.3"
+
+[badges]
+travis-ci = { repository = "RustCrypto/hashes" }
