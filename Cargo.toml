@@ -1,0 +1,23 @@
+[package]
+name = "workspace"
+version = "0.0.0"
+description = "This crate used for workspace only"
+
+[lib]
+path = ".workspace.rs"
+
+[dependencies]
+blake2 = {path="blake2"}
+gost94 = {path="gost94"}
+groestl = {path="groestl"}
+md2 = {path="md2"}
+md4 = {path="md4"}
+md5 = {path="md5"}
+ripemd160 = {path="ripemd160"}
+sha1 = {path="sha1"}
+sha2 = {path="sha2"}
+sha3 = {path="sha3"}
+streebog = {path="streebog"}
+whirlpool = {path="whirlpool"}
+
+[workspace]
