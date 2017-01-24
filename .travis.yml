@@ -18,7 +18,5 @@ env:
   - TEST_DIR=sha3
   - TEST_DIR=streebog
   - TEST_DIR=whirlpool
-  - TEST_DIR=utils/digest
-  - TEST_DIR=utils/digest-buffer
 script: cd $TEST_DIR && cargo build --verbose && cargo test --verbose
 
