@@ -6,17 +6,5 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
-env:
-  - TEST_DIR=blake2
-  - TEST_DIR=gost94
-  - TEST_DIR=md2
-  - TEST_DIR=md4
-  - TEST_DIR=md5
-  - TEST_DIR=ripemd160
-  - TEST_DIR=sha1
-  - TEST_DIR=sha2
-  - TEST_DIR=sha3
-  - TEST_DIR=streebog
-  - TEST_DIR=whirlpool
-script: cd $TEST_DIR && cargo build --verbose && cargo test --verbose
+script: cargo build --verbose && cargo test --verbose --all
 

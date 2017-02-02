@@ -29,7 +29,6 @@
 //! ```
 
 #![no_std]
-#[macro_use]
 extern crate generic_array;
 extern crate digest_buffer;
 extern crate byte_tools;

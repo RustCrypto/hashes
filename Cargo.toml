@@ -7,7 +7,7 @@ description = "This crate used for workspace only"
 path = ".workspace.rs"
 
 [dependencies]
-blake2 = {path="blake2"}
+#blake2 = {path="blake2"}
 gost94 = {path="gost94"}
 groestl = {path="groestl"}
 md2 = {path="md2"}
