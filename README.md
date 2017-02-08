@@ -14,6 +14,10 @@ available under the license terms of the Rust-Crypto project.
 All crates in this repository are dual-licensed under the MIT and Apache 2.0 licenses.
 
 ## Supported algorithms
+**Note:** For new applications, or where compatibility with other existing
+standards is not a primary concern, we strongly recommend either BLAKE2, SHA-2
+or SHA3.
+
 | Name     | Alt name   | Crates.io  | Documentation  | [Security Level] |
 | ------------- |:-------------:| :-----:| :-----:| :-----:|
 | [BLAKE2](https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2) |   | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | :green_heart: |
@@ -27,7 +31,7 @@ All crates in this repository are dual-licensed under the MIT and Apache 2.0 lic
 | [SHA-2](https://en.wikipedia.org/wiki/SHA-2) |    | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) |  [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | :green_heart: |
 | [SHA-3](https://en.wikipedia.org/wiki/SHA-3) |  Keccak  | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) |  [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | :green_heart: |
 | [Streebog](https://en.wikipedia.org/wiki/Streebog) |  GOST R 34.11-2012  | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) |  [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | :yellow_heart: |
-| [Whirlpool](https://en.wikipedia.org/wiki/Whirlpool_(cryptography)) |    | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) |  [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | :yellow_heart: |
+| [Whirlpool](https://en.wikipedia.org/wiki/Whirlpool_(cryptography)) |    | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) |  [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | :green_heart: |
 
 [Security Level]: https://en.wikipedia.org/wiki/Hash_function_security_summary
 
