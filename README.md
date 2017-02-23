@@ -27,7 +27,7 @@ or SHA3.
 | [MD4](https://en.wikipedia.org/wiki/MD4) |    | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) |  [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | :broken_heart: |
 | [MD5](https://en.wikipedia.org/wiki/MD5) |   | [not published](https://github.com/stainless-steel/md5/pull/2) |  | :broken_heart: |
 | [RIPEMD-160](https://en.wikipedia.org/wiki/RIPEMD) |    | [![crates.io](https://img.shields.io/crates/v/ripemd160.svg)](https://crates.io/crates/ripemd160) |  [![Documentation](https://docs.rs/ripemd160/badge.svg)](https://docs.rs/ripemd160) | :green_heart: |
-| [SHA-1](https://en.wikipedia.org/wiki/SHA-1) |    | [not published](https://github.com/mitsuhiko/rust-sha1/issues/17) |  | :yellow_heart: |
+| [SHA-1](https://en.wikipedia.org/wiki/SHA-1) |    | [not published](https://github.com/mitsuhiko/rust-sha1/issues/17) |  | :broken_heart: |
 | [SHA-2](https://en.wikipedia.org/wiki/SHA-2) |    | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) |  [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | :green_heart: |
 | [SHA-3](https://en.wikipedia.org/wiki/SHA-3) |  Keccak  | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) |  [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | :green_heart: |
 | [Streebog](https://en.wikipedia.org/wiki/Streebog) |  GOST R 34.11-2012  | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) |  [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | :yellow_heart: |
