@@ -126,7 +126,7 @@ impl<N> Blake2s<N> where N: ArrayLength<u8> + Copy {
             h: IV,
             t: [0,0],
             f: [0,0],
-            buf: GenericArray::new(),
+            buf: GenericArray::default(),
             buflen: 0,
             last_node: 0,
             key: [0; BLAKE2S_KEYBYTES],
@@ -249,7 +249,7 @@ impl<N> Blake2s<N> where N: ArrayLength<u8> + Copy {
 
         write_u32v_le(&mut self.buf[0..32], &self.h);
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         copy_memory(&self.buf[..N::to_usize()], &mut out);
         out
     }

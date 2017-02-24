@@ -264,7 +264,7 @@ impl<N> Blake2b<N> where N: ArrayLength<u8> + Copy  {
 
         write_u64v_le(&mut self.buf[0..64], &self.h);
 
-        let mut out = GenericArray::new();
+        let mut out = GenericArray::default();
         copy_memory(&self.buf[..N::to_usize()], &mut out);
         out
     }
