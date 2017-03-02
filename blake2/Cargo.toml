@@ -7,6 +7,7 @@ description = "BLAKE2 hash functions"
 documentation = "https://docs.rs/blake2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "blake2", "hash", "digest"]
+categories = ["cryptography", "no-std"]
 
 [dependencies]
 byte-tools = "0.1"

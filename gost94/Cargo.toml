@@ -7,7 +7,7 @@ description = "GOST R 34.11-94 hash function"
 documentation = "https://docs.rs/gost94"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "gost94", "gost", "hash", "digest"]
-categories = ["cryptography"]
+categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest-buffer = "0.2"
