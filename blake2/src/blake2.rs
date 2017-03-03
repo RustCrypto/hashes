@@ -2,12 +2,19 @@
 
 macro_rules! blake2_impl {
     ($state:ident, $word:ident, $vec:ident,
-     $bytes:expr, $R1:expr, $R2:expr, $R3:expr, $R4:expr,
+     $bytes:ident, $R1:expr, $R2:expr, $R3:expr, $R4:expr,
      $IV:expr) => {
 
         use $crate::as_bytes::AsBytes;
         use $crate::bytes::BytesExt;
         use $crate::simd::{Vector4, $vec};
+
+        use generic_array::{GenericArray, ArrayLength};
+        use core::marker::PhantomData;
+        use core::cmp;
+        use byte_tools::copy_memory;
+        use generic_array::typenum::Unsigned;
+        use digest::Digest;
 
         /// State context.
         #[derive(Clone, Debug)]
@@ -70,9 +77,10 @@ macro_rules! blake2_impl {
             pub fn new_keyed(k: &[u8]) -> Self {
                 let kk = k.len();
                 // TODO: encode into type
-                //assert!(kk <= BLAKE2B_KEYBYTES);
+                //assert!(kk <= $bytes::to_usize());
 
-                let p0 = 0x01010000 ^ ((kk as $word) << 8) ^ ($bytes as $word);
+                let p0 = 0x01010000 ^ ((kk as $word) << 8) ^
+                    ($bytes::to_u64() as $word);
                 let mut state = $state {
                     m: [0; 16],
                     h: [iv0() ^ $vec::new(p0, 0, 0, 0), iv1()],
@@ -82,7 +90,7 @@ macro_rules! blake2_impl {
 
                 if kk > 0 {
                     state.m.as_mut_bytes().copy_bytes_from(k);
-                    state.t = $bytes * 2;
+                    state.t = $bytes::to_u64() * 2;
                 }
                 state
             }
@@ -111,9 +119,9 @@ macro_rules! blake2_impl {
             pub fn update(&mut self, data: &[u8]) {
                 let mut rest = data;
 
-                let off = (self.t % ($bytes * 2)) as usize;
+                let off = (self.t % ($bytes::to_u64() * 2)) as usize;
                 if off != 0 || self.t == 0 {
-                    let len = cmp::min(($bytes * 2) - off, rest.len());
+                    let len = cmp::min(($bytes::to_usize() * 2) - off, rest.len());
 
                     let part = &rest[..len];
                     rest = &rest[part.len()..];
@@ -123,10 +131,10 @@ macro_rules! blake2_impl {
                         .expect("hash data length overflow");
                 }
 
-                while rest.len() >= $bytes * 2 {
+                while rest.len() >= $bytes::to_usize() * 2 {
                     self.compress(0, 0);
 
-                    let part = &rest[..($bytes * 2)];
+                    let part = &rest[..($bytes::to_usize() * 2)];
                     rest = &rest[part.len()..];
 
                     self.m.as_mut_bytes().copy_bytes_from(part);
@@ -150,7 +158,7 @@ macro_rules! blake2_impl {
 
             #[cfg_attr(feature = "clippy", allow(cast_possible_truncation))]
             fn finalize_with_flag(mut self, f1: $word) -> GenericArray<u8, N> {
-                let off = (self.t % ($bytes * 2)) as usize;
+                let off = (self.t % ($bytes::to_u64() * 2)) as usize;
                 if off != 0 {
                     self.m.as_mut_bytes()[off..].set_bytes(0);
                 }
@@ -173,7 +181,7 @@ macro_rules! blake2_impl {
                 let h = &mut self.h;
 
                 let t0 = self.t as $word;
-                let t1 = match $bytes {
+                let t1 = match $bytes::to_u8() {
                     64 => 0,
                     32 => (self.t >> 32) as $word,
                     _  => unreachable!(),
@@ -196,7 +204,7 @@ macro_rules! blake2_impl {
                 round(&mut v, m, &SIGMA[7]);
                 round(&mut v, m, &SIGMA[8]);
                 round(&mut v, m, &SIGMA[9]);
-                if $bytes > 32 {
+                if $bytes::to_u8() == 64 {
                     round(&mut v, m, &SIGMA[0]);
                     round(&mut v, m, &SIGMA[1]);
                 }
@@ -215,7 +223,7 @@ macro_rules! blake2_impl {
         impl<N> Digest for $state<N> where N: ArrayLength<u8> + Copy {
             type OutputSize = N;
             // TODO: change for blake2s
-            type BlockSize = U64;
+            type BlockSize = $bytes;
 
             fn input(&mut self, input: &[u8]) { self.update(input); }
 

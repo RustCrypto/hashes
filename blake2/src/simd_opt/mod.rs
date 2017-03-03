@@ -13,7 +13,7 @@ macro_rules! transmute_shuffle {
         unsafe {
             use simdty::$tmp;
             use simdint::$shuffle;
-            use std::mem::transmute;
+            use core::mem::transmute;
 
             let tmp_i: $tmp = transmute($vec);
             let tmp_o: $tmp = $shuffle(tmp_i, tmp_i, $idx);

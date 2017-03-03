@@ -12,8 +12,13 @@ keywords = ["crypto", "blake2", "hash", "digest"]
 digest = "0.4"
 generic-array = "0.6"
 byte-tools = "0.1"
-crypto-ops = "0.1"
+#crypto-ops = "0.1"
 #crypto-mac = {path = "../../../rust-crypto-decoupled/utils/crypto-mac/"}
 
 [dev-dependencies]
 crypto-tests = "0.3"
+
+[features]
+simd = []
+simd_opt = ["simd"]
+simd_asm = ["simd_opt"]
