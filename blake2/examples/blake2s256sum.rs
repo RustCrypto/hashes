@@ -1,4 +1,4 @@
-extern crate blake2;
+/*extern crate blake2;
 
 use blake2::{Blake2s256, Digest};
 use std::env;
@@ -46,4 +46,8 @@ fn main() {
     } else {
         process::<Blake2s256, _>(&mut io::stdin(), "-");
     }
+}
+*/
+
+fn main() {
 }

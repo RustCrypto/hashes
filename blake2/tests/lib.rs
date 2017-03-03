@@ -4,7 +4,8 @@ extern crate crypto_tests;
 extern crate blake2;
 extern crate digest;
 
-use blake2::{Blake2b512, Blake2s256};
+//use blake2::{Blake2b512, Blake2s256};
+use blake2::Blake2b512;
 use crypto_tests::hash::{Test, main_test};
 use digest::Digest;
 
@@ -23,6 +24,7 @@ fn blake2b() {
     assert_eq!(&sh.result()[..], &output[..]);
 }
 
+/*
 #[test]
 fn blake2s() {
     let input = include_bytes!("data/blake2s/1.input.bin");
@@ -33,3 +35,4 @@ fn blake2s() {
     sh.input(input);
     assert_eq!(&sh.result()[..], output);
 }
+*/
