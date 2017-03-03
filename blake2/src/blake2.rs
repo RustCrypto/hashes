@@ -2,7 +2,8 @@
 
 macro_rules! blake2_impl {
     ($state:ident, $word:ident, $vec:ident,
-     $bytes:ident, $R1:expr, $R2:expr, $R3:expr, $R4:expr,
+     $bytes:ident, $bytes_plus1:ident,
+     $R1:expr, $R2:expr, $R3:expr, $R4:expr,
      $IV:expr) => {
 
         use $crate::as_bytes::AsBytes;
@@ -13,13 +14,18 @@ macro_rules! blake2_impl {
         use core::marker::PhantomData;
         use core::cmp;
         use byte_tools::copy_memory;
-        use generic_array::typenum::Unsigned;
+        use generic_array::typenum::{Cmp, Compare, Greater, Less, Same};
+        use generic_array::typenum::{U0, Unsigned};
         use digest::Digest;
 
+
         /// State context.
-        #[derive(Clone, Debug)]
-        // TODO: encode  assert!(nn >= 1 && nn <= $bytes && kk <= $bytes);
-        pub struct $state<N> where N: ArrayLength<u8> + Copy {
+        #[derive(Copy, Clone, Debug)]
+        pub struct $state<N>
+            where N: ArrayLength<u8> + Copy + Cmp<U0> + Cmp<$bytes_plus1>,
+                Compare<N, U0>: Same<Greater>,
+                Compare<N, $bytes_plus1>: Same<Less>,
+        {
             m: [$word; 16],
             h: [$vec; 2],
             t: u64,
@@ -68,7 +74,11 @@ macro_rules! blake2_impl {
             unshuffle(v);
         }
         
-        impl<N> $state<N> where N: ArrayLength<u8> + Copy {
+        impl<N> $state<N>
+            where N: ArrayLength<u8> + Copy + Cmp<U0> + Cmp<$bytes_plus1>,
+                Compare<N, U0>: Same<Greater>,
+                Compare<N, $bytes_plus1>: Same<Less>,
+        {
             /// Creates a new hashing context without a key.
             pub fn new() -> Self { Self::new_keyed(&[]) }
 
@@ -76,8 +86,7 @@ macro_rules! blake2_impl {
             #[cfg_attr(feature = "clippy", allow(cast_possible_truncation))]
             pub fn new_keyed(k: &[u8]) -> Self {
                 let kk = k.len();
-                // TODO: encode into type
-                //assert!(kk <= $bytes::to_usize());
+                assert!(kk <= $bytes::to_usize());
 
                 let p0 = 0x01010000 ^ ((kk as $word) << 8) ^
                     ($bytes::to_u64() as $word);
@@ -216,19 +225,27 @@ macro_rules! blake2_impl {
         }
 
 
-        impl<N> Default for $state<N> where N: ArrayLength<u8> + Copy {
+        impl<N> Default for $state<N>
+            where N: ArrayLength<u8> + Copy + Cmp<U0> + Cmp<$bytes_plus1>,
+                Compare<N, U0>: Same<Greater>,
+                Compare<N, $bytes_plus1>: Same<Less>,
+        {
             fn default() -> Self { Self::new() }
         }
 
-        impl<N> Digest for $state<N> where N: ArrayLength<u8> + Copy {
+        impl<N> Digest for $state<N>
+            where N: ArrayLength<u8> + Copy + Cmp<U0> + Cmp<$bytes_plus1>,
+                Compare<N, U0>: Same<Greater>,
+                Compare<N, $bytes_plus1>: Same<Less>,
+        {
             type OutputSize = N;
-            // TODO: change for blake2s
             type BlockSize = $bytes;
 
             fn input(&mut self, input: &[u8]) { self.update(input); }
 
-            fn result(self) -> GenericArray<u8, Self::OutputSize> { self.finalize() }
+            fn result(self) -> GenericArray<u8, Self::OutputSize> {
+                self.finalize()
+            }
         }
-
     }
 }
