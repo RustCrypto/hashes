@@ -102,7 +102,7 @@ impl<N> Streebog<N> where N: ArrayLength<u8> + Copy {
                 for x in block.iter_mut() { *x = 1 }
                 block
             },
-            _ => panic!("Unexpected block size parameter")
+            _ => unreachable!()
         };
         Streebog {
             buffer: Default::default(),
