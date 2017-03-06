@@ -1,8 +1,6 @@
 macro_rules! blake2_impl {
-    ($state:ident, $word:ident, $vec:ident,
-     $bytes:ident, $bytes_plus1:ident,
-     $R1:expr, $R2:expr, $R3:expr, $R4:expr,
-     $IV:expr) => {
+    ($state:ident, $word:ident, $vec:ident, $bytes:ident,
+     $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr) => {
 
         use $crate::as_bytes::AsBytes;
         use $crate::bytes::BytesExt;
@@ -86,7 +84,7 @@ macro_rules! blake2_impl {
 
                 if kk > 0 {
                     state.m.as_mut_bytes().copy_bytes_from(k);
-                    state.t = $bytes::to_u64() * 2;
+                    state.t = 2 * $bytes::to_u64();
                 }
                 state
             }
@@ -115,9 +113,11 @@ macro_rules! blake2_impl {
             pub fn update(&mut self, data: &[u8]) {
                 let mut rest = data;
 
-                let off = (self.t % ($bytes::to_u64() * 2)) as usize;
+                let block = 2 * $bytes::to_usize();
+
+                let off = self.t as usize % block;
                 if off != 0 || self.t == 0 {
-                    let len = cmp::min(($bytes::to_usize() * 2) - off, rest.len());
+                    let len = cmp::min(block - off, rest.len());
 
                     let part = &rest[..len];
                     rest = &rest[part.len()..];
@@ -127,10 +127,10 @@ macro_rules! blake2_impl {
                         .expect("hash data length overflow");
                 }
 
-                while rest.len() >= $bytes::to_usize() * 2 {
+                while rest.len() >= block {
                     self.compress(0, 0);
 
-                    let part = &rest[..($bytes::to_usize() * 2)];
+                    let part = &rest[..block];
                     rest = &rest[part.len()..];
 
                     self.m.as_mut_bytes().copy_bytes_from(part);
@@ -154,7 +154,7 @@ macro_rules! blake2_impl {
 
             #[cfg_attr(feature = "clippy", allow(cast_possible_truncation))]
             fn finalize_with_flag(mut self, f1: $word) -> Output {
-                let off = (self.t % ($bytes::to_u64() * 2)) as usize;
+                let off = self.t as usize % (2 * $bytes::to_usize());
                 if off != 0 {
                     self.m.as_mut_bytes()[off..].set_bytes(0);
                 }
