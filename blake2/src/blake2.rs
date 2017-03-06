@@ -14,8 +14,8 @@ macro_rules! blake2_impl {
 
         type Output = GenericArray<u8, $bytes>;
 
-        /// State context.
-        #[derive(Copy, Clone, Debug)]
+        /// Hash function context.
+        #[derive(Copy, Clone)]
         pub struct $state {
             m: [$word; 16],
             h: [$vec; 2],
@@ -65,11 +65,7 @@ macro_rules! blake2_impl {
         }
         
         impl $state {
-            /// Creates a new hashing context without a key.
-            pub fn new() -> Self { Self::new_keyed(&[]) }
-
             /// Creates a new hashing context with a key.
-            #[cfg_attr(feature = "clippy", allow(cast_possible_truncation))]
             pub fn new_keyed(k: &[u8]) -> Self {
                 let kk = k.len();
                 assert!(kk <= $bytes::to_usize());
@@ -90,27 +86,22 @@ macro_rules! blake2_impl {
             }
 
             #[doc(hidden)]
-            #[cfg_attr(feature = "clippy", allow(cast_possible_truncation))]
-            /*
             pub fn with_parameter_block(p: &[$word; 8]) -> Self {
                 let nn = p[0] as u8 as usize;
                 let kk = (p[0] >> 8) as u8 as usize;
-                assert!(nn >= 1 && nn <= $bytes && kk <= $bytes);
+                assert!(nn >= 1 && nn <= $bytes::to_usize());
+                assert!(kk <= $bytes::to_usize());
 
                 $state {
                     m: [0; 16],
                     h: [iv0() ^ $vec::new(p[0], p[1], p[2], p[3]),
                         iv1() ^ $vec::new(p[4], p[5], p[6], p[7])],
                     t: 0,
-                    nn: nn,
                 }
             }
-            */
-
 
             /// Updates the hashing context with more data.
-            #[cfg_attr(feature = "clippy", allow(cast_possible_truncation))]
-            pub fn update(&mut self, data: &[u8]) {
+            fn update(&mut self, data: &[u8]) {
                 let mut rest = data;
 
                 let block = 2 * $bytes::to_usize();
@@ -146,13 +137,13 @@ macro_rules! blake2_impl {
                         .expect("hash data length overflow");
                 }
             }
-            
-            /// Consumes the hashing context and returns the resulting hash.
-            pub fn finalize(self) -> Output {
-                self.finalize_with_flag(0)
+
+            #[doc(hidden)]
+            pub fn finalize_last_node(self) -> Output {
+                self.finalize_with_flag(!0)
             }
 
-            #[cfg_attr(feature = "clippy", allow(cast_possible_truncation))]
+
             fn finalize_with_flag(mut self, f1: $word) -> Output {
                 let off = self.t as usize % (2 * $bytes::to_usize());
                 if off != 0 {
@@ -161,7 +152,6 @@ macro_rules! blake2_impl {
 
                 self.compress(!0, f1);
 
-
                 let buf = [self.h[0].to_le(), self.h[1].to_le()];
 
                 let mut out = GenericArray::default();
@@ -169,7 +159,6 @@ macro_rules! blake2_impl {
                 out
             }
 
-            #[cfg_attr(feature = "clippy", allow(cast_possible_truncation, eq_op))]
             fn compress(&mut self, f0: $word, f1: $word) {
                 use $crate::consts::SIGMA;
 
@@ -213,7 +202,7 @@ macro_rules! blake2_impl {
 
 
         impl Default for $state {
-            fn default() -> Self { Self::new() }
+            fn default() -> Self { Self::new_keyed(&[]) }
         }
 
         impl Digest for $state {
@@ -222,7 +211,7 @@ macro_rules! blake2_impl {
 
             fn input(&mut self, input: &[u8]) { self.update(input); }
 
-            fn result(self) -> Output { self.finalize() }
+            fn result(self) -> Output { self.finalize_with_flag(0) }
         }
     }
 }
