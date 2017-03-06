@@ -7,7 +7,7 @@ description = "RIPEMD-160 hash function"
 documentation = "https://docs.rs/ripemd160"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "ripemd160", "hash", "digest"]
-categories = ["cryptography"]
+categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.4"

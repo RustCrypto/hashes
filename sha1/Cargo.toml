@@ -7,7 +7,7 @@ description = "SHA-1 hash function"
 #documentation = "https://docs.rs/sha1"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha1", "hash", "digest"]
-categories = ["cryptography"]
+categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.4"

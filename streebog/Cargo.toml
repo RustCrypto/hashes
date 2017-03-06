@@ -7,7 +7,7 @@ description = "Streebog (GOST R 34.11-2012) hash function"
 documentation = "https://docs.rs/streebog"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "streebog", "gost", "hash", "digest"]
-categories = ["cryptography"]
+categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.4"

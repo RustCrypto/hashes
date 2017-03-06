@@ -7,7 +7,7 @@ description = "MD4 hash function"
 documentation = "https://docs.rs/md4"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md4", "hash", "digest"]
-categories = ["cryptography"]
+categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.4"
