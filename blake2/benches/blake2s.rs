@@ -4,4 +4,4 @@
 extern crate crypto_tests;
 extern crate blake2;
 
-bench_digest!(blake2::Blake2s256);
+bench_digest!(blake2::Blake2s);

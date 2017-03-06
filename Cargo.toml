@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    #"blake2",
+    "blake2",
     "gost94",
     "groestl",
     "md2",
