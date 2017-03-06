@@ -1,6 +1,6 @@
 extern crate blake2;
 
-use blake2::{Blake2s256, Digest};
+use blake2::{Blake2b, Digest};
 use std::env;
 use std::fs;
 use std::io::{self, Read};
@@ -40,10 +40,10 @@ fn main() {
     if args.len() > 1 {
         for path in args.skip(1) {
             if let Ok(mut file) = fs::File::open(&path) {
-                process::<Blake2s256, _>(&mut file, &path);
+                process::<Blake2b, _>(&mut file, &path);
             }
         }
     } else {
-        process::<Blake2s256, _>(&mut io::stdin(), "-");
+        process::<Blake2b, _>(&mut io::stdin(), "-");
     }
 }

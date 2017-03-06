@@ -1,5 +1,3 @@
-//$result
-
 macro_rules! blake2_impl {
     ($state:ident, $word:ident, $vec:ident,
      $bytes:ident, $bytes_plus1:ident,
@@ -10,26 +8,20 @@ macro_rules! blake2_impl {
         use $crate::bytes::BytesExt;
         use $crate::simd::{Vector4, $vec};
 
-        use generic_array::{GenericArray, ArrayLength};
-        use core::marker::PhantomData;
+        use generic_array::GenericArray;
         use core::cmp;
         use byte_tools::copy_memory;
-        use generic_array::typenum::{Cmp, Compare, Greater, Less, Same};
-        use generic_array::typenum::{U0, Unsigned};
+        use generic_array::typenum::Unsigned;
         use digest::Digest;
 
+        type Output = GenericArray<u8, $bytes>;
 
         /// State context.
         #[derive(Copy, Clone, Debug)]
-        pub struct $state<N>
-            where N: ArrayLength<u8> + Copy + Cmp<U0> + Cmp<$bytes_plus1>,
-                Compare<N, U0>: Same<Greater>,
-                Compare<N, $bytes_plus1>: Same<Less>,
-        {
+        pub struct $state {
             m: [$word; 16],
             h: [$vec; 2],
             t: u64,
-            phantom: PhantomData<N>,
         }
 
         #[inline(always)]
@@ -74,11 +66,7 @@ macro_rules! blake2_impl {
             unshuffle(v);
         }
         
-        impl<N> $state<N>
-            where N: ArrayLength<u8> + Copy + Cmp<U0> + Cmp<$bytes_plus1>,
-                Compare<N, U0>: Same<Greater>,
-                Compare<N, $bytes_plus1>: Same<Less>,
-        {
+        impl $state {
             /// Creates a new hashing context without a key.
             pub fn new() -> Self { Self::new_keyed(&[]) }
 
@@ -94,7 +82,6 @@ macro_rules! blake2_impl {
                     m: [0; 16],
                     h: [iv0() ^ $vec::new(p0, 0, 0, 0), iv1()],
                     t: 0,
-                    phantom: Default::default(),
                 };
 
                 if kk > 0 {
@@ -161,12 +148,12 @@ macro_rules! blake2_impl {
             }
             
             /// Consumes the hashing context and returns the resulting hash.
-            pub fn finalize(self) -> GenericArray<u8, N> {
+            pub fn finalize(self) -> Output {
                 self.finalize_with_flag(0)
             }
 
             #[cfg_attr(feature = "clippy", allow(cast_possible_truncation))]
-            fn finalize_with_flag(mut self, f1: $word) -> GenericArray<u8, N> {
+            fn finalize_with_flag(mut self, f1: $word) -> Output {
                 let off = (self.t % ($bytes::to_u64() * 2)) as usize;
                 if off != 0 {
                     self.m.as_mut_bytes()[off..].set_bytes(0);
@@ -178,7 +165,7 @@ macro_rules! blake2_impl {
                 let buf = [self.h[0].to_le(), self.h[1].to_le()];
 
                 let mut out = GenericArray::default();
-                copy_memory(&buf.as_bytes()[..N::to_usize()], &mut out);
+                copy_memory(buf.as_bytes(), &mut out);
                 out
             }
 
@@ -225,27 +212,17 @@ macro_rules! blake2_impl {
         }
 
 
-        impl<N> Default for $state<N>
-            where N: ArrayLength<u8> + Copy + Cmp<U0> + Cmp<$bytes_plus1>,
-                Compare<N, U0>: Same<Greater>,
-                Compare<N, $bytes_plus1>: Same<Less>,
-        {
+        impl Default for $state {
             fn default() -> Self { Self::new() }
         }
 
-        impl<N> Digest for $state<N>
-            where N: ArrayLength<u8> + Copy + Cmp<U0> + Cmp<$bytes_plus1>,
-                Compare<N, U0>: Same<Greater>,
-                Compare<N, $bytes_plus1>: Same<Less>,
-        {
-            type OutputSize = N;
+        impl Digest for $state {
+            type OutputSize = $bytes;
             type BlockSize = $bytes;
 
             fn input(&mut self, input: &[u8]) { self.update(input); }
 
-            fn result(self) -> GenericArray<u8, Self::OutputSize> {
-                self.finalize()
-            }
+            fn result(self) -> Output { self.finalize() }
         }
     }
 }
