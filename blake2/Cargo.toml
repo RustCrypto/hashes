@@ -23,3 +23,6 @@ crypto-tests = "0.3"
 simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
+
+[badges]
+travis-ci = { repository = "RustCrypto/hashes" }
