@@ -27,7 +27,7 @@ struct Md4State {
     s: u32x4,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct Md4 {
     length_bytes: u64,
     buffer: DigestBuffer<BlockSize>,
@@ -36,10 +36,6 @@ pub struct Md4 {
 
 
 impl Md4State {
-    fn new() -> Md4State {
-        Md4State { s: S }
-    }
-
     fn process_block(&mut self, input: &Block) {
         fn f(x: u32, y: u32, z: u32) -> u32 {
             (x & y) | (!x & z)
@@ -105,15 +101,11 @@ impl Md4State {
     }
 }
 
-impl Md4 {
-    pub fn new() -> Md4 {
-        Md4 {
-            length_bytes: 0,
-            buffer: Default::default(),
-            state: Md4State::new()
-        }
-    }
+impl Default for Md4State {
+    fn default() -> Self { Md4State { s: S } }
+}
 
+impl Md4 {
     fn finalize(&mut self) {
         let self_state = &mut self.state;
         self.buffer.standard_padding(8, |d: &Block| { self_state.process_block(d); });
@@ -123,23 +115,21 @@ impl Md4 {
     }
 }
 
-impl Default for Md4 {
-    fn default() -> Self { Self::new() }
-}
-
-impl Digest for Md4 {
-    type OutputSize = U16;
+impl digest::Input for Md4 {
     type BlockSize = BlockSize;
 
-    fn input(&mut self, input: &[u8]) {
+    fn digest(&mut self, input: &[u8]) {
         // 2^64 - ie: integer overflow is OK.
         self.length_bytes += input.len() as u64;
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| { self_state.process_block(d);}
         );
     }
+}
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+impl digest::FixedOutput for Md4 {
+    type OutputSize = U16;
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();

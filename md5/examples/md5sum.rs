@@ -1,4 +1,4 @@
-extern crate md5;
+extern crate md_5 as md5;
 
 use md5::{Md5, Digest};
 use std::env;

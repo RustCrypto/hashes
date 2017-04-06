@@ -31,10 +31,6 @@ struct Md5State {
 }
 
 impl Md5State {
-    fn new() -> Md5State {
-        Md5State { s: S }
-    }
-
     fn process_block(&mut self, input: &Block) {
         fn f(u: u32, v: u32, w: u32) -> u32 { (u & v) | (!u & w) }
 
@@ -135,23 +131,20 @@ impl Md5State {
     }
 }
 
+impl Default for Md5State {
+    fn default() -> Self { Md5State{ s: S } }
+}
+
 /// The MD5 Digest algorithm
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct Md5 {
     length_bytes: u64,
     buffer: DigestBuffer<BlockSize>,
     state: Md5State,
 }
 
-impl Md5 {
-    pub fn new() -> Md5 {
-        Md5 {
-            length_bytes: 0,
-            buffer: Default::default(),
-            state: Md5State::new(),
-        }
-    }
 
+impl Md5 {
     fn finalize(&mut self) {
         let self_state = &mut self.state;
         self.buffer.standard_padding(8, |d: &Block| {
@@ -163,15 +156,10 @@ impl Md5 {
     }
 }
 
-impl Default for Md5 {
-    fn default() -> Self { Self::new() }
-}
-
-impl Digest for Md5 {
-    type OutputSize = U16;
+impl digest::Input for Md5 {
     type BlockSize = BlockSize;
 
-    fn input(&mut self, input: &[u8]) {
+    fn digest(&mut self, input: &[u8]) {
         // Unlike Sha1 and Sha2, the length value in MD5 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes += input.len() as u64;
@@ -180,8 +168,12 @@ impl Digest for Md5 {
             self_state.process_block(d);
         });
     }
+}
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+impl digest::FixedOutput for Md5 {
+    type OutputSize = U16;
+
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();

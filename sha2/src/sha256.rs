@@ -1,5 +1,5 @@
+use digest;
 use generic_array::GenericArray;
-use digest::Digest;
 use digest_buffer::DigestBuffer;
 use generic_array::typenum::{U28, U32, U64};
 use byte_tools::{write_u32v_be, write_u32_be, add_bytes_to_bits};
@@ -71,21 +71,20 @@ pub struct Sha256 {
     engine: Engine256,
 }
 
-impl Sha256 {
-    pub fn new() -> Sha256 { Sha256 { engine: Engine256::new(&H256) } }
-}
-
 impl Default for Sha256 {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self { Self { engine: Engine256::new(&H256) } }
 }
 
-impl Digest for Sha256 {
-    type OutputSize = U32;
+impl digest::Input for Sha256 {
     type BlockSize = BlockSize;
 
-    fn input(&mut self, msg: &[u8]) { self.engine.input(msg); }
+    fn digest(&mut self, msg: &[u8]) { self.engine.input(msg); }
+}
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+impl digest::FixedOutput for Sha256 {
+    type OutputSize = U32;
+
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         write_u32v_be(&mut out, &self.engine.state.h);
@@ -100,21 +99,20 @@ pub struct Sha224 {
     engine: Engine256,
 }
 
-impl Sha224 {
-    pub fn new() -> Sha224 { Sha224 { engine: Engine256::new(&H224) } }
-}
-
 impl Default for Sha224 {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self { Self { engine: Engine256::new(&H224) } }
 }
 
-impl Digest for Sha224 {
-    type OutputSize = U28;
+impl digest::Input for Sha224 {
     type BlockSize = BlockSize;
 
-    fn input(&mut self, msg: &[u8]) { self.engine.input(msg); }
+    fn digest(&mut self, msg: &[u8]) { self.engine.input(msg); }
+}
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+impl digest::FixedOutput for Sha224 {
+    type OutputSize = U28;
+
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         write_u32v_be(&mut out[..28], &self.engine.state.h[..7]);

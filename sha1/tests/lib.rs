@@ -1,7 +1,7 @@
 #![no_std]
 #[macro_use]
 extern crate crypto_tests;
-extern crate sha1;
+extern crate sha_1 as sha1;
 
 use crypto_tests::hash::{Test, main_test, one_million_a};
 

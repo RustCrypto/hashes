@@ -19,7 +19,7 @@
 //! use sha3::{Digest, Sha3_256};
 //!
 //! // create a SHA3-256 object
-//! let mut hasher = Sha3_256::new();
+//! let mut hasher = Sha3_256::default();
 //!
 //! // write input message
 //! hasher.input(b"abc");
@@ -39,60 +39,71 @@ extern crate digest;
 extern crate generic_array;
 
 pub use digest::Digest;
-use generic_array::{GenericArray, ArrayLength};
-use generic_array::typenum::{Unsigned, U0, U2, U4, U28, U32,
+use generic_array::GenericArray;
+use generic_array::typenum::{Unsigned, U28, U32,
                              U48, U64, U72, U104, U136, U144, U168, U200};
 use core::cmp;
-use core::marker::PhantomData;
 
 mod keccak;
+mod consts;
+#[macro_use]
+mod macros;
 
-/// Generic SHA-3 hasher. Type arguments meaning:
-/// N -- digest len, K -- rate and block size, M -- padding property
 #[derive(Copy, Clone)]
-pub struct Sha3<N: ArrayLength<u8>, K: ArrayLength<u8>, M: ArrayLength<u8>> {
-    state: GenericArray<u8, U200>, // B bytes
-    // Enqueued bytes in state for absorb phase
-    //Squeeze offset for squeeze phase
-    offset: usize,
-    digest_length: PhantomData<N>,
-    rate: PhantomData<K>,
-    ds_len: PhantomData<M>, // 0 for keccak, 2 for shake, 4 for sha3
+enum Sha3Variant {
+    Keccak,
+    Sha3,
+    Shake,
 }
 
-pub type Keccak224 = Sha3<U28, U144, U0>;
-pub type Keccak256 = Sha3<U32, U136, U0>;
-pub type Keccak384 = Sha3<U48, U104, U0>;
-pub type Keccak512 = Sha3<U64, U72, U0>;
+/// Generic SHA-3 hasher. 
+#[derive(Copy, Clone)]
+struct Sha3 {
+    state: GenericArray<u8, U200>,
+    // Enqueued bytes in state for absorb phase
+    // Squeeze offset for squeeze phase
+    offset: usize,
+    rate: usize,
+    variant: Sha3Variant,
+}
 
-#[allow(non_camel_case_types)]
-pub type Sha3_224 = Sha3<U28, U144, U2>;
-#[allow(non_camel_case_types)]
-pub type Sha3_256 = Sha3<U32, U136, U2>;
-#[allow(non_camel_case_types)]
-pub type Sha3_384 = Sha3<U48, U104, U2>;
-#[allow(non_camel_case_types)]
-pub type Sha3_512 = Sha3<U64, U72, U2>;
+impl Sha3 {
+    fn new(rate: usize, variant: Sha3Variant) -> Self {
+        Self{ state: Default::default(),
+            offset: 0, rate: rate, variant: variant }
+    }
 
-pub type Shake128<N> = Sha3<N, U168, U4>;
-pub type Shake256<N> = Sha3<N, U136, U4>;
+    fn absorb(&mut self, data: &[u8]) {
+        assert!(self.offset < self.rate);
 
-impl<N, K, M> Sha3<N, K, M>
-    where N: ArrayLength<u8>, K: ArrayLength<u8>, M: ArrayLength<u8> {
+        let in_len = data.len();
+        let mut in_pos: usize = 0;
 
-    pub fn new() -> Sha3<N, K, M> {
-        Sha3 {
-            state: GenericArray::default(),
-            offset: 0,
+        // Absorb
+        while in_pos < in_len {
+            let offset = self.offset;
+            let nread = cmp::min(self.rate - offset, in_len - in_pos);
+            for i in 0..nread {
+                self.state[offset + i] ^= data[in_pos + i];
+            }
+            in_pos += nread;
 
-            digest_length: Default::default(),
-            rate: Default::default(),
-            ds_len: Default::default(),
+            if offset + nread != self.rate {
+                self.offset += nread;
+                break;
+            }
+
+            self.offset = 0;
+            keccak::f(&mut self.state);
         }
     }
 
     fn finalize(&mut self) {
-        let ds_len = M::to_usize();
+        let ds_len = match self.variant {
+            Sha3Variant::Keccak => 0,
+            Sha3Variant::Sha3 => 2,
+            Sha3Variant::Shake => 4,
+        };
 
         // All parameters are expected to be in bits.
         fn pad_len(ds_len: usize, offset: usize, rate: usize) -> usize {
@@ -118,7 +129,7 @@ impl<N, K, M> Sha3<N, K, M>
             buf[buflen - 1] |= 0x80;
         }
 
-        let p_len = pad_len(ds_len, self.offset * 8, self.rate() * 8);
+        let p_len = pad_len(ds_len, self.offset * 8, self.rate * 8);
 
         // TODO: check correctness
         const BUF_LEN: usize = 1 << 8;
@@ -127,75 +138,38 @@ impl<N, K, M> Sha3<N, K, M>
         let mut buf = &mut buf[..p_len];
 
         // Setting domain separator
-        if ds_len == 2 {
-            // 01...
-            buf[0] &= 0xfe;
-            buf[0] |= 0x2;
-        } else if ds_len == 4 {
-            // 1111...
-            buf[0] |= 0xf;
-        }
+        match self.variant {
+            Sha3Variant::Keccak => (),
+            Sha3Variant::Sha3 => {
+                // 01...
+                buf[0] &= 0xfe;
+                buf[0] |= 0x2;
+            },
+            Sha3Variant::Shake => {
+                // 1111...
+                buf[0] |= 0xf;
+            },
+        };
 
         set_pad(ds_len, &mut buf);
 
-        self.input(&buf);
+        self.absorb(&buf);
     }
 
-    fn rate(&self) -> usize { K::to_usize() }
-}
-
-impl<L, K, M> Default for Sha3<L, K, M>
-        where L: ArrayLength<u8>, K: ArrayLength<u8>, M: ArrayLength<u8> {
-    fn default() -> Self { Self::new() }
-}
-
-impl<L, K, M> Digest for Sha3<L, K, M>
-    where L: ArrayLength<u8>, K: ArrayLength<u8>, M: ArrayLength<u8> {
-    type OutputSize = L;
-    type BlockSize = K;
-
-    fn input(&mut self, data: &[u8]) {
-        assert!(self.offset < K::to_usize());
-
-        let r = K::to_usize();
-        let in_len = data.len();
-        let mut in_pos: usize = 0;
-
-        // Absorb
-        while in_pos < in_len {
-            let offset = self.offset;
-            let nread = cmp::min(r - offset, in_len - in_pos);
-            for i in 0..nread {
-                self.state[offset + i] ^= data[in_pos + i];
-            }
-            in_pos += nread;
-
-            if offset + nread != r {
-                self.offset += nread;
-                break;
-            }
-
-            self.offset = 0;
-            keccak::f(&mut self.state);
-        }
-    }
-
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finish(mut self, out: &mut [u8]) {
         self.finalize();
 
-        let r = K::to_usize();
-        let out_len = Self::OutputSize::to_usize();
+        let out_len = out.len();
         assert!(self.offset < out_len);
-        assert!(self.offset < r);
+        assert!(self.offset < self.rate);
 
-        let mut out = GenericArray::default();
-        let in_len = Self::OutputSize::to_usize();
+        let in_len = out.len();
         let mut in_pos: usize = 0;
 
         // Squeeze
         while in_pos < in_len {
-            let offset = self.offset % r;
-            let mut nread = cmp::min(r - offset, in_len - in_pos);
+            let offset = self.offset % self.rate;
+            let mut nread = cmp::min(self.rate - offset, in_len - in_pos);
             if out_len != 0 {
                 nread = cmp::min(nread, out_len - self.offset);
             }
@@ -205,7 +179,7 @@ impl<L, K, M> Digest for Sha3<L, K, M>
             }
             in_pos += nread;
 
-            if offset + nread != r {
+            if offset + nread != self.rate {
                 self.offset += nread;
                 break;
             }
@@ -219,7 +193,22 @@ impl<L, K, M> Digest for Sha3<L, K, M>
             keccak::f(&mut self.state);
         }
 
-        assert!(out_len != 0 && out_len == self.offset, "something left to squeeze");
-        out
+        assert!(out_len != 0 && out_len == self.offset,
+            "something left to squeeze");
     }
 }
+
+
+
+sha3_impl!(Keccak224, U28, U144, Sha3Variant::Keccak);
+sha3_impl!(Keccak256, U32, U136, Sha3Variant::Keccak);
+sha3_impl!(Keccak384, U48, U104, Sha3Variant::Keccak);
+sha3_impl!(Keccak512, U64, U72, Sha3Variant::Keccak);
+
+sha3_impl!(Sha3_224, U28, U144, Sha3Variant::Sha3);
+sha3_impl!(Sha3_256, U32, U136, Sha3Variant::Sha3);
+sha3_impl!(Sha3_384, U48, U104, Sha3Variant::Sha3);
+sha3_impl!(Sha3_512, U64, U72, Sha3Variant::Sha3);
+
+shake_impl!(Shake128, U168, Sha3Variant::Shake);
+shake_impl!(Shake256, U136, Sha3Variant::Shake);

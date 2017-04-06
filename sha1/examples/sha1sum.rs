@@ -1,4 +1,4 @@
-extern crate sha1;
+extern crate sha_1 as sha1;
 
 use sha1::{Sha1, Digest};
 use std::env;

@@ -15,10 +15,10 @@
 //! algorithms that implement the `Digest` trait. An example of use is:
 //! 
 //! ```rust
-//! use sha1::{Sha1, Digest};
+//! use sha_1::{Sha1, Digest};
 //!
 //! // create a Sha1 object
-//! let mut sh = Sha1::new();
+//! let mut sh = Sha1::default();
 //! 
 //! // write input message
 //! sh.input(b"hello world");
@@ -56,7 +56,7 @@ extern crate digest_buffer;
 extern crate fake_simd as simd;
 
 pub use digest::Digest;
-use byte_tools::{write_u32_be, add_bytes_to_bits};
+use byte_tools::{write_u32_be, write_u32v_be, add_bytes_to_bits};
 use digest_buffer::DigestBuffer;
 use generic_array::GenericArray;
 use generic_array::typenum::{U20, U64};
@@ -79,14 +79,6 @@ pub struct Sha1 {
 }
 
 impl Sha1 {
-    pub fn new() -> Sha1 {
-        Sha1 {
-            h: H,
-            length_bits: 0u64,
-            buffer: Default::default(),
-        }
-    }
-
     fn finalize(&mut self) {
         let st_h = &mut self.h;
         self.buffer
@@ -98,14 +90,15 @@ impl Sha1 {
 }
 
 impl Default for Sha1 {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Sha1{ h: H, length_bits: 0u64, buffer: Default::default() }
+    }
 }
 
-impl Digest for Sha1 {
-    type OutputSize = U20;
+impl digest::Input for Sha1 {
     type BlockSize = BlockSize;
 
-    fn input(&mut self, msg: &[u8]) {
+    fn digest(&mut self, msg: &[u8]) {
         // Assumes that msg.len() can be converted to u64 without overflow
         self.length_bits = add_bytes_to_bits(self.length_bits, msg.len() as u64);
         let st_h = &mut self.h;
@@ -113,16 +106,16 @@ impl Digest for Sha1 {
             sha1_digest_block(st_h, d);
         });
     }
+}
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+impl digest::FixedOutput for Sha1 {
+    type OutputSize = U20;
+
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();
-        write_u32_be(&mut out[0..4], self.h[0]);
-        write_u32_be(&mut out[4..8], self.h[1]);
-        write_u32_be(&mut out[8..12], self.h[2]);
-        write_u32_be(&mut out[12..16], self.h[3]);
-        write_u32_be(&mut out[16..20], self.h[4]);
+        write_u32v_be(&mut out[..], &self.h);
         out
     }
 }

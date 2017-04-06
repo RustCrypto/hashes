@@ -1,4 +1,4 @@
-use digest::Digest;
+use digest;
 use digest_buffer::DigestBuffer;
 use generic_array::typenum::{Unsigned, U64};
 use generic_array::{GenericArray, ArrayLength};
@@ -10,6 +10,7 @@ use table::SHUFFLED_LIN_TABLE;
 
 type Block = GenericArray<u8, U64>;
 
+#[derive(Copy, Clone)]
 struct StreebogState {
     h: Block,
     n: Block,
@@ -86,6 +87,7 @@ impl StreebogState {
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
     buffer: DigestBuffer<U64>,
     state: StreebogState,
@@ -93,8 +95,8 @@ pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
     digest_size: PhantomData<DigestSize>,
 }
 
-impl<N> Streebog<N> where N: ArrayLength<u8> + Copy {
-    pub fn new() -> Streebog<N> {
+impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
+    fn default() -> Self {
         let h = match N::to_usize() {
             64 => Block::default(),
             32 => {
@@ -116,23 +118,22 @@ impl<N> Streebog<N> where N: ArrayLength<u8> + Copy {
     }
 }
 
-impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
-    fn default() -> Self { Self::new() }
-}
 
-
-impl<N> Digest for Streebog<N>  where N: ArrayLength<u8> + Copy {
-    type OutputSize = N;
+impl<N> digest::Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
     type BlockSize = U64;
 
-    fn input(&mut self, input: &[u8]) {
+    fn digest(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| {
             self_state.process_block(d, BLOCK_SIZE as u8);
         });
     }
+}
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
+    type OutputSize = N;
+
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         let self_state = &mut self.state;
 
         let msg_len = self.buffer.position() as u8;

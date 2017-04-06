@@ -4,8 +4,7 @@ extern crate crypto_tests;
 extern crate generic_array;
 extern crate sha3;
 
-use generic_array::typenum::{U512};
-use crypto_tests::hash::{Test, main_test};
+use crypto_tests::hash::{Test, main_test, variable_test};
 
 #[test]
 fn keccak_224() {
@@ -1332,7 +1331,7 @@ fn sha3_shake128() {
                            "sha3_shake128/test254",
                            "sha3_shake128/test255",
                            "sha3_shake128/test256");
-    main_test::<sha3::Shake128<U512>>(&tests);
+    variable_test::<sha3::Shake128>(&tests);
 }
 
 #[test]
@@ -1593,5 +1592,5 @@ fn sha3_shake256() {
                            "sha3_shake256/test254",
                            "sha3_shake256/test255",
                            "sha3_shake256/test256");
-    main_test::<sha3::Shake256<U512>>(&tests);
+    variable_test::<sha3::Shake256>(&tests);
 }

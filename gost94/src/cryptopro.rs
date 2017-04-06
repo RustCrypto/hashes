@@ -1,8 +1,3 @@
-use gost94::{Gost94, SBox, Block};
-use generic_array::typenum::U32;
-use digest::Digest;
-use generic_array::GenericArray;
-
 const S_CRYPTO_PRO: SBox = [
     [10, 4, 5, 6, 8, 1, 3, 7, 13, 12, 14, 0, 9, 2, 11, 15],
     [5, 15, 4, 0, 2, 13, 11, 9, 1, 7, 6, 3, 12, 14, 10, 8],
@@ -13,32 +8,5 @@ const S_CRYPTO_PRO: SBox = [
     [13, 14, 4, 1, 7, 0, 5, 10, 3, 12, 8, 15, 6, 2, 9, 11],
     [1, 3, 10, 9, 5, 11, 4, 15, 8, 6, 7, 14, 13, 0, 2, 12],
 ];
-#[derive(Clone, Copy)]
-pub struct Gost94CryptoPro {
-    sh: Gost94
-}
 
-impl Gost94CryptoPro {
-    pub fn new() -> Self {
-        Gost94CryptoPro{sh: Gost94::new(S_CRYPTO_PRO, Block::default())}
-    }
-}
-
-impl Default for Gost94CryptoPro {
-    fn default() -> Self {
-        Self::new()    
-    }
-}
-
-impl Digest for Gost94CryptoPro {
-    type OutputSize = U32;
-    type BlockSize = U32;
-
-    fn input(&mut self, input: &[u8]) {
-        self.sh.input(input);
-    }
-
-    fn result(self) -> GenericArray<u8, Self::OutputSize> {
-        self.sh.result()
-    }
-}
+gost94_impl!(Gost94CryptoPro, S_CRYPTO_PRO);

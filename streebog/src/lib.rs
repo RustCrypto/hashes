@@ -16,14 +16,14 @@
 //! use streebog::{Digest, Streebog256, Streebog512};
 //!
 //! // create a hasher object, to use it do not forget to import `Digest` trait
-//! let mut hasher = Streebog256::new();
+//! let mut hasher = Streebog256::default();
 //! // write input message
 //! hasher.input(b"my message");
 //! // read hash digest (it will consume hasher)
 //! let result = hasher.result();
 //!
 //! // same for Streebog512
-//! let mut hasher = Streebog512::new();
+//! let mut hasher = Streebog512::default();
 //! hasher.input(b"my message");
 //! let result = hasher.result();
 //! ```

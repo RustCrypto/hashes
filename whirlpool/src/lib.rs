@@ -16,7 +16,7 @@
 //! ```rust
 //! use whirlpool::{Whirlpool, Digest};
 //!
-//! let mut hasher = Whirlpool::new();
+//! let mut hasher = Whirlpool::default();
 //! hasher.input(b"Hello Whirlpool");
 //! let result = hasher.result();
 //! ```
@@ -95,7 +95,7 @@ fn process_buffer(hash: &mut[u64; 8], buffer: &Block) {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct Whirlpool {
     bit_length: [u8; 32],
     buffer: DigestBuffer<BlockSize>,
@@ -103,14 +103,6 @@ pub struct Whirlpool {
 }
 
 impl Whirlpool {
-    pub fn new() -> Whirlpool {
-        Whirlpool{
-            bit_length: [0; 32],
-            buffer: Default::default(),
-            hash: [0; 8],
-        }
-    }
-
     fn finalize(&mut self) {
         // padding
         assert!(self.buffer.remaining() >= 1);
@@ -130,15 +122,10 @@ impl Whirlpool {
     }
 }
 
-impl Default for Whirlpool {
-    fn default() -> Self { Self::new() }
-}
-
-impl Digest for Whirlpool {
-    type OutputSize = U64;
+impl digest::Input for Whirlpool {
     type BlockSize = BlockSize;
 
-    fn input(&mut self, input: &[u8]) {
+    fn digest(&mut self, input: &[u8]) {
         // (byte length * 8) = (bit lenght) converted in a 72 bit uint
         let len = input.len() as u64;
         let len_bits = [
@@ -177,8 +164,12 @@ impl Digest for Whirlpool {
         let hash = &mut self.hash;
         self.buffer.input(input, |b| { process_buffer(hash, b); });
     }
+}
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+impl digest::FixedOutput for Whirlpool {
+    type OutputSize = U64;
+
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();

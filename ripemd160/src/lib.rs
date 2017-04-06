@@ -7,7 +7,7 @@ extern crate digest;
 extern crate digest_buffer;
 
 pub use digest::Digest;
-use byte_tools::{write_u32_le, add_bytes_to_bits};
+use byte_tools::{write_u32v_le, write_u32_le, add_bytes_to_bits};
 use digest_buffer::{DigestBuffer};
 use generic_array::GenericArray;
 use generic_array::typenum::{U20, U64};
@@ -29,14 +29,6 @@ pub struct Ripemd160 {
 
 
 impl Ripemd160 {
-    pub fn new() -> Ripemd160 {
-        Ripemd160 {
-            h: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0],
-            length_bits: 0,
-            buffer: Default::default(),
-        }
-    }
-
     fn finalize(&mut self) {
         let st_h = &mut self.h;
         self.buffer.standard_padding(8, |d: &Block| {
@@ -50,14 +42,19 @@ impl Ripemd160 {
 }
 
 impl Default for Ripemd160 {
-    fn default() -> Self { Ripemd160::new() }
+    fn default() -> Self {
+        Self {
+            h: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0],
+            length_bits: 0,
+            buffer: Default::default(),
+        }
+    }
 }
 
-impl Digest for Ripemd160 {
-    type OutputSize = U20;
+impl digest::Input for Ripemd160 {
     type BlockSize = BlockSize;
 
-    fn input(&mut self, input: &[u8]) {
+    fn digest(&mut self, input: &[u8]) {
         // Assumes that input.len() can be converted to u64 without overflow
         self.length_bits = add_bytes_to_bits(self.length_bits,
                                              input.len() as u64);
@@ -66,16 +63,17 @@ impl Digest for Ripemd160 {
             process_msg_block(d, &mut *st_h);
         });
     }
+}
 
-    fn result(mut self) -> GenericArray<u8, Self::OutputSize> {
+
+impl digest::FixedOutput for Ripemd160 {
+    type OutputSize = U20;
+
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();
-        write_u32_le(&mut out[0..4], self.h[0]);
-        write_u32_le(&mut out[4..8], self.h[1]);
-        write_u32_le(&mut out[8..12], self.h[2]);
-        write_u32_le(&mut out[12..16], self.h[3]);
-        write_u32_le(&mut out[16..20], self.h[4]);
+        write_u32v_le(&mut out[..], &self.h);
         out
     }
 }

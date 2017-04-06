@@ -25,7 +25,7 @@
 //! use sha2::{Sha256, Digest};
 //!
 //! // create a Sha256 object
-//! let mut hasher = Sha256::new();
+//! let mut hasher = Sha256::default();
 //!
 //! // write input message
 //! hasher.input(b"hello world");
@@ -45,7 +45,7 @@
 //! use sha2::{Sha512, Digest};
 //!
 //! // create a Sha512 object
-//! let mut hasher = Sha512::new();
+//! let mut hasher = Sha512::default();
 //!
 //! // write input message
 //! hasher.input(b"hello world");

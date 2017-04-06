@@ -4,6 +4,9 @@ extern crate digest_buffer;
 extern crate generic_array;
 extern crate digest;
 
+#[macro_use]
+mod macros;
+
 mod gost94;
 mod s2015;
 mod cryptopro;

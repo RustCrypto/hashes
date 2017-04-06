@@ -1,8 +1,3 @@
-use gost94::{Gost94, SBox, Block};
-use generic_array::typenum::U32;
-use digest::Digest;
-use generic_array::GenericArray;
-
 const S_TEST: SBox = [
     [4,10,9,2,13,8,0,14,6,11,1,12,7,15,5,3],
     [14,11,4,12,6,13,15,10,2,3,8,1,0,7,5,9],
@@ -14,32 +9,4 @@ const S_TEST: SBox = [
     [1,15,13,0,5,7,10,4,9,2,3,14,6,11,8,12],
 ];
 
-#[derive(Clone, Copy)]
-pub struct Gost94Test {
-    sh: Gost94
-}
-
-impl Gost94Test {
-    pub fn new() -> Self {
-        Gost94Test{sh: Gost94::new(S_TEST, Block::default())}
-    }
-}
-
-impl Default for Gost94Test {
-    fn default() -> Self {
-        Self::new()    
-    }
-}
-
-impl Digest for Gost94Test {
-    type OutputSize = U32;
-    type BlockSize = U32;
-
-    fn input(&mut self, input: &[u8]) {
-        self.sh.input(input);
-    }
-
-    fn result(self) -> GenericArray<u8, Self::OutputSize> {
-        self.sh.result()
-    }
-}
+gost94_impl!(Gost94Test, S_TEST);

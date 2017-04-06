@@ -1,4 +1,4 @@
-use digest::Digest;
+use digest;
 use digest_buffer::DigestBuffer;
 use generic_array::GenericArray;
 use generic_array::typenum::U32;
@@ -192,18 +192,21 @@ impl Gost94 {
     }
 }
 
-impl Digest for Gost94 {
-    type OutputSize = U32;
+impl digest::Input for Gost94 {
     type BlockSize = U32;
 
-    fn input(&mut self, input: &[u8]) {
+    fn digest(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| {
             self_state.process_block(d, 32);
         });
     }
+}
 
-    fn result(mut self) -> GenericArray<u8, U32> {
+impl digest::FixedOutput for Gost94 {
+    type OutputSize = U32;
+
+    fn fixed_result(mut self) -> GenericArray<u8, U32> {
         let self_state = &mut self.state;
         let buf = self.buffer.current_buffer();
 

@@ -10,12 +10,12 @@ macro_rules! blake2_impl {
         use core::cmp;
         use byte_tools::copy_memory;
         use generic_array::typenum::Unsigned;
-        use digest::Digest;
+        use digest;
 
         type Output = GenericArray<u8, $bytes>;
 
         /// Hash function context.
-        #[derive(Copy, Clone)]
+        #[derive(Copy, Clone, Debug)]
         pub struct $state {
             m: [$word; 16],
             h: [$vec; 2],
@@ -197,7 +197,6 @@ macro_rules! blake2_impl {
                 h[0] = h[0] ^ (v[0] ^ v[2]);
                 h[1] = h[1] ^ (v[1] ^ v[3]);
             }
-
         }
 
 
@@ -205,13 +204,34 @@ macro_rules! blake2_impl {
             fn default() -> Self { Self::new_keyed(&[]) }
         }
 
-        impl Digest for $state {
-            type OutputSize = $bytes;
+
+        impl digest::Input for $state {
             type BlockSize = $bytes;
 
-            fn input(&mut self, input: &[u8]) { self.update(input); }
-
-            fn result(self) -> Output { self.finalize_with_flag(0) }
+            fn digest(&mut self, input: &[u8]) { self.update(input); }
         }
+
+        impl digest::FixedOutput for $state {
+            type OutputSize = $bytes;
+
+            fn fixed_result(self) -> Output { self.finalize_with_flag(0) }
+        }
+
+        impl digest::VariableOutput for $state {
+            fn variable_result(self, buf: &mut [u8])
+                                    -> digest::VariableResult
+            {
+                let n = buf.len();
+                if n == 0 || n > $bytes::to_usize() {
+                    Err(digest::InvalidLength)
+                } else {
+                    let res = self.finalize_with_flag(0);
+                    buf.copy_bytes_from(&res[..n]);
+                    Ok(buf)
+                }
+            }
+        }
+
+
     }
 }
