@@ -1,10 +1,10 @@
 [package]
 name = "sha-1"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "SHA-1 hash function"
-#documentation = "https://docs.rs/sha1"
+documentation = "https://docs.rs/sha-1"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha1", "hash", "digest"]
 categories = ["cryptography", "no-std"]
