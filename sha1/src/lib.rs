@@ -15,7 +15,7 @@
 //! algorithms that implement the `Digest` trait. An example of use is:
 //! 
 //! ```rust
-//! use sha1::{Sha1, Digest};
+//! use sha_1::{Sha1, Digest};
 //!
 //! // create a Sha1 object
 //! let mut sh = Sha1::default();

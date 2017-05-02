@@ -1,6 +1,6 @@
 [package]
-name = "md5"
-version = "0.5.0"
+name = "md-5"
+version = "0.4.2"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "MD5 hash function"
