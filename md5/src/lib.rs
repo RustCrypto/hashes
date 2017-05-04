@@ -4,155 +4,176 @@
 
 #![no_std]
 extern crate generic_array;
-extern crate fake_simd as simd;
 extern crate byte_tools;
 extern crate digest;
 extern crate digest_buffer;
 
 pub use digest::Digest;
-use byte_tools::{write_u32_le, read_u32v_le};
+use byte_tools::{write_u32_le, write_u32v_le, read_u32v_le};
 use digest_buffer::{DigestBuffer};
-use simd::u32x4;
 use generic_array::GenericArray;
 use generic_array::typenum::{U16, U64};
 
 
 mod consts;
-use consts::{C1, C2, C3, C4, S};
+use consts::{RC, S0};
 
 type BlockSize = U64;
 type Block = GenericArray<u8, BlockSize>;
 
-/// A structure that represents that state of a digest computation for the MD5
-/// digest function
-#[derive(Copy, Clone)]
-struct Md5State {
-    s: u32x4,
+#[inline(always)]
+fn op_f(w: u32, x: u32, y: u32, z: u32, m: u32, c:u32, s: u32) -> u32 {
+    ((x & y) | (!x & z))
+        .wrapping_add(w).wrapping_add(m).wrapping_add(c)
+        .rotate_left(s).wrapping_add(x)
+}
+#[inline(always)]
+fn op_g(w: u32, x: u32, y: u32, z: u32, m: u32, c:u32, s: u32) -> u32 {
+    ((x & z) | (y & !z))
+        .wrapping_add(w).wrapping_add(m).wrapping_add(c)
+        .rotate_left(s).wrapping_add(x)
 }
 
-impl Md5State {
-    fn process_block(&mut self, input: &Block) {
-        fn f(u: u32, v: u32, w: u32) -> u32 { (u & v) | (!u & w) }
-
-        fn g(u: u32, v: u32, w: u32) -> u32 { (u & w) | (v & !w) }
-
-        fn h(u: u32, v: u32, w: u32) -> u32 { u ^ v ^ w }
-
-        fn i(u: u32, v: u32, w: u32) -> u32 { v ^ (u | !w) }
-
-        fn op_f(w: u32, x: u32, y: u32, z: u32, m: u32, s: u32) -> u32 {
-            w.wrapping_add(f(x, y, z))
-                .wrapping_add(m)
-                .rotate_left(s)
-                .wrapping_add(x)
-        }
-
-        fn op_g(w: u32, x: u32, y: u32, z: u32, m: u32, s: u32) -> u32 {
-            w.wrapping_add(g(x, y, z))
-                .wrapping_add(m)
-                .rotate_left(s)
-                .wrapping_add(x)
-        }
-
-        fn op_h(w: u32, x: u32, y: u32, z: u32, m: u32, s: u32) -> u32 {
-            w.wrapping_add(h(x, y, z))
-                .wrapping_add(m)
-                .rotate_left(s)
-                .wrapping_add(x)
-        }
-
-        fn op_i(w: u32, x: u32, y: u32, z: u32, m: u32, s: u32) -> u32 {
-            w.wrapping_add(i(x, y, z))
-                .wrapping_add(m)
-                .rotate_left(s)
-                .wrapping_add(x)
-        }
-
-        let u32x4(mut a, mut b, mut c, mut d) = self.s;
-
-        let mut data = [0u32; 16];
-
-        read_u32v_le(&mut data, input);
-
-        // FIXME: replace [0, 4, 8, 12] with (0..16).step_by(4)
-        // after stabilization
-
-        // round 1
-        for i in [0, 4, 8, 12].iter().cloned() {
-            a = op_f(a, b, c, d, data[i].wrapping_add(C1[i]), 7);
-            d = op_f(d, a, b, c, data[i + 1].wrapping_add(C1[i + 1]), 12);
-            c = op_f(c, d, a, b, data[i + 2].wrapping_add(C1[i + 2]), 17);
-            b = op_f(b, c, d, a, data[i + 3].wrapping_add(C1[i + 3]), 22);
-        }
-
-        // round 2
-        let mut t = 1;
-        for i in [0, 4, 8, 12].iter().cloned() {
-            let q = data[t & 0x0f].wrapping_add(C2[i]);
-            a = op_g(a, b, c, d, q, 5);
-            let q = data[(t + 5) & 0x0f].wrapping_add(C2[i + 1]);
-            d = op_g(d, a, b, c, q, 9);
-            let q = data[(t + 10) & 0x0f].wrapping_add(C2[i + 2]);
-            c = op_g(c, d, a, b, q, 14);
-            let q = data[(t + 15) & 0x0f].wrapping_add(C2[i + 3]);
-            b = op_g(b, c, d, a, q, 20);
-            t += 20;
-        }
-
-        // round 3
-        t = 5;
-        for i in [0, 4, 8, 12].iter().cloned() {
-            let q = data[t & 0x0f].wrapping_add(C3[i]);
-            a = op_h(a, b, c, d, q, 4);
-            let q = data[(t + 3) & 0x0f].wrapping_add(C3[i + 1]);
-            d = op_h(d, a, b, c, q, 11);
-            let q = data[(t + 6) & 0x0f].wrapping_add(C3[i + 2]);
-            c = op_h(c, d, a, b, q, 16);
-            let q = data[(t + 9) & 0x0f].wrapping_add(C3[i + 3]);
-            b = op_h(b, c, d, a, q, 23);
-            t += 12;
-        }
-
-        // round 4
-        t = 0;
-        for i in [0, 4, 8, 12].iter().cloned() {
-            let q = data[t & 0x0f].wrapping_add(C4[i]);
-            a = op_i(a, b, c, d, q, 6);
-            let q = data[(t + 7) & 0x0f].wrapping_add(C4[i + 1]);
-            d = op_i(d, a, b, c, q, 10);
-            let q = data[(t + 14) & 0x0f].wrapping_add(C4[i + 2]);
-            c = op_i(c, d, a, b, q, 15);
-            let q = data[(t + 21) & 0x0f].wrapping_add(C4[i + 3]);
-            b = op_i(b, c, d, a, q, 21);
-            t += 28;
-        }
-
-        self.s = self.s + u32x4(a, b, c, d);
-    }
+#[inline(always)]
+fn op_h(w: u32, x: u32, y: u32, z: u32, m: u32, c:u32, s: u32) -> u32 {
+    (x ^ y ^ z)
+        .wrapping_add(w).wrapping_add(m).wrapping_add(c)
+        .rotate_left(s).wrapping_add(x)
 }
 
-impl Default for Md5State {
-    fn default() -> Self { Md5State{ s: S } }
+#[inline(always)]
+fn op_i(w: u32, x: u32, y: u32, z: u32, m: u32, c:u32, s: u32) -> u32 {
+    (y ^ (x | !z))
+        .wrapping_add(w).wrapping_add(m).wrapping_add(c)
+        .rotate_left(s).wrapping_add(x)
+}
+
+fn process_block(state: &mut [u32; 4], input: &Block) {
+    let mut a = state[0];
+    let mut b = state[1];
+    let mut c = state[2];
+    let mut d = state[3];
+
+    let mut data = [0u32; 16];
+    read_u32v_le(&mut data, input);
+
+    // round 1
+    a = op_f(a, b, c, d, data[0],  RC[0],  7);
+    d = op_f(d, a, b, c, data[1],  RC[1],  12);
+    c = op_f(c, d, a, b, data[2],  RC[2],  17);
+    b = op_f(b, c, d, a, data[3],  RC[3],  22);
+
+    a = op_f(a, b, c, d, data[4],  RC[4],  7);
+    d = op_f(d, a, b, c, data[5],  RC[5],  12);
+    c = op_f(c, d, a, b, data[6],  RC[6],  17);
+    b = op_f(b, c, d, a, data[7],  RC[7],  22);
+
+    a = op_f(a, b, c, d, data[8],  RC[8],  7);
+    d = op_f(d, a, b, c, data[9],  RC[9],  12);
+    c = op_f(c, d, a, b, data[10], RC[10], 17);
+    b = op_f(b, c, d, a, data[11], RC[11], 22);
+
+    a = op_f(a, b, c, d, data[12], RC[12], 7);
+    d = op_f(d, a, b, c, data[13], RC[13], 12);
+    c = op_f(c, d, a, b, data[14], RC[14], 17);
+    b = op_f(b, c, d, a, data[15], RC[15], 22);
+
+    // round 2
+    a = op_g(a, b, c, d, data[1],  RC[16], 5);
+    d = op_g(d, a, b, c, data[6],  RC[17], 9);
+    c = op_g(c, d, a, b, data[11], RC[18], 14);
+    b = op_g(b, c, d, a, data[0],  RC[19], 20);
+
+    a = op_g(a, b, c, d, data[5],  RC[20], 5);
+    d = op_g(d, a, b, c, data[10], RC[21], 9);
+    c = op_g(c, d, a, b, data[15], RC[22], 14);
+    b = op_g(b, c, d, a, data[4],  RC[23], 20);
+
+    a = op_g(a, b, c, d, data[9],  RC[24], 5);
+    d = op_g(d, a, b, c, data[14], RC[25], 9);
+    c = op_g(c, d, a, b, data[3],  RC[26], 14);
+    b = op_g(b, c, d, a, data[8],  RC[27], 20);
+
+    a = op_g(a, b, c, d, data[13], RC[28], 5);
+    d = op_g(d, a, b, c, data[2],  RC[29], 9);
+    c = op_g(c, d, a, b, data[7],  RC[30], 14);
+    b = op_g(b, c, d, a, data[12], RC[31], 20);
+
+    // round 3
+    a = op_h(a, b, c, d, data[5],  RC[32], 4);
+    d = op_h(d, a, b, c, data[8],  RC[33], 11);
+    c = op_h(c, d, a, b, data[11], RC[34], 16);
+    b = op_h(b, c, d, a, data[14], RC[35], 23);
+
+    a = op_h(a, b, c, d, data[1],  RC[36], 4);
+    d = op_h(d, a, b, c, data[4],  RC[37], 11);
+    c = op_h(c, d, a, b, data[7],  RC[38], 16);
+    b = op_h(b, c, d, a, data[10], RC[39], 23);
+
+    a = op_h(a, b, c, d, data[13], RC[40], 4);
+    d = op_h(d, a, b, c, data[0],  RC[41], 11);
+    c = op_h(c, d, a, b, data[3],  RC[42], 16);
+    b = op_h(b, c, d, a, data[6],  RC[43], 23);
+
+    a = op_h(a, b, c, d, data[9],  RC[44], 4);
+    d = op_h(d, a, b, c, data[12], RC[45], 11);
+    c = op_h(c, d, a, b, data[15], RC[46], 16);
+    b = op_h(b, c, d, a, data[2],  RC[47], 23);
+
+    // round 4
+    a = op_i(a, b, c, d, data[0],  RC[48], 6);
+    d = op_i(d, a, b, c, data[7],  RC[49], 10);
+    c = op_i(c, d, a, b, data[14], RC[50], 15);
+    b = op_i(b, c, d, a, data[5],  RC[51], 21);
+
+    a = op_i(a, b, c, d, data[12], RC[52], 6);
+    d = op_i(d, a, b, c, data[3],  RC[53], 10);
+    c = op_i(c, d, a, b, data[10], RC[54], 15);
+    b = op_i(b, c, d, a, data[1],  RC[55], 21);
+
+    a = op_i(a, b, c, d, data[8],  RC[56], 6);
+    d = op_i(d, a, b, c, data[15], RC[57], 10);
+    c = op_i(c, d, a, b, data[6],  RC[58], 15);
+    b = op_i(b, c, d, a, data[13], RC[59], 21);
+
+    a = op_i(a, b, c, d, data[4],  RC[60], 6);
+    d = op_i(d, a, b, c, data[11], RC[61], 10);
+    c = op_i(c, d, a, b, data[2],  RC[62], 15);
+    b = op_i(b, c, d, a, data[9],  RC[63], 21);
+
+    state[0] = state[0].wrapping_add(a);
+    state[1] = state[1].wrapping_add(b);
+    state[2] = state[2].wrapping_add(c);
+    state[3] = state[3].wrapping_add(d);
 }
 
 /// The MD5 Digest algorithm
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone)]
 pub struct Md5 {
     length_bytes: u64,
     buffer: DigestBuffer<BlockSize>,
-    state: Md5State,
+    state: [u32; 4],
 }
 
+impl Default for Md5 {
+    fn default() -> Self {
+        Self {
+            length_bytes: 0,
+            buffer: Default::default(),
+            state: S0,
+        }
+    }
+}
 
 impl Md5 {
     fn finalize(&mut self) {
         let self_state = &mut self.state;
         self.buffer.standard_padding(8, |d: &Block| {
-            self_state.process_block(d);
+            process_block(self_state, d);
         });
         write_u32_le(self.buffer.next(4), (self.length_bytes << 3) as u32);
         write_u32_le(self.buffer.next(4), (self.length_bytes >> 29) as u32);
-        self_state.process_block(self.buffer.full_buffer());
+        process_block(self_state, self.buffer.full_buffer());
     }
 }
 
@@ -165,7 +186,7 @@ impl digest::Input for Md5 {
         self.length_bytes += input.len() as u64;
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| {
-            self_state.process_block(d);
+            process_block(self_state, d);
         });
     }
 }
@@ -177,10 +198,7 @@ impl digest::FixedOutput for Md5 {
         self.finalize();
 
         let mut out = GenericArray::default();
-        write_u32_le(&mut out[0..4], self.state.s.0);
-        write_u32_le(&mut out[4..8], self.state.s.1);
-        write_u32_le(&mut out[8..12], self.state.s.2);
-        write_u32_le(&mut out[12..16], self.state.s.3);
+        write_u32v_le(&mut out, &self.state);
         out
     }
 }

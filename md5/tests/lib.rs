@@ -7,8 +7,7 @@ use crypto_tests::hash::{Test, main_test, one_million_a};
 
 #[test]
 fn md5_main() {
-    // Examples from wikipedia
-    let tests = new_tests!("test1", "test2", "test3");
+    let tests = new_tests!("1", "2", "3", "4", "5", "6");
     main_test::<md5::Md5>(&tests);
 }
 
