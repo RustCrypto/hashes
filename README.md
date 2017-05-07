@@ -1,6 +1,11 @@
 # RustCrypto hashes [![Build Status](https://travis-ci.org/RustCrypto/hashes.svg?branch=master)](https://travis-ci.org/RustCrypto/hashes)
 Collection of cryptographic hash functions written in pure Rust.
 
+All algorithms split into separate crates and implemented using traits from
+[`digest`](https://docs.rs/digest/0.5.2/digest/) crate. Additionally all crates
+do not require the standard library (i.e. `no_std` capable) and can
+be easily used for bare-metal programming.
+
 ## Supported algorithms
 **Note:** For new applications, or where compatibility with other existing
 standards is not a primary concern, we strongly recommend either BLAKE2, SHA-2
@@ -45,10 +50,8 @@ project. This is why crates marked by :exclamation: are published under
 `md-5` and `sha-1` names respectively.
 
 ## Usage
-All algorithms are split into separate crates and implemented using traits from
-[`digest`](https://docs.rs/digest/0.5.2/digest/) crate. Usually you will work
-with the [`Digest`](https://docs.rs/digest/0.5.2/digest/trait.Digest.html)
-trait. Let us demonstrate how to use it using BLAKE2b as an example.
+Let us demonstrate how to use crates in this repository using BLAKE2b as an
+example.
 
 First add `blake2` crate to your `Cargo.toml`:
 
@@ -57,8 +60,11 @@ First add `blake2` crate to your `Cargo.toml`:
 blake2 = "0.5"
 ```
 
-It re-exports `digest` crate so can omit it. After that you can write
-the following code:
+`blake2` and other crates re-export
+[`Digest`](https://docs.rs/digest/0.5.2/digest/trait.Digest.html) trait for
+convenience, so you don't have to add `digest` crate as an explicit dependency.
+
+Now you can write the following code:
 
 ```Rust
 use blake2::{Blake2b, Digest};
@@ -67,22 +73,18 @@ let mut hasher = Blake2b::default();
 let data = b"Hello world!";
 hasher.input(data);
 // `input` can be called repeatedly
-hasher.input("String data".as_byted());
+hasher.input("String data".as_bytes());
 // Note that calling `result()` consumes hasher
 let hash = hasher.result();
 println!("Result: {:x}", hash);
 ```
 
-`hash` has type [`GenericArray<u8, U64>`](http://fizyk20.github.io/generic-array/generic_array/struct.GenericArray.html),
-it's a generic alternative to `[u8; 64]`. Generally you can work with it as
-with simple arrays.
+`hash` has type [`GenericArray<u8, U64>`](http://fizyk20.github.io/generic-array/generic_array/struct.GenericArray.html), which is a generic alternative to `[u8; 64]`.
 
 You can write generic code over `Digest` trait which will work over different
 hash functions:
 
 ```Rust
-use blake2::Blake2b;
-use sha2::Sha256;
 use digest::Digest;
 
 // Toy example, do not use it in practice!
@@ -94,14 +96,17 @@ fn hash_password<D: Digest + Default>(password: &str, salt: &str, output: &mut [
     output.copy_from_slice(hasher.result().as_slice())
 }
 
+use blake2::Blake2b;
+use sha2::Sha256;
+
 hash_password::<Blake2b>("my_password", "abcd", &mut buf);
 hash_password::<Sha256>("my_password", "abcd", &mut buf);
 ```
 
 If you want to hash data from [`Read`](https://doc.rust-lang.org/std/io/trait.Read.html)
-trait you can use `DigestReader` trait or convenience function `digest_reader`.
-They will compute hash by reading data using 1 KB blocks. To use them first
-enable `std` feature for `digest` crate in your `Cargo.toml`:
+trait (e.g. from file) you can use `DigestReader` trait or convenience function
+`digest_reader`. They will compute hash by reading data using 1 KB blocks.
+To use them first enable `std` feature for `digest` crate in your `Cargo.toml`:
 
 ```toml
 [dependencies]
