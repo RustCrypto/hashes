@@ -1,17 +1,5 @@
-# rust-crypto's hashes [![Build Status](https://travis-ci.org/RustCrypto/hashes.svg?branch=master)](https://travis-ci.org/RustCrypto/hashes)
-Collection of cryptographic hash functions written in pure Rust. This is the part
-of the RustCrypto project.
-
-## Contributions
-
-Contributions are extremely welcome. The most significant needs are help adding
-documentation, implementing new algorithms, and general cleanup and improvement
-of the code. By submitting a pull request you are agreeing to make you work
-available under the license terms of the RustCrypto project.
-
-## License
-
-All crates in this repository are dual-licensed under the MIT and Apache 2.0 licenses.
+# RustCrypto hashes [![Build Status](https://travis-ci.org/RustCrypto/hashes.svg?branch=master)](https://travis-ci.org/RustCrypto/hashes)
+Collection of cryptographic hash functions written in pure Rust.
 
 ## Supported algorithms
 **Note:** For new applications, or where compatibility with other existing
@@ -49,10 +37,104 @@ hash function (i.e. algorithms, not the specific implementation):
 
 ### Crate names
 
-Whenever possible crates are published under the name of the algorithm.
- Owners of `md5` and `sha1` crates refused
+Whenever possible crates are published under the the same name as the crate
+folder. Owners of `md5` and `sha1` crates refused
 ([1](https://github.com/stainless-steel/md5/pull/2),
 [2](https://github.com/mitsuhiko/rust-sha1/issues/17)) to participate in this
 project. This is why crates marked by :exclamation: are published under
 `md-5` and `sha-1` names respectively.
 
+## Usage
+All algorithms are split into separate crates and implemented using traits from
+[`digest`](https://docs.rs/digest/0.5.2/digest/) crate. Usually you will work
+with the [`Digest`](https://docs.rs/digest/0.5.2/digest/trait.Digest.html)
+trait. Let us demonstrate how to use it using BLAKE2b as an example.
+
+First add `blake2` crate to your `Cargo.toml`:
+
+```toml
+[dependencies]
+blake2 = "0.5"
+```
+
+It re-exports `digest` crate so can omit it. After that you can write
+the following code:
+
+```Rust
+use blake2::{Blake2b, Digest};
+
+let mut hasher = Blake2b::default();
+let data = b"Hello world!";
+hasher.input(data);
+// `input` can be called repeatedly
+hasher.input("String data".as_byted());
+// Note that calling `result()` consumes hasher
+let hash = hasher.result();
+println!("Result: {:x}", hash);
+```
+
+`hash` has type [`GenericArray<u8, U64>`](http://fizyk20.github.io/generic-array/generic_array/struct.GenericArray.html),
+it's a generic alternative to `[u8; 64]`. Generally you can work with it as
+with simple arrays.
+
+You can write generic code over `Digest` trait which will work over different
+hash functions:
+
+```Rust
+use blake2::Blake2b;
+use sha2::Sha256;
+use digest::Digest;
+
+// Toy example, do not use it in practice!
+fn hash_password<D: Digest + Default>(password: &str, salt: &str, output: &mut [u8]) {
+    let mut hasher = D::default();
+    hasher.input(password.as_bytes());
+    hasher.input(b"$");
+    hasher.input(salt.as_bytes());
+    output.copy_from_slice(hasher.result().as_slice())
+}
+
+hash_password::<Blake2b>("my_password", "abcd", &mut buf);
+hash_password::<Sha256>("my_password", "abcd", &mut buf);
+```
+
+If you want to hash data from [`Read`](https://doc.rust-lang.org/std/io/trait.Read.html)
+trait you can use `DigestReader` trait or convenience function `digest_reader`.
+They will compute hash by reading data using 1 KB blocks. To use them first
+enable `std` feature for `digest` crate in your `Cargo.toml`:
+
+```toml
+[dependencies]
+blake2 = "0.5"
+digest = { version = "0.5", features = ["std"]}
+```
+
+All crates in this repository are `no_std` by default, thus this feature must be
+enabled explicitly.
+
+After that you can write the following code:
+
+```Rust
+use digest::digest_reader;
+use blake2::Blake2b;
+use std::fs;
+
+let mut file = fs::File::open(&path)?;
+digest_reader::<Blake2b>(&mut file);
+println!("{:x}\t{}", result, path);
+```
+
+## License
+
+All crates licensed under either of
+
+ * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+ * [MIT license](http://opensource.org/licenses/MIT)
+
+at your option.
+
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
+dual licensed as above, without any additional terms or conditions.
