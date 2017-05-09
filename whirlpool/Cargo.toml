@@ -1,8 +1,8 @@
 [package]
 name = "whirlpool-asm"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["The RustCrypto Devs"]
-license = "MIT/Apache-2.0"
+license = "MIT"
 description = "Assembly implementation of Whirlpool compression function"
 documentation = "https://docs.rs/whirlpool-asm"
 repository = "https://github.com/RustCrypto/asm-hashes"
