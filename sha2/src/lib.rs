@@ -69,9 +69,13 @@ extern crate byte_tools;
 extern crate digest;
 extern crate digest_buffer;
 extern crate fake_simd as simd;
+#[cfg(feature = "asm")]
+extern crate sha2_asm;
 
 mod consts;
+#[cfg(not(feature = "asm"))]
 mod sha256_utils;
+#[cfg(not(feature = "asm"))]
 mod sha512_utils;
 mod sha256;
 mod sha512;

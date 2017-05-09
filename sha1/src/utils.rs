@@ -1,7 +1,7 @@
 use consts::{BLOCK_LEN, K0, K1, K2, K3};
 use byte_tools::{read_u32v_be};
 use simd::u32x4;
-use ::Block;
+use super::{BlockSize, GenericArray};
 
 /// Not an intrinsic, but gets the first element of a vector.
 #[inline]
@@ -288,7 +288,7 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
 /// and also shown above is how the digest-related functions can be used to
 /// perform 4 rounds of the message block digest calculation.
 ///
-pub fn sha1_digest_block(state: &mut [u32; 5], block: &Block) {
+pub fn compress(state: &mut [u32; 5], block: &GenericArray<u8, BlockSize>) {
     let mut block_u32 = [0u32; BLOCK_LEN];
     read_u32v_be(&mut block_u32[..], block);
     sha1_digest_block_u32(state, &block_u32);

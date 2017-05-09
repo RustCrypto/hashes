@@ -1,4 +1,5 @@
 /// Round constants
+#[cfg(not(feature = "asm"))]
 pub static RC: [u32; 64] = [
     // round 1
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,

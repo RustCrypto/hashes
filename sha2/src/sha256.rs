@@ -6,7 +6,10 @@ use byte_tools::{write_u32v_be, write_u32_be, add_bytes_to_bits};
 
 use consts::{STATE_LEN, H224, H256};
 
-use sha256_utils::sha256_digest_block;
+#[cfg(not(feature = "asm"))]
+use sha256_utils::compress256;
+#[cfg(feature = "asm")]
+use sha2_asm::compress256;
 
 type BlockSize = U64;
 pub type Block = GenericArray<u8, BlockSize>;
@@ -22,7 +25,7 @@ impl Engine256State {
     fn new(h: &[u32; STATE_LEN]) -> Engine256State { Engine256State { h: *h } }
 
     pub fn process_block(&mut self, data: &Block) {
-        sha256_digest_block(&mut self.h, data);
+        compress256(&mut self.h, data);
     }
 }
 

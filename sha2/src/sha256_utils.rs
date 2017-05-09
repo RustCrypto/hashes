@@ -258,7 +258,7 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
 /// implemented by any CPU (at the time of this writing), and so they are
 /// emulated in this library until the instructions become more common, and gain
 ///  support in LLVM (and GCC, etc.).
-pub fn sha256_digest_block(state: &mut [u32; 8], block: &Block) {
+pub fn compress256(state: &mut [u32; 8], block: &Block) {
     let mut block_u32 = [0u32; BLOCK_LEN];
     read_u32v_be(&mut block_u32[..], block);
     sha256_digest_block_u32(state, &block_u32);

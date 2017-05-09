@@ -7,7 +7,10 @@ use byte_tools::add_bytes_to_bits_tuple;
 
 use consts::{STATE_LEN, H384, H512, H512_TRUNC_224, H512_TRUNC_256};
 
-use sha512_utils::sha512_digest_block;
+#[cfg(not(feature = "asm"))]
+use sha512_utils::compress512;
+#[cfg(feature = "asm")]
+use sha2_asm::compress512;
 
 type BlockSize = U128;
 pub type Block = GenericArray<u8, BlockSize>;
@@ -23,7 +26,7 @@ impl Engine512State {
     fn new(h: &[u64; 8]) -> Engine512State { Engine512State { h: *h } }
 
     pub fn process_block(&mut self, data: &Block) {
-        sha512_digest_block(&mut self.h, data);
+        compress512(&mut self.h, data);
     }
 }
 

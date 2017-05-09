@@ -53,7 +53,16 @@ extern crate generic_array;
 extern crate byte_tools;
 extern crate digest;
 extern crate digest_buffer;
+
+#[cfg(not(feature = "asm"))]
 extern crate fake_simd as simd;
+
+#[cfg(feature = "asm")]
+extern crate sha1_asm as utils;
+#[cfg(not(feature = "asm"))]
+mod utils;
+
+use utils::compress;
 
 pub use digest::Digest;
 use byte_tools::{write_u32_be, write_u32v_be, add_bytes_to_bits};
@@ -62,15 +71,11 @@ use generic_array::GenericArray;
 use generic_array::typenum::{U20, U64};
 
 mod consts;
-mod utils;
-
 use consts::{STATE_LEN, H};
-use utils::{sha1_digest_block};
 
 type BlockSize = U64;
-type Block = GenericArray<u8, BlockSize>;
 
-/// Structure representing the state of a Sha1 computation
+/// Structure representing the state of a SHA-1 computation
 #[derive(Clone)]
 pub struct Sha1 {
     h: [u32; STATE_LEN],
@@ -82,10 +87,10 @@ impl Sha1 {
     fn finalize(&mut self) {
         let st_h = &mut self.h;
         self.buffer
-            .standard_padding(8, |d| sha1_digest_block(&mut *st_h, d));
+            .standard_padding(8, |d| compress(&mut *st_h, d));
         write_u32_be(self.buffer.next(4), (self.length_bits >> 32) as u32);
         write_u32_be(self.buffer.next(4), self.length_bits as u32);
-        sha1_digest_block(st_h, self.buffer.full_buffer());
+        compress(st_h, self.buffer.full_buffer());
     }
 }
 
@@ -103,7 +108,7 @@ impl digest::Input for Sha1 {
         self.length_bits = add_bytes_to_bits(self.length_bits, msg.len() as u64);
         let st_h = &mut self.h;
         self.buffer.input(msg, |d| {
-            sha1_digest_block(st_h, d);
+            compress(st_h, d);
         });
     }
 }

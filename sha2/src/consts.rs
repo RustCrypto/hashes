@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use simd::u64x2;
 use simd::u32x4;
 

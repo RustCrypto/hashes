@@ -278,7 +278,7 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
 /// }
 /// ```
 ///
-pub fn sha512_digest_block(state: &mut [u64; 8], block: &Block) {
+pub fn compress512(state: &mut [u64; 8], block: &Block) {
     let mut block_u64 = [0u64; BLOCK_LEN];
     read_u64v_be(&mut block_u64[..], block);
     sha512_digest_block_u64(state, &block_u64);
