@@ -1,7 +1,18 @@
 #![no_std]
 #![feature(test)]
-#[macro_use]
-extern crate crypto_tests;
-extern crate md5_asm as md5;
+extern crate test;
+extern crate md5_asm;
 
-bench_digest!(md5::Md5);
+use test::Bencher;
+
+#[bench]
+fn bench_compress(b: &mut Bencher) {
+    let mut state = Default::default();
+    let data = Default::default();
+
+    b.iter(|| {
+        md5_asm::compress(&mut state, &data);
+    });
+
+    b.bytes = data.len() as u64;
+}

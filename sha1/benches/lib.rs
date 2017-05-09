@@ -1,7 +1,18 @@
 #![no_std]
 #![feature(test)]
-#[macro_use]
-extern crate crypto_tests;
-extern crate sha1_asm as sha1;
+extern crate test;
+extern crate sha1_asm;
 
-bench_digest!(sha1::Sha1);
+use test::Bencher;
+
+#[bench]
+fn bench_compress(b: &mut Bencher) {
+    let mut state = Default::default();
+    let data = Default::default();
+
+    b.iter(|| {
+        sha1_asm::compress(&mut state, &data);
+    });
+
+    b.bytes = data.len() as u64;
+}

@@ -1,7 +1,18 @@
 #![no_std]
 #![feature(test)]
-#[macro_use]
-extern crate crypto_tests;
-extern crate whirlpool_asm as whirlpool;
+extern crate test;
+extern crate whirlpool_asm;
 
-bench_digest!(whirlpool::Whirlpool);
+use test::Bencher;
+
+#[bench]
+fn bench_compress(b: &mut Bencher) {
+    let mut state = Default::default();
+    let data = Default::default();
+
+    b.iter(|| {
+        whirlpool_asm::compress(&mut state, &data);
+    });
+
+    b.bytes = data.len() as u64;
+}

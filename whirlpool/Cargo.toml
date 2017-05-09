@@ -1,24 +1,19 @@
 [package]
 name = "whirlpool-asm"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["The RustCrypto Devs"]
 license = "MIT/Apache-2.0"
-description = "Assembly implementation of Whirlpool hash function"
+description = "Assembly implementation of Whirlpool compression function"
 documentation = "https://docs.rs/whirlpool-asm"
 repository = "https://github.com/RustCrypto/asm-hashes"
-keywords = ["crypto", "whirlpool", "hash", "digest"]
+keywords = ["crypto", "whirlpool", "asm"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.5"
 generic-array = "0.7"
-digest-buffer = "0.3"
-
-[dev-dependencies]
-crypto-tests = "0.4"
 
 [build-dependencies]
 gcc = "0.3"
 
 [badges]
-travis-ci = { repository = "RustCrypto/hashes" }
+travis-ci = { repository = "RustCrypto/asm-hashes" }
