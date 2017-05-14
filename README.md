@@ -81,27 +81,7 @@ println!("Result: {:x}", hash);
 
 `hash` has type [`GenericArray<u8, U64>`](http://fizyk20.github.io/generic-array/generic_array/struct.GenericArray.html), which is a generic alternative to `[u8; 64]`.
 
-You can write generic code over `Digest` trait which will work over different
-hash functions:
-
-```Rust
-use digest::Digest;
-
-// Toy example, do not use it in practice!
-fn hash_password<D: Digest + Default>(password: &str, salt: &str, output: &mut [u8]) {
-    let mut hasher = D::default();
-    hasher.input(password.as_bytes());
-    hasher.input(b"$");
-    hasher.input(salt.as_bytes());
-    output.copy_from_slice(hasher.result().as_slice())
-}
-
-use blake2::Blake2b;
-use sha2::Sha256;
-
-hash_password::<Blake2b>("my_password", "abcd", &mut buf);
-hash_password::<Sha256>("my_password", "abcd", &mut buf);
-```
+### Hashing `Read`able objects
 
 If you want to hash data from [`Read`](https://doc.rust-lang.org/std/io/trait.Read.html)
 trait (e.g. from file) you can use `DigestReader` trait or convenience function
@@ -127,6 +107,81 @@ use std::fs;
 let mut file = fs::File::open(&path)?;
 digest_reader::<Blake2b>(&mut file);
 println!("{:x}\t{}", result, path);
+```
+
+### Hash-based Message Authentication Code (HMAC)
+
+One of the common tasks for cryptographic hash functions is generation of
+[Message Authentication Codes](https://en.wikipedia.org/wiki/Message_authentication_code)
+(MAC). In RustCrypto all MAC functions represented using `Mac` trait from
+[`crypto-mac`](https://crates.io/crates/crypto-mac) crate. Some hash functions
+provide `Mac` implementations (e.g. BLAKE2), but for others you can use generically
+implemented [HMAC](https://en.wikipedia.org/wiki/Hash-based_message_authentication_code)
+from [`hmac`](https://crates.io/crates/hmac) crate.
+
+To demonstrate how to use HMAC, lets use SHA256 as an example. First add the
+following dependencies to your crate:
+
+```toml
+[dependencies]
+hmac = "0.1"
+sha2 = "0.5"
+```
+
+To get the authentication code:
+
+```Rust
+extern crate sha2;
+extern crate hmac;
+
+use hmac::{Hmac, Mac};
+use sha2::Sha256;
+
+// Create `Mac` trait implementation, in this case HMAC-SHA256
+let mac = Hmac::<Sha256>::new(b"my secret and secure key");
+mac.input(b"input message");
+
+// `result` has type `MacResult` which is a thin wrapper around array of
+// bytes for providing constant time equality check
+let result = mac.result();
+// To get &[u8] use `code` method, but be carefull, since incorrect use
+// of the code value may permit timing attacks which defeat the security
+// provided by the `MacResult`.
+let code_bytes = resul.code();
+```
+
+To verify the message:
+
+```rust,ignore
+let mac = Hmac::<Sha256>::new(b"my secret and secure key");
+
+mac.input(b"input message");
+
+let is_code_correct = mac.verify(code_bytes); 
+```
+
+### Generic code
+
+You can write generic code over `Digest` trait which will work over different
+hash functions:
+
+```Rust
+use digest::Digest;
+
+// Toy example, do not use it in practice!
+fn hash_password<D: Digest + Default>(password: &str, salt: &str, output: &mut [u8]) {
+    let mut hasher = D::default();
+    hasher.input(password.as_bytes());
+    hasher.input(b"$");
+    hasher.input(salt.as_bytes());
+    output.copy_from_slice(hasher.result().as_slice())
+}
+
+use blake2::Blake2b;
+use sha2::Sha256;
+
+hash_password::<Blake2b>("my_password", "abcd", &mut buf);
+hash_password::<Sha256>("my_password", "abcd", &mut buf);
 ```
 
 ## License
