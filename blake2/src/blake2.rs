@@ -11,6 +11,7 @@ macro_rules! blake2_impl {
         use byte_tools::copy_memory;
         use generic_array::typenum::Unsigned;
         use digest;
+        use crypto_mac::{Mac, MacResult};
 
         type Output = GenericArray<u8, $bytes>;
 
@@ -232,6 +233,17 @@ macro_rules! blake2_impl {
             }
         }
 
+        impl Mac for $state {
+            type OutputSize = $bytes;
+
+            fn new(key: &[u8]) -> Self { Self::new_keyed(key) }
+
+            fn input(&mut self, data: &[u8]) { self.update(data); }
+
+            fn result(self) -> MacResult<Self::OutputSize> {
+                MacResult::new(self.finalize_with_flag(0))
+            }
+        }
 
     }
 }

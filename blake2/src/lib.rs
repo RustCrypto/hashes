@@ -42,8 +42,7 @@
 
 extern crate byte_tools;
 extern crate digest;
-// extern crate crypto_mac;
-//extern crate crypto_ops;
+extern crate crypto_mac;
 extern crate generic_array;
 
 mod consts;
