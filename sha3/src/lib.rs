@@ -34,20 +34,28 @@
 //! ```
 
 #![no_std]
+#[cfg(target_endian = "big")]
 extern crate byte_tools;
 extern crate digest;
 extern crate generic_array;
 
 pub use digest::Digest;
 use generic_array::GenericArray;
-use generic_array::typenum::{Unsigned, U28, U32,
-                             U48, U64, U72, U104, U136, U144, U168, U200};
+use generic_array::typenum::Unsigned;
+use generic_array::typenum::{U28, U32, U48, U64, U72, U104, U136, U144, U168};
 use core::cmp;
+
+#[cfg(target_endian = "big")]
+use byte_tools::{write_u64v_le, read_u64v_le};
+#[cfg(target_endian = "little")]
+use core::mem;
 
 mod keccak;
 mod consts;
 #[macro_use]
 mod macros;
+
+use consts::PLEN;
 
 #[derive(Copy, Clone)]
 enum Sha3Variant {
@@ -56,10 +64,10 @@ enum Sha3Variant {
     Shake,
 }
 
-/// Generic SHA-3 hasher. 
+/// Generic SHA-3 hasher.
 #[derive(Copy, Clone)]
 struct Sha3 {
-    state: GenericArray<u8, U200>,
+    state: [u64; PLEN],
     // Enqueued bytes in state for absorb phase
     // Squeeze offset for squeeze phase
     offset: usize,
@@ -69,42 +77,48 @@ struct Sha3 {
 
 impl Sha3 {
     fn new(rate: usize, variant: Sha3Variant) -> Self {
-        Self{ state: Default::default(),
+        Sha3{ state: Default::default(),
             offset: 0, rate: rate, variant: variant }
     }
 
-    fn absorb(&mut self, data: &[u8]) {
-        assert!(self.offset < self.rate);
+    #[cfg(target_endian = "big")]
+    fn xorin(&mut self, data: &[u8], nread: usize) {
+        let mut state_copy = [0u8; PLEN*8];
+        write_u64v_le(&mut state_copy, &self.state);
+        for i in 0..nread {
+            state_copy[self.offset + i] ^= data[i];
+        }
+        read_u64v_le(&mut self.state, &state_copy);
+    }
 
-        let in_len = data.len();
-        let mut in_pos: usize = 0;
-
-        // Absorb
-        while in_pos < in_len {
-            let offset = self.offset;
-            let nread = cmp::min(self.rate - offset, in_len - in_pos);
-            for i in 0..nread {
-                self.state[offset + i] ^= data[in_pos + i];
-            }
-            in_pos += nread;
-
-            if offset + nread != self.rate {
-                self.offset += nread;
-                break;
-            }
-
-            self.offset = 0;
-            keccak::f(&mut self.state);
+    #[cfg(target_endian = "little")]
+    fn xorin(&mut self, data: &[u8], nread: usize) {
+        let state_ref: &mut [u8; PLEN*8] = unsafe {
+            mem::transmute(&mut self.state)
+        };
+        for i in 0..nread {
+            state_ref[self.offset + i] ^= data[i];
         }
     }
 
-    fn finalize(&mut self) {
-        let ds_len = match self.variant {
-            Sha3Variant::Keccak => 0,
-            Sha3Variant::Sha3 => 2,
-            Sha3Variant::Shake => 4,
-        };
+    fn absorb(&mut self, mut data: &[u8]) {
+        let mut nread = self.rate - self.offset;
 
+        //first foldp
+        while data.len() >= nread {
+            self.xorin(data, nread);
+            keccak::f(&mut self.state);
+            data = &data[nread..];
+            nread = self.rate;
+            self.offset = 0;
+        }
+
+        // Xor in the last block
+        self.xorin(data, data.len());
+        self.offset += data.len();
+    }
+
+    fn finalize(&mut self) {
         // All parameters are expected to be in bits.
         fn pad_len(ds_len: usize, offset: usize, rate: usize) -> usize {
             assert!(rate % 8 == 0 && offset % 8 == 0);
@@ -116,7 +130,6 @@ impl Sha3 {
         }
 
         fn set_pad(offset: usize, buf: &mut [u8]) {
-            //assert!(buf.len() as f32 >= ((offset + 2) as f32 / 8.0).ceil());
             let s = offset / 8;
             let buflen = buf.len();
             buf[s] |= 1 << (offset % 8);
@@ -129,31 +142,47 @@ impl Sha3 {
             buf[buflen - 1] |= 0x80;
         }
 
+        let ds_len = match self.variant {
+            Sha3Variant::Keccak => 0,
+            Sha3Variant::Sha3 => 2,
+            Sha3Variant::Shake => 4,
+        };
+
         let p_len = pad_len(ds_len, self.offset * 8, self.rate * 8);
 
-        // TODO: check correctness
-        const BUF_LEN: usize = 1 << 8;
+        const BUF_LEN: usize = 200;
         assert!(p_len < BUF_LEN);
         let mut buf = [0; BUF_LEN];
         let mut buf = &mut buf[..p_len];
 
         // Setting domain separator
-        match self.variant {
-            Sha3Variant::Keccak => (),
-            Sha3Variant::Sha3 => {
-                // 01...
-                buf[0] &= 0xfe;
-                buf[0] |= 0x2;
-            },
-            Sha3Variant::Shake => {
-                // 1111...
-                buf[0] |= 0xf;
-            },
+        buf[0] = match self.variant {
+            Sha3Variant::Keccak => 0x0,
+            Sha3Variant::Sha3 => 0x2,
+            Sha3Variant::Shake => 0xf,
         };
 
         set_pad(ds_len, &mut buf);
 
         self.absorb(&buf);
+    }
+
+    #[cfg(target_endian = "big")]
+    fn readout(&mut self, out: &mut [u8], nread: usize) {
+        let mut state_copy = [0u8; PLEN*8];
+        write_u64v_le(&mut state_copy, &self.state);
+        let off = self.offset % self.rate;
+        out[..nread].copy_from_slice(&state_copy[off..][..nread]);
+    }
+
+    #[cfg(target_endian = "little")]
+    fn readout(&mut self, out: &mut [u8], nread: usize) {
+        let state_ref: &[u8; PLEN*8] = unsafe {
+            mem::transmute(&mut self.state)
+        };
+
+        let off = self.offset % self.rate;
+        out[..nread].copy_from_slice(&state_ref[off..][..nread]);
     }
 
     fn finish(mut self, out: &mut [u8]) {
@@ -174,9 +203,8 @@ impl Sha3 {
                 nread = cmp::min(nread, out_len - self.offset);
             }
 
-            for i in 0..nread {
-                out[in_pos + i] = self.state[offset + i];
-            }
+            self.readout(&mut out[in_pos..], nread);
+
             in_pos += nread;
 
             if offset + nread != self.rate {

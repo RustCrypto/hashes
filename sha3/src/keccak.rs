@@ -1,50 +1,81 @@
-use byte_tools::{write_u64v_le, read_u64v_le};
-use generic_array::GenericArray;
-use generic_array::typenum::U200;
+use consts::{PLEN, RC, RHO, PI};
 
-use consts::{RC, ROTC, PIL, M5};
+macro_rules! REPEAT4 {
+    ($e: expr) => ( $e; $e; $e; $e; )
+}
 
-/// Code based on Keccak-compact64.c from ref implementation.
-pub fn f(state: &mut GenericArray<u8, U200>) {
-    let mut s: [u64; 25] = [0; 25];
-    let mut t: [u64; 1] = [0; 1];
-    let mut c: [u64; 5] = [0; 5];
+macro_rules! REPEAT5 {
+    ($e: expr) => ( $e; $e; $e; $e; $e; )
+}
 
-    read_u64v_le(&mut s, state);
+macro_rules! REPEAT6 {
+    ($e: expr) => ( $e; $e; $e; $e; $e; $e; )
+}
 
-    for rc in &RC {
+macro_rules! REPEAT24 {
+    ($e: expr, $s: expr) => (
+        REPEAT6!({ $e; $s; });
+        REPEAT6!({ $e; $s; });
+        REPEAT6!({ $e; $s; });
+        REPEAT5!({ $e; $s; });
+        $e;
+    )
+}
+
+macro_rules! FOR5 {
+    ($v: expr, $s: expr, $e: expr) => {
+        $v = 0;
+        REPEAT4!({
+            $e;
+            $v += $s;
+        });
+        $e;
+    }
+}
+
+pub fn f(a: &mut [u64; PLEN]) {
+    let mut b = [0u64; 5];
+    let mut t: u64;
+    let mut x: usize;
+    let mut y: usize;
+
+    for i in 0..24 {
         // Theta
-        for x in 0..5 {
-            c[x] = s[x] ^ s[5 + x] ^ s[10 + x] ^ s[15 + x] ^ s[20 + x];
-        }
-        for x in 0..5 {
-            t[0] = c[M5[x + 4]] ^ c[M5[x + 1]].rotate_left(1);
-            for y in 0..5 {
-                s[y * 5 + x] ^= t[0];
-            }
-        }
+        FOR5!(x, 1, {
+            b[x] = 0;
+            FOR5!(y, 5, {
+                b[x] ^= a[x + y];
+            });
+        });
 
-        // Rho Pi
-        t[0] = s[1];
-        for x in 0..24 {
-            c[0] = s[PIL[x]];
-            s[PIL[x]] = t[0].rotate_left(ROTC[x] as u32);
-            t[0] = c[0];
-        }
+        FOR5!(x, 1, {
+            FOR5!(y, 5, {
+                a[y + x] ^= b[(x + 4) % 5] ^ b[(x + 1) % 5].rotate_left(1);
+            });
+        });
+
+        // Rho and pi
+        t = a[1];
+        x = 0;
+        REPEAT24!({
+            b[0] = a[PI[x]];
+            a[PI[x]] = t.rotate_left(RHO[x]);
+        }, {
+            t = b[0];
+            x += 1;
+        });
 
         // Chi
-        for y in 0..5 {
-            for x in 0..5 {
-                c[x] = s[y * 5 + x];
-            }
-            for x in 0..5 {
-                s[y * 5 + x] = c[x] ^ (!c[M5[x + 1]] & c[M5[x + 2]]);
-            }
-        }
+        FOR5!(y, 5, {
+            FOR5!(x, 1, {
+                b[x] = a[y + x];
+            });
+            FOR5!(x, 1, {
+                a[y + x] = b[x] ^ ((!b[(x + 1) % 5]) & (b[(x + 2) % 5]));
+            });
+        });
 
         // Iota
-        s[0] = s[0] ^ rc;
+        a[0] ^= RC[i];
     }
-
-    write_u64v_le(state, &s);
 }

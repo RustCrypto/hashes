@@ -8,7 +8,7 @@ macro_rules! sha3_impl {
 
         impl Default for $state {
             fn default() -> Self {
-                Self {engine: Sha3::new($rate::to_usize(), $padding)}
+                $state {engine: Sha3::new($rate::to_usize(), $padding)}
             }
         }
 
@@ -42,7 +42,7 @@ macro_rules! shake_impl {
 
         impl Default for $state {
             fn default() -> Self {
-                Self {engine: Sha3::new($rate::to_usize(), $padding)}
+                $state {engine: Sha3::new($rate::to_usize(), $padding)}
             }
         }
 
