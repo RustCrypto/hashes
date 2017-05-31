@@ -1,6 +1,6 @@
 [package]
 name = "sha3"
-version = "0.5.2"
+version = "0.5.3"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "SHA-3 (Keccak) hash function"
@@ -12,9 +12,8 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 digest = "0.5"
 generic-array = "0.7"
-
-[target.'cfg(target_endian = "big")'.dependencies]
 byte-tools = "0.1"
+digest-buffer = "0.3"
 
 [dev-dependencies]
 crypto-tests = "0.4"

@@ -27,28 +27,25 @@
 //! // read hash digest
 //! let out = hasher.result();
 //!
-//! assert_eq!(out[..], [0x3a, 0x98, 0x5d, 0xa7, 0x4f, 0xe2, 0x25, 0xb2,
-//!                      0x04, 0x5c, 0x17, 0x2d, 0x6b, 0xd3, 0x90, 0xbd,
-//!                      0x85, 0x5f, 0x08, 0x6e, 0x3e, 0x9d, 0x52, 0x5b,
-//!                      0x46, 0xbf, 0xe2, 0x45, 0x11, 0x43, 0x15, 0x32]);
+//! println!("{:x}", out);
 //! ```
 
 #![no_std]
-#[cfg(target_endian = "big")]
 extern crate byte_tools;
 extern crate digest;
 extern crate generic_array;
+extern crate digest_buffer;
 
 pub use digest::Digest;
-use generic_array::GenericArray;
-use generic_array::typenum::Unsigned;
+use digest_buffer::DigestBuffer;
+use generic_array::{GenericArray, ArrayLength};
 use generic_array::typenum::{U28, U32, U48, U64, U72, U104, U136, U144, U168};
 use core::cmp;
 
-#[cfg(target_endian = "big")]
+
 use byte_tools::{write_u64v_le, read_u64v_le};
 #[cfg(target_endian = "little")]
-use core::mem;
+use core::mem::transmute;
 
 mod keccak;
 mod consts;
@@ -66,166 +63,135 @@ enum Sha3Variant {
 
 /// Generic SHA-3 hasher.
 #[derive(Copy, Clone)]
-struct Sha3 {
+struct Sha3<Rate> where Rate: ArrayLength<u8>, Rate::ArrayType: Copy {
     state: [u64; PLEN],
-    // Enqueued bytes in state for absorb phase
-    // Squeeze offset for squeeze phase
-    offset: usize,
-    rate: usize,
     variant: Sha3Variant,
+    buffer: DigestBuffer<Rate>,
 }
 
-impl Sha3 {
-    fn new(rate: usize, variant: Sha3Variant) -> Self {
-        Sha3{ state: Default::default(),
-            offset: 0, rate: rate, variant: variant }
+type Block<BlockSize> = GenericArray<u8, BlockSize>;
+
+fn absorb_block<R>(state: &mut [u64; PLEN], block: &Block<R>)
+    where R: ArrayLength<u8>
+{
+    let n = R::to_usize()/8;
+
+    let mut buf;
+    let buf: &[u64] = if cfg!(target_endian = "little") {
+        unsafe { transmute(block.as_slice()) }
+    } else if cfg!(target_endian = "big") {
+        buf = [0u64; 21];
+        let buf = &mut buf[..n];
+        read_u64v_le(buf, block.as_slice());
+        buf
+    } else { unreachable!() };
+
+    for (d, i) in state[..n].iter_mut().zip(buf) {
+        *d ^= *i;
     }
 
-    #[cfg(target_endian = "big")]
-    fn xorin(&mut self, data: &[u8], nread: usize) {
-        let mut state_copy = [0u8; PLEN*8];
-        write_u64v_le(&mut state_copy, &self.state);
-        for i in 0..nread {
-            state_copy[self.offset + i] ^= data[i];
-        }
-        read_u64v_le(&mut self.state, &state_copy);
-    }
+    keccak::f(state);
+}
 
-    #[cfg(target_endian = "little")]
-    fn xorin(&mut self, data: &[u8], nread: usize) {
-        let state_ref: &mut [u8; PLEN*8] = unsafe {
-            mem::transmute(&mut self.state)
-        };
-        for i in 0..nread {
-            state_ref[self.offset + i] ^= data[i];
+impl<Rate> Sha3<Rate>
+    where Rate: ArrayLength<u8>, Rate::ArrayType: Copy
+{
+    fn new(variant: Sha3Variant) -> Self {
+        Sha3{
+            state: Default::default(), variant: variant,
+            buffer: Default::default(),
         }
     }
 
-    fn absorb(&mut self, mut data: &[u8]) {
-        let mut nread = self.rate - self.offset;
-
-        //first foldp
-        while data.len() >= nread {
-            self.xorin(data, nread);
-            keccak::f(&mut self.state);
-            data = &data[nread..];
-            nread = self.rate;
-            self.offset = 0;
-        }
-
-        // Xor in the last block
-        self.xorin(data, data.len());
-        self.offset += data.len();
+    fn absorb(&mut self, input: &[u8]) {
+        let self_state = &mut self.state;
+        self.buffer.input(input, |d: &Block<Rate>| {
+            absorb_block(self_state, d);
+        });
     }
 
-    fn finalize(&mut self) {
-        // All parameters are expected to be in bits.
-        fn pad_len(ds_len: usize, offset: usize, rate: usize) -> usize {
-            assert!(rate % 8 == 0 && offset % 8 == 0);
-            let r: i64 = rate as i64;
-            let m: i64 = (offset + ds_len) as i64;
-            let zeros = (((-m - 2) + 2 * r) % r) as usize;
-            assert!((m as usize + zeros + 2) % 8 == 0);
-            (ds_len as usize + zeros + 2) / 8
-        }
-
-        fn set_pad(offset: usize, buf: &mut [u8]) {
-            let s = offset / 8;
-            let buflen = buf.len();
-            buf[s] |= 1 << (offset % 8);
-            for i in (offset % 8) + 1..8 {
-                buf[s] &= !(1 << i);
-            }
-            for v in buf.iter_mut().skip(s + 1) {
-                *v = 0;
-            }
-            buf[buflen - 1] |= 0x80;
-        }
-
-        let ds_len = match self.variant {
-            Sha3Variant::Keccak => 0,
-            Sha3Variant::Sha3 => 2,
-            Sha3Variant::Shake => 4,
-        };
-
-        let p_len = pad_len(ds_len, self.offset * 8, self.rate * 8);
-
-        const BUF_LEN: usize = 200;
-        assert!(p_len < BUF_LEN);
-        let mut buf = [0; BUF_LEN];
-        let mut buf = &mut buf[..p_len];
-
-        // Setting domain separator
+    fn apply_padding(&mut self) {
+        let mut buf = GenericArray::<u8, Rate>::default();
+        let pos = self.buffer.position();
+        let n = Rate::to_usize() - pos;
+        let buf = &mut buf[..n];
         buf[0] = match self.variant {
-            Sha3Variant::Keccak => 0x0,
-            Sha3Variant::Sha3 => 0x2,
-            Sha3Variant::Shake => 0xf,
+            Sha3Variant::Keccak => 0x01,
+            Sha3Variant::Sha3 => 0x06,
+            Sha3Variant::Shake => 0x1f,
         };
-
-        set_pad(ds_len, &mut buf);
+        buf[n-1] |= 0x80;
 
         self.absorb(&buf);
     }
 
-    #[cfg(target_endian = "big")]
-    fn readout(&mut self, out: &mut [u8], nread: usize) {
-        let mut state_copy = [0u8; PLEN*8];
-        write_u64v_le(&mut state_copy, &self.state);
-        let off = self.offset % self.rate;
-        out[..nread].copy_from_slice(&state_copy[off..][..nread]);
-    }
+    fn readout(&self, out: &mut [u8]) {
+        let mut state_copy;
+        let state_ref: &[u8; PLEN*8] = if cfg!(target_endian = "little") {
+            unsafe { transmute(&self.state) }
+        } else if cfg!(target_endian = "big") {
+            state_copy = [0u8; PLEN*8];
+            write_u64v_le(&mut state_copy, &self.state);
+            &state_copy
+        } else { unreachable!() };
 
-    #[cfg(target_endian = "little")]
-    fn readout(&mut self, out: &mut [u8], nread: usize) {
-        let state_ref: &[u8; PLEN*8] = unsafe {
-            mem::transmute(&mut self.state)
-        };
-
-        let off = self.offset % self.rate;
-        out[..nread].copy_from_slice(&state_ref[off..][..nread]);
+        let n = out.len();
+        out.copy_from_slice(&state_ref[..n]);
     }
 
     fn finish(mut self, out: &mut [u8]) {
-        self.finalize();
+        self.apply_padding();
+        assert_eq!(0, self.buffer.position());
+        let mut offset = 0;
 
         let out_len = out.len();
-        assert!(self.offset < out_len);
-        assert!(self.offset < self.rate);
 
         let in_len = out.len();
         let mut in_pos: usize = 0;
 
         // Squeeze
         while in_pos < in_len {
-            let offset = self.offset % self.rate;
-            let mut nread = cmp::min(self.rate - offset, in_len - in_pos);
+            let rate = Rate::to_usize();
+            let off_n = offset % rate;
+            let mut nread = cmp::min(rate - off_n, in_len - in_pos);
             if out_len != 0 {
-                nread = cmp::min(nread, out_len - self.offset);
+                nread = cmp::min(nread, out_len - offset);
             }
 
-            self.readout(&mut out[in_pos..], nread);
+
+            let mut state_copy;
+            let state_ref: &[u8; PLEN*8] = if cfg!(target_endian = "little") {
+                unsafe { transmute(&mut self.state) }
+            } else if cfg!(target_endian = "big") {
+                state_copy = [0u8; PLEN*8];
+                write_u64v_le(&mut state_copy, &self.state);
+                &state_copy
+            } else { unreachable!() };
+
+
+            let off = offset % Rate::to_usize();
+            let part = &state_ref[off..off+nread];
+            out[in_pos..in_pos+nread].copy_from_slice(part);
 
             in_pos += nread;
 
-            if offset + nread != self.rate {
-                self.offset += nread;
+            if off_n + nread != rate {
+                offset += nread;
                 break;
             }
 
             if out_len == 0 {
-                self.offset = 0;
+                offset = 0;
             } else {
-                self.offset += nread;
+                offset += nread;
             }
 
             keccak::f(&mut self.state);
         }
 
-        assert!(out_len != 0 && out_len == self.offset,
-            "something left to squeeze");
+        assert!(out_len != 0 && out_len == offset, "Not everything squeezed");
     }
 }
-
 
 
 sha3_impl!(Keccak224, U28, U144, Sha3Variant::Keccak);

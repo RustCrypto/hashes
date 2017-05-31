@@ -3,12 +3,12 @@ macro_rules! sha3_impl {
         #[allow(non_camel_case_types)]
         #[derive(Copy, Clone)]
         pub struct $state {
-            engine: Sha3,
+            engine: Sha3<$rate>,
         }
 
         impl Default for $state {
             fn default() -> Self {
-                $state {engine: Sha3::new($rate::to_usize(), $padding)}
+                $state {engine: Sha3::new($padding)}
             }
         }
 
@@ -23,9 +23,10 @@ macro_rules! sha3_impl {
         impl digest::FixedOutput for $state {
             type OutputSize = $output_size;
 
-            fn fixed_result(self) -> GenericArray<u8, Self::OutputSize> {
+            fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
                 let mut out = GenericArray::default();
-                self.engine.finish(&mut out);
+                self.engine.apply_padding();
+                self.engine.readout(out.as_mut_slice());
                 out
             }
         }
@@ -37,12 +38,12 @@ macro_rules! shake_impl {
     ($state:ident, $rate:ident, $padding:expr) => {
         #[derive(Copy, Clone)]
         pub struct $state {
-            engine: Sha3,
+            engine: Sha3<$rate>,
         }
 
         impl Default for $state {
             fn default() -> Self {
-                $state {engine: Sha3::new($rate::to_usize(), $padding)}
+                $state {engine: Sha3::new($padding)}
             }
         }
 
