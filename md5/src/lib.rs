@@ -37,7 +37,7 @@ pub struct Md5 {
 
 impl Default for Md5 {
     fn default() -> Self {
-        Self {
+        Md5 {
             length_bytes: 0,
             buffer: Default::default(),
             state: S0,
