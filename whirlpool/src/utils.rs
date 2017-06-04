@@ -1,4 +1,5 @@
-use super::{GenericArray, BlockSize};
+use generic_array::GenericArray;
+use super::BlockSize;
 use consts::*;
 use core::mem::uninitialized;
 

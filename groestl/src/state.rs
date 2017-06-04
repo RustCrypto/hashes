@@ -198,7 +198,7 @@ impl<BlockSize> GroestlState<BlockSize>
 #[cfg(test)]
 mod test {
     use super::{xor_generic_array, GroestlState};
-    use super::{C_P, C_Q, SHIFTS_P};
+    use consts::{C_P, C_Q, SHIFTS_P};
     use generic_array::typenum::U64;
     use generic_array::GenericArray;
 

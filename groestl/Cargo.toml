@@ -1,6 +1,6 @@
 [package]
 name = "groestl"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "Grøstl hash function"

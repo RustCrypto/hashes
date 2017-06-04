@@ -75,7 +75,7 @@ pub struct Sha256 {
 }
 
 impl Default for Sha256 {
-    fn default() -> Self { Self { engine: Engine256::new(&H256) } }
+    fn default() -> Self { Sha256 { engine: Engine256::new(&H256) } }
 }
 
 impl digest::Input for Sha256 {
@@ -103,7 +103,7 @@ pub struct Sha224 {
 }
 
 impl Default for Sha224 {
-    fn default() -> Self { Self { engine: Engine256::new(&H224) } }
+    fn default() -> Self { Sha224 { engine: Engine256::new(&H224) } }
 }
 
 impl digest::Input for Sha224 {

@@ -7,7 +7,7 @@ macro_rules! impl_groestl {
 
         impl Default for $state {
             fn default() -> Self {
-                Self{groestl: Groestl::new($output::to_usize()).unwrap()}
+                $state{groestl: Groestl::new($output::to_usize()).unwrap()}
             }
         }
 
@@ -45,7 +45,7 @@ macro_rules! impl_variable_groestl {
                 if output_size == $min || output_size > $max {
                     return Err(digest::InvalidLength);
                 }
-                Ok(Self {groestl: Groestl::new(output_size).unwrap()})
+                Ok($state {groestl: Groestl::new(output_size).unwrap()})
             }
         }
 

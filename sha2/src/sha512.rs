@@ -80,7 +80,7 @@ pub struct Sha512 {
 }
 
 impl Default for Sha512 {
-    fn default() -> Self { Self { engine: Engine512::new(&H512) } }
+    fn default() -> Self { Sha512 { engine: Engine512::new(&H512) } }
 }
 
 impl digest::Input for Sha512 {
@@ -111,7 +111,7 @@ pub struct Sha384 {
 }
 
 impl Default for Sha384 {
-    fn default() -> Self { Self { engine: Engine512::new(&H384) } }
+    fn default() -> Self { Sha384 { engine: Engine512::new(&H384) } }
 }
 
 impl digest::Input for Sha384 {
@@ -142,7 +142,9 @@ pub struct Sha512Trunc256 {
 }
 
 impl Default for Sha512Trunc256 {
-    fn default() -> Self { Self { engine: Engine512::new(&H512_TRUNC_256) } }
+    fn default() -> Self {
+        Sha512Trunc256 { engine: Engine512::new(&H512_TRUNC_256) }
+    }
 }
 
 impl digest::Input for Sha512Trunc256 {
@@ -171,7 +173,9 @@ pub struct Sha512Trunc224 {
 }
 
 impl Default for Sha512Trunc224 {
-    fn default() -> Self { Self { engine: Engine512::new(&H512_TRUNC_224) } }
+    fn default() -> Self {
+        Sha512Trunc224 { engine: Engine512::new(&H512_TRUNC_224) }
+    }
 }
 
 impl digest::Input for Sha512Trunc224 {

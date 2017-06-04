@@ -39,7 +39,7 @@ impl<BlockSize> Groestl<BlockSize>
             _ => unreachable!(),
         };
 
-        Ok(Self{
+        Ok(Groestl{
             buffer: Default::default(),
             state: GroestlState::new(output_size),
             output_size: output_size

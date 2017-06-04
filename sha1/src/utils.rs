@@ -1,7 +1,8 @@
 use consts::{BLOCK_LEN, K0, K1, K2, K3};
 use byte_tools::{read_u32v_be};
 use simd::u32x4;
-use super::{BlockSize, GenericArray};
+use generic_array::GenericArray;
+use super::BlockSize;
 
 /// Not an intrinsic, but gets the first element of a vector.
 #[inline]
