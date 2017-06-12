@@ -1,9 +1,8 @@
 use digest;
 use generic_array::GenericArray;
-use digest_buffer::DigestBuffer;
+use block_buffer::BlockBuffer;
 use generic_array::typenum::{U28, U32, U48, U64, U128};
-use byte_tools::{write_u64v_be, write_u32_be, write_u64_be};
-use byte_tools::add_bytes_to_bits_tuple;
+use byte_tools::{write_u64v_be, write_u32_be};
 
 use consts::{STATE_LEN, H384, H512, H512_TRUNC_224, H512_TRUNC_256};
 
@@ -34,41 +33,34 @@ impl Engine512State {
 /// contains the logic necessary to perform the final calculations.
 #[derive(Copy, Clone)]
 struct Engine512 {
-    length_bits: (u64, u64),
-    buffer: DigestBuffer<BlockSize>,
+    len: (u64, u64), // TODO: replace with u128 on stabilization
+    buffer: BlockBuffer<BlockSize>,
     state: Engine512State,
 }
 
 impl Engine512 {
     fn new(h: &[u64; STATE_LEN]) -> Engine512 {
         Engine512 {
-            length_bits: (0, 0),
+            len: (0, 0),
             buffer: Default::default(),
             state: Engine512State::new(h),
         }
     }
 
     fn input(&mut self, input: &[u8]) {
-        // Assumes that input.len() can be converted to u64 without overflow
-        self.length_bits = add_bytes_to_bits_tuple(self.length_bits,
-                                                   input.len() as u64);
+        let (res, over) = self.len.1.overflowing_add(input.len() as u64);
+        self.len.1 = res;
+        if over { self.len.0 += 1; }
         let self_state = &mut self.state;
-        self.buffer
-            .input(input, |input| self_state.process_block(input));
+        self.buffer.input(input, |d| self_state.process_block(d));
     }
 
     fn finish(&mut self) {
         let self_state = &mut self.state;
-        self.buffer.standard_padding(16, |input| {
-            self_state.process_block(input)
-        });
-        match self.length_bits {
-            (hi, low) => {
-                write_u64_be(self.buffer.next(8), hi);
-                write_u64_be(self.buffer.next(8), low);
-            },
-        }
-        self_state.process_block(self.buffer.full_buffer());
+        let (mut hi, mut lo) = self.len;
+        hi = (hi << 3).to_be();
+        lo = (lo << 3).to_be();
+        self.buffer.len_padding_u128(hi, lo, |d| self_state.process_block(d));
     }
 }
 
@@ -83,10 +75,12 @@ impl Default for Sha512 {
     fn default() -> Self { Sha512 { engine: Engine512::new(&H512) } }
 }
 
-impl digest::Input for Sha512 {
+impl digest::BlockInput for Sha512 {
     type BlockSize = BlockSize;
+}
 
-    fn digest(&mut self, msg: &[u8]) { self.engine.input(msg); }
+impl digest::Input for Sha512 {
+    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
 }
 
 impl digest::FixedOutput for Sha512 {
@@ -114,10 +108,12 @@ impl Default for Sha384 {
     fn default() -> Self { Sha384 { engine: Engine512::new(&H384) } }
 }
 
-impl digest::Input for Sha384 {
+impl digest::BlockInput for Sha384 {
     type BlockSize = BlockSize;
+}
 
-    fn digest(&mut self, msg: &[u8]) { self.engine.input(msg); }
+impl digest::Input for Sha384 {
+    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
 }
 
 impl digest::FixedOutput for Sha384 {
@@ -147,10 +143,12 @@ impl Default for Sha512Trunc256 {
     }
 }
 
-impl digest::Input for Sha512Trunc256 {
+impl digest::BlockInput for Sha512Trunc256 {
     type BlockSize = BlockSize;
+}
 
-    fn digest(&mut self, msg: &[u8]) { self.engine.input(msg); }
+impl digest::Input for Sha512Trunc256 {
+    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
 }
 
 impl digest::FixedOutput for Sha512Trunc256 {
@@ -178,10 +176,12 @@ impl Default for Sha512Trunc224 {
     }
 }
 
-impl digest::Input for Sha512Trunc224 {
+impl digest::BlockInput for Sha512Trunc224 {
     type BlockSize = BlockSize;
+}
 
-    fn digest(&mut self, msg: &[u8]) { self.engine.input(msg); }
+impl digest::Input for Sha512Trunc224 {
+    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
 }
 
 impl digest::FixedOutput for Sha512Trunc224 {
@@ -193,6 +193,6 @@ impl digest::FixedOutput for Sha512Trunc224 {
         let mut out = GenericArray::default();
         write_u64v_be(&mut out[..24], &self.engine.state.h[..3]);
         write_u32_be(&mut out[24..28], (self.engine.state.h[3] >> 32) as u32);
-out
+        out
     }
 }

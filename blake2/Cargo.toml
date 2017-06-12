@@ -1,6 +1,6 @@
 [package]
 name = "blake2"
-version = "0.5.2"
+version = "0.6.0"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "BLAKE2 hash functions"
@@ -10,13 +10,13 @@ keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.5"
-generic-array = "0.7"
-byte-tools = "0.1"
-crypto-mac = "0.3"
+digest = "0.6"
+generic-array = "0.8"
+byte-tools = "0.2"
+crypto-mac = "0.4"
 
 [dev-dependencies]
-crypto-tests = "0.4"
+crypto-tests = "0.5"
 
 [features]
 simd = []

@@ -1,6 +1,6 @@
 #![no_std]
 extern crate byte_tools;
-extern crate digest_buffer;
+extern crate block_buffer;
 extern crate generic_array;
 extern crate digest;
 

@@ -11,10 +11,12 @@ macro_rules! impl_groestl {
             }
         }
 
-        impl digest::Input for $state {
+        impl digest::BlockInput for $state {
             type BlockSize = $block;
+        }
 
-            fn digest(&mut self, input: &[u8]) {
+        impl digest::Input for $state {
+            fn process(&mut self, input: &[u8]) {
                 self.groestl.process(input);
             }
         }
@@ -49,16 +51,20 @@ macro_rules! impl_variable_groestl {
             }
         }
 
-        impl digest::Input for $state {
+        impl digest::BlockInput for $state {
             type BlockSize = $block;
+        }
 
-            fn digest(&mut self, input: &[u8]) {
+        impl digest::Input for $state {
+            fn process(&mut self, input: &[u8]) {
                 self.groestl.process(input);
             }
         }
 
         impl digest::VariableOutput for $state {
-            fn variable_result(self, buffer: &mut [u8]) -> digest::VariableResult {
+            fn variable_result(self, buffer: &mut [u8])
+                -> Result<&[u8], digest::InvalidLength>
+            {
                 if buffer.len() != self.groestl.output_size {
                     return Err(digest::InvalidLength);
                 }

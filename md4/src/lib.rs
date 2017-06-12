@@ -7,11 +7,11 @@ extern crate generic_array;
 extern crate fake_simd as simd;
 extern crate byte_tools;
 extern crate digest;
-extern crate digest_buffer;
+extern crate block_buffer;
 
 pub use digest::Digest;
 use byte_tools::{write_u32_le, read_u32v_le};
-use digest_buffer::{DigestBuffer};
+use block_buffer::{BlockBuffer};
 use simd::u32x4;
 use generic_array::GenericArray;
 use generic_array::typenum::{U16, U64};
@@ -27,10 +27,11 @@ struct Md4State {
     s: u32x4,
 }
 
+/// The MD4 hasher
 #[derive(Copy, Clone, Default)]
 pub struct Md4 {
     length_bytes: u64,
-    buffer: DigestBuffer<BlockSize>,
+    buffer: BlockBuffer<BlockSize>,
     state: Md4State,
 }
 
@@ -48,17 +49,19 @@ impl Md4State {
         fn h(x: u32, y: u32, z: u32) -> u32 {
             x ^ y ^ z
         }
- 
+
         fn op1(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
             a.wrapping_add(f(b, c, d)).wrapping_add(k).rotate_left(s)
         }
 
         fn op2(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-            a.wrapping_add(g(b, c, d)).wrapping_add(k).wrapping_add(0x5a827999).rotate_left(s)
+            a.wrapping_add(g(b, c, d)).wrapping_add(k)
+                .wrapping_add(0x5a827999).rotate_left(s)
         }
 
         fn op3(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-            a.wrapping_add(h(b, c, d)).wrapping_add(k).wrapping_add(0x6ED9EBA1).rotate_left(s)
+            a.wrapping_add(h(b, c, d)).wrapping_add(k)
+                .wrapping_add(0x6ED9EBA1).rotate_left(s)
         }
 
         let mut a = self.s.0;
@@ -69,9 +72,6 @@ impl Md4State {
         // load block to data
         let mut data = [0u32; 16];
         read_u32v_le(&mut data, input);
-
-        // FIXME: replace [0, 4, 8, 12] with (0..16).step_by(4)
-        // after stabilization
 
         // round 1
         for &i in [0, 4, 8, 12].iter() {
@@ -108,17 +108,17 @@ impl Default for Md4State {
 impl Md4 {
     fn finalize(&mut self) {
         let self_state = &mut self.state;
-        self.buffer.standard_padding(8, |d: &Block| { self_state.process_block(d); });
-        write_u32_le(self.buffer.next(4), (self.length_bytes << 3) as u32);
-        write_u32_le(self.buffer.next(4), (self.length_bytes >> 29) as u32);
-        self_state.process_block(self.buffer.full_buffer());
+        let l = (self.length_bytes << 3) as u64;
+        self.buffer.len_padding(l, |d| self_state.process_block(d))
     }
 }
 
-impl digest::Input for Md4 {
+impl digest::BlockInput for Md4 {
     type BlockSize = BlockSize;
+}
 
-    fn digest(&mut self, input: &[u8]) {
+impl digest::Input for Md4 {
+    fn process(&mut self, input: &[u8]) {
         // 2^64 - ie: integer overflow is OK.
         self.length_bytes += input.len() as u64;
         let self_state = &mut self.state;

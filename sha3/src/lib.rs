@@ -34,39 +34,35 @@
 extern crate byte_tools;
 extern crate digest;
 extern crate generic_array;
-extern crate digest_buffer;
+extern crate block_buffer;
 
 pub use digest::Digest;
-use digest_buffer::DigestBuffer;
+use block_buffer::{BlockBuffer, Padding};
 use generic_array::{GenericArray, ArrayLength};
 use generic_array::typenum::{U28, U32, U48, U64, U72, U104, U136, U144, U168};
-use core::cmp;
-
 
 use byte_tools::{write_u64v_le, read_u64v_le};
-#[cfg(target_endian = "little")]
 use core::mem::transmute;
+use core::marker::PhantomData;
+use core::cmp::min;
 
 mod keccak;
 mod consts;
+mod paddings;
 #[macro_use]
 mod macros;
 
 use consts::PLEN;
 
-#[derive(Copy, Clone)]
-enum Sha3Variant {
-    Keccak,
-    Sha3,
-    Shake,
-}
-
 /// Generic SHA-3 hasher.
-#[derive(Copy, Clone)]
-struct Sha3<Rate> where Rate: ArrayLength<u8>, Rate::ArrayType: Copy {
+#[derive(Copy, Clone, Default)]
+struct Sha3<Rate, P>
+    where Rate: ArrayLength<u8>, Rate::ArrayType: Copy,
+          P: Padding,
+{
     state: [u64; PLEN],
-    variant: Sha3Variant,
-    buffer: DigestBuffer<Rate>,
+    buffer: BlockBuffer<Rate>,
+    pad: PhantomData<P>,
 }
 
 type Block<BlockSize> = GenericArray<u8, BlockSize>;
@@ -93,15 +89,11 @@ fn absorb_block<R>(state: &mut [u64; PLEN], block: &Block<R>)
     keccak::f(state);
 }
 
-impl<Rate> Sha3<Rate>
-    where Rate: ArrayLength<u8>, Rate::ArrayType: Copy
+impl<Rate, P> Sha3<Rate, P>
+    where Rate: ArrayLength<u8>,
+          Rate::ArrayType: Copy, Rate: core::default::Default,
+          P: Padding,
 {
-    fn new(variant: Sha3Variant) -> Self {
-        Sha3{
-            state: Default::default(), variant: variant,
-            buffer: Default::default(),
-        }
-    }
 
     fn absorb(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
@@ -110,19 +102,13 @@ impl<Rate> Sha3<Rate>
         });
     }
 
-    fn apply_padding(&mut self) {
-        let mut buf = GenericArray::<u8, Rate>::default();
-        let pos = self.buffer.position();
-        let n = Rate::to_usize() - pos;
-        let buf = &mut buf[..n];
-        buf[0] = match self.variant {
-            Sha3Variant::Keccak => 0x01,
-            Sha3Variant::Sha3 => 0x06,
-            Sha3Variant::Shake => 0x1f,
-        };
-        buf[n-1] |= 0x80;
+    fn rate(&self) -> usize {
+        Rate::to_usize()
+    }
 
-        self.absorb(&buf);
+    fn apply_padding(&mut self) {
+        let buf = self.buffer.pad_with::<P>();
+        absorb_block(&mut self.state, buf);
     }
 
     fn readout(&self, out: &mut [u8]) {
@@ -138,24 +124,36 @@ impl<Rate> Sha3<Rate>
         let n = out.len();
         out.copy_from_slice(&state_ref[..n]);
     }
+}
 
-    fn finish(mut self, out: &mut [u8]) {
-        self.apply_padding();
-        assert_eq!(0, self.buffer.position());
-        let mut offset = 0;
+/// Reader state for extracting extendable output.
+pub struct Sha3XofReader {
+    state: [u64; PLEN],
+    rate: usize,
+}
 
-        let out_len = out.len();
+impl Sha3XofReader {
+    fn new(state: [u64; PLEN], rate: usize) -> Self {
+        Sha3XofReader{ state: state, rate: rate }
+    }
+}
 
-        let in_len = out.len();
+impl digest::XofReader for Sha3XofReader {
+    fn read(&mut self, buffer: &mut [u8]) {
+       let mut offset = 0;
+
+        let buffer_len = buffer.len();
+
+        let in_len = buffer.len();
         let mut in_pos: usize = 0;
 
         // Squeeze
         while in_pos < in_len {
-            let rate = Rate::to_usize();
+            let rate = self.rate;
             let off_n = offset % rate;
-            let mut nread = cmp::min(rate - off_n, in_len - in_pos);
-            if out_len != 0 {
-                nread = cmp::min(nread, out_len - offset);
+            let mut nread = min(rate - off_n, in_len - in_pos);
+            if buffer_len != 0 {
+                nread = min(nread, buffer_len - offset);
             }
 
 
@@ -169,9 +167,9 @@ impl<Rate> Sha3<Rate>
             } else { unreachable!() };
 
 
-            let off = offset % Rate::to_usize();
+            let off = offset % self.rate;
             let part = &state_ref[off..off+nread];
-            out[in_pos..in_pos+nread].copy_from_slice(part);
+            buffer[in_pos..in_pos+nread].copy_from_slice(part);
 
             in_pos += nread;
 
@@ -180,7 +178,7 @@ impl<Rate> Sha3<Rate>
                 break;
             }
 
-            if out_len == 0 {
+            if buffer_len == 0 {
                 offset = 0;
             } else {
                 offset += nread;
@@ -189,20 +187,19 @@ impl<Rate> Sha3<Rate>
             keccak::f(&mut self.state);
         }
 
-        assert!(out_len != 0 && out_len == offset, "Not everything squeezed");
+        assert!(buffer_len != 0 && buffer_len == offset, "Not everything squeezed");
     }
 }
 
+sha3_impl!(Keccak224, U28, U144, paddings::Keccak);
+sha3_impl!(Keccak256, U32, U136, paddings::Keccak);
+sha3_impl!(Keccak384, U48, U104, paddings::Keccak);
+sha3_impl!(Keccak512, U64, U72, paddings::Keccak);
 
-sha3_impl!(Keccak224, U28, U144, Sha3Variant::Keccak);
-sha3_impl!(Keccak256, U32, U136, Sha3Variant::Keccak);
-sha3_impl!(Keccak384, U48, U104, Sha3Variant::Keccak);
-sha3_impl!(Keccak512, U64, U72, Sha3Variant::Keccak);
+sha3_impl!(Sha3_224, U28, U144, paddings::Sha3);
+sha3_impl!(Sha3_256, U32, U136, paddings::Sha3);
+sha3_impl!(Sha3_384, U48, U104, paddings::Sha3);
+sha3_impl!(Sha3_512, U64, U72, paddings::Sha3);
 
-sha3_impl!(Sha3_224, U28, U144, Sha3Variant::Sha3);
-sha3_impl!(Sha3_256, U32, U136, Sha3Variant::Sha3);
-sha3_impl!(Sha3_384, U48, U104, Sha3Variant::Sha3);
-sha3_impl!(Sha3_512, U64, U72, Sha3Variant::Sha3);
-
-shake_impl!(Shake128, U168, Sha3Variant::Shake);
-shake_impl!(Shake256, U136, Sha3Variant::Shake);
+shake_impl!(Shake128, U168, paddings::Shake);
+shake_impl!(Shake256, U136, paddings::Shake);

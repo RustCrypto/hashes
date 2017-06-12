@@ -12,7 +12,7 @@
 //! For details see <http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html>.
 //!
 //! # Usage
-//! 
+//!
 //! ```rust
 //! use whirlpool::{Whirlpool, Digest};
 //!
@@ -24,7 +24,7 @@
 #![no_std]
 extern crate generic_array;
 extern crate digest;
-extern crate digest_buffer;
+extern crate block_buffer;
 #[cfg(not(feature = "asm"))]
 extern crate byte_tools;
 #[cfg(feature = "asm")]
@@ -36,8 +36,8 @@ use utils::compress;
 
 pub use digest::Digest;
 #[cfg(not(feature = "asm"))]
-use byte_tools::write_u64v_be;
-use digest_buffer::DigestBuffer;
+use byte_tools::{write_u64v_be, zero};
+use block_buffer::{BlockBuffer, ZeroPadding};
 use generic_array::GenericArray;
 use generic_array::typenum::U64;
 
@@ -50,7 +50,7 @@ type BlockSize = U64;
 #[derive(Copy, Clone, Default)]
 pub struct Whirlpool {
     bit_length: [u8; 32],
-    buffer: DigestBuffer<BlockSize>,
+    buffer: BlockBuffer<BlockSize>,
     #[cfg(not(feature = "asm"))]
     hash: [u64; 8],
     #[cfg(feature = "asm")]
@@ -58,31 +58,7 @@ pub struct Whirlpool {
 }
 
 impl Whirlpool {
-    fn finalize(&mut self) {
-        // padding
-        assert!(self.buffer.remaining() >= 1);
-        let hash = &mut self.hash;
-        self.buffer.input(&[0b10000000], |b| { compress(hash, b); });
-
-        if self.buffer.remaining() < self.bit_length.len() {
-            let size = self.buffer.size();
-            self.buffer.zero_until(size);
-            compress(hash, self.buffer.full_buffer());
-        }
-
-        // length
-        self.buffer.zero_until(32);
-        self.buffer.input(&self.bit_length, |b| { compress(hash, b); });
-        assert!(self.buffer.position() == 0);
-    }
-}
-
-impl digest::Input for Whirlpool {
-    type BlockSize = BlockSize;
-
-    fn digest(&mut self, input: &[u8]) {
-        // (byte length * 8) = (bit lenght) converted in a 72 bit uint
-        let len = input.len() as u64;
+    fn update_len(&mut self, len: u64) {
         let len_bits = [
             ((len >> (56 + 5))       ) as u8,
             ((len >> (48 + 5)) & 0xff) as u8,
@@ -95,11 +71,10 @@ impl digest::Input for Whirlpool {
             ((len << 3) & 0xff) as u8,
         ];
 
-        // adds the 72 bit len_bits to the 256 bit self.bit_length
         let mut carry = false;
         for i in 0..32 {
             let mut x = self.bit_length[self.bit_length.len() - i - 1] as u16;
-            
+
             if i < len_bits.len() {
                 x += len_bits[len_bits.len() - i - 1] as u16;
             } else if !carry {
@@ -109,15 +84,39 @@ impl digest::Input for Whirlpool {
             if carry {
                 x += 1;
             }
-            
+
             carry = x > 0xff;
             let pos = self.bit_length.len() -i - 1;
             self.bit_length[pos] = (x & 0xff) as u8;
         }
+    }
 
-        // process the data itself
+    fn finalize(&mut self) {
+        // padding
         let hash = &mut self.hash;
-        self.buffer.input(input, |b| { compress(hash, b); });
+        let pos = self.buffer.position();
+        let buf = self.buffer.pad_with::<ZeroPadding>();
+        buf[pos] = 0x80;
+
+        if pos + 1 > self.bit_length.len() {
+            compress(hash, buf);
+            zero(&mut buf[..pos+1]);
+        }
+
+        buf[32..].copy_from_slice(&self.bit_length);
+        compress(hash, buf);
+    }
+}
+
+impl digest::BlockInput for Whirlpool {
+    type BlockSize = BlockSize;
+}
+
+impl digest::Input for Whirlpool {
+    fn process(&mut self, input: &[u8]) {
+        self.update_len(input.len() as u64);
+        let hash = &mut self.hash;
+        self.buffer.input(input, |b| compress(hash, b));
     }
 }
 

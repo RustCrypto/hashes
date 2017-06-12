@@ -9,17 +9,17 @@
 //! the `result` or `result_str` methods. The first will return bytes, and
 //! the second will return a `String` object of the same bytes represented
 //! in hexadecimal form.
-//! 
+//!
 //! The `Sha1` object may be reused to create multiple hashes by calling
 //! the `reset()` method. These traits are implemented by all hash digest
 //! algorithms that implement the `Digest` trait. An example of use is:
-//! 
+//!
 //! ```rust
 //! use sha_1::{Sha1, Digest};
 //!
 //! // create a Sha1 object
 //! let mut sh = Sha1::default();
-//! 
+//!
 //! // write input message
 //! sh.input(b"hello world");
 //!
@@ -47,12 +47,11 @@
 //!
 //! Some of these functions are commonly found in all hash digest
 //! algorithms, but some, like "parity" is only found in SHA-1.
-
 #![no_std]
 extern crate generic_array;
 extern crate byte_tools;
 extern crate digest;
-extern crate digest_buffer;
+extern crate block_buffer;
 
 #[cfg(not(feature = "asm"))]
 extern crate fake_simd as simd;
@@ -65,8 +64,8 @@ mod utils;
 use utils::compress;
 
 pub use digest::Digest;
-use byte_tools::{write_u32_be, write_u32v_be, add_bytes_to_bits};
-use digest_buffer::DigestBuffer;
+use byte_tools::{write_u32v_be};
+use block_buffer::BlockBuffer;
 use generic_array::GenericArray;
 use generic_array::typenum::{U20, U64};
 
@@ -79,37 +78,26 @@ type BlockSize = U64;
 #[derive(Clone)]
 pub struct Sha1 {
     h: [u32; STATE_LEN],
-    length_bits: u64,
-    buffer: DigestBuffer<BlockSize>,
-}
-
-impl Sha1 {
-    fn finalize(&mut self) {
-        let st_h = &mut self.h;
-        self.buffer
-            .standard_padding(8, |d| compress(&mut *st_h, d));
-        write_u32_be(self.buffer.next(4), (self.length_bits >> 32) as u32);
-        write_u32_be(self.buffer.next(4), self.length_bits as u32);
-        compress(st_h, self.buffer.full_buffer());
-    }
+    len: u64,
+    buffer: BlockBuffer<BlockSize>,
 }
 
 impl Default for Sha1 {
     fn default() -> Self {
-        Sha1{ h: H, length_bits: 0u64, buffer: Default::default() }
+        Sha1{ h: H, len: 0u64, buffer: Default::default() }
     }
 }
 
-impl digest::Input for Sha1 {
+impl digest::BlockInput for Sha1 {
     type BlockSize = BlockSize;
+}
 
-    fn digest(&mut self, msg: &[u8]) {
-        // Assumes that msg.len() can be converted to u64 without overflow
-        self.length_bits = add_bytes_to_bits(self.length_bits, msg.len() as u64);
-        let st_h = &mut self.h;
-        self.buffer.input(msg, |d| {
-            compress(st_h, d);
-        });
+impl digest::Input for Sha1 {
+    fn process(&mut self, msg: &[u8]) {
+        // Assumes that `length_bits<<3` will not overflow
+        self.len += msg.len() as u64;
+        let state = &mut self.h;
+        self.buffer.input(msg, |d| compress(state, d));
     }
 }
 
@@ -117,10 +105,12 @@ impl digest::FixedOutput for Sha1 {
     type OutputSize = U20;
 
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        self.finalize();
+        let state = &mut self.h;
+        let len_bits = self.len << 3;
+        self.buffer.len_padding(len_bits.to_be(), |d| compress(state, d));
 
         let mut out = GenericArray::default();
-        write_u32v_be(&mut out[..], &self.h);
+        write_u32v_be(out.as_mut_slice(), & *state);
         out
     }
 }

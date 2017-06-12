@@ -1,8 +1,7 @@
 use core::ops::Div;
 
 use digest;
-use byte_tools::write_u64_be;
-use digest_buffer::DigestBuffer;
+use block_buffer::BlockBuffer;
 use generic_array::{ArrayLength, GenericArray};
 use generic_array::typenum::{Quot, U8};
 
@@ -10,17 +9,17 @@ use state::{GroestlState, xor_generic_array};
 
 #[derive(Copy, Clone)]
 pub struct Groestl<BlockSize>
-    where BlockSize: ArrayLength<u8> + Div<U8>,
+    where BlockSize: ArrayLength<u8> + Div<U8> + Default,
           BlockSize::ArrayType: Copy,
           Quot<BlockSize, U8>: ArrayLength<u8>,
 {
-    buffer: DigestBuffer<BlockSize>,
+    buffer: BlockBuffer<BlockSize>,
     state: GroestlState<BlockSize>,
     pub output_size: usize,
 }
 
 impl<BlockSize> Groestl<BlockSize>
-    where BlockSize: ArrayLength<u8> + Div<U8>,
+    where BlockSize: ArrayLength<u8> + Div<U8> + Default,
           BlockSize::ArrayType: Copy,
           Quot<BlockSize, U8>: ArrayLength<u8>,
 {
@@ -55,19 +54,13 @@ impl<BlockSize> Groestl<BlockSize>
     }
 
     pub fn finalize(mut self) -> GenericArray<u8, BlockSize> {
-        {
-            let state = &mut self.state;
-            self.buffer.standard_padding(
-                8,
-                |b: &GenericArray<u8, BlockSize>| { state.compress(b); },
-            );
-        }
-        {
-            let mut buf = self.buffer.next(8);
-            write_u64_be(&mut buf, (self.state.num_blocks + 1) as u64);
-        }
         let state = &mut self.state;
-        state.compress(self.buffer.full_buffer());
+        let l = if self.buffer.remaining() <= 8 {
+            state.num_blocks + 2
+        } else {
+            state.num_blocks + 1
+        };
+        self.buffer.len_padding(l.to_be() as u64, |b| state.compress(b));
         xor_generic_array(&state.p(&state.state), &state.state)
     }
 }

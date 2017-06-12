@@ -64,7 +64,7 @@ macro_rules! blake2_impl {
                                   s[ 9], s[11], s[13], s[15]));
             unshuffle(v);
         }
-        
+
         impl $state {
             /// Creates a new hashing context with a key.
             pub fn new_keyed(k: &[u8]) -> Self {
@@ -205,11 +205,12 @@ macro_rules! blake2_impl {
             fn default() -> Self { Self::new_keyed(&[]) }
         }
 
+        impl digest::BlockInput for $state {
+            type BlockSize = $bytes;
+        }
 
         impl digest::Input for $state {
-            type BlockSize = $bytes;
-
-            fn digest(&mut self, input: &[u8]) { self.update(input); }
+            fn process(&mut self, input: &[u8]) { self.update(input); }
         }
 
         impl digest::FixedOutput for $state {
@@ -220,10 +221,10 @@ macro_rules! blake2_impl {
 
         impl digest::VariableOutput for $state {
             fn variable_result(self, buf: &mut [u8])
-                                    -> digest::VariableResult
+                                    -> Result<&[u8], digest::InvalidLength>
             {
                 let n = buf.len();
-                if n == 0 || n > $bytes::to_usize() {
+                if n > $bytes::to_usize() {
                     Err(digest::InvalidLength)
                 } else {
                     let res = self.finalize_with_flag(0);

@@ -5,12 +5,12 @@
 #![no_std]
 extern crate byte_tools;
 extern crate digest;
-extern crate digest_buffer;
+extern crate block_buffer;
 extern crate generic_array;
 
 pub use digest::Digest;
 use byte_tools::copy_memory;
-use digest_buffer::DigestBuffer;
+use block_buffer::{BlockBuffer, Pkcs7};
 use generic_array::GenericArray;
 use generic_array::typenum::{U16, U48};
 
@@ -25,9 +25,10 @@ struct Md2State {
     checksum: GenericArray<u8, U16>,
 }
 
+/// The MD2 hasher
 #[derive(Copy, Clone, Default)]
 pub struct Md2 {
-    buffer: DigestBuffer<BlockSize>,
+    buffer: BlockBuffer<BlockSize>,
     state: Md2State,
 }
 
@@ -64,25 +65,20 @@ impl Md2 {
     }
 
     fn finalize(&mut self) {
-        let self_state = &mut self.state;
-        {
-            // Padding
-            let rem = self.buffer.remaining();
-            let mut buffer_end = self.buffer.next(rem);
-            for idx in 0..rem {
-                buffer_end[idx] = rem as u8;
-            }
-        }
-        self_state.process_block(self.buffer.full_buffer());
-        let checksum = self_state.checksum;
-        self_state.process_block(&checksum);
+        let buf = self.buffer.pad_with::<Pkcs7>();
+        self.state.process_block(buf);
+        let checksum = self.state.checksum;
+        self.state.process_block(&checksum);
     }
 }
 
-impl digest::Input for Md2 {
-    type BlockSize = BlockSize;
 
-    fn digest(&mut self, input: &[u8]) {
+impl digest::BlockInput for Md2 {
+    type BlockSize = BlockSize;
+}
+
+impl digest::Input for Md2 {
+    fn process(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| {
             self_state.process_block(d);

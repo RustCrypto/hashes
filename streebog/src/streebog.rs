@@ -1,5 +1,5 @@
 use digest;
-use digest_buffer::DigestBuffer;
+use block_buffer::{BlockBuffer, ZeroPadding};
 use generic_array::typenum::{Unsigned, U64};
 use generic_array::{GenericArray, ArrayLength};
 use byte_tools::{write_u64v_le, copy_memory};
@@ -58,24 +58,28 @@ impl StreebogState {
     }
 
     fn update_sigma(&mut self, m: &Block) {
-        let mut over = 0u16;
+        let mut over = false;
         for (a, b) in self.sigma.iter_mut().zip(m.iter()) {
-            let res = (*a as u16) + (*b as u16) + over;
-            *a = (res & 0xff) as u8;
-            over = res >> 8;
+            let (res, loc_over) = (*a).overflowing_add(*b);
+            *a = res;
+            if over { *a += 1; }
+            over = loc_over;
         }
     }
 
-    fn update_n(&mut self, m_len: u8) {
-        let res = (self.n[0] as u16) + ((m_len as u16) << 3);
+    fn update_n(&mut self, mut l: u8) {
+        let res = (self.n[0] as u16) + ((l as u16) << 3);
         self.n[0] = (res & 0xff) as u8;
-        let mut over = res >> 8;
+        l = (res >> 8) as u8;
 
         for a in self.n.iter_mut().skip(1) {
-            let res = (*a as u16) + over;
-            *a = (res & 0xff) as u8;
-            over = res >> 8;
-            if over == 0 { return; }
+            let (res, over) = (*a).overflowing_add(l);
+            *a = res;
+            if over {
+                l = 1;
+            } else {
+                break;
+            }
         }
     }
 
@@ -89,7 +93,7 @@ impl StreebogState {
 
 #[derive(Copy, Clone)]
 pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
-    buffer: DigestBuffer<U64>,
+    buffer: BlockBuffer<U64>,
     state: StreebogState,
     // Phantom data to tie digest size to the struct
     digest_size: PhantomData<DigestSize>,
@@ -119,10 +123,12 @@ impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
 }
 
 
-impl<N> digest::Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> digest::BlockInput for Streebog<N>  where N: ArrayLength<u8> + Copy {
     type BlockSize = U64;
+}
 
-    fn digest(&mut self, input: &[u8]) {
+impl<N> digest::Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
+    fn process(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| {
             self_state.process_block(d, BLOCK_SIZE as u8);
@@ -135,14 +141,11 @@ impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
 
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         let self_state = &mut self.state;
+        let pos = self.buffer.position();
 
-        let msg_len = self.buffer.position() as u8;
-        self.buffer.next(1)[0] = 1;
-        self.buffer.zero_until(BLOCK_SIZE);
-        let block = self.buffer.full_buffer();
-
-        self_state.process_block(block, msg_len);
-
+        let mut block = self.buffer.pad_with::<ZeroPadding>();
+        block[pos] = 1;
+        self_state.process_block(block, pos as u8);
 
         let n = self_state.n;
         self_state.g(&Block::default(), &n);
@@ -151,7 +154,7 @@ impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
 
         let mut buf = GenericArray::default();
         let n = BLOCK_SIZE - Self::OutputSize::to_usize();
-        copy_memory(&self_state.h[n..], &mut buf);
+        buf.copy_from_slice(&self_state.h[n..]);
         buf
     }
 }

@@ -19,15 +19,17 @@ macro_rules! gost94_impl {
 
     impl Default for $state {
         fn default() -> Self {
-            Self::new()    
+            Self::new()
         }
     }
 
-    impl digest::Input for $state {
+    impl digest::BlockInput for $state {
         type BlockSize = U32;
+    }
 
-        fn digest(&mut self, input: &[u8]) {
-            self.sh.digest(input);
+    impl digest::Input for $state {
+        fn process(&mut self, input: &[u8]) {
+            self.sh.process(input);
         }
     }
 

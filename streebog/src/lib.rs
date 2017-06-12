@@ -1,4 +1,4 @@
-//! An implementation of the [Streebog][1] cryptographic hash function. It's 
+//! An implementation of the [Streebog][1] cryptographic hash function. It's
 //! officially known as GOST R 34.11-2012.
 //!
 //! [1]: https://en.wikipedia.org/wiki/Streebog
@@ -28,15 +28,15 @@
 //! let result = hasher.result();
 //! ```
 
-#![no_std]
+//#![no_std]
 extern crate generic_array;
-extern crate digest_buffer;
+extern crate block_buffer;
 extern crate byte_tools;
 extern crate digest;
 
 pub use digest::Digest;
 use generic_array::typenum::{U32, U64};
-
+use std as core;
 mod consts;
 mod table;
 mod streebog;

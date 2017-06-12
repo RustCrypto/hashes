@@ -67,7 +67,7 @@
 extern crate generic_array;
 extern crate byte_tools;
 extern crate digest;
-extern crate digest_buffer;
+extern crate block_buffer;
 extern crate fake_simd as simd;
 #[cfg(feature = "asm")]
 extern crate sha2_asm;

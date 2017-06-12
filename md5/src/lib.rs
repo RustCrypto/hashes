@@ -6,7 +6,7 @@
 extern crate generic_array;
 extern crate byte_tools;
 extern crate digest;
-extern crate digest_buffer;
+extern crate block_buffer;
 #[cfg(feature = "asm")]
 extern crate md5_asm as utils;
 
@@ -16,8 +16,8 @@ mod utils;
 use utils::compress;
 
 pub use digest::Digest;
-use byte_tools::{write_u32_le, write_u32v_le};
-use digest_buffer::{DigestBuffer};
+use byte_tools::{write_u32v_le};
+use block_buffer::{BlockBuffer};
 use generic_array::GenericArray;
 use generic_array::typenum::{U16, U64};
 
@@ -27,11 +27,11 @@ use consts::S0;
 type BlockSize = U64;
 type Block = GenericArray<u8, BlockSize>;
 
-/// The MD5 Digest algorithm
+/// The MD5 hasher
 #[derive(Copy, Clone)]
 pub struct Md5 {
     length_bytes: u64,
-    buffer: DigestBuffer<BlockSize>,
+    buffer: BlockBuffer<BlockSize>,
     state: [u32; 4],
 }
 
@@ -48,19 +48,17 @@ impl Default for Md5 {
 impl Md5 {
     fn finalize(&mut self) {
         let self_state = &mut self.state;
-        self.buffer.standard_padding(8, |d: &Block| {
-            compress(self_state, d);
-        });
-        write_u32_le(self.buffer.next(4), (self.length_bytes << 3) as u32);
-        write_u32_le(self.buffer.next(4), (self.length_bytes >> 29) as u32);
-        compress(self_state, self.buffer.full_buffer());
+        let l = (self.length_bytes << 3) as u64;
+        self.buffer.len_padding(l, |d| compress(self_state, d))
     }
 }
 
-impl digest::Input for Md5 {
+impl digest::BlockInput for Md5 {
     type BlockSize = BlockSize;
+}
 
-    fn digest(&mut self, input: &[u8]) {
+impl digest::Input for Md5 {
+    fn process(&mut self, input: &[u8]) {
         // Unlike Sha1 and Sha2, the length value in MD5 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes += input.len() as u64;

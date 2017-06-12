@@ -108,7 +108,7 @@ macro_rules! process_block(
     });
 );
 
-pub fn process_msg_block(data: &Block, h: &mut [u32; DIGEST_BUF_LEN]) {
+pub fn process_msg_block(h: &mut [u32; DIGEST_BUF_LEN], data: &Block, ) {
     let mut w = [0u32; WORK_BUF_LEN];
     read_u32v_le(&mut w[0..16], data);
     process_block!(h, w[..],
