@@ -111,8 +111,8 @@ use blake2::{Blake2b, Digest};
 use std::fs;
 
 let mut file = fs::File::open(&path)?;
-Blake2b::digest_reader(&mut file);
-println!("{:x}\t{}", result, path);
+let hash = Blake2b::digest_reader(&mut file);
+println!("{:x}\t{}", hash, path);
 ```
 
 ### Hash-based Message Authentication Code (HMAC)
