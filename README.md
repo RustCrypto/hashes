@@ -61,7 +61,7 @@ First add `blake2` crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-blake2 = "0.5"
+blake2 = "0.6"
 ```
 
 `blake2` and other crates re-export
@@ -73,7 +73,7 @@ Now you can write the following code:
 ```Rust
 use blake2::{Blake2b, Digest};
 
-let mut hasher = Blake2b::default();
+let mut hasher = Blake2b::new();
 let data = b"Hello world!";
 hasher.input(data);
 // `input` can be called repeatedly
@@ -85,31 +85,33 @@ println!("Result: {:x}", hash);
 
 `hash` has type [`GenericArray<u8, U64>`](http://fizyk20.github.io/generic-array/generic_array/struct.GenericArray.html), which is a generic alternative to `[u8; 64]`.
 
+Also you can use the following approach if the whole message is available:
+
+```Rust
+let hash = Blake2b::digest(b"my message");
+println!("Result: {:x}", hash);
+```
+
 ### Hashing `Read`able objects
 
 If you want to hash data from [`Read`](https://doc.rust-lang.org/std/io/trait.Read.html)
-trait (e.g. from file) you can use `DigestReader` trait or convenience function
-`digest_reader`. They will compute hash by reading data using 1 KB blocks.
-To use them first enable `std` feature for `digest` crate in your `Cargo.toml`:
+trait (e.g. from file) you can enable `std` feature in digest crate:
 
 ```toml
 [dependencies]
-blake2 = "0.5"
-digest = { version = "0.5", features = ["std"]}
+blake2 = "0.6"
+digest = { version = "0.6", features = ["std"]}
 ```
 
-All crates in this repository are `no_std` by default, thus this feature must be
-enabled explicitly.
-
-After that you can write the following code:
+And use `digest_reader` method which will compute hash by reading data using
+1 KB blocks:
 
 ```Rust
-use digest::digest_reader;
-use blake2::Blake2b;
+use blake2::{Blake2b, Digest};
 use std::fs;
 
 let mut file = fs::File::open(&path)?;
-digest_reader::<Blake2b>(&mut file);
+Blake2b::digest_reader(&mut file);
 println!("{:x}\t{}", result, path);
 ```
 
@@ -128,8 +130,8 @@ following dependencies to your crate:
 
 ```toml
 [dependencies]
-hmac = "0.1"
-sha2 = "0.5"
+hmac = "0.3"
+sha2 = "0.6"
 ```
 
 To get the authentication code:
@@ -151,7 +153,7 @@ let result = mac.result();
 // To get &[u8] use `code` method, but be carefull, since incorrect use
 // of the code value may permit timing attacks which defeat the security
 // provided by the `MacResult`.
-let code_bytes = resul.code();
+let code_bytes = result.code();
 ```
 
 To verify the message:
@@ -161,7 +163,7 @@ let mac = Hmac::<Sha256>::new(b"my secret and secure key");
 
 mac.input(b"input message");
 
-let is_code_correct = mac.verify(code_bytes); 
+let is_code_correct = mac.verify(code_bytes);
 ```
 
 ### Generic code
