@@ -1,6 +1,6 @@
 [package]
 name = "sha-1"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["The RustCrypto Devs"]
 license = "MIT/Apache-2.0"
 description = "SHA-1 hash function"
@@ -10,18 +10,20 @@ keywords = ["crypto", "sha1", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.6"
-generic-array = "0.8"
 byte-tools = "0.2"
-block-buffer = "0.2"
+block-buffer = "0.3"
 fake-simd = "0.1"
-sha1-asm = {version="0.3", optional=true}
+digest = { version = "0.6", optional=true}
+generic-array = { version = "0.8", optional=true}
+sha1-asm = {version="0.4", optional=true}
 
 [dev-dependencies]
 crypto-tests = "0.5"
 
 [features]
 asm = ["sha1-asm"]
+generic = ["generic-array", "digest"]
+default = ["generic"]
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

@@ -48,10 +48,13 @@
 //! Some of these functions are commonly found in all hash digest
 //! algorithms, but some, like "parity" is only found in SHA-1.
 #![no_std]
-extern crate generic_array;
-extern crate byte_tools;
-extern crate digest;
 extern crate block_buffer;
+extern crate byte_tools;
+#[cfg(feature = "generic")]
+extern crate digest;
+#[cfg(feature = "generic")]
+extern crate generic_array;
+
 
 #[cfg(not(feature = "asm"))]
 extern crate fake_simd as simd;
@@ -63,23 +66,25 @@ mod utils;
 
 use utils::compress;
 
+use byte_tools::write_u32v_be;
+use block_buffer::BlockBuffer512;
+
+#[cfg(feature = "generic")]
 pub use digest::Digest;
-use byte_tools::{write_u32v_be};
-use block_buffer::BlockBuffer;
+#[cfg(feature = "generic")]
 use generic_array::GenericArray;
+#[cfg(feature = "generic")]
 use generic_array::typenum::{U20, U64};
 
 mod consts;
 use consts::{STATE_LEN, H};
 
-type BlockSize = U64;
-
 /// Structure representing the state of a SHA-1 computation
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct Sha1 {
     h: [u32; STATE_LEN],
     len: u64,
-    buffer: BlockBuffer<BlockSize>,
+    buffer: BlockBuffer512,
 }
 
 impl Default for Sha1 {
@@ -88,29 +93,52 @@ impl Default for Sha1 {
     }
 }
 
-impl digest::BlockInput for Sha1 {
-    type BlockSize = BlockSize;
-}
+impl Sha1 {
+    #[inline]
+    fn finalize(mut self) -> [u32; STATE_LEN] {
+        {
+            let state = &mut self.h;
+            let len_bits = self.len << 3;
+            self.buffer.len_padding(len_bits.to_be(), |d| compress(state, d));
+        }
+        self.h
+    }
 
-impl digest::Input for Sha1 {
-    fn process(&mut self, msg: &[u8]) {
+    #[inline]
+    pub fn hash(self) -> [u8; 20] {
+        let mut out = [0u8; 20];
+        write_u32v_be(&mut out, &self.finalize());
+        out
+    }
+
+    #[inline]
+    pub fn consume(&mut self, input: &[u8]) {
         // Assumes that `length_bits<<3` will not overflow
-        self.len += msg.len() as u64;
+        self.len += input.len() as u64;
         let state = &mut self.h;
-        self.buffer.input(msg, |d| compress(state, d));
+        self.buffer.input(input, |d| compress(state, d));
     }
 }
 
+#[cfg(feature = "generic")]
+impl digest::BlockInput for Sha1 {
+    type BlockSize = U64;
+}
+
+#[cfg(feature = "generic")]
+impl digest::Input for Sha1 {
+    fn process(&mut self, input: &[u8]) {
+        self.consume(input);
+    }
+}
+
+#[cfg(feature = "generic")]
 impl digest::FixedOutput for Sha1 {
     type OutputSize = U20;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        let state = &mut self.h;
-        let len_bits = self.len << 3;
-        self.buffer.len_padding(len_bits.to_be(), |d| compress(state, d));
-
+    fn fixed_result(self) -> GenericArray<u8, Self::OutputSize> {
         let mut out = GenericArray::default();
-        write_u32v_be(out.as_mut_slice(), & *state);
+        write_u32v_be(&mut out, &self.finalize());
         out
     }
 }
