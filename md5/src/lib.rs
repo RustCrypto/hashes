@@ -59,8 +59,8 @@ impl Md5 {
     }
 
     #[inline]
-    pub fn hash(self) -> [u8; 32] {
-        let mut out = [0u8; 32];
+    pub fn hash(self) -> [u8; 16] {
+        let mut out = [0u8; 16];
         write_u32v_le(&mut out, &self.finalize());
         out
     }
