@@ -1,4 +1,3 @@
-use super::Block;
 use consts::RC;
 use byte_tools::read_u32v_le;
 
@@ -30,7 +29,7 @@ fn op_i(w: u32, x: u32, y: u32, z: u32, m: u32, c:u32, s: u32) -> u32 {
 }
 
 #[inline]
-pub fn compress(state: &mut [u32; 4], input: &Block) {
+pub fn compress(state: &mut [u32; 4], input: &[u8; 64]) {
     let mut a = state[0];
     let mut b = state[1];
     let mut c = state[2];
