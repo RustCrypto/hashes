@@ -1,16 +1,13 @@
 [package]
 name = "md5-asm"
-version = "0.3.0"
-authors = ["The RustCrypto Devs"]
+version = "0.4.0"
+authors = ["RustCrypto Developers"]
 license = "MIT"
 description = "Assembly implementation of MD5 compression function"
 documentation = "https://docs.rs/md5-asm"
 repository = "https://github.com/RustCrypto/asm-hashes"
 keywords = ["crypto", "md5", "asm"]
 categories = ["cryptography", "no-std"]
-
-[dependencies]
-generic-array = "0.8"
 
 [build-dependencies]
 gcc = "0.3"
