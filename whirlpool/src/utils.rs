@@ -1,29 +1,22 @@
 use generic_array::GenericArray;
 use super::BlockSize;
 use consts::*;
-use core::mem::uninitialized;
+use byte_tools::read_u64v_be;
 
 pub fn compress(hash: &mut [u64; 8], buffer: &GenericArray<u8, BlockSize>) {
-    let mut k: [u64; 8] = unsafe { uninitialized() };
-    let mut block: [u64; 8] = unsafe { uninitialized() };
-    let mut state: [u64; 8] = unsafe { uninitialized() };
-    let mut l: [u64; 8] = unsafe { uninitialized() };
+    let mut k = [0u64; 8];
+    let mut block = [0u64; 8];
+    let mut state = [0u64; 8];
+    let mut l = [0u64; 8];
+
+    read_u64v_be(&mut block, buffer.as_slice());
+    k.copy_from_slice(hash);
 
     for i in 0..8 {
-        block[i] =
-            ((buffer[i * 8 + 0] as u64) << 56) ^
-            ((buffer[i * 8 + 1] as u64) << 48) ^
-            ((buffer[i * 8 + 2] as u64) << 40) ^
-            ((buffer[i * 8 + 3] as u64) << 32) ^
-            ((buffer[i * 8 + 4] as u64) << 24) ^
-            ((buffer[i * 8 + 5] as u64) << 16) ^
-            ((buffer[i * 8 + 6] as u64) <<  8) ^
-            ((buffer[i * 8 + 7] as u64)      );
-        k[i] = hash[i];
         state[i] = block[i] ^ k[i];
     }
 
-    for r in 1..(R + 1) /* [1, R] */ {
+    for r in 1..(R + 1) {
         for i in 0..8 {
             l[i] =
                 C0[((k[(0 + i) % 8] >> 56)       ) as usize] ^
