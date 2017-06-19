@@ -111,7 +111,7 @@ use blake2::{Blake2b, Digest};
 use std::fs;
 
 let mut file = fs::File::open(&path)?;
-let hash = Blake2b::digest_reader(&mut file);
+let hash = Blake2b::digest_reader(&mut file)?;
 println!("{:x}\t{}", hash, path);
 ```
 
