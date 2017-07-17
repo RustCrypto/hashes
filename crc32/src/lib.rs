@@ -1,6 +1,6 @@
-// //! The [MD5][1] hash function.
+// //! The [CRC32][1] hash function (ISO/IEC/IEEE 8802-3 standard).
 // //!
-// //! [1]: https://en.wikipedia.org/wiki/MD5
+// //! [1]: https://en.wikipedia.org/wiki/Cyclic_redundancy_check
 
 
 #![no_std]
@@ -23,7 +23,6 @@ mod consts;
 
 #[derive(Copy, Clone)]
 pub struct CRC32 {
-    length_bytes: u64,
     state: u32,
 }
 
@@ -31,7 +30,6 @@ pub struct CRC32 {
 impl Default for CRC32 {
     fn default() -> Self {
         CRC32 {
-            length_bytes: 0,
             state: 0,
         }
     }
@@ -52,7 +50,6 @@ impl CRC32 {
     #[inline]
     pub fn consume(&mut self, input: &[u8]) {
 
-        self.length_bytes += input.len() as u64;
         let mut crc = !self.state;
         let mut pos: u32;
 

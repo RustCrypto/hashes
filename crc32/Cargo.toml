@@ -14,13 +14,11 @@ byte-tools = "0.2"
 block-buffer = "0.3"
 digest = { version = "0.6", optional=true}
 generic-array = { version = "0.8", optional=true}
-# md5-asm = { version = "0.4", optional=true}
 
 [dev-dependencies]
 crypto-tests = "0.5"
 
 [features]
-# asm = ["md5-asm"]
 generic = ["generic-array", "digest"]
 default = ["generic"]
 
