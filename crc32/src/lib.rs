@@ -38,12 +38,7 @@ impl Default for CRC32 {
 }
 
 
-static POLY: u32 = 0xedb88320;
-
-
-
 impl CRC32 {
-
     #[inline]
     fn finalize(self) -> u32 {
         self.state
@@ -62,12 +57,12 @@ impl CRC32 {
         let mut pos: u32;
 
         for &byte in input.iter() {
-           crc = (crc >> 8) ^ consts::TABLE[((crc ^ byte as u32) & 0xFF) as usize];
+            pos = (crc ^ byte as u32) & 0xFF;
+            crc = (crc >> 8) ^ consts::TABLE_CRC32[pos as usize];
         }
 
         self.state = !crc;
     }
-
 }
 
 
