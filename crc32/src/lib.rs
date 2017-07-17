@@ -3,7 +3,7 @@
 // //! [1]: https://en.wikipedia.org/wiki/MD5
 
 
-// #![no_std]
+#![no_std]
 extern crate byte_tools;
 #[cfg(feature = "generic")]
 extern crate generic_array;
