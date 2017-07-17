@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "blake2",
+    "crc32",
     "gost94",
     "groestl",
     "md2",
