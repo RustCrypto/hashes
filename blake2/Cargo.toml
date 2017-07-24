@@ -1,7 +1,7 @@
 [package]
 name = "blake2"
-version = "0.6.0"
-authors = ["The Rust-Crypto Project Developers"]
+version = "0.6.1"
+authors = ["RustCrypto Developers"]
 license = "MIT/Apache-2.0"
 description = "BLAKE2 hash functions"
 documentation = "https://docs.rs/blake2"

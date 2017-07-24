@@ -219,6 +219,7 @@ macro_rules! blake2_impl {
             fn fixed_result(self) -> Output { self.finalize_with_flag(0) }
         }
 
+        /*
         impl digest::VariableOutput for $state {
             fn variable_result(self, buf: &mut [u8])
                                     -> Result<&[u8], digest::InvalidLength>
@@ -233,6 +234,7 @@ macro_rules! blake2_impl {
                 }
             }
         }
+        */
 
         impl Mac for $state {
             type OutputSize = $bytes;
