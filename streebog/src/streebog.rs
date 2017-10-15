@@ -143,7 +143,7 @@ impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
         let self_state = &mut self.state;
         let pos = self.buffer.position();
 
-        let mut block = self.buffer.pad_with::<ZeroPadding>();
+        let block = self.buffer.pad_with::<ZeroPadding>();
         block[pos] = 1;
         self_state.process_block(block, pos as u8);
 
