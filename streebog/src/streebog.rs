@@ -47,9 +47,9 @@ impl StreebogState {
 
         lps(&mut key, n);
 
-        for i in 0..12 {
+        for item in C.iter().take(12) {
             lps(&mut block, &key);
-            lps(&mut key, Block::from_slice(&C[i]));
+            lps(&mut key, Block::from_slice(item));
         }
 
         for i in 0..64 {
@@ -68,7 +68,7 @@ impl StreebogState {
     }
 
     fn update_n(&mut self, mut l: u8) {
-        let res = (self.n[0] as u16) + ((l as u16) << 3);
+        let res = u16::from(self.n[0]) + (u16::from(l) << 3);
         self.n[0] = (res & 0xff) as u8;
         l = (res >> 8) as u8;
 

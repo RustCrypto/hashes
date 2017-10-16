@@ -3,6 +3,8 @@
 //!
 //! It was created using `gen_table` function
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
+
 pub const SHUFFLED_LIN_TABLE: [[u64; 256]; 8] = [
     [
         0xD01F715B5C7EF8E6, 0x16FA240980778325, 0xA8A42E857EE049C8, 0x6AC1068FA186465B,
