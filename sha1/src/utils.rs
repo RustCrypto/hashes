@@ -72,7 +72,7 @@ fn sha1rnds4c(abcd: u32x4, msg: u32x4) -> u32x4 {
     let mut e = 0u32;
 
     macro_rules! bool3ary_202 {
-        ($a:expr, $b:expr, $c:expr) => (($c ^ ($a & ($b ^ $c))))
+        ($a:expr, $b:expr, $c:expr) => ($c ^ ($a & ($b ^ $c)))
     } // Choose, MD5F, SHA1C
 
     e = e.wrapping_add(a.rotate_left(5))
@@ -105,7 +105,7 @@ fn sha1rnds4p(abcd: u32x4, msg: u32x4) -> u32x4 {
     let mut e = 0u32;
 
     macro_rules! bool3ary_150 {
-        ($a:expr, $b:expr, $c:expr) => (($a ^ $b ^ $c))
+        ($a:expr, $b:expr, $c:expr) => ($a ^ $b ^ $c)
     } // Parity, XOR, MD5H, SHA1P
 
     e = e.wrapping_add(a.rotate_left(5))
