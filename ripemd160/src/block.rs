@@ -45,27 +45,27 @@ macro_rules! process_block(
 
         // Round 1
         $( round!(bb[$f0], bb[$f1], bb[$f2], bb[$f3], bb[$f4],
-                  $data[$data_index1], $bits1, 0x00000000,
+                  $data[$data_index1], $bits1, 0x0000_0000,
                   bb[$f1] ^ bb[$f2] ^ bb[$f3]); )*
 
         // Round 2
         $( round!(bb[$g0], bb[$g1], bb[$g2], bb[$g3], bb[$g4],
-                  $data[$data_index2], $bits2, 0x5a827999,
+                  $data[$data_index2], $bits2, 0x5a82_7999,
                   (bb[$g1] & bb[$g2]) | (!bb[$g1] & bb[$g3])); )*
 
         // Round 3
         $( round!(bb[$h0], bb[$h1], bb[$h2], bb[$h3], bb[$h4],
-                  $data[$data_index3], $bits3, 0x6ed9eba1,
+                  $data[$data_index3], $bits3, 0x6ed9_eba1,
                   (bb[$h1] | !bb[$h2]) ^ bb[$h3]); )*
 
         // Round 4
         $( round!(bb[$i0], bb[$i1], bb[$i2], bb[$i3], bb[$i4],
-                  $data[$data_index4], $bits4, 0x8f1bbcdc,
+                  $data[$data_index4], $bits4, 0x8f1b_bcdc,
                   (bb[$i1] & bb[$i3]) | (bb[$i2] & !bb[$i3])); )*
 
         // Round 5
         $( round!(bb[$j0], bb[$j1], bb[$j2], bb[$j3], bb[$j4],
-                  $data[$data_index5], $bits5, 0xa953fd4e,
+                  $data[$data_index5], $bits5, 0xa953_fd4e,
                   bb[$j1] ^ (bb[$j2] | !bb[$j3])); )*
 
         // Parallel rounds: these are the same as the previous five
@@ -75,27 +75,27 @@ macro_rules! process_block(
 
         // Parallel Round 1
         $( round!(bbb[$pj0], bbb[$pj1], bbb[$pj2], bbb[$pj3], bbb[$pj4],
-                  $data[$pdata_index1], $pbits1, 0x50a28be6,
+                  $data[$pdata_index1], $pbits1, 0x50a2_8be6,
                   bbb[$pj1] ^ (bbb[$pj2] | !bbb[$pj3])); )*
 
         // Parallel Round 2
         $( round!(bbb[$pi0], bbb[$pi1], bbb[$pi2], bbb[$pi3], bbb[$pi4],
-                  $data[$pdata_index2], $pbits2, 0x5c4dd124,
+                  $data[$pdata_index2], $pbits2, 0x5c4d_d124,
                   (bbb[$pi1] & bbb[$pi3]) | (bbb[$pi2] & !bbb[$pi3])); )*
 
         // Parallel Round 3
         $( round!(bbb[$ph0], bbb[$ph1], bbb[$ph2], bbb[$ph3], bbb[$ph4],
-                  $data[$pdata_index3], $pbits3, 0x6d703ef3,
+                  $data[$pdata_index3], $pbits3, 0x6d70_3ef3,
                   (bbb[$ph1] | !bbb[$ph2]) ^ bbb[$ph3]); )*
 
         // Parallel Round 4
         $( round!(bbb[$pg0], bbb[$pg1], bbb[$pg2], bbb[$pg3], bbb[$pg4],
-                  $data[$pdata_index4], $pbits4, 0x7a6d76e9,
+                  $data[$pdata_index4], $pbits4, 0x7a6d_76e9,
                   (bbb[$pg1] & bbb[$pg2]) | (!bbb[$pg1] & bbb[$pg3])); )*
 
         // Parallel Round 5
         $( round!(bbb[$pf0], bbb[$pf1], bbb[$pf2], bbb[$pf3], bbb[$pf4],
-                  $data[$pdata_index5], $pbits5, 0x00000000,
+                  $data[$pdata_index5], $pbits5, 0x0000_0000,
                   bbb[$pf1] ^ bbb[$pf2] ^ bbb[$pf3]); )*
 
         // Combine results
