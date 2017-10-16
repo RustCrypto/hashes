@@ -151,11 +151,8 @@ impl<BlockSize> GroestlState<BlockSize>
         for i in 0..matrix.rows() {
             for j in 0..matrix.cols() {
                 matrix[i][j] ^= c[i * 16 + j];
-                if c[0] == 0x00 && i == 0 {
-                    matrix[i][j] ^= round;
-                } else if c[0] == 0xff && i == 7 {
-                    matrix[i][j] ^= round;
-                }
+
+                matrix[i][j] ^= round;
             }
         }
     }
