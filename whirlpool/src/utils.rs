@@ -16,7 +16,7 @@ pub fn compress(hash: &mut [u64; 8], buffer: &GenericArray<u8, BlockSize>) {
         state[i] = block[i] ^ k[i];
     }
 
-    for r in 1..(R + 1) {
+    for item in RC.iter().take(R + 1) {
         for i in 0..8 {
             l[i] =
                 C0[((k[(0 + i) % 8] >> 56)       ) as usize] ^
@@ -27,7 +27,7 @@ pub fn compress(hash: &mut [u64; 8], buffer: &GenericArray<u8, BlockSize>) {
                 C5[((k[(3 + i) % 8] >> 16) & 0xff) as usize] ^
                 C6[((k[(2 + i) % 8] >>  8) & 0xff) as usize] ^
                 C7[((k[(1 + i) % 8]      ) & 0xff) as usize] ^
-                if i == 0 { RC[r] } else { 0 };
+                if i == 0 { *item } else { 0 };
         }
         k = l;
         for i in 0..8 {

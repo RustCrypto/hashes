@@ -73,10 +73,10 @@ impl Whirlpool {
 
         let mut carry = false;
         for i in 0..32 {
-            let mut x = self.bit_length[self.bit_length.len() - i - 1] as u16;
+            let mut x = u16::from(self.bit_length[self.bit_length.len() - i - 1]);
 
             if i < len_bits.len() {
-                x += len_bits[len_bits.len() - i - 1] as u16;
+                x += u16::from(len_bits[len_bits.len() - i - 1]);
             } else if !carry {
                 break;
             }

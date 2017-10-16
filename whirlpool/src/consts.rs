@@ -1,5 +1,6 @@
 pub static R: usize = 10;
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static RC: [u64; 11 /* R + 1 */] = [
     0x0000000000000000,
     0x1823c6e887b8014f,
@@ -14,6 +15,7 @@ pub static RC: [u64; 11 /* R + 1 */] = [
     0xca2dbf07ad5a8333,
 ];
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static C0: [u64; 256] = [
     0x18186018c07830d8, 0x23238c2305af4626, 0xc6c63fc67ef991b8, 0xe8e887e8136fcdfb,
     0x878726874ca113cb, 0xb8b8dab8a9626d11, 0x0101040108050209, 0x4f4f214f426e9e0d,
@@ -81,6 +83,7 @@ pub static C0: [u64; 256] = [
     0x2828a0285d885075, 0x5c5c6d5cda31b886, 0xf8f8c7f8933fed6b, 0x8686228644a411c2,
 ];
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static C1: [u64; 256] = [
     0xd818186018c07830, 0x2623238c2305af46, 0xb8c6c63fc67ef991, 0xfbe8e887e8136fcd,
     0xcb878726874ca113, 0x11b8b8dab8a9626d, 0x0901010401080502, 0x0d4f4f214f426e9e,
@@ -148,6 +151,7 @@ pub static C1: [u64; 256] = [
     0x752828a0285d8850, 0x865c5c6d5cda31b8, 0x6bf8f8c7f8933fed, 0xc28686228644a411,
 ];
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static C2: [u64; 256] = [
     0x30d818186018c078, 0x462623238c2305af, 0x91b8c6c63fc67ef9, 0xcdfbe8e887e8136f,
     0x13cb878726874ca1, 0x6d11b8b8dab8a962, 0x0209010104010805, 0x9e0d4f4f214f426e,
@@ -215,6 +219,7 @@ pub static C2: [u64; 256] = [
     0x50752828a0285d88, 0xb8865c5c6d5cda31, 0xed6bf8f8c7f8933f, 0x11c28686228644a4,
 ];
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static C3: [u64; 256] = [
     0x7830d818186018c0, 0xaf462623238c2305, 0xf991b8c6c63fc67e, 0x6fcdfbe8e887e813,
     0xa113cb878726874c, 0x626d11b8b8dab8a9, 0x0502090101040108, 0x6e9e0d4f4f214f42,
@@ -282,6 +287,7 @@ pub static C3: [u64; 256] = [
     0x8850752828a0285d, 0x31b8865c5c6d5cda, 0x3fed6bf8f8c7f893, 0xa411c28686228644,
 ];
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static C4: [u64; 256] = [
     0xc07830d818186018, 0x05af462623238c23, 0x7ef991b8c6c63fc6, 0x136fcdfbe8e887e8,
     0x4ca113cb87872687, 0xa9626d11b8b8dab8, 0x0805020901010401, 0x426e9e0d4f4f214f,
@@ -349,6 +355,7 @@ pub static C4: [u64; 256] = [
     0x5d8850752828a028, 0xda31b8865c5c6d5c, 0x933fed6bf8f8c7f8, 0x44a411c286862286,
 ];
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static C5: [u64; 256] = [
     0x18c07830d8181860, 0x2305af462623238c, 0xc67ef991b8c6c63f, 0xe8136fcdfbe8e887,
     0x874ca113cb878726, 0xb8a9626d11b8b8da, 0x0108050209010104, 0x4f426e9e0d4f4f21,
@@ -416,6 +423,7 @@ pub static C5: [u64; 256] = [
     0x285d8850752828a0, 0x5cda31b8865c5c6d, 0xf8933fed6bf8f8c7, 0x8644a411c2868622,
 ];
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static C6: [u64; 256] = [
     0x6018c07830d81818, 0x8c2305af46262323, 0x3fc67ef991b8c6c6, 0x87e8136fcdfbe8e8,
     0x26874ca113cb8787, 0xdab8a9626d11b8b8, 0x0401080502090101, 0x214f426e9e0d4f4f,
@@ -483,6 +491,7 @@ pub static C6: [u64; 256] = [
     0xa0285d8850752828, 0x6d5cda31b8865c5c, 0xc7f8933fed6bf8f8, 0x228644a411c28686,
 ];
 
+#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static C7: [u64; 256] = [
     0x186018c07830d818, 0x238c2305af462623, 0xc63fc67ef991b8c6, 0xe887e8136fcdfbe8,
     0x8726874ca113cb87, 0xb8dab8a9626d11b8, 0x0104010805020901, 0x4f214f426e9e0d4f,
