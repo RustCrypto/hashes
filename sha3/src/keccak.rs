@@ -39,7 +39,7 @@ pub fn f(a: &mut [u64; PLEN]) {
     let mut x: usize;
     let mut y: usize;
 
-    for i in 0..24 {
+    for item in RC.iter().take(24) {
         // Theta
         FOR5!(x, 1, {
             b[x] = 0;
@@ -76,6 +76,6 @@ pub fn f(a: &mut [u64; PLEN]) {
         });
 
         // Iota
-        a[0] ^= RC[i];
+        a[0] ^= item;
     }
 }
