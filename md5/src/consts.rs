@@ -1,6 +1,7 @@
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
+
 /// Round constants
 #[cfg(not(feature = "asm"))]
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static RC: [u32; 64] = [
     // round 1
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
@@ -25,5 +26,4 @@ pub static RC: [u32; 64] = [
 ];
 
 /// Init state
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub const S0: [u32; 4] = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];

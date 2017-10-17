@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 
 use simd::u64x2;
 use simd::u32x4;
@@ -7,7 +8,6 @@ pub const STATE_LEN: usize = 8;
 pub const BLOCK_LEN: usize = 16;
 
 /// Constants necessary for SHA-256 family of digests.
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub const K32: [u32; 64] =
     [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
      0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -40,7 +40,6 @@ pub const K32X4: [u32x4; 16] = [u32x4(K32[3], K32[2], K32[1], K32[0]),
                                 u32x4(K32[63], K32[62], K32[61], K32[60])];
 
 /// Constants necessary for SHA-512 family of digests.
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub const K64: [u64; 80] = [0x428a2f98d728ae22,
                             0x7137449123ef65cd,
                             0xb5c0fbcfec4d3b2f,
@@ -164,29 +163,24 @@ pub const K64X2: [u64x2; 40] = [u64x2(K64[1], K64[0]),
                                 u64x2(K64[77], K64[76]),
                                 u64x2(K64[79], K64[78])];
 
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static H224: [u32; STATE_LEN] = [0xc1059ed8, 0x367cd507, 0x3070dd17,
                                      0xf70e5939, 0xffc00b31, 0x68581511,
                                      0x64f98fa7, 0xbefa4fa4];
 
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static H256: [u32; STATE_LEN] = [0x6a09e667, 0xbb67ae85, 0x3c6ef372,
                                      0xa54ff53a, 0x510e527f, 0x9b05688c,
                                      0x1f83d9ab, 0x5be0cd19];
 
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static H384: [u64; STATE_LEN] = [0xcbbb9d5dc1059ed8, 0x629a292a367cd507,
                                      0x9159015a3070dd17, 0x152fecd8f70e5939,
                                      0x67332667ffc00b31, 0x8eb44a8768581511,
                                      0xdb0c2e0d64f98fa7, 0x47b5481dbefa4fa4];
 
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static H512: [u64; STATE_LEN] = [0x6a09e667f3bcc908, 0xbb67ae8584caa73b,
                                      0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
                                      0x510e527fade682d1, 0x9b05688c2b3e6c1f,
                                      0x1f83d9abfb41bd6b, 0x5be0cd19137e2179];
 
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static H512_TRUNC_224: [u64; STATE_LEN] = [0x8c3d37c819544da2,
                                                0x73e1996689dcd4d6,
                                                0x1dfab7ae32ff9c82,
@@ -196,7 +190,6 @@ pub static H512_TRUNC_224: [u64; STATE_LEN] = [0x8c3d37c819544da2,
                                                0x3f9d85a86a1d36c8,
                                                0x1112e6ad91d692a1];
 
-#[cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 pub static H512_TRUNC_256: [u64; STATE_LEN] = [0x22312194fc2bf72c,
                                                0x9f555fa3c84c64c2,
                                                0x2393b86b6f53b151,
