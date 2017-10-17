@@ -76,6 +76,6 @@ pub fn f(a: &mut [u64; PLEN]) {
         });
 
         // Iota
-        a[0] ^= item;
+        a[0] ^= *item;
     }
 }
