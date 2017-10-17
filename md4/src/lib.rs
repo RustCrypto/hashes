@@ -38,29 +38,29 @@ pub struct Md4 {
 
 impl Md4State {
     fn process_block(&mut self, input: &Block) {
-        fn foo(x: u32, y: u32, z: u32) -> u32 {
+        fn f(x: u32, y: u32, z: u32) -> u32 {
             (x & y) | (!x & z)
         }
 
-        fn bar(x: u32, y: u32, z: u32) -> u32 {
+        fn g(x: u32, y: u32, z: u32) -> u32 {
             (x & y) | (x & z) | (y & z)
         }
 
-        fn baz(x: u32, y: u32, z: u32) -> u32 {
+        fn h(x: u32, y: u32, z: u32) -> u32 {
             x ^ y ^ z
         }
 
         fn op1(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-            a.wrapping_add(foo(b, c, d)).wrapping_add(k).rotate_left(s)
+            a.wrapping_add(f(b, c, d)).wrapping_add(k).rotate_left(s)
         }
 
         fn op2(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-            a.wrapping_add(bar(b, c, d)).wrapping_add(k)
+            a.wrapping_add(g(b, c, d)).wrapping_add(k)
                 .wrapping_add(0x5A82_7999).rotate_left(s)
         }
 
         fn op3(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-            a.wrapping_add(baz(b, c, d)).wrapping_add(k)
+            a.wrapping_add(h(b, c, d)).wrapping_add(k)
                 .wrapping_add(0x6ED9_EBA1).rotate_left(s)
         }
 
