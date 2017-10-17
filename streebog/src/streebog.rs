@@ -47,9 +47,9 @@ impl StreebogState {
 
         lps(&mut key, n);
 
-        for item in C.iter().take(12) {
+        for i in 0..12 {
             lps(&mut block, &key);
-            lps(&mut key, Block::from_slice(item));
+            lps(&mut key, Block::from_slice(&C[i]));
         }
 
         for i in 0..64 {
