@@ -15,10 +15,10 @@ pub type Block = GenericArray<u8, U32>;
 
 fn sbox(a: u32, s: &SBox) -> u32 {
     let mut v = 0;
-    for (i, item) in s.iter().enumerate().take(8) {
+    for i in 0..8 {
         let shft = 4*i;
         let k = ((a & (0b1111u32 << shft) ) >> shft) as usize;
-        v += u32::from(item[k]) << shft;
+        v += u32::from(s[i][k]) << shft;
     }
     v
 }
@@ -34,8 +34,8 @@ fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
     read_u32v_le(&mut k, &key);
 
     for _ in 0..3 {
-        for item in k.iter().take(8) {
-            let t = b ^ g(a, *item, sbox);
+        for i in 0..8 {
+            let t = b ^ g(a, k[i], sbox);
             b = a;
             a = t;
         }
