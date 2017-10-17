@@ -2,6 +2,9 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD2_(cryptography)
 
+// Range loops are preferred for reading simplicity
+#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
+
 #![no_std]
 extern crate byte_tools;
 extern crate digest;

@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
+
 use simd::u64x2;
 use consts::{BLOCK_LEN, K64X2};
 use byte_tools::{read_u64v_be};

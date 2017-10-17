@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(identity_op, needless_range_loop, double_parens))]
+
 use generic_array::GenericArray;
 use super::BlockSize;
 use consts::*;

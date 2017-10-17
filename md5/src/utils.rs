@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(inline_always, many_single_char_names))]
+
 use consts::RC;
 use byte_tools::read_u32v_le;
 

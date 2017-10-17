@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
+
 use consts::{BLOCK_LEN, K0, K1, K2, K3};
 use byte_tools::read_u32v_be;
 use simd::u32x4;

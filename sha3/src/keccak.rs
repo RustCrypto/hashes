@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop, many_single_char_names))]
+
 use consts::{PLEN, RC, RHO, PI};
 
 macro_rules! REPEAT4 {

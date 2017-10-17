@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop, inline_always))]
+
 use digest;
 use block_buffer::{BlockBuffer, ZeroPadding};
 use generic_array::typenum::{Unsigned, U64};

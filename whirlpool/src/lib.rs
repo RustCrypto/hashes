@@ -20,6 +20,7 @@
 //! hasher.input(b"Hello Whirlpool");
 //! let result = hasher.result();
 //! ```
+#![cfg_attr(feature = "cargo-clippy", allow(identity_op, double_parens))]
 
 #![no_std]
 extern crate generic_array;
