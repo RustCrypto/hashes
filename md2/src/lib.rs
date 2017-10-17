@@ -36,9 +36,9 @@ pub struct Md2 {
 impl Md2State {
     fn process_block(&mut self, input: &Block) {
         // Update state
-        for (i, item) in input.iter().enumerate().take(16) {
-            self.x[16 + i] = *item;
-            self.x[32 + i] = self.x[16 + i] ^ self.x[i];
+        for j in 0..16 {
+            self.x[16 + j] = input[j];
+            self.x[32 + j] = self.x[16 + j] ^ self.x[j];
         }
 
         let mut t = 0u8;
@@ -52,9 +52,9 @@ impl Md2State {
 
         // Update checksum
         let mut l = self.checksum[15];
-        for (k, item) in input.iter().enumerate().take(16) {
-            self.checksum[k] ^= consts::S[(item ^ l) as usize];
-            l = self.checksum[k];
+        for j in 0..16 {
+            self.checksum[j] ^= consts::S[(input[j] ^ l) as usize];
+            l = self.checksum[j];
         }
     }
 }
