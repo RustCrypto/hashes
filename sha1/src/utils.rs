@@ -63,7 +63,7 @@ fn sha1_digest_round_x4(abcd: u32x4, work: u32x4, i: i8) -> u32x4 {
         1 => sha1rnds4p(abcd, work + K1V),
         2 => sha1rnds4m(abcd, work + K2V),
         3 => sha1rnds4p(abcd, work + K3V),
-        _ => panic!("unknown icosaround index"),
+        _ => unreachable!("unknown icosaround index"),
     }
 }
 
