@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
+
 pub const RC: [u64; 24] = [
     0x0000000000000001,
     0x0000000000008082,

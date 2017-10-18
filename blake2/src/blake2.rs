@@ -71,7 +71,7 @@ macro_rules! blake2_impl {
                 let kk = k.len();
                 assert!(kk <= $bytes::to_usize());
 
-                let p0 = 0x01010000 ^ ((kk as $word) << 8) ^
+                let p0 = 0x0101_0000 ^ ((kk as $word) << 8) ^
                     ($bytes::to_u64() as $word);
                 let mut state = $state {
                     m: [0; 16],

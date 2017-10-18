@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
+
 pub const STATE_LEN: usize = 5;
 
 #[cfg(not(feature = "asm"))]

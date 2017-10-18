@@ -17,7 +17,7 @@ use generic_array::GenericArray;
 use generic_array::typenum::{U16, U64};
 
 // initial values for Md4State
-const S: u32x4 = u32x4(0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476);
+const S: u32x4 = u32x4(0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476);
 
 type BlockSize = U64;
 type Block = GenericArray<u8, U64>;
@@ -56,12 +56,12 @@ impl Md4State {
 
         fn op2(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
             a.wrapping_add(g(b, c, d)).wrapping_add(k)
-                .wrapping_add(0x5a827999).rotate_left(s)
+                .wrapping_add(0x5A82_7999).rotate_left(s)
         }
 
         fn op3(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
             a.wrapping_add(h(b, c, d)).wrapping_add(k)
-                .wrapping_add(0x6ED9EBA1).rotate_left(s)
+                .wrapping_add(0x6ED9_EBA1).rotate_left(s)
         }
 
         let mut a = self.s.0;
@@ -74,7 +74,7 @@ impl Md4State {
         read_u32v_le(&mut data, input);
 
         // round 1
-        for &i in [0, 4, 8, 12].iter() {
+        for &i in &[0, 4, 8, 12] {
             a = op1(a, b, c, d, data[i], 3);
             d = op1(d, a, b, c, data[i + 1], 7);
             c = op1(c, d, a, b, data[i + 2], 11);
@@ -90,7 +90,7 @@ impl Md4State {
         }
 
         // round 3
-        for &i in [0, 2, 1, 3].iter() {
+        for &i in &[0, 2, 1, 3] {
             a = op3(a, b, c, d, data[i], 3);
             d = op3(d, a, b, c, data[i + 8], 9);
             c = op3(c, d, a, b, data[i + 4], 11);

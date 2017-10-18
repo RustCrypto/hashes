@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop, inline_always))]
+
 use digest;
 use block_buffer::{BlockBuffer, ZeroPadding};
 use generic_array::typenum::{Unsigned, U64};
@@ -68,7 +70,7 @@ impl StreebogState {
     }
 
     fn update_n(&mut self, mut l: u8) {
-        let res = (self.n[0] as u16) + ((l as u16) << 3);
+        let res = u16::from(self.n[0]) + (u16::from(l) << 3);
         self.n[0] = (res & 0xff) as u8;
         l = (res >> 8) as u8;
 
@@ -143,7 +145,7 @@ impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
         let self_state = &mut self.state;
         let pos = self.buffer.position();
 
-        let mut block = self.buffer.pad_with::<ZeroPadding>();
+        let block = self.buffer.pad_with::<ZeroPadding>();
         block[pos] = 1;
         self_state.process_block(block, pos as u8);
 

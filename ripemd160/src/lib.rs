@@ -37,7 +37,7 @@ impl Ripemd160 {
 impl Default for Ripemd160 {
     fn default() -> Self {
         Ripemd160 {
-            h: [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0],
+            h: [0x6745_2301, 0xefcd_ab89, 0x98ba_dcfe, 0x1032_5476, 0xc3d2_e1f0],
             len: 0,
             buffer: Default::default(),
         }

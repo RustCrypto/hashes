@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
+
 /// Round constants
 #[cfg(not(feature = "asm"))]
 pub static RC: [u32; 64] = [

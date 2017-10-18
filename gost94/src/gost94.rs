@@ -18,7 +18,7 @@ fn sbox(a: u32, s: &SBox) -> u32 {
     for i in 0..8 {
         let shft = 4*i;
         let k = ((a & (0b1111u32 << shft) ) >> shft) as usize;
-        v += (s[i][k] as u32) << shft;
+        v += u32::from(s[i][k]) << shft;
     }
     v
 }

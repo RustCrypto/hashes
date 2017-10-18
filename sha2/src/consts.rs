@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
 
 use simd::u64x2;
 use simd::u32x4;

@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
+
 use simd::u32x4;
 use consts::{BLOCK_LEN, K32X4};
 use byte_tools::{read_u32v_be};
@@ -35,7 +37,7 @@ fn sha256msg1(v0: u32x4, v1: u32x4) -> u32x4 {
 fn sha256msg2(v4: u32x4, v3: u32x4) -> u32x4 {
 
     macro_rules! sigma1 {
-        ($a:expr) => (($a.rotate_right(17) ^ $a.rotate_right(19) ^ ($a >> 10)))
+        ($a:expr) => ($a.rotate_right(17) ^ $a.rotate_right(19) ^ ($a >> 10))
     }
 
     let u32x4(x3, x2, x1, x0) = v4;
@@ -66,7 +68,7 @@ fn sha256_digest_round_x2(cdgh: u32x4, abef: u32x4, wk: u32x4) -> u32x4 {
         ($a:expr) => (($a.rotate_right(6) ^ $a.rotate_right(11) ^ $a.rotate_right(25)))
     }
     macro_rules! bool3ary_202 {
-        ($a:expr, $b:expr, $c:expr) => (($c ^ ($a & ($b ^ $c))))
+        ($a:expr, $b:expr, $c:expr) => ($c ^ ($a & ($b ^ $c)))
     } // Choose, MD5F, SHA1C
     macro_rules! bool3ary_232 {
         ($a:expr, $b:expr, $c:expr) => (($a & $b) ^ ($a & $c) ^ ($b & $c))

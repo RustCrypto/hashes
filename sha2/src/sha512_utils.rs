@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
+
 use simd::u64x2;
 use consts::{BLOCK_LEN, K64X2};
 use byte_tools::{read_u64v_be};
@@ -48,7 +50,7 @@ pub fn sha512_digest_round(ae: u64x2, bf: u64x2, cg: u64x2, dh: u64x2,
         ($a:expr) => (($a.rotate_right(14) ^ $a.rotate_right(18) ^ $a.rotate_right(41)))
     }
     macro_rules! bool3ary_202 {
-        ($a:expr, $b:expr, $c:expr) => (($c ^ ($a & ($b ^ $c))))
+        ($a:expr, $b:expr, $c:expr) => ($c ^ ($a & ($b ^ $c)))
     } // Choose, MD5F, SHA1C
     macro_rules! bool3ary_232 {
         ($a:expr, $b:expr, $c:expr) => (($a & $b) ^ ($a & $c) ^ ($b & $c))

@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
+
 pub static R: usize = 10;
 
 pub static RC: [u64; 11 /* R + 1 */] = [
