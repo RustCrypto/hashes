@@ -6,35 +6,37 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
 
 #![no_std]
-extern crate byte_tools;
+#[macro_use]
 extern crate digest;
 extern crate block_buffer;
-extern crate generic_array;
 
 pub use digest::Digest;
-use byte_tools::copy_memory;
-use block_buffer::{BlockBuffer, Pkcs7};
-use generic_array::GenericArray;
-use generic_array::typenum::{U16, U48};
+use block_buffer::{BlockBuffer128, Pkcs7};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::U16;
 
 mod consts;
 
-type BlockSize = U16;
-type Block = GenericArray<u8, U16>;
+type Block = [u8; 16];
 
-#[derive(Copy, Clone, Default)]
+#[derive(Clone)]
 struct Md2State {
-    x: GenericArray<u8, U48>,
-    checksum: GenericArray<u8, U16>,
+    x: [u8; 48],
+    checksum: [u8; 16],
+}
+
+impl Default for Md2State {
+    fn default() -> Self {
+        Self { x: [0; 48], checksum: [0; 16] }
+    }
 }
 
 /// The MD2 hasher
-#[derive(Copy, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct Md2 {
-    buffer: BlockBuffer<BlockSize>,
+    buffer: BlockBuffer128,
     state: Md2State,
 }
-
 
 impl Md2State {
     fn process_block(&mut self, input: &Block) {
@@ -77,7 +79,7 @@ impl Md2 {
 
 
 impl digest::BlockInput for Md2 {
-    type BlockSize = BlockSize;
+    type BlockSize = U16;
 }
 
 impl digest::Input for Md2 {
@@ -95,8 +97,8 @@ impl digest::FixedOutput for Md2 {
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
-        let mut out = GenericArray::default();
-        copy_memory(&self.state.x[0..16], &mut out);
-        out
+        GenericArray::clone_from_slice(&self.state.x[0..16])
     }
 }
+
+impl_opaque_debug!(Md2);
