@@ -13,9 +13,7 @@ use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U20, U64};
 
 mod block;
-use block::{process_msg_block, DIGEST_BUF_LEN};
-
-type Block = [u8; 64];
+use block::{process_msg_block, DIGEST_BUF_LEN, H0};
 
 /// Structure representing the state of a Ripemd160 computation
 #[derive(Clone)]
@@ -36,7 +34,7 @@ impl Ripemd160 {
 impl Default for Ripemd160 {
     fn default() -> Self {
         Ripemd160 {
-            h: [0x6745_2301, 0xefcd_ab89, 0x98ba_dcfe, 0x1032_5476, 0xc3d2_e1f0],
+            h: H0,
             len: 0,
             buffer: Default::default(),
         }

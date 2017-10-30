@@ -1,19 +1,18 @@
 use byte_tools::{read_u32v_le};
-use ::Block;
 
 pub const DIGEST_BUF_LEN: usize = 5;
 pub const WORK_BUF_LEN: usize = 16;
 
-fn circular_shift(bits: u32, word: u32) -> u32 {
-    word << bits as usize | word >> (32u32 - bits) as usize
-}
+pub const H0: [u32; DIGEST_BUF_LEN] = [
+    0x6745_2301, 0xefcd_ab89, 0x98ba_dcfe, 0x1032_5476, 0xc3d2_e1f0
+];
 
 macro_rules! round(
     ($a:expr, $b:expr, $c:expr, $d:expr, $e:expr,
      $x:expr, $bits:expr, $add:expr, $round:expr) => ({
         $a = $a.wrapping_add($round).wrapping_add($x).wrapping_add($add);
-        $a = circular_shift($bits, $a).wrapping_add($e);
-        $c = circular_shift(10, $c);
+        $a = $a.rotate_left($bits).wrapping_add($e);
+        $c = $c.rotate_left(10);
     });
 );
 
@@ -108,7 +107,7 @@ macro_rules! process_block(
     });
 );
 
-pub fn process_msg_block(h: &mut [u32; DIGEST_BUF_LEN], data: &Block, ) {
+pub fn process_msg_block(h: &mut [u32; DIGEST_BUF_LEN], data: &[u8; 64]) {
     let mut w = [0u32; WORK_BUF_LEN];
     read_u32v_le(&mut w[0..16], data);
     process_block!(h, w[..],
