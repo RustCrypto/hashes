@@ -1,17 +1,15 @@
 #![cfg_attr(feature = "cargo-clippy", allow(identity_op, needless_range_loop, double_parens))]
 
-use generic_array::GenericArray;
-use super::BlockSize;
 use consts::*;
 use byte_tools::read_u64v_be;
 
-pub fn compress(hash: &mut [u64; 8], buffer: &GenericArray<u8, BlockSize>) {
+pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
     let mut k = [0u64; 8];
     let mut block = [0u64; 8];
     let mut state = [0u64; 8];
     let mut l = [0u64; 8];
 
-    read_u64v_be(&mut block, buffer.as_slice());
+    read_u64v_be(&mut block, &buffer[..]);
     k.copy_from_slice(hash);
 
     for i in 0..8 {

@@ -23,7 +23,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(identity_op, double_parens))]
 
 #![no_std]
-extern crate generic_array;
+#[macro_use]
 extern crate digest;
 extern crate block_buffer;
 #[cfg(not(feature = "asm"))]
@@ -38,9 +38,9 @@ use utils::compress;
 pub use digest::Digest;
 #[cfg(not(feature = "asm"))]
 use byte_tools::{write_u64v_be, zero};
-use block_buffer::{BlockBuffer, ZeroPadding};
-use generic_array::GenericArray;
-use generic_array::typenum::U64;
+use block_buffer::{BlockBuffer512, ZeroPadding};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::U64;
 
 #[cfg(not(feature = "asm"))]
 mod consts;
@@ -51,11 +51,11 @@ type BlockSize = U64;
 #[derive(Copy, Clone, Default)]
 pub struct Whirlpool {
     bit_length: [u8; 32],
-    buffer: BlockBuffer<BlockSize>,
+    buffer: BlockBuffer512,
     #[cfg(not(feature = "asm"))]
     hash: [u64; 8],
     #[cfg(feature = "asm")]
-    hash: GenericArray<u8, BlockSize>,
+    hash: [u8; 64],
 }
 
 impl Whirlpool {
@@ -139,3 +139,5 @@ impl digest::FixedOutput for Whirlpool {
         self.hash
     }
 }
+
+impl_opaque_debug!(Whirlpool);
