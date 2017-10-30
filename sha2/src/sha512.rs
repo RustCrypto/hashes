@@ -1,7 +1,7 @@
 use digest;
-use generic_array::GenericArray;
-use block_buffer::BlockBuffer;
-use generic_array::typenum::{U28, U32, U48, U64, U128};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::{U28, U32, U48, U64, U128};
+use block_buffer::BlockBuffer1024;
 use byte_tools::{write_u64v_be, write_u32_be};
 
 use consts::{STATE_LEN, H384, H512, H512_TRUNC_224, H512_TRUNC_256};
@@ -12,11 +12,11 @@ use sha512_utils::compress512;
 use sha2_asm::compress512;
 
 type BlockSize = U128;
-pub type Block = GenericArray<u8, BlockSize>;
+pub type Block = [u8; 128];
 
 /// A structure that represents that state of a digest computation for the
 /// SHA-2 512 family of digest functions
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 struct Engine512State {
     h: [u64; 8],
 }
@@ -31,10 +31,10 @@ impl Engine512State {
 
 /// A structure that keeps track of the state of the Sha-512 operation and
 /// contains the logic necessary to perform the final calculations.
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 struct Engine512 {
     len: (u64, u64), // TODO: replace with u128 on stabilization
-    buffer: BlockBuffer<BlockSize>,
+    buffer: BlockBuffer1024,
     state: Engine512State,
 }
 
@@ -66,7 +66,7 @@ impl Engine512 {
 
 
 /// The SHA-512 hash algorithm with the SHA-512 initial hash value.
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Sha512 {
     engine: Engine512,
 }
@@ -90,7 +90,7 @@ impl digest::FixedOutput for Sha512 {
         self.engine.finish();
 
         let mut out = GenericArray::default();
-        write_u64v_be(&mut out, &self.engine.state.h[..]);
+        write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..]);
         out
     }
 }
@@ -99,7 +99,7 @@ impl digest::FixedOutput for Sha512 {
 
 /// The SHA-512 hash algorithm with the SHA-384 initial hash value. The result
 /// is truncated to 384 bits.
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Sha384 {
     engine: Engine512,
 }
@@ -123,7 +123,7 @@ impl digest::FixedOutput for Sha384 {
         self.engine.finish();
 
         let mut out = GenericArray::default();
-        write_u64v_be(&mut out, &self.engine.state.h[..6]);
+        write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..6]);
         out
     }
 }
@@ -132,7 +132,7 @@ impl digest::FixedOutput for Sha384 {
 
 /// The SHA-512 hash algorithm with the SHA-512/256 initial hash value. The
 /// result is truncated to 256 bits.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Sha512Trunc256 {
     engine: Engine512,
 }
@@ -158,14 +158,14 @@ impl digest::FixedOutput for Sha512Trunc256 {
         self.engine.finish();
 
         let mut out = GenericArray::default();
-        write_u64v_be(&mut out, &self.engine.state.h[..4]);
+        write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..4]);
         out
     }
 }
 
 /// The SHA-512 hash algorithm with the SHA-512/224 initial hash value.
 /// The result is truncated to 224 bits.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Sha512Trunc224 {
     engine: Engine512,
 }
@@ -196,3 +196,8 @@ impl digest::FixedOutput for Sha512Trunc224 {
         out
     }
 }
+
+impl_opaque_debug!(Sha384);
+impl_opaque_debug!(Sha512);
+impl_opaque_debug!(Sha512Trunc224);
+impl_opaque_debug!(Sha512Trunc256);
