@@ -119,10 +119,9 @@ impl digest::BlockInput for Md4 {
 impl digest::Input for Md4 {
     fn process(&mut self, input: &[u8]) {
         // 2^64 - ie: integer overflow is OK.
-        self.length_bytes += input.len() as u64;
+        self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &Block| { self_state.process_block(d);}
-        );
+        self.buffer.input(input, |d: &Block| self_state.process_block(d));
     }
 }
 
