@@ -1,6 +1,6 @@
 [package]
 name = "md-5"
-version = "0.5.2"
+version = "0.6.0"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "MD5 hash function"
@@ -9,20 +9,20 @@ repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md5", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
+[lib]
+name = "md5"
+
 [dependencies]
+digest = "0.7"
 byte-tools = "0.2"
 block-buffer = "0.3"
-digest = { version = "0.6", optional=true}
-generic-array = { version = "0.8", optional=true}
 md5-asm = { version = "0.4", optional=true}
 
 [dev-dependencies]
-crypto-tests = "0.5"
+crypto-tests = "0.6"
 
 [features]
 asm = ["md5-asm"]
-generic = ["generic-array", "digest"]
-default = ["generic"]
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

@@ -7,9 +7,7 @@ extern crate byte_tools;
 extern crate block_buffer;
 #[cfg(feature = "asm")]
 extern crate md5_asm as utils;
-#[cfg(feature = "generic")]
-extern crate generic_array;
-#[cfg(feature = "generic")]
+#[macro_use]
 extern crate digest;
 
 #[cfg(not(feature = "asm"))]
@@ -20,12 +18,9 @@ use utils::compress;
 use byte_tools::write_u32v_le;
 use block_buffer::BlockBuffer512;
 
-#[cfg(feature = "generic")]
 pub use digest::Digest;
-#[cfg(feature = "generic")]
-use generic_array::GenericArray;
-#[cfg(feature = "generic")]
-use generic_array::typenum::{U16, U64};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::{U16, U64};
 
 mod consts;
 
@@ -75,12 +70,10 @@ impl Md5 {
     }
 }
 
-#[cfg(feature = "generic")]
 impl digest::BlockInput for Md5 {
     type BlockSize = U64;
 }
 
-#[cfg(feature = "generic")]
 impl digest::Input for Md5 {
     #[inline]
     fn process(&mut self, input: &[u8]) {
@@ -88,7 +81,6 @@ impl digest::Input for Md5 {
     }
 }
 
-#[cfg(feature = "generic")]
 impl digest::FixedOutput for Md5 {
     type OutputSize = U16;
 
@@ -99,3 +91,5 @@ impl digest::FixedOutput for Md5 {
         out
     }
 }
+
+impl_opaque_debug!(Md5);
