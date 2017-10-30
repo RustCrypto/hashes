@@ -33,17 +33,20 @@
 #![no_std]
 extern crate byte_tools;
 extern crate digest;
-extern crate generic_array;
 extern crate block_buffer;
 
 pub use digest::Digest;
-use block_buffer::{BlockBuffer, Padding};
-use generic_array::{GenericArray, ArrayLength};
-use generic_array::typenum::{U28, U32, U48, U64, U72, U104, U136, U144, U168};
+use block_buffer::{
+    BlockBuffer576, BlockBuffer832, BlockBuffer1152, BlockBuffer1088,
+    BlockBuffer1344,
+};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::{
+    U28, U32, U48, U64, U72, U104, U136, U144, U168, Unsigned,
+};
 
 use byte_tools::{write_u64v_le, read_u64v_le};
 use core::mem::transmute;
-use core::marker::PhantomData;
 use core::cmp::min;
 
 mod keccak;
@@ -54,75 +57,32 @@ mod macros;
 
 use consts::PLEN;
 
-/// Generic SHA-3 hasher.
-#[derive(Copy, Clone, Default)]
-struct Sha3<Rate, P>
-    where Rate: ArrayLength<u8>, Rate::ArrayType: Copy,
-          P: Padding,
-{
+#[derive(Clone, Default)]
+struct Sha3State {
     state: [u64; PLEN],
-    buffer: BlockBuffer<Rate>,
-    pad: PhantomData<P>,
 }
 
-type Block<BlockSize> = GenericArray<u8, BlockSize>;
+impl Sha3State {
+    #[inline(always)]
+    fn absorb_block(&mut self, block: &[u8]) {
+        assert_eq!(block.len() % 8, 0);
+        let n = block.len()/8;
 
-fn absorb_block<R>(state: &mut [u64; PLEN], block: &Block<R>)
-    where R: ArrayLength<u8>
-{
-    let n = R::to_usize()/8;
-
-    let mut buf;
-    let buf: &[u64] = if cfg!(target_endian = "little") {
-        unsafe { transmute(block.as_slice()) }
-    } else if cfg!(target_endian = "big") {
-        buf = [0u64; 21];
-        let buf = &mut buf[..n];
-        read_u64v_le(buf, block.as_slice());
-        buf
-    } else { unreachable!() };
-
-    for (d, i) in state[..n].iter_mut().zip(buf) {
-        *d ^= *i;
-    }
-
-    keccak::f(state);
-}
-
-impl<Rate, P> Sha3<Rate, P>
-    where Rate: ArrayLength<u8>,
-          Rate::ArrayType: Copy, Rate: core::default::Default,
-          P: Padding,
-{
-
-    fn absorb(&mut self, input: &[u8]) {
-        let self_state = &mut self.state;
-        self.buffer.input(input, |d: &Block<Rate>| {
-            absorb_block(self_state, d);
-        });
-    }
-
-    fn rate(&self) -> usize {
-        Rate::to_usize()
-    }
-
-    fn apply_padding(&mut self) {
-        let buf = self.buffer.pad_with::<P>();
-        absorb_block(&mut self.state, buf);
-    }
-
-    fn readout(&self, out: &mut [u8]) {
-        let mut state_copy;
-        let state_ref: &[u8; PLEN*8] = if cfg!(target_endian = "little") {
-            unsafe { transmute(&self.state) }
+        let mut buf;
+        let buf: &[u64] = if cfg!(target_endian = "little") {
+            unsafe { transmute(block) }
         } else if cfg!(target_endian = "big") {
-            state_copy = [0u8; PLEN*8];
-            write_u64v_le(&mut state_copy, &self.state);
-            &state_copy
+            buf = [0u64; 21];
+            let buf = &mut buf[..n];
+            read_u64v_le(buf, block);
+            buf
         } else { unreachable!() };
 
-        let n = out.len();
-        out.copy_from_slice(&state_ref[..n]);
+        for (d, i) in self.state[..n].iter_mut().zip(buf) {
+            *d ^= *i;
+        }
+
+        keccak::f(&mut self.state);
     }
 }
 
@@ -191,15 +151,15 @@ impl digest::XofReader for Sha3XofReader {
     }
 }
 
-sha3_impl!(Keccak224, U28, U144, paddings::Keccak);
-sha3_impl!(Keccak256, U32, U136, paddings::Keccak);
-sha3_impl!(Keccak384, U48, U104, paddings::Keccak);
-sha3_impl!(Keccak512, U64, U72, paddings::Keccak);
+sha3_impl!(Keccak224, U28, U144, BlockBuffer1152, paddings::Keccak);
+sha3_impl!(Keccak256, U32, U136, BlockBuffer1088, paddings::Keccak);
+sha3_impl!(Keccak384, U48, U104, BlockBuffer832, paddings::Keccak);
+sha3_impl!(Keccak512, U64, U72, BlockBuffer576, paddings::Keccak);
 
-sha3_impl!(Sha3_224, U28, U144, paddings::Sha3);
-sha3_impl!(Sha3_256, U32, U136, paddings::Sha3);
-sha3_impl!(Sha3_384, U48, U104, paddings::Sha3);
-sha3_impl!(Sha3_512, U64, U72, paddings::Sha3);
+sha3_impl!(Sha3_224, U28, U144, BlockBuffer1152, paddings::Sha3);
+sha3_impl!(Sha3_256, U32, U136, BlockBuffer1088, paddings::Sha3);
+sha3_impl!(Sha3_384, U48, U104, BlockBuffer832, paddings::Sha3);
+sha3_impl!(Sha3_512, U64, U72, BlockBuffer576, paddings::Sha3);
 
-shake_impl!(Shake128, U168, paddings::Shake);
-shake_impl!(Shake256, U136, paddings::Shake);
+shake_impl!(Shake128, U168, BlockBuffer1344, paddings::Shake);
+shake_impl!(Shake256, U136, BlockBuffer1088, paddings::Shake);

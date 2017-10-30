@@ -1,10 +1,9 @@
 #![no_std]
 #[macro_use]
 extern crate crypto_tests;
-extern crate generic_array;
 extern crate sha3;
 
-use crypto_tests::hash::{Test, main_test, variable_test};
+use crypto_tests::hash::{Test, main_test, xof_test};
 
 #[test]
 fn keccak_224() {
@@ -1331,7 +1330,7 @@ fn sha3_shake128() {
                            "sha3_shake128/test254",
                            "sha3_shake128/test255",
                            "sha3_shake128/test256");
-    variable_test::<sha3::Shake128>(&tests);
+    xof_test::<sha3::Shake128>(&tests);
 }
 
 #[test]
@@ -1592,5 +1591,5 @@ fn sha3_shake256() {
                            "sha3_shake256/test254",
                            "sha3_shake256/test255",
                            "sha3_shake256/test256");
-    variable_test::<sha3::Shake256>(&tests);
+    xof_test::<sha3::Shake256>(&tests);
 }
