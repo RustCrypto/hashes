@@ -29,17 +29,21 @@
 //! ```
 
 //#![no_std]
-extern crate generic_array;
 extern crate block_buffer;
 extern crate byte_tools;
+#[macro_use]
 extern crate digest;
 
 pub use digest::Digest;
-use generic_array::typenum::{U32, U64};
+use digest::generic_array::typenum::{U32, U64};
 use std as core;
+
 mod consts;
 mod table;
 mod streebog;
 
-pub type Streebog512 = streebog::Streebog<U64>;
 pub type Streebog256 = streebog::Streebog<U32>;
+pub type Streebog512 = streebog::Streebog<U64>;
+
+impl_opaque_debug!(Streebog512);
+impl_opaque_debug!(Streebog256);

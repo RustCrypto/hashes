@@ -1,16 +1,16 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop, inline_always))]
 
 use digest;
-use block_buffer::{BlockBuffer, ZeroPadding};
-use generic_array::typenum::{Unsigned, U64};
-use generic_array::{GenericArray, ArrayLength};
+use digest::generic_array::typenum::{Unsigned, U64};
+use digest::generic_array::{GenericArray, ArrayLength};
+use block_buffer::{BlockBuffer512, ZeroPadding};
 use byte_tools::{write_u64v_le, copy_memory};
 use core::marker::PhantomData;
 
 use consts::{BLOCK_SIZE, C};
 use table::SHUFFLED_LIN_TABLE;
 
-type Block = GenericArray<u8, U64>;
+type Block = [u8; 64];
 
 #[derive(Copy, Clone)]
 struct StreebogState {
@@ -41,8 +41,8 @@ fn lps(h: &mut Block, n: &Block) {
 
 impl StreebogState {
     fn g(&mut self, n: &Block, m: &Block) {
-        let mut key = Block::default();
-        let mut block = Block::default();
+        let mut key = [0u8; 64];
+        let mut block = [0u8; 64];
 
         copy_memory(&self.h, &mut key);
         copy_memory(m, &mut block);
@@ -51,7 +51,7 @@ impl StreebogState {
 
         for i in 0..12 {
             lps(&mut block, &key);
-            lps(&mut key, Block::from_slice(&C[i]));
+            lps(&mut key, &C[i]);
         }
 
         for i in 0..64 {
@@ -93,9 +93,9 @@ impl StreebogState {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
-    buffer: BlockBuffer<U64>,
+    buffer: BlockBuffer512,
     state: StreebogState,
     // Phantom data to tie digest size to the struct
     digest_size: PhantomData<DigestSize>,
@@ -104,20 +104,16 @@ pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
 impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
     fn default() -> Self {
         let h = match N::to_usize() {
-            64 => Block::default(),
-            32 => {
-                let mut block = Block::default();
-                for x in block.iter_mut() { *x = 1 }
-                block
-            },
+            64 => [0u8; 64],
+            32 => [1u8; 64],
             _ => unreachable!()
         };
         Streebog {
             buffer: Default::default(),
             state: StreebogState{
                 h: h,
-                n: Block::default(),
-                sigma: Block::default(),
+                n: [0u8; 64],
+                sigma: [0u8; 64],
             },
             digest_size: Default::default(),
         }
@@ -150,9 +146,9 @@ impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
         self_state.process_block(block, pos as u8);
 
         let n = self_state.n;
-        self_state.g(&Block::default(), &n);
+        self_state.g(&[0u8; 64], &n);
         let sigma = self_state.sigma;
-        self_state.g(&Block::default(), &sigma);
+        self_state.g(&[0u8; 64], &sigma);
 
         let mut buf = GenericArray::default();
         let n = BLOCK_SIZE - Self::OutputSize::to_usize();
