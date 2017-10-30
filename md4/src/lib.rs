@@ -3,24 +3,23 @@
 //! [1]: https://en.wikipedia.org/wiki/MD4
 
 #![no_std]
-extern crate generic_array;
 extern crate fake_simd as simd;
 extern crate byte_tools;
+#[macro_use]
 extern crate digest;
 extern crate block_buffer;
 
 pub use digest::Digest;
 use byte_tools::{write_u32_le, read_u32v_le};
-use block_buffer::{BlockBuffer};
+use block_buffer::BlockBuffer512;
 use simd::u32x4;
-use generic_array::GenericArray;
-use generic_array::typenum::{U16, U64};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::{U16, U64};
 
 // initial values for Md4State
 const S: u32x4 = u32x4(0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476);
 
-type BlockSize = U64;
-type Block = GenericArray<u8, U64>;
+type Block = [u8; 64];
 
 #[derive(Copy, Clone)]
 struct Md4State {
@@ -28,10 +27,10 @@ struct Md4State {
 }
 
 /// The MD4 hasher
-#[derive(Copy, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct Md4 {
     length_bytes: u64,
-    buffer: BlockBuffer<BlockSize>,
+    buffer: BlockBuffer512,
     state: Md4State,
 }
 
@@ -114,7 +113,7 @@ impl Md4 {
 }
 
 impl digest::BlockInput for Md4 {
-    type BlockSize = BlockSize;
+    type BlockSize = U64;
 }
 
 impl digest::Input for Md4 {
@@ -129,6 +128,7 @@ impl digest::Input for Md4 {
 
 impl digest::FixedOutput for Md4 {
     type OutputSize = U16;
+
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
@@ -140,3 +140,5 @@ impl digest::FixedOutput for Md4 {
         out
     }
 }
+
+impl_opaque_debug!(Md4);
