@@ -1,16 +1,18 @@
 use digest;
-use block_buffer::{BlockBuffer, ZeroPadding};
-use generic_array::GenericArray;
-use generic_array::typenum::U32;
-use byte_tools::{read_u32v_le, read_u32_le, write_u32v_le,  read_u64v_le, write_u64v_le};
+use block_buffer::{BlockBuffer256, ZeroPadding};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::U32;
+use byte_tools::{
+    read_u32v_le, read_u32_le, write_u32v_le, read_u64v_le, write_u64v_le
+};
 
-const C:[u8; 32] = [
+pub(crate) type Block = [u8; 32];
+const C: Block = [
     0, 255, 0, 255, 0, 255, 0, 255, 255, 0, 255, 0, 255, 0,
     255, 0, 0, 255, 255, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 255, 0, 255
 ];
 
 pub type SBox = [[u8; 16]; 8];
-pub type Block = GenericArray<u8, U32>;
 
 
 fn sbox(a: u32, s: &SBox) -> u32 {
@@ -109,7 +111,7 @@ fn psi(block: &mut Block) {
     block.copy_from_slice(&out);
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 struct Gost94State {
     s: SBox,
     h: Block,
@@ -144,7 +146,7 @@ impl Gost94State {
         encrypt(&mut s[8..16], k, &self.s);
 
         let mut u = a(u);
-        x_mut(&mut u, Block::from_slice(&C));
+        x_mut(&mut u, &C);
         let v = a(a(v));
         let k = p(x(&u, &v));
         encrypt(&mut s[16..24], k, &self.s);
@@ -197,9 +199,9 @@ impl Gost94State {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Gost94 {
-    buffer: BlockBuffer<U32>,
+    buffer: BlockBuffer256,
     state: Gost94State,
 }
 
@@ -221,7 +223,6 @@ impl Gost94 {
 impl digest::BlockInput for Gost94 {
     type BlockSize = U32;
 }
-
 
 impl digest::Input for Gost94 {
     fn process(&mut self, input: &[u8]) {
@@ -250,8 +251,8 @@ impl digest::FixedOutput for Gost94 {
         write_u64v_le(&mut buf, &self_state.sigma);
         self_state.f(&buf);
 
-        let mut out = Block::default();
-        out.copy_from_slice(&self_state.h);
-        out
+        GenericArray::clone_from_slice(&self_state.h)
     }
 }
+
+impl_opaque_debug!(Gost94);

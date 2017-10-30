@@ -2,11 +2,11 @@ macro_rules! gost94_impl {
     ($state:ident, $sbox:expr) => {
 
     use $crate::gost94::{Gost94, SBox, Block};
-    use generic_array::typenum::U32;
     use digest;
-    use generic_array::GenericArray;
+    use digest::generic_array::GenericArray;
+    use digest::generic_array::typenum::U32;
 
-    #[derive(Clone, Copy)]
+    #[derive(Clone)]
     pub struct $state {
         sh: Gost94
     }
@@ -40,4 +40,6 @@ macro_rules! gost94_impl {
             self.sh.fixed_result()
         }
     }
+
+    impl_opaque_debug!($state);
 }}
