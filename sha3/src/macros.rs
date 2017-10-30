@@ -2,7 +2,6 @@ macro_rules! impl_state {
     ($state:ident, $rate:ident, $buffer:ty, $padding:ty) => {
 
         #[allow(non_camel_case_types)]
-        /// Generic SHA-3 hasher.
         #[derive(Clone, Default)]
         pub struct $state {
             state: Sha3State,
@@ -22,8 +21,6 @@ macro_rules! impl_state {
         }
     }
 }
-
-
 
 macro_rules! sha3_impl {
     (
@@ -66,6 +63,7 @@ macro_rules! sha3_impl {
             }
         }
 
+        impl_opaque_debug!($state);
     }
 }
 
@@ -89,5 +87,6 @@ macro_rules! shake_impl {
             }
         }
 
+        impl_opaque_debug!($state);
     }
 }
