@@ -1,6 +1,6 @@
 [package]
 name = "ripemd160"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["The Rust-Crypto Project Developers"]
 license = "MIT/Apache-2.0"
 description = "RIPEMD-160 hash function"
@@ -10,13 +10,12 @@ keywords = ["crypto", "ripemd160", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.6"
-generic-array = "0.8"
+digest = "0.7"
 byte-tools = "0.2"
-block-buffer = "0.2"
+block-buffer = "0.3"
 
 [dev-dependencies]
-crypto-tests = "0.5"
+crypto-tests = "0.6"
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

@@ -1,29 +1,28 @@
 //! An implementation of the RIPEMD-160 cryptographic hash.
 
 #![no_std]
-extern crate generic_array;
 extern crate byte_tools;
+#[macro_use]
 extern crate digest;
 extern crate block_buffer;
 
 pub use digest::Digest;
 use byte_tools::write_u32v_le;
-use block_buffer::BlockBuffer;
-use generic_array::GenericArray;
-use generic_array::typenum::{U20, U64};
+use block_buffer::BlockBuffer512;
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::{U20, U64};
 
 mod block;
 use block::{process_msg_block, DIGEST_BUF_LEN};
 
-type BlockSize = U64;
-type Block = GenericArray<u8, BlockSize>;
+type Block = [u8; 64];
 
 /// Structure representing the state of a Ripemd160 computation
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Ripemd160 {
     h: [u32; DIGEST_BUF_LEN],
     len: u64,
-    buffer: BlockBuffer<BlockSize>,
+    buffer: BlockBuffer512,
 }
 
 impl Ripemd160 {
@@ -45,7 +44,7 @@ impl Default for Ripemd160 {
 }
 
 impl digest::BlockInput for Ripemd160 {
-    type BlockSize = BlockSize;
+    type BlockSize = U64;
 }
 
 impl digest::Input for Ripemd160 {
@@ -69,3 +68,5 @@ impl digest::FixedOutput for Ripemd160 {
         out
     }
 }
+
+impl_opaque_debug!(Ripemd160);
