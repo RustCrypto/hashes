@@ -4,6 +4,8 @@ sudo: required
 
 matrix:
   include:
+    - env: TARGET=i686-unknown-linux-gnu
+      rust: stable
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: stable
     - env: TARGET=x86_64-unknown-linux-gnu
@@ -12,7 +14,9 @@ matrix:
       rust: stable
 
   allow_failures:
-      - rust: nightly
+    - rust: nightly
+    - env: TARGET=powerpc-unknown-linux-gnu
+    - env: TARGET=i686-unknown-linux-gnu
 
 install:
   - curl -LSfs https://japaric.github.io/trust/install.sh | sh -s -- --git japaric/cross --force
