@@ -30,6 +30,8 @@ macro_rules! impl_groestl {
                 GenericArray::clone_from_slice( &block[n..])
             }
         }
+
+        impl_opaque_debug!($state);
     )
 }
 
@@ -77,5 +79,6 @@ macro_rules! impl_variable_groestl {
             }
         }
 
+        impl_opaque_debug!($state);
     )
 }
