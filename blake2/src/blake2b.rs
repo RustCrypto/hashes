@@ -1,4 +1,4 @@
-use generic_array::typenum::U64;
+use digest::generic_array::typenum::U64;
 use consts::BLAKE2B_IV;
 
 blake2_impl!(Blake2b, u64, u64x4, U64,

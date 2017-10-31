@@ -6,10 +6,10 @@ macro_rules! blake2_impl {
         use $crate::bytes::BytesExt;
         use $crate::simd::{Vector4, $vec};
 
-        use generic_array::GenericArray;
+        use digest::generic_array::GenericArray;
+        use digest::generic_array::typenum::Unsigned;
         use core::cmp;
         use byte_tools::copy_memory;
-        use generic_array::typenum::Unsigned;
         use digest;
         use crypto_mac::{Mac, MacResult};
 
