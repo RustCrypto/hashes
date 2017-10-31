@@ -2,7 +2,6 @@
 
 #[macro_use]
 extern crate crypto_tests;
-extern crate generic_array;
 extern crate groestl;
 
 use crypto_tests::hash::{Test, main_test};

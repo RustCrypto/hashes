@@ -1,6 +1,6 @@
 macro_rules! impl_groestl {
     ($state:ident, $output:ident, $block:ident) => (
-        #[derive(Copy, Clone)]
+        #[derive(Clone)]
         pub struct $state {
             groestl: Groestl<$block>,
         }
@@ -37,18 +37,9 @@ macro_rules! impl_groestl {
 macro_rules! impl_variable_groestl {
     ($state:ident, $block:ident, $min:expr, $max:expr) => (
 
-        #[derive(Copy, Clone)]
+        #[derive(Clone)]
         pub struct $state {
             groestl: Groestl<$block>,
-        }
-
-        impl $state {
-            pub fn new(output_size: usize) -> Result<Self, digest::InvalidLength> {
-                if output_size == $min || output_size > $max {
-                    return Err(digest::InvalidLength);
-                }
-                Ok($state {groestl: Groestl::new(output_size).unwrap()})
-            }
         }
 
         impl digest::BlockInput for $state {
@@ -62,6 +53,17 @@ macro_rules! impl_variable_groestl {
         }
 
         impl digest::VariableOutput for $state {
+            fn new(output_size: usize) -> Result<Self, digest::InvalidLength> {
+                if output_size == $min || output_size > $max {
+                    return Err(digest::InvalidLength);
+                }
+                Ok($state {groestl: Groestl::new(output_size).unwrap()})
+            }
+
+            fn output_size(&self) -> usize {
+                self.groestl.output_size
+            }
+
             fn variable_result(self, buffer: &mut [u8])
                 -> Result<&[u8], digest::InvalidLength>
             {
@@ -69,7 +71,7 @@ macro_rules! impl_variable_groestl {
                     return Err(digest::InvalidLength);
                 }
                 let block = self.groestl.finalize();
-                let n = block.len() - self.groestl.output_size;
+                let n = block.len() - buffer.len();
                 buffer.copy_from_slice(&block[n..]);
                 Ok(buffer)
             }

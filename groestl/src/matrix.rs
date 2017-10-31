@@ -1,6 +1,6 @@
 use core::ops::{Index, IndexMut};
 
-use generic_array::{ArrayLength, GenericArray};
+use digest::generic_array::{ArrayLength, GenericArray};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Matrix<R: ArrayLength<GenericArray<u8, C>>, C: ArrayLength<u8>> {

@@ -1,8 +1,8 @@
 use core::ops::Div;
 
 use byte_tools::write_u64_be;
-use generic_array::{ArrayLength, GenericArray};
-use generic_array::typenum::{Quot, U8};
+use digest::generic_array::{ArrayLength, GenericArray};
+use digest::generic_array::typenum::{Quot, U8};
 use matrix::Matrix;
 use consts::{
     B,
@@ -198,8 +198,8 @@ impl<BlockSize> GroestlState<BlockSize>
 mod test {
     use super::{xor_generic_array, GroestlState};
     use consts::{C_P, C_Q, SHIFTS_P};
-    use generic_array::typenum::U64;
-    use generic_array::GenericArray;
+    use digest::generic_array::typenum::U64;
+    use digest::generic_array::GenericArray;
 
     fn get_padding_block() -> GenericArray<u8, U64> {
         let padding_block: [u8; 64] = [

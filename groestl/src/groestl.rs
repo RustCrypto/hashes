@@ -2,12 +2,12 @@ use core::ops::Div;
 
 use digest;
 use block_buffer::BlockBuffer;
-use generic_array::{ArrayLength, GenericArray};
-use generic_array::typenum::{Quot, U8};
+use digest::generic_array::{ArrayLength, GenericArray};
+use digest::generic_array::typenum::{Quot, U8};
 
 use state::{GroestlState, xor_generic_array};
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Groestl<BlockSize>
     where BlockSize: ArrayLength<u8> + Div<U8> + Default,
           BlockSize::ArrayType: Copy,

@@ -23,11 +23,10 @@
 extern crate byte_tools;
 extern crate digest;
 extern crate block_buffer;
-extern crate generic_array;
 
 pub use digest::Digest;
-use generic_array::GenericArray;
-use generic_array::typenum::{Unsigned, U28, U32, U48, U64, U128};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::{Unsigned, U28, U32, U48, U64, U128};
 
 mod consts;
 mod groestl;

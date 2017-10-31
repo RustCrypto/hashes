@@ -1,7 +1,7 @@
 [package]
 name = "groestl"
 version = "0.3.0"
-authors = ["The Rust-Crypto Project Developers"]
+authors = ["RustCrypto Developers"]
 license = "MIT/Apache-2.0"
 description = "Grøstl hash function"
 documentation = "https://docs.rs/groestl"
@@ -10,13 +10,12 @@ keywords = ["crypto", "groestl", "grostl", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.6"
-generic-array = "0.8"
+digest = "0.7"
 byte-tools = "0.2"
-block-buffer = "0.2"
+block-buffer = "=0.2.0-tmp"
 
 [dev-dependencies]
-crypto-tests = "0.5"
+crypto-tests = "0.6"
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }
