@@ -1,10 +1,31 @@
 language: rust
-rust:
-  - stable
-  - beta
-  - nightly
+services: docker
+sudo: required
+
 matrix:
+  include:
+    - env: TARGET=i686-unknown-linux-gnu
+      rust: stable
+    - env: TARGET=x86_64-unknown-linux-gnu
+      rust: stable
+    - env: TARGET=x86_64-unknown-linux-gnu
+      rust: nightly
+    - env: TARGET=powerpc-unknown-linux-gnu
+      rust: stable
+    - env: TARGET=powerpc64-unknown-linux-gnu
+      rust: stable
+
   allow_failures:
     - rust: nightly
-script: cargo test --verbose --all
+    - env: TARGET=i686-unknown-linux-gnu
+    - env: TARGET=powerpc-unknown-linux-gnu
+    - env: TARGET=powerpc64-unknown-linux-gnu
 
+install:
+  - curl -LSfs https://japaric.github.io/trust/install.sh | sh -s -- --git japaric/cross --force
+  - source ~/.cargo/env || true
+
+script:
+  - cross test --verbose --all --target $TARGET
+
+cache: cargo
