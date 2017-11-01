@@ -176,10 +176,10 @@ impl Gost94State {
     }
 
     fn update_n(&mut self, len: usize) {
-        let (res, over) = self.n[0].overflowing_add((len << 3) as u64);
+        let (res, over) = self.n[0].overflowing_add((len as u64) << 3);
         self.n[0] = res;
         if over {
-            let (res, over) = self.n[1].overflowing_add(1 + (len >> 61) as u64);
+            let (res, over) = self.n[1].overflowing_add(1 + ((len as u64) >> 61));
             self.n[1] = res;
             if over {
                 let (res, over) = self.n[2].overflowing_add(1);
