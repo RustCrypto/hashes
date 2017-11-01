@@ -60,7 +60,7 @@ impl<BlockSize> Groestl<BlockSize>
         } else {
             state.num_blocks + 1
         };
-        self.buffer.len_padding(l.to_be() as u64, |b| state.compress(b));
+        self.buffer.len_padding((l as u64).to_be(), |b| state.compress(b));
         xor_generic_array(&state.p(&state.state), &state.state)
     }
 }
