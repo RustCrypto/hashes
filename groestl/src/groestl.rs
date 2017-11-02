@@ -55,7 +55,7 @@ impl<BlockSize> Groestl<BlockSize>
 
     pub fn finalize(mut self) -> GenericArray<u8, BlockSize> {
         let state = &mut self.state;
-        let mut l = if self.buffer.remaining() <= 8 {
+        let l = if self.buffer.remaining() <= 8 {
             state.num_blocks + 2
         } else {
             state.num_blocks + 1
