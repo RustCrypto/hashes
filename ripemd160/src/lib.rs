@@ -23,14 +23,6 @@ pub struct Ripemd160 {
     buffer: BlockBuffer512,
 }
 
-impl Ripemd160 {
-    fn finalize(&mut self) {
-        let h = &mut self.h;
-        let l = self.len << 3;
-        self.buffer.len_padding(l, |b| process_msg_block(h, b));
-    }
-}
-
 impl Default for Ripemd160 {
     fn default() -> Self {
         Ripemd160 {
@@ -54,12 +46,15 @@ impl digest::Input for Ripemd160 {
     }
 }
 
-
 impl digest::FixedOutput for Ripemd160 {
     type OutputSize = U20;
 
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        self.finalize();
+        {
+            let h = &mut self.h;
+            let l = self.len << 3;
+            self.buffer.len_padding(l, |b| process_msg_block(h, b));
+        }
 
         let mut out = GenericArray::default();
         write_u32v_le(&mut out[..], &self.h);
