@@ -48,7 +48,7 @@ impl Engine512 {
     }
 
     fn input(&mut self, input: &[u8]) {
-        let (res, over) = self.len.1.overflowing_add(input.len() as u64);
+        let (res, over) = self.len.1.overflowing_add((input.len() as u64) << 3);
         self.len.1 = res;
         if over { self.len.0 += 1; }
         let self_state = &mut self.state;
@@ -58,8 +58,14 @@ impl Engine512 {
     fn finish(&mut self) {
         let self_state = &mut self.state;
         let (mut hi, mut lo) = self.len;
-        hi = (hi << 3).to_be();
-        lo = (lo << 3).to_be();
+        // TODO: change `len_padding_u128` to use BE
+        if cfg!(target_endian = "little") {
+            hi = hi.to_be();
+            lo = lo.to_be();
+        } else {
+            hi = hi.to_le();
+            lo = lo.to_le();
+        };
         self.buffer.len_padding_u128(hi, lo, |d| self_state.process_block(d));
     }
 }

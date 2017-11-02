@@ -49,14 +49,16 @@ impl Engine256 {
 
     fn input(&mut self, input: &[u8]) {
         // Assumes that input.len() can be converted to u64 without overflow
-        self.len += input.len() as u64;
+        self.len += (input.len() as u64) << 3;
         let self_state = &mut self.state;
         self.buffer.input(input, |input| self_state.process_block(input));
     }
 
     fn finish(&mut self) {
         let self_state = &mut self.state;
-        let l = (self.len<<3).to_be();
+        let l = self.len;
+        // TODO: replace with `len_padding_be` method
+        let l = if cfg!(target_endian = "little") { l.to_be() } else { l.to_le() };
         self.buffer.len_padding(l, |input| self_state.process_block(input));
     }
 }
