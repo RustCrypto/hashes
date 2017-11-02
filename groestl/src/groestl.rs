@@ -53,7 +53,6 @@ impl<BlockSize> Groestl<BlockSize>
         );
     }
 
-
     pub fn finalize(mut self) -> GenericArray<u8, BlockSize> {
         let state = &mut self.state;
         let mut l = if self.buffer.remaining() <= 8 {
@@ -63,10 +62,7 @@ impl<BlockSize> Groestl<BlockSize>
         };
         // remove this mess by adding `len_padding_be` method
         let l = if cfg!(target_endian = "little") { l.to_be() } else { l.to_le() };
-        self.buffer.len_padding(l, |b| {
-            println!("{:?}", b);
-            state.compress(b)
-        });
+        self.buffer.len_padding(l, |b| state.compress(b));
         xor_generic_array(&state.p(&state.state), &state.state)
     }
 }
