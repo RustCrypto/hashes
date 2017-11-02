@@ -106,8 +106,10 @@ impl digest::FixedOutput for Sha1 {
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         {
             let state = &mut self.h;
-            let len_bits = self.len << 3;
-            self.buffer.len_padding(len_bits.to_be(), |d| compress(state, d));
+            let l = self.len << 3;
+            // remove this mess by adding `len_padding_be` method
+            let l = if cfg!(target_endian = "little") { l.to_be() } else { l.to_le() };
+            self.buffer.len_padding(l, |d| compress(state, d));
         }
         let mut out = GenericArray::default();
         write_u32v_be(&mut out, &self.h);
