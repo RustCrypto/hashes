@@ -26,6 +26,6 @@ install:
   - source ~/.cargo/env || true
 
 script:
-  - cross test --verbose --all --target $TARGET
+  - cross test --verbose --all --release --target $TARGET
 
 cache: cargo
