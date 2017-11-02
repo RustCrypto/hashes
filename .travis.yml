@@ -9,6 +9,8 @@ matrix:
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: stable
     - env: TARGET=x86_64-unknown-linux-gnu
+      rust: 1.18.0
+    - env: TARGET=x86_64-unknown-linux-gnu
       rust: nightly
     - env: TARGET=powerpc-unknown-linux-gnu
       rust: stable
@@ -17,6 +19,7 @@ matrix:
 
   allow_failures:
     - rust: nightly
+    - rust: 1.18.0
     - env: TARGET=i686-unknown-linux-gnu
     - env: TARGET=powerpc-unknown-linux-gnu
     - env: TARGET=powerpc64-unknown-linux-gnu

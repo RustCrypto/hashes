@@ -40,9 +40,10 @@ hash function (i.e. algorithms, not the specific implementation):
 | :broken_heart: | Attack demonstrated in practice: avoid if at all possible |
 
 ### Minimum Rust version
-All crates in this repository support Rust 1.13 or higher. In future minimally
-supported version of Rust can be changed, but it will be done in accordance with
-semver, i.e. with the minor version bump.
+All crates in this repository support Rust 1.13 or higher. Although to cimplify
+CI config the oldest version which is continuously tested is 1.18. In future
+minimally supported version of Rust can be changed, but it will be done with
+the minor version bump.
 
 ### Crate names
 
