@@ -19,7 +19,7 @@ pub struct GroestlState<BlockSize>
 {
     pub state: GenericArray<u8, BlockSize>,
     rounds: u8,
-    pub num_blocks: usize,
+    pub num_blocks: u64,
 }
 
 pub fn xor_generic_array<L: ArrayLength<u8>>(
