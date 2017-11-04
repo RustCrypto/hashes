@@ -28,7 +28,7 @@
 //! let result = hasher.result();
 //! ```
 
-//#![no_std]
+#![no_std]
 extern crate block_buffer;
 extern crate byte_tools;
 #[macro_use]
@@ -36,7 +36,6 @@ extern crate digest;
 
 pub use digest::Digest;
 use digest::generic_array::typenum::{U32, U64};
-use std as core;
 
 mod consts;
 mod table;
