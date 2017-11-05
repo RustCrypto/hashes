@@ -16,6 +16,8 @@ matrix:
       rust: stable
     - env: TARGET=powerpc64-unknown-linux-gnu
       rust: stable
+    # test if crates truly can be built without std
+    - script: xargo build --verbose --target x86_64-unknown-linux-gnu
 
   allow_failures:
     - rust: nightly
@@ -26,6 +28,7 @@ matrix:
 
 install:
   - curl -LSfs https://japaric.github.io/trust/install.sh | sh -s -- --git japaric/cross --force
+  - cargo install --force xargo
   - source ~/.cargo/env || true
 
 script:
