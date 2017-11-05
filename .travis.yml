@@ -28,7 +28,6 @@ matrix:
 
 install:
   - curl -LSfs https://japaric.github.io/trust/install.sh | sh -s -- --git japaric/cross --force
-  - cargo install --force xargo
   - source ~/.cargo/env || true
 
 script:
