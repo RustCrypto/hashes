@@ -21,6 +21,7 @@ macro_rules! blake2_impl {
             m: [$word; 16],
             h: [$vec; 2],
             t: u64,
+            n: usize,
         }
 
         #[inline(always)]
@@ -67,16 +68,18 @@ macro_rules! blake2_impl {
 
         impl $state {
             /// Creates a new hashing context with a key.
-            pub fn new_keyed(k: &[u8]) -> Self {
+            pub fn new_keyed(k: &[u8], output_size: usize) -> Self {
                 let kk = k.len();
                 assert!(kk <= $bytes::to_usize());
+                assert!(output_size <= $bytes::to_usize());
 
                 let p0 = 0x0101_0000 ^ ((kk as $word) << 8) ^
-                    ($bytes::to_u64() as $word);
+                    (output_size as $word);
                 let mut state = $state {
                     m: [0; 16],
                     h: [iv0() ^ $vec::new(p0, 0, 0, 0), iv1()],
                     t: 0,
+                    n: output_size,
                 };
 
                 if kk > 0 {
@@ -98,6 +101,7 @@ macro_rules! blake2_impl {
                     h: [iv0() ^ $vec::new(p[0], p[1], p[2], p[3]),
                         iv1() ^ $vec::new(p[4], p[5], p[6], p[7])],
                     t: 0,
+                    n: nn,
                 }
             }
 
@@ -202,7 +206,7 @@ macro_rules! blake2_impl {
 
 
         impl Default for $state {
-            fn default() -> Self { Self::new_keyed(&[]) }
+            fn default() -> Self { Self::new_keyed(&[], $bytes::to_usize()) }
         }
 
         impl digest::BlockInput for $state {
@@ -216,16 +220,29 @@ macro_rules! blake2_impl {
         impl digest::FixedOutput for $state {
             type OutputSize = $bytes;
 
-            fn fixed_result(self) -> Output { self.finalize_with_flag(0) }
+            fn fixed_result(self) -> Output {
+                assert_eq!(self.n, $bytes::to_usize());
+                self.finalize_with_flag(0)
+            }
         }
 
-        /*
         impl digest::VariableOutput for $state {
+            fn new(output_size: usize) -> Result<Self, digest::InvalidLength> {
+                if output_size == 0 || output_size > $bytes::to_usize() {
+                    return Err(digest::InvalidLength);
+                }
+                Ok(Self::new_keyed(&[], output_size))
+            }
+
+            fn output_size(&self) -> usize {
+                self.n
+            }
+
             fn variable_result(self, buf: &mut [u8])
                                     -> Result<&[u8], digest::InvalidLength>
             {
                 let n = buf.len();
-                if n > $bytes::to_usize() {
+                if n > self.output_size() {
                     Err(digest::InvalidLength)
                 } else {
                     let res = self.finalize_with_flag(0);
@@ -234,12 +251,11 @@ macro_rules! blake2_impl {
                 }
             }
         }
-        */
 
         impl Mac for $state {
             type OutputSize = $bytes;
 
-            fn new(key: &[u8]) -> Self { Self::new_keyed(key) }
+            fn new(key: &[u8]) -> Self { Self::new_keyed(key, $bytes::to_usize()) }
 
             fn input(&mut self, data: &[u8]) { self.update(data); }
 
