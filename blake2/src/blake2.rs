@@ -10,7 +10,7 @@ macro_rules! blake2_impl {
         use core::cmp;
         use byte_tools::{copy_memory, zero};
         use digest;
-        use crypto_mac::{Mac, MacResult};
+        use crypto_mac::{Mac, MacResult, InvalidKeyLength};
 
         type Output = GenericArray<u8, $bytes>;
 
@@ -255,7 +255,13 @@ macro_rules! blake2_impl {
         impl Mac for $state {
             type OutputSize = $bytes;
 
-            fn new(key: &[u8]) -> Self { Self::new_keyed(key, $bytes::to_usize()) }
+            fn new(key: &[u8]) -> Result<Self, InvalidKeyLength> {
+                if key.len() > $bytes::to_usize() {
+                    Err(InvalidKeyLength)
+                } else {
+                    Ok(Self::new_keyed(key, $bytes::to_usize()))
+                }
+            }
 
             fn input(&mut self, data: &[u8]) { self.update(data); }
 
