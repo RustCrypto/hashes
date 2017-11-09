@@ -7,9 +7,12 @@
 
 #![cfg_attr(feature = "cargo-clippy", allow(inline_always))]
 
-use simd_opt;
+mod simdty;
+mod simdint;
+mod simdop;
+mod simd_opt;
 
-pub use simdty::{u32x4, u64x4};
+pub use self::simdty::{u32x4, u64x4};
 
 pub trait Vector4<T>: Copy {
     fn gather(src: &[T], i0: usize, i1: usize, i2: usize, i3: usize) -> Self;

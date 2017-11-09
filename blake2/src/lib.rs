@@ -46,12 +46,7 @@ extern crate crypto_mac;
 
 mod consts;
 mod as_bytes;
-mod bytes;
 
-mod simdty;
-mod simdint;
-mod simdop;
-mod simd_opt;
 mod simd;
 
 

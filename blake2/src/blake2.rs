@@ -3,13 +3,12 @@ macro_rules! blake2_impl {
      $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr) => {
 
         use $crate::as_bytes::AsBytes;
-        use $crate::bytes::BytesExt;
         use $crate::simd::{Vector4, $vec};
 
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::Unsigned;
         use core::cmp;
-        use byte_tools::copy_memory;
+        use byte_tools::{copy_memory, zero};
         use digest;
         use crypto_mac::{Mac, MacResult};
 
@@ -83,7 +82,7 @@ macro_rules! blake2_impl {
                 };
 
                 if kk > 0 {
-                    state.m.as_mut_bytes().copy_bytes_from(k);
+                    copy_memory(k, state.m.as_mut_bytes());
                     state.t = 2 * $bytes::to_u64();
                 }
                 state
@@ -118,7 +117,7 @@ macro_rules! blake2_impl {
                     let part = &rest[..len];
                     rest = &rest[part.len()..];
 
-                    self.m.as_mut_bytes()[off..].copy_bytes_from(part);
+                    copy_memory(part, &mut self.m.as_mut_bytes()[off..]);
                     self.t = self.t.checked_add(part.len() as u64)
                         .expect("hash data length overflow");
                 }
@@ -129,15 +128,16 @@ macro_rules! blake2_impl {
                     let part = &rest[..block];
                     rest = &rest[part.len()..];
 
-                    self.m.as_mut_bytes().copy_bytes_from(part);
+                    copy_memory(part, &mut self.m.as_mut_bytes());
                     self.t = self.t.checked_add(part.len() as u64)
                         .expect("hash data length overflow");
                 }
 
-                if rest.len() > 0 {
+                let n = rest.len();
+                if n > 0 {
                     self.compress(0, 0);
 
-                    self.m.as_mut_bytes().copy_bytes_from(rest);
+                    copy_memory(rest, &mut self.m.as_mut_bytes());
                     self.t = self.t.checked_add(rest.len() as u64)
                         .expect("hash data length overflow");
                 }
@@ -152,7 +152,7 @@ macro_rules! blake2_impl {
             fn finalize_with_flag(mut self, f1: $word) -> Output {
                 let off = self.t as usize % (2 * $bytes::to_usize());
                 if off != 0 {
-                    self.m.as_mut_bytes()[off..].set_bytes(0);
+                    zero(&mut self.m.as_mut_bytes()[off..]);
                 }
 
                 self.compress(!0, f1);
@@ -246,7 +246,7 @@ macro_rules! blake2_impl {
                     Err(digest::InvalidLength)
                 } else {
                     let res = self.finalize_with_flag(0);
-                    buf.copy_bytes_from(&res[..n]);
+                    copy_memory(&res[..n], buf);
                     Ok(buf)
                 }
             }

@@ -5,7 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use simdty::{u32x4, u64x4};
+use simd::simdty::{u32x4, u64x4};
 #[cfg(feature = "simd")] use simdint;
 
 use core::ops::{Add, BitXor, Shl, Shr};
