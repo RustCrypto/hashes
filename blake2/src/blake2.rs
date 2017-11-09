@@ -15,7 +15,7 @@ macro_rules! blake2_impl {
         type Output = GenericArray<u8, $bytes>;
 
         /// Hash function context.
-        #[derive(Copy, Clone, Debug)]
+        #[derive(Copy, Clone)]
         pub struct $state {
             m: [$word; 16],
             h: [$vec; 2],
@@ -269,6 +269,8 @@ macro_rules! blake2_impl {
                 MacResult::new(self.finalize_with_flag(0))
             }
         }
+
+        impl_opaque_debug!($state);
 
     }
 }

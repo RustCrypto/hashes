@@ -41,6 +41,7 @@
 #![cfg_attr(feature = "simd_asm", feature(asm))]
 
 extern crate byte_tools;
+#[macro_use]
 extern crate digest;
 extern crate crypto_mac;
 
