@@ -1,6 +1,6 @@
 [package]
 name = "blake2"
-version = "0.6.1"
+version = "0.7.0"
 authors = ["RustCrypto Developers"]
 license = "MIT/Apache-2.0"
 description = "BLAKE2 hash functions"
@@ -15,7 +15,8 @@ byte-tools = "0.2"
 crypto-mac = "0.5"
 
 [dev-dependencies]
-crypto-tests = "0.6"
+digest = { version = "*", features = ["dev"] }
+crypto-mac = { version = "*", features = ["dev"] }
 
 [features]
 simd = []

@@ -1,7 +1,7 @@
 [package]
 name = "streebog"
-version = "0.6.0"
-authors = ["The Rust-Crypto Project Developers"]
+version = "0.7.0"
+authors = ["RustCrypto Developers"]
 license = "MIT/Apache-2.0"
 description = "Streebog (GOST R 34.11-2012) hash function"
 documentation = "https://docs.rs/streebog"
@@ -15,7 +15,7 @@ byte-tools = "0.2"
 block-buffer = "0.3"
 
 [dev-dependencies]
-crypto-tests = "0.6"
+digest = { version = "*", features = ["dev"] }
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

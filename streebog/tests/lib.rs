@@ -1,9 +1,9 @@
 #![no_std]
 #[macro_use]
-extern crate crypto_tests;
+extern crate digest;
 extern crate streebog;
 
-use crypto_tests::hash::{Test, main_test};
+use digest::dev::{Test, main_test};
 
 #[test]
 fn streebog256_main() {

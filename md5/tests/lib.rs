@@ -1,9 +1,9 @@
 #![no_std]
 #[macro_use]
-extern crate crypto_tests;
+extern crate digest;
 extern crate md5;
 
-use crypto_tests::hash::{Test, main_test, one_million_a};
+use digest::dev::{Test, main_test, one_million_a};
 
 #[test]
 fn md5_main() {

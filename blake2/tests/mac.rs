@@ -1,10 +1,10 @@
 #![no_std]
 extern crate blake2;
 #[macro_use]
-extern crate crypto_tests;
+extern crate crypto_mac;
 
 use blake2::{Blake2b, Blake2s};
-use crypto_tests::mac::{mac_test, MacTest};
+use crypto_mac::dev::{mac_test, Test};
 
 #[test]
 fn blake2b_mac() {

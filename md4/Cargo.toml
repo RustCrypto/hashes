@@ -1,7 +1,7 @@
 [package]
 name = "md4"
 version = "0.7.0"
-authors = ["The Rust-Crypto Project Developers"]
+authors = ["RustCrypto Developers"]
 license = "MIT/Apache-2.0"
 description = "MD4 hash function"
 documentation = "https://docs.rs/md4"
@@ -16,7 +16,7 @@ block-buffer = "0.3"
 fake-simd = "0.1"
 
 [dev-dependencies]
-crypto-tests = "0.6"
+digest = { version = "*", features = ["dev"] }
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

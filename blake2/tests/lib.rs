@@ -1,11 +1,10 @@
 #![no_std]
 #[macro_use]
-extern crate crypto_tests;
-extern crate blake2;
 extern crate digest;
+extern crate blake2;
 
 use blake2::{Blake2b, Blake2s};
-use crypto_tests::hash::{Test, variable_test};
+use digest::dev::{Test, variable_test};
 use digest::Digest;
 
 #[test]

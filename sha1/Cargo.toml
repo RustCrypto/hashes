@@ -1,7 +1,7 @@
 [package]
 name = "sha-1"
-version = "0.5.0"
-authors = ["The RustCrypto Devs"]
+version = "0.7.0"
+authors = ["RustCrypto Developers"]
 license = "MIT/Apache-2.0"
 description = "SHA-1 hash function"
 documentation = "https://docs.rs/sha-1"
@@ -20,7 +20,7 @@ fake-simd = "0.1"
 sha1-asm = {version="0.4", optional=true}
 
 [dev-dependencies]
-crypto-tests = "0.6"
+digest = { version = "*", features = ["dev"] }
 
 [features]
 asm = ["sha1-asm"]

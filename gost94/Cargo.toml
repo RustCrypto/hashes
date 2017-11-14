@@ -1,6 +1,6 @@
 [package]
 name = "gost94"
-version = "0.5.0"
+version = "0.7.0"
 authors = ["RustCrypto Developers"]
 license = "MIT/Apache-2.0"
 description = "GOST R 34.11-94 hash function"
@@ -15,7 +15,7 @@ byte-tools = "0.2"
 block-buffer = "0.3"
 
 [dev-dependencies]
-crypto-tests = "0.6"
+digest = { version = "*", features = ["dev"] }
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

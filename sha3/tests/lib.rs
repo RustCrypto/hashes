@@ -1,9 +1,9 @@
 #![no_std]
 #[macro_use]
-extern crate crypto_tests;
+extern crate digest;
 extern crate sha3;
 
-use crypto_tests::hash::{Test, main_test, xof_test};
+use digest::dev::{Test, main_test, xof_test};
 
 #[test]
 fn keccak_224() {

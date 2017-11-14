@@ -58,5 +58,6 @@ mod blake2b;
 mod blake2s;
 
 pub use digest::Digest;
+pub use crypto_mac::Mac;
 pub use blake2b::Blake2b;
 pub use blake2s::Blake2s;
