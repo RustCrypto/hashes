@@ -9,19 +9,18 @@ matrix:
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: stable
     - env: TARGET=x86_64-unknown-linux-gnu
-      rust: 1.18.0
+      rust: 1.20.0
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: nightly
     - env: TARGET=powerpc-unknown-linux-gnu
       rust: stable
     - env: TARGET=powerpc64-unknown-linux-gnu
       rust: stable
-    # test if crates truly can be built without std
+    # tests if crates truly can be built without std
     - script: xargo build --verbose --target x86_64-unknown-linux-gnu
 
   allow_failures:
     - rust: nightly
-    - rust: 1.18.0
     - env: TARGET=i686-unknown-linux-gnu
     - env: TARGET=powerpc-unknown-linux-gnu
     - env: TARGET=powerpc64-unknown-linux-gnu
