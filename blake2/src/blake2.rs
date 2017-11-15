@@ -15,7 +15,7 @@ macro_rules! blake2_impl {
         type Output = GenericArray<u8, $bytes>;
 
         /// Hash function context.
-        #[derive(Copy, Clone)]
+        #[derive(Clone)]
         pub struct $state {
             m: [$word; 16],
             h: [$vec; 2],
