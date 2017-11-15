@@ -63,7 +63,7 @@ First add `blake2` crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-blake2 = "0.6"
+blake2 = "0.7"
 ```
 
 `blake2` and other crates re-export
@@ -101,8 +101,8 @@ trait (e.g. from file) you can enable `std` feature in digest crate:
 
 ```toml
 [dependencies]
-blake2 = "0.6"
-digest = { version = "0.6", features = ["std"]}
+blake2 = "0.7"
+digest = { version = "0.7", features = ["std"]}
 ```
 
 And use `digest_reader` method which will compute hash by reading data using
@@ -132,40 +132,41 @@ following dependencies to your crate:
 
 ```toml
 [dependencies]
-hmac = "0.3"
-sha2 = "0.6"
+hmac = "0.5"
+sha2 = "0.7"
 ```
 
 To get the authentication code:
 
 ```Rust
-extern crate sha2;
 extern crate hmac;
+extern crate sha2;
 
-use hmac::{Hmac, Mac};
 use sha2::Sha256;
+use hmac::{Hmac, Mac};
 
-// Create `Mac` trait implementation, in this case HMAC-SHA256
-let mac = Hmac::<Sha256>::new(b"my secret and secure key");
+// Create `Mac` trait implementation, namely HMAC-SHA256
+let mut mac = Hmac::<Sha256>::new(b"my secret and secure key").unwrap();
 mac.input(b"input message");
 
 // `result` has type `MacResult` which is a thin wrapper around array of
 // bytes for providing constant time equality check
 let result = mac.result();
-// To get &[u8] use `code` method, but be carefull, since incorrect use
-// of the code value may permit timing attacks which defeat the security
-// provided by the `MacResult`.
+// To get underlying array use `code` method, but be carefull, since
+// incorrect use of the code value may permit timing attacks which defeat
+// the security provided by the `MacResult`
 let code_bytes = result.code();
 ```
 
 To verify the message:
 
 ```rust,ignore
-let mac = Hmac::<Sha256>::new(b"my secret and secure key");
+let mut mac = Hmac::<Sha256>::new(b"my secret and secure key").unwrap();
 
 mac.input(b"input message");
 
-let is_code_correct = mac.verify(code_bytes);
+// `verify` will return `Ok(())` if code is correct, `Err(MacError)` otherwise
+mac.verify(&code_bytes).unwrap();
 ```
 
 ### Generic code
@@ -177,8 +178,8 @@ hash functions:
 use digest::Digest;
 
 // Toy example, do not use it in practice!
-fn hash_password<D: Digest + Default>(password: &str, salt: &str, output: &mut [u8]) {
-    let mut hasher = D::default();
+fn hash_password<D: Digest>(password: &str, salt: &str, output: &mut [u8]) {
+    let mut hasher = D::new();
     hasher.input(password.as_bytes());
     hasher.input(b"$");
     hasher.input(salt.as_bytes());
