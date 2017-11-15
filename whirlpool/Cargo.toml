@@ -16,7 +16,7 @@ block-buffer = "0.3"
 whirlpool-asm = {version="0.3", optional=true}
 
 [dev-dependencies]
-digest = { version = "*", features = ["dev"] }
+digest = { version = "^0.7.1", features = ["dev"] }
 
 [features]
 asm = ["whirlpool-asm"]

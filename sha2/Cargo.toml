@@ -17,7 +17,7 @@ fake-simd = "0.1"
 sha2-asm = {version="0.3", optional=true}
 
 [dev-dependencies]
-digest = { version = "*", features = ["dev"] }
+digest = { version = "^0.7.1", features = ["dev"] }
 
 [features]
 asm = ["sha2-asm"]

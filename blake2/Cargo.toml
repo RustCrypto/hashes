@@ -15,8 +15,8 @@ byte-tools = "0.2"
 crypto-mac = "0.5"
 
 [dev-dependencies]
-digest = { version = "*", features = ["dev"] }
-crypto-mac = { version = "*", features = ["dev"] }
+digest = { version = "^0.7.1", features = ["dev"] }
+crypto-mac = { version = "^0.5.1", features = ["dev"] }
 
 [features]
 simd = []

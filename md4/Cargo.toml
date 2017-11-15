@@ -16,7 +16,7 @@ block-buffer = "0.3"
 fake-simd = "0.1"
 
 [dev-dependencies]
-digest = { version = "*", features = ["dev"] }
+digest = { version = "^0.7.1", features = ["dev"] }
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

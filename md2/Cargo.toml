@@ -14,7 +14,7 @@ digest = "0.7"
 block-buffer = "0.3"
 
 [dev-dependencies]
-digest = { version = "*", features = ["dev"] }
+digest = { version = "^0.7.1", features = ["dev"] }
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }
