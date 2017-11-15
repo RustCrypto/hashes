@@ -23,9 +23,6 @@ matrix:
 
   allow_failures:
     - rust: nightly
-    - env: TARGET=i686-unknown-linux-gnu
-    - env: TARGET=powerpc-unknown-linux-gnu
-    - env: TARGET=powerpc64-unknown-linux-gnu
 
 install:
   - curl -LSfs https://japaric.github.io/trust/install.sh | sh -s -- --git japaric/cross --force
