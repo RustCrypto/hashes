@@ -7,7 +7,7 @@ macro_rules! impl_state {
             state: Sha3State,
             buffer: $buffer,
         }
- 
+
         impl $state {
             fn absorb(&mut self, input: &[u8]) {
                 let self_state = &mut self.state;
@@ -44,21 +44,13 @@ macro_rules! sha3_impl {
             type OutputSize = $output_size;
 
             fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-                let mut out = GenericArray::default();
                 self.apply_padding();
 
-                let mut state_copy;
-                let state_ref: &[u8; PLEN*8] = if cfg!(target_endian = "little") {
-                    unsafe { transmute(&self.state) }
-                } else if cfg!(target_endian = "big") {
-                    state_copy = [0u8; PLEN*8];
-                    write_u64v_le(&mut state_copy, &self.state.state);
-                    &state_copy
-                } else { unreachable!() };
-
+                let mut out = GenericArray::default();
                 let n = out.len();
-                out.copy_from_slice(&state_ref[..n]);
-
+                self.state.as_bytes(|state| {
+                    out.copy_from_slice(&state[..n]);
+                });
                 out
             }
         }
@@ -83,7 +75,7 @@ macro_rules! shake_impl {
             fn xof_result(mut self) -> Sha3XofReader
             {
                 self.apply_padding();
-                Sha3XofReader::new(self.state.state, $rate::to_usize())
+                Sha3XofReader::new(self.state, $rate::to_usize())
             }
         }
 

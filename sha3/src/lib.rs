@@ -30,11 +30,13 @@
 //! println!("{:x}", out);
 //! ```
 
-#![no_std]
+//#![no_std]
 extern crate byte_tools;
 #[macro_use]
 extern crate digest;
 extern crate block_buffer;
+
+use std as core;
 
 pub use digest::Digest;
 use block_buffer::{
@@ -46,9 +48,6 @@ use digest::generic_array::typenum::{
     U28, U32, U48, U64, U72, U104, U136, U144, U168, Unsigned,
 };
 
-use byte_tools::write_u64v_le;
-use core::mem::transmute;
-
 mod keccak;
 mod consts;
 mod paddings;
@@ -58,7 +57,6 @@ mod reader;
 mod state;
 
 pub use reader::Sha3XofReader;
-use consts::PLEN;
 use state::Sha3State;
 
 sha3_impl!(Keccak224, U28, U144, BlockBuffer1152, paddings::Keccak);
