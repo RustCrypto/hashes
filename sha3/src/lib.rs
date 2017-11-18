@@ -29,14 +29,11 @@
 //!
 //! println!("{:x}", out);
 //! ```
-
-//#![no_std]
+#![no_std]
 extern crate byte_tools;
 #[macro_use]
 extern crate digest;
 extern crate block_buffer;
-
-use std as core;
 
 pub use digest::Digest;
 use block_buffer::{
