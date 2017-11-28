@@ -1,0 +1,19 @@
+[package]
+name = "jh-x86_64"
+version = "0.1.0"
+authors = ["Kaz Wesley <keziahw@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "Optimized JH for x86-64 cpus"
+documentation = "https://docs.rs/jh-x86_64"
+keywords = ["crypto", "jh", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+repository = "https://github.com/kazcw/jh-x86_64"
+
+[dependencies]
+digest = { version = "^0.7.1", features = ["dev"] }
+
+[build-dependencies]
+cc = "1.0.3"
+
+[badges]
+travis-ci = { repository = "kazcw/jh-x86_64" }
