@@ -1,0 +1,20 @@
+[package]
+name = "blake"
+version = "0.1.0"
+authors = ["Kaz Wesley <keziahw@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "BLAKE hash functions"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "blake", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+block-buffer = "0.3"
+byte-tools = "0.2"
+digest = "0.7"
+
+[dev-dependencies]
+hex_literals = "0.1.6"
+
+[badges]
+travis-ci = { repository = "RustCrypto/hashes" }
