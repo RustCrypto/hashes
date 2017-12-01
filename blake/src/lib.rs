@@ -65,7 +65,7 @@ macro_rules! define_compressor {
                 &v[..8].copy_from_slice(&self.state.h);
                 &v[8..].copy_from_slice(&U[..8]);
                 for (vx, sx) in v[8..11].iter_mut().zip(&self.state.s) {
-                    *vx ^= sx;
+                    *vx ^= *sx;
                 }
 
                 // don't xor t when the block is only padding
@@ -90,7 +90,7 @@ macro_rules! define_compressor {
                 }
 
                 for (i, vx) in v.iter().enumerate() {
-                    self.state.h[i % 8] ^= vx;
+                    self.state.h[i % 8] ^= *vx;
                 }
 
                 for (i, hx) in self.state.h.iter_mut().enumerate() {
