@@ -11,10 +11,7 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 block-buffer = "0.3"
 byte-tools = "0.2"
-digest = "0.7"
-
-[dev-dependencies]
-hex_literals = "0.1.6"
+digest = { version = "^0.7.1", features = ["dev"] }
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

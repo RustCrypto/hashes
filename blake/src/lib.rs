@@ -3,8 +3,6 @@
 //! Classic Blake in a Rustic setting
 
 #![no_std]
-#![cfg_attr(test, feature(plugin))]
-#![cfg_attr(test, plugin(hex_literals))]
 
 extern crate block_buffer;
 extern crate byte_tools;
@@ -12,14 +10,11 @@ pub extern crate digest;
 
 mod consts;
 
-#[cfg(test)]
-mod tests;
-
 use core::mem;
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C)]
 struct State<T> {
     h: [T; 8],
@@ -31,6 +26,7 @@ struct State<T> {
 macro_rules! define_compressor {
     ($compressor:ident, $word:ident, $buf:expr, $deserializer:ident, $uval:expr,
      $rounds:expr, $shift0:expr, $shift1:expr, $shift2: expr, $shift3: expr) => {
+        #[derive(Clone, Copy, Debug)]
         struct $compressor {
             state: State<$word>
         }
@@ -108,9 +104,19 @@ macro_rules! define_compressor {
 macro_rules! define_hasher {
     ($name:ident, $word:ident, $buf:expr, $Buffer:ident, $bits:expr, $Bytes:ident,
      $serializer:ident, $compressor:ident, $iv:expr) => {
+        #[derive(Clone, Copy)]
         pub struct $name {
             compressor: $compressor,
             buffer: $Buffer
+        }
+
+        impl core::fmt::Debug for $name {
+            fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
+                f.debug_struct("Blake")
+                    .field("compressor", &self.compressor)
+                    .field("buffer.position()", &self.buffer.position())
+                    .finish()
+            }
         }
 
         impl Default for $name {
@@ -128,7 +134,6 @@ macro_rules! define_hasher {
                 }
             }
         }
-
 
         impl digest::BlockInput for $name {
             type BlockSize = $Bytes;
