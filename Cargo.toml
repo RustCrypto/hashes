@@ -10,6 +10,7 @@ members = [
     "sha1",
     "sha2",
     "sha3",
+    "skein",
     "streebog",
     "whirlpool",
 ]
