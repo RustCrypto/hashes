@@ -13,7 +13,7 @@
    Compare with the original JH sse2 code (October 2008) for 64-bit platform, we made the modifications:
    a) The Sbox implementation follows exactly the description given in the document
    b) Data alignment definition is improved so that the code can be compiled by GCC, Intel C++ compiler and Microsoft Visual C compiler
-   c) Using y0,y1,..,y7 variables in Function F8 for performance improvement (local variable in function F8 so that compiler can optimize the code easily)
+   c) Using y0,y1,..,y7 variables in Function f8 for performance improvement (local variable in function f8 so that compiler can optimize the code easily)
    d) Removed a number of intermediate variables from the program (so as to given compiler more freedom to optimize the code)
    e) Using "for" loop to implement 42 rounds (with 7 rounds in each loop), so as to reduce the code size.
 
@@ -40,11 +40,7 @@ typedef unsigned long long DataLength;
 #endif
 
 typedef struct {
-      int hashbitlen;	                /*the message digest size*/
-      unsigned long long databitlen;    /*the message size in bits*/
-      unsigned long long datasize_in_buffer;           /*the size of the message remained in buffer; assumed to be multiple of 8bits except for the last partial block at the end of the message*/
       word128  x0,x1,x2,x3,x4,x5,x6,x7; /*1024-bit state;*/
-      unsigned char buffer[64];         /*512-bit message block;*/
 } hashState;
 
 /*42 round constants, each round constant is 32-byte (256-bit)*/
@@ -93,11 +89,7 @@ DATA_ALIGN16(const unsigned char E8_bitslice_roundconstant[42][32])={
 {0x35,0xb4,0x98,0x31,0xdb,0x41,0x15,0x70,0xea,0x1e,0xf,0xbb,0xed,0xcd,0x54,0x9b,0x9a,0xd0,0x63,0xa1,0x51,0x97,0x40,0x72,0xf6,0x75,0x9d,0xbf,0x91,0x47,0x6f,0xe2}};
 
 
-void F8(hashState *state);    /* the compression function F8 */
-
-/*The API functions*/
-void jh_update(hashState *state, const BitSequence *data, DataLength databitlen);
-void jh_final(hashState *state);
+void f8(hashState *state, const BitSequence *block);    /* the compression function f8 */
 
 /*The following defines operations on 128-bit word(s)*/
 #define CONSTANT(b)   _mm_set1_epi8((b))          /*set each byte in a 128-bit register to be "b"*/
@@ -132,6 +124,7 @@ void jh_final(hashState *state);
 #define SWAP64(x)     _mm_shuffle_epi32((x),_MM_SHUFFLE(1,0,3,2))  /*swapping bits 128i||128i+1||...||128i+63 with bits 128i+64||128i+65||...||128i+127 of the 128-bit x*/
 #define STORE(x,p)    _mm_store_si128((__m128i *)(p), (x))         /*store the 128-bit word x into memeory address p, where p is the multile of 16 bytes*/
 #define LOAD(p)       _mm_load_si128((__m128i *)(p))               /*load 16 bytes from the memory address p, return a 128-bit word, where p is the multile of 16 bytes*/
+#define LOADU(p)       _mm_loadu_si128((__m128i *)(p))
 
 /*The MDS code*/
 #define L(m0,m1,m2,m3,m4,m5,m6,m7)     \
@@ -224,8 +217,8 @@ void jh_final(hashState *state);
       SS(y0,y2,y4,y6,y1,y3,y5,y7, LOAD(E8_bitslice_roundconstant[r]), LOAD(E8_bitslice_roundconstant[r]+16) ); \
       lineartransform_R##nn(y0,y2,y4,y6,y1,y3,y5,y7);
 
-/*the compression function F8 */
-void F8(hashState *state)
+/*the compression function f8 */
+void f8(hashState *state, const BitSequence *block)
 {
       uint64 i;
       word128  y0,y1,y2,y3,y4,y5,y6,y7;
@@ -241,10 +234,10 @@ void F8(hashState *state)
       y7 = state->x7;
 
       /*xor the 512-bit message with the fist half of the 1024-bit hash state*/
-      y0 = XOR(y0, LOAD(state->buffer));
-      y1 = XOR(y1, LOAD(state->buffer+16));
-      y2 = XOR(y2, LOAD(state->buffer+32));
-      y3 = XOR(y3, LOAD(state->buffer+48));
+      y0 = XOR(y0, LOADU(block));
+      y1 = XOR(y1, LOADU(block+16));
+      y2 = XOR(y2, LOADU(block+32));
+      y3 = XOR(y3, LOADU(block+48));
 
       /*perform 42 rounds*/
       for (i = 0; i < 42; i = i+7) {
@@ -258,10 +251,10 @@ void F8(hashState *state)
       }
 
       /*xor the 512-bit message with the second half of the 1024-bit hash state*/
-      y4 = XOR(y4, LOAD(state->buffer));
-      y5 = XOR(y5, LOAD(state->buffer+16));
-      y6 = XOR(y6, LOAD(state->buffer+32));
-      y7 = XOR(y7, LOAD(state->buffer+48));
+      y4 = XOR(y4, LOADU(block));
+      y5 = XOR(y5, LOADU(block+16));
+      y6 = XOR(y6, LOADU(block+32));
+      y7 = XOR(y7, LOADU(block+48));
 
       state->x0 = y0;
       state->x1 = y1;
@@ -271,111 +264,4 @@ void F8(hashState *state)
       state->x5 = y5;
       state->x6 = y6;
       state->x7 = y7;
-}
-
-/*hash each 512-bit message block, except the last partial block*/
-void jh_update(hashState *state, const BitSequence *data, DataLength databitlen)
-{
-      DataLength index; /*the starting address of the data to be compressed*/
-
-      state->databitlen += databitlen;
-      index = 0;
-
-      /*if there is remaining data in the buffer, fill it to a full message block first*/
-      /*we assume that the size of the data in the buffer is the multiple of 8 bits if it is not at the end of a message*/
-
-      /*There is data in the buffer, but the incoming data is insufficient for a full block*/
-      if ( (state->datasize_in_buffer > 0 ) && (( state->datasize_in_buffer + databitlen) < 512)  ) {
-            if ( (databitlen & 7) == 0 ) {
-                 memcpy(state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3)) ;
-		    }
-            else memcpy(state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3)+1) ;
-            state->datasize_in_buffer += databitlen;
-            databitlen = 0;
-      }
-
-      /*There is data in the buffer, and the incoming data is sufficient for a full block*/
-      if ( (state->datasize_in_buffer > 0 ) && (( state->datasize_in_buffer + databitlen) >= 512)  ) {
-	        memcpy( state->buffer + (state->datasize_in_buffer >> 3), data, 64-(state->datasize_in_buffer >> 3) ) ;
-	        index = 64-(state->datasize_in_buffer >> 3);
-	        databitlen = databitlen - (512 - state->datasize_in_buffer);
-	        F8(state);
-	        state->datasize_in_buffer = 0;
-      }
-
-      /*hash the remaining full message blocks*/
-      for ( ; databitlen >= 512; index = index+64, databitlen = databitlen - 512) {
-            memcpy(state->buffer, data+index, 64);
-            F8(state);
-      }
-
-      /*store the partial block into buffer, assume that -- if part of the last byte is not part of the message, then that part consists of 0 bits*/
-      if ( databitlen > 0) {
-            if ((databitlen & 7) == 0)
-                  memcpy(state->buffer, data+index, (databitlen & 0x1ff) >> 3);
-            else
-                  memcpy(state->buffer, data+index, ((databitlen & 0x1ff) >> 3)+1);
-            state->datasize_in_buffer = databitlen;
-      }
-}
-
-/*pad the message, process the padded block(s), truncate the hash value H to obtain the message digest*/
-void jh_final(hashState *state)
-{
-	  unsigned int i;
-      DATA_ALIGN16(unsigned char t[64]);
-
-      if ( (state->databitlen & 0x1ff) == 0 )
-      {
-          /*pad the message when databitlen is multiple of 512 bits, then process the padded block*/
-          memset(state->buffer,0,64);
-          state->buffer[0] = 0x80;
-          state->buffer[63] = state->databitlen & 0xff;
-          state->buffer[62] = (state->databitlen >> 8) & 0xff;
-          state->buffer[61] = (state->databitlen >> 16) & 0xff;
-          state->buffer[60] = (state->databitlen >> 24) & 0xff;
-          state->buffer[59] = (state->databitlen >> 32) & 0xff;
-          state->buffer[58] = (state->databitlen >> 40) & 0xff;
-          state->buffer[57] = (state->databitlen >> 48) & 0xff;
-          state->buffer[56] = (state->databitlen >> 56) & 0xff;
-          F8(state);
-      }
-      else  {
-           /*set the rest of the bytes in the buffer to 0*/
-           if ( (state->datasize_in_buffer & 7) == 0)
-               for (i = (state->databitlen & 0x1ff) >> 3; i < 64; i++)  state->buffer[i] = 0;
-           else
-               for (i = ((state->databitlen & 0x1ff) >> 3)+1; i < 64; i++)  state->buffer[i] = 0;
-
-          /*pad and process the partial block when databitlen is not multiple of 512 bits, then hash the padded blocks*/
-          state->buffer[((state->databitlen & 0x1ff) >> 3)] |= 1 << (7- (state->databitlen & 7));
-          F8(state);
-          memset(state->buffer,0,64);
-          state->buffer[63] = state->databitlen & 0xff;
-          state->buffer[62] = (state->databitlen >> 8) & 0xff;
-          state->buffer[61] = (state->databitlen >> 16) & 0xff;
-          state->buffer[60] = (state->databitlen >> 24) & 0xff;
-          state->buffer[59] = (state->databitlen >> 32) & 0xff;
-          state->buffer[58] = (state->databitlen >> 40) & 0xff;
-          state->buffer[57] = (state->databitlen >> 48) & 0xff;
-          state->buffer[56] = (state->databitlen >> 56) & 0xff;
-          F8(state);
-      }
-
-      /*truncting the final hash value to generate the message digest*/
-
-      STORE(state->x4,t);
-      STORE(state->x5,t+16);
-      STORE(state->x6,t+32);
-      STORE(state->x7,t+48);
-
-      /*
-      switch (state->hashbitlen)
-      {
-          case 224: memcpy(hashval,t+36,28); break;
-          case 256: memcpy(hashval,t+32,32); break;
-          case 384: memcpy(hashval,t+16,48); break;
-          case 512: memcpy(hashval,t,64);    break;
-      }
-      */
 }
