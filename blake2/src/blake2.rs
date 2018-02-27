@@ -80,6 +80,11 @@ macro_rules! blake2_impl {
             /// make sure to compare codes in constant time! It can be done
             /// for example by using `subtle` crate.
             pub fn new_keyed(key: &[u8], output_size: usize) -> Self {
+                Self::with_params(key, &[], &[], output_size)
+            }
+
+            /// Creates a new hashing context with the full set of sequential-mode parameters.
+            pub fn with_params(key: &[u8], salt: &[u8], persona: &[u8], output_size: usize) -> Self {
                 let kk = key.len();
                 assert!(kk <= $bytes::to_usize());
                 assert!(output_size <= $bytes::to_usize());
