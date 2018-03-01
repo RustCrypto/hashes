@@ -1,6 +1,6 @@
 macro_rules! blake2_impl {
     (
-        $state:ident, $fix_state:ident, $word:ident, $vec:ident, $bytes:ident,
+        $state:ident, $fix_state:ident, $word:ident, $vec:ident, $pack:ident, $bytes:ident,
         $block_size:ident, $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr,
         $vardoc:expr, $doc:expr,
     ) => {
@@ -8,11 +8,13 @@ macro_rules! blake2_impl {
         use $crate::as_bytes::AsBytes;
         use $crate::simd::{Vector4, $vec};
 
+        use byteorder::{ByteOrder, LittleEndian};
         use digest::{Input, BlockInput, FixedOutput, VariableOutput, Reset};
         use digest::InvalidOutputSize;
         use digest::generic_array::GenericArray;
-        use digest::generic_array::typenum::Unsigned;
+        use digest::generic_array::typenum::{U4, Unsigned};
         use core::cmp;
+        use core::ops::Div;
         use byte_tools::{copy, zero};
         use crypto_mac::{Mac, MacResult, InvalidKeyLength};
 
@@ -89,19 +91,43 @@ macro_rules! blake2_impl {
                 assert!(kk <= $bytes::to_usize());
                 assert!(output_size <= $bytes::to_usize());
 
-                let p0 = 0x0101_0000 ^ ((kk as $word) << 8) ^
-                    (output_size as $word);
-                let h0 = [iv0() ^ $vec::new(p0, 0, 0, 0), iv1()];
-                let mut state = $state {
-                    m: [0; 16],
-                    h: h0,
-                    t: 0,
-                    n: output_size,
+                // The number of bytes needed to express two words.
+                let length = $bytes::to_usize()/4;
+                assert!(salt.len() <= length);
+                assert!(persona.len() <= length);
 
-                    t0: 0,
-                    m0: [0; 16],
-                    h0: h0,
-                };
+                // Build a parameter block
+                let mut p = [0 as $word; 8];
+                p[0] = 0x0101_0000 ^ ((kk as $word) << 8) ^
+                    (output_size as $word);
+
+                // salt is two words long
+                if salt.len() < length {
+                    let mut padded_salt = GenericArray::<u8, <$bytes as Div<U4>>::Output>::default();
+                    for i in 0..salt.len() {
+                        padded_salt[i] = salt[i];
+                    }
+                    p[4] = LittleEndian::$pack(&padded_salt[0 .. length/2]);
+                    p[5] = LittleEndian::$pack(&padded_salt[length/2 .. padded_salt.len()]);
+                } else {
+                    p[4] = LittleEndian::$pack(&salt[0 .. salt.len()/2]);
+                    p[5] = LittleEndian::$pack(&salt[salt.len()/2 .. salt.len()]);
+                }
+
+                // persona is also two words long
+                if persona.len() < length {
+                    let mut padded_persona = GenericArray::<u8, <$bytes as Div<U4>>::Output>::default();
+                    for i in 0..persona.len() {
+                        padded_persona[i] = persona[i];
+                    }
+                    p[6] = LittleEndian::$pack(&padded_persona[0 .. length/2]);
+                    p[7] = LittleEndian::$pack(&padded_persona[length/2 .. padded_persona.len()]);
+                } else {
+                    p[6] = LittleEndian::$pack(&persona[0 .. length/2]);
+                    p[7] = LittleEndian::$pack(&persona[length/2 .. persona.len()]);
+                }
+
+                let mut state = Self::with_parameter_block(&p);
 
                 if kk > 0 {
                     copy(key, state.m.as_mut_bytes());
@@ -286,6 +312,14 @@ macro_rules! blake2_impl {
         #[doc=$doc]
         pub struct $fix_state {
             state: $state,
+        }
+
+        impl $fix_state {
+            /// Creates a new hashing context with the full set of sequential-mode parameters.
+            pub fn with_params(key: &[u8], salt: &[u8], persona: &[u8]) -> Self {
+                let state = $state::with_params(key, salt, persona, $bytes::to_usize());
+                Self { state }
+            }
         }
 
         impl Default for $fix_state {

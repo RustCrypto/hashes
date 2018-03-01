@@ -12,6 +12,7 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 digest = "0.8"
 byte-tools = "0.3"
+byteorder = "1"
 crypto-mac = "0.7"
 opaque-debug = "0.2"
 
