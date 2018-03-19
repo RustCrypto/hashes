@@ -1,4 +1,4 @@
-extern crate gcc;
+extern crate cc;
 
 fn main() {
     let asm_path = if cfg!(target_arch = "x86") {
@@ -8,8 +8,8 @@ fn main() {
     } else {
         panic!("Unsupported target architecture");
     };
-    gcc::Config::new()
-                .flag("-c")
-                .file(asm_path)
-                .compile("libsha1.a");
+    cc::Build::new()
+              .flag("-c")
+              .file(asm_path)
+              .compile("libsha1.a");
 }

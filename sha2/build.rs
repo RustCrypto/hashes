@@ -1,4 +1,4 @@
-extern crate gcc;
+extern crate cc;
 
 fn main() {
     let (sha256_path, sha512_path) = if cfg!(target_arch = "x86") {
@@ -8,12 +8,12 @@ fn main() {
     } else {
         panic!("Unsupported target architecture");
     };
-    gcc::Config::new()
-                .flag("-c")
-                .file(sha256_path)
-                .compile("libsha256.a");
-    gcc::Config::new()
-                .flag("-c")
-                .file(sha512_path)
-                .compile("libsha512.a");
+    cc::Build::new()
+              .flag("-c")
+              .file(sha256_path)
+              .compile("libsha256.a");
+    cc::Build::new()
+              .flag("-c")
+              .file(sha512_path)
+              .compile("libsha512.a");
 }
