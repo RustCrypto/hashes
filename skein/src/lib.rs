@@ -3,6 +3,7 @@
 #![no_std]
 
 extern crate block_buffer;
+extern crate block_padding;
 extern crate byte_tools;
 extern crate threefish;
 pub extern crate digest;
@@ -10,7 +11,8 @@ pub extern crate digest;
 pub use digest::generic_array::GenericArray;
 pub use digest::Digest;
 
-use block_buffer::{BlockBuffer1024, BlockBuffer256, BlockBuffer512, ZeroPadding};
+use block_buffer::{BlockBuffer1024, BlockBuffer256, BlockBuffer512};
+use block_padding::ZeroPadding;
 use byte_tools::{write_u64_le, write_u64v_le};
 use core::mem;
 use digest::generic_array::ArrayLength;
@@ -107,7 +109,7 @@ macro_rules! define_hasher {
             fn process(&mut self, data: &[u8]) {
                 let buffer = &mut self.buffer;
                 let state = &mut self.state;
-                buffer.input_with_lazy_flush(data, |block| Self::process_block(state, block, $state_bits/8));
+                buffer.input_lazy(data, |block| Self::process_block(state, block, $state_bits/8));
             }
         }
 
@@ -117,7 +119,7 @@ macro_rules! define_hasher {
             fn fixed_result(mut self) -> GenericArray<u8, N> {
                 self.state.t[1] |= T1_FLAG_FINAL;
                 let pos = self.buffer.position();
-                let final_block = self.buffer.pad_with::<ZeroPadding>();
+                let final_block = self.buffer.pad_with::<ZeroPadding>().unwrap();
                 Self::process_block(&mut self.state, final_block, pos);
 
                 // run Threefish in "counter mode" to generate output

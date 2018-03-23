@@ -1,6 +1,6 @@
 [package]
 name = "skein"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Kaz Wesley <keziahw@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = "Skein hash functions"
@@ -9,7 +9,8 @@ keywords = ["crypto", "skein", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-block-buffer = "0.3.3"
+block-buffer = { git = "git://github.com/RustCrypto/utils", rev = "82f3e1b8", version = "0.4.0" }
+block-padding = "0.1.0"
 byte-tools = "0.2.0"
 digest = { version = "^0.7.1", features = ["dev"] }
-threefish = "0.1.0"
+threefish = { git = "git://github.com/kazcw/RustCrypto-block-ciphers", branch = "threefish", version = "0.1.0" }
