@@ -33,6 +33,7 @@
 extern crate byte_tools;
 #[macro_use]
 extern crate digest;
+extern crate keccak;
 extern crate block_buffer;
 
 pub use digest::Digest;
@@ -45,8 +46,6 @@ use digest::generic_array::typenum::{
     U28, U32, U48, U64, U72, U104, U136, U144, U168, Unsigned,
 };
 
-mod keccak;
-mod consts;
 mod paddings;
 #[macro_use]
 mod macros;
