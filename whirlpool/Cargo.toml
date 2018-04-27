@@ -1,7 +1,7 @@
 [package]
 name = "whirlpool-asm"
-version = "0.4.0"
-authors = ["The RustCrypto Devs"]
+version = "0.5.0"
+authors = ["RustCrypto Developers"]
 license = "MIT"
 description = "Assembly implementation of Whirlpool compression function"
 documentation = "https://docs.rs/whirlpool-asm"
@@ -10,7 +10,6 @@ keywords = ["crypto", "whirlpool", "asm"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-generic-array = "0.10"
 
 [build-dependencies]
 cc = "1.0"
