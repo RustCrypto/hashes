@@ -26,7 +26,6 @@
 #[macro_use]
 extern crate digest;
 extern crate block_buffer;
-#[cfg(not(feature = "asm"))]
 extern crate byte_tools;
 #[cfg(feature = "asm")]
 extern crate whirlpool_asm as utils;
@@ -37,7 +36,8 @@ use utils::compress;
 
 pub use digest::Digest;
 #[cfg(not(feature = "asm"))]
-use byte_tools::{write_u64v_be, zero};
+use byte_tools::write_u64v_be;
+use byte_tools::zero;
 use block_buffer::{BlockBuffer512, ZeroPadding};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U64;
@@ -48,7 +48,7 @@ mod consts;
 type BlockSize = U64;
 
 
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone)]
 pub struct Whirlpool {
     bit_length: [u8; 32],
     buffer: BlockBuffer512,
@@ -56,6 +56,19 @@ pub struct Whirlpool {
     hash: [u64; 8],
     #[cfg(feature = "asm")]
     hash: [u8; 64],
+}
+
+impl Default for Whirlpool {
+    fn default() -> Self {
+        Self {
+            bit_length: [0u8; 32],
+            buffer: BlockBuffer512::default(),
+            #[cfg(not(feature = "asm"))]
+            hash: [0u64; 8],
+            #[cfg(feature = "asm")]
+            hash: [0u8; 64],
+        }
+    }
 }
 
 impl Whirlpool {
@@ -136,7 +149,7 @@ impl digest::FixedOutput for Whirlpool {
     #[cfg(feature = "asm")]
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
-        self.hash
+        GenericArray::clone_from_slice(&self.hash)
     }
 }
 
