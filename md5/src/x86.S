@@ -23,8 +23,13 @@
 
 
 /* void md5_compress(uint32_t state[4], const uint8_t block[64]) */
+#ifdef __APPLE__
+.globl _md5_compress
+_md5_compress:
+#else
 .globl md5_compress
 md5_compress:
+#endif
     /* 
      * Storage usage:
      *   Bytes  Location  Description

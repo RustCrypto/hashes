@@ -23,8 +23,13 @@
 
 
 /* void sha256_compress(uint32_t state[8], const uint8_t block[64]) */
+#ifdef __APPLE__
+.globl _sha256_compress
+_sha256_compress:
+#else
 .globl sha256_compress
 sha256_compress:
+#endif
     /* 
      * Storage usage:
      *   Bytes  Location  Description

@@ -23,8 +23,13 @@
 
 
 /* void sha1_compress(uint32_t state[5], const uint8_t block[64]) */
+#ifdef __APPLE__
+.globl _sha1_compress
+_sha1_compress:
+#else
 .globl sha1_compress
 sha1_compress:
+#endif
     /* 
      * Storage usage:
      *   Bytes  Location  Description

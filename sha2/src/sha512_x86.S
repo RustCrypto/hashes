@@ -23,8 +23,13 @@
 
 
 /* void sha512_compress(uint64_t state[8], const uint8_t block[128]) */
+#ifdef __APPLE__
+.globl _sha512_compress
+_sha512_compress:
+#else
 .globl sha512_compress
 sha512_compress:
+#endif
     /* 
      * Storage usage:
      *   Bytes  Location    Description
