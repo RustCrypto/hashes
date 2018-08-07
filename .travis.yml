@@ -25,10 +25,6 @@ matrix:
         - rustup target install armv7-unknown-linux-gnueabihf
         - rustup component add rust-src
 
-install:
-  - curl -LSfs https://japaric.github.io/trust/install.sh | sh -s -- --git japaric/cross --force
-  - source ~/.cargo/env || true
-
 script:
   - cross test --verbose --all --release --target $TARGET
 
