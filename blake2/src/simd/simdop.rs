@@ -6,7 +6,7 @@
 // copied, modified, or distributed except according to those terms.
 
 use simd::simdty::{u32x4, u64x4};
-#[cfg(feature = "simd")] use simdint;
+#[cfg(feature = "simd")] use simd::simdint;
 
 use core::ops::{Add, BitXor, Shl, Shr};
 

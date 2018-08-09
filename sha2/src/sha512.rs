@@ -1,4 +1,4 @@
-use digest;
+use digest::{Input, BlockInput, FixedOutput};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U28, U32, U48, U64, U128};
 use block_buffer::BlockBuffer1024;
@@ -81,22 +81,23 @@ impl Default for Sha512 {
     fn default() -> Self { Sha512 { engine: Engine512::new(&H512) } }
 }
 
-impl digest::BlockInput for Sha512 {
+impl BlockInput for Sha512 {
     type BlockSize = BlockSize;
 }
 
-impl digest::Input for Sha512 {
+impl Input for Sha512 {
     fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
 }
 
-impl digest::FixedOutput for Sha512 {
+impl FixedOutput for Sha512 {
     type OutputSize = U64;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::default();
         write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..]);
+        *self = Default::default();
         out
     }
 }
@@ -114,22 +115,23 @@ impl Default for Sha384 {
     fn default() -> Self { Sha384 { engine: Engine512::new(&H384) } }
 }
 
-impl digest::BlockInput for Sha384 {
+impl BlockInput for Sha384 {
     type BlockSize = BlockSize;
 }
 
-impl digest::Input for Sha384 {
+impl Input for Sha384 {
     fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
 }
 
-impl digest::FixedOutput for Sha384 {
+impl FixedOutput for Sha384 {
     type OutputSize = U48;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::default();
         write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..6]);
+        *self = Default::default();
         out
     }
 }
@@ -149,22 +151,23 @@ impl Default for Sha512Trunc256 {
     }
 }
 
-impl digest::BlockInput for Sha512Trunc256 {
+impl BlockInput for Sha512Trunc256 {
     type BlockSize = BlockSize;
 }
 
-impl digest::Input for Sha512Trunc256 {
+impl Input for Sha512Trunc256 {
     fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
 }
 
-impl digest::FixedOutput for Sha512Trunc256 {
+impl FixedOutput for Sha512Trunc256 {
     type OutputSize = U32;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::default();
         write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..4]);
+        *self = Default::default();
         out
     }
 }
@@ -182,23 +185,24 @@ impl Default for Sha512Trunc224 {
     }
 }
 
-impl digest::BlockInput for Sha512Trunc224 {
+impl BlockInput for Sha512Trunc224 {
     type BlockSize = BlockSize;
 }
 
-impl digest::Input for Sha512Trunc224 {
+impl Input for Sha512Trunc224 {
     fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
 }
 
-impl digest::FixedOutput for Sha512Trunc224 {
+impl FixedOutput for Sha512Trunc224 {
     type OutputSize = U28;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::default();
         write_u64v_be(&mut out[..24], &self.engine.state.h[..3]);
         write_u32_be(&mut out[24..28], (self.engine.state.h[3] >> 32) as u32);
+        *self = Default::default();
         out
     }
 }
@@ -207,3 +211,8 @@ impl_opaque_debug!(Sha384);
 impl_opaque_debug!(Sha512);
 impl_opaque_debug!(Sha512Trunc224);
 impl_opaque_debug!(Sha512Trunc256);
+
+impl_write!(Sha384);
+impl_write!(Sha512);
+impl_write!(Sha512Trunc224);
+impl_write!(Sha512Trunc256);

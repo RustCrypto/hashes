@@ -1,4 +1,4 @@
-use core::ops::Div;
+use ops::Div;
 
 use digest;
 use block_buffer::BlockBuffer;
@@ -23,16 +23,16 @@ impl<BlockSize> Groestl<BlockSize>
           BlockSize::ArrayType: Copy,
           Quot<BlockSize, U8>: ArrayLength<u8>,
 {
-    pub fn new(output_size: usize) -> Result<Self, digest::InvalidLength> {
+    pub fn new(output_size: usize) -> Result<Self, digest::InvalidOutputSize> {
         match BlockSize::to_usize() {
             128 => {
                 if output_size <= 32 || output_size > 64 {
-                    return Err(digest::InvalidLength);
+                    return Err(digest::InvalidOutputSize);
                 }
             },
             64 => {
                 if output_size == 0 || output_size > 32 {
-                    return Err(digest::InvalidLength);
+                    return Err(digest::InvalidOutputSize);
                 }
             },
             _ => unreachable!(),
@@ -53,16 +53,26 @@ impl<BlockSize> Groestl<BlockSize>
         );
     }
 
-    pub fn finalize(mut self) -> GenericArray<u8, BlockSize> {
-        let state = &mut self.state;
-        let l = if self.buffer.remaining() <= 8 {
-            state.num_blocks + 2
-        } else {
-            state.num_blocks + 1
+    pub fn finalize(&mut self) -> GenericArray<u8, BlockSize> {
+        let res = {
+            let state = &mut self.state;
+            let l = if self.buffer.remaining() <= 8 {
+                state.num_blocks + 2
+            } else {
+                state.num_blocks + 1
+            };
+            // remove this mess by adding `len_padding_be` method
+            let l = if cfg!(target_endian = "little") {
+                l.to_be()
+            } else {
+                l.to_le()
+            };
+            self.buffer.len_padding(l, |b| state.compress(b));
+            xor_generic_array(&state.p(&state.state), &state.state)
         };
-        // remove this mess by adding `len_padding_be` method
-        let l = if cfg!(target_endian = "little") { l.to_be() } else { l.to_le() };
-        self.buffer.len_padding(l, |b| state.compress(b));
-        xor_generic_array(&state.p(&state.state), &state.state)
+
+        self.buffer = Default::default();
+        self.state = GroestlState::new(self.output_size);
+        res
     }
 }

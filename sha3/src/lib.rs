@@ -19,7 +19,7 @@
 //! use sha3::{Digest, Sha3_256};
 //!
 //! // create a SHA3-256 object
-//! let mut hasher = Sha3_256::default();
+//! let mut hasher = Sha3_256::new();
 //!
 //! // write input message
 //! hasher.input(b"abc");
@@ -29,13 +29,15 @@
 //!
 //! println!("{:x}", out);
 //! ```
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 extern crate byte_tools;
-#[macro_use]
-extern crate digest;
+extern crate keccak;
 extern crate block_buffer;
+#[macro_use] extern crate opaque_debug;
+#[macro_use] extern crate digest;
 
 pub use digest::Digest;
+use digest::{Input, BlockInput, FixedOutput, ExtendableOutput};
 use block_buffer::{
     BlockBuffer576, BlockBuffer832, BlockBuffer1152, BlockBuffer1088,
     BlockBuffer1344,
@@ -45,8 +47,6 @@ use digest::generic_array::typenum::{
     U28, U32, U48, U64, U72, U104, U136, U144, U168, Unsigned,
 };
 
-mod keccak;
-mod consts;
 mod paddings;
 #[macro_use]
 mod macros;

@@ -1,12 +1,13 @@
 //! An implementation of the RIPEMD-160 cryptographic hash.
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 extern crate byte_tools;
-#[macro_use]
-extern crate digest;
 extern crate block_buffer;
+#[macro_use] extern crate opaque_debug;
+#[macro_use] extern crate digest;
 
 pub use digest::Digest;
+use digest::{Input, BlockInput, FixedOutput};
 use byte_tools::write_u32v_le;
 use block_buffer::BlockBuffer512;
 use digest::generic_array::GenericArray;
@@ -33,11 +34,11 @@ impl Default for Ripemd160 {
     }
 }
 
-impl digest::BlockInput for Ripemd160 {
+impl BlockInput for Ripemd160 {
     type BlockSize = U64;
 }
 
-impl digest::Input for Ripemd160 {
+impl Input for Ripemd160 {
     fn process(&mut self, input: &[u8]) {
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += input.len() as u64;
@@ -46,10 +47,10 @@ impl digest::Input for Ripemd160 {
     }
 }
 
-impl digest::FixedOutput for Ripemd160 {
+impl FixedOutput for Ripemd160 {
     type OutputSize = U20;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
         {
             let h = &mut self.h;
             let l = self.len << 3;
@@ -58,8 +59,10 @@ impl digest::FixedOutput for Ripemd160 {
 
         let mut out = GenericArray::default();
         write_u32v_le(&mut out[..], &self.h);
+        *self = Default::default();
         out
     }
 }
 
 impl_opaque_debug!(Ripemd160);
+impl_write!(Ripemd160);

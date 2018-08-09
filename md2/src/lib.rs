@@ -4,13 +4,13 @@
 
 // Range loops are preferred for reading simplicity
 #![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
-
-#![no_std]
-#[macro_use]
-extern crate digest;
+#![cfg_attr(not(feature = "std"), no_std)]
+#[macro_use] extern crate opaque_debug;
+#[macro_use] extern crate digest;
 extern crate block_buffer;
 
 pub use digest::Digest;
+use digest::{Input, BlockInput, FixedOutput};
 use block_buffer::{BlockBuffer128, Pkcs7};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U16;
@@ -78,11 +78,11 @@ impl Md2 {
 }
 
 
-impl digest::BlockInput for Md2 {
+impl BlockInput for Md2 {
     type BlockSize = U16;
 }
 
-impl digest::Input for Md2 {
+impl Input for Md2 {
     fn process(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| {
@@ -91,14 +91,16 @@ impl digest::Input for Md2 {
     }
 }
 
-impl digest::FixedOutput for Md2 {
+impl FixedOutput for Md2 {
     type OutputSize = U16;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
-
-        GenericArray::clone_from_slice(&self.state.x[0..16])
+        let res = GenericArray::clone_from_slice(&self.state.x[0..16]);
+        *self = Default::default();
+        res
     }
 }
 
 impl_opaque_debug!(Md2);
+impl_write!(Md2);

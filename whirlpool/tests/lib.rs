@@ -3,19 +3,12 @@
 extern crate digest;
 extern crate whirlpool;
 
-use digest::dev::{Test, main_test, one_million_a};
+use digest::dev::{one_million_a, digest_test};
 
-#[test]
-fn whirlpool_main() {
-    let tests = new_tests!("test1", "test2", "test3", "test4", "test5", "test6",
-                           "test7", "test8", "test9", "test10", "test11",
-                           "test12", "test13", "test14", "test15", "test16",
-                           "test17", "test18");
-    main_test::<whirlpool::Whirlpool>(&tests);
-}
+new_test!(whirlpool_main, "whirlpool", whirlpool::Whirlpool, digest_test);
 
 #[test]
 fn whirlpool_1million_a() {
-    let output = include_bytes!("data/one_million_a.output.bin");
+    let output = include_bytes!("data/one_million_a.bin");
     one_million_a::<whirlpool::Whirlpool>(output);
 }

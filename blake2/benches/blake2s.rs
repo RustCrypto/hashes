@@ -4,4 +4,4 @@
 extern crate digest;
 extern crate blake2;
 
-bench_digest!(blake2::Blake2s);
+bench!(blake2::Blake2s);

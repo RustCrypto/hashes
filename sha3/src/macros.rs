@@ -30,20 +30,20 @@ macro_rules! sha3_impl {
 
         impl_state!($state, $rate, $buffer, $padding);
 
-        impl digest::BlockInput for $state {
+        impl BlockInput for $state {
             type BlockSize = $rate;
         }
 
-        impl digest::Input for $state {
+        impl Input for $state {
             fn process(&mut self, data: &[u8]) {
                 self.absorb(data)
             }
         }
 
-        impl digest::FixedOutput for $state {
+        impl FixedOutput for $state {
             type OutputSize = $output_size;
 
-            fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+            fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
                 self.apply_padding();
 
                 let mut out = GenericArray::default();
@@ -51,11 +51,13 @@ macro_rules! sha3_impl {
                 self.state.as_bytes(|state| {
                     out.copy_from_slice(&state[..n]);
                 });
+                *self = Default::default();
                 out
             }
         }
 
         impl_opaque_debug!($state);
+        impl_write!($state);
     }
 }
 
@@ -63,22 +65,26 @@ macro_rules! shake_impl {
     ($state:ident, $rate:ident, $buffer:ty, $padding:ty) => {
         impl_state!($state, $rate, $buffer, $padding);
 
-        impl digest::Input for $state {
+        impl Input for $state {
             fn process(&mut self, data: &[u8]) {
                 self.absorb(data)
             }
         }
 
-        impl digest::ExtendableOutput for $state {
+        impl ExtendableOutput for $state {
             type Reader = Sha3XofReader;
 
-            fn xof_result(mut self) -> Sha3XofReader
+            fn xof_result(&mut self) -> Sha3XofReader
             {
                 self.apply_padding();
-                Sha3XofReader::new(self.state, $rate::to_usize())
+                let r = $rate::to_usize();
+                let res = Sha3XofReader::new(self.state.clone(), r);
+                *self = Default::default();
+                res
             }
         }
 
         impl_opaque_debug!($state);
+        impl_write!($state);
     }
 }

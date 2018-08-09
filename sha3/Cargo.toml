@@ -1,6 +1,6 @@
 [package]
 name = "sha3"
-version = "0.7.2"
+version = "0.8.0"
 authors = ["RustCrypto Developers"]
 license = "MIT/Apache-2.0"
 description = "SHA-3 (Keccak) hash function"
@@ -10,12 +10,18 @@ keywords = ["crypto", "sha3", "keccak", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.7"
+digest = "0.8"
 byte-tools = "0.2"
 block-buffer = "^0.3.3"
+opaque-debug = "0.2"
+keccak = "0.1"
 
 [dev-dependencies]
-digest = { version = "^0.7.1", features = ["dev"] }
+digest = { version = "0.8", features = ["dev"] }
+
+[features]
+default = ["std"]
+std = ["digest/std"]
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

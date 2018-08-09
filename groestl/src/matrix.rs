@@ -1,4 +1,4 @@
-use core::ops::{Index, IndexMut};
+use ops::{Index, IndexMut};
 
 use digest::generic_array::{ArrayLength, GenericArray};
 

@@ -5,7 +5,10 @@ use digest::generic_array::typenum::{Unsigned, U64};
 use digest::generic_array::{GenericArray, ArrayLength};
 use block_buffer::{BlockBuffer512, ZeroPadding};
 use byte_tools::{write_u64v_le, copy_memory};
+#[cfg(not(feature = "std"))]
 use core::marker::PhantomData;
+#[cfg(feature = "std")]
+use std::marker::PhantomData;
 
 use consts::{BLOCK_SIZE, C};
 use table::SHUFFLED_LIN_TABLE;
@@ -137,22 +140,25 @@ impl<N> digest::Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
 impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
     type OutputSize = N;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        let self_state = &mut self.state;
-        let pos = self.buffer.position();
-
-        let block = self.buffer.pad_with::<ZeroPadding>();
-        block[pos] = 1;
-        self_state.process_block(block, pos as u8);
-
-        let n = self_state.n;
-        self_state.g(&[0u8; 64], &n);
-        let sigma = self_state.sigma;
-        self_state.g(&[0u8; 64], &sigma);
-
+    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
         let mut buf = GenericArray::default();
-        let n = BLOCK_SIZE - Self::OutputSize::to_usize();
-        buf.copy_from_slice(&self_state.h[n..]);
+        {
+            let mut self_state = self.state;
+            let pos = self.buffer.position();
+
+            let block = self.buffer.pad_with::<ZeroPadding>();
+            block[pos] = 1;
+            self_state.process_block(block, pos as u8);
+
+            let n = self_state.n;
+            self_state.g(&[0u8; 64], &n);
+            let sigma = self_state.sigma;
+            self_state.g(&[0u8; 64], &sigma);
+
+            let n = BLOCK_SIZE - Self::OutputSize::to_usize();
+            buf.copy_from_slice(&self_state.h[n..]);
+        }
+        *self = Default::default();
         buf
     }
 }

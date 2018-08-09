@@ -1,4 +1,4 @@
-use core::ops::Div;
+use ops::Div;
 
 use byte_tools::write_u64_be;
 use digest::generic_array::{ArrayLength, GenericArray};

@@ -4,4 +4,4 @@
 extern crate digest;
 extern crate sha1;
 
-bench_digest!(sha1::Sha1);
+bench!(sha1::Sha1);

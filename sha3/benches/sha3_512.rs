@@ -4,4 +4,4 @@
 extern crate digest;
 extern crate sha3;
 
-bench_digest!(sha3::Sha3_512);
+bench!(sha3::Sha3_512);

@@ -5,11 +5,12 @@ macro_rules! blake2_impl {
         use $crate::as_bytes::AsBytes;
         use $crate::simd::{Vector4, $vec};
 
+        use digest::{Input, BlockInput, FixedOutput, VariableOutput};
+        use digest::{InvalidOutputSize, InvalidBufferLength};
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::Unsigned;
         use core::cmp;
         use byte_tools::{copy_memory, zero};
-        use digest;
         use crypto_mac::{Mac, MacResult, InvalidKeyLength};
 
         type Output = GenericArray<u8, $bytes>;
@@ -21,6 +22,10 @@ macro_rules! blake2_impl {
             h: [$vec; 2],
             t: u64,
             n: usize,
+
+            h0: [$vec; 2],
+            m0: [$word; 16],
+            t0: u64,
         }
 
         #[inline(always)]
@@ -74,18 +79,32 @@ macro_rules! blake2_impl {
 
                 let p0 = 0x0101_0000 ^ ((kk as $word) << 8) ^
                     (output_size as $word);
+                let h0 = [iv0() ^ $vec::new(p0, 0, 0, 0), iv1()];
                 let mut state = $state {
                     m: [0; 16],
-                    h: [iv0() ^ $vec::new(p0, 0, 0, 0), iv1()],
+                    h: h0,
                     t: 0,
                     n: output_size,
+
+                    t0: 0,
+                    m0: [0; 16],
+                    h0: h0,
                 };
 
                 if kk > 0 {
                     copy_memory(k, state.m.as_mut_bytes());
                     state.t = 2 * $bytes::to_u64();
                 }
+
+                state.t0 = state.t;
+                state.m0 = state.m;
                 state
+            }
+
+            fn reset(&mut self) {
+                self.t = self.t0;
+                self.m = self.m0;
+                self.h = self.h0;
             }
 
             #[doc(hidden)]
@@ -95,12 +114,20 @@ macro_rules! blake2_impl {
                 assert!(nn >= 1 && nn <= $bytes::to_usize());
                 assert!(kk <= $bytes::to_usize());
 
+                let h0 = [
+                    iv0() ^ $vec::new(p[0], p[1], p[2], p[3]),
+                    iv1() ^ $vec::new(p[4], p[5], p[6], p[7]),
+                ];
+
                 $state {
                     m: [0; 16],
-                    h: [iv0() ^ $vec::new(p[0], p[1], p[2], p[3]),
-                        iv1() ^ $vec::new(p[4], p[5], p[6], p[7])],
+                    h: h0,
                     t: 0,
                     n: nn,
+
+                    t0: 0,
+                    m0: [0; 16],
+                    h0: h0,
                 }
             }
 
@@ -144,12 +171,12 @@ macro_rules! blake2_impl {
             }
 
             #[doc(hidden)]
-            pub fn finalize_last_node(self) -> Output {
+            pub fn finalize_last_node(&mut self) -> Output {
                 self.finalize_with_flag(!0)
             }
 
 
-            fn finalize_with_flag(mut self, f1: $word) -> Output {
+            fn finalize_with_flag(&mut self, f1: $word) -> Output {
                 let off = self.t as usize % (2 * $bytes::to_usize());
                 if off != 0 {
                     zero(&mut self.m.as_mut_bytes()[off..]);
@@ -161,6 +188,7 @@ macro_rules! blake2_impl {
 
                 let mut out = GenericArray::default();
                 copy_memory(buf.as_bytes(), &mut out);
+                self.reset();
                 out
             }
 
@@ -209,27 +237,28 @@ macro_rules! blake2_impl {
             fn default() -> Self { Self::new_keyed(&[], $bytes::to_usize()) }
         }
 
-        impl digest::BlockInput for $state {
+        impl BlockInput for $state {
             type BlockSize = $bytes;
         }
 
-        impl digest::Input for $state {
+        impl Input for $state {
             fn process(&mut self, input: &[u8]) { self.update(input); }
         }
 
-        impl digest::FixedOutput for $state {
+        impl FixedOutput for $state {
             type OutputSize = $bytes;
 
-            fn fixed_result(self) -> Output {
+            fn fixed_result(&mut self) -> Output {
                 assert_eq!(self.n, $bytes::to_usize());
-                self.finalize_with_flag(0)
+                let res = self.finalize_with_flag(0);
+                res
             }
         }
 
-        impl digest::VariableOutput for $state {
-            fn new(output_size: usize) -> Result<Self, digest::InvalidLength> {
+        impl VariableOutput for $state {
+            fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
                 if output_size == 0 || output_size > $bytes::to_usize() {
-                    return Err(digest::InvalidLength);
+                    return Err(InvalidOutputSize);
                 }
                 Ok(Self::new_keyed(&[], output_size))
             }
@@ -238,24 +267,29 @@ macro_rules! blake2_impl {
                 self.n
             }
 
-            fn variable_result(self, buf: &mut [u8])
-                                    -> Result<&[u8], digest::InvalidLength>
+            fn variable_result(&mut self, buf: &mut [u8])
+                -> Result<(), InvalidBufferLength>
             {
                 let n = buf.len();
                 if n > self.output_size() {
-                    Err(digest::InvalidLength)
+                    Err(InvalidBufferLength)
                 } else {
                     let res = self.finalize_with_flag(0);
                     copy_memory(&res[..n], buf);
-                    Ok(buf)
+                    Ok(())
                 }
             }
         }
 
         impl Mac for $state {
             type OutputSize = $bytes;
+            type KeySize = $bytes;
 
-            fn new(key: &[u8]) -> Result<Self, InvalidKeyLength> {
+            fn new(key: &GenericArray<u8, $bytes>) -> Self {
+                Self::new_keyed(key, $bytes::to_usize())
+            }
+
+            fn new_varkey(key: &[u8]) -> Result<Self, InvalidKeyLength> {
                 if key.len() > $bytes::to_usize() {
                     Err(InvalidKeyLength)
                 } else {
@@ -265,12 +299,14 @@ macro_rules! blake2_impl {
 
             fn input(&mut self, data: &[u8]) { self.update(data); }
 
-            fn result(self) -> MacResult<Self::OutputSize> {
-                MacResult::new(self.finalize_with_flag(0))
+            fn result(&mut self) -> MacResult<Self::OutputSize> {
+                let val = self.finalize_with_flag(0);
+                MacResult::new(val)
             }
         }
 
         impl_opaque_debug!($state);
+        impl_write!($state);
 
     }
 }

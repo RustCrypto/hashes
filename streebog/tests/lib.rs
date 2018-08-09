@@ -3,18 +3,7 @@
 extern crate digest;
 extern crate streebog;
 
-use digest::dev::{Test, main_test};
+use digest::dev::digest_test;
 
-#[test]
-fn streebog256_main() {
-    // tests from specification
-    let tests = new_tests!("256/1", "256/2");
-    main_test::<streebog::Streebog256>(&tests);
-}
-
-#[test]
-fn streebog512_main() {
-    // tests from specification
-    let tests = new_tests!("512/1", "512/2");
-    main_test::<streebog::Streebog512>(&tests);
-}
+new_test!(streebog256_main, "streebog256", streebog::Streebog256, digest_test);
+new_test!(streebog512_main, "streebog512", streebog::Streebog512, digest_test);

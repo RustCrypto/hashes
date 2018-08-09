@@ -2,14 +2,15 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD4
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
+#[macro_use] extern crate opaque_debug;
+#[macro_use] extern crate digest;
 extern crate fake_simd as simd;
 extern crate byte_tools;
-#[macro_use]
-extern crate digest;
 extern crate block_buffer;
 
 pub use digest::Digest;
+use digest::{Input, BlockInput, FixedOutput};
 use byte_tools::{write_u32_le, read_u32v_le};
 use block_buffer::BlockBuffer512;
 use simd::u32x4;
@@ -112,11 +113,11 @@ impl Md4 {
     }
 }
 
-impl digest::BlockInput for Md4 {
+impl BlockInput for Md4 {
     type BlockSize = U64;
 }
 
-impl digest::Input for Md4 {
+impl Input for Md4 {
     fn process(&mut self, input: &[u8]) {
         // 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
@@ -125,10 +126,10 @@ impl digest::Input for Md4 {
     }
 }
 
-impl digest::FixedOutput for Md4 {
+impl FixedOutput for Md4 {
     type OutputSize = U16;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();
@@ -136,8 +137,11 @@ impl digest::FixedOutput for Md4 {
         write_u32_le(&mut out[4..8], self.state.s.1);
         write_u32_le(&mut out[8..12], self.state.s.2);
         write_u32_le(&mut out[12..16], self.state.s.3);
+
+        *self = Default::default();
         out
     }
 }
 
 impl_opaque_debug!(Md4);
+impl_write!(Md4);

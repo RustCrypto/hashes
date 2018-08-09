@@ -1,4 +1,4 @@
-use digest;
+use digest::{Input, BlockInput, FixedOutput};
 use block_buffer::{BlockBuffer256, ZeroPadding};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U32;
@@ -7,13 +7,15 @@ use byte_tools::{
 };
 
 pub(crate) type Block = [u8; 32];
+
 const C: Block = [
-    0, 255, 0, 255, 0, 255, 0, 255, 255, 0, 255, 0, 255, 0,
-    255, 0, 0, 255, 255, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 255, 0, 255
+    0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
+    0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00,
+    0x00, 0xff, 0xff, 0x00, 0xff, 0x00, 0x00, 0xff,
+    0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0xff,
 ];
 
 pub type SBox = [[u8; 16]; 8];
-
 
 fn sbox(a: u32, s: &SBox) -> u32 {
     let mut v = 0;
@@ -203,13 +205,15 @@ impl Gost94State {
 pub struct Gost94 {
     buffer: BlockBuffer256,
     state: Gost94State,
+    h0: Block,
 }
 
 impl Gost94 {
     // Create new GOST94 instance with given S-Box and IV
     pub fn new(s: SBox, h: Block) -> Self {
-        Gost94{
+        Gost94 {
             buffer: Default::default(),
+            h0: h,
             state: Gost94State{
                 s: s,
                 h: h,
@@ -220,11 +224,11 @@ impl Gost94 {
     }
 }
 
-impl digest::BlockInput for Gost94 {
+impl BlockInput for Gost94 {
     type BlockSize = U32;
 }
 
-impl digest::Input for Gost94 {
+impl Input for Gost94 {
     fn process(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
         self_state.update_n(input.len());
@@ -232,27 +236,35 @@ impl digest::Input for Gost94 {
     }
 }
 
-impl digest::FixedOutput for Gost94 {
+impl FixedOutput for Gost94 {
     type OutputSize = U32;
 
-    fn fixed_result(mut self) -> GenericArray<u8, U32> {
-        let self_state = &mut self.state;
+    fn fixed_result(&mut self) -> GenericArray<u8, U32> {
+        {
+            let self_state = &mut self.state;
 
-        if self.buffer.position() != 0 {
-            let block = self.buffer.pad_with::<ZeroPadding>();
-            self_state.process_block(block);
+            if self.buffer.position() != 0 {
+                let block = self.buffer.pad_with::<ZeroPadding>();
+                self_state.process_block(block);
+            }
+
+            let mut buf = Block::default();
+
+            write_u64v_le(&mut buf, &self_state.n);
+            self_state.f(&buf);
+
+            write_u64v_le(&mut buf, &self_state.sigma);
+            self_state.f(&buf);
         }
 
-        let mut buf = Block::default();
-
-        write_u64v_le(&mut buf, &self_state.n);
-        self_state.f(&buf);
-
-        write_u64v_le(&mut buf, &self_state.sigma);
-        self_state.f(&buf);
-
-        GenericArray::clone_from_slice(&self_state.h)
+        let res = GenericArray::clone_from_slice(&self.state.h);
+        self.buffer = Default::default();
+        self.state.n = Default::default();
+        self.state.h = self.h0;
+        self.state.sigma = Default::default();
+        res
     }
 }
 
 impl_opaque_debug!(Gost94);
+impl_write!(Gost94);

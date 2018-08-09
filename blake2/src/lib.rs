@@ -56,7 +56,7 @@
 //! use blake2::Blake2b;
 //! use blake2::crypto_mac::Mac;
 //!
-//! let mut hasher = Blake2b::new(b"my key").unwrap();
+//! let mut hasher = Blake2b::new_varkey(b"my key").unwrap();
 //! hasher.input(b"hello world");
 //!
 //! // `result` has type `MacResult` which is a thin wrapper around array of
@@ -68,7 +68,7 @@
 //! let code_bytes = result.code();
 //!
 //! // To verify the message it's recommended to use `verify` method
-//! let mut hasher = Blake2b::new(b"my key").unwrap();
+//! let mut hasher = Blake2b::new_varkey(b"my key").unwrap();
 //! hasher.input(b"hello world");
 //! // `verify` return `Ok(())` if code is correct, `Err(MacError)` otherwise
 //! hasher.verify(&code_bytes).unwrap();
@@ -76,17 +76,19 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
 //! [2]: https://github.com/cesarb/blake2-rfc
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs)]
 
 #![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]
-#![cfg_attr(feature = "simd_opt", feature(cfg_target_feature))]
 #![cfg_attr(feature = "simd_asm", feature(asm))]
 
+#[macro_use] extern crate opaque_debug;
+#[macro_use] pub extern crate digest;
 extern crate byte_tools;
-#[macro_use]
-pub extern crate digest;
 pub extern crate crypto_mac;
+
+#[cfg(feature = "std")]
+use std as core;
 
 mod consts;
 mod as_bytes;

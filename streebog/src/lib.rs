@@ -28,14 +28,16 @@
 //! let result = hasher.result();
 //! ```
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 extern crate block_buffer;
 extern crate byte_tools;
-#[macro_use]
-extern crate digest;
+#[macro_use] extern crate digest;
+#[macro_use] extern crate opaque_debug;
 
 pub use digest::Digest;
 use digest::generic_array::typenum::{U32, U64};
+#[cfg(feature = "std")]
+use digest::Input;
 
 mod consts;
 mod table;
@@ -46,3 +48,6 @@ pub type Streebog512 = streebog::Streebog<U64>;
 
 impl_opaque_debug!(Streebog512);
 impl_opaque_debug!(Streebog256);
+
+impl_write!(Streebog512);
+impl_write!(Streebog256);

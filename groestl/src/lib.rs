@@ -19,13 +19,15 @@
 //! let result = hasher.result();
 //! ```
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
+#[macro_use] extern crate opaque_debug;
+#[macro_use] extern crate digest;
 extern crate byte_tools;
-#[macro_use]
-extern crate digest;
 extern crate block_buffer;
 
 pub use digest::Digest;
+use digest::{Input, BlockInput, FixedOutput, VariableOutput};
+use digest::{InvalidOutputSize, InvalidBufferLength};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{Unsigned, U28, U32, U48, U64, U128};
 
@@ -37,6 +39,11 @@ mod matrix;
 mod macros;
 
 use groestl::Groestl;
+
+#[cfg(feature = "std")]
+use std::ops;
+#[cfg(not(feature = "std"))]
+use core::ops;
 
 impl_groestl!(Groestl512, U64, U128);
 impl_groestl!(Groestl384, U48, U128);

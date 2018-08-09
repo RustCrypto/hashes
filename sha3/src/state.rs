@@ -1,7 +1,11 @@
 use keccak;
-use consts::PLEN;
 use byte_tools::{read_u64v_le, write_u64v_le};
+#[cfg(feature = "std")]
+use std::mem;
+#[cfg(not(feature = "std"))]
 use core::mem;
+
+const PLEN: usize = 25;
 
 #[derive(Clone, Default)]
 pub(crate) struct Sha3State {
@@ -28,7 +32,7 @@ impl Sha3State {
             *d ^= *i;
         }
 
-        keccak::f(&mut self.state);
+        keccak::f1600(&mut self.state);
     }
 
     #[inline(always)]
@@ -46,6 +50,6 @@ impl Sha3State {
 
     #[inline(always)]
     pub(crate) fn apply_f(&mut self) {
-        keccak::f(&mut self.state);
+        keccak::f1600(&mut self.state);
     }
 }
