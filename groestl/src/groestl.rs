@@ -61,13 +61,7 @@ impl<BlockSize> Groestl<BlockSize>
             } else {
                 state.num_blocks + 1
             };
-            // remove this mess by adding `len_padding_be` method
-            let l = if cfg!(target_endian = "little") {
-                l.to_be()
-            } else {
-                l.to_le()
-            };
-            self.buffer.len_padding(l, |b| state.compress(b));
+            self.buffer.len64_padding_be(0x80, l, |b| state.compress(b));
             xor_generic_array(&state.p(&state.state), &state.state)
         };
 

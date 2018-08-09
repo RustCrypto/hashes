@@ -9,7 +9,7 @@ matrix:
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: stable
     - rust: 1.22.0
-      script: test --verbose --all
+      script: cargo test --verbose --all --release
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: nightly
     - env: TARGET=powerpc-unknown-linux-gnu
