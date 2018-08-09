@@ -16,7 +16,7 @@ mod utils;
 use utils::compress;
 
 use byte_tools::write_u32v_le;
-use block_buffer::BlockBuffer512;
+use block_buffer::BlockBuffer;
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput};
@@ -26,10 +26,10 @@ use digest::generic_array::typenum::{U16, U64};
 mod consts;
 
 /// The MD5 hasher
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Md5 {
     length_bytes: u64,
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
     state: [u32; 4],
 }
 
@@ -43,13 +43,19 @@ impl Default for Md5 {
     }
 }
 
+#[inline(always)]
+fn convert(d: &GenericArray<u8, U64>) -> &[u8; 64] {
+    unsafe { &*(d.as_ptr() as *const [u8; 64]) }
+}
+
 impl Md5 {
     #[inline]
     fn finalize(&mut self) -> [u32; 4] {
         {
             let self_state = &mut self.state;
             let l = (self.length_bytes << 3) as u64;
-            self.buffer.len_padding(l, |d| compress(self_state, d));
+            self.buffer.len64_padding_le(0x80, l,
+                |d| compress(self_state, convert(d)));
         }
         let res = self.state.clone();
         *self = Default::default();
@@ -60,9 +66,9 @@ impl Md5 {
     fn consume(&mut self, input: &[u8]) {
         // Unlike Sha1 and Sha2, the length value in MD5 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
-        self.length_bytes += input.len() as u64;
+        self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
         let self_state = &mut self.state;
-        self.buffer.input(input, |d| compress(self_state, d));
+        self.buffer.input(input, |d| compress(self_state, convert(d)));
     }
 }
 

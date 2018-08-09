@@ -12,7 +12,7 @@ extern crate block_buffer;
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput};
 use byte_tools::{write_u32_le, read_u32v_le};
-use block_buffer::BlockBuffer512;
+use block_buffer::BlockBuffer;
 use simd::u32x4;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U16, U64};
@@ -20,7 +20,7 @@ use digest::generic_array::typenum::{U16, U64};
 // initial values for Md4State
 const S: u32x4 = u32x4(0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476);
 
-type Block = [u8; 64];
+type Block = GenericArray<u8, U64>;
 
 #[derive(Copy, Clone)]
 struct Md4State {
@@ -31,7 +31,7 @@ struct Md4State {
 #[derive(Clone, Default)]
 pub struct Md4 {
     length_bytes: u64,
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
     state: Md4State,
 }
 
@@ -109,7 +109,7 @@ impl Md4 {
     fn finalize(&mut self) {
         let self_state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer.len_padding(l, |d| self_state.process_block(d))
+        self.buffer.len64_padding_le(0x80, l, |d| self_state.process_block(d))
     }
 }
 

@@ -11,30 +11,31 @@ extern crate block_buffer;
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput};
-use block_buffer::{BlockBuffer128, Pkcs7};
+use block_buffer::BlockBuffer;
+use block_buffer::block_padding::Pkcs7;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U16;
 
 mod consts;
 
-type Block = [u8; 16];
+type Block = GenericArray<u8, U16>;
 
 #[derive(Clone)]
 struct Md2State {
     x: [u8; 48],
-    checksum: [u8; 16],
+    checksum: Block,
 }
 
 impl Default for Md2State {
     fn default() -> Self {
-        Self { x: [0; 48], checksum: [0; 16] }
+        Self { x: [0; 48], checksum: Default::default() }
     }
 }
 
 /// The MD2 hasher
 #[derive(Clone, Default)]
 pub struct Md2 {
-    buffer: BlockBuffer128,
+    buffer: BlockBuffer<U16>,
     state: Md2State,
 }
 
@@ -70,7 +71,8 @@ impl Md2 {
     }
 
     fn finalize(&mut self) {
-        let buf = self.buffer.pad_with::<Pkcs7>();
+        let buf = self.buffer.pad_with::<Pkcs7>()
+            .expect("we never use input_lazy");
         self.state.process_block(buf);
         let checksum = self.state.checksum;
         self.state.process_block(&checksum);

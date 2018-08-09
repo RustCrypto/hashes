@@ -1,5 +1,6 @@
 use digest::{Input, BlockInput, FixedOutput};
-use block_buffer::{BlockBuffer256, ZeroPadding};
+use block_buffer::BlockBuffer;
+use block_buffer::block_padding::ZeroPadding;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U32;
 use byte_tools::{
@@ -195,7 +196,8 @@ impl Gost94State {
         }
     }
 
-    fn process_block(&mut self, block: &Block) {
+    fn process_block(&mut self, block: &GenericArray<u8, U32>) {
+        let block = unsafe { &*(block.as_ptr() as *const [u8; 32]) };
         self.f(block);
         self.update_sigma(block);
     }
@@ -203,7 +205,7 @@ impl Gost94State {
 
 #[derive(Clone)]
 pub struct Gost94 {
-    buffer: BlockBuffer256,
+    buffer: BlockBuffer<U32>,
     state: Gost94State,
     h0: Block,
 }
@@ -244,7 +246,8 @@ impl FixedOutput for Gost94 {
             let self_state = &mut self.state;
 
             if self.buffer.position() != 0 {
-                let block = self.buffer.pad_with::<ZeroPadding>();
+                let block = self.buffer.pad_with::<ZeroPadding>()
+                    .expect("we never use input_lazy");
                 self_state.process_block(block);
             }
 
