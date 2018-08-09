@@ -15,7 +15,7 @@ byte-tools = "0.2"
 block-buffer = "0.3"
 fake-simd = "0.1"
 opaque-debug = "0.2"
-sha2-asm = { version="0.5", optional = true }
+sha2-asm = { version="0.5", optional=true }
 
 [dev-dependencies]
 digest = { version = "0.8", features = ["dev"] }
