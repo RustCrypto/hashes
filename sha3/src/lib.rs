@@ -31,7 +31,6 @@
 //! ```
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate byte_tools;
-extern crate digest;
 extern crate keccak;
 extern crate block_buffer;
 #[macro_use] extern crate opaque_debug;
