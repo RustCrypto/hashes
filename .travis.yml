@@ -8,8 +8,8 @@ matrix:
       rust: stable
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: stable
-    - env: TARGET=x86_64-unknown-linux-gnu
-      rust: 1.22.0
+    - rust: 1.22.0
+      script: test --verbose --all
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: nightly
     - env: TARGET=powerpc-unknown-linux-gnu
@@ -29,3 +29,7 @@ script:
   - cross test --verbose --all --release --target $TARGET
 
 cache: cargo
+install:
+  - cargo install xargo --force
+  - rustup target install armv7-unknown-linux-gnueabihf
+  - rustup component add rust-src
