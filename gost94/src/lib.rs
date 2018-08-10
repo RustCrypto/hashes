@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate byte_tools;
 extern crate block_buffer;
-#[macro_use] extern crate digest;
+#[macro_use] pub extern crate digest;
 #[macro_use] extern crate opaque_debug;
 
 #[macro_use]

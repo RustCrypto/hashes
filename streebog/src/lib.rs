@@ -13,25 +13,40 @@
 //! An example of using `Streebog256` and `Streebog256` is:
 //!
 //! ```rust
+//! # #[macro_use] extern crate hex_literal;
+//! # extern crate streebog;
+//! # fn main() {
 //! use streebog::{Digest, Streebog256, Streebog512};
 //!
 //! // create a hasher object, to use it do not forget to import `Digest` trait
-//! let mut hasher = Streebog256::default();
+//! let mut hasher = Streebog256::new();
 //! // write input message
 //! hasher.input(b"my message");
 //! // read hash digest (it will consume hasher)
 //! let result = hasher.result();
 //!
+//! assert_eq!(result[..], hex!("
+//!     a47752ba9491bd1d52dd5dcea6d8c08e9b1ee70c42a2fc3e0d1a2852468c1329
+//! ")[..]);
+//!
 //! // same for Streebog512
-//! let mut hasher = Streebog512::default();
+//! let mut hasher = Streebog512::new();
 //! hasher.input(b"my message");
 //! let result = hasher.result();
+//!
+//! assert_eq!(result[..], hex!("
+//!     c40cc26c37a683c74459820d884b766d9c96697a8d168c0272db8f4ecca2935b
+//!     4164ede98fc9c8d2bafb1249b238676c81f5b97f98c393b99fdf2dc961391484
+//! ")[..]);
+//! # }
 //! ```
+//!
+//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate block_buffer;
 extern crate byte_tools;
-#[macro_use] extern crate digest;
+#[macro_use] pub extern crate digest;
 #[macro_use] extern crate opaque_debug;
 
 pub use digest::Digest;

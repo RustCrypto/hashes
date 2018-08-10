@@ -19,13 +19,17 @@
 //! # fn main() {
 //! use whirlpool::{Whirlpool, Digest};
 //!
+//! // create a hasher object, to use it do not forget to import `Digest` trait
 //! let mut hasher = Whirlpool::new();
+//! // write input message
 //! hasher.input(b"Hello Whirlpool");
+//! // read hash digest (it will consume hasher)
 //! let result = hasher.result();
-//! assert_eq!(&result[..], &hex!("
+//!
+//! assert_eq!(result[..], hex!("
 //!     8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c
 //!     a373816495e63db0fff2ff25f75aa7162f332c9f518c3036456502a8414d300a
-//!")[..]);
+//! ")[..]);
 //! # }
 //! ```
 //!
@@ -33,7 +37,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(identity_op, double_parens))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #[macro_use] extern crate opaque_debug;
-#[macro_use] extern crate digest;
+#[macro_use] pub extern crate digest;
 extern crate block_buffer;
 extern crate byte_tools;
 #[cfg(feature = "asm")]
@@ -59,6 +63,7 @@ mod consts;
 type BlockSize = U64;
 
 
+/// Structure representing the state of a Whirlpool computation
 #[derive(Clone)]
 pub struct Whirlpool {
     bit_length: [u8; 32],

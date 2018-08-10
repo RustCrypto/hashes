@@ -17,12 +17,12 @@ digest = "0.8"
 byte-tools = "0.2"
 block-buffer = "0.5"
 fake-simd = "0.1"
-sha1-asm = { version="0.4", optional = true }
+sha1-asm = { version = "0.4", optional = true }
 opaque-debug = "0.2"
 
 [dev-dependencies]
 digest = { version = "0.8", features = ["dev"] }
-hex-literal = { version = "0.1" }
+hex-literal = "0.1"
 
 [features]
 default = ["std"]

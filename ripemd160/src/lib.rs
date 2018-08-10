@@ -1,10 +1,31 @@
 //! An implementation of the RIPEMD-160 cryptographic hash.
+//!
+//! # Usage
+//!
+//! ```rust
+//! # #[macro_use] extern crate hex_literal;
+//! # extern crate ripemd160;
+//! # fn main() {
+//! use ripemd160::{Ripemd160, Digest};
+//!
+//! // create a hasher object, to use it do not forget to import `Digest` trait
+//! let mut hasher = Ripemd160::new();
+//! // write input message
+//! hasher.input(b"Hello world!");
+//! // read hash digest (it will consume hasher)
+//! let result = hasher.result();
+//!
+//! assert_eq!(result[..], hex!("7f772647d88750add82d8e1a7a3e5c0902a346a3"));
+//! # }
+//! ```
+//!
+//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate byte_tools;
 extern crate block_buffer;
 #[macro_use] extern crate opaque_debug;
-#[macro_use] extern crate digest;
+#[macro_use] pub extern crate digest;
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput};

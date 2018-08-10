@@ -9,22 +9,24 @@
 //! use sha1::{Sha1, Digest};
 //!
 //! // create a Sha1 object
-//! let mut sh = Sha1::new();
+//! let mut hasher = Sha1::new();
 //!
 //! // write input message
-//! sh.input(b"hello world");
+//! hasher.input(b"hello world");
 //!
 //! // read hash digest in the form of GenericArray which is in this case
 //! // equivalent to [u8; 20]
-//! let output = sh.result();
+//! let output = hasher.result();
 //! assert_eq!(output[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
 //! # }
 //! ```
+//!
+//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate block_buffer;
 extern crate byte_tools;
 #[macro_use] extern crate opaque_debug;
-#[macro_use] extern crate digest;
+#[macro_use] pub extern crate digest;
 
 #[cfg(not(feature = "asm"))]
 extern crate fake_simd as simd;

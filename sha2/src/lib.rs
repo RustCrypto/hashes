@@ -19,13 +19,11 @@
 //!
 //! # Usage
 //!
-//! An example of using `Sha256` is:
-//!
 //! ```rust
 //! # #[macro_use] extern crate hex_literal;
 //! # extern crate sha2;
 //! # fn main() {
-//! use sha2::{Sha256, Digest};
+//! use sha2::{Sha256, Sha512, Digest};
 //!
 //! // create a Sha256 object
 //! let mut hasher = Sha256::new();
@@ -36,41 +34,30 @@
 //! // read hash digest and consume hasher
 //! let output = hasher.result();
 //!
-//! assert_eq!(output[..], hex!("b94d27b9934d3e08a52e52d7da7dabfa
-//!                              c484efe37a5380ee9088f7ace2efcde9"));
-//! # }
-//! ```
+//! assert_eq!(output[..], hex!("
+//!     b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
+//! ")[..]);
 //!
-//! An example of using `Sha512` is:
-//!
-//! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate sha2;
-//! # fn main() {
-//! use sha2::{Sha512, Digest};
-//!
-//! // create a Sha512 object
+//! // same for Sha512
 //! let mut hasher = Sha512::new();
-//!
-//! // write input message
 //! hasher.input(b"hello world");
-//!
-//! // read hash digest and consume hasher
 //! let output = hasher.result();
 //!
-//! assert_eq!(output[..], hex!("309ecc489c12d6eb4cc40f50c902f2b4
-//!                              d0ed77ee511a7c7a9bcd3ca86d4cd86f
-//!                              989dd35bc5ff499670da34255b45b0cf
-//!                              d830e81f605dcf7dc5542e93ae9cd76f")[..]);
+//! assert_eq!(output[..], hex!("
+//!     309ecc489c12d6eb4cc40f50c902f2b4d0ed77ee511a7c7a9bcd3ca86d4cd86f
+//!     989dd35bc5ff499670da34255b45b0cfd830e81f605dcf7dc5542e93ae9cd76f
+//! ")[..]);
 //! # }
 //! ```
+//!
+//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate byte_tools;
 extern crate block_buffer;
 extern crate fake_simd as simd;
 #[macro_use] extern crate opaque_debug;
-#[macro_use] extern crate digest;
+#[macro_use] pub extern crate digest;
 #[cfg(feature = "asm")]
 extern crate sha2_asm;
 

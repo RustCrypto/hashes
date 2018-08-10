@@ -16,6 +16,9 @@
 //! An example of using `SHA3-256` is:
 //!
 //! ```rust
+//! # #[macro_use] extern crate hex_literal;
+//! # extern crate sha3;
+//! # fn main() {
 //! use sha3::{Digest, Sha3_256};
 //!
 //! // create a SHA3-256 object
@@ -25,16 +28,21 @@
 //! hasher.input(b"abc");
 //!
 //! // read hash digest
-//! let out = hasher.result();
+//! let result = hasher.result();
 //!
-//! println!("{:x}", out);
+//! assert_eq!(result[..], hex!("
+//!     3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532
+//! ")[..]);
+//! # }
 //! ```
+//!
+//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 #![cfg_attr(not(feature = "std"), no_std)]
 extern crate byte_tools;
 extern crate keccak;
 extern crate block_buffer;
 #[macro_use] extern crate opaque_debug;
-#[macro_use] extern crate digest;
+#[macro_use] pub extern crate digest;
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput, ExtendableOutput};
