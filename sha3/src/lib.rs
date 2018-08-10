@@ -37,15 +37,17 @@
 //! ```
 //!
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 extern crate byte_tools;
 extern crate keccak;
 extern crate block_buffer;
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
+#[cfg(feature = "std")]
+extern crate std;
 
 pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput, ExtendableOutput};
+use digest::{Input, BlockInput, FixedOutput, ExtendableOutput, Reset};
 use block_buffer::BlockBuffer;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{

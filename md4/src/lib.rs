@@ -1,16 +1,18 @@
 //! The [MD4][1] hash function.
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD4
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
 extern crate fake_simd as simd;
 extern crate byte_tools;
 extern crate block_buffer;
+#[cfg(feature = "std")]
+extern crate std;
 
 pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput};
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use byte_tools::{write_u32_le, read_u32v_le};
 use block_buffer::BlockBuffer;
 use simd::u32x4;
@@ -129,7 +131,7 @@ impl Input for Md4 {
 impl FixedOutput for Md4 {
     type OutputSize = U16;
 
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();
@@ -138,8 +140,15 @@ impl FixedOutput for Md4 {
         write_u32_le(&mut out[8..12], self.state.s.2);
         write_u32_le(&mut out[12..16], self.state.s.3);
 
-        *self = Default::default();
         out
+    }
+}
+
+impl Reset for Md4 {
+    fn reset(&mut self) -> Self {
+        let mut temp = Self::default();
+        core::mem::swap(self, &mut temp);
+        temp
     }
 }
 

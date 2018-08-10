@@ -2,7 +2,7 @@ macro_rules! gost94_impl {
     ($state:ident, $sbox:expr) => {
 
     use $crate::gost94::{Gost94, SBox, Block};
-    use digest::{Input, BlockInput, FixedOutput};
+    use digest::{Input, BlockInput, FixedOutput, Reset};
     use digest::generic_array::GenericArray;
     use digest::generic_array::typenum::U32;
 
@@ -11,15 +11,9 @@ macro_rules! gost94_impl {
         sh: Gost94
     }
 
-    impl $state {
-        pub fn new() -> Self {
-            $state{sh: Gost94::new($sbox, Block::default())}
-        }
-    }
-
     impl Default for $state {
         fn default() -> Self {
-            Self::new()
+            $state { sh: Gost94::new($sbox, Block::default()) }
         }
     }
 
@@ -36,8 +30,14 @@ macro_rules! gost94_impl {
     impl FixedOutput for $state {
         type OutputSize = U32;
 
-        fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+        fn fixed_result(self) -> GenericArray<u8, Self::OutputSize> {
             self.sh.fixed_result()
+        }
+    }
+
+    impl Reset for $state {
+        fn reset(&mut self) -> Self {
+            Self{ sh: self.sh.reset() }
         }
     }
 

@@ -1,14 +1,15 @@
 //! The [MD5][1] hash function.
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD5
-
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 extern crate byte_tools;
 extern crate block_buffer;
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
 #[cfg(feature = "asm")]
 extern crate md5_asm as utils;
+#[cfg(feature = "std")]
+extern crate std;
 
 #[cfg(not(feature = "asm"))]
 mod utils;
@@ -19,7 +20,7 @@ use byte_tools::write_u32v_le;
 use block_buffer::BlockBuffer;
 
 pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput};
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U16, U64};
 
@@ -50,16 +51,10 @@ fn convert(d: &GenericArray<u8, U64>) -> &[u8; 64] {
 
 impl Md5 {
     #[inline]
-    fn finalize(&mut self) -> [u32; 4] {
-        {
-            let self_state = &mut self.state;
-            let l = (self.length_bytes << 3) as u64;
-            self.buffer.len64_padding_le(0x80, l,
-                |d| compress(self_state, convert(d)));
-        }
-        let res = self.state;
-        *self = Default::default();
-        res
+    fn finalize(&mut self) {
+        let self_state = &mut self.state;
+        let l = (self.length_bytes << 3) as u64;
+        self.buffer.len64_padding_le(0x80, l, |d| compress(self_state, convert(d)));
     }
 
     #[inline]
@@ -87,11 +82,19 @@ impl FixedOutput for Md5 {
     type OutputSize = U16;
 
     #[inline]
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         let mut out = GenericArray::default();
-        let res = self.finalize();
-        write_u32v_le(&mut out, &res);
+        self.finalize();
+        write_u32v_le(&mut out, &self.state);
         out
+    }
+}
+
+impl Reset for Md5 {
+    fn reset(&mut self) -> Self {
+        let mut temp = Self::default();
+        core::mem::swap(self, &mut temp);
+        temp
     }
 }
 

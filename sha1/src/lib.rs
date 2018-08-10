@@ -22,12 +22,13 @@
 //! ```
 //!
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 extern crate block_buffer;
 extern crate byte_tools;
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
-
+#[cfg(feature = "std")]
+extern crate std;
 #[cfg(not(feature = "asm"))]
 extern crate fake_simd as simd;
 
@@ -42,7 +43,7 @@ use byte_tools::write_u32v_be;
 use block_buffer::BlockBuffer;
 
 pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput};
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U20, U64};
 
@@ -79,7 +80,7 @@ impl Input for Sha1 {
 impl FixedOutput for Sha1 {
     type OutputSize = U20;
 
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         {
             let state = &mut self.h;
             let l = self.len << 3;
@@ -87,8 +88,15 @@ impl FixedOutput for Sha1 {
         }
         let mut out = GenericArray::default();
         write_u32v_be(&mut out, &self.h);
-        *self = Default::default();
         out
+    }
+}
+
+impl Reset for Sha1 {
+    fn reset(&mut self) -> Self {
+        let mut temp = Self::default();
+        core::mem::swap(self, &mut temp);
+        temp
     }
 }
 

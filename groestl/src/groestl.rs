@@ -1,4 +1,5 @@
-use ops::Div;
+use core::ops::Div;
+use core::mem;
 
 use digest;
 use block_buffer::BlockBuffer;
@@ -65,5 +66,12 @@ impl<BlockSize> Groestl<BlockSize>
         self.buffer = Default::default();
         self.state = GroestlState::new(self.output_size);
         res
+    }
+
+    pub fn reset(&mut self) -> Self {
+        // not the most efficient way
+        let mut temp = Self::new(self.output_size).unwrap();
+        mem::swap(self, &mut temp);
+        temp
     }
 }

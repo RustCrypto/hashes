@@ -1,16 +1,16 @@
 //! The [MD2][1] hash function.
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD2_(cryptography)
-
-// Range loops are preferred for reading simplicity
+#![no_std]
 #![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
-#![cfg_attr(not(feature = "std"), no_std)]
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
 extern crate block_buffer;
+#[cfg(feature = "std")]
+extern crate std;
 
 pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput};
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::Pkcs7;
 use digest::generic_array::GenericArray;
@@ -96,11 +96,17 @@ impl Input for Md2 {
 impl FixedOutput for Md2 {
     type OutputSize = U16;
 
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
-        let res = GenericArray::clone_from_slice(&self.state.x[0..16]);
-        *self = Default::default();
-        res
+        GenericArray::clone_from_slice(&self.state.x[0..16])
+    }
+}
+
+impl Reset for Md2 {
+    fn reset(&mut self) -> Self {
+        let mut temp = Self::default();
+        core::mem::swap(self, &mut temp);
+        temp
     }
 }
 

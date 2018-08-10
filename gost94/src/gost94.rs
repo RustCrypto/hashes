@@ -1,6 +1,6 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
 #![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
-use digest::{Input, BlockInput, FixedOutput};
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;
 use digest::generic_array::GenericArray;
@@ -238,7 +238,7 @@ impl Input for Gost94 {
 impl FixedOutput for Gost94 {
     type OutputSize = U32;
 
-    fn fixed_result(&mut self) -> GenericArray<u8, U32> {
+    fn fixed_result(mut self) -> GenericArray<u8, U32> {
         {
             let self_state = &mut self.state;
 
@@ -257,12 +257,18 @@ impl FixedOutput for Gost94 {
             self_state.f(&buf);
         }
 
-        let res = GenericArray::clone_from_slice(&self.state.h);
-        self.buffer = Default::default();
+        GenericArray::clone_from_slice(&self.state.h)
+    }
+}
+
+impl Reset for Gost94 {
+    fn reset(&mut self) -> Self {
+        let temp = self.clone();
+        self.buffer = Default::default(); // TODO: repalce with reset
         self.state.n = Default::default();
         self.state.h = self.h0;
         self.state.sigma = Default::default();
-        res
+        temp
     }
 }
 

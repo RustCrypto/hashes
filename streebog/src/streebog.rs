@@ -1,15 +1,12 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop, inline_always))]
-
-use digest;
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use digest::generic_array::typenum::{Unsigned, U64};
 use digest::generic_array::{GenericArray, ArrayLength};
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;
 use byte_tools::{write_u64v_le, copy_memory};
-#[cfg(not(feature = "std"))]
 use core::marker::PhantomData;
-#[cfg(feature = "std")]
-use std::marker::PhantomData;
+use core::mem;
 
 use consts::{BLOCK_SIZE, C};
 use table::SHUFFLED_LIN_TABLE;
@@ -122,11 +119,11 @@ impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
 }
 
 
-impl<N> digest::BlockInput for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> BlockInput for Streebog<N>  where N: ArrayLength<u8> + Copy {
     type BlockSize = U64;
 }
 
-impl<N> digest::Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
     fn process(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
         self.buffer.input(input,
@@ -134,29 +131,36 @@ impl<N> digest::Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
     }
 }
 
-impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
     type OutputSize = N;
 
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         let mut buf = GenericArray::default();
-        {
-            let mut self_state = self.state;
-            let pos = self.buffer.position();
 
-            let block = self.buffer.pad_with::<ZeroPadding>()
-                .expect("we never use input_lazy");
-            block[pos] = 1;
-            self_state.process_block(block, pos as u8);
+        let mut self_state = self.state;
+        let pos = self.buffer.position();
 
-            let n = self_state.n;
-            self_state.g(&[0u8; 64], &n);
-            let sigma = self_state.sigma;
-            self_state.g(&[0u8; 64], &sigma);
+        let block = self.buffer.pad_with::<ZeroPadding>()
+            .expect("we never use input_lazy");
+        block[pos] = 1;
+        self_state.process_block(block, pos as u8);
 
-            let n = BLOCK_SIZE - Self::OutputSize::to_usize();
-            buf.copy_from_slice(&self_state.h[n..]);
-        }
-        *self = Default::default();
+        let n = self_state.n;
+        self_state.g(&[0u8; 64], &n);
+        let sigma = self_state.sigma;
+        self_state.g(&[0u8; 64], &sigma);
+
+        let n = BLOCK_SIZE - Self::OutputSize::to_usize();
+        buf.copy_from_slice(&self_state.h[n..]);
+
         buf
+    }
+}
+
+impl<N> Reset for Streebog<N>  where N: ArrayLength<u8> + Copy {
+    fn reset(&mut self) -> Self {
+        let mut temp = Self::default();
+        mem::swap(self, &mut temp);
+        temp
     }
 }

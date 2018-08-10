@@ -42,12 +42,13 @@
 //! ```
 //!
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
-
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 extern crate block_buffer;
 extern crate byte_tools;
 #[macro_use] pub extern crate digest;
 #[macro_use] extern crate opaque_debug;
+#[cfg(feature = "std")]
+extern crate std;
 
 pub use digest::Digest;
 use digest::generic_array::typenum::{U32, U64};

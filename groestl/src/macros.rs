@@ -7,7 +7,7 @@ macro_rules! impl_groestl {
 
         impl Default for $state {
             fn default() -> Self {
-                $state{groestl: Groestl::new($output::to_usize()).unwrap()}
+                $state { groestl: Groestl::new($output::to_usize()).unwrap() }
             }
         }
 
@@ -24,10 +24,16 @@ macro_rules! impl_groestl {
         impl FixedOutput for $state {
             type OutputSize = $output;
 
-            fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+            fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
                 let block = self.groestl.finalize();
                 let n = block.len() - Self::OutputSize::to_usize();
                 GenericArray::clone_from_slice( &block[n..])
+            }
+        }
+
+        impl Reset for $state {
+            fn reset(&mut self) -> Self {
+                Self { groestl: self.groestl.reset() }
             }
         }
 
@@ -39,7 +45,6 @@ macro_rules! impl_groestl {
 
 macro_rules! impl_variable_groestl {
     ($state:ident, $block:ident, $min:expr, $max:expr) => (
-
         #[derive(Clone)]
         pub struct $state {
             groestl: Groestl<$block>,
@@ -69,17 +74,16 @@ macro_rules! impl_variable_groestl {
                 self.groestl.output_size
             }
 
-            fn variable_result(&mut self, buffer: & mut [u8])
-                -> Result<(), InvalidBufferLength>
-            {
-                if buffer.len() != self.groestl.output_size {
-                    return Err(InvalidBufferLength);
-                }
+            fn variable_result<F: FnOnce(&[u8])>(mut self, f: F) {
                 let block = self.groestl.finalize();
-                let n = block.len() - buffer.len();
-                buffer.copy_from_slice(&block[n..]);
-                *self = Self::new(self.groestl.output_size).unwrap();
-                Ok(())
+                let n = block.len() - self.groestl.output_size;
+                f(&block[n..]);
+            }
+        }
+
+        impl Reset for $state {
+            fn reset(&mut self) -> Self {
+                Self { groestl: self.groestl.reset() }
             }
         }
 

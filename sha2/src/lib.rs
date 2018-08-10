@@ -51,8 +51,7 @@
 //! ```
 //!
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
-
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 extern crate byte_tools;
 extern crate block_buffer;
 extern crate fake_simd as simd;
@@ -60,6 +59,8 @@ extern crate fake_simd as simd;
 #[macro_use] pub extern crate digest;
 #[cfg(feature = "asm")]
 extern crate sha2_asm;
+#[cfg(feature = "std")]
+extern crate std;
 
 mod consts;
 #[cfg(not(feature = "asm"))]

@@ -1,5 +1,5 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
-use ops::{Index, IndexMut};
+use core::ops::{Index, IndexMut};
 
 use digest::generic_array::{ArrayLength, GenericArray};
 

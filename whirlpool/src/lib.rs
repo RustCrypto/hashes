@@ -34,21 +34,23 @@
 //! ```
 //!
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
-#![cfg_attr(feature = "cargo-clippy", allow(identity_op, double_parens))]
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
 extern crate block_buffer;
 extern crate byte_tools;
+#[cfg(feature = "std")]
+extern crate std;
 #[cfg(feature = "asm")]
 extern crate whirlpool_asm as utils;
+
 #[cfg(not(feature = "asm"))]
 mod utils;
 
 use utils::compress;
 
 pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput};
+use digest::{Input, BlockInput, FixedOutput, Reset};
 #[cfg(not(feature = "asm"))]
 use byte_tools::write_u64v_be;
 use byte_tools::zero;
@@ -92,6 +94,7 @@ fn convert(block: &GenericArray<u8, U64>) -> &[u8; 64] {
 }
 
 impl Whirlpool {
+    #![cfg_attr(feature = "cargo-clippy", allow(identity_op, double_parens))]
     fn update_len(&mut self, len: u64) {
         let len_bits = [
             ((len >> (56 + 5))       ) as u8,
@@ -159,12 +162,11 @@ impl FixedOutput for Whirlpool {
     type OutputSize = U64;
 
     #[cfg(not(feature = "asm"))]
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();
         write_u64v_be(&mut out, &self.hash[..]);
-        *self = Default::default();
         out
     }
 
@@ -174,6 +176,14 @@ impl FixedOutput for Whirlpool {
         let res = GenericArray::clone_from_slice(&self.hash);
         *self = Default::default();
         res
+    }
+}
+
+impl Reset for Whirlpool {
+    fn reset(&mut self) -> Self {
+        let mut temp = Self::default();
+        core::mem::swap(self, &mut temp);
+        temp
     }
 }
 

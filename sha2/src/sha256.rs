@@ -1,8 +1,9 @@
-use digest::{Input, BlockInput, FixedOutput};
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U28, U32, U64};
 use block_buffer::BlockBuffer;
 use byte_tools::write_u32v_be;
+use core::mem;
 
 use consts::{STATE_LEN, H224, H256};
 
@@ -58,8 +59,7 @@ impl Engine256 {
     fn finish(&mut self) {
         let self_state = &mut self.state;
         let l = self.len;
-        self.buffer.len64_padding_be(0x80, l,
-            |input| self_state.process_block(input));
+        self.buffer.len64_padding_be(0x80, l, |b| self_state.process_block(b));
     }
 }
 
@@ -85,12 +85,19 @@ impl Input for Sha256 {
 impl FixedOutput for Sha256 {
     type OutputSize = U32;
 
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         write_u32v_be(out.as_mut_slice(), &self.engine.state.h);
-        *self = Default::default();
         out
+    }
+}
+
+impl Reset for Sha256 {
+    fn reset(&mut self) -> Self {
+        let mut temp = Self::default();
+        mem::swap(self, &mut temp);
+        temp
     }
 }
 
@@ -116,12 +123,19 @@ impl Input for Sha224 {
 impl FixedOutput for Sha224 {
     type OutputSize = U28;
 
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         write_u32v_be(out.as_mut_slice(), &self.engine.state.h[..7]);
-        *self = Default::default();
         out
+    }
+}
+
+impl Reset for Sha224 {
+    fn reset(&mut self) -> Self {
+        let mut temp = Self::default();
+        mem::swap(self, &mut temp);
+        temp
     }
 }
 
