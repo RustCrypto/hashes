@@ -2,7 +2,7 @@
 name = "gost94"
 version = "0.8.0"
 authors = ["RustCrypto Developers"]
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 description = "GOST R 34.11-94 hash function"
 documentation = "https://docs.rs/gost94"
 repository = "https://github.com/RustCrypto/hashes"
