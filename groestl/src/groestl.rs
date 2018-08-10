@@ -38,11 +38,8 @@ impl<BlockSize> Groestl<BlockSize>
             _ => unreachable!(),
         };
 
-        Ok(Groestl{
-            buffer: Default::default(),
-            state: GroestlState::new(output_size),
-            output_size: output_size
-        })
+        let state = GroestlState::new(output_size);
+        Ok(Groestl{ buffer: Default::default(), state, output_size })
     }
 
     pub fn process(&mut self, input: &[u8]) {

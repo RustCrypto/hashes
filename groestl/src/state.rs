@@ -49,15 +49,15 @@ impl<BlockSize> GroestlState<BlockSize>
         let block_bytes = BlockSize::to_usize();
         let output_bits = output_size * 8;
 
-        let mut iv = GenericArray::default();
-        write_u64_be(&mut iv[block_bytes - 8..], output_bits as u64);
+        let mut state = GenericArray::default();
+        write_u64_be(&mut state[block_bytes - 8..], output_bits as u64);
         let rounds = match block_bytes {
             128 => 14,
             64 => 10,
             _ => unreachable!(),
         };
 
-        GroestlState { state: iv, rounds: rounds, num_blocks: 0 }
+        GroestlState { state, rounds, num_blocks: 0 }
     }
 
     fn wide(&self) -> bool {

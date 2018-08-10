@@ -250,8 +250,7 @@ macro_rules! blake2_impl {
 
             fn fixed_result(&mut self) -> Output {
                 assert_eq!(self.n, $bytes::to_usize());
-                let res = self.finalize_with_flag(0);
-                res
+                self.finalize_with_flag(0)
             }
         }
 

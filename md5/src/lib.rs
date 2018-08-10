@@ -57,7 +57,7 @@ impl Md5 {
             self.buffer.len64_padding_le(0x80, l,
                 |d| compress(self_state, convert(d)));
         }
-        let res = self.state.clone();
+        let res = self.state;
         *self = Default::default();
         res
     }

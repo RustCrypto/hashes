@@ -1,8 +1,8 @@
 //! The [MD4][1] hash function.
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD4
-
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
 extern crate fake_simd as simd;

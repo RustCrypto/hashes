@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
+#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
 use digest::{Input, BlockInput, FixedOutput};
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;
@@ -70,9 +72,7 @@ fn x_mut(a: &mut Block, b: &Block) {
 
 fn a(x: Block) -> Block {
     let mut out = Block::default();
-    for i in 0..24 {
-        out[i] = x[i+8];
-    }
+    out[..24].clone_from_slice(&x[8..]);
     for i in 0..8 {
         out[24+i] = x[i]^x[i+8];
     }
@@ -96,20 +96,20 @@ fn psi(block: &mut Block) {
     out[..30].copy_from_slice(&block[2..]);
     out[30..].copy_from_slice(&block[..2]);
 
-    out[30] ^= block[2*1];
-    out[31] ^= block[2*1+1];
+    out[30] ^= block[2];
+    out[31] ^= block[3];
 
-    out[30] ^= block[2*2];
-    out[31] ^= block[2*2+1];
+    out[30] ^= block[4];
+    out[31] ^= block[5];
 
-    out[30] ^= block[2*3];
-    out[31] ^= block[2*3+1];
+    out[30] ^= block[6];
+    out[31] ^= block[7];
 
-    out[30] ^= block[2*12];
-    out[31] ^= block[2*12+1];
+    out[30] ^= block[24];
+    out[31] ^= block[25];
 
-    out[30] ^= block[2*15];
-    out[31] ^= block[2*15+1];
+    out[30] ^= block[30];
+    out[31] ^= block[31];
 
     block.copy_from_slice(&out);
 }
@@ -213,15 +213,12 @@ pub struct Gost94 {
 impl Gost94 {
     // Create new GOST94 instance with given S-Box and IV
     pub fn new(s: SBox, h: Block) -> Self {
+        let n = Default::default();
+        let sigma = Default::default();
         Gost94 {
             buffer: Default::default(),
             h0: h,
-            state: Gost94State{
-                s: s,
-                h: h,
-                n: Default::default(),
-                sigma: Default::default(),
-            }
+            state: Gost94State { s, h, n, sigma },
         }
     }
 }

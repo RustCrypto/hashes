@@ -10,7 +10,7 @@ pub struct Sha3XofReader {
 
 impl Sha3XofReader {
     pub(crate) fn new(state: Sha3State, rate: usize) -> Self {
-        Sha3XofReader{ state: state, rate: rate, pos: 0 }
+        Sha3XofReader{ state, rate, pos: 0 }
     }
 }
 

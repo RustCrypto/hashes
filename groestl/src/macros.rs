@@ -27,8 +27,7 @@ macro_rules! impl_groestl {
             fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
                 let block = self.groestl.finalize();
                 let n = block.len() - Self::OutputSize::to_usize();
-                let res = GenericArray::clone_from_slice( &block[n..]);
-                res
+                GenericArray::clone_from_slice( &block[n..])
             }
         }
 

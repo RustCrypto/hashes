@@ -115,11 +115,7 @@ impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
         };
         Streebog {
             buffer: Default::default(),
-            state: StreebogState{
-                h: h,
-                n: [0u8; 64],
-                sigma: [0u8; 64],
-            },
+            state: StreebogState { h, n: [0u8; 64], sigma: [0u8; 64] },
             digest_size: Default::default(),
         }
     }
