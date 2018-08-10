@@ -1,8 +1,10 @@
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 extern crate byte_tools;
 extern crate block_buffer;
 #[macro_use] pub extern crate digest;
 #[macro_use] extern crate opaque_debug;
+#[cfg(feature = "std")]
+extern crate std;
 
 #[macro_use]
 mod macros;
