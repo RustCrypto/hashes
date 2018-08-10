@@ -3,7 +3,8 @@
 use digest;
 use digest::generic_array::typenum::{Unsigned, U64};
 use digest::generic_array::{GenericArray, ArrayLength};
-use block_buffer::{BlockBuffer512, ZeroPadding};
+use block_buffer::BlockBuffer;
+use block_buffer::block_padding::ZeroPadding;
 use byte_tools::{write_u64v_le, copy_memory};
 #[cfg(not(feature = "std"))]
 use core::marker::PhantomData;
@@ -88,8 +89,9 @@ impl StreebogState {
         }
     }
 
-    fn process_block(&mut self, block: &Block, msg_len: u8) {
+    fn process_block(&mut self, block: &GenericArray<u8, U64>, msg_len: u8) {
         let n = self.n;
+        let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
         self.g(&n, block);
         self.update_n(msg_len);
         self.update_sigma(block);
@@ -98,7 +100,7 @@ impl StreebogState {
 
 #[derive(Clone)]
 pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
     state: StreebogState,
     // Phantom data to tie digest size to the struct
     digest_size: PhantomData<DigestSize>,
@@ -131,9 +133,8 @@ impl<N> digest::BlockInput for Streebog<N>  where N: ArrayLength<u8> + Copy {
 impl<N> digest::Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
     fn process(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &Block| {
-            self_state.process_block(d, BLOCK_SIZE as u8);
-        });
+        self.buffer.input(input,
+            |d| self_state.process_block(d, BLOCK_SIZE as u8));
     }
 }
 
@@ -146,7 +147,8 @@ impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
             let mut self_state = self.state;
             let pos = self.buffer.position();
 
-            let block = self.buffer.pad_with::<ZeroPadding>();
+            let block = self.buffer.pad_with::<ZeroPadding>()
+                .expect("we never use input_lazy");
             block[pos] = 1;
             self_state.process_block(block, pos as u8);
 

@@ -37,7 +37,7 @@ mod utils;
 use utils::compress;
 
 use byte_tools::write_u32v_be;
-use block_buffer::BlockBuffer512;
+use block_buffer::BlockBuffer;
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput};
@@ -52,7 +52,7 @@ use consts::{STATE_LEN, H};
 pub struct Sha1 {
     h: [u32; STATE_LEN],
     len: u64,
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
 }
 
 impl Default for Sha1 {
@@ -81,13 +81,7 @@ impl FixedOutput for Sha1 {
         {
             let state = &mut self.h;
             let l = self.len << 3;
-            // remove this mess by adding `len_padding_be` method
-            let l = if cfg!(target_endian = "little") {
-                l.to_be()
-            } else {
-                l.to_le()
-            };
-            self.buffer.len_padding(l, |d| compress(state, d));
+            self.buffer.len64_padding_be(0x80, l, |d| compress(state, d));
         }
         let mut out = GenericArray::default();
         write_u32v_be(&mut out, &self.h);

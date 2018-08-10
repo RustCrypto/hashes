@@ -1,11 +1,11 @@
 macro_rules! impl_state {
-    ($state:ident, $rate:ident, $buffer:ty, $padding:ty) => {
+    ($state:ident, $rate:ident, $padding:ty) => {
 
         #[allow(non_camel_case_types)]
         #[derive(Clone, Default)]
         pub struct $state {
             state: Sha3State,
-            buffer: $buffer,
+            buffer: BlockBuffer<$rate>,
         }
 
         impl $state {
@@ -15,7 +15,8 @@ macro_rules! impl_state {
             }
 
             fn apply_padding(&mut self) {
-                let buf = self.buffer.pad_with::<$padding>();
+                let buf = self.buffer.pad_with::<$padding>()
+                    .expect("we never use input_lazy");
                 self.state.absorb_block(buf);
             }
         }
@@ -23,12 +24,9 @@ macro_rules! impl_state {
 }
 
 macro_rules! sha3_impl {
-    (
-        $state:ident, $output_size:ident, $rate:ident,
-        $buffer:ty, $padding:ty
-    ) => {
+    ($state:ident, $output_size:ident, $rate:ident, $padding:ty) => {
 
-        impl_state!($state, $rate, $buffer, $padding);
+        impl_state!($state, $rate, $padding);
 
         impl BlockInput for $state {
             type BlockSize = $rate;
@@ -62,8 +60,8 @@ macro_rules! sha3_impl {
 }
 
 macro_rules! shake_impl {
-    ($state:ident, $rate:ident, $buffer:ty, $padding:ty) => {
-        impl_state!($state, $rate, $buffer, $padding);
+    ($state:ident, $rate:ident, $padding:ty) => {
+        impl_state!($state, $rate, $padding);
 
         impl Input for $state {
             fn process(&mut self, data: &[u8]) {

@@ -4,7 +4,7 @@
 //! Signatures, Integrity and Encryption; an European research project).
 //!
 //! The constants used by Whirlpool were changed twice (2001 and 2003) - this
-//! module only implements the most recent standard. The two older Whirlpool
+//! crate only implements the most recent standard. The two older Whirlpool
 //! implementations (sometimes called Whirlpool-0 (pre 2001) and Whirlpool-T
 //! (pre 2003)) were not used much anyway (both have never been recommended
 //! by NESSIE).
@@ -14,11 +14,17 @@
 //! # Usage
 //!
 //! ```rust
+//! # #[macro_use] extern crate hex_literal;
+//! # extern crate whirlpool;
 //! use whirlpool::{Whirlpool, Digest};
 //!
 //! let mut hasher = Whirlpool::default();
 //! hasher.input(b"Hello Whirlpool");
 //! let result = hasher.result();
+//! assert_eq!(&result[..], &hex!("
+//!     8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c
+//!     a373816495e63db0fff2ff25f75aa7162f332c9f518c3036456502a8414d300a
+//!")[..]);
 //! ```
 #![cfg_attr(feature = "cargo-clippy", allow(identity_op, double_parens))]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -38,7 +44,8 @@ use digest::{Input, BlockInput, FixedOutput};
 #[cfg(not(feature = "asm"))]
 use byte_tools::write_u64v_be;
 use byte_tools::zero;
-use block_buffer::{BlockBuffer512, ZeroPadding};
+use block_buffer::BlockBuffer;
+use block_buffer::block_padding::Iso7816;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U64;
 
@@ -48,10 +55,10 @@ mod consts;
 type BlockSize = U64;
 
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct Whirlpool {
     bit_length: [u8; 32],
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
     #[cfg(not(feature = "asm"))]
     hash: [u64; 8],
     #[cfg(feature = "asm")]
@@ -62,13 +69,17 @@ impl Default for Whirlpool {
     fn default() -> Self {
         Self {
             bit_length: [0u8; 32],
-            buffer: BlockBuffer512::default(),
+            buffer: BlockBuffer::default(),
             #[cfg(not(feature = "asm"))]
             hash: [0u64; 8],
             #[cfg(feature = "asm")]
             hash: [0u8; 64],
         }
     }
+}
+
+fn convert(block: &GenericArray<u8, U64>) -> &[u8; 64] {
+    unsafe { &*(block.as_ptr() as *const [u8; 64]) }
 }
 
 impl Whirlpool {
@@ -109,16 +120,17 @@ impl Whirlpool {
         // padding
         let hash = &mut self.hash;
         let pos = self.buffer.position();
-        let buf = self.buffer.pad_with::<ZeroPadding>();
+        let buf = self.buffer.pad_with::<Iso7816>()
+            .expect("we never use input_lazy");
         buf[pos] = 0x80;
 
         if pos + 1 > self.bit_length.len() {
-            compress(hash, buf);
+            compress(hash, convert(buf));
             zero(&mut buf[..pos+1]);
         }
 
         buf[32..].copy_from_slice(&self.bit_length);
-        compress(hash, buf);
+        compress(hash, convert(buf));
     }
 }
 
@@ -130,7 +142,7 @@ impl Input for Whirlpool {
     fn process(&mut self, input: &[u8]) {
         self.update_len(input.len() as u64);
         let hash = &mut self.hash;
-        self.buffer.input(input, |b| compress(hash, b));
+        self.buffer.input(input, |b| compress(hash, convert(b)));
     }
 }
 

@@ -9,7 +9,7 @@ extern crate block_buffer;
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput};
 use byte_tools::write_u32v_le;
-use block_buffer::BlockBuffer512;
+use block_buffer::BlockBuffer;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U20, U64};
 
@@ -21,7 +21,7 @@ use block::{process_msg_block, DIGEST_BUF_LEN, H0};
 pub struct Ripemd160 {
     h: [u32; DIGEST_BUF_LEN],
     len: u64,
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
 }
 
 impl Default for Ripemd160 {
@@ -54,7 +54,7 @@ impl FixedOutput for Ripemd160 {
         {
             let h = &mut self.h;
             let l = self.len << 3;
-            self.buffer.len_padding(l, |b| process_msg_block(h, b));
+            self.buffer.len64_padding_le(0x80, l, |b| process_msg_block(h, b));
         }
 
         let mut out = GenericArray::default();

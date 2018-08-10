@@ -1,7 +1,7 @@
 use digest::{Input, BlockInput, FixedOutput};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U28, U32, U48, U64, U128};
-use block_buffer::BlockBuffer1024;
+use block_buffer::BlockBuffer;
 use byte_tools::{write_u64v_be, write_u32_be};
 
 use consts::{STATE_LEN, H384, H512, H512_TRUNC_224, H512_TRUNC_256};
@@ -12,7 +12,7 @@ use sha512_utils::compress512;
 use sha2_asm::compress512;
 
 type BlockSize = U128;
-pub type Block = [u8; 128];
+type Block = GenericArray<u8, BlockSize>;
 
 /// A structure that represents that state of a digest computation for the
 /// SHA-2 512 family of digest functions
@@ -24,8 +24,9 @@ struct Engine512State {
 impl Engine512State {
     fn new(h: &[u64; 8]) -> Engine512State { Engine512State { h: *h } }
 
-    pub fn process_block(&mut self, data: &Block) {
-        compress512(&mut self.h, data);
+    pub fn process_block(&mut self, block: &Block) {
+        let block = unsafe { &*(block.as_ptr() as *const [u8; 128])};
+        compress512(&mut self.h, block);
     }
 }
 
@@ -34,7 +35,7 @@ impl Engine512State {
 #[derive(Clone)]
 struct Engine512 {
     len: (u64, u64), // TODO: replace with u128 on stabilization
-    buffer: BlockBuffer1024,
+    buffer: BlockBuffer<BlockSize>,
     state: Engine512State,
 }
 
@@ -57,16 +58,9 @@ impl Engine512 {
 
     fn finish(&mut self) {
         let self_state = &mut self.state;
-        let (mut hi, mut lo) = self.len;
-        // TODO: change `len_padding_u128` to use BE
-        if cfg!(target_endian = "little") {
-            hi = hi.to_be();
-            lo = lo.to_be();
-        } else {
-            hi = hi.to_le();
-            lo = lo.to_le();
-        };
-        self.buffer.len_padding_u128(hi, lo, |d| self_state.process_block(d));
+        let (hi, lo) = self.len;
+        // TODO: fix. lo and hi are mixed in te BlockBuffer impl.
+        self.buffer.len128_padding_be(0x80, lo, hi, |d| self_state.process_block(d));
     }
 }
 

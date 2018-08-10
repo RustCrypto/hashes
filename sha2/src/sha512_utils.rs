@@ -2,8 +2,7 @@
 
 use simd::u64x2;
 use consts::{BLOCK_LEN, K64X2};
-use byte_tools::{read_u64v_be};
-use sha512::Block;
+use byte_tools::read_u64v_be;
 
 /// Not an intrinsic, but works like an unaligned load.
 #[inline]
@@ -280,7 +279,7 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
 /// }
 /// ```
 ///
-pub fn compress512(state: &mut [u64; 8], block: &Block) {
+pub fn compress512(state: &mut [u64; 8], block: &[u8; 128]) {
     let mut block_u64 = [0u64; BLOCK_LEN];
     read_u64v_be(&mut block_u64[..], block);
     sha512_digest_block_u64(state, &block_u64);
