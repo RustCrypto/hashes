@@ -16,16 +16,20 @@
 //! ```rust
 //! # #[macro_use] extern crate hex_literal;
 //! # extern crate whirlpool;
+//! # fn main() {
 //! use whirlpool::{Whirlpool, Digest};
 //!
-//! let mut hasher = Whirlpool::default();
+//! let mut hasher = Whirlpool::new();
 //! hasher.input(b"Hello Whirlpool");
 //! let result = hasher.result();
 //! assert_eq!(&result[..], &hex!("
 //!     8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c
 //!     a373816495e63db0fff2ff25f75aa7162f332c9f518c3036456502a8414d300a
 //!")[..]);
+//! # }
 //! ```
+//!
+//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 #![cfg_attr(feature = "cargo-clippy", allow(identity_op, double_parens))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #[macro_use] extern crate opaque_debug;
