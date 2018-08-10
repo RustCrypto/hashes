@@ -5,8 +5,8 @@ macro_rules! blake2_impl {
         use $crate::as_bytes::AsBytes;
         use $crate::simd::{Vector4, $vec};
 
-        use digest::{Input, BlockInput, FixedOutput, VariableOutput};
-        use digest::{InvalidOutputSize, InvalidBufferLength};
+        use digest::{Input, BlockInput, FixedOutput, VariableOutput, Reset};
+        use digest::InvalidOutputSize;
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::Unsigned;
         use core::cmp;
@@ -101,12 +101,6 @@ macro_rules! blake2_impl {
                 state
             }
 
-            fn reset(&mut self) {
-                self.t = self.t0;
-                self.m = self.m0;
-                self.h = self.h0;
-            }
-
             #[doc(hidden)]
             pub fn with_parameter_block(p: &[$word; 8]) -> Self {
                 let nn = p[0] as u8 as usize;
@@ -171,12 +165,12 @@ macro_rules! blake2_impl {
             }
 
             #[doc(hidden)]
-            pub fn finalize_last_node(&mut self) -> Output {
+            pub fn finalize_last_node(self) -> Output {
                 self.finalize_with_flag(!0)
             }
 
 
-            fn finalize_with_flag(&mut self, f1: $word) -> Output {
+            fn finalize_with_flag(mut self, f1: $word) -> Output {
                 let off = self.t as usize % (2 * $bytes::to_usize());
                 if off != 0 {
                     zero(&mut self.m.as_mut_bytes()[off..]);
@@ -188,7 +182,6 @@ macro_rules! blake2_impl {
 
                 let mut out = GenericArray::default();
                 copy_memory(buf.as_bytes(), &mut out);
-                self.reset();
                 out
             }
 
@@ -248,7 +241,7 @@ macro_rules! blake2_impl {
         impl FixedOutput for $state {
             type OutputSize = $bytes;
 
-            fn fixed_result(&mut self) -> Output {
+            fn fixed_result(self) -> Output {
                 assert_eq!(self.n, $bytes::to_usize());
                 self.finalize_with_flag(0)
             }
@@ -266,17 +259,20 @@ macro_rules! blake2_impl {
                 self.n
             }
 
-            fn variable_result(&mut self, buf: &mut [u8])
-                -> Result<(), InvalidBufferLength>
-            {
-                let n = buf.len();
-                if n > self.output_size() {
-                    Err(InvalidBufferLength)
-                } else {
-                    let res = self.finalize_with_flag(0);
-                    copy_memory(&res[..n], buf);
-                    Ok(())
-                }
+            fn variable_result<F: FnOnce(&[u8])>(self, f: F) {
+                let n = self.n;
+                let res = self.finalize_with_flag(0);
+                f(&res[..n]);
+            }
+        }
+
+        impl  Reset for $state {
+            fn reset(&mut self) -> Self {
+                let temp = self.clone();
+                self.t = self.t0;
+                self.m = self.m0;
+                self.h = self.h0;
+                temp
             }
         }
 
@@ -299,7 +295,7 @@ macro_rules! blake2_impl {
             fn input(&mut self, data: &[u8]) { self.update(data); }
 
             fn result(&mut self) -> MacResult<Self::OutputSize> {
-                let val = self.finalize_with_flag(0);
+                let val = self.reset().finalize_with_flag(0);
                 MacResult::new(val)
             }
         }
