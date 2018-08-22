@@ -10,7 +10,7 @@ macro_rules! blake2_impl {
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::Unsigned;
         use core::cmp;
-        use byte_tools::{copy_memory, zero};
+        use byte_tools::{copy, zero};
         use crypto_mac::{Mac, MacResult, InvalidKeyLength};
 
         type Output = GenericArray<u8, $bytes>;
@@ -92,7 +92,7 @@ macro_rules! blake2_impl {
                 };
 
                 if kk > 0 {
-                    copy_memory(k, state.m.as_mut_bytes());
+                    copy(k, state.m.as_mut_bytes());
                     state.t = 2 * $bytes::to_u64();
                 }
 
@@ -138,7 +138,7 @@ macro_rules! blake2_impl {
                     let part = &rest[..len];
                     rest = &rest[part.len()..];
 
-                    copy_memory(part, &mut self.m.as_mut_bytes()[off..]);
+                    copy(part, &mut self.m.as_mut_bytes()[off..]);
                     self.t = self.t.checked_add(part.len() as u64)
                         .expect("hash data length overflow");
                 }
@@ -149,7 +149,7 @@ macro_rules! blake2_impl {
                     let part = &rest[..block];
                     rest = &rest[part.len()..];
 
-                    copy_memory(part, &mut self.m.as_mut_bytes());
+                    copy(part, &mut self.m.as_mut_bytes());
                     self.t = self.t.checked_add(part.len() as u64)
                         .expect("hash data length overflow");
                 }
@@ -158,7 +158,7 @@ macro_rules! blake2_impl {
                 if n > 0 {
                     self.compress(0, 0);
 
-                    copy_memory(rest, &mut self.m.as_mut_bytes());
+                    copy(rest, &mut self.m.as_mut_bytes());
                     self.t = self.t.checked_add(rest.len() as u64)
                         .expect("hash data length overflow");
                 }
@@ -181,7 +181,7 @@ macro_rules! blake2_impl {
                 let buf = [self.h[0].to_le(), self.h[1].to_le()];
 
                 let mut out = GenericArray::default();
-                copy_memory(buf.as_bytes(), &mut out);
+                copy(buf.as_bytes(), &mut out);
                 out
             }
 

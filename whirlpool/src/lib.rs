@@ -52,10 +52,10 @@ use utils::compress;
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput, Reset};
 #[cfg(not(feature = "asm"))]
-use byte_tools::write_u64v_be;
 use byte_tools::zero;
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::Iso7816;
+use block_buffer::byteorder::{BE, ByteOrder};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U64;
 
@@ -134,7 +134,6 @@ impl Whirlpool {
         let pos = self.buffer.position();
         let buf = self.buffer.pad_with::<Iso7816>()
             .expect("we never use input_lazy");
-        buf[pos] = 0x80;
 
         if pos + 1 > self.bit_length.len() {
             compress(hash, convert(buf));
@@ -166,7 +165,7 @@ impl FixedOutput for Whirlpool {
         self.finalize();
 
         let mut out = GenericArray::default();
-        write_u64v_be(&mut out, &self.hash[..]);
+        BE::write_u64_into(&self.hash[..], &mut out);
         out
     }
 
@@ -181,8 +180,10 @@ impl FixedOutput for Whirlpool {
 
 impl Reset for Whirlpool {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        core::mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.bit_length = [0u8; 32];
+        self.buffer.reset();
+        for v in self.hash.iter_mut() { *v = 0; }
         temp
     }
 }

@@ -5,9 +5,7 @@ use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U32;
-use byte_tools::{
-    read_u32v_le, read_u32_le, write_u32v_le, read_u64v_le, write_u64v_le
-};
+use block_buffer::byteorder::{LE, ByteOrder};
 
 pub(crate) type Block = [u8; 32];
 
@@ -36,9 +34,9 @@ fn g(a: u32, k: u32, s: &SBox) -> u32 {
 
 fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
     let mut k = [0u32; 8];
-    let mut a = read_u32_le(&msg[0..4]);
-    let mut b = read_u32_le(&msg[4..8]);
-    read_u32v_le(&mut k, &key);
+    let mut a = LE::read_u32(&msg[0..4]);
+    let mut b = LE::read_u32(&msg[4..8]);
+    LE::read_u32_into(&key, &mut k);
 
     for _ in 0..3 {
         for i in 0..8 {
@@ -52,7 +50,7 @@ fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
         b = a;
         a = t;
     }
-    write_u32v_le(msg, &[b, a]);
+    LE::write_u32_into(&[b, a], msg);
 }
 
 fn x(a: &Block, b: &Block) -> Block {
@@ -164,7 +162,7 @@ impl Gost94State {
 
     fn update_sigma(&mut self, m: &Block) {
         let mut buf = [0u64; 4];
-        read_u64v_le(&mut buf, m);
+        LE::read_u64_into(m, &mut buf);
         let mut over = (0u64, false);
         for (a, b) in self.sigma.iter_mut().zip(buf.iter()) {
             if over.1 {
@@ -250,10 +248,10 @@ impl FixedOutput for Gost94 {
 
             let mut buf = Block::default();
 
-            write_u64v_le(&mut buf, &self_state.n);
+            LE::write_u64_into(&self_state.n, &mut buf);
             self_state.f(&buf);
 
-            write_u64v_le(&mut buf, &self_state.sigma);
+            LE::write_u64_into(&self_state.sigma, &mut buf);
             self_state.f(&buf);
         }
 
@@ -264,7 +262,7 @@ impl FixedOutput for Gost94 {
 impl Reset for Gost94 {
     fn reset(&mut self) -> Self {
         let temp = self.clone();
-        self.buffer = Default::default(); // TODO: repalce with reset
+        self.buffer.reset();
         self.state.n = Default::default();
         self.state.h = self.h0;
         self.state.sigma = Default::default();

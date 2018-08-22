@@ -18,11 +18,9 @@
 //! hasher.input(b"my message");
 //! let result = hasher.result();
 //! ```
-
 #![no_std]
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
-extern crate byte_tools;
 extern crate block_buffer;
 #[cfg(feature = "std")]
 extern crate std;

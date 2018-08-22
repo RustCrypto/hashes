@@ -65,21 +65,6 @@ impl Md2State {
     }
 }
 
-impl Md2 {
-    pub fn new() -> Md2 {
-        Default::default()
-    }
-
-    fn finalize(&mut self) {
-        let buf = self.buffer.pad_with::<Pkcs7>()
-            .expect("we never use input_lazy");
-        self.state.process_block(buf);
-        let checksum = self.state.checksum;
-        self.state.process_block(&checksum);
-    }
-}
-
-
 impl BlockInput for Md2 {
     type BlockSize = U16;
 }
@@ -87,9 +72,7 @@ impl BlockInput for Md2 {
 impl Input for Md2 {
     fn process(&mut self, input: &[u8]) {
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &Block| {
-            self_state.process_block(d);
-        });
+        self.buffer.input(input, |d| self_state.process_block(d) );
     }
 }
 
@@ -97,15 +80,20 @@ impl FixedOutput for Md2 {
     type OutputSize = U16;
 
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        self.finalize();
+        let buf = self.buffer.pad_with::<Pkcs7>()
+            .expect("we never use input_lazy");
+        self.state.process_block(buf);
+        let checksum = self.state.checksum;
+        self.state.process_block(&checksum);
         GenericArray::clone_from_slice(&self.state.x[0..16])
     }
 }
 
 impl Reset for Md2 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        core::mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.state = Default::default();
+        self.buffer.reset();
         temp
     }
 }

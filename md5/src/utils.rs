@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(inline_always, many_single_char_names))]
 
 use consts::RC;
-use byte_tools::read_u32v_le;
+use block_buffer::byteorder::{LE, ByteOrder};
 
 #[inline(always)]
 fn op_f(w: u32, x: u32, y: u32, z: u32, m: u32, c:u32, s: u32) -> u32 {
@@ -38,7 +38,7 @@ pub fn compress(state: &mut [u32; 4], input: &[u8; 64]) {
     let mut d = state[3];
 
     let mut data = [0u32; 16];
-    read_u32v_le(&mut data, input);
+    LE::read_u32_into(input, &mut data);
 
     // round 1
     a = op_f(a, b, c, d, data[0],  RC[0],  7);

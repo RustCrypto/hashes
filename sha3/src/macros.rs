@@ -55,8 +55,9 @@ macro_rules! sha3_impl {
 
         impl Reset for $state {
             fn reset(&mut self) -> Self {
-                let mut temp = Self::default();
-                core::mem::swap(self, &mut temp);
+                let temp = self.clone();
+                self.state = Default::default();
+                self.buffer.reset();
                 temp
             }
         }
@@ -89,8 +90,9 @@ macro_rules! shake_impl {
 
         impl Reset for $state {
             fn reset(&mut self) -> Self {
-                let mut temp = Self::default();
-                core::mem::swap(self, &mut temp);
+                let temp = self.clone();
+                self.state = Default::default();
+                self.buffer.reset();
                 temp
             }
         }

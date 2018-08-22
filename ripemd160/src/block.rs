@@ -1,4 +1,4 @@
-use byte_tools::{read_u32v_le};
+use block_buffer::byteorder::{LE, ByteOrder};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U64;
 
@@ -113,7 +113,7 @@ macro_rules! process_block(
 
 pub fn process_msg_block(h: &mut [u32; DIGEST_BUF_LEN], data: &Block) {
     let mut w = [0u32; WORK_BUF_LEN];
-    read_u32v_le(&mut w[0..16], data);
+    LE::read_u32_into(data, &mut w[0..16]);
     process_block!(h, w[..],
     // Round 1
         round1: h_ordering 0, 1, 2, 3, 4; data_index  0; roll_shift 11

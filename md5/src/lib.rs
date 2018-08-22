@@ -2,7 +2,6 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD5
 #![no_std]
-extern crate byte_tools;
 extern crate block_buffer;
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
@@ -16,8 +15,8 @@ mod utils;
 
 use utils::compress;
 
-use byte_tools::write_u32v_le;
 use block_buffer::BlockBuffer;
+use block_buffer::byteorder::{LE, ByteOrder};
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput, Reset};
@@ -52,18 +51,9 @@ fn convert(d: &GenericArray<u8, U64>) -> &[u8; 64] {
 impl Md5 {
     #[inline]
     fn finalize(&mut self) {
-        let self_state = &mut self.state;
+        let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer.len64_padding_le(0x80, l, |d| compress(self_state, convert(d)));
-    }
-
-    #[inline]
-    fn consume(&mut self, input: &[u8]) {
-        // Unlike Sha1 and Sha2, the length value in MD5 is defined as
-        // the length of the message mod 2^64 - ie: integer overflow is OK.
-        self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
-        let self_state = &mut self.state;
-        self.buffer.input(input, |d| compress(self_state, convert(d)));
+        self.buffer.len64_padding::<LE, _>(l, |d| compress(state, convert(d)));
     }
 }
 
@@ -74,7 +64,11 @@ impl BlockInput for Md5 {
 impl Input for Md5 {
     #[inline]
     fn process(&mut self, input: &[u8]) {
-        self.consume(input);
+        // Unlike Sha1 and Sha2, the length value in MD5 is defined as
+        // the length of the message mod 2^64 - ie: integer overflow is OK.
+        self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
+        let self_state = &mut self.state;
+        self.buffer.input(input, |d| compress(self_state, convert(d)));
     }
 }
 
@@ -85,15 +79,17 @@ impl FixedOutput for Md5 {
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         let mut out = GenericArray::default();
         self.finalize();
-        write_u32v_le(&mut out, &self.state);
+        LE::write_u32_into(&self.state, &mut out);
         out
     }
 }
 
 impl Reset for Md5 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        core::mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.state = consts::S0;
+        self.length_bytes = 0;
+        self.buffer.reset();
         temp
     }
 }

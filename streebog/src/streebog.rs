@@ -4,9 +4,9 @@ use digest::generic_array::typenum::{Unsigned, U64};
 use digest::generic_array::{GenericArray, ArrayLength};
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;
-use byte_tools::{write_u64v_le, copy_memory};
+use block_buffer::byteorder::{LE, ByteOrder};
+use byte_tools::copy;
 use core::marker::PhantomData;
-use core::mem;
 
 use consts::{BLOCK_SIZE, C};
 use table::SHUFFLED_LIN_TABLE;
@@ -37,7 +37,7 @@ fn lps(h: &mut Block, n: &Block) {
         }
     }
 
-    write_u64v_le(h, &buf);
+    LE::write_u64_into(&buf, h);
 }
 
 impl StreebogState {
@@ -45,8 +45,8 @@ impl StreebogState {
         let mut key = [0u8; 64];
         let mut block = [0u8; 64];
 
-        copy_memory(&self.h, &mut key);
-        copy_memory(m, &mut block);
+        copy(&self.h, &mut key);
+        copy(m, &mut block);
 
         lps(&mut key, n);
 
@@ -135,8 +135,6 @@ impl<N> FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
     type OutputSize = N;
 
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        let mut buf = GenericArray::default();
-
         let mut self_state = self.state;
         let pos = self.buffer.position();
 
@@ -151,16 +149,21 @@ impl<N> FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
         self_state.g(&[0u8; 64], &sigma);
 
         let n = BLOCK_SIZE - Self::OutputSize::to_usize();
-        buf.copy_from_slice(&self_state.h[n..]);
-
-        buf
+        GenericArray::clone_from_slice(&self_state.h[n..])
     }
 }
 
 impl<N> Reset for Streebog<N>  where N: ArrayLength<u8> + Copy {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.buffer.reset();
+        self.state.h = match N::to_usize() {
+            64 => [0u8; 64],
+            32 => [1u8; 64],
+            _ => unreachable!()
+        };
+        self.state.n = [0; 64];
+        self.state.sigma = [0; 64];
         temp
     }
 }

@@ -24,7 +24,6 @@
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 #![no_std]
 extern crate block_buffer;
-extern crate byte_tools;
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
 #[cfg(feature = "std")]
@@ -39,13 +38,12 @@ mod utils;
 
 use utils::compress;
 
-use byte_tools::write_u32v_be;
-use block_buffer::BlockBuffer;
-
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput, Reset};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U20, U64};
+use block_buffer::BlockBuffer;
+use block_buffer::byteorder::{BE, ByteOrder};
 
 mod consts;
 use consts::{STATE_LEN, H};
@@ -84,18 +82,20 @@ impl FixedOutput for Sha1 {
         {
             let state = &mut self.h;
             let l = self.len << 3;
-            self.buffer.len64_padding_be(0x80, l, |d| compress(state, d));
+            self.buffer.len64_padding::<BE, _>(l, |d| compress(state, d));
         }
         let mut out = GenericArray::default();
-        write_u32v_be(&mut out, &self.h);
+        BE::write_u32_into(&self.h,&mut out);
         out
     }
 }
 
 impl Reset for Sha1 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        core::mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.h = H;
+        self.len = 0;
+        self.buffer.reset();
         temp
     }
 }

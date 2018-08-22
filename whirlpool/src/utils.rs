@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(identity_op, needless_range_loop, double_parens))]
 
 use consts::*;
-use byte_tools::read_u64v_be;
+use block_buffer::byteorder::{BE, ByteOrder};
 
 pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
     let mut k = [0u64; 8];
@@ -9,7 +9,7 @@ pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
     let mut state = [0u64; 8];
     let mut l = [0u64; 8];
 
-    read_u64v_be(&mut block, &buffer[..]);
+    BE::read_u64_into(&buffer[..], &mut block);
     k.copy_from_slice(hash);
 
     for i in 0..8 {

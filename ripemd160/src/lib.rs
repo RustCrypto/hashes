@@ -21,7 +21,6 @@
 //!
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 #![no_std]
-extern crate byte_tools;
 extern crate block_buffer;
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
@@ -30,8 +29,8 @@ extern crate std;
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput, Reset};
-use byte_tools::write_u32v_le;
 use block_buffer::BlockBuffer;
+use block_buffer::byteorder::{LE, ByteOrder};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U20, U64};
 
@@ -76,19 +75,21 @@ impl FixedOutput for Ripemd160 {
         {
             let h = &mut self.h;
             let l = self.len << 3;
-            self.buffer.len64_padding_le(0x80, l, |b| process_msg_block(h, b));
+            self.buffer.len64_padding::<LE, _>(l, |b| process_msg_block(h, b));
         }
 
         let mut out = GenericArray::default();
-        write_u32v_le(&mut out[..], &self.h);
+        LE::write_u32_into(&self.h, &mut out[..]);
         out
     }
 }
 
 impl Reset for Ripemd160 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        core::mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.buffer.reset();
+        self.len = 0;
+        self.h = H0;
         temp
     }
 }

@@ -11,8 +11,8 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.8"
-byte-tools = "0.2"
-block-buffer = "0.5"
+block-buffer = "0.6"
+byte-tools = "0.3"
 opaque-debug = "0.2"
 keccak = "0.1"
 

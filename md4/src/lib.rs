@@ -6,15 +6,14 @@
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
 extern crate fake_simd as simd;
-extern crate byte_tools;
 extern crate block_buffer;
 #[cfg(feature = "std")]
 extern crate std;
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput, Reset};
-use byte_tools::{write_u32_le, read_u32v_le};
 use block_buffer::BlockBuffer;
+use block_buffer::byteorder::{LE, ByteOrder};
 use simd::u32x4;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U16, U64};
@@ -36,7 +35,6 @@ pub struct Md4 {
     buffer: BlockBuffer<U64>,
     state: Md4State,
 }
-
 
 impl Md4State {
     fn process_block(&mut self, input: &Block) {
@@ -73,7 +71,7 @@ impl Md4State {
 
         // load block to data
         let mut data = [0u32; 16];
-        read_u32v_le(&mut data, input);
+        LE::read_u32_into(input, &mut data);
 
         // round 1
         for &i in &[0, 4, 8, 12] {
@@ -109,9 +107,9 @@ impl Default for Md4State {
 
 impl Md4 {
     fn finalize(&mut self) {
-        let self_state = &mut self.state;
+        let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer.len64_padding_le(0x80, l, |d| self_state.process_block(d))
+        self.buffer.len64_padding::<LE, _>(l, |d| state.process_block(d))
     }
 }
 
@@ -121,7 +119,8 @@ impl BlockInput for Md4 {
 
 impl Input for Md4 {
     fn process(&mut self, input: &[u8]) {
-        // 2^64 - ie: integer overflow is OK.
+        // Unlike Sha1 and Sha2, the length value in MD4 is defined as
+        // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| self_state.process_block(d));
@@ -135,10 +134,10 @@ impl FixedOutput for Md4 {
         self.finalize();
 
         let mut out = GenericArray::default();
-        write_u32_le(&mut out[0..4], self.state.s.0);
-        write_u32_le(&mut out[4..8], self.state.s.1);
-        write_u32_le(&mut out[8..12], self.state.s.2);
-        write_u32_le(&mut out[12..16], self.state.s.3);
+        LE::write_u32(&mut out[0..4], self.state.s.0);
+        LE::write_u32(&mut out[4..8], self.state.s.1);
+        LE::write_u32(&mut out[8..12], self.state.s.2);
+        LE::write_u32(&mut out[12..16], self.state.s.3);
 
         out
     }
@@ -146,8 +145,10 @@ impl FixedOutput for Md4 {
 
 impl Reset for Md4 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        core::mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.state = Default::default();
+        self.length_bytes = 0;
+        self.buffer.reset();
         temp
     }
 }

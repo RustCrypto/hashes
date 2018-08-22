@@ -2,8 +2,7 @@ use digest::{Input, BlockInput, FixedOutput, Reset};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U28, U32, U48, U64, U128};
 use block_buffer::BlockBuffer;
-use byte_tools::{write_u64v_be, write_u32_be};
-use core::mem;
+use block_buffer::byteorder::{BE, ByteOrder};
 
 use consts::{STATE_LEN, H384, H512, H512_TRUNC_224, H512_TRUNC_256};
 
@@ -35,7 +34,7 @@ impl Engine512State {
 /// contains the logic necessary to perform the final calculations.
 #[derive(Clone)]
 struct Engine512 {
-    len: (u64, u64), // TODO: replace with u128 on stabilization
+    len: (u64, u64), // TODO: replace with u128 on MSRV bump
     buffer: BlockBuffer<BlockSize>,
     state: Engine512State,
 }
@@ -60,8 +59,13 @@ impl Engine512 {
     fn finish(&mut self) {
         let self_state = &mut self.state;
         let (hi, lo) = self.len;
-        // TODO: fix. lo and hi are mixed in te BlockBuffer impl.
-        self.buffer.len128_padding_be(0x80, lo, hi, |d| self_state.process_block(d));
+        self.buffer.len128_padding_be(hi, lo, |d| self_state.process_block(d));
+    }
+
+    fn reset(&mut self, h: &[u64; STATE_LEN]) {
+        self.len = (0, 0);
+        self.buffer.reset();
+        self.state = Engine512State::new(h);
     }
 }
 
@@ -91,15 +95,15 @@ impl FixedOutput for Sha512 {
         self.engine.finish();
 
         let mut out = GenericArray::default();
-        write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..]);
+        BE::write_u64_into(&self.engine.state.h[..], out.as_mut_slice());
         out
     }
 }
 
 impl Reset for Sha512 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.engine.reset(&H512);
         temp
     }
 }
@@ -130,15 +134,15 @@ impl FixedOutput for Sha384 {
         self.engine.finish();
 
         let mut out = GenericArray::default();
-        write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..6]);
+        BE::write_u64_into(&self.engine.state.h[..6], out.as_mut_slice());
         out
     }
 }
 
 impl Reset for Sha384 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.engine.reset(&H384);
         temp
     }
 }
@@ -171,15 +175,15 @@ impl FixedOutput for Sha512Trunc256 {
         self.engine.finish();
 
         let mut out = GenericArray::default();
-        write_u64v_be(out.as_mut_slice(), &self.engine.state.h[..4]);
+        BE::write_u64_into(&self.engine.state.h[..4], out.as_mut_slice());
         out
     }
 }
 
 impl Reset for Sha512Trunc256 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.engine.reset(&H512_TRUNC_256);
         temp
     }
 }
@@ -212,16 +216,16 @@ impl FixedOutput for Sha512Trunc224 {
         self.engine.finish();
 
         let mut out = GenericArray::default();
-        write_u64v_be(&mut out[..24], &self.engine.state.h[..3]);
-        write_u32_be(&mut out[24..28], (self.engine.state.h[3] >> 32) as u32);
+        BE::write_u64_into(&self.engine.state.h[..3], &mut out[..24]);
+        BE::write_u32(&mut out[24..28], (self.engine.state.h[3] >> 32) as u32);
         out
     }
 }
 
 impl Reset for Sha512Trunc224 {
     fn reset(&mut self) -> Self {
-        let mut temp = Self::default();
-        mem::swap(self, &mut temp);
+        let temp = self.clone();
+        self.engine.reset(&H512_TRUNC_224);
         temp
     }
 }

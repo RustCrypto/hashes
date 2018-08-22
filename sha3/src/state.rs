@@ -1,5 +1,5 @@
 use keccak;
-use byte_tools::{read_u64v_le, write_u64v_le};
+use block_buffer::byteorder::{LE, ByteOrder};
 
 const PLEN: usize = 25;
 
@@ -24,7 +24,7 @@ impl Sha3State {
             let n = block.len()/8;
             let mut buf = [0u64; 21];
             let buf = &mut buf[..n];
-            read_u64v_le(buf, block);
+            LE::read_u64_into(block, buf);
             for (d, i) in self.state[..n].iter_mut().zip(buf) {
                 *d ^= *i;
             }
@@ -40,7 +40,7 @@ impl Sha3State {
             unsafe { &*(&self.state as *const [u64; 25] as *const [u8; 8*PLEN]) }
         } else {
             data_copy = [0u8; 8*PLEN];
-            write_u64v_le(&mut data_copy, &self.state);
+            LE::write_u64_into(&self.state, &mut data_copy);
             &data_copy
         };
         f(data_ref);

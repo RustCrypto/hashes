@@ -1,6 +1,6 @@
 use core::ops::Div;
 
-use byte_tools::write_u64_be;
+use block_buffer::byteorder::{BE, ByteOrder};
 use digest::generic_array::{ArrayLength, GenericArray};
 use digest::generic_array::typenum::{Quot, U8};
 use matrix::Matrix;
@@ -50,7 +50,7 @@ impl<BlockSize> GroestlState<BlockSize>
         let output_bits = output_size * 8;
 
         let mut state = GenericArray::default();
-        write_u64_be(&mut state[block_bytes - 8..], output_bits as u64);
+        BE::write_u64(&mut state[block_bytes - 8..], output_bits as u64);
         let rounds = match block_bytes {
             128 => 14,
             64 => 10,
