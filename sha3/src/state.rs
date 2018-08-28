@@ -37,7 +37,7 @@ impl Sha3State {
     pub(crate) fn as_bytes<F: FnOnce(&[u8; 8*PLEN])>(&self, f: F) {
         let mut data_copy;
         let data_ref: &[u8; 8*PLEN] = if cfg!(target_endian = "little") {
-            unsafe { &*(&self.state as *const [u64; 25] as *const [u8; 8*PLEN]) }
+            unsafe { &*(self.state.as_ptr() as *const [u8; 8*PLEN]) }
         } else {
             data_copy = [0u8; 8*PLEN];
             LE::write_u64_into(&self.state, &mut data_copy);
