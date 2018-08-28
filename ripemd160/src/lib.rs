@@ -1,4 +1,4 @@
-//! An implementation of the RIPEMD-160 cryptographic hash.
+//! An implementation of the [RIPEMD-160][1] cryptographic hash.
 //!
 //! # Usage
 //!
@@ -8,18 +8,23 @@
 //! # fn main() {
 //! use ripemd160::{Ripemd160, Digest};
 //!
-//! // create a hasher object, to use it do not forget to import `Digest` trait
+//! // create a RIPEMD-160 hasher instance
 //! let mut hasher = Ripemd160::new();
-//! // write input message
-//! hasher.input(b"Hello world!");
-//! // read hash digest (it will consume hasher)
-//! let result = hasher.result();
 //!
+//! // process input message
+//! hasher.input(b"Hello world!");
+//!
+//! // acquire hash digest in the form of GenericArray,
+//! // which in this case is equivalent to [u8; 20]
+//! let result = hasher.result();
 //! assert_eq!(result[..], hex!("7f772647d88750add82d8e1a7a3e5c0902a346a3"));
 //! # }
 //! ```
 //!
-//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
+//! Also see [RustCrypto/hashes][2] readme.
+//!
+//! [1]: https://en.wikipedia.org/wiki/RIPEMD
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]

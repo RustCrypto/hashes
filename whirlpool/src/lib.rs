@@ -1,4 +1,4 @@
-//! An implementation of the Whirlpool cryptographic hash algorithm.
+//! An implementation of the [Whirlpool][1] cryptographic hash algorithm.
 //!
 //! This is the algorithm recommended by NESSIE (New European Schemes for
 //! Signatures, Integrity and Encryption; an European research project).
@@ -33,7 +33,10 @@
 //! # }
 //! ```
 //!
-//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
+//! Also see [RustCrypto/hashes][2] readme.
+//!
+//! [1]: https://en.wikipedia.org/wiki/Whirlpool_(hash_function)
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]

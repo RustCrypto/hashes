@@ -1,6 +1,4 @@
-//! An implementation of the [Groestl][1] cryptographic hash function.
-//!
-//! [1]: http://www.groestl.info/
+//! An implementation of the [Grøstl][1] cryptographic hash function.
 //!
 //! # Usage
 //!
@@ -12,12 +10,30 @@
 //! you to specify a digest size between 33 and 64 inclusive.
 //!
 //! ```rust
+//! # #[macro_use] extern crate hex_literal;
+//! # extern crate groestl;
+//! # fn main() {
 //! use groestl::{Digest, Groestl256};
 //!
+//! // create a Groestl-256 hasher instance
 //! let mut hasher = Groestl256::default();
+//!
+//! // process input message
 //! hasher.input(b"my message");
+//!
+//! // acquire hash digest in the form of GenericArray,
+//! // which in this case is equivalent to [u8; 32]
 //! let result = hasher.result();
+//! assert_eq!(result[..], hex!("
+//!     dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86
+//! "));
+//! # }
 //! ```
+//!
+//! Also see [RustCrypto/hashes][2] readme.
+//!
+//! [1]: https://en.wikipedia.org/wiki/Grøstl
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]

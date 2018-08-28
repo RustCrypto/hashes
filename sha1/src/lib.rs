@@ -1,4 +1,4 @@
-//! An implementation of the SHA-1 cryptographic hash algorithm.
+//! An implementation of the [SHA-1][1] cryptographic hash algorithm.
 //!
 //! # Usage
 //!
@@ -11,17 +11,20 @@
 //! // create a Sha1 object
 //! let mut hasher = Sha1::new();
 //!
-//! // write input message
+//! // process input message
 //! hasher.input(b"hello world");
 //!
-//! // read hash digest in the form of GenericArray which is in this case
-//! // equivalent to [u8; 20]
-//! let output = hasher.result();
-//! assert_eq!(output[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
+//! // acquire hash digest in the form of GenericArray,
+//! // which in this case is equivalent to [u8; 20]
+//! let result = hasher.result();
+//! assert_eq!(result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
 //! # }
 //! ```
 //!
-//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
+//! Also see [RustCrypto/hashes][2] readme.
+//!
+//! [1]: https://en.wikipedia.org/wiki/SHA-1
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]

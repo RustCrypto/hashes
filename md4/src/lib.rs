@@ -1,6 +1,30 @@
-//! The [MD4][1] hash function.
+//! An implementation of the [MD4][1] cryptographic hash algorithm.
+//!
+//! # Usage
+//!
+//! ```rust
+//! # #[macro_use] extern crate hex_literal;
+//! # extern crate md4;
+//! # fn main() {
+//! use md4::{Md4, Digest};
+//!
+//! // create a Md4 hasher instance
+//! let mut hasher = Md4::new();
+//!
+//! // process input message
+//! hasher.input(b"hello world");
+//!
+//! // acquire hash digest in the form of GenericArray,
+//! // which in this case is equivalent to [u8; 16]
+//! let result = hasher.result();
+//! assert_eq!(result[..], hex!("aa010fbc1d14c795d86ef98c95479d17"));
+//! # }
+//! ```
+//!
+//! Also see [RustCrypto/hashes][2] readme.
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD4
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]

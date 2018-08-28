@@ -1,6 +1,30 @@
-//! The [MD5][1] hash function.
+//! An implementation of the [MD5][1] cryptographic hash algorithm.
+//!
+//! # Usage
+//!
+//! ```rust
+//! # #[macro_use] extern crate hex_literal;
+//! # extern crate md5;
+//! # fn main() {
+//! use md5::{Md5, Digest};
+//!
+//! // create a Md5 hasher instance
+//! let mut hasher = Md5::new();
+//!
+//! // process input message
+//! hasher.input(b"hello world");
+//!
+//! // acquire hash digest in the form of GenericArray,
+//! // which in this case is equivalent to [u8; 16]
+//! let result = hasher.result();
+//! assert_eq!(result[..], hex!("5eb63bbbe01eeed093cb22bb8f5acdc3"));
+//! # }
+//! ```
+//!
+//! Also see [RustCrypto/hashes][2] readme.
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD5
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]

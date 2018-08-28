@@ -1,8 +1,6 @@
 //! An implementation of the [Streebog][1] cryptographic hash function. It's
 //! officially known as GOST R 34.11-2012.
 //!
-//! [1]: https://en.wikipedia.org/wiki/Streebog
-//!
 //! This implementation returns digest result using little-endian encoding
 //! in the form of array with least significant octets first, thus compared to
 //! specifications which uses big-endian result will have "reversed" order of
@@ -41,7 +39,10 @@
 //! # }
 //! ```
 //!
-//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
+//! Also see [RustCrypto/hashes][2] readme.
+//!
+//! [1]: https://en.wikipedia.org/wiki/Streebog
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]

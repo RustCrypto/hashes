@@ -1,4 +1,4 @@
-//! An implementation of the SHA-3 cryptographic hash algorithms.
+//! An implementation of the [SHA-3][1] cryptographic hash algorithms.
 //!
 //! There are 6 standard algorithms specified in the SHA-3 standard:
 //!
@@ -36,7 +36,10 @@
 //! # }
 //! ```
 //!
-//! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
+//! Also see [RustCrypto/hashes][2] readme.
+//!
+//! [1]: https://en.wikipedia.org/wiki/SHA-3
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
