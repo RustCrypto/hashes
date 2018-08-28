@@ -52,6 +52,8 @@
 //!
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
 #![no_std]
+#![doc(html_logo_url =
+    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 extern crate block_buffer;
 extern crate fake_simd as simd;
 #[macro_use] extern crate opaque_debug;

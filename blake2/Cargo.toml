@@ -22,7 +22,7 @@ hex-literal = "0.1"
 
 [features]
 default = ["std"]
-std = ["digest/std"]
+std = ["digest/std", "crypto-mac/std"]
 simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]

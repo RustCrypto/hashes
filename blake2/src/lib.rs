@@ -84,6 +84,8 @@
 //! [1]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
 //! [2]: https://github.com/cesarb/blake2-rfc
 #![no_std]
+#![doc(html_logo_url =
+    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 #![warn(missing_docs)]
 
 #![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]

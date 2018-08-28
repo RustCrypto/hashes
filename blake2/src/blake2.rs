@@ -294,14 +294,16 @@ macro_rules! blake2_impl {
 
             fn input(&mut self, data: &[u8]) { self.update(data); }
 
-            fn result(&mut self) -> MacResult<Self::OutputSize> {
-                let val = self.reset().finalize_with_flag(0);
-                MacResult::new(val)
+            fn reset(&mut self) -> Self {
+                <Self as Reset>::reset(self)
+            }
+
+            fn result(self) -> MacResult<Self::OutputSize> {
+                MacResult::new(self.finalize_with_flag(0))
             }
         }
 
         impl_opaque_debug!($state);
         impl_write!($state);
-
     }
 }

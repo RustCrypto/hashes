@@ -2,6 +2,8 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD4
 #![no_std]
+#![doc(html_logo_url =
+    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 #![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
