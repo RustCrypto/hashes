@@ -22,10 +22,14 @@ matrix:
       rust: nightly
       script: ./build_nostd.sh
       install:
-        - cargo install xargo --force
+        - cargo install xargo || true
         - rustup target install armv7-unknown-linux-gnueabihf
         - rustup component add rust-src
 
+install:
+  - cargo install cross || true
+
 script:
   - cross test --verbose --all --release --target $TARGET
+
 cache: cargo

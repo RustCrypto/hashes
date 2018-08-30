@@ -3,17 +3,16 @@
 # cargo build --all --no-default-features we have to explicitly iterate over
 # all crates (see https://github.com/rust-lang/cargo/issues/4753 )
 DIRS=`ls -d */`
-TARGET="thumbv7em-none-eabi"
 cargo clean
 
-for dir in $DIRS; do
-    if [ $dir = "target/" ]
+for DIR in $DIRS; do
+    if [ $DIR = "target/" ]
     then
         continue
     fi
-    cd $dir
+    cd $DIR
     xargo build --no-default-features --verbose --target $TARGET || {
-        echo $dir failed
+        echo $DIR failed
         exit 1
     }
     cd ..
