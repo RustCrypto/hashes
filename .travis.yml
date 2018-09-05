@@ -4,14 +4,15 @@ sudo: required
 
 matrix:
   include:
+    - rust: 1.21.0
+      script: cargo test --verbose --all --release
+    - rust: stable
+      script: cargo test --verbose --all --release
+    - rust: nightly
+      script: cargo test --verbose --all --release
+
     - env: TARGET=i686-unknown-linux-gnu
       rust: stable
-    - env: TARGET=x86_64-unknown-linux-gnu
-      rust: stable
-    - env: TARGET=x86_64-unknown-linux-gnu
-      rust: 1.21.0
-    - env: TARGET=x86_64-unknown-linux-gnu
-      rust: nightly
     - env: TARGET=powerpc-unknown-linux-gnu
       rust: stable
     - env: TARGET=powerpc64-unknown-linux-gnu
@@ -19,11 +20,14 @@ matrix:
     # tests if crates truly can be built without std
     - env: TARGET=thumbv7em-none-eabi
       rust: nightly
-      script: xargo build --verbose --target $TARGET
+      script: ./build_nostd.sh
       install:
-        - cargo install xargo --force
+        - cargo install xargo || true
         - rustup target install armv7-unknown-linux-gnueabihf
         - rustup component add rust-src
+
+install:
+  - cargo install cross || true
 
 script:
   - cross test --verbose --all --release --target $TARGET
