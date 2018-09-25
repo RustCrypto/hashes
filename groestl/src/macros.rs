@@ -16,7 +16,8 @@ macro_rules! impl_groestl {
         }
 
         impl Input for $state {
-            fn process(&mut self, input: &[u8]) {
+            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+                let input = input.as_ref();
                 self.groestl.process(input);
             }
         }
@@ -55,8 +56,8 @@ macro_rules! impl_variable_groestl {
         }
 
         impl Input for $state {
-            fn process(&mut self, input: &[u8]) {
-                self.groestl.process(input);
+            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+                self.groestl.process(input.as_ref());
             }
         }
 

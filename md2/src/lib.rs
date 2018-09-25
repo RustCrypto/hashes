@@ -96,7 +96,8 @@ impl BlockInput for Md2 {
 }
 
 impl Input for Md2 {
-    fn process(&mut self, input: &[u8]) {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        let input = input.as_ref();
         let self_state = &mut self.state;
         self.buffer.input(input, |d| self_state.process_block(d) );
     }

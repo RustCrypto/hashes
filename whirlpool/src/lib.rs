@@ -155,7 +155,8 @@ impl BlockInput for Whirlpool {
 }
 
 impl Input for Whirlpool {
-    fn process(&mut self, input: &[u8]) {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        let input = input.as_ref();
         self.update_len(input.len() as u64);
         let hash = &mut self.hash;
         self.buffer.input(input, |b| compress(hash, convert(b)));

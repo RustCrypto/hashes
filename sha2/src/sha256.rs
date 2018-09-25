@@ -84,7 +84,9 @@ impl BlockInput for Sha256 {
 }
 
 impl Input for Sha256 {
-    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        self.engine.input(input.as_ref());
+    }
 }
 
 impl FixedOutput for Sha256 {
@@ -122,7 +124,9 @@ impl BlockInput for Sha224 {
 }
 
 impl Input for Sha224 {
-    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        self.engine.input(input.as_ref());
+    }
 }
 
 impl FixedOutput for Sha224 {

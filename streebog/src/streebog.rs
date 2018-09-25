@@ -124,9 +124,9 @@ impl<N> BlockInput for Streebog<N>  where N: ArrayLength<u8> + Copy {
 }
 
 impl<N> Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
-    fn process(&mut self, input: &[u8]) {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
         let self_state = &mut self.state;
-        self.buffer.input(input,
+        self.buffer.input(input.as_ref(),
             |d| self_state.process_block(d, BLOCK_SIZE as u8));
     }
 }

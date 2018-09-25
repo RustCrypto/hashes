@@ -85,7 +85,9 @@ impl BlockInput for Sha512 {
 }
 
 impl Input for Sha512 {
-    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        self.engine.input(input.as_ref());
+    }
 }
 
 impl FixedOutput for Sha512 {
@@ -124,7 +126,9 @@ impl BlockInput for Sha384 {
 }
 
 impl Input for Sha384 {
-    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        self.engine.input(input.as_ref());
+    }
 }
 
 impl FixedOutput for Sha384 {
@@ -165,7 +169,9 @@ impl BlockInput for Sha512Trunc256 {
 }
 
 impl Input for Sha512Trunc256 {
-    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        self.engine.input(input.as_ref());
+    }
 }
 
 impl FixedOutput for Sha512Trunc256 {
@@ -206,7 +212,9 @@ impl BlockInput for Sha512Trunc224 {
 }
 
 impl Input for Sha512Trunc224 {
-    fn process(&mut self, msg: &[u8]) { self.engine.input(msg); }
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        self.engine.input(input.as_ref());
+    }
 }
 
 impl FixedOutput for Sha512Trunc224 {

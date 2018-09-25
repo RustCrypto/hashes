@@ -45,8 +45,7 @@
 //! use blake2::digest::{Input, VariableOutput};
 //!
 //! let mut hasher = Blake2b::new(10).unwrap();
-//! // instead of `input` method here we should use `process`
-//! hasher.process(b"my_input");
+//! hasher.input(b"my_input");
 //! hasher.variable_result(|res| {
 //!     assert_eq!(res, [44, 197, 92, 132, 228, 22, 146, 78, 100, 0])
 //! })

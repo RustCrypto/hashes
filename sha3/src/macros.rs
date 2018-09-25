@@ -33,8 +33,8 @@ macro_rules! sha3_impl {
         }
 
         impl Input for $state {
-            fn process(&mut self, data: &[u8]) {
-                self.absorb(data)
+            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+                self.absorb(input.as_ref())
             }
         }
 
@@ -72,8 +72,8 @@ macro_rules! shake_impl {
         impl_state!($state, $rate, $padding);
 
         impl Input for $state {
-            fn process(&mut self, data: &[u8]) {
-                self.absorb(data)
+            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+                self.absorb(input.as_ref())
             }
         }
 

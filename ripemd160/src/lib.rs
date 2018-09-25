@@ -67,7 +67,8 @@ impl BlockInput for Ripemd160 {
 }
 
 impl Input for Ripemd160 {
-    fn process(&mut self, input: &[u8]) {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        let input = input.as_ref();
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += input.len() as u64;
         let h = &mut self.h;

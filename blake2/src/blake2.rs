@@ -235,7 +235,9 @@ macro_rules! blake2_impl {
         }
 
         impl Input for $state {
-            fn process(&mut self, input: &[u8]) { self.update(input); }
+            fn input<B: AsRef<[u8]>>(&mut self, data: B) {
+                self.update(data.as_ref());
+            }
         }
 
         impl FixedOutput for $state {

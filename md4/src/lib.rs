@@ -144,7 +144,8 @@ impl BlockInput for Md4 {
 }
 
 impl Input for Md4 {
-    fn process(&mut self, input: &[u8]) {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        let input = input.as_ref();
         // Unlike Sha1 and Sha2, the length value in MD4 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);

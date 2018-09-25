@@ -72,7 +72,8 @@ impl BlockInput for Sha1 {
 }
 
 impl Input for Sha1 {
-    fn process(&mut self, input: &[u8]) {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        let input = input.as_ref();
         // Assumes that `length_bits<<3` will not overflow
         self.len += input.len() as u64;
         let state = &mut self.h;

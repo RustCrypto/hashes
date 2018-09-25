@@ -22,8 +22,9 @@ macro_rules! gost94_impl {
     }
 
     impl Input for $state {
-        fn process(&mut self, input: &[u8]) {
-            self.sh.process(input);
+        fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+            let input = input.as_ref();
+            self.sh.input(input);
         }
     }
 
