@@ -269,12 +269,10 @@ macro_rules! blake2_impl {
         }
 
         impl  Reset for $state {
-            fn reset(&mut self) -> Self {
-                let temp = self.clone();
+            fn reset(&mut self) {
                 self.t = self.t0;
                 self.m = self.m0;
                 self.h = self.h0;
-                temp
             }
         }
 
@@ -296,7 +294,7 @@ macro_rules! blake2_impl {
 
             fn input(&mut self, data: &[u8]) { self.update(data); }
 
-            fn reset(&mut self) -> Self {
+            fn reset(&mut self) {
                 <Self as Reset>::reset(self)
             }
 

@@ -261,13 +261,11 @@ impl FixedOutput for Gost94 {
 }
 
 impl Reset for Gost94 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.buffer.reset();
         self.state.n = Default::default();
         self.state.h = self.h0;
         self.state.sigma = Default::default();
-        temp
     }
 }
 

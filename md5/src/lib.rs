@@ -112,12 +112,10 @@ impl FixedOutput for Md5 {
 }
 
 impl Reset for Md5 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.state = consts::S0;
         self.length_bytes = 0;
         self.buffer.reset();
-        temp
     }
 }
 

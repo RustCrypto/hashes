@@ -33,8 +33,8 @@ macro_rules! impl_groestl {
         }
 
         impl Reset for $state {
-            fn reset(&mut self) -> Self {
-                Self { groestl: self.groestl.reset() }
+            fn reset(&mut self) {
+                self.groestl.reset()
             }
         }
 
@@ -83,8 +83,8 @@ macro_rules! impl_variable_groestl {
         }
 
         impl Reset for $state {
-            fn reset(&mut self) -> Self {
-                Self { groestl: self.groestl.reset() }
+            fn reset(&mut self) {
+                self.groestl.reset()
             }
         }
 

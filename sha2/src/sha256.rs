@@ -101,10 +101,8 @@ impl FixedOutput for Sha256 {
 }
 
 impl Reset for Sha256 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.engine.reset(&H256);
-        temp
     }
 }
 
@@ -141,10 +139,8 @@ impl FixedOutput for Sha224 {
 }
 
 impl Reset for Sha224 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.engine.reset(&H224);
-        temp
     }
 }
 

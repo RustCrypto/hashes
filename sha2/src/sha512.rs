@@ -103,10 +103,8 @@ impl FixedOutput for Sha512 {
 }
 
 impl Reset for Sha512 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.engine.reset(&H512);
-        temp
     }
 }
 
@@ -144,10 +142,8 @@ impl FixedOutput for Sha384 {
 }
 
 impl Reset for Sha384 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.engine.reset(&H384);
-        temp
     }
 }
 
@@ -187,10 +183,8 @@ impl FixedOutput for Sha512Trunc256 {
 }
 
 impl Reset for Sha512Trunc256 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.engine.reset(&H512_TRUNC_256);
-        temp
     }
 }
 
@@ -231,10 +225,8 @@ impl FixedOutput for Sha512Trunc224 {
 }
 
 impl Reset for Sha512Trunc224 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.engine.reset(&H512_TRUNC_224);
-        temp
     }
 }
 

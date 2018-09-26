@@ -171,12 +171,10 @@ impl FixedOutput for Md4 {
 }
 
 impl Reset for Md4 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.state = Default::default();
         self.length_bytes = 0;
         self.buffer.reset();
-        temp
     }
 }
 

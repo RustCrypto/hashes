@@ -37,8 +37,8 @@ macro_rules! gost94_impl {
     }
 
     impl Reset for $state {
-        fn reset(&mut self) -> Self {
-            Self{ sh: self.sh.reset() }
+        fn reset(&mut self) {
+            self.sh.reset()
         }
     }
 

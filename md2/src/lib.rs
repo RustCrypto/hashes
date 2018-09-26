@@ -117,11 +117,9 @@ impl FixedOutput for Md2 {
 }
 
 impl Reset for Md2 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.state = Default::default();
         self.buffer.reset();
-        temp
     }
 }
 

@@ -154,8 +154,7 @@ impl<N> FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
 }
 
 impl<N> Reset for Streebog<N>  where N: ArrayLength<u8> + Copy {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.buffer.reset();
         self.state.h = match N::to_usize() {
             64 => [0u8; 64],
@@ -164,6 +163,5 @@ impl<N> Reset for Streebog<N>  where N: ArrayLength<u8> + Copy {
         };
         self.state.n = [0; 64];
         self.state.sigma = [0; 64];
-        temp
     }
 }

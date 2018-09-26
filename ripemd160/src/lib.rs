@@ -93,12 +93,10 @@ impl FixedOutput for Ripemd160 {
 }
 
 impl Reset for Ripemd160 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.buffer.reset();
         self.len = 0;
         self.h = H0;
-        temp
     }
 }
 

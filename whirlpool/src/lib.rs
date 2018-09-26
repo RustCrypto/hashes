@@ -185,12 +185,10 @@ impl FixedOutput for Whirlpool {
 }
 
 impl Reset for Whirlpool {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.bit_length = [0u8; 32];
         self.buffer.reset();
         for v in self.hash.iter_mut() { *v = 0; }
-        temp
     }
 }
 

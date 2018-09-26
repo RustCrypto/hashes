@@ -97,12 +97,10 @@ impl FixedOutput for Sha1 {
 }
 
 impl Reset for Sha1 {
-    fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    fn reset(&mut self) {
         self.h = H;
         self.len = 0;
         self.buffer.reset();
-        temp
     }
 }
 

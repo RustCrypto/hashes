@@ -69,10 +69,8 @@ impl<BlockSize> Groestl<BlockSize>
         res
     }
 
-    pub fn reset(&mut self) -> Self {
-        let temp = self.clone();
+    pub fn reset(&mut self) {
         self.state = GroestlState::new(self.output_size);
         self.buffer.reset();
-        temp
     }
 }
