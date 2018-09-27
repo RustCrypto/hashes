@@ -13,7 +13,6 @@ edition = "2018"
 [dependencies]
 block-buffer = "0.3.3"
 digest = { version = "^0.7.1", features = ["dev"] }
-byte-tools = "0.2.0"
 
 [build-dependencies]
 cc = "1.0.3"

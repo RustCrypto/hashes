@@ -10,7 +10,6 @@ pub extern crate digest;
 pub use digest::Digest;
 
 use block_buffer::BlockBuffer512;
-use byte_tools::write_u64_be;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U28, U32, U48, U64, Unsigned};
 
@@ -101,7 +100,14 @@ macro_rules! define_hasher {
                 } else {
                     state.process_block(buffer.pad_with::<DigestPadToEnd>());
                     let mut last = [0u8; 64];
-                    write_u64_be(&mut last[56..], len);
+                    last[56] = (len >> 56) as u8;
+                    last[57] = (len >> 48) as u8;
+                    last[58] = (len >> 40) as u8;
+                    last[59] = (len >> 32) as u8;
+                    last[60] = (len >> 24) as u8;
+                    last[61] = (len >> 16) as u8;
+                    last[62] = (len >> 8) as u8;
+                    last[63] = len as u8;
                     state.process_block(&last);
                 }
                 let mut out = GenericArray::default();
