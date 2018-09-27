@@ -11,7 +11,7 @@ repository = "https://github.com/kazcw/jh-x86_64"
 edition = "2018"
 
 [dependencies]
-block-buffer = "0.3.3"
+block-buffer = "0.6"
 digest = { version = "^0.7.1", features = ["dev"] }
 
 [build-dependencies]
