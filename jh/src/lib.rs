@@ -3,11 +3,8 @@
 //! Optimized implementation of JH for x86-64 systems.
 
 #![no_std]
-#![feature(repr_align, attr_literals)]
 #![cfg(target_arch = "x86_64")]
 
-extern crate block_buffer;
-extern crate byte_tools;
 pub extern crate digest;
 
 pub use digest::Digest;

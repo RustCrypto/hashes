@@ -8,6 +8,7 @@ documentation = "https://docs.rs/jh-x86_64"
 keywords = ["crypto", "jh", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 repository = "https://github.com/kazcw/jh-x86_64"
+edition = "2018"
 
 [dependencies]
 block-buffer = "0.3.3"
