@@ -13,7 +13,3 @@ members = [
     "streebog",
     "whirlpool",
 ]
-
-[patch.crates-io]
-digest = { git = "https://github.com/RustCrypto/traits", branch="digest_v0.8" }
-crypto-mac = { git = "https://github.com/RustCrypto/traits", branch="digest_v0.8" }
