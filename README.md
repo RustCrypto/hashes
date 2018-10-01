@@ -2,7 +2,7 @@
 Collection of cryptographic hash functions written in pure Rust.
 
 All algorithms split into separate crates and implemented using traits from
-[`digest`](https://docs.rs/digest/0.5.2/digest/) crate. Additionally all crates
+[`digest`](https://docs.rs/digest/) crate. Additionally all crates
 do not require the standard library (i.e. `no_std` capable) and can
 be easily used for bare-metal programming.
 
@@ -44,8 +44,6 @@ All crates in this repository support Rust 1.21 or higher. In future
 minimally supported version of Rust can be changed, but it will be done with
 the minor version bump.
 
-Older crate versions support older Rust as well up to 1.13.
-
 ### Crate names
 
 Whenever possible crates are published under the the same name as the crate
@@ -66,8 +64,7 @@ First add `blake2` crate to your `Cargo.toml`:
 blake2 = "0.7"
 ```
 
-`blake2` and other crates re-export
-[`Digest`](https://docs.rs/digest/0.5.2/digest/trait.Digest.html) trait for
+`blake2` and other crates re-export `digest` crate and `Digest` trait for
 convenience, so you don't have to add `digest` crate as an explicit dependency.
 
 Now you can write the following code:
@@ -78,16 +75,28 @@ use blake2::{Blake2b, Digest};
 let mut hasher = Blake2b::new();
 let data = b"Hello world!";
 hasher.input(data);
-// `input` can be called repeatedly
-hasher.input("String data".as_bytes());
+// `input` can be called repeatedly and is generic over `AsRef<[u8]>`
+hasher.input("String data");
 // Note that calling `result()` consumes hasher
 let hash = hasher.result();
 println!("Result: {:x}", hash);
 ```
 
-`hash` has type [`GenericArray<u8, U64>`](http://fizyk20.github.io/generic-array/generic_array/struct.GenericArray.html), which is a generic alternative to `[u8; 64]`.
+In this example `hash` has type [`GenericArray<u8, U64>`](https://docs.rs/generic-array),
+which is a generic alternative to `[u8; 64]`.
 
-Also you can use the following approach if the whole message is available:
+Alternatively you can use chained approach, which is equivalent to the previous
+example:
+
+```Rust
+let hash = Blake2b::new()
+    .chain(b"Hello world!")
+    .chain("String data")
+    .result();
+println!("Result: {:x}", hash);
+```
+
+If the whole message is available you also can use convinience `digest` method:
 
 ```Rust
 let hash = Blake2b::digest(b"my message");
@@ -97,77 +106,27 @@ println!("Result: {:x}", hash);
 ### Hashing `Read`able objects
 
 If you want to hash data from [`Read`](https://doc.rust-lang.org/std/io/trait.Read.html)
-trait (e.g. from file) you can enable `std` feature in digest crate:
-
-```toml
-[dependencies]
-blake2 = "0.7"
-digest = { version = "0.7", features = ["std"]}
-```
-
-And use `digest_reader` method which will compute hash by reading data using
-1 KB blocks:
+trait (e.g. from file) you can rely on implementation of
+[`Write`](https://doc.rust-lang.org/std/io/trait.Write.html) trait (requires
+enabled-by-default `std` feature):
 
 ```Rust
 use blake2::{Blake2b, Digest};
-use std::fs;
+use std::{fs, io};
 
 let mut file = fs::File::open(&path)?;
-let hash = Blake2b::digest_reader(&mut file)?;
+let mut hasher = Blake2b::new();
+let n = io::copy(&mut file, &mut hasher)?;
+let hash = hasher.result();
 println!("{:x}\t{}", hash, path);
 ```
 
 ### Hash-based Message Authentication Code (HMAC)
 
-One of the common tasks for cryptographic hash functions is generation of
-[Message Authentication Codes](https://en.wikipedia.org/wiki/Message_authentication_code)
-(MAC). In RustCrypto all MAC functions represented using `Mac` trait from
-[`crypto-mac`](https://crates.io/crates/crypto-mac) crate. Some hash functions
-provide `Mac` implementations (e.g. BLAKE2), but for others you can use generically
-implemented [HMAC](https://en.wikipedia.org/wiki/Hash-based_message_authentication_code)
-from [`hmac`](https://crates.io/crates/hmac) crate.
-
-To demonstrate how to use HMAC, lets use SHA256 as an example. First add the
-following dependencies to your crate:
-
-```toml
-[dependencies]
-hmac = "0.5"
-sha2 = "0.7"
-```
-
-To get the authentication code:
-
-```Rust
-extern crate hmac;
-extern crate sha2;
-
-use sha2::Sha256;
-use hmac::{Hmac, Mac};
-
-// Create `Mac` trait implementation, namely HMAC-SHA256
-let mut mac = Hmac::<Sha256>::new(b"my secret and secure key").unwrap();
-mac.input(b"input message");
-
-// `result` has type `MacResult` which is a thin wrapper around array of
-// bytes for providing constant time equality check
-let result = mac.result();
-// To get underlying array use `code` method, but be carefull, since
-// incorrect use of the code value may permit timing attacks which defeat
-// the security provided by the `MacResult`
-let code_bytes = result.code();
-```
-
-To verify the message:
-
-```rust,ignore
-let mut mac = Hmac::<Sha256>::new(b"my secret and secure key").unwrap();
-
-mac.input(b"input message");
-
-// `verify` will return `Ok(())` if code is correct, `Err(MacError)` otherwise
-mac.verify(&code_bytes).unwrap();
-```
+If you need [Hash-based Message Authentication Code](https://en.wikipedia.org/wiki/Hash-based_message_authentication_code)
+(HMAC), you can use generic implementation from [`hmac`](https://docs.rs/hmac)
+crate, which is part of the [RustCrypto/MACs](https://github.com/RustCrypto/MACs)
+repository.
 
 ### Generic code
 
