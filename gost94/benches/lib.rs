@@ -4,4 +4,4 @@
 extern crate digest;
 extern crate gost94;
 
-bench_digest!(gost94::Gost94Test);
+bench!(gost94::Gost94Test);

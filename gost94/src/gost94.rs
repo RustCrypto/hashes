@@ -1,19 +1,22 @@
-use digest;
-use block_buffer::{BlockBuffer256, ZeroPadding};
+#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
+#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
+use digest::{Input, BlockInput, FixedOutput, Reset};
+use block_buffer::BlockBuffer;
+use block_buffer::block_padding::ZeroPadding;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U32;
-use byte_tools::{
-    read_u32v_le, read_u32_le, write_u32v_le, read_u64v_le, write_u64v_le
-};
+use block_buffer::byteorder::{LE, ByteOrder};
 
 pub(crate) type Block = [u8; 32];
+
 const C: Block = [
-    0, 255, 0, 255, 0, 255, 0, 255, 255, 0, 255, 0, 255, 0,
-    255, 0, 0, 255, 255, 0, 255, 0, 0, 255, 255, 0, 0, 0, 255, 255, 0, 255
+    0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
+    0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00,
+    0x00, 0xff, 0xff, 0x00, 0xff, 0x00, 0x00, 0xff,
+    0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0xff,
 ];
 
 pub type SBox = [[u8; 16]; 8];
-
 
 fn sbox(a: u32, s: &SBox) -> u32 {
     let mut v = 0;
@@ -31,9 +34,9 @@ fn g(a: u32, k: u32, s: &SBox) -> u32 {
 
 fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
     let mut k = [0u32; 8];
-    let mut a = read_u32_le(&msg[0..4]);
-    let mut b = read_u32_le(&msg[4..8]);
-    read_u32v_le(&mut k, &key);
+    let mut a = LE::read_u32(&msg[0..4]);
+    let mut b = LE::read_u32(&msg[4..8]);
+    LE::read_u32_into(&key, &mut k);
 
     for _ in 0..3 {
         for i in 0..8 {
@@ -47,7 +50,7 @@ fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
         b = a;
         a = t;
     }
-    write_u32v_le(msg, &[b, a]);
+    LE::write_u32_into(&[b, a], msg);
 }
 
 fn x(a: &Block, b: &Block) -> Block {
@@ -67,9 +70,7 @@ fn x_mut(a: &mut Block, b: &Block) {
 
 fn a(x: Block) -> Block {
     let mut out = Block::default();
-    for i in 0..24 {
-        out[i] = x[i+8];
-    }
+    out[..24].clone_from_slice(&x[8..]);
     for i in 0..8 {
         out[24+i] = x[i]^x[i+8];
     }
@@ -93,20 +94,20 @@ fn psi(block: &mut Block) {
     out[..30].copy_from_slice(&block[2..]);
     out[30..].copy_from_slice(&block[..2]);
 
-    out[30] ^= block[2*1];
-    out[31] ^= block[2*1+1];
+    out[30] ^= block[2];
+    out[31] ^= block[3];
 
-    out[30] ^= block[2*2];
-    out[31] ^= block[2*2+1];
+    out[30] ^= block[4];
+    out[31] ^= block[5];
 
-    out[30] ^= block[2*3];
-    out[31] ^= block[2*3+1];
+    out[30] ^= block[6];
+    out[31] ^= block[7];
 
-    out[30] ^= block[2*12];
-    out[31] ^= block[2*12+1];
+    out[30] ^= block[24];
+    out[31] ^= block[25];
 
-    out[30] ^= block[2*15];
-    out[31] ^= block[2*15+1];
+    out[30] ^= block[30];
+    out[31] ^= block[31];
 
     block.copy_from_slice(&out);
 }
@@ -161,7 +162,7 @@ impl Gost94State {
 
     fn update_sigma(&mut self, m: &Block) {
         let mut buf = [0u64; 4];
-        read_u64v_le(&mut buf, m);
+        LE::read_u64_into(m, &mut buf);
         let mut over = (0u64, false);
         for (a, b) in self.sigma.iter_mut().zip(buf.iter()) {
             if over.1 {
@@ -193,7 +194,8 @@ impl Gost94State {
         }
     }
 
-    fn process_block(&mut self, block: &Block) {
+    fn process_block(&mut self, block: &GenericArray<u8, U32>) {
+        let block = unsafe { &*(block.as_ptr() as *const [u8; 32]) };
         self.f(block);
         self.update_sigma(block);
     }
@@ -201,58 +203,71 @@ impl Gost94State {
 
 #[derive(Clone)]
 pub struct Gost94 {
-    buffer: BlockBuffer256,
+    buffer: BlockBuffer<U32>,
     state: Gost94State,
+    h0: Block,
 }
 
 impl Gost94 {
     // Create new GOST94 instance with given S-Box and IV
     pub fn new(s: SBox, h: Block) -> Self {
-        Gost94{
+        let n = Default::default();
+        let sigma = Default::default();
+        Gost94 {
             buffer: Default::default(),
-            state: Gost94State{
-                s: s,
-                h: h,
-                n: Default::default(),
-                sigma: Default::default(),
-            }
+            h0: h,
+            state: Gost94State { s, h, n, sigma },
         }
     }
 }
 
-impl digest::BlockInput for Gost94 {
+impl BlockInput for Gost94 {
     type BlockSize = U32;
 }
 
-impl digest::Input for Gost94 {
-    fn process(&mut self, input: &[u8]) {
+impl Input for Gost94 {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        let input = input.as_ref();
         let self_state = &mut self.state;
         self_state.update_n(input.len());
         self.buffer.input(input, |d| self_state.process_block(d));
     }
 }
 
-impl digest::FixedOutput for Gost94 {
+impl FixedOutput for Gost94 {
     type OutputSize = U32;
 
     fn fixed_result(mut self) -> GenericArray<u8, U32> {
-        let self_state = &mut self.state;
+        {
+            let self_state = &mut self.state;
 
-        if self.buffer.position() != 0 {
-            let block = self.buffer.pad_with::<ZeroPadding>();
-            self_state.process_block(block);
+            if self.buffer.position() != 0 {
+                let block = self.buffer.pad_with::<ZeroPadding>()
+                    .expect("we never use input_lazy");
+                self_state.process_block(block);
+            }
+
+            let mut buf = Block::default();
+
+            LE::write_u64_into(&self_state.n, &mut buf);
+            self_state.f(&buf);
+
+            LE::write_u64_into(&self_state.sigma, &mut buf);
+            self_state.f(&buf);
         }
 
-        let mut buf = Block::default();
+        GenericArray::clone_from_slice(&self.state.h)
+    }
+}
 
-        write_u64v_le(&mut buf, &self_state.n);
-        self_state.f(&buf);
-
-        write_u64v_le(&mut buf, &self_state.sigma);
-        self_state.f(&buf);
-
-        GenericArray::clone_from_slice(&self_state.h)
+impl Reset for Gost94 {
+    fn reset(&mut self) {
+        self.buffer.reset();
+        self.state.n = Default::default();
+        self.state.h = self.h0;
+        self.state.sigma = Default::default();
     }
 }
 
 impl_opaque_debug!(Gost94);
+impl_write!(Gost94);

@@ -4,4 +4,4 @@
 extern crate digest;
 extern crate whirlpool;
 
-bench_digest!(whirlpool::Whirlpool);
+bench!(whirlpool::Whirlpool);

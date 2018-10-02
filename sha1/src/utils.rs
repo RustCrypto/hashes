@@ -1,8 +1,12 @@
 #![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
 
 use consts::{BLOCK_LEN, K0, K1, K2, K3};
-use byte_tools::read_u32v_be;
+use block_buffer::byteorder::{BE, ByteOrder};
 use simd::u32x4;
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::U64;
+
+type Block = GenericArray<u8, U64>;
 
 /// Not an intrinsic, but gets the first element of a vector.
 #[inline]
@@ -289,8 +293,8 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
 /// and also shown above is how the digest-related functions can be used to
 /// perform 4 rounds of the message block digest calculation.
 ///
-pub fn compress(state: &mut [u32; 5], block: &[u8; 64]) {
+pub fn compress(state: &mut [u32; 5], block: &Block) {
     let mut block_u32 = [0u32; BLOCK_LEN];
-    read_u32v_be(&mut block_u32[..], block);
+    BE::read_u32_into(block, &mut block_u32[..]);
     sha1_digest_block_u32(state, &block_u32);
 }

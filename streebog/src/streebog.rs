@@ -1,10 +1,11 @@
 #![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop, inline_always))]
-
-use digest;
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use digest::generic_array::typenum::{Unsigned, U64};
 use digest::generic_array::{GenericArray, ArrayLength};
-use block_buffer::{BlockBuffer512, ZeroPadding};
-use byte_tools::{write_u64v_le, copy_memory};
+use block_buffer::BlockBuffer;
+use block_buffer::block_padding::ZeroPadding;
+use block_buffer::byteorder::{LE, ByteOrder};
+use byte_tools::copy;
 use core::marker::PhantomData;
 
 use consts::{BLOCK_SIZE, C};
@@ -36,7 +37,7 @@ fn lps(h: &mut Block, n: &Block) {
         }
     }
 
-    write_u64v_le(h, &buf);
+    LE::write_u64_into(&buf, h);
 }
 
 impl StreebogState {
@@ -44,8 +45,8 @@ impl StreebogState {
         let mut key = [0u8; 64];
         let mut block = [0u8; 64];
 
-        copy_memory(&self.h, &mut key);
-        copy_memory(m, &mut block);
+        copy(&self.h, &mut key);
+        copy(m, &mut block);
 
         lps(&mut key, n);
 
@@ -85,8 +86,9 @@ impl StreebogState {
         }
     }
 
-    fn process_block(&mut self, block: &Block, msg_len: u8) {
+    fn process_block(&mut self, block: &GenericArray<u8, U64>, msg_len: u8) {
         let n = self.n;
+        let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
         self.g(&n, block);
         self.update_n(msg_len);
         self.update_sigma(block);
@@ -95,7 +97,7 @@ impl StreebogState {
 
 #[derive(Clone)]
 pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
     state: StreebogState,
     // Phantom data to tie digest size to the struct
     digest_size: PhantomData<DigestSize>,
@@ -110,38 +112,34 @@ impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
         };
         Streebog {
             buffer: Default::default(),
-            state: StreebogState{
-                h: h,
-                n: [0u8; 64],
-                sigma: [0u8; 64],
-            },
+            state: StreebogState { h, n: [0u8; 64], sigma: [0u8; 64] },
             digest_size: Default::default(),
         }
     }
 }
 
 
-impl<N> digest::BlockInput for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> BlockInput for Streebog<N>  where N: ArrayLength<u8> + Copy {
     type BlockSize = U64;
 }
 
-impl<N> digest::Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
-    fn process(&mut self, input: &[u8]) {
+impl<N> Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &Block| {
-            self_state.process_block(d, BLOCK_SIZE as u8);
-        });
+        self.buffer.input(input.as_ref(),
+            |d| self_state.process_block(d, BLOCK_SIZE as u8));
     }
 }
 
-impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
     type OutputSize = N;
 
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        let self_state = &mut self.state;
+        let mut self_state = self.state;
         let pos = self.buffer.position();
 
-        let block = self.buffer.pad_with::<ZeroPadding>();
+        let block = self.buffer.pad_with::<ZeroPadding>()
+            .expect("we never use input_lazy");
         block[pos] = 1;
         self_state.process_block(block, pos as u8);
 
@@ -150,9 +148,20 @@ impl<N> digest::FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
         let sigma = self_state.sigma;
         self_state.g(&[0u8; 64], &sigma);
 
-        let mut buf = GenericArray::default();
         let n = BLOCK_SIZE - Self::OutputSize::to_usize();
-        buf.copy_from_slice(&self_state.h[n..]);
-        buf
+        GenericArray::clone_from_slice(&self_state.h[n..])
+    }
+}
+
+impl<N> Reset for Streebog<N>  where N: ArrayLength<u8> + Copy {
+    fn reset(&mut self) {
+        self.buffer.reset();
+        self.state.h = match N::to_usize() {
+            64 => [0u8; 64],
+            32 => [1u8; 64],
+            _ => unreachable!()
+        };
+        self.state.n = [0; 64];
+        self.state.sigma = [0; 64];
     }
 }

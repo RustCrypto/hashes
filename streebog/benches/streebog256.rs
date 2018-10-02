@@ -4,4 +4,4 @@
 extern crate digest;
 extern crate streebog;
 
-bench_digest!(streebog::Streebog256);
+bench!(streebog::Streebog256);

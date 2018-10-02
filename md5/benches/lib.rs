@@ -4,4 +4,4 @@
 extern crate digest;
 extern crate md5;
 
-bench_digest!(md5::Md5);
+bench!(md5::Md5);

@@ -1,17 +1,45 @@
-//! The [MD4][1] hash function.
+//! An implementation of the [MD4][1] cryptographic hash algorithm.
+//!
+//! # Usage
+//!
+//! ```rust
+//! # #[macro_use] extern crate hex_literal;
+//! # extern crate md4;
+//! # fn main() {
+//! use md4::{Md4, Digest};
+//!
+//! // create a Md4 hasher instance
+//! let mut hasher = Md4::new();
+//!
+//! // process input message
+//! hasher.input(b"hello world");
+//!
+//! // acquire hash digest in the form of GenericArray,
+//! // which in this case is equivalent to [u8; 16]
+//! let result = hasher.result();
+//! assert_eq!(result[..], hex!("aa010fbc1d14c795d86ef98c95479d17"));
+//! # }
+//! ```
+//!
+//! Also see [RustCrypto/hashes][2] readme.
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD4
-
+//! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
+#![doc(html_logo_url =
+    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
+#[macro_use] extern crate opaque_debug;
+#[macro_use] pub extern crate digest;
 extern crate fake_simd as simd;
-extern crate byte_tools;
-#[macro_use]
-extern crate digest;
 extern crate block_buffer;
+#[cfg(feature = "std")]
+extern crate std;
 
 pub use digest::Digest;
-use byte_tools::{write_u32_le, read_u32v_le};
-use block_buffer::BlockBuffer512;
+use digest::{Input, BlockInput, FixedOutput, Reset};
+use block_buffer::BlockBuffer;
+use block_buffer::byteorder::{LE, ByteOrder};
 use simd::u32x4;
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U16, U64};
@@ -19,7 +47,7 @@ use digest::generic_array::typenum::{U16, U64};
 // initial values for Md4State
 const S: u32x4 = u32x4(0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476);
 
-type Block = [u8; 64];
+type Block = GenericArray<u8, U64>;
 
 #[derive(Copy, Clone)]
 struct Md4State {
@@ -30,10 +58,9 @@ struct Md4State {
 #[derive(Clone, Default)]
 pub struct Md4 {
     length_bytes: u64,
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
     state: Md4State,
 }
-
 
 impl Md4State {
     fn process_block(&mut self, input: &Block) {
@@ -70,7 +97,7 @@ impl Md4State {
 
         // load block to data
         let mut data = [0u32; 16];
-        read_u32v_le(&mut data, input);
+        LE::read_u32_into(input, &mut data);
 
         // round 1
         for &i in &[0, 4, 8, 12] {
@@ -106,38 +133,50 @@ impl Default for Md4State {
 
 impl Md4 {
     fn finalize(&mut self) {
-        let self_state = &mut self.state;
+        let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer.len_padding(l, |d| self_state.process_block(d))
+        self.buffer.len64_padding::<LE, _>(l, |d| state.process_block(d))
     }
 }
 
-impl digest::BlockInput for Md4 {
+impl BlockInput for Md4 {
     type BlockSize = U64;
 }
 
-impl digest::Input for Md4 {
-    fn process(&mut self, input: &[u8]) {
-        // 2^64 - ie: integer overflow is OK.
+impl Input for Md4 {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        let input = input.as_ref();
+        // Unlike Sha1 and Sha2, the length value in MD4 is defined as
+        // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
         let self_state = &mut self.state;
         self.buffer.input(input, |d: &Block| self_state.process_block(d));
     }
 }
 
-impl digest::FixedOutput for Md4 {
+impl FixedOutput for Md4 {
     type OutputSize = U16;
 
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
 
         let mut out = GenericArray::default();
-        write_u32_le(&mut out[0..4], self.state.s.0);
-        write_u32_le(&mut out[4..8], self.state.s.1);
-        write_u32_le(&mut out[8..12], self.state.s.2);
-        write_u32_le(&mut out[12..16], self.state.s.3);
+        LE::write_u32(&mut out[0..4], self.state.s.0);
+        LE::write_u32(&mut out[4..8], self.state.s.1);
+        LE::write_u32(&mut out[8..12], self.state.s.2);
+        LE::write_u32(&mut out[12..16], self.state.s.3);
+
         out
     }
 }
 
+impl Reset for Md4 {
+    fn reset(&mut self) {
+        self.state = Default::default();
+        self.length_bytes = 0;
+        self.buffer.reset();
+    }
+}
+
 impl_opaque_debug!(Md4);
+impl_write!(Md4);

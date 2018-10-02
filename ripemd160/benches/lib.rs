@@ -4,4 +4,4 @@
 extern crate digest;
 extern crate ripemd160;
 
-bench_digest!(ripemd160::Ripemd160);
+bench!(ripemd160::Ripemd160);

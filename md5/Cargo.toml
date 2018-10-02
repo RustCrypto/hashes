@@ -1,8 +1,8 @@
 [package]
 name = "md-5"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["RustCrypto Developers"]
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 description = "MD5 hash function"
 documentation = "https://docs.rs/md-5"
 repository = "https://github.com/RustCrypto/hashes"
@@ -13,15 +13,18 @@ categories = ["cryptography", "no-std"]
 name = "md5"
 
 [dependencies]
-digest = "0.7"
-byte-tools = "0.2"
-block-buffer = "0.3"
+digest = "0.8"
+block-buffer = "0.7"
 md5-asm = { version = "0.4", optional=true}
+opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "^0.7.1", features = ["dev"] }
+digest = { version = "0.8", features = ["dev"] }
+hex-literal = "0.1"
 
 [features]
+default = ["std"]
+std = ["digest/std"]
 asm = ["md5-asm"]
 
 [badges]

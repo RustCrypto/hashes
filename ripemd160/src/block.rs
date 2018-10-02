@@ -1,4 +1,6 @@
-use byte_tools::{read_u32v_le};
+use block_buffer::byteorder::{LE, ByteOrder};
+use digest::generic_array::GenericArray;
+use digest::generic_array::typenum::U64;
 
 pub const DIGEST_BUF_LEN: usize = 5;
 pub const WORK_BUF_LEN: usize = 16;
@@ -6,6 +8,8 @@ pub const WORK_BUF_LEN: usize = 16;
 pub const H0: [u32; DIGEST_BUF_LEN] = [
     0x6745_2301, 0xefcd_ab89, 0x98ba_dcfe, 0x1032_5476, 0xc3d2_e1f0
 ];
+
+type Block = GenericArray<u8, U64>;
 
 macro_rules! round(
     ($a:expr, $b:expr, $c:expr, $d:expr, $e:expr,
@@ -107,9 +111,9 @@ macro_rules! process_block(
     });
 );
 
-pub fn process_msg_block(h: &mut [u32; DIGEST_BUF_LEN], data: &[u8; 64]) {
+pub fn process_msg_block(h: &mut [u32; DIGEST_BUF_LEN], data: &Block) {
     let mut w = [0u32; WORK_BUF_LEN];
-    read_u32v_le(&mut w[0..16], data);
+    LE::read_u32_into(data, &mut w[0..16]);
     process_block!(h, w[..],
     // Round 1
         round1: h_ordering 0, 1, 2, 3, 4; data_index  0; roll_shift 11
