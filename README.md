@@ -1,15 +1,15 @@
 # RustCrypto hashes [![Build Status](https://travis-ci.org/RustCrypto/hashes.svg?branch=master)](https://travis-ci.org/RustCrypto/hashes)
 Collection of [cryptographic hash functions][1] written in pure Rust.
 
-All algorithms split into separate crates and implemented using traits from
-[`digest`](https://docs.rs/digest/) crate. Additionally all crates
-do not require the standard library (i.e. `no_std` capable) and can
-be easily used for bare-metal programming.
+All algorithms reside in the separate crates and implemented using traits from
+[`digest`](https://docs.rs/digest/) crate. Additionally all crates do not
+require the standard library (i.e. `no_std` capable) and can be easily used for
+bare-metal or WebAssembly programming.
 
 ## Supported algorithms
 **Note:** For new applications, or where compatibility with other existing
-standards is not a primary concern, we strongly recommend either BLAKE2, SHA-2
-or SHA-3.
+standards is not a primary concern, we strongly recommend to use either
+BLAKE2, SHA-2 or SHA-3.
 
 | Name     | Alt name   | Crates.io  | Documentation  | [Security Level] |
 | ------------- |:-------------:| :-----:| :-----:| :-----:|
@@ -39,10 +39,10 @@ hash function (i.e. algorithms, not the specific implementation):
 | :yellow_heart: | Theoretical break: security lower than claimed |
 | :broken_heart: | Attack demonstrated in practice: avoid if at all possible |
 
-### Minimum Rust version
+### Minimum Supported Rust Version (MSRV)
 All crates in this repository support Rust 1.21 or higher. In future
 minimally supported version of Rust can be changed, but it will be done with
-the minor version bump.
+a minor version bump.
 
 ### Crate names
 
@@ -116,7 +116,9 @@ let mut file = fs::File::open(&path)?;
 let mut hasher = Blake2b::new();
 let n = io::copy(&mut file, &mut hasher)?;
 let hash = hasher.result();
-println!("{:x}\t{}", hash, path);
+println!("Path: {}", path);
+println!("Bytes processed: {}", n);
+println!("Hash value: {:x}", hash);
 ```
 
 ### Hash-based Message Authentication Code (HMAC)
@@ -134,6 +136,7 @@ trait which will work over different hash functions:
 use digest::Digest;
 
 // Toy example, do not use it in practice!
+// Instead use crates from: https://github.com/RustCrypto/password-hashing
 fn hash_password<D: Digest>(password: &str, salt: &str, output: &mut [u8]) {
     let mut hasher = D::new();
     hasher.input(password.as_bytes());
@@ -149,7 +152,7 @@ hash_password::<Blake2b>("my_password", "abcd", &mut buf);
 hash_password::<Sha256>("my_password", "abcd", &mut buf);
 ```
 
-If you want to use hash functions via trait objects, use `digest::DynDigest`
+If you want to use hash functions with trait objects, use `digest::DynDigest`
 trait.
 
 ## License
