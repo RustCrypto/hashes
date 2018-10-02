@@ -1,5 +1,5 @@
 # RustCrypto hashes [![Build Status](https://travis-ci.org/RustCrypto/hashes.svg?branch=master)](https://travis-ci.org/RustCrypto/hashes)
-Collection of cryptographic hash functions written in pure Rust.
+Collection of [cryptographic hash functions][1] written in pure Rust.
 
 All algorithms split into separate crates and implemented using traits from
 [`digest`](https://docs.rs/digest/) crate. Additionally all crates
@@ -61,7 +61,7 @@ First add `blake2` crate to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-blake2 = "0.7"
+blake2 = "0.8"
 ```
 
 `blake2` and other crates re-export `digest` crate and `Digest` trait for
@@ -82,8 +82,8 @@ let hash = hasher.result();
 println!("Result: {:x}", hash);
 ```
 
-In this example `hash` has type [`GenericArray<u8, U64>`](https://docs.rs/generic-array),
-which is a generic alternative to `[u8; 64]`.
+In this example `hash` has type [`GenericArray<u8, U64>`][2], which is a generic
+alternative to `[u8; 64]`.
 
 Alternatively you can use chained approach, which is equivalent to the previous
 example:
@@ -105,10 +105,8 @@ println!("Result: {:x}", hash);
 
 ### Hashing `Read`able objects
 
-If you want to hash data from [`Read`](https://doc.rust-lang.org/std/io/trait.Read.html)
-trait (e.g. from file) you can rely on implementation of
-[`Write`](https://doc.rust-lang.org/std/io/trait.Write.html) trait (requires
-enabled-by-default `std` feature):
+If you want to hash data from [`Read`][3] trait (e.g. from file) you can rely on
+implementation of [`Write`][4] trait (requires enabled-by-default `std` feature):
 
 ```Rust
 use blake2::{Blake2b, Digest};
@@ -123,15 +121,14 @@ println!("{:x}\t{}", hash, path);
 
 ### Hash-based Message Authentication Code (HMAC)
 
-If you need [Hash-based Message Authentication Code](https://en.wikipedia.org/wiki/Hash-based_message_authentication_code)
-(HMAC), you can use generic implementation from [`hmac`](https://docs.rs/hmac)
-crate, which is part of the [RustCrypto/MACs](https://github.com/RustCrypto/MACs)
-repository.
+If you want to calculate [Hash-based Message Authentication Code][5] (HMAC),
+you can use generic implementation from [`hmac`](https://docs.rs/hmac) crate,
+which is a part of the [RustCrypto/MACs][6] repository.
 
 ### Generic code
 
-You can write generic code over `Digest` trait which will work over different
-hash functions:
+You can write generic code over `Digest` (or other traits from `digest` crate)
+trait which will work over different hash functions:
 
 ```Rust
 use digest::Digest;
@@ -152,6 +149,9 @@ hash_password::<Blake2b>("my_password", "abcd", &mut buf);
 hash_password::<Sha256>("my_password", "abcd", &mut buf);
 ```
 
+If you want to use hash functions via trait objects, use `digest::DynDigest`
+trait.
+
 ## License
 
 All crates licensed under either of
@@ -166,3 +166,10 @@ at your option.
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
+
+[1]: https://en.wikipedia.org/wiki/Cryptographic_hash_function
+[2]: https://docs.rs/generic-array
+[3]: https://doc.rust-lang.org/std/io/trait.Read.html
+[4]: https://doc.rust-lang.org/std/io/trait.Write.html
+[5]: https://en.wikipedia.org/wiki/Hash-based_message_authentication_code
+[6]: https://github.com/RustCrypto/MACs
