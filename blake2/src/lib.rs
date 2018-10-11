@@ -37,14 +37,15 @@
 //!
 //! ## Variable output size
 //!
-//! Both `Blake2b` and `Blake2s` support variable output sizes through
-//! `VariableOutput` trait. `Input` trait has to be imported as well.
+//! If you need variable sized output you can use `VarBlake2b` and `VarBlake2s`
+//! which support variable output sizes through `VariableOutput` trait. `Input`
+//! trait has to be imported as well.
 //!
 //! ```rust
-//! use blake2::Blake2b;
+//! use blake2::VarBlake2b;
 //! use blake2::digest::{Input, VariableOutput};
 //!
-//! let mut hasher = Blake2b::new(10).unwrap();
+//! let mut hasher = VarBlake2b::new(10).unwrap();
 //! hasher.input(b"my_input");
 //! hasher.variable_result(|res| {
 //!     assert_eq!(res, [44, 197, 92, 132, 228, 22, 146, 78, 100, 0])
@@ -111,5 +112,5 @@ mod blake2b;
 mod blake2s;
 
 pub use digest::Digest;
-pub use blake2b::Blake2b;
-pub use blake2s::Blake2s;
+pub use blake2b::{Blake2b, VarBlake2b};
+pub use blake2s::{Blake2s, VarBlake2s};

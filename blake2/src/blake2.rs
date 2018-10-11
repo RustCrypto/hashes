@@ -1,6 +1,9 @@
 macro_rules! blake2_impl {
-    ($state:ident, $word:ident, $vec:ident, $bytes:ident,
-     $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr) => {
+    (
+        $state:ident, $fix_state:ident, $word:ident, $vec:ident, $bytes:ident,
+        $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr,
+        $vardoc:expr, $doc:expr,
+    ) => {
 
         use $crate::as_bytes::AsBytes;
         use $crate::simd::{Vector4, $vec};
@@ -15,8 +18,8 @@ macro_rules! blake2_impl {
 
         type Output = GenericArray<u8, $bytes>;
 
-        /// Hash function context.
         #[derive(Clone)]
+        #[doc=$vardoc]
         pub struct $state {
             m: [$word; 16],
             h: [$vec; 2],
@@ -72,8 +75,12 @@ macro_rules! blake2_impl {
 
         impl $state {
             /// Creates a new hashing context with a key.
-            pub fn new_keyed(k: &[u8], output_size: usize) -> Self {
-                let kk = k.len();
+            ///
+            /// **WARNING!** If you plan to use it for variable output MAC, then
+            /// make sure to compare codes in constant time! It can be done
+            /// for example by using `subtle` crate.
+            pub fn new_keyed(key: &[u8], output_size: usize) -> Self {
+                let kk = key.len();
                 assert!(kk <= $bytes::to_usize());
                 assert!(output_size <= $bytes::to_usize());
 
@@ -92,7 +99,7 @@ macro_rules! blake2_impl {
                 };
 
                 if kk > 0 {
-                    copy(k, state.m.as_mut_bytes());
+                    copy(key, state.m.as_mut_bytes());
                     state.t = 2 * $bytes::to_u64();
                 }
 
@@ -225,7 +232,6 @@ macro_rules! blake2_impl {
             }
         }
 
-
         impl Default for $state {
             fn default() -> Self { Self::new_keyed(&[], $bytes::to_usize()) }
         }
@@ -237,15 +243,6 @@ macro_rules! blake2_impl {
         impl Input for $state {
             fn input<B: AsRef<[u8]>>(&mut self, data: B) {
                 self.update(data.as_ref());
-            }
-        }
-
-        impl FixedOutput for $state {
-            type OutputSize = $bytes;
-
-            fn fixed_result(self) -> Output {
-                assert_eq!(self.n, $bytes::to_usize());
-                self.finalize_with_flag(0)
             }
         }
 
@@ -276,34 +273,77 @@ macro_rules! blake2_impl {
             }
         }
 
-        impl Mac for $state {
+        impl_opaque_debug!($state);
+        impl_write!($state);
+
+
+        #[derive(Clone)]
+        #[doc=$doc]
+        pub struct $fix_state {
+            state: $state,
+        }
+
+        impl Default for $fix_state {
+            fn default() -> Self {
+                let state = $state::new_keyed(&[], $bytes::to_usize());
+                Self { state }
+            }
+        }
+
+        impl BlockInput for $fix_state {
+            type BlockSize = $bytes;
+        }
+
+        impl Input for $fix_state {
+            fn input<B: AsRef<[u8]>>(&mut self, data: B) {
+                self.state.update(data.as_ref());
+            }
+        }
+
+        impl FixedOutput for $fix_state {
+            type OutputSize = $bytes;
+
+            fn fixed_result(self) -> Output {
+                self.state.finalize_with_flag(0)
+            }
+        }
+
+        impl  Reset for $fix_state {
+            fn reset(&mut self) {
+                self.state.reset()
+            }
+        }
+
+        impl Mac for $fix_state {
             type OutputSize = $bytes;
             type KeySize = $bytes;
 
             fn new(key: &GenericArray<u8, $bytes>) -> Self {
-                Self::new_keyed(key, $bytes::to_usize())
+                let state = $state::new_keyed(key, $bytes::to_usize());
+                Self { state }
             }
 
             fn new_varkey(key: &[u8]) -> Result<Self, InvalidKeyLength> {
                 if key.len() > $bytes::to_usize() {
                     Err(InvalidKeyLength)
                 } else {
-                    Ok(Self::new_keyed(key, $bytes::to_usize()))
+                    let state = $state::new_keyed(key, $bytes::to_usize());
+                    Ok(Self { state })
                 }
             }
 
-            fn input(&mut self, data: &[u8]) { self.update(data); }
+            fn input(&mut self, data: &[u8]) { self.state.update(data); }
 
             fn reset(&mut self) {
                 <Self as Reset>::reset(self)
             }
 
             fn result(self) -> MacResult<Self::OutputSize> {
-                MacResult::new(self.finalize_with_flag(0))
+                MacResult::new(self.state.finalize_with_flag(0))
             }
         }
 
-        impl_opaque_debug!($state);
-        impl_write!($state);
+        impl_opaque_debug!($fix_state);
+        impl_write!($fix_state);
     }
 }
