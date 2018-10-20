@@ -11,6 +11,5 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 block-buffer = "0.7"
 block-padding = "0.1.0"
-byte-tools = "0.3"
 digest = "0.8"
-threefish = { git = "git://github.com/kazcw/RustCrypto-block-ciphers", branch = "threefish", version = "0.1.0" }
+threefish = { git = "git://github.com/kazcw/RustCrypto-block-ciphers", branch = "threefish", version = "0.3.0" }
