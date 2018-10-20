@@ -73,7 +73,8 @@ macro_rules! define_hasher {
         }
 
         impl digest::Input for $name {
-            fn process(&mut self, data: &[u8]) {
+            fn input<T: AsRef<[u8]>>(&mut self, data: T) {
+                let data = data.as_ref();
                 self.datalen += data.len();
                 let state = &mut self.state;
                 self.buffer.input(data, |b| state.process_block(b))
@@ -106,6 +107,12 @@ macro_rules! define_hasher {
                 let mut out = DGenericArray::default();
                 out.copy_from_slice(&state.0[(128 - $OutputBytes::to_usize())..]);
                 out
+            }
+        }
+
+        impl digest::Reset for $name {
+            fn reset(&mut self) {
+                *self = Self::default();
             }
         }
     }

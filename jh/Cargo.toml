@@ -1,6 +1,6 @@
 [package]
 name = "jh-x86_64"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Kaz Wesley <keziahw@gmail.com>"]
 license = "MIT/Apache-2.0"
 description = "Optimized JH for x86-64 cpus"
@@ -11,8 +11,8 @@ repository = "https://github.com/kazcw/jh-x86_64"
 edition = "2018"
 
 [dependencies]
-block-buffer = "0.6"
-digest = "^0.7.1"
+block-buffer = "0.7"
+digest = "0.8"
 
 [build-dependencies]
 cc = "1.0.3"
