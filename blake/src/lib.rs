@@ -5,11 +5,11 @@
 #![no_std]
 
 extern crate block_buffer;
-extern crate byte_tools;
 pub extern crate digest;
 
 mod consts;
 
+use block_buffer::BlockBuffer;
 use core::mem;
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
@@ -24,11 +24,11 @@ struct State<T> {
 }
 
 macro_rules! define_compressor {
-    ($compressor:ident, $word:ident, $buf:expr, $deserializer:ident, $uval:expr,
+    ($compressor:ident, $word:ident, $Bufsz:ty, $deserializer:path, $uval:expr,
      $rounds:expr, $shift0:expr, $shift1:expr, $shift2: expr, $shift3: expr) => {
         #[derive(Clone, Copy, Debug)]
         struct $compressor {
-            state: State<$word>
+            state: State<$word>,
         }
 
         impl $compressor {
@@ -38,7 +38,7 @@ macro_rules! define_compressor {
                 if carry { self.state.t[1] += 1; }
             }
 
-            fn put_block(&mut self, block: &[u8; $buf]) {
+            fn put_block(&mut self, block: &GenericArray<u8, $Bufsz>) {
                 const U: [$word; 16] = $uval;
 
                 #[inline(always)]
@@ -102,12 +102,12 @@ macro_rules! define_compressor {
 }
 
 macro_rules! define_hasher {
-    ($name:ident, $word:ident, $buf:expr, $Buffer:ident, $bits:expr, $Bytes:ident,
-     $serializer:ident, $compressor:ident, $iv:expr) => {
-        #[derive(Clone, Copy)]
+    ($name:ident, $word:ident, $buf:expr, $Bufsz:ty, $bits:expr, $Bytes:ident,
+     $serializer:path, $compressor:ident, $iv:expr) => {
+        #[derive(Clone)]
         pub struct $name {
             compressor: $compressor,
-            buffer: $Buffer
+            buffer: BlockBuffer<$Bufsz>,
         }
 
         impl core::fmt::Debug for $name {
@@ -130,7 +130,7 @@ macro_rules! define_hasher {
                             nullt: false,
                         }
                     },
-                    buffer: $Buffer::default()
+                    buffer: BlockBuffer::default(),
                 }
             }
         }
@@ -140,9 +140,9 @@ macro_rules! define_hasher {
         }
 
         impl digest::Input for $name {
-            fn process(&mut self, data: &[u8]) {
+            fn input<T: AsRef<[u8]>>(&mut self, data: T) {
                 let compressor = &mut self.compressor;
-                self.buffer.input(data, |block| {
+                self.buffer.input(data.as_ref(), |block| {
                     compressor.increase_count((mem::size_of::<$word>() * 16) as $word);
                     compressor.put_block(block);
                 });
@@ -196,33 +196,35 @@ macro_rules! define_hasher {
                 out
             }
         }
-    }
+
+        impl digest::Reset for $name {
+            fn reset(&mut self) {
+                *self = Self::default()
+            }
+        }
+    };
 }
 
-use block_buffer::{BlockBuffer1024, BlockBuffer512};
-use byte_tools::{read_u32_be, read_u64_be, write_u32_be, write_u64_be};
-use consts::{BLAKE224_IV, BLAKE256_IV, BLAKE256_U, BLAKE384_IV, BLAKE512_IV, BLAKE512_U, PADDING,
-             SIGMA};
-use digest::generic_array::typenum::{U28, U32, U48, U64};
+use block_buffer::byteorder::{ByteOrder, BE};
+use consts::{
+    BLAKE224_IV, BLAKE256_IV, BLAKE256_U, BLAKE384_IV, BLAKE512_IV, BLAKE512_U, PADDING, SIGMA,
+};
+use digest::generic_array::typenum::{U128, U28, U32, U48, U64};
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-define_compressor!(Compressor256, u32, 64, read_u32_be, BLAKE256_U, 14, 16, 12, 8, 7);
+define_compressor!(Compressor256, u32, U64, BE::read_u32, BLAKE256_U, 14, 16, 12, 8, 7);
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-define_hasher!(
-    Blake224, u32, 64, BlockBuffer512, 224, U28, write_u32_be, Compressor256, BLAKE224_IV);
+define_hasher!(Blake224, u32, 64, U64, 224, U28, BE::write_u32, Compressor256, BLAKE224_IV);
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-define_hasher!(
-    Blake256, u32, 64, BlockBuffer512, 256, U32, write_u32_be, Compressor256, BLAKE256_IV);
+define_hasher!(Blake256, u32, 64, U64, 256, U32, BE::write_u32, Compressor256, BLAKE256_IV);
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-define_compressor!(Compressor512, u64, 128, read_u64_be, BLAKE512_U, 16, 32, 25, 16, 11);
+define_compressor!(Compressor512, u64, U128, BE::read_u64, BLAKE512_U, 16, 32, 25, 16, 11);
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-define_hasher!(
-    Blake384, u64, 128, BlockBuffer1024, 384, U48, write_u64_be, Compressor512, BLAKE384_IV);
+define_hasher!(Blake384, u64, 128, U128, 384, U48, BE::write_u64, Compressor512, BLAKE384_IV);
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-define_hasher!(
-    Blake512, u64, 128, BlockBuffer1024, 512, U64, write_u64_be, Compressor512, BLAKE512_IV);
+define_hasher!(Blake512, u64, 128, U128, 512, U64, BE::write_u64, Compressor512, BLAKE512_IV);
