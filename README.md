@@ -1,4 +1,6 @@
-# RustCrypto hashes [![Build Status](https://travis-ci.org/RustCrypto/hashes.svg?branch=master)](https://travis-ci.org/RustCrypto/hashes)
+# RustCrypto: hashes
+[![Build Status](https://travis-ci.org/RustCrypto/hashes.svg?branch=master)](https://travis-ci.org/RustCrypto/hashes) [![dependency status](https://deps.rs/repo/github/RustCrypto/hashes/status.svg)](https://deps.rs/repo/github/RustCrypto/hashes)
+
 Collection of [cryptographic hash functions][1] written in pure Rust.
 
 All algorithms reside in the separate crates and implemented using traits from
