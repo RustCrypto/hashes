@@ -37,7 +37,7 @@ extern crate std;
 extern crate fake_simd as simd;
 
 #[cfg(feature = "asm")]
-extern crate sha1_asm as utils;
+extern crate sha1_asm;
 #[cfg(feature = "asm")]
 #[inline(always)]
 fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
