@@ -37,10 +37,17 @@ extern crate std;
 extern crate fake_simd as simd;
 
 #[cfg(feature = "asm")]
-extern crate sha1_asm as utils;
+extern crate sha1_asm;
+#[cfg(feature = "asm")]
+#[inline(always)]
+fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
+    let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
+    sha1_asm::compress(state, block);
+}
+
 #[cfg(not(feature = "asm"))]
 mod utils;
-
+#[cfg(not(feature = "asm"))]
 use utils::compress;
 
 pub use digest::Digest;
