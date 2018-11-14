@@ -73,6 +73,7 @@ sha3_impl!(Keccak256, U32, U136, paddings::Keccak);
 sha3_impl!(Keccak384, U48, U104, paddings::Keccak);
 sha3_impl!(Keccak512, U64, U72, paddings::Keccak);
 
+// SHA-3 variant used in CryptoNight
 sha3_impl!(Keccak256Full, U200, U136, paddings::Keccak);
 
 sha3_impl!(Sha3_224, U28, U144, paddings::Sha3);
