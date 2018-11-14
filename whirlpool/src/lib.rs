@@ -56,10 +56,10 @@ use utils::compress;
 
 pub use digest::Digest;
 use digest::{Input, BlockInput, FixedOutput, Reset};
-#[cfg(not(feature = "asm"))]
 use byte_tools::zero;
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::Iso7816;
+#[cfg(not(feature = "asm"))]
 use block_buffer::byteorder::{BE, ByteOrder};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U64;
@@ -176,11 +176,9 @@ impl FixedOutput for Whirlpool {
     }
 
     #[cfg(feature = "asm")]
-    fn fixed_result(&mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.finalize();
-        let res = GenericArray::clone_from_slice(&self.hash);
-        *self = Default::default();
-        res
+        GenericArray::clone_from_slice(&self.hash)
     }
 }
 

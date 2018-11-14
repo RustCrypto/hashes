@@ -25,6 +25,9 @@ matrix:
         - cargo install xargo || true
         - rustup target install armv7-unknown-linux-gnueabihf
         - rustup component add rust-src
+    - env: NAME=features-test
+      rust: 1.21.0
+      script: ./test_features.sh
 
 install:
   - cargo install cross || true
