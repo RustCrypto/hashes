@@ -54,7 +54,7 @@
 //!
 //! ## Message Authentication Code (MAC)
 //!
-//! BLAKE2 can be used as a MAC without any additionall constructs:
+//! BLAKE2 can be used as a MAC without any additional constructs:
 //!
 //! ```rust
 //! use blake2::Blake2b;
