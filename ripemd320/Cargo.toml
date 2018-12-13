@@ -1,0 +1,26 @@
+[package]
+name = "ripemd320"
+version = "0.8.0"
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+description = "RIPEMD-320 hash function"
+documentation = "https://docs.rs/ripemd320"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "ripemd320", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+digest = "0.8"
+block-buffer = "0.7"
+opaque-debug = "0.2"
+
+[dev-dependencies]
+digest = { version = "0.8", features = ["dev"] }
+hex-literal = "0.1"
+
+[features]
+default = ["std"]
+std = ["digest/std"]
+
+[badges]
+travis-ci = { repository = "RustCrypto/hashes" }
