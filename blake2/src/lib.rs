@@ -112,5 +112,5 @@ mod blake2b;
 mod blake2s;
 
 pub use digest::Digest;
-pub use blake2b::{Blake2b, VarBlake2b};
-pub use blake2s::{Blake2s, VarBlake2s};
+pub use blake2b::{Blake2b, VarBlake2b, FixedBlake2b, Blake2b128, Blake2b256, Blake2b512};
+pub use blake2s::{Blake2s, VarBlake2s, FixedBlake2s, Blake2s128, Blake2s256};

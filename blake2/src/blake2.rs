@@ -15,6 +15,8 @@ macro_rules! blake2_impl {
         use core::cmp;
         use byte_tools::{copy, zero};
         use crypto_mac::{Mac, MacResult, InvalidKeyLength};
+        use std::marker::PhantomData;
+        use digest::generic_array::ArrayLength;
 
         type Output = GenericArray<u8, $bytes>;
 
@@ -279,48 +281,53 @@ macro_rules! blake2_impl {
 
         #[derive(Clone)]
         #[doc=$doc]
-        pub struct $fix_state {
+        pub struct $fix_state<U = $bytes> {
             state: $state,
+            _u: PhantomData<U>,
         }
 
-        impl Default for $fix_state {
+        impl<U: Unsigned> Default for $fix_state<U> {
             fn default() -> Self {
-                let state = $state::new_keyed(&[], $bytes::to_usize());
-                Self { state }
+                let state = $state::new_keyed(&[], U::to_usize());
+                Self { state, _u: PhantomData }
             }
         }
 
-        impl BlockInput for $fix_state {
+        impl<U> BlockInput for $fix_state<U> {
             type BlockSize = $bytes;
         }
 
-        impl Input for $fix_state {
+        impl<U> Input for $fix_state<U> {
             fn input<B: AsRef<[u8]>>(&mut self, data: B) {
                 self.state.update(data.as_ref());
             }
         }
 
-        impl FixedOutput for $fix_state {
-            type OutputSize = $bytes;
+        impl<U: ArrayLength<u8>> FixedOutput for $fix_state<U> {
+            type OutputSize = U;
 
-            fn fixed_result(self) -> Output {
-                self.state.finalize_with_flag(0)
+            fn fixed_result(self) -> GenericArray<u8, Self::OutputSize> {
+
+                let state_out = self.state.finalize_with_flag(0);
+                let mut out = GenericArray::default();
+                copy(&state_out.as_bytes()[..U::to_usize()], &mut out);
+                out
             }
         }
 
-        impl  Reset for $fix_state {
+        impl<U> Reset for $fix_state<U> {
             fn reset(&mut self) {
                 self.state.reset()
             }
         }
 
-        impl Mac for $fix_state {
-            type OutputSize = $bytes;
+        impl<U: ArrayLength<u8>+Clone> Mac for $fix_state<U> {
+            type OutputSize = U;
             type KeySize = $bytes;
 
             fn new(key: &GenericArray<u8, $bytes>) -> Self {
                 let state = $state::new_keyed(key, $bytes::to_usize());
-                Self { state }
+                Self { state, _u: PhantomData  }
             }
 
             fn new_varkey(key: &[u8]) -> Result<Self, InvalidKeyLength> {
@@ -328,7 +335,7 @@ macro_rules! blake2_impl {
                     Err(InvalidKeyLength)
                 } else {
                     let state = $state::new_keyed(key, $bytes::to_usize());
-                    Ok(Self { state })
+                    Ok(Self { state, _u: PhantomData  })
                 }
             }
 
@@ -339,7 +346,7 @@ macro_rules! blake2_impl {
             }
 
             fn result(self) -> MacResult<Self::OutputSize> {
-                MacResult::new(self.state.finalize_with_flag(0))
+                MacResult::new(self.fixed_result())
             }
         }
 
