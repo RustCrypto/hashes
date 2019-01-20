@@ -1,40 +1,114 @@
-macro_rules! blake2_impl {
+macro_rules! blake2_compressor_impl {
     (
-        $state:ident, $fix_state:ident, $word:ident, $vec:ident, $bytes:ident,
+        $compressor:ident, $builder:ident, $word:ident, $vec:ident, $bytes:ident,
         $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr,
-        $vardoc:expr, $doc:expr,
+        $XofLen:ident, $reserved_len:expr, $salt_len:expr,
     ) => {
 
         use $crate::as_bytes::AsBytes;
         use $crate::simd::{Vector4, $vec};
 
-        use digest::{Input, BlockInput, FixedOutput, VariableOutput, Reset};
-        use digest::InvalidOutputSize;
+        use byte_tools::copy;
+        use core::{mem, u8, u32};
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::Unsigned;
-        use core::cmp;
-        use byte_tools::{copy, zero};
-        use crypto_mac::{Mac, MacResult, InvalidKeyLength};
 
-        type Output = GenericArray<u8, $bytes>;
+        #[derive(Clone, Copy)]
+        #[repr(packed)]
+        #[allow(unused)]
+        pub struct $builder {
+            digest_len: u8,
+            key_len: u8,
+            fanout: u8,
+            depth: u8,
+            leaf_len: u32,
+            node_offs: u32,
+            xof_len: $XofLen,
+            node_depth: u8,
+            inner_len: u8,
+            reserved: [u8; $reserved_len],
+            salt: [u8; $salt_len],
+            personal: [u8; $salt_len],
+        }
 
-        #[derive(Clone)]
-        #[doc=$vardoc]
-        pub struct $state {
-            m: [$word; 16],
-            h: [$vec; 2],
-            t: u64,
-            n: usize,
+        impl $builder {
+            pub fn new() -> Self {
+                Self {
+                    digest_len: 0,
+                    key_len: 0,
+                    fanout: 1,
+                    depth: 1,
+                    leaf_len: 0,
+                    node_offs: 0,
+                    xof_len: 0,
+                    node_depth: 0,
+                    inner_len: 0,
+                    reserved: Default::default(),
+                    salt: Default::default(),
+                    personal: Default::default(),
+                }
+            }
 
-            h0: [$vec; 2],
-            m0: [$word; 16],
-            t0: u64,
+            pub fn out(&mut self, out: usize) {
+                assert!(out <= usize::from(u8::MAX));
+                self.digest_len = out as u8;
+            }
+
+            pub fn key(&mut self, kk: usize) {
+                assert!(kk as usize <= $bytes::to_usize());
+                self.key_len = kk as u8;
+            }
+
+            pub fn fanout(&mut self, fanout: u8) {
+                self.fanout = fanout;
+            }
+
+            pub fn depth(&mut self, depth: u8) {
+                self.depth = depth;
+            }
+
+            pub fn node_depth(&mut self, node_depth: u8) {
+                self.node_depth = node_depth;
+            }
+
+            pub fn node_offset(&mut self, node_offs: usize) {
+                assert!(node_offs <= u32::MAX as usize);
+                assert!(node_offs as u32 <= u32::MAX);
+                self.node_offs = u32::to_le(node_offs as u32);
+            }
+
+            pub fn inner_length(&mut self, inner_len: u8) {
+                self.inner_len = inner_len;
+            }
+
+            pub fn build(&self) -> $compressor {
+                assert!(self.digest_len > 0);
+                // All fields of both types are Copy.
+                // Field endianness is handled at field-setting time.
+                let h0: [$vec; 2] = unsafe { mem::transmute(*self) };
+                $compressor {
+                    h: [iv0() ^ h0[0].to_le(), iv1() ^ h0[1].to_le()],
+                }
+            }
         }
 
         #[inline(always)]
         fn iv0() -> $vec { $vec::new($IV[0], $IV[1], $IV[2], $IV[3]) }
         #[inline(always)]
         fn iv1() -> $vec { $vec::new($IV[4], $IV[5], $IV[6], $IV[7]) }
+
+        #[derive(Clone)]
+        pub struct $compressor {
+            h: [$vec; 2],
+        }
+
+        impl Default for $compressor {
+            fn default() -> Self {
+                Self {
+                    h: [$vec::new(0, 0, 0, 0), $vec::new(0, 0, 0, 0)]
+                }
+            }
+        }
 
         #[inline(always)]
         fn quarter_round(v: &mut [$vec; 4], rd: u32, rb: u32, m: $vec) {
@@ -73,6 +147,104 @@ macro_rules! blake2_impl {
             unshuffle(v);
         }
 
+        impl $compressor {
+            pub fn with_parameter_block(p: &[$word; 8]) -> Self {
+                let h0 = [
+                    iv0() ^ $vec::new(p[0], p[1], p[2], p[3]),
+                    iv1() ^ $vec::new(p[4], p[5], p[6], p[7]),
+                ];
+                Self {
+                    h: h0,
+                }
+            }
+
+            pub fn compress(&mut self, m: &[$word; 16], f0: $word, f1: $word, t: u64) {
+                use $crate::consts::SIGMA;
+
+                let h = &mut self.h;
+
+                let t0 = t as $word;
+                let t1 = match $bytes::to_u8() {
+                    64 => 0,
+                    32 => (t >> 32) as $word,
+                    _  => unreachable!(),
+                };
+
+                let mut v = [
+                    h[0],
+                    h[1],
+                    iv0(),
+                    iv1() ^ $vec::new(t0, t1, f0, f1),
+                ];
+
+                round(&mut v, m, &SIGMA[0]);
+                round(&mut v, m, &SIGMA[1]);
+                round(&mut v, m, &SIGMA[2]);
+                round(&mut v, m, &SIGMA[3]);
+                round(&mut v, m, &SIGMA[4]);
+                round(&mut v, m, &SIGMA[5]);
+                round(&mut v, m, &SIGMA[6]);
+                round(&mut v, m, &SIGMA[7]);
+                round(&mut v, m, &SIGMA[8]);
+                round(&mut v, m, &SIGMA[9]);
+                if $bytes::to_u8() == 64 {
+                    round(&mut v, m, &SIGMA[0]);
+                    round(&mut v, m, &SIGMA[1]);
+                }
+
+                h[0] = h[0] ^ (v[0] ^ v[2]);
+                h[1] = h[1] ^ (v[1] ^ v[3]);
+            }
+
+            pub fn finalize(&mut self, out: &mut GenericArray<u8, $bytes>, m: &[$word; 16], f1: $word, t: u64) {
+                self.compress(m, !0, f1, t);
+                let buf = [self.h[0].to_le(), self.h[1].to_le()];
+                copy(buf.as_bytes(), out);
+            }
+
+            pub fn finalize_into_slice(&mut self, out: &mut [u8], m: &[$word; 16], f1: $word, t: u64) {
+                self.compress(m, !0, f1, t);
+                let buf = [self.h[0].to_le(), self.h[1].to_le()];
+                out.copy_from_slice(buf.as_bytes());
+            }
+
+            pub fn builder() -> $builder {
+                $builder::new()
+            }
+        }
+    }
+}
+
+macro_rules! blake2_impl {
+    (
+        $state:ident, $fix_state:ident, $compressor:ident, $word:ident, $bytes:ident,
+        $vardoc:expr, $doc:expr,
+    ) => {
+
+        use $crate::as_bytes::AsBytes;
+
+        use digest::{Input, BlockInput, FixedOutput, VariableOutput, Reset};
+        use digest::InvalidOutputSize;
+        use digest::generic_array::GenericArray;
+        use digest::generic_array::typenum::Unsigned;
+        use core::cmp;
+        use byte_tools::{copy, zero};
+        use crypto_mac::{Mac, MacResult, InvalidKeyLength};
+
+        type Output = GenericArray<u8, $bytes>;
+
+        #[derive(Clone)]
+        #[doc=$vardoc]
+        pub struct $state {
+            n: usize,
+            h: $compressor,
+            m: [$word; 16],
+            h0: $compressor,
+            m0: [$word; 16],
+            t: u64,
+            t0: u64,
+        }
+
         impl $state {
             /// Creates a new hashing context with a key.
             ///
@@ -80,32 +252,26 @@ macro_rules! blake2_impl {
             /// make sure to compare codes in constant time! It can be done
             /// for example by using `subtle` crate.
             pub fn new_keyed(key: &[u8], output_size: usize) -> Self {
-                let kk = key.len();
-                assert!(kk <= $bytes::to_usize());
-                assert!(output_size <= $bytes::to_usize());
-
-                let p0 = 0x0101_0000 ^ ((kk as $word) << 8) ^
-                    (output_size as $word);
-                let h0 = [iv0() ^ $vec::new(p0, 0, 0, 0), iv1()];
-                let mut state = $state {
-                    m: [0; 16],
-                    h: h0,
-                    t: 0,
+                let mut h0 = $compressor::builder();
+                h0.key(key.len());
+                h0.out(output_size);
+                let h0 = h0.build();
+                let mut m = [0; 16];
+                let mut t = 0;
+                if !key.is_empty() {
+                    copy(key, m.as_mut_bytes());
+                    t = 2 * $bytes::to_u64();
+                }
+                $state {
+                    m,
+                    h: h0.clone(),
+                    t,
                     n: output_size,
 
-                    t0: 0,
-                    m0: [0; 16],
+                    t0: t,
+                    m0: m,
                     h0: h0,
-                };
-
-                if kk > 0 {
-                    copy(key, state.m.as_mut_bytes());
-                    state.t = 2 * $bytes::to_u64();
                 }
-
-                state.t0 = state.t;
-                state.m0 = state.m;
-                state
             }
 
             #[doc(hidden)]
@@ -114,15 +280,10 @@ macro_rules! blake2_impl {
                 let kk = (p[0] >> 8) as u8 as usize;
                 assert!(nn >= 1 && nn <= $bytes::to_usize());
                 assert!(kk <= $bytes::to_usize());
-
-                let h0 = [
-                    iv0() ^ $vec::new(p[0], p[1], p[2], p[3]),
-                    iv1() ^ $vec::new(p[4], p[5], p[6], p[7]),
-                ];
-
+                let h0 = $compressor::with_parameter_block(p);
                 $state {
                     m: [0; 16],
-                    h: h0,
+                    h: h0.clone(),
                     t: 0,
                     n: nn,
 
@@ -151,7 +312,7 @@ macro_rules! blake2_impl {
                 }
 
                 while rest.len() >= block {
-                    self.compress(0, 0);
+                    self.h.compress(&self.m, 0, 0, self.t);
 
                     let part = &rest[..block];
                     rest = &rest[part.len()..];
@@ -163,7 +324,7 @@ macro_rules! blake2_impl {
 
                 let n = rest.len();
                 if n > 0 {
-                    self.compress(0, 0);
+                    self.h.compress(&self.m, 0, 0, self.t);
 
                     copy(rest, &mut self.m.as_mut_bytes());
                     self.t = self.t.checked_add(rest.len() as u64)
@@ -182,53 +343,9 @@ macro_rules! blake2_impl {
                 if off != 0 {
                     zero(&mut self.m.as_mut_bytes()[off..]);
                 }
-
-                self.compress(!0, f1);
-
-                let buf = [self.h[0].to_le(), self.h[1].to_le()];
-
                 let mut out = GenericArray::default();
-                copy(buf.as_bytes(), &mut out);
+                self.h.finalize(&mut out, &self.m, f1, self.t);
                 out
-            }
-
-            fn compress(&mut self, f0: $word, f1: $word) {
-                use $crate::consts::SIGMA;
-
-                let m = &self.m;
-                let h = &mut self.h;
-
-                let t0 = self.t as $word;
-                let t1 = match $bytes::to_u8() {
-                    64 => 0,
-                    32 => (self.t >> 32) as $word,
-                    _  => unreachable!(),
-                };
-
-                let mut v = [
-                    h[0],
-                    h[1],
-                    iv0(),
-                    iv1() ^ $vec::new(t0, t1, f0, f1),
-                ];
-
-                round(&mut v, m, &SIGMA[0]);
-                round(&mut v, m, &SIGMA[1]);
-                round(&mut v, m, &SIGMA[2]);
-                round(&mut v, m, &SIGMA[3]);
-                round(&mut v, m, &SIGMA[4]);
-                round(&mut v, m, &SIGMA[5]);
-                round(&mut v, m, &SIGMA[6]);
-                round(&mut v, m, &SIGMA[7]);
-                round(&mut v, m, &SIGMA[8]);
-                round(&mut v, m, &SIGMA[9]);
-                if $bytes::to_u8() == 64 {
-                    round(&mut v, m, &SIGMA[0]);
-                    round(&mut v, m, &SIGMA[1]);
-                }
-
-                h[0] = h[0] ^ (v[0] ^ v[2]);
-                h[1] = h[1] ^ (v[1] ^ v[3]);
             }
         }
 
@@ -269,7 +386,7 @@ macro_rules! blake2_impl {
             fn reset(&mut self) {
                 self.t = self.t0;
                 self.m = self.m0;
-                self.h = self.h0;
+                self.h = self.h0.clone();
             }
         }
 

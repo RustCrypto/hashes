@@ -108,6 +108,8 @@ mod simd;
 #[macro_use]
 mod blake2;
 
+mod compressor_b;
+mod compressor_s;
 mod blake2b;
 mod blake2s;
 
