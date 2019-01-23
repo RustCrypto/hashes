@@ -311,23 +311,11 @@ macro_rules! blake2_impl {
                         .expect("hash data length overflow");
                 }
 
-                while rest.len() >= block {
+                for part in rest.chunks(block) {
                     self.h.compress(&self.m, 0, 0, self.t);
-
-                    let part = &rest[..block];
-                    rest = &rest[part.len()..];
 
                     copy(part, &mut self.m.as_mut_bytes());
                     self.t = self.t.checked_add(part.len() as u64)
-                        .expect("hash data length overflow");
-                }
-
-                let n = rest.len();
-                if n > 0 {
-                    self.h.compress(&self.m, 0, 0, self.t);
-
-                    copy(rest, &mut self.m.as_mut_bytes());
-                    self.t = self.t.checked_add(rest.len() as u64)
                         .expect("hash data length overflow");
                 }
             }
