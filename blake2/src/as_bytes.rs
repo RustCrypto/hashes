@@ -41,3 +41,5 @@ unsafe impl Safe for i8 {}
 unsafe impl Safe for i16 {}
 unsafe impl Safe for i32 {}
 unsafe impl Safe for i64 {}
+unsafe impl<T: Safe> Safe for [T; 8] {}
+unsafe impl<T: Safe> Safe for [T; 16] {}

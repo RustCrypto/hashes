@@ -464,3 +464,251 @@ macro_rules! blake2_impl {
         impl_write!($fix_state);
     }
 }
+
+macro_rules! blake2_p_impl {
+    (
+        $state:ident, $fix_state:ident, $compressor:ident, $builder:ident, $word:ident, $bytes:ident, $fanout:expr,
+        $vardoc:expr, $doc:expr,
+    ) => {
+
+        use $crate::as_bytes::AsBytes;
+
+        use digest::{Input, BlockInput, FixedOutput, VariableOutput, Reset};
+        use digest::InvalidOutputSize;
+        use digest::generic_array::GenericArray;
+        use digest::generic_array::typenum::Unsigned;
+        use core::cmp;
+        use byte_tools::{copy, zero};
+        use crypto_mac::{Mac, MacResult, InvalidKeyLength};
+
+        type Output = GenericArray<u8, $bytes>;
+
+        #[derive(Clone)]
+        #[doc=$vardoc]
+        pub struct $state {
+            n: usize,
+            m0: [$word; 16],
+            t0: u64,
+            h0: $builder,
+            h: [$compressor; $fanout],
+            m: [[$word; 16]; $fanout],
+            t: u64,
+        }
+
+        impl $state {
+            /// Creates a new hashing context with a key.
+            ///
+            /// **WARNING!** If you plan to use it for variable output MAC, then
+            /// make sure to compare codes in constant time! It can be done
+            /// for example by using `subtle` crate.
+            pub fn new_keyed(key: &[u8], output_size: usize) -> Self {
+                let mut h0 = $builder::new();
+                h0.key(key.len());
+                h0.out(output_size);
+                h0.fanout($fanout);
+                h0.depth(2);
+                h0.inner_length($bytes::to_u8());
+                let mut m0 = [0; 16];
+                let mut t0 = 0;
+                if !key.is_empty() {
+                    copy(key, m0.as_mut_bytes());
+                    t0 = 2 * $bytes::to_u64() * $fanout;
+                }
+                let mut state = $state {
+                    n: output_size,
+                    h0,
+                    t0,
+                    m0,
+                    // everything else set up by reset()
+                    h: Default::default(),
+                    m: Default::default(),
+                    t: Default::default(),
+                };
+                state.reset();
+                state
+            }
+
+            /// Updates the hashing context with more data.
+            fn update(&mut self, mut data: &[u8]) {
+                const BLOCK: usize = 2 * $bytes::USIZE;
+                const RING: usize = BLOCK * $fanout;
+
+                if self.t < RING as u64 {
+                    // initial ring fill
+                    let (d0, d1) = data.split_at(cmp::min(data.len(), RING - self.t as usize));
+                    self.m.as_mut_bytes()[self.t as usize..self.t as usize + d0.len()].copy_from_slice(d0);
+                    self.t += d0.len() as u64;
+                    data = d1;
+                } else if self.t as usize % BLOCK != 0 {
+                    // complete partial block
+                    let (d0, d1) = data.split_at(cmp::min(data.len(), BLOCK - self.t as usize % BLOCK));
+                    let ri = self.t as usize % RING;
+                    self.m.as_mut_bytes()[ri..ri + d0.len()].copy_from_slice(d0);
+                    self.t += d0.len() as u64;
+                    data = d1;
+                }
+
+                // if there's data remaining, the ring is full of whole blocks
+                for b in data.chunks(BLOCK) {
+                    let i = self.t as usize / BLOCK % $fanout;
+                    self.h[i].compress(&mut self.m[i], 0, 0, self.t / RING as u64 * BLOCK as u64);
+                    self.m[i].as_mut_bytes()[..b.len()].copy_from_slice(b);
+                    self.t += b.len() as u64;
+                }
+            }
+
+            fn finalize(mut self) -> Output {
+                const BLOCK: usize = 2 * $bytes::USIZE;
+                const RING: usize = BLOCK * $fanout;
+
+                self.h0.node_offset(0);
+                self.h0.node_depth(1);
+                let mut root = self.h0.build();
+
+                let mut ri = self.t as usize % RING;
+                let trb = self.t / RING as u64 * BLOCK as u64;
+                if ri % BLOCK != 0 {
+                    let ni = ((self.t as usize & !(BLOCK - 1)) + BLOCK) % RING;
+                    zero(&mut self.m.as_mut_bytes()[ri..ni]);
+                }
+                let mut inter = [0; 16];
+                for i in 0..$fanout {
+                    if i != 0 && i & 1 == 0 {
+                        root.compress(&inter, 0, 0, i as u64 * $bytes::to_u64());
+                    }
+                    let len = cmp::min(ri, BLOCK);
+                    ri -= len;
+                    let f1 = if i == $fanout - 1 { !0 } else { 0 };
+                    let ix0 = (i & 1) * $bytes::to_usize();
+                    let ix1 = ((i & 1) + 1) * $bytes::to_usize();
+                    self.h[i].finalize_into_slice(&mut inter.as_mut_bytes()[ix0..ix1], &self.m[i], f1, trb + len as u64);
+                }
+                let mut out = GenericArray::default();
+                root.finalize(&mut out, &inter, !0, $fanout * $bytes::to_u64());
+                out
+            }
+        }
+
+        impl Default for $state {
+            fn default() -> Self { Self::new_keyed(&[], $bytes::to_usize()) }
+        }
+
+        impl BlockInput for $state {
+            type BlockSize = $bytes;
+        }
+
+        impl Input for $state {
+            fn input<B: AsRef<[u8]>>(&mut self, data: B) {
+                self.update(data.as_ref());
+            }
+        }
+
+        impl VariableOutput for $state {
+            fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
+                if output_size == 0 || output_size > $bytes::to_usize() {
+                    return Err(InvalidOutputSize);
+                }
+                Ok(Self::new_keyed(&[], output_size))
+            }
+
+            fn output_size(&self) -> usize {
+                self.n
+            }
+
+            fn variable_result<F: FnOnce(&[u8])>(self, f: F) {
+                let n = self.n;
+                let res = self.finalize();
+                f(&res[..n]);
+            }
+        }
+
+        impl Reset for $state {
+            fn reset(&mut self) {
+                self.h0.node_depth(0);
+                for (i, h) in self.h.iter_mut().enumerate() {
+                    self.h0.node_offset(i);
+                    *h = self.h0.build();
+                }
+
+                for m in self.m.iter_mut() {
+                    m.copy_from_slice(&self.m0);
+                }
+
+                self.t = self.t0;
+            }
+        }
+
+        impl_opaque_debug!($state);
+        impl_write!($state);
+
+
+        #[derive(Clone)]
+        #[doc=$doc]
+        pub struct $fix_state {
+            state: $state,
+        }
+
+        impl Default for $fix_state {
+            fn default() -> Self {
+                let state = $state::new_keyed(&[], $bytes::to_usize());
+                Self { state }
+            }
+        }
+
+        impl BlockInput for $fix_state {
+            type BlockSize = $bytes;
+        }
+
+        impl Input for $fix_state {
+            fn input<B: AsRef<[u8]>>(&mut self, data: B) {
+                self.state.update(data.as_ref());
+            }
+        }
+
+        impl FixedOutput for $fix_state {
+            type OutputSize = $bytes;
+
+            fn fixed_result(self) -> Output {
+                self.state.finalize()
+            }
+        }
+
+        impl  Reset for $fix_state {
+            fn reset(&mut self) {
+                self.state.reset()
+            }
+        }
+
+        impl Mac for $fix_state {
+            type OutputSize = $bytes;
+            type KeySize = $bytes;
+
+            fn new(key: &GenericArray<u8, $bytes>) -> Self {
+                let state = $state::new_keyed(key, $bytes::to_usize());
+                Self { state }
+            }
+
+            fn new_varkey(key: &[u8]) -> Result<Self, InvalidKeyLength> {
+                if key.len() > $bytes::to_usize() {
+                    Err(InvalidKeyLength)
+                } else {
+                    let state = $state::new_keyed(key, $bytes::to_usize());
+                    Ok(Self { state })
+                }
+            }
+
+            fn input(&mut self, data: &[u8]) { self.state.update(data); }
+
+            fn reset(&mut self) {
+                <Self as Reset>::reset(self)
+            }
+
+            fn result(self) -> MacResult<Self::OutputSize> {
+                MacResult::new(self.state.finalize())
+            }
+        }
+
+        impl_opaque_debug!($fix_state);
+        impl_write!($fix_state);
+    }
+}
