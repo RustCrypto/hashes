@@ -88,8 +88,8 @@
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 #![warn(missing_docs)]
 
-#![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]
-#![cfg_attr(feature = "simd_asm", feature(asm))]
+#![cfg_attr(all(feature = "simd", not(feature = "coresimd")), feature(platform_intrinsics, repr_simd))]
+#![cfg_attr(all(feature = "simd_asm", not(feature = "coresimd")), feature(asm))]
 
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
@@ -102,6 +102,11 @@ extern crate std;
 mod consts;
 mod as_bytes;
 
+#[cfg(feature = "coresimd")]
+mod coresimd; 
+#[cfg(feature = "coresimd")]
+mod simd { pub use coresimd::*; }
+#[cfg(not(feature = "coresimd"))]
 mod simd;
 
 

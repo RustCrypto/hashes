@@ -1,6 +1,6 @@
 [package]
 name = "blake2"
-version = "0.8.1"
+version = "0.8.2"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 description = "BLAKE2 hash functions"
@@ -26,6 +26,7 @@ std = ["digest/std", "crypto-mac/std"]
 simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
+coresimd = []
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

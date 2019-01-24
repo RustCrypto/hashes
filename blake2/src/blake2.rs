@@ -6,6 +6,7 @@ macro_rules! blake2_compressor_impl {
     ) => {
 
         use $crate::as_bytes::AsBytes;
+        #[allow(unused_imports)]
         use $crate::simd::{Vector4, $vec};
 
         use byte_tools::copy;
@@ -127,9 +128,9 @@ macro_rules! blake2_compressor_impl {
 
         #[inline(always)]
         fn unshuffle(v: &mut [$vec; 4]) {
-            v[1] = v[1].shuffle_right_1();
-            v[2] = v[2].shuffle_right_2();
-            v[3] = v[3].shuffle_right_3();
+            v[1] = v[1].shuffle_left_3();
+            v[2] = v[2].shuffle_left_2();
+            v[3] = v[3].shuffle_left_1();
         }
 
         #[inline(always)]
