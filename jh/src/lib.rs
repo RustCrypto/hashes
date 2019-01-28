@@ -14,22 +14,22 @@ pub use digest::Digest;
 use block_buffer::byteorder::BigEndian;
 use block_buffer::generic_array::GenericArray as BBGenericArray;
 use block_buffer::BlockBuffer;
+use compressor::f8;
 use digest::generic_array::typenum::{Unsigned, U28, U32, U48, U64};
 use digest::generic_array::GenericArray as DGenericArray;
 
+mod compressor;
 mod consts;
 
 #[derive(Clone)]
-#[repr(C, align(128))]
+#[repr(C, align(16))]
 struct State([u8; 128]);
-
-extern "C" {
-    fn f8(state: *mut State, block: *const [u8; 64]);
-}
 
 impl State {
     fn process_block(&mut self, block: &BBGenericArray<u8, U64>) {
-        unsafe { f8(self, block.as_slice().as_ptr() as *const [u8; 64]) };
+        unsafe {
+            f8(core::mem::transmute(self), block.as_ptr() as *const _);
+        }
     }
 }
 
