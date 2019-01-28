@@ -193,7 +193,7 @@ mod sse2 {
                 )
             })
         }
-        // TODO: non-ssse3 versions of _mm_shuffle_epi8 fns?
+        #[cfg(target_feature = "ssse3")]
         #[inline(always)]
         pub fn swap8(self) -> Self {
             U128(unsafe {
@@ -201,12 +201,23 @@ mod sse2 {
                 _mm_shuffle_epi8(self.0, k)
             })
         }
+        #[cfg(not(target_feature = "ssse3"))]
+        #[inline(always)]
+        pub fn swap8(self) -> Self {
+            U128(unsafe { _mm_or_si128(_mm_slli_epi16(self.0, 8), _mm_srli_epi16(self.0, 8)) })
+        }
+        #[cfg(target_feature = "ssse3")]
         #[inline(always)]
         pub fn swap16(self) -> Self {
             U128(unsafe {
                 let k = _mm_set_epi64x(0x0d0c_0f0e_0908_0b0a, 0x0504_0706_0100_0302);
                 _mm_shuffle_epi8(self.0, k)
             })
+        }
+        #[cfg(not(target_feature = "ssse3"))]
+        #[inline(always)]
+        pub fn swap16(self) -> Self {
+            U128(unsafe { _mm_or_si128(_mm_slli_epi32(self.0, 16), _mm_srli_epi32(self.0, 16)) })
         }
         #[inline(always)]
         pub fn swap32(self) -> Self {
