@@ -2,8 +2,7 @@
 
 //! Optimized implementation of JH for x86-64 systems.
 
-#![no_std]
-#![cfg(target_arch = "x86_64")]
+#![cfg_attr(not(features = "std"), no_std)]
 
 pub extern crate digest;
 #[macro_use]
@@ -122,6 +121,3 @@ define_hasher!(Jh224, consts::JH224_H0, U28);
 define_hasher!(Jh256, consts::JH256_H0, U32);
 define_hasher!(Jh384, consts::JH384_H0, U48);
 define_hasher!(Jh512, consts::JH512_H0, U64);
-
-#[cfg(test)]
-mod tests {}

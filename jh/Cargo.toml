@@ -1,9 +1,9 @@
 [package]
 name = "jh-x86_64"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Kaz Wesley <keziahw@gmail.com>"]
 license = "MIT/Apache-2.0"
-description = "Optimized JH for x86-64 cpus"
+description = "Portable JH with optimizations for x86-64 cpus"
 documentation = "https://docs.rs/jh-x86_64"
 keywords = ["crypto", "jh", "hash", "digest"]
 categories = ["cryptography", "no-std"]
