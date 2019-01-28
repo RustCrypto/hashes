@@ -158,10 +158,12 @@ mod sse2 {
         fn const8(k: u8) -> Self {
             U128(unsafe { _mm_set1_epi8(k as i8) })
         }
+        #[cfg(not(all(feature = "avx2", target_feature = "avx2")))]
         #[inline(always)]
         pub fn const_ff() -> Self {
             Self::const8(0xff)
         }
+        #[cfg(not(all(feature = "avx2", target_feature = "avx2")))]
         #[inline(always)]
         pub fn andnot(self, rhs: Self) -> Self {
             U128(unsafe { _mm_andnot_si128(self.0, rhs.0) })
@@ -227,6 +229,16 @@ mod sse2 {
         pub fn swap64(self) -> Self {
             U128(unsafe { _mm_shuffle_epi32(self.0, 0b01001110) })
         }
+        #[cfg(all(feature = "avx2", target_feature = "avx2"))]
+        #[inline(always)]
+        pub fn from_raw(x: __m128i) -> Self {
+            U128(x)
+        }
+        #[cfg(all(feature = "avx2", target_feature = "avx2"))]
+        #[inline(always)]
+        pub fn raw(self) -> __m128i {
+            self.0
+        }
     }
     impl BitXor for U128 {
         type Output = U128;
@@ -259,7 +271,7 @@ mod sse2 {
 #[cfg(target_feature = "sse2")]
 use sse2::*;
 
-// TODO: double_channel impls for avx2
+#[cfg(not(all(feature = "avx2", target_feature = "avx2")))]
 mod single_channel {
     use super::*;
     #[repr(C)]
@@ -305,7 +317,65 @@ mod single_channel {
         }
     }
 }
+#[cfg(not(all(feature = "avx2", target_feature = "avx2")))]
 use single_channel::X2;
+
+#[cfg(all(feature = "avx2", target_feature = "avx2"))]
+mod double_channel {
+    use super::*;
+    #[cfg(target_arch = "x86")]
+    use core::arch::x86::*;
+    #[cfg(target_arch = "x86_64")]
+    use core::arch::x86_64::*;
+    #[repr(transparent)]
+    #[derive(Copy, Clone)]
+    pub struct X2(__m256i);
+    impl X2 {
+        #[inline(always)]
+        pub fn new(a: U128, b: U128) -> Self {
+            X2(unsafe { _mm256_inserti128_si256(_mm256_castsi128_si256(a.raw()), b.raw(), 1) })
+        }
+        #[inline(always)]
+        pub fn const_ff() -> Self {
+            X2(unsafe { _mm256_set1_epi8(0xffu8 as i8) })
+        }
+        #[inline(always)]
+        pub fn andnot(self, rhs: Self) -> Self {
+            X2(unsafe { _mm256_andnot_si256(self.0, rhs.0) })
+        }
+        #[inline(always)]
+        pub fn split(self) -> (U128, U128) {
+            unsafe {
+                (
+                    U128::from_raw(_mm256_castsi256_si128(self.0)),
+                    U128::from_raw(_mm256_extracti128_si256(self.0, 1)),
+                )
+            }
+        }
+    }
+    impl BitXorAssign for X2 {
+        #[inline(always)]
+        fn bitxor_assign(&mut self, rhs: Self) {
+            self.0 = unsafe { _mm256_xor_si256(self.0, rhs.0) };
+        }
+    }
+    impl BitOr for X2 {
+        type Output = Self;
+        #[inline(always)]
+        fn bitor(self, rhs: Self) -> Self::Output {
+            X2(unsafe { _mm256_or_si256(self.0, rhs.0) })
+        }
+    }
+    impl BitAnd for X2 {
+        type Output = Self;
+        #[inline(always)]
+        fn bitand(self, rhs: Self) -> Self::Output {
+            X2(unsafe { _mm256_and_si256(self.0, rhs.0) })
+        }
+    }
+}
+#[cfg(all(feature = "avx2", target_feature = "avx2"))]
+use double_channel::X2;
 
 #[repr(C)]
 #[derive(Copy, Clone)]

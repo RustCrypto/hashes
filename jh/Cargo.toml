@@ -21,5 +21,10 @@ digest = { version = "0.8", features = ["dev"] }
 [build-dependencies]
 cc = "1.0.3"
 
+[features]
+default = ["std"]
+std = []
+avx2 = []
+
 [badges]
 travis-ci = { repository = "kazcw/jh-x86_64" }
