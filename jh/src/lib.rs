@@ -6,14 +6,16 @@
 #![cfg(target_arch = "x86_64")]
 
 pub extern crate digest;
+#[macro_use]
+extern crate hex_literal;
 
 pub use digest::Digest;
 
 use block_buffer::byteorder::BigEndian;
-use block_buffer::BlockBuffer;
 use block_buffer::generic_array::GenericArray as BBGenericArray;
+use block_buffer::BlockBuffer;
+use digest::generic_array::typenum::{Unsigned, U28, U32, U48, U64};
 use digest::generic_array::GenericArray as DGenericArray;
-use digest::generic_array::typenum::{U28, U32, U48, U64, Unsigned};
 
 mod consts;
 
@@ -33,9 +35,7 @@ impl State {
 
 impl core::fmt::Debug for State {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
-        f.debug_tuple("State")
-            .field(&"(array)")
-            .finish()
+        f.debug_tuple("State").field(&"(array)").finish()
     }
 }
 
@@ -61,9 +61,9 @@ macro_rules! define_hasher {
         impl Default for $name {
             fn default() -> Self {
                 Self {
-                    state: State(*$init),
+                    state: State($init),
                     buffer: BlockBuffer::default(),
-                    datalen: 0
+                    datalen: 0,
                 }
             }
         }
@@ -115,7 +115,7 @@ macro_rules! define_hasher {
                 *self = Self::default();
             }
         }
-    }
+    };
 }
 
 define_hasher!(Jh224, consts::JH224_H0, U28);
