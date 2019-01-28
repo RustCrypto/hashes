@@ -61,6 +61,89 @@ macro_rules! unroll7 {
     };
 }
 
+#[cfg(not(target_feature = "sse2"))]
+mod generic {
+    use super::*;
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    pub struct U128(u64, u64);
+    impl U128 {
+        #[inline(always)]
+        pub fn const_ff() -> Self {
+            U128(0xffffffffffffffff, 0xffffffffffffffff)
+        }
+        #[inline(always)]
+        pub fn andnot(self, rhs: Self) -> Self {
+            U128(!self.0 & rhs.0, !self.1 & rhs.1)
+        }
+        #[inline(always)]
+        fn swap(self, l: u64, r: u64, i: u32) -> Self {
+            U128(
+                ((self.0 & l) >> i) | ((self.0 & r) << i),
+                ((self.1 & l) >> i) | ((self.1 & r) << i),
+            )
+        }
+        #[inline(always)]
+        pub fn swap1(self) -> Self {
+            self.swap(0xaaaaaaaaaaaaaaaa, 0x5555555555555555, 1)
+        }
+        #[inline(always)]
+        pub fn swap2(self) -> Self {
+            self.swap(0xcccccccccccccccc, 0x3333333333333333, 2)
+        }
+        #[inline(always)]
+        pub fn swap4(self) -> Self {
+            self.swap(0xf0f0f0f0f0f0f0f0, 0x0f0f0f0f0f0f0f0f, 4)
+        }
+        #[inline(always)]
+        pub fn swap8(self) -> Self {
+            self.swap(0xff00ff00ff00ff00, 0x00ff00ff00ff00ff, 8)
+        }
+        #[inline(always)]
+        pub fn swap16(self) -> Self {
+            self.swap(0xffff0000ffff0000, 0x0000ffff0000ffff, 16)
+        }
+        #[inline(always)]
+        pub fn swap32(self) -> Self {
+            self.swap(0xffffffff00000000, 0x00000000ffffffff, 32)
+        }
+        #[inline(always)]
+        pub fn swap64(self) -> Self {
+            U128(self.1, self.0)
+        }
+    }
+    impl BitXor for U128 {
+        type Output = U128;
+        #[inline(always)]
+        fn bitxor(self, rhs: Self) -> Self::Output {
+            U128(self.0 ^ rhs.0, self.1 ^ rhs.1)
+        }
+    }
+    impl BitOr for U128 {
+        type Output = Self;
+        #[inline(always)]
+        fn bitor(self, rhs: Self) -> Self::Output {
+            U128(self.0 | rhs.0, self.1 | rhs.1)
+        }
+    }
+    impl BitAnd for U128 {
+        type Output = Self;
+        #[inline(always)]
+        fn bitand(self, rhs: Self) -> Self::Output {
+            U128(self.0 & rhs.0, self.1 & rhs.1)
+        }
+    }
+    impl BitXorAssign for U128 {
+        #[inline(always)]
+        fn bitxor_assign(&mut self, rhs: Self) {
+            *self = *self ^ rhs;
+        }
+    }
+}
+#[cfg(not(target_feature = "sse2"))]
+use generic::*;
+
+#[cfg(target_feature = "sse2")]
 mod sse2 {
     use super::*;
     #[cfg(target_arch = "x86")]
