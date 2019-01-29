@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 
+use core::mem;
 use core::ops::{BitAnd, BitOr, BitXor, BitXorAssign};
 use core::ptr;
 
@@ -48,7 +49,7 @@ const E8_BITSLICE_ROUNDCONSTANT: [[u8; 32]; 42] = [
     hex!("35b49831db411570ea1e0fbbedcd549b9ad063a151974072f6759dbf91476fe2"),
 ];
 
-#[rustfmt::skip]
+#[cfg_attr(rustfmt, rustfmt::skip)]
 macro_rules! unroll7 {
     ($j:ident, $body:block) => {
         { const $j: usize = 0; $body }
@@ -61,7 +62,7 @@ macro_rules! unroll7 {
     };
 }
 
-#[cfg(not(target_feature = "sse2"))]
+#[cfg(not(all(feature = "simd", target_feature = "sse2")))]
 mod generic {
     use super::*;
     #[repr(C)]
@@ -140,10 +141,10 @@ mod generic {
         }
     }
 }
-#[cfg(not(target_feature = "sse2"))]
-use generic::*;
+#[cfg(not(all(feature = "simd", target_feature = "sse2")))]
+use self::generic::*;
 
-#[cfg(target_feature = "sse2")]
+#[cfg(all(feature = "simd", target_feature = "sse2"))]
 mod sse2 {
     use super::*;
     #[cfg(target_arch = "x86")]
@@ -268,8 +269,8 @@ mod sse2 {
         }
     }
 }
-#[cfg(target_feature = "sse2")]
-use sse2::*;
+#[cfg(all(feature = "simd", target_feature = "sse2"))]
+use self::sse2::*;
 
 #[cfg(not(all(feature = "avx2", target_feature = "avx2")))]
 mod single_channel {
@@ -318,7 +319,7 @@ mod single_channel {
     }
 }
 #[cfg(not(all(feature = "avx2", target_feature = "avx2")))]
-use single_channel::X2;
+use self::single_channel::X2;
 
 #[cfg(all(feature = "avx2", target_feature = "avx2"))]
 mod double_channel {
@@ -375,7 +376,7 @@ mod double_channel {
     }
 }
 #[cfg(all(feature = "avx2", target_feature = "avx2"))]
-use double_channel::X2;
+use self::double_channel::X2;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -428,14 +429,14 @@ unsafe fn l(mut y: X8) -> X8 {
     y
 }
 
-pub unsafe fn f8(state: &mut X8, data: *const U128) {
-    let mut y = *state;
+pub unsafe fn f8(state: *mut X8, data: *const U128) {
+    let mut y = ptr::read_unaligned(state);
     y.0 ^= ptr::read_unaligned(data);
     y.1 ^= ptr::read_unaligned(data.offset(1));
     y.2 ^= ptr::read_unaligned(data.offset(2));
     y.3 ^= ptr::read_unaligned(data.offset(3));
-    let roundconst: [X2; 42] = core::mem::transmute(E8_BITSLICE_ROUNDCONSTANT);
-    for rc in roundconst.chunks_exact(7) {
+    let roundconst: [X2; 42] = mem::transmute(E8_BITSLICE_ROUNDCONSTANT);
+    for rc in roundconst.chunks(7) {
         unroll7!(j, {
             y = ss(y, rc[j]);
             y = l(y);
@@ -456,5 +457,5 @@ pub unsafe fn f8(state: &mut X8, data: *const U128) {
     y.5 ^= ptr::read_unaligned(data.offset(1));
     y.6 ^= ptr::read_unaligned(data.offset(2));
     y.7 ^= ptr::read_unaligned(data.offset(3));
-    *state = y;
+    ptr::write_unaligned(state, y);
 }

@@ -8,7 +8,6 @@ documentation = "https://docs.rs/jh"
 keywords = ["crypto", "jh", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 repository = "https://github.com/RustCrypto/hashes"
-edition = "2018"
 
 [dependencies]
 block-buffer = "0.7"
@@ -22,3 +21,4 @@ digest = { version = "0.8", features = ["dev"] }
 default = ["std"]
 std = []
 avx2 = []
+simd = ["avx2"]

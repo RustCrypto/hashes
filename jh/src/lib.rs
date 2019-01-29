@@ -7,6 +7,7 @@
 pub extern crate digest;
 #[macro_use]
 extern crate hex_literal;
+extern crate block_buffer;
 
 pub use digest::Digest;
 
@@ -21,7 +22,6 @@ mod compressor;
 mod consts;
 
 #[derive(Clone)]
-#[repr(C, align(16))]
 struct State([u8; 128]);
 
 impl State {
