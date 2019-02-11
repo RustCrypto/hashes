@@ -22,6 +22,7 @@ BLAKE2, SHA-2 or SHA-3.
 | [MD4](https://en.wikipedia.org/wiki/MD4) |    | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) |  [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | :broken_heart: |
 | [MD5](https://en.wikipedia.org/wiki/MD5) [:exclamation:](#crate-names) |   | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | :broken_heart: |
 | [RIPEMD-160](https://en.wikipedia.org/wiki/RIPEMD) |    | [![crates.io](https://img.shields.io/crates/v/ripemd160.svg)](https://crates.io/crates/ripemd160) |  [![Documentation](https://docs.rs/ripemd160/badge.svg)](https://docs.rs/ripemd160) | :green_heart: |
+| [RIPEMD-320](https://en.wikipedia.org/wiki/RIPEMD) |    | [![crates.io](https://img.shields.io/crates/v/ripemd320.svg)](https://crates.io/crates/ripemd320) |  [![Documentation](https://docs.rs/ripemd320/badge.svg)](https://docs.rs/ripemd320) | :green_heart:* |
 | [SHA-1](https://en.wikipedia.org/wiki/SHA-1) [:exclamation:](#crate-names) |    | [![crates.io](https://img.shields.io/crates/v/sha-1.svg)](https://crates.io/crates/sha-1) | [![Documentation](https://docs.rs/sha-1/badge.svg)](https://docs.rs/sha-1) | :broken_heart: |
 | [SHA-2](https://en.wikipedia.org/wiki/SHA-2) |    | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) |  [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | :green_heart: |
 | [SHA-3](https://en.wikipedia.org/wiki/SHA-3) |  Keccak  | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) |  [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | :green_heart: |
@@ -29,6 +30,7 @@ BLAKE2, SHA-2 or SHA-3.
 | [Whirlpool](https://en.wikipedia.org/wiki/Whirlpool_(cryptography)) |    | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) |  [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | :green_heart: |
 
 [Security Level]: https://en.wikipedia.org/wiki/Hash_function_security_summary
+\* RIPEMD-320 provides only the same security as RIPEMD-160
 
 ### Security Level Legend
 
