@@ -76,7 +76,7 @@ impl EngineState {
     }
 
     #[inline]
-    unsafe fn perm(&mut self, m: &[u32; 16]) {
+    fn perm(&mut self, m: &[u32; 16]) {
         for b in self.b.iter_mut() {
             *b = b.wrapping_shl(17) | b.wrapping_shr(15);
         }
@@ -162,7 +162,7 @@ impl EngineState {
     }
 
     #[inline]
-    unsafe fn perm_blocks(&mut self, m: &[u32; 16]) {
+    fn perm_blocks(&mut self, m: &[u32; 16]) {
         self.perm_elt(0, 11, 0, 13, 9, 6, 8, m[0]);
         self.perm_elt(1, 0, 1, 14, 10, 7, 7, m[1]);
         self.perm_elt(2, 1, 2, 15, 11, 8, 6, m[2]);
@@ -484,7 +484,7 @@ fn compress(state: &mut EngineState, input: &[u8; 64]) {
     let m = read_m(input);
     state.add_m(&m);
     state.xor_w();
-    unsafe { state.perm(&m) };
+    state.perm(&m);
     state.sub_m(&m);
     state.swap_b_c();
     state.inc_w();
@@ -494,10 +494,10 @@ fn compress_final(state: &mut EngineState, input: &[u8; 64]) {
     let m = read_m(input);
     state.add_m(&m);
     state.xor_w();
-    unsafe { state.perm(&m) };
+    state.perm(&m);
     for _ in 0..3 {
         state.swap_b_c();
         state.xor_w();
-        unsafe { state.perm(&m) };
+        state.perm(&m);
     }
 }
