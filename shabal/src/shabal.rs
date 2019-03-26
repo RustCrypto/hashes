@@ -3,9 +3,8 @@ use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U24, U28, U32, U48, U64};
 use digest::generic_array::GenericArray;
-pub use digest::{impl_write, Digest};
+pub use digest::Digest;
 use digest::{BlockInput, FixedOutput, Input, Reset};
-use opaque_debug::impl_opaque_debug;
 
 use consts::{
     A_INIT_192, A_INIT_224, A_INIT_256, A_INIT_384, A_INIT_512, B_INIT_192, B_INIT_224, B_INIT_256,
@@ -215,7 +214,7 @@ impl EngineState {
 
     #[inline]
     fn swap_b_c(&mut self) {
-        core::mem::swap(&mut self.b, &mut self.c);
+        ::core::mem::swap(&mut self.b, &mut self.c);
     }
 }
 
