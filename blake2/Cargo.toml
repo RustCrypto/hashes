@@ -12,7 +12,7 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 digest = "0.8"
 byte-tools = "0.3"
-byteorder = "1"
+byteorder = { version = "1", default-features = false }
 crypto-mac = "0.7"
 opaque-debug = "0.2"
 
@@ -23,7 +23,7 @@ hex-literal = "0.1"
 
 [features]
 default = ["std"]
-std = ["digest/std", "crypto-mac/std"]
+std = ["digest/std", "byteorder/std", "crypto-mac/std"]
 simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
