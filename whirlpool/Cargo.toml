@@ -1,6 +1,6 @@
 [package]
 name = "whirlpool-asm"
-version = "0.5.1"
+version = "0.5.2"
 authors = ["RustCrypto Developers"]
 license = "MIT"
 description = "Assembly implementation of Whirlpool compression function"

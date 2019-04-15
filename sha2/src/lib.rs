@@ -9,6 +9,8 @@
 //! [1]: https://en.wikipedia.org/wiki/SHA-2
 
 #![no_std]
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
+compile_error!("crate can only be used on x86 and x86-64 architectures");
 
 #[link(name="sha256", kind="static")]
 extern "C" {
