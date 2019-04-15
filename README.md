@@ -51,7 +51,7 @@ a minor version bump.
 ### Crate names
 
 Whenever possible crates are published under the the same name as the crate
-folder. Owners of `md5` and `sha1` crates refused
+folder. Owners of `md5` and `sha1` crates declined
 ([1](https://github.com/stainless-steel/md5/pull/2),
 [2](https://github.com/mitsuhiko/rust-sha1/issues/17)) to participate in this
 project. This is why crates marked by :exclamation: are published under
