@@ -1,8 +1,9 @@
 macro_rules! impl_state {
-    ($state:ident, $rate:ident, $padding:ty) => {
+    ($(#[$meta:meta])* $state:ident, $rate:ident, $padding:ty) => {
 
         #[allow(non_camel_case_types)]
         #[derive(Clone, Default)]
+        $(#[$meta])*
         pub struct $state {
             state: Sha3State,
             buffer: BlockBuffer<$rate>,
@@ -24,9 +25,9 @@ macro_rules! impl_state {
 }
 
 macro_rules! sha3_impl {
-    ($state:ident, $output_size:ident, $rate:ident, $padding:ty) => {
+    ($(#[$meta:meta])* $state:ident, $output_size:ident, $rate:ident, $padding:ty) => {
 
-        impl_state!($state, $rate, $padding);
+        impl_state!($(#[$meta])* $state, $rate, $padding);
 
         impl BlockInput for $state {
             type BlockSize = $rate;
