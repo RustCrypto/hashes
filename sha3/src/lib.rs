@@ -68,17 +68,17 @@ mod state;
 pub use reader::Sha3XofReader;
 use state::Sha3State;
 
-sha3_impl!(Keccak224, U28, U144, paddings::Keccak);
-sha3_impl!(Keccak256, U32, U136, paddings::Keccak);
-sha3_impl!(Keccak384, U48, U104, paddings::Keccak);
-sha3_impl!(Keccak512, U64, U72, paddings::Keccak);
+sha3_impl!(Keccak224, U28, U144, paddings::Keccak, "");
+sha3_impl!(Keccak256, U32, U136, paddings::Keccak, "");
+sha3_impl!(Keccak384, U48, U104, paddings::Keccak, "");
+sha3_impl!(Keccak512, U64, U72, paddings::Keccak, "");
 
-sha3_impl!(#[doc="SHA-3 variant used in CryptoNight."] Keccak256Full, U200, U136, paddings::Keccak);
+sha3_impl!(Keccak256Full, U200, U136, paddings::Keccak, "SHA-3 variant used in CryptoNight.");
 
-sha3_impl!(Sha3_224, U28, U144, paddings::Sha3);
-sha3_impl!(Sha3_256, U32, U136, paddings::Sha3);
-sha3_impl!(Sha3_384, U48, U104, paddings::Sha3);
-sha3_impl!(Sha3_512, U64, U72, paddings::Sha3);
+sha3_impl!(Sha3_224, U28, U144, paddings::Sha3, "");
+sha3_impl!(Sha3_256, U32, U136, paddings::Sha3, "");
+sha3_impl!(Sha3_384, U48, U104, paddings::Sha3, "");
+sha3_impl!(Sha3_512, U64, U72, paddings::Sha3, "");
 
-shake_impl!(Shake128, U168, paddings::Shake);
-shake_impl!(Shake256, U136, paddings::Shake);
+shake_impl!(Shake128, U168, paddings::Shake, "");
+shake_impl!(Shake256, U136, paddings::Shake, "");
