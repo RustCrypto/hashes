@@ -1,8 +1,9 @@
 macro_rules! impl_state {
-    ($state:ident, $rate:ident, $padding:ty) => {
+    ($state:ident, $rate:ident, $padding:ty, $doc:expr) => {
 
         #[allow(non_camel_case_types)]
         #[derive(Clone, Default)]
+        #[doc=$doc]
         pub struct $state {
             state: Sha3State,
             buffer: BlockBuffer<$rate>,
@@ -24,9 +25,9 @@ macro_rules! impl_state {
 }
 
 macro_rules! sha3_impl {
-    ($state:ident, $output_size:ident, $rate:ident, $padding:ty) => {
+    ($state:ident, $output_size:ident, $rate:ident, $padding:ty, $doc:expr) => {
 
-        impl_state!($state, $rate, $padding);
+        impl_state!($state, $rate, $padding, $doc);
 
         impl BlockInput for $state {
             type BlockSize = $rate;
@@ -66,8 +67,8 @@ macro_rules! sha3_impl {
 }
 
 macro_rules! shake_impl {
-    ($state:ident, $rate:ident, $padding:ty) => {
-        impl_state!($state, $rate, $padding);
+    ($state:ident, $rate:ident, $padding:ty, $doc:expr) => {
+        impl_state!($state, $rate, $padding, $doc);
 
         impl Input for $state {
             fn input<B: AsRef<[u8]>>(&mut self, input: B) {
