@@ -12,5 +12,6 @@ members = [
     "sha2",
     "sha3",
     "streebog",
+    "ring-digest",
     "whirlpool",
 ]
