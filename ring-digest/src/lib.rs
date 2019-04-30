@@ -1,8 +1,12 @@
-#[macro_use] pub extern crate digest;
+#![no_std]
+
+#[cfg(feature = "std")]
+#[macro_use] extern crate std;
 #[macro_use] extern crate opaque_debug;
+#[macro_use] pub extern crate digest;
 extern crate ring;
 
-use std::mem;
+use core::mem;
 
 pub use digest::Digest;
 use digest::{
@@ -70,5 +74,5 @@ impl_digest!(
 );
 impl_digest!(
     /// Structure representing the state of a SHA-512/256 computation
-    Sha512_256, SHA512_256, U32
+    Sha512Trunc256, SHA512_256, U32
 );

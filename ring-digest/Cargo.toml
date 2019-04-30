@@ -6,13 +6,17 @@ license = "MIT OR Apache-2.0"
 description = "RIPEMD-160 hash function"
 documentation = "https://docs.rs/ring-digest"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "ring", "hash", "digest", "sha1", "sha2", "SHA-1", "SHA-256", "SHA-384", "SHA-512", "SHA-512/256"]
+keywords = ["crypto", "hash", "digest", "sha1", "sha2"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "0.8", features = ["std"] }
+digest = "0.8"
 opaque-debug = "0.2"
-ring = "0.14"
+ring = { version = "0.14", default-features = false }
+
+[dev-dependencies]
+digest = { version = "0.8", features = ["dev"] }
+hex-literal = "0.1"
 
 [features]
 default = ["std"]
