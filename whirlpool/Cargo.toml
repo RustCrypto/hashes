@@ -18,7 +18,7 @@ whirlpool-asm = { version="0.5", optional=true }
 
 [dev-dependencies]
 digest = { version = "0.8", features = ["dev"] }
-hex-literal = "0.1"
+hex-literal = "0.2"
 
 [features]
 default = ["std"]
