@@ -9,13 +9,13 @@ repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "tiger", "hash", "digest"]
 
 [dependencies]
-digest = "0.7"
-#block-buffer = "0.3"
-block-buffer = { git = "https://github.com/jmcomets/utils.git", branch = "len_padding_with" }
+digest = "0.8"
+block-buffer = "0.7"
 byte-tools = "0.2"
+opaque-debug = "0.2"
 
-[dev-dependencies]
-digest = { version = "^0.7.1", features = ["dev"] }
+# [dev-dependencies]
+# digest = { version = "0.8", features = ["dev"] }
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }

@@ -1,10 +1,10 @@
 //! The [Tiger][1] hash function.
 //!
-//! [1]: https://en.wikipedia.org/wiki/MD2_(cryptography)
+//! [1]: https://en.wikipedia.org/wiki/Tiger_(hash_function)
 
 #![no_std]
-#[macro_use]
-extern crate digest;
+#[macro_use] extern crate opaque_debug;
+#[macro_use] extern crate digest;
 extern crate block_buffer;
 extern crate byte_tools;
 
@@ -12,12 +12,14 @@ use core::mem;
 use core::num::Wrapping;
 
 pub use digest::Digest;
+use digest::{Input, BlockInput, FixedOutput, Reset};
 use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U24, U64};
 
 use byte_tools::{read_u64v_le, write_u64v_le};
 
-use block_buffer::BlockBuffer512;
+use block_buffer::BlockBuffer;
+use block_buffer::byteorder::BE;
 
 #[macro_use]
 mod macros;
@@ -25,38 +27,29 @@ mod consts;
 
 use consts::*;
 
-#[derive(Debug, Clone)]
-pub enum Version {
-    Tiger,
-    Tiger2,
-}
-
-impl Version {
-    fn to_prefix(&self) -> u8 {
-        match *self {
-            Version::Tiger  => 0x01,
-            Version::Tiger2 => 0x80,
-        }
-    }
-}
+type BlockSize = U64;
+type Block = GenericArray<u8, BlockSize>;
 
 #[derive(Clone)]
 pub struct Tiger {
-    buffer: BlockBuffer512,
+    buffer: BlockBuffer<U64>,
     len: u64,
     state: TigerState,
-    version: Version,
 }
 
 #[derive(Clone)]
 struct TigerState((u64, u64, u64));
 
+const A: u64 = 0x0123456789ABCDEF;
+const B: u64 = 0xFEDCBA9876543210;
+const C: u64 = 0xF096A5B4C3B2E187;
+
 impl TigerState {
     fn new() -> Self {
-        TigerState((0x0123456789ABCDEF, 0xFEDCBA9876543210, 0xF096A5B4C3B2E187))
+        TigerState((A, B, C))
     }
 
-    fn process_block(&mut self, block: &[u8; 64]) {
+    fn process_block(&mut self, block: &Block) {
         let (a, b, c) = self.0;
         let (mut a, mut b, mut c) = (Wrapping(a), Wrapping(b), Wrapping(c));
 
@@ -76,12 +69,11 @@ impl TigerState {
 }
 
 impl Tiger {
-    pub fn with_version(version: Version) -> Self {
+    pub fn new() -> Self {
         Tiger {
-            buffer: BlockBuffer512::default(),
+            buffer: BlockBuffer::default(),
             len: 0,
             state: TigerState::new(),
-            version: version,
         }
     }
 
@@ -93,23 +85,23 @@ impl Tiger {
 
     fn finalize(&mut self) {
         let self_state = &mut self.state;
-        self.buffer.len_padding_with(self.version.to_prefix(), self.len,
-                                     |blk| self_state.process_block(blk));
+        self.buffer.len64_padding::<BE, _>(self.len, |blk| self_state.process_block(blk));
     }
 }
 
 impl Default for Tiger  {
     fn default() -> Self {
-        Self::with_version(Version::Tiger)
+        Self::new()
     }
 }
 
-impl digest::BlockInput for Tiger {
+impl BlockInput for Tiger {
     type BlockSize = U64;
 }
 
-impl digest::Input for Tiger {
-    fn process(&mut self, input: &[u8]) {
+impl Input for Tiger {
+    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        let input = input.as_ref();
         self.process_block(input);
         self.len += (input.len() << 3) as u64;
     }
@@ -117,7 +109,7 @@ impl digest::Input for Tiger {
 
 type Output = GenericArray<u8, U24>;
 
-impl digest::FixedOutput for Tiger {
+impl FixedOutput for Tiger {
     type OutputSize = U24;
 
     fn fixed_result(mut self) -> Output {
@@ -132,7 +124,16 @@ impl digest::FixedOutput for Tiger {
     }
 }
 
+impl Reset for Tiger {
+    fn reset(&mut self) {
+        self.state = TigerState((A, B, C));
+        self.buffer.reset();
+        self.len = 0;
+    }
+}
+
 impl_opaque_debug!(Tiger);
+impl_write!(Tiger);
 
 #[cfg(test)]
 mod tests {
@@ -149,7 +150,7 @@ mod tests {
     }
 
     fn tiger_hash(input: &[u8]) -> Output {
-        let mut hasher = Tiger::default();
+        let mut hasher = Tiger::new();
         hasher.input(&input);
         hasher.result()
     }
