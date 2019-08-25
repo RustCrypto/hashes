@@ -1,7 +1,7 @@
 macro_rules! blake2_impl {
     (
         $state:ident, $fix_state:ident, $word:ident, $vec:ident, $bytes:ident,
-        $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr,
+        $block_size:ident, $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr,
         $vardoc:expr, $doc:expr,
     ) => {
 
@@ -237,7 +237,7 @@ macro_rules! blake2_impl {
         }
 
         impl BlockInput for $state {
-            type BlockSize = $bytes;
+            type BlockSize = $block_size;
         }
 
         impl Input for $state {
@@ -291,7 +291,7 @@ macro_rules! blake2_impl {
         }
 
         impl BlockInput for $fix_state {
-            type BlockSize = $bytes;
+            type BlockSize = $block_size;
         }
 
         impl Input for $fix_state {
