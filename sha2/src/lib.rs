@@ -89,8 +89,11 @@ extern crate std;
 #[cfg(feature = "asm-aarch64")]
 mod aarch64;
 mod consts;
+mod platform;
 mod sha256;
-#[cfg(any(not(feature = "asm"), feature = "asm-aarch64", feature = "compress"))]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+mod sha256_intrinsics;
+#[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
 mod sha256_utils;
 mod sha512;
 #[cfg(any(not(feature = "asm"), target_arch = "aarch64", feature = "compress"))]

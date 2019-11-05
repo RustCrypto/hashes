@@ -1,6 +1,7 @@
 //! SHA-256
 
 use crate::consts::{H224, H256, STATE_LEN};
+use crate::platform::Implementation;
 use block_buffer::BlockBuffer;
 use digest::impl_write;
 use digest::{
@@ -9,14 +10,12 @@ use digest::{
 };
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
-#[cfg(not(feature = "asm"))]
-use crate::sha256_utils::compress256;
-
-#[cfg(feature = "asm")]
-use sha2_asm::compress256;
-
 type BlockSize = U64;
 type Block = GenericArray<u8, BlockSize>;
+
+lazy_static::lazy_static! {
+    static ref IMPL: Implementation = Implementation::detect();
+}
 
 /// A structure that represents that state of a digest computation for the
 /// SHA-2 512 family of digest functions
@@ -33,7 +32,7 @@ impl Engine256State {
     #[cfg(not(feature = "asm-aarch64"))]
     pub fn process_block(&mut self, block: &Block) {
         let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
-        compress256(&mut self.h, block);
+        IMPL.compress256(&mut self.h, block);
     }
 
     #[cfg(feature = "asm-aarch64")]
@@ -71,14 +70,16 @@ impl Engine256 {
     fn update(&mut self, input: &[u8]) {
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += (input.len() as u64) << 3;
-        let s = &mut self.state;
-        self.buffer.input_block(input, |b| s.process_block(b));
+        let self_state = &mut self.state;
+        self.buffer
+            .input_block(input, |input| self_state.process_block(input));
     }
 
     fn finish(&mut self) {
-        let s = &mut self.state;
+        let self_state = &mut self.state;
         let l = self.len;
-        self.buffer.len64_padding_be(l, |b| s.process_block(b));
+        self.buffer
+            .len64_padding_be(l, |b| self_state.process_block(b));
     }
 
     fn reset(&mut self, h: &[u32; STATE_LEN]) {

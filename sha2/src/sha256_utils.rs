@@ -309,6 +309,7 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
 /// implemented by any CPU (at the time of this writing), and so they are
 /// emulated in this library until the instructions become more common, and gain
 ///  support in LLVM (and GCC, etc.).
+#[inline]
 pub fn compress256(state: &mut [u32; 8], block: &[u8; 64]) {
     let mut block_u32 = [0u32; BLOCK_LEN];
     for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
