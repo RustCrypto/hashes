@@ -61,12 +61,10 @@ impl StreebogState {
     }
 
     fn update_sigma(&mut self, m: &Block) {
-        let mut over = false;
+        let mut carry = 0;
         for (a, b) in self.sigma.iter_mut().zip(m.iter()) {
-            let (res, loc_over) = (*a).overflowing_add(*b);
-            *a = res;
-            if over { *a += 1; }
-            over = loc_over;
+            carry = (*a as u16) + (*b as u16) + (carry >> 8);
+            *a = (carry & 0xFF) as u8;
         }
     }
 
