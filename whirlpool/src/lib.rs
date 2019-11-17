@@ -108,8 +108,8 @@ impl Whirlpool {
             ((len >> (32 + 5)) & 0xff) as u8,
             ((len >> (24 + 5)) & 0xff) as u8,
             ((len >> (16 + 5)) & 0xff) as u8,
-            ((len >> ( 8 + 5)) & 0xff) as u8,
-            ((len >> ( 0 + 5)) & 0xff) as u8,
+            ((len >> (8 + 5)) & 0xff) as u8,
+            ((len >> (0 + 5)) & 0xff) as u8,
             ((len << 3) & 0xff) as u8,
         ];
 
@@ -128,7 +128,7 @@ impl Whirlpool {
             }
 
             carry = x > 0xff;
-            let pos = self.bit_length.len() -i - 1;
+            let pos = self.bit_length.len() - i - 1;
             self.bit_length[pos] = (x & 0xff) as u8;
         }
     }
@@ -142,7 +142,7 @@ impl Whirlpool {
 
         if pos + 1 > self.bit_length.len() {
             compress(hash, convert(buf));
-            zero(&mut buf[..=pos]);
+            zero(&mut buf[..(pos + 1)]);
         }
 
         buf[32..].copy_from_slice(&self.bit_length);
