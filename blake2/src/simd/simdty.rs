@@ -7,7 +7,7 @@
 
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
-#![cfg_attr(feature = "cargo-clippy", allow(inline_always))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::inline_always))]
 
 use as_bytes::Safe;
 

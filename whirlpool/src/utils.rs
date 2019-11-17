@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "cargo-clippy", allow(identity_op, needless_range_loop, double_parens))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::identity_op, clippy::needless_range_loop, clippy::double_parens))]
 
 use consts::*;
 use block_buffer::byteorder::{BE, ByteOrder};
@@ -16,7 +16,7 @@ pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
         state[i] = block[i] ^ k[i];
     }
 
-    for r in 1..(R + 1) {
+    for r in 1..=R {
         for i in 0..8 {
             l[i] =
                 C0[((k[(0 + i) % 8] >> 56)       ) as usize] ^

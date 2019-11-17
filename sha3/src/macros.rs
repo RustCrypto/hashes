@@ -82,8 +82,7 @@ macro_rules! shake_impl {
             fn xof_result(mut self) -> Sha3XofReader {
                 self.apply_padding();
                 let r = $rate::to_usize();
-                let res = Sha3XofReader::new(self.state.clone(), r);
-                res
+                Sha3XofReader::new(self.state.clone(), r)
             }
         }
 

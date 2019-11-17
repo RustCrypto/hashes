@@ -99,10 +99,10 @@ fn convert(block: &GenericArray<u8, U64>) -> &[u8; 64] {
 }
 
 impl Whirlpool {
-    #![cfg_attr(feature = "cargo-clippy", allow(identity_op, double_parens))]
+    #![cfg_attr(feature = "cargo-clippy", allow(clippy::identity_op, clippy::double_parens))]
     fn update_len(&mut self, len: u64) {
         let len_bits = [
-            ((len >> (56 + 5))       ) as u8,
+            (len >> (56 + 5)) as u8,
             ((len >> (48 + 5)) & 0xff) as u8,
             ((len >> (40 + 5)) & 0xff) as u8,
             ((len >> (32 + 5)) & 0xff) as u8,
@@ -142,7 +142,7 @@ impl Whirlpool {
 
         if pos + 1 > self.bit_length.len() {
             compress(hash, convert(buf));
-            zero(&mut buf[..pos+1]);
+            zero(&mut buf[..=pos]);
         }
 
         buf[32..].copy_from_slice(&self.bit_length);

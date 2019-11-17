@@ -1,6 +1,6 @@
-#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop, inline_always))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::needless_range_loop, clippy::inline_always))]
 use digest::{Input, BlockInput, FixedOutput, Reset};
-use digest::generic_array::typenum::{Unsigned, U64};
+use digest::generic_array::typenum::U64;
 use digest::generic_array::{GenericArray, ArrayLength};
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;
