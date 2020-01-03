@@ -9,8 +9,8 @@
 //! [1]: https://en.wikipedia.org/wiki/SHA-2
 
 #![no_std]
-#[cfg(not(any(target_arch = "x86_64", target_arch = "x86")))]
-compile_error!("crate can only be used on x86 and x86-64 architectures");
+#[cfg(not(any(target_arch = "x86_64", target_arch = "x86", target_arch = "aarch64")))]
+compile_error!("crate can only be used on x86, x86-64 and aarch64 architectures");
 
 #[link(name="sha256", kind="static")]
 extern "C" {
@@ -23,12 +23,14 @@ pub fn compress256(state: &mut [u32; 8], block: &[u8; 64]) {
     unsafe { sha256_compress(state, block) }
 }
 
+#[cfg(not(target_arch = "aarch64"))]
 #[link(name="sha512", kind="static")]
 extern "C" {
     fn sha512_compress(state: &mut [u64; 8], block: &[u8; 128]);
 }
 
 /// Safe wrapper around assembly implementation of SHA512 compression function
+#[cfg(not(target_arch = "aarch64"))]
 #[inline]
 pub fn compress512(state: &mut [u64; 8], block: &[u8; 128]) {
     unsafe { sha512_compress(state, block) }
