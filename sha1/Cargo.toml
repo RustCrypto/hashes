@@ -18,6 +18,7 @@ block-buffer = "0.7"
 fake-simd = "0.1"
 sha1-asm = { version = "0.4", optional = true }
 opaque-debug = "0.2"
+libc = { version = "0.2", optional = true }
 
 [dev-dependencies]
 digest = { version = "0.8", features = ["dev"] }
@@ -27,6 +28,10 @@ hex-literal = "0.1"
 default = ["std"]
 std = ["digest/std"]
 asm = ["sha1-asm"]
+
+# TODO: Remove this feature once is_aarch64_feature_detected!() is stabilised.
+# Only used on AArch64 Linux systems.
+asm-aarch64 = ["asm", "libc"]
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }
