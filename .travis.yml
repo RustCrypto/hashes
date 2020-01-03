@@ -3,8 +3,12 @@ rust:
   - stable
   - beta
   - nightly
+jobs:
+  include:
+  - arch: amd64
+    script: cargo test --verbose --all
+  - arch: arm64
+    script: cargo test --verbose --package sha1-asm --package sha2-asm
 matrix:
   allow_failures:
     - rust: nightly
-script: cargo test --verbose --all
-
