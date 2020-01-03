@@ -17,6 +17,7 @@ fn bench_compress256(b: &mut Bencher) {
     b.bytes = data.len() as u64;
 }
 
+#[cfg(not(target_arch = "aarch64"))]
 #[bench]
 fn bench_compress512(b: &mut Bencher) {
     let mut state = Default::default();
