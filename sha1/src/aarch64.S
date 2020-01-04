@@ -36,15 +36,15 @@ sha1_compress:
 	 *      16  q4        k
 	 *      16  q5        Original ABCD
 	 *      16  q6        ABCD (with s3 being A)
-	 *       4  s7        E
-	 *       4  s8        e0
-	 *       4  s9        e1
-	 *      16  q11       wk
+	 *       4  s16       E
+	 *       4  s17       e0
+	 *       4  s18       e1
+	 *      16  q19       wk
 	 */
 
 	// Load state in registers
 	ldr	q5, [x0]
-	ldr	s7, [x0, 16]
+	ldr	s16, [x0, 16]
 	mov	v6.16b, v5.16b
 
 	// Load block in registers
@@ -64,36 +64,36 @@ sha1_compress:
 	ldr	q4, [x1, #:lo12:.K0]
 
 	// 0
-	sha1h	s9, s6
-	add	v11.4s, v0.4s, v4.4s
-	sha1c	q6, s7, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v0.4s, v4.4s
+	sha1c	q6, s16, v19.4s
 	sha1su0	v0.4s, v1.4s, v2.4s
 
 	// 1
-	sha1h	s8, s6
-	add	v11.4s, v1.4s, v4.4s
-	sha1c	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v1.4s, v4.4s
+	sha1c	q6, s18, v19.4s
 	sha1su1	v0.4s, v3.4s
 	sha1su0	v1.4s, v2.4s, v3.4s
 
 	// 2
-	sha1h	s9, s6
-	add	v11.4s, v2.4s, v4.4s
-	sha1c	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v2.4s, v4.4s
+	sha1c	q6, s17, v19.4s
 	sha1su1	v1.4s, v0.4s
 	sha1su0	v2.4s, v3.4s, v0.4s
 
 	// 3
-	sha1h	s8, s6
-	add	v11.4s, v3.4s, v4.4s
-	sha1c	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v3.4s, v4.4s
+	sha1c	q6, s18, v19.4s
 	sha1su1	v2.4s, v1.4s
 	sha1su0	v3.4s, v0.4s, v1.4s
 
 	// 4
-	sha1h	s9, s6
-	add	v11.4s, v0.4s, v4.4s
-	sha1c	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v0.4s, v4.4s
+	sha1c	q6, s17, v19.4s
 	sha1su1	v3.4s, v2.4s
 	sha1su0	v0.4s, v1.4s, v2.4s
 
@@ -102,37 +102,37 @@ sha1_compress:
 	ldr	q4, [x1, #:lo12:.K1]
 
 	// 5
-	sha1h	s8, s6
-	add	v11.4s, v1.4s, v4.4s
-	sha1p	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v1.4s, v4.4s
+	sha1p	q6, s18, v19.4s
 	sha1su1	v0.4s, v3.4s
 	sha1su0	v1.4s, v2.4s, v3.4s
 
 	// 6
-	sha1h	s9, s6
-	add	v11.4s, v2.4s, v4.4s
-	sha1p	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v2.4s, v4.4s
+	sha1p	q6, s17, v19.4s
 	sha1su1	v1.4s, v0.4s
 	sha1su0	v2.4s, v3.4s, v0.4s
 
 	// 7
-	sha1h	s8, s6
-	add	v11.4s, v3.4s, v4.4s
-	sha1p	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v3.4s, v4.4s
+	sha1p	q6, s18, v19.4s
 	sha1su1	v2.4s, v1.4s
 	sha1su0	v3.4s, v0.4s, v1.4s
 
 	// 8
-	sha1h	s9, s6
-	add	v11.4s, v0.4s, v4.4s
-	sha1p	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v0.4s, v4.4s
+	sha1p	q6, s17, v19.4s
 	sha1su1	v3.4s, v2.4s
 	sha1su0	v0.4s, v1.4s, v2.4s
 
 	// 9
-	sha1h	s8, s6
-	add	v11.4s, v1.4s, v4.4s
-	sha1p	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v1.4s, v4.4s
+	sha1p	q6, s18, v19.4s
 	sha1su1	v0.4s, v3.4s
 	sha1su0	v1.4s, v2.4s, v3.4s
 
@@ -141,37 +141,37 @@ sha1_compress:
 	ldr	q4, [x1, #:lo12:.K2]
 
 	// 10
-	sha1h	s9, s6
-	add	v11.4s, v2.4s, v4.4s
-	sha1m	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v2.4s, v4.4s
+	sha1m	q6, s17, v19.4s
 	sha1su1	v1.4s, v0.4s
 	sha1su0	v2.4s, v3.4s, v0.4s
 
 	// 11
-	sha1h	s8, s6
-	add	v11.4s, v3.4s, v4.4s
-	sha1m	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v3.4s, v4.4s
+	sha1m	q6, s18, v19.4s
 	sha1su1	v2.4s, v1.4s
 	sha1su0	v3.4s, v0.4s, v1.4s
 
 	// 12
-	sha1h	s9, s6
-	add	v11.4s, v0.4s, v4.4s
-	sha1m	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v0.4s, v4.4s
+	sha1m	q6, s17, v19.4s
 	sha1su1	v3.4s, v2.4s
 	sha1su0	v0.4s, v1.4s, v2.4s
 
 	// 13
-	sha1h	s8, s6
-	add	v11.4s, v1.4s, v4.4s
-	sha1m	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v1.4s, v4.4s
+	sha1m	q6, s18, v19.4s
 	sha1su1	v0.4s, v3.4s
 	sha1su0	v1.4s, v2.4s, v3.4s
 
 	// 14
-	sha1h	s9, s6
-	add	v11.4s, v2.4s, v4.4s
-	sha1m	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v2.4s, v4.4s
+	sha1m	q6, s17, v19.4s
 	sha1su1	v1.4s, v0.4s
 	sha1su0	v2.4s, v3.4s, v0.4s
 
@@ -180,38 +180,38 @@ sha1_compress:
 	ldr	q4, [x1, #:lo12:.K3]
 
 	// 15
-	sha1h	s8, s6
-	add	v11.4s, v3.4s, v4.4s
-	sha1p	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v3.4s, v4.4s
+	sha1p	q6, s18, v19.4s
 	sha1su1	v2.4s, v1.4s
 	sha1su0	v3.4s, v0.4s, v1.4s
 
 	// 16
-	sha1h	s9, s6
-	add	v11.4s, v0.4s, v4.4s
-	sha1p	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v0.4s, v4.4s
+	sha1p	q6, s17, v19.4s
 	sha1su1	v3.4s, v2.4s
 
 	// 17
-	sha1h	s8, s6
-	add	v11.4s, v1.4s, v4.4s
-	sha1p	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v1.4s, v4.4s
+	sha1p	q6, s18, v19.4s
 
 	// 18
-	sha1h	s9, s6
-	add	v11.4s, v2.4s, v4.4s
-	sha1p	q6, s8, v11.4s
+	sha1h	s18, s6
+	add	v19.4s, v2.4s, v4.4s
+	sha1p	q6, s17, v19.4s
 
 	// 19
-	sha1h	s8, s6
-	add	v11.4s, v3.4s, v4.4s
-	sha1p	q6, s9, v11.4s
+	sha1h	s17, s6
+	add	v19.4s, v3.4s, v4.4s
+	sha1p	q6, s18, v19.4s
 
 	// Update state
 	add	v6.4s, v6.4s, v5.4s
 	str	q6, [x0]
-	add	v7.2s, v7.2s, v8.2s
-	str	s7, [x0, 16]
+	add	v16.2s, v16.2s, v17.2s
+	str	s16, [x0, 16]
 
 	ret
 .align 4
