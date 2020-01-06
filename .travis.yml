@@ -34,12 +34,8 @@ matrix:
       script:
         - cd sha1
         - cargo test --verbose --release --features asm-aarch64
-        - cargo bench --verbose
-        - cargo bench --verbose --features asm-aarch64
         - cd ../sha2
         - cargo test --verbose --release --features asm-aarch64
-        - cargo bench --verbose
-        - cargo bench --verbose --features asm-aarch64
 
 install:
   - cargo install cross || true
