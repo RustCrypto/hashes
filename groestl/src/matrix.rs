@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::needless_range_loop))]
 use core::ops::{Index, IndexMut};
 
 use digest::generic_array::{ArrayLength, GenericArray};
