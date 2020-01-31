@@ -57,6 +57,15 @@
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+
+// Give relevant error messages if the user tries to enable AArch64 asm on unsupported platforms.
+#[cfg(all(feature = "asm-aarch64", target_arch = "aarch64", not(target_os = "linux")))]
+compile_error!("Your OS isn’t yet supported for runtime-checking of AArch64 features.");
+#[cfg(all(feature = "asm-aarch64", target_os = "linux", not(target_arch = "aarch64")))]
+compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" on non-AArch64 Linux systems.");
+#[cfg(all(not(feature = "asm-aarch64"), feature = "asm", target_arch = "aarch64", target_os = "linux"))]
+compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm.");
+
 extern crate block_buffer;
 extern crate fake_simd as simd;
 #[macro_use] extern crate opaque_debug;
@@ -65,12 +74,16 @@ extern crate fake_simd as simd;
 extern crate sha2_asm;
 #[cfg(feature = "std")]
 extern crate std;
+#[cfg(feature = "asm-aarch64")]
+extern crate libc;
 
 mod consts;
-#[cfg(not(feature = "asm"))]
+#[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
 mod sha256_utils;
-#[cfg(not(feature = "asm"))]
+#[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
 mod sha512_utils;
+#[cfg(feature = "asm-aarch64")]
+mod aarch64;
 mod sha256;
 mod sha512;
 

@@ -28,6 +28,14 @@ matrix:
     - env: NAME=features-test
       rust: nightly
       script: ./test_features.sh
+    - env: NAME=test-aarch64
+      arch: arm64
+      rust: nightly
+      script:
+        - cd sha1
+        - cargo test --verbose --release --features asm-aarch64
+        - cd ../sha2
+        - cargo test --verbose --release --features asm-aarch64
 
 install:
   - cargo install cross || true

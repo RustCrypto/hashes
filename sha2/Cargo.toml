@@ -1,6 +1,6 @@
 [package]
 name = "sha2"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 description = "SHA-2 hash functions"
@@ -15,6 +15,7 @@ block-buffer = "0.7"
 fake-simd = "0.1"
 opaque-debug = "0.2"
 sha2-asm = { version="0.5", optional=true }
+libc = { version = "0.2", optional = true }
 
 [dev-dependencies]
 digest = { version = "0.8", features = ["dev"] }
@@ -24,6 +25,10 @@ hex-literal = "0.1"
 default = ["std"]
 std = ["digest/std"]
 asm = ["sha2-asm"]
+
+# TODO: Remove this feature once is_aarch64_feature_detected!() is stabilised.
+# Only used on AArch64 Linux systems.
+asm-aarch64 = ["asm", "libc"]
 
 [badges]
 travis-ci = { repository = "RustCrypto/hashes" }
