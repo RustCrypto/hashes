@@ -102,14 +102,14 @@ impl Whirlpool {
     #![cfg_attr(feature = "cargo-clippy", allow(clippy::identity_op, clippy::double_parens))]
     fn update_len(&mut self, len: u64) {
         let len_bits = [
-            (len >> (56 + 5)) as u8,
+            ( len >> (56 + 5))         as u8,
             ((len >> (48 + 5)) & 0xff) as u8,
             ((len >> (40 + 5)) & 0xff) as u8,
             ((len >> (32 + 5)) & 0xff) as u8,
             ((len >> (24 + 5)) & 0xff) as u8,
             ((len >> (16 + 5)) & 0xff) as u8,
-            ((len >> (8 + 5)) & 0xff) as u8,
-            ((len >> (0 + 5)) & 0xff) as u8,
+            ((len >> ( 8 + 5)) & 0xff) as u8,
+            ((len >> ( 0 + 5)) & 0xff) as u8,
             ((len << 3) & 0xff) as u8,
         ];
 
