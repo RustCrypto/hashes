@@ -30,7 +30,7 @@ std = ["digest/std"]
 asm = ["sha1-asm"]
 
 # TODO: Remove this feature once is_aarch64_feature_detected!() is stabilised.
-# Only used on AArch64 Linux systems.
+# Only used on AArch64 Linux systems, when built without the crypto target_feature.
 asm-aarch64 = ["asm", "libc"]
 
 [badges]

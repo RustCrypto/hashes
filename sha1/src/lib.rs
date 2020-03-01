@@ -32,10 +32,12 @@
 // Give relevant error messages if the user tries to enable AArch64 asm on unsupported platforms.
 #[cfg(all(feature = "asm-aarch64", target_arch = "aarch64", not(target_os = "linux")))]
 compile_error!("Your OS isn’t yet supported for runtime-checking of AArch64 features.");
-#[cfg(all(feature = "asm-aarch64", target_os = "linux", not(target_arch = "aarch64")))]
-compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" on non-AArch64 Linux systems.");
-#[cfg(all(not(feature = "asm-aarch64"), feature = "asm", target_arch = "aarch64", target_os = "linux"))]
-compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm.");
+#[cfg(all(feature = "asm-aarch64", not(target_arch = "aarch64")))]
+compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" on non-AArch64 systems.");
+#[cfg(all(feature = "asm-aarch64", target_arch = "aarch64", target_feature = "crypto"))]
+compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" when building for AArch64 systems with crypto extensions.");
+#[cfg(all(not(feature = "asm-aarch64"), feature = "asm", target_arch = "aarch64", not(target_feature = "crypto"), target_os = "linux"))]
+compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm detected at runtime, or build with the crypto extensions support, for instance with RUSTFLAGS='-C target-cpu=native' on a compatible CPU.");
 
 extern crate block_buffer;
 #[macro_use] extern crate opaque_debug;
