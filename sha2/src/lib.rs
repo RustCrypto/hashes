@@ -98,14 +98,12 @@ extern crate std;
 mod aarch64;
 mod consts;
 mod sha256;
-#[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
-mod sha256_utils;
+#[cfg(any(not(feature = "asm"), feature = "asm-aarch64", feature = "utils"))]
+pub mod sha256_utils;
 mod sha512;
 #[cfg(any(not(feature = "asm"), target_arch = "aarch64"))]
 mod sha512_utils;
 
 pub use digest::Digest;
 pub use sha256::{Sha224, Sha256};
-#[cfg(feature = "utils")]
-pub use sha256_utils;
 pub use sha512::{Sha384, Sha512, Sha512Trunc224, Sha512Trunc256};
