@@ -1,0 +1,8 @@
+[package]
+name = "rust_threefish"
+version = "0.0.3"
+authors = ["zerononsense"]
+description = "a rust implementation of the threefish algorithm."
+license = "unlicense"
+
+[dependencies]
