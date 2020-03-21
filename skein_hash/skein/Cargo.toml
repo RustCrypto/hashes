@@ -1,0 +1,13 @@
+[package]
+name = "skein"
+version = "0.0.2"
+authors = ["zerononsense"]
+description = "a rust implementation of the skein algorithm."
+license = "unlicense"
+
+[dependencies]
+# rust_threefish= { git = "https://www.github.com/zerononsense/rust_threefish" }
+
+# ALTERNATELY YOU CAN SPECIFY
+rust_threefish = { path = "rust_threefish" }
+# and download it your self into your project directory

@@ -1,0 +1,35 @@
+skein
+
+description
+skein is an hashing algorithm that was entered into the nist sha3 hash algorithm competition in
+2008. Although it was not the winner, it has been throughly analayzed and deemed secure enough and
+fast enough for use. the original submission had implementations in c and assembly. this is an
+implementation using rust.
+
+notes
+(1) the original specification for skein allows for data up to 2 to the 99th bits to be hashed. this
+implementation (and also the sha3 specification) only hashes up to data up to 2 to the 64th bits.
+
+(2) This algorithm uses unique block chaining shown below
+
+                             msg_n                                           msg_n+1
+           +--------------------|------------+             +--------------------|------------+
+           |  +--(adjust)<------+-------+    |             |  +--(adjust)<------+-------+    |
+           |  |   (tweak)       |       |    |             |  |   (tweak)       |       |    |
+           |  +---------+       V       V    |             |  +---------+       V       V    |
+           |            |    (copy ) (copy ) |             |            |    (copy ) (copy ) |
+           |            V       |       |    |             |            V       |       |    |
+           | [chain] [tweak]    V       V    |             | [chain] [tweak]    V       V    |
+     +------>[block] [  n  ] [buff ] [buff ] |       +------>[block] [ n+1 ] [buff ] [buff ] |
+     |     | [  n  ]    |    [msg1 ] [msg2 ] |       |     | [ n+1 ]    |    [msg1 ] [msg2 ] |
+     |     |    |       |    [  n  ] [  n  ] |       |     |    |       |    [ n+1 ] [ n+1 ] |
+     |     |    V       V       |       |    |       |     |    V       V       |       |    |
+     |     | (key schedule)     |       |    |       |     | (key schedule)     |       |    |
+     |     |       |            |       |    |       |     |       |            |       |    |
+     |     |       V            |       |    |       |     |       V            |       |    |
+     |     | [key instance n]   |       |    |       |     | [key instance n+1] |       |    |
+     |     |       |            |       |    |       |     |       |            |       |    |
+ out |     |       V            V       V    |   out |     |       V            V       V    |   out
+>put-+     | (threefish algorithm)--->(XOR)----->put-+     | (threefish algorithm)--->(XOR)----->put
+ n-1       |                                 |    n        |                                 |   n+1
+           +---------------------------------+             +---------------------------------+
