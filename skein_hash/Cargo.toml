@@ -1,0 +1,13 @@
+[package]
+name = "skein_hash"
+version = "0.0.2"
+authors = ["zerononsense"]
+description = "this library allows you to use skein as a hash algorithm"
+license = "unlicense"
+
+[dependencies]
+#skein= { git = "https://www.github.com/zerononsense/skein" }
+
+# ALTERNATELY YOU CAN SPECIFY
+skein = { path = "skein" }
+# and download it your self into your project directory
