@@ -18,7 +18,7 @@ block-buffer = "0.7"
 fake-simd = "0.1"
 sha1-asm = { version = "0.4", optional = true }
 opaque-debug = "0.2"
-libc = { version = "0.2", optional = true }
+libc = { version = "0.2.68", optional = true }
 
 [dev-dependencies]
 digest = { version = "0.8", features = ["dev"] }
