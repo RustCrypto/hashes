@@ -5,7 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-#![cfg_attr(feature = "clippy", allow(inline_always))]
+#![cfg_attr(feature = "clippy", allow(clippy::inline_always))]
 
 use simd::simdty::u32x4;
 

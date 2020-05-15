@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
 
 /// Round constants
 #[cfg(not(feature = "asm"))]

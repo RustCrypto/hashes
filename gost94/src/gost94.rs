@@ -1,5 +1,5 @@
-#![cfg_attr(feature = "cargo-clippy", allow(needless_range_loop))]
-#![cfg_attr(feature = "cargo-clippy", allow(many_single_char_names))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::needless_range_loop))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
 use digest::{Input, BlockInput, FixedOutput, Reset};
 use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;

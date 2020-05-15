@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "cargo-clippy", allow(inline_always, many_single_char_names))]
+#![cfg_attr(feature = "cargo-clippy", allow(clippy::inline_always, clippy::many_single_char_names))]
 
 use consts::RC;
 use block_buffer::byteorder::{LE, ByteOrder};
