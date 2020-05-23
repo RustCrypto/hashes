@@ -1,9 +1,12 @@
 [package]
 name = "sha2"
-version = "0.8.1"
+version = "0.8.2"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "SHA-2 hash functions"
+description = """
+Pure Rust implementation of the SHA-2 hash function family
+including SHA-224, SHA-256, SHA-384, and SHA-512.
+"""
 documentation = "https://docs.rs/sha2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha2", "hash", "digest"]
@@ -32,4 +35,5 @@ compress = []
 asm-aarch64 = ["asm", "libc"]
 
 [badges]
+maintenance = { status = "actively-developed" }
 travis-ci = { repository = "RustCrypto/hashes" }
