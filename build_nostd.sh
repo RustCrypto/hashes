@@ -6,7 +6,7 @@ DIRS=`ls -d */`
 cargo clean
 
 for DIR in $DIRS; do
-    if [ $DIR = "target/" ]
+    if [ $DIR = "target/" ] || [ $DIR = "k12/" ]
     then
         continue
     fi

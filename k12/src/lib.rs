@@ -5,7 +5,14 @@
 //!
 //! Some optimisations copied from: <https://github.com/RustCrypto/hashes/tree/master/sha3/src>
 
-use std::cmp::min;
+#![no_std]
+
+extern crate alloc;
+
+use core::cmp::min;
+
+// TODO(tarcieri): eliminate usage of `Vec`
+use alloc::vec::Vec;
 
 #[macro_use]
 mod macros {
@@ -292,7 +299,7 @@ pub fn kangaroo_twelve(
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::iter;
+    use core::iter;
 
     fn read_bytes<T: AsRef<[u8]>>(s: T) -> Vec<u8> {
         fn b(c: u8) -> u8 {
