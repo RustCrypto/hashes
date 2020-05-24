@@ -18,34 +18,62 @@ mod macros {
                     &*(slice.as_ptr() as *const [_; $len])
                 }
                 let offset = $offset;
-                let slice = & $arr[offset..offset + $len];
-                unsafe {
-                    as_array(slice)
-                }
+                let slice = &$arr[offset..offset + $len];
+                unsafe { as_array(slice) }
             }
-        }}
+        }};
     }
 
     macro_rules! REPEAT4 {
-        ($e: expr) => ( $e; $e; $e; $e; )
+        ($e: expr) => {
+            $e;
+            $e;
+            $e;
+            $e;
+        };
     }
 
     macro_rules! REPEAT5 {
-        ($e: expr) => ( $e; $e; $e; $e; $e; )
+        ($e: expr) => {
+            $e;
+            $e;
+            $e;
+            $e;
+            $e;
+        };
     }
 
     macro_rules! REPEAT6 {
-        ($e: expr) => ( $e; $e; $e; $e; $e; $e; )
+        ($e: expr) => {
+            $e;
+            $e;
+            $e;
+            $e;
+            $e;
+            $e;
+        };
     }
 
     macro_rules! REPEAT24 {
-        ($e: expr, $s: expr) => (
-            REPEAT6!({ $e; $s; });
-            REPEAT6!({ $e; $s; });
-            REPEAT6!({ $e; $s; });
-            REPEAT5!({ $e; $s; });
+        ($e: expr, $s: expr) => {
+            REPEAT6!({
+                $e;
+                $s;
+            });
+            REPEAT6!({
+                $e;
+                $s;
+            });
+            REPEAT6!({
+                $e;
+                $s;
+            });
+            REPEAT5!({
+                $e;
+                $s;
+            });
             $e;
-        )
+        };
     }
 
     macro_rules! FOR5 {
@@ -56,7 +84,7 @@ mod macros {
                 $v += $s;
             });
             $e;
-        }
+        };
     }
 }
 
@@ -78,12 +106,10 @@ mod lanes {
 
     // (0..24).map(|t| ((t+1)*(t+2)/2) % 64)
     pub const RHO: [u32; 24] = [
-        1, 3, 6, 10, 15, 21,28, 36, 45, 55, 2, 14, 27,
-        41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44
+        1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44,
     ];
     pub const PI: [usize; 24] = [
-        10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23,
-        19, 13, 12, 2, 20, 14, 22, 9, 6, 1
+        10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20, 14, 22, 9, 6, 1,
     ];
 
     pub fn keccak(lanes: &mut [u64; 25]) {
@@ -93,25 +119,28 @@ mod lanes {
         for round in 0..12 {
             // θ
             FOR5!(x, 1, {
-                c[x] = lanes[x] ^ lanes[x+5] ^ lanes[x+10] ^ lanes[x+15] ^ lanes[x+20];
+                c[x] = lanes[x] ^ lanes[x + 5] ^ lanes[x + 10] ^ lanes[x + 15] ^ lanes[x + 20];
             });
 
             FOR5!(x, 1, {
                 FOR5!(y, 5, {
-                    lanes[x + y] ^= c[(x+4)%5] ^ c[(x+1)%5].rotate_left(1);
+                    lanes[x + y] ^= c[(x + 4) % 5] ^ c[(x + 1) % 5].rotate_left(1);
                 });
             });
 
             // ρ and π
             let mut a = lanes[1];
             x = 0;
-            REPEAT24!({
-                c[0] = lanes[PI[x]];
-                lanes[PI[x]] = a.rotate_left(RHO[x]);
-            }, {
-                a = c[0];
-                x += 1;
-            });
+            REPEAT24!(
+                {
+                    c[0] = lanes[PI[x]];
+                    lanes[PI[x]] = a.rotate_left(RHO[x]);
+                },
+                {
+                    a = c[0];
+                    x += 1;
+                }
+            );
 
             // χ
             FOR5!(y, 5, {
@@ -119,7 +148,7 @@ mod lanes {
                     c[x] = lanes[x + y];
                 });
                 FOR5!(x, 1, {
-                    lanes[x + y] = c[x] ^((!c[(x+1) % 5]) & c[(x+2)%5]);
+                    lanes[x + y] = c[x] ^ ((!c[(x + 1) % 5]) & c[(x + 2) % 5]);
                 });
             });
 
@@ -130,10 +159,10 @@ mod lanes {
 }
 
 fn read_u64(bytes: &[u8; 8]) -> u64 {
-    unsafe{ *(bytes as *const [u8; 8] as *const u64) }.to_le()
+    unsafe { *(bytes as *const [u8; 8] as *const u64) }.to_le()
 }
 fn write_u64(val: u64) -> [u8; 8] {
-    unsafe{ *(&val.to_le() as *const u64 as *const [u8; 8]) }
+    unsafe { *(&val.to_le() as *const u64 as *const [u8; 8]) }
 }
 
 fn keccak(state: &mut [u8; 200]) {
@@ -141,21 +170,21 @@ fn keccak(state: &mut [u8; 200]) {
     let mut y;
     for x in 0..5 {
         FOR5!(y, 5, {
-            lanes[x + y] = read_u64(array_ref!(state, 8*(x+y), 8));
+            lanes[x + y] = read_u64(array_ref!(state, 8 * (x + y), 8));
         });
     }
     lanes::keccak(&mut lanes);
     for x in 0..5 {
         FOR5!(y, 5, {
-            let i = 8*(x+y);
-            state[i..i+8].copy_from_slice(&write_u64(lanes[x + y]));
+            let i = 8 * (x + y);
+            state[i..i + 8].copy_from_slice(&write_u64(lanes[x + y]));
         });
     }
 }
 
 fn f(input: &[u8], suffix: u8, mut output_len: usize) -> Vec<u8> {
     let mut state = [0u8; 200];
-    let max_block_size = 1344 / 8;  // r, also known as rate in bytes
+    let max_block_size = 1344 / 8; // r, also known as rate in bytes
 
     // === Absorb all the input blocks ===
     // We unroll first loop, which allows simple copy
@@ -168,7 +197,7 @@ fn f(input: &[u8], suffix: u8, mut output_len: usize) -> Vec<u8> {
         block_size = min(input.len() - offset, max_block_size);
         for i in 0..block_size {
             // TODO: is this sufficiently optimisable or better to convert to u64 first?
-            state[i] ^= input[i+offset];
+            state[i] ^= input[i + offset];
         }
         offset += block_size;
     }
@@ -181,12 +210,12 @@ fn f(input: &[u8], suffix: u8, mut output_len: usize) -> Vec<u8> {
 
     // === Do the padding and switch to the squeezing phase ===
     state[block_size] ^= suffix;
-    if ((suffix & 0x80) != 0) && (block_size == (max_block_size-1)) {
+    if ((suffix & 0x80) != 0) && (block_size == (max_block_size - 1)) {
         // TODO: condition is almost always false — in fact tests pass without
         // this block! So why is it here?
         keccak(&mut state);
     }
-    state[max_block_size-1] ^= 0x80;
+    state[max_block_size - 1] ^= 0x80;
     keccak(&mut state);
 
     // === Squeeze out all the output blocks ===
@@ -215,9 +244,11 @@ fn right_encode(mut x: usize) -> Vec<u8> {
 }
 
 /// Hash the `input` message, with the given `customization` string, to `output_len` bytes.
-pub fn kangaroo_twelve<TA: AsRef<[u8]>, TB: AsRef<[u8]>>(input: TA,
-                                                         customization: TB, output_len: usize) -> Vec<u8>
-{
+pub fn kangaroo_twelve(
+    input: impl AsRef<[u8]>,
+    customization: impl AsRef<[u8]>,
+    output_len: usize,
+) -> Vec<u8> {
     let b = 8192;
     let c = 256;
 
@@ -230,8 +261,8 @@ pub fn kangaroo_twelve<TA: AsRef<[u8]>, TB: AsRef<[u8]>>(input: TA,
     let n = (slice.len() + b - 1) / b;
     let mut slices = Vec::with_capacity(n); // Si
     for i in 0..n {
-        let ub = min((i+1)*b, slice.len());
-        slices.push(&slice[i*b .. ub]);
+        let ub = min((i + 1) * b, slice.len());
+        slices.push(&slice[i * b..ub]);
     }
 
     if n == 1 {
@@ -240,18 +271,18 @@ pub fn kangaroo_twelve<TA: AsRef<[u8]>, TB: AsRef<[u8]>>(input: TA,
     } else {
         // === Process the tree with kangaroo hopping ===
         // TODO: in parallel
-        let mut intermediate = Vec::with_capacity(n-1); // CVi
-        for i in 0..n-1 {
-            intermediate.push(f(slices[i+1], 0x0B, c/8));
+        let mut intermediate = Vec::with_capacity(n - 1); // CVi
+        for i in 0..n - 1 {
+            intermediate.push(f(slices[i + 1], 0x0B, c / 8));
         }
 
         let mut node_star = Vec::new();
         node_star.extend_from_slice(slices[0]);
-        node_star.extend_from_slice(&[3,0,0,0,0,0,0,0]);
-        for i in 0..n-1 {
+        node_star.extend_from_slice(&[3, 0, 0, 0, 0, 0, 0, 0]);
+        for i in 0..n - 1 {
             node_star.extend_from_slice(&intermediate[i][..]);
         }
-        node_star.extend_from_slice(&right_encode(n-1));
+        node_star.extend_from_slice(&right_encode(n - 1));
         node_star.extend_from_slice(b"\xFF\xFF");
 
         f(&node_star[..], 0x06, output_len)
@@ -266,9 +297,9 @@ mod test {
     fn read_bytes<T: AsRef<[u8]>>(s: T) -> Vec<u8> {
         fn b(c: u8) -> u8 {
             match c {
-                b'0' ... b'9' => c - b'0',
-                b'a' ... b'f' => c - b'a' + 10,
-                b'A' ... b'F' => c - b'A' + 10,
+                b'0'..=b'9' => c - b'0',
+                b'a'..=b'f' => c - b'a' + 10,
+                b'A'..=b'F' => c - b'A' + 10,
                 _ => unreachable!(),
             }
         }
@@ -276,9 +307,12 @@ mod test {
         let mut i = 0;
         let mut v = Vec::new();
         while i < s.len() {
-            if s[i] == b' ' || s[i] == b'\n' { i += 1; continue; }
+            if s[i] == b' ' || s[i] == b'\n' {
+                i += 1;
+                continue;
+            }
 
-            let n = b(s[i]) * 16 + b(s[i+1]);
+            let n = b(s[i]) * 16 + b(s[i + 1]);
             v.push(n);
             i += 2;
         }
@@ -288,15 +322,30 @@ mod test {
     #[test]
     fn empty() {
         // Source: reference paper
-        assert_eq!(kangaroo_twelve("", "", 32), read_bytes("1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
-                1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5"));
+        assert_eq!(
+            kangaroo_twelve("", "", 32),
+            read_bytes(
+                "1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
+                1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5"
+            )
+        );
 
-        assert_eq!(kangaroo_twelve("", "", 64), read_bytes("1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
+        assert_eq!(
+            kangaroo_twelve("", "", 64),
+            read_bytes(
+                "1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
                 1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5 42 69 c0 56 b8 c8 2e
-                48 27 60 38 b6 d2 92 96 6c c0 7a 3d 46 45 27 2e 31 ff 38 50 81 39 eb 0a 71"));
+                48 27 60 38 b6 d2 92 96 6c c0 7a 3d 46 45 27 2e 31 ff 38 50 81 39 eb 0a 71"
+            )
+        );
 
-        assert_eq!(kangaroo_twelve("", "", 10032)[10000..], read_bytes("e8 dc 56 36 42 f7 22 8c 84
-                68 4c 89 84 05 d3 a8 34 79 91 58 c0 79 b1 28 80 27 7a 1d 28 e2 ff 6d")[..]);
+        assert_eq!(
+            kangaroo_twelve("", "", 10032)[10000..],
+            read_bytes(
+                "e8 dc 56 36 42 f7 22 8c 84
+                68 4c 89 84 05 d3 a8 34 79 91 58 c0 79 b1 28 80 27 7a 1d 28 e2 ff 6d"
+            )[..]
+        );
     }
 
     #[test]
@@ -315,8 +364,11 @@ mod test {
             "84 4d 61 09 33 b1 b9 96 3c bd eb 5a e3 b6 b0 5c c7 cb d6 7c
                 ee df 88 3e b6 78 a0 a8 e0 37 16 82",
             "3c 39 07 82 a8 a4 e8 9f a6 36 7f 72 fe aa f1 32 55 c8 d9 58
-                78 48 1d 3c d8 ce 85 f5 8e 88 0a f8"];
-        for i in 0..5 /*NOTE: can be up to 7 but is slow*/ {
+                78 48 1d 3c d8 ce 85 f5 8e 88 0a f8",
+        ];
+        for i in 0..5
+        /*NOTE: can be up to 7 but is slow*/
+        {
             let len = 17usize.pow(i);
             let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
             let result = kangaroo_twelve(m, "", 32);
@@ -334,7 +386,8 @@ mod test {
             "c3 89 e5 00 9a e5 71 20 85 4c 2e 8c 64 67 0a c0 13 58 cf 4c
                 1b af 89 44 7a 72 42 34 dc 7c ed 74",
             "75 d2 f8 6a 2e 64 45 66 72 6b 4f bc fc 56 57 b9 db cf 07 0c
-                7b 0d ca 06 45 0a b2 91 d7 44 3b cf"];
+                7b 0d ca 06 45 0a b2 91 d7 44 3b cf",
+        ];
         for i in 0..4 {
             let m: Vec<u8> = iter::repeat(0xFF).take(2usize.pow(i) - 1).collect();
             let len = 41usize.pow(i);
