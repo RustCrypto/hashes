@@ -5,7 +5,7 @@ sudo: required
 matrix:
   include:
     - rust: 1.21.0
-      script: cargo test --verbose --all --release
+      script: cargo test --verbose --all --exclude k12 --release
     - rust: stable
       script: cargo test --verbose --all --release
     - rust: nightly

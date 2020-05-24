@@ -3,6 +3,7 @@ members = [
     "blake2",
     "gost94",
     "groestl",
+    "k12",
     "md2",
     "md4",
     "md5",
