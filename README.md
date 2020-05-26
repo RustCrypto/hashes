@@ -69,6 +69,14 @@ First add `blake2` crate to your `Cargo.toml`:
 blake2 = "0.8"
 ```
 
+Note that crates in this repository have an enabled by default `std` feature.
+So if you plan to use the crate in `no_std` enviroments, don't forget to disable it:
+
+```toml
+[dependencies]
+blake2 = { version="0.8", default-features = false }
+```
+
 `blake2` and other crates re-export `digest` crate and `Digest` trait for
 convenience, so you don't have to add `digest` crate as an explicit dependency.
 
