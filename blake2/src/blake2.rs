@@ -9,14 +9,14 @@ macro_rules! blake2_impl {
         use $crate::simd::{Vector4, $vec};
 
         use byteorder::{ByteOrder, LittleEndian};
-        use digest::{Input, BlockInput, FixedOutput, VariableOutput, Reset};
+        use digest::{Update, BlockInput, FixedOutput, VariableOutput, Reset};
         use digest::InvalidOutputSize;
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::{U4, Unsigned};
         use core::cmp;
         use core::ops::Div;
         use byte_tools::{copy, zero};
-        use crypto_mac::{Mac, MacResult, InvalidKeyLength};
+        use crypto_mac::{InvalidKeyLength, Mac, NewMac};
 
         type Output = GenericArray<u8, $bytes>;
 
@@ -271,8 +271,8 @@ macro_rules! blake2_impl {
             type BlockSize = $block_size;
         }
 
-        impl Input for $state {
-            fn input<B: AsRef<[u8]>>(&mut self, data: B) {
+        impl Update for $state {
+            fn update(&mut self, data: impl AsRef<[u8]>) {
                 self.update(data.as_ref());
             }
         }
@@ -333,8 +333,8 @@ macro_rules! blake2_impl {
             type BlockSize = $block_size;
         }
 
-        impl Input for $fix_state {
-            fn input<B: AsRef<[u8]>>(&mut self, data: B) {
+        impl Update for $fix_state {
+            fn update(&mut self, data: impl AsRef<[u8]>) {
                 self.state.update(data.as_ref());
             }
         }
@@ -353,8 +353,7 @@ macro_rules! blake2_impl {
             }
         }
 
-        impl Mac for $fix_state {
-            type OutputSize = $bytes;
+        impl NewMac for $fix_state {
             type KeySize = $bytes;
 
             fn new(key: &GenericArray<u8, $bytes>) -> Self {
@@ -370,15 +369,19 @@ macro_rules! blake2_impl {
                     Ok(Self { state })
                 }
             }
+        }
 
-            fn input(&mut self, data: &[u8]) { self.state.update(data); }
+        impl Mac for $fix_state {
+            type OutputSize = $bytes;
+
+            fn update(&mut self, data: &[u8]) { self.state.update(data); }
 
             fn reset(&mut self) {
                 <Self as Reset>::reset(self)
             }
 
-            fn result(self) -> MacResult<Self::OutputSize> {
-                MacResult::new(self.state.finalize_with_flag(0))
+            fn result(self) -> crypto_mac::Output<Self> {
+                crypto_mac::Output::new(self.state.finalize_with_flag(0))
             }
         }
 

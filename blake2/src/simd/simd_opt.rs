@@ -7,12 +7,13 @@
 
 #![cfg_attr(feature = "clippy", allow(clippy::inline_always))]
 
+#[allow(unused_macros)]
 #[cfg(feature = "simd")]
 macro_rules! transmute_shuffle {
     ($tmp:ident, $shuffle:ident, $vec:expr, $idx:expr) => {
         unsafe {
-            use simd::simdty::$tmp;
-            use simd::simdint::$shuffle;
+            use crate::simd::simdty::$tmp;
+            use crate::simd::simdint::$shuffle;
             use core::mem::transmute;
 
             let tmp_i: $tmp = transmute($vec);
@@ -29,7 +30,7 @@ macro_rules! transmute_shuffle {
 macro_rules! simd_opt {
     ($vec:ident) => {
         pub mod $vec {
-            use simd::simdty::$vec;
+            use crate::simd::simdty::$vec;
 
             #[inline(always)]
             pub fn rotate_right_const(vec: $vec, n: u32) -> $vec {

@@ -79,7 +79,7 @@ macro_rules! impl_vector4 {
             #[cfg(feature = "simd")]
             #[inline(always)]
             fn shuffle_left_1(self) -> Self {
-                use simd::simdint::simd_shuffle4;
+                use crate::simd::simdint::simd_shuffle4;
                 unsafe { simd_shuffle4(self, self, [1, 2, 3, 0]) }
             }
 
@@ -92,7 +92,7 @@ macro_rules! impl_vector4 {
             #[cfg(feature = "simd")]
             #[inline(always)]
             fn shuffle_left_2(self) -> Self {
-                use simd::simdint::simd_shuffle4;
+                use crate::simd::simdint::simd_shuffle4;
                 unsafe { simd_shuffle4(self, self, [2, 3, 0, 1]) }
             }
 
@@ -105,7 +105,7 @@ macro_rules! impl_vector4 {
             #[cfg(feature = "simd")]
             #[inline(always)]
             fn shuffle_left_3(self) -> Self {
-                use simd::simdint::simd_shuffle4;
+                use crate::simd::simdint::simd_shuffle4;
                 unsafe { simd_shuffle4(self, self, [3, 0, 1, 2]) }
             }
 

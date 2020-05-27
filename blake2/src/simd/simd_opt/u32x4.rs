@@ -7,7 +7,7 @@
 
 #![cfg_attr(feature = "clippy", allow(clippy::inline_always))]
 
-use simd::simdty::u32x4;
+use crate::simd::simdty::u32x4;
 
 #[cfg(feature = "simd_opt")]
 #[inline(always)]

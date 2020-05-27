@@ -5,21 +5,22 @@ description = "BLAKE2 hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
+edition = "2018"
 documentation = "https://docs.rs/blake2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.8"
+digest = { version = "= 0.9.0-pre", git = "https://github.com/RustCrypto/traits" }
 byte-tools = "0.3"
 byteorder = { version = "1", default-features = false }
-crypto-mac = "0.7"
+crypto-mac = { version = "= 0.8.0-pre", git = "https://github.com/rustcrypto/traits" }
 opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "0.8", features = ["dev"] }
-crypto-mac = { version = "0.7", features = ["dev"] }
+digest = { version = "= 0.9.0-pre", features = ["dev"], git = "https://github.com/rustcrypto/traits" }
+crypto-mac = { version = "0.8.0-pre", features = ["dev"], git = "https://github.com/rustcrypto/traits" }
 hex-literal = "0.1"
 
 [features]
