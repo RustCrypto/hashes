@@ -1,0 +1,54 @@
+name: sha1
+
+on:
+  pull_request:
+    paths:
+      - "sha1/**"
+      - "Cargo.*"
+  push:
+    branches: master
+    paths:
+      - "sha1/**"
+      - "Cargo.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - 1.41.0 # MSRV
+          - stable
+        target:
+          - thumbv7em-none-eabi
+          - wasm32-unknown-unknown
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
+          override: true
+      - run: cargo build --no-default-features --release --target ${{ matrix.target }}
+        working-directory: sha1
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - 1.41.0 # MSRV
+          - stable
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - run: cargo test --no-default-features
+        working-directory: sha1
+      - run: cargo test
+        working-directory: sha1
+      - run: cargo test --features asm
+        working-directory: sha1

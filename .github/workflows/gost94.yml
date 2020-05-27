@@ -1,0 +1,55 @@
+name: gost94
+
+on:
+  pull_request:
+    paths:
+      - "gost94/**"
+      - "Cargo.*"
+  push:
+    branches: master
+    paths:
+      - "gost94/**"
+      - "Cargo.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - 1.41.0 # MSRV
+          - stable
+        target:
+          - thumbv7em-none-eabi
+          - wasm32-unknown-unknown
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
+          override: true
+      - working-directory: gost94
+        run: cargo build --no-default-features --release --target ${{ matrix.target }}
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - 1.41.0 # MSRV
+          - stable
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - working-directory: gost94
+        run: |
+          cargo check --all-features
+          cargo test --no-default-features
+          cargo test
+          cargo test --all-features
+
