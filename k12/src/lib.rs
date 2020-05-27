@@ -12,183 +12,78 @@
 
 extern crate alloc;
 
-use core::cmp::min;
+#[macro_use]
+mod lanes;
 
 // TODO(tarcieri): eliminate usage of `Vec`
 use alloc::vec::Vec;
+use core::cmp::min;
 
-#[macro_use]
-mod macros {
-    /// Copied from `arrayref` crate
-    macro_rules! array_ref {
-        ($arr:expr, $offset:expr, $len:expr) => {{
-            {
-                #[inline]
-                unsafe fn as_array<T>(slice: &[T]) -> &[T; $len] {
-                    &*(slice.as_ptr() as *const [_; $len])
-                }
-                let offset = $offset;
-                let slice = &$arr[offset..offset + $len];
-                unsafe { as_array(slice) }
-            }
-        }};
-    }
-
-    macro_rules! REPEAT4 {
-        ($e: expr) => {
-            $e;
-            $e;
-            $e;
-            $e;
-        };
-    }
-
-    macro_rules! REPEAT5 {
-        ($e: expr) => {
-            $e;
-            $e;
-            $e;
-            $e;
-            $e;
-        };
-    }
-
-    macro_rules! REPEAT6 {
-        ($e: expr) => {
-            $e;
-            $e;
-            $e;
-            $e;
-            $e;
-            $e;
-        };
-    }
-
-    macro_rules! REPEAT24 {
-        ($e: expr, $s: expr) => {
-            REPEAT6!({
-                $e;
-                $s;
-            });
-            REPEAT6!({
-                $e;
-                $s;
-            });
-            REPEAT6!({
-                $e;
-                $s;
-            });
-            REPEAT5!({
-                $e;
-                $s;
-            });
-            $e;
-        };
-    }
-
-    macro_rules! FOR5 {
-        ($v: expr, $s: expr, $e: expr) => {
-            $v = 0;
-            REPEAT4!({
-                $e;
-                $v += $s;
-            });
-            $e;
-        };
-    }
+/// The KangarooTwelve extendable-output function (XOF).
+#[derive(Debug, Default)]
+pub struct KangarooTwelve {
+    /// Input to be processed
+    // TODO(tarcieri): don't store input in a `Vec`
+    buffer: Vec<u8>,
 }
 
-mod lanes {
-    pub const RC: [u64; 12] = [
-        0x000000008000808b,
-        0x800000000000008b,
-        0x8000000000008089,
-        0x8000000000008003,
-        0x8000000000008002,
-        0x8000000000000080,
-        0x000000000000800a,
-        0x800000008000000a,
-        0x8000000080008081,
-        0x8000000000008080,
-        0x0000000080000001,
-        0x8000000080008008,
-    ];
+impl KangarooTwelve {
+    /// Create a new [`KangarooTwelve`] instance
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-    // (0..24).map(|t| ((t+1)*(t+2)/2) % 64)
-    pub const RHO: [u32; 24] = [
-        1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44,
-    ];
-    pub const PI: [usize; 24] = [
-        10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20, 14, 22, 9, 6, 1,
-    ];
+    /// Input data into the hash function
+    pub fn input(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
+    }
 
-    pub fn keccak(lanes: &mut [u64; 25]) {
-        let mut c = [0u64; 5];
-        let (mut x, mut y): (usize, usize);
+    /// Chained input into the hash function
+    pub fn chain(mut self, bytes: &[u8]) -> Self {
+        self.input(bytes);
+        self
+    }
 
-        for round in 0..12 {
-            // θ
-            FOR5!(x, 1, {
-                c[x] = lanes[x] ^ lanes[x + 5] ^ lanes[x + 10] ^ lanes[x + 15] ^ lanes[x + 20];
-            });
+    /// Get the resulting output of the function
+    pub fn result(self, customization: impl AsRef<[u8]>, output_len: usize) -> Vec<u8> {
+        let b = 8192;
+        let c = 256;
 
-            FOR5!(x, 1, {
-                FOR5!(y, 5, {
-                    lanes[x + y] ^= c[(x + 4) % 5] ^ c[(x + 1) % 5].rotate_left(1);
-                });
-            });
+        let mut slice = Vec::new(); // S
+        slice.extend_from_slice(self.buffer.as_ref());
+        slice.extend_from_slice(customization.as_ref());
+        slice.extend_from_slice(&right_encode(customization.as_ref().len())[..]);
 
-            // ρ and π
-            let mut a = lanes[1];
-            x = 0;
-            REPEAT24!(
-                {
-                    c[0] = lanes[PI[x]];
-                    lanes[PI[x]] = a.rotate_left(RHO[x]);
-                },
-                {
-                    a = c[0];
-                    x += 1;
-                }
-            );
-
-            // χ
-            FOR5!(y, 5, {
-                FOR5!(x, 1, {
-                    c[x] = lanes[x + y];
-                });
-                FOR5!(x, 1, {
-                    lanes[x + y] = c[x] ^ ((!c[(x + 1) % 5]) & c[(x + 2) % 5]);
-                });
-            });
-
-            // ι
-            lanes[0] ^= RC[round];
+        // === Cut the input string into chunks of b bytes ===
+        let n = (slice.len() + b - 1) / b;
+        let mut slices = Vec::with_capacity(n); // Si
+        for i in 0..n {
+            let ub = min((i + 1) * b, slice.len());
+            slices.push(&slice[i * b..ub]);
         }
-    }
-}
 
-fn read_u64(bytes: &[u8; 8]) -> u64 {
-    unsafe { *(bytes as *const [u8; 8] as *const u64) }.to_le()
-}
-fn write_u64(val: u64) -> [u8; 8] {
-    unsafe { *(&val.to_le() as *const u64 as *const [u8; 8]) }
-}
+        if n == 1 {
+            // === Process the tree with only a final node ===
+            f(slices[0], 0x07, output_len)
+        } else {
+            // === Process the tree with kangaroo hopping ===
+            // TODO: in parallel
+            let mut intermediate = Vec::with_capacity(n - 1); // CVi
+            for i in 0..n - 1 {
+                intermediate.push(f(slices[i + 1], 0x0B, c / 8));
+            }
 
-fn keccak(state: &mut [u8; 200]) {
-    let mut lanes = [0u64; 25];
-    let mut y;
-    for x in 0..5 {
-        FOR5!(y, 5, {
-            lanes[x + y] = read_u64(array_ref!(state, 8 * (x + y), 8));
-        });
-    }
-    lanes::keccak(&mut lanes);
-    for x in 0..5 {
-        FOR5!(y, 5, {
-            let i = 8 * (x + y);
-            state[i..i + 8].copy_from_slice(&write_u64(lanes[x + y]));
-        });
+            let mut node_star = Vec::new();
+            node_star.extend_from_slice(slices[0]);
+            node_star.extend_from_slice(&[3, 0, 0, 0, 0, 0, 0, 0]);
+            for i in 0..n - 1 {
+                node_star.extend_from_slice(&intermediate[i][..]);
+            }
+            node_star.extend_from_slice(&right_encode(n - 1));
+            node_star.extend_from_slice(b"\xFF\xFF");
+
+            f(&node_star[..], 0x06, output_len)
+        }
     }
 }
 
@@ -241,6 +136,30 @@ fn f(input: &[u8], suffix: u8, mut output_len: usize) -> Vec<u8> {
     output
 }
 
+fn read_u64(bytes: &[u8; 8]) -> u64 {
+    unsafe { *(bytes as *const _ as *const u64) }.to_le()
+}
+fn write_u64(val: u64) -> [u8; 8] {
+    unsafe { *(&val.to_le() as *const u64 as *const _) }
+}
+
+fn keccak(state: &mut [u8; 200]) {
+    let mut lanes = [0u64; 25];
+    let mut y;
+    for x in 0..5 {
+        FOR5!(y, 5, {
+            lanes[x + y] = read_u64(array_ref!(state, 8 * (x + y), 8));
+        });
+    }
+    lanes::keccak(&mut lanes);
+    for x in 0..5 {
+        FOR5!(y, 5, {
+            let i = 8 * (x + y);
+            state[i..i + 8].copy_from_slice(&write_u64(lanes[x + y]));
+        });
+    }
+}
+
 fn right_encode(mut x: usize) -> Vec<u8> {
     let mut slice = Vec::new();
     while x > 0 {
@@ -251,52 +170,6 @@ fn right_encode(mut x: usize) -> Vec<u8> {
     let len = slice.len();
     slice.push(len as u8);
     slice
-}
-
-/// Hash the `input` message, with the given `customization` string, to `output_len` bytes.
-pub fn kangaroo_twelve(
-    input: impl AsRef<[u8]>,
-    customization: impl AsRef<[u8]>,
-    output_len: usize,
-) -> Vec<u8> {
-    let b = 8192;
-    let c = 256;
-
-    let mut slice = Vec::new(); // S
-    slice.extend_from_slice(input.as_ref());
-    slice.extend_from_slice(customization.as_ref());
-    slice.extend_from_slice(&right_encode(customization.as_ref().len())[..]);
-
-    // === Cut the input string into chunks of b bytes ===
-    let n = (slice.len() + b - 1) / b;
-    let mut slices = Vec::with_capacity(n); // Si
-    for i in 0..n {
-        let ub = min((i + 1) * b, slice.len());
-        slices.push(&slice[i * b..ub]);
-    }
-
-    if n == 1 {
-        // === Process the tree with only a final node ===
-        f(slices[0], 0x07, output_len)
-    } else {
-        // === Process the tree with kangaroo hopping ===
-        // TODO: in parallel
-        let mut intermediate = Vec::with_capacity(n - 1); // CVi
-        for i in 0..n - 1 {
-            intermediate.push(f(slices[i + 1], 0x0B, c / 8));
-        }
-
-        let mut node_star = Vec::new();
-        node_star.extend_from_slice(slices[0]);
-        node_star.extend_from_slice(&[3, 0, 0, 0, 0, 0, 0, 0]);
-        for i in 0..n - 1 {
-            node_star.extend_from_slice(&intermediate[i][..]);
-        }
-        node_star.extend_from_slice(&right_encode(n - 1));
-        node_star.extend_from_slice(b"\xFF\xFF");
-
-        f(&node_star[..], 0x06, output_len)
-    }
 }
 
 #[cfg(test)]
@@ -333,7 +206,7 @@ mod test {
     fn empty() {
         // Source: reference paper
         assert_eq!(
-            kangaroo_twelve("", "", 32),
+            KangarooTwelve::new().chain(b"").result(b"", 32),
             read_bytes(
                 "1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
                 1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5"
@@ -341,7 +214,7 @@ mod test {
         );
 
         assert_eq!(
-            kangaroo_twelve("", "", 64),
+            KangarooTwelve::new().chain(b"").result(b"", 64),
             read_bytes(
                 "1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
                 1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5 42 69 c0 56 b8 c8 2e
@@ -350,7 +223,7 @@ mod test {
         );
 
         assert_eq!(
-            kangaroo_twelve("", "", 10032)[10000..],
+            KangarooTwelve::new().chain(b"").result("", 10032)[10000..],
             read_bytes(
                 "e8 dc 56 36 42 f7 22 8c 84
                 68 4c 89 84 05 d3 a8 34 79 91 58 c0 79 b1 28 80 27 7a 1d 28 e2 ff 6d"
@@ -381,7 +254,7 @@ mod test {
         {
             let len = 17usize.pow(i);
             let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
-            let result = kangaroo_twelve(m, "", 32);
+            let result = KangarooTwelve::new().chain(&m).result("", 32);
             assert_eq!(result, read_bytes(expected[i as usize]));
         }
     }
@@ -402,7 +275,7 @@ mod test {
             let m: Vec<u8> = iter::repeat(0xFF).take(2usize.pow(i) - 1).collect();
             let len = 41usize.pow(i);
             let c: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
-            let result = kangaroo_twelve(m, c, 32);
+            let result = KangarooTwelve::new().chain(&m).result(c, 32);
             assert_eq!(result, read_bytes(expected[i as usize]));
         }
     }
