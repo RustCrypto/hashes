@@ -1,8 +1,8 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
 
-use simd::u64x2;
+use block_buffer::byteorder::{ByteOrder, BE};
 use consts::{BLOCK_LEN, K64X2};
-use block_buffer::byteorder::{BE, ByteOrder};
+use simd::u64x2;
 
 /// Not an intrinsic, but works like an unaligned load.
 #[inline]
@@ -11,9 +11,7 @@ fn sha512load(v0: u64x2, v1: u64x2) -> u64x2 {
 }
 
 /// Performs 2 rounds of the SHA-512 message schedule update.
-pub fn sha512_schedule_x2(v0: u64x2, v1: u64x2, v4to5: u64x2, v7: u64x2)
-                          -> u64x2 {
-
+pub fn sha512_schedule_x2(v0: u64x2, v1: u64x2, v4to5: u64x2, v7: u64x2) -> u64x2 {
     // sigma 0
     fn sigma0(x: u64) -> u64 {
         ((x << 63) | (x >> 1)) ^ ((x << 56) | (x >> 8)) ^ (x >> 7)
@@ -29,30 +27,39 @@ pub fn sha512_schedule_x2(v0: u64x2, v1: u64x2, v4to5: u64x2, v7: u64x2)
     let u64x2(w10, w9) = v4to5;
     let u64x2(w15, w14) = v7;
 
-    let w16 =
-        sigma1(w14).wrapping_add(w9).wrapping_add(sigma0(w1)).wrapping_add(w0);
-    let w17 =
-        sigma1(w15).wrapping_add(w10).wrapping_add(sigma0(w2)).wrapping_add(w1);
+    let w16 = sigma1(w14)
+        .wrapping_add(w9)
+        .wrapping_add(sigma0(w1))
+        .wrapping_add(w0);
+    let w17 = sigma1(w15)
+        .wrapping_add(w10)
+        .wrapping_add(sigma0(w2))
+        .wrapping_add(w1);
 
     u64x2(w17, w16)
 }
 
 /// Performs one round of the SHA-512 message block digest.
-pub fn sha512_digest_round(ae: u64x2, bf: u64x2, cg: u64x2, dh: u64x2,
-                           wk0: u64)
-                           -> u64x2 {
-
+pub fn sha512_digest_round(ae: u64x2, bf: u64x2, cg: u64x2, dh: u64x2, wk0: u64) -> u64x2 {
     macro_rules! big_sigma0 {
-        ($a:expr) => (($a.rotate_right(28) ^ $a.rotate_right(34) ^ $a.rotate_right(39)))
+        ($a:expr) => {
+            ($a.rotate_right(28) ^ $a.rotate_right(34) ^ $a.rotate_right(39))
+        };
     }
     macro_rules! big_sigma1 {
-        ($a:expr) => (($a.rotate_right(14) ^ $a.rotate_right(18) ^ $a.rotate_right(41)))
+        ($a:expr) => {
+            ($a.rotate_right(14) ^ $a.rotate_right(18) ^ $a.rotate_right(41))
+        };
     }
     macro_rules! bool3ary_202 {
-        ($a:expr, $b:expr, $c:expr) => ($c ^ ($a & ($b ^ $c)))
+        ($a:expr, $b:expr, $c:expr) => {
+            $c ^ ($a & ($b ^ $c))
+        };
     } // Choose, MD5F, SHA1C
     macro_rules! bool3ary_232 {
-        ($a:expr, $b:expr, $c:expr) => (($a & $b) ^ ($a & $c) ^ ($b & $c))
+        ($a:expr, $b:expr, $c:expr) => {
+            ($a & $b) ^ ($a & $c) ^ ($b & $c)
+        };
     } // Majority, SHA1M
 
     let u64x2(a0, e0) = ae;
@@ -66,8 +73,16 @@ pub fn sha512_digest_round(ae: u64x2, bf: u64x2, cg: u64x2, dh: u64x2,
         .wrapping_add(wk0)
         .wrapping_add(h0);
     let y0 = big_sigma0!(a0).wrapping_add(bool3ary_232!(a0, b0, c0));
-    let (a1, _, _, _, e1, _, _, _) =
-        (x0.wrapping_add(y0), a0, b0, c0, x0.wrapping_add(d0), e0, f0, g0);
+    let (a1, _, _, _, e1, _, _, _) = (
+        x0.wrapping_add(y0),
+        a0,
+        b0,
+        c0,
+        x0.wrapping_add(d0),
+        e0,
+        f0,
+        g0,
+    );
 
     u64x2(a1, e1)
 }
@@ -77,23 +92,21 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
     let k = &K64X2;
 
     macro_rules! schedule {
-        ($v0:expr, $v1:expr, $v4:expr, $v5:expr, $v7:expr) => (
-             sha512_schedule_x2($v0, $v1, sha512load($v4, $v5), $v7)
-        )
+        ($v0:expr, $v1:expr, $v4:expr, $v5:expr, $v7:expr) => {
+            sha512_schedule_x2($v0, $v1, sha512load($v4, $v5), $v7)
+        };
     }
 
     macro_rules! rounds4 {
-        ($ae:ident, $bf:ident, $cg:ident, $dh:ident, $wk0:expr, $wk1:expr) => {
-            {
-                let u64x2(u, t) = $wk0;
-                let u64x2(w, v) = $wk1;
+        ($ae:ident, $bf:ident, $cg:ident, $dh:ident, $wk0:expr, $wk1:expr) => {{
+            let u64x2(u, t) = $wk0;
+            let u64x2(w, v) = $wk1;
 
-                $dh = sha512_digest_round($ae, $bf, $cg, $dh, t);
-                $cg = sha512_digest_round($dh, $ae, $bf, $cg, u);
-                $bf = sha512_digest_round($cg, $dh, $ae, $bf, v);
-                $ae = sha512_digest_round($bf, $cg, $dh, $ae, w);
-            }
-        }
+            $dh = sha512_digest_round($ae, $bf, $cg, $dh, t);
+            $cg = sha512_digest_round($dh, $ae, $bf, $cg, u);
+            $bf = sha512_digest_round($cg, $dh, $ae, $bf, v);
+            $ae = sha512_digest_round($bf, $cg, $dh, $ae, w);
+        }};
     }
 
     let mut ae = u64x2(state[0], state[4]);
@@ -102,17 +115,13 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
     let mut dh = u64x2(state[3], state[7]);
 
     // Rounds 0..20
-    let (mut w1, mut w0) = (u64x2(block[3], block[2]),
-                            u64x2(block[1], block[0]));
+    let (mut w1, mut w0) = (u64x2(block[3], block[2]), u64x2(block[1], block[0]));
     rounds4!(ae, bf, cg, dh, k[0] + w0, k[1] + w1);
-    let (mut w3, mut w2) = (u64x2(block[7], block[6]),
-                            u64x2(block[5], block[4]));
+    let (mut w3, mut w2) = (u64x2(block[7], block[6]), u64x2(block[5], block[4]));
     rounds4!(ae, bf, cg, dh, k[2] + w2, k[3] + w3);
-    let (mut w5, mut w4) = (u64x2(block[11], block[10]),
-                            u64x2(block[9], block[8]));
+    let (mut w5, mut w4) = (u64x2(block[11], block[10]), u64x2(block[9], block[8]));
     rounds4!(ae, bf, cg, dh, k[4] + w4, k[5] + w5);
-    let (mut w7, mut w6) = (u64x2(block[15], block[14]),
-                            u64x2(block[13], block[12]));
+    let (mut w7, mut w6) = (u64x2(block[15], block[14]), u64x2(block[13], block[12]));
     rounds4!(ae, bf, cg, dh, k[6] + w6, k[7] + w7);
     let mut w8 = schedule!(w0, w1, w4, w5, w7);
     let mut w9 = schedule!(w1, w2, w5, w6, w8);

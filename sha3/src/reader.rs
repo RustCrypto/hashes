@@ -12,7 +12,11 @@ pub struct Sha3XofReader {
 
 impl Sha3XofReader {
     pub(crate) fn new(state: Sha3State, rate: usize) -> Self {
-        Sha3XofReader{ state, rate, pos: 0 }
+        Sha3XofReader {
+            state,
+            rate,
+            pos: 0,
+        }
     }
 }
 
@@ -21,7 +25,7 @@ impl XofReader for Sha3XofReader {
         let rem = self.rate - self.pos;
         let n = buffer.len();
         if n >= rem {
-            let (l, r) = {buffer}.split_at_mut(rem);
+            let (l, r) = { buffer }.split_at_mut(rem);
             buffer = r;
             self.state.as_bytes(|state| {
                 l.copy_from_slice(&state[self.pos..self.rate]);
@@ -29,14 +33,14 @@ impl XofReader for Sha3XofReader {
             self.state.apply_f();
         } else {
             self.state.as_bytes(|state| {
-                buffer.copy_from_slice(&state[self.pos..self.pos+n]);
+                buffer.copy_from_slice(&state[self.pos..self.pos + n]);
             });
             self.pos += n;
             return;
         }
 
         while buffer.len() >= self.rate {
-            let (l, r) = {buffer}.split_at_mut(self.rate);
+            let (l, r) = { buffer }.split_at_mut(self.rate);
             buffer = r;
 
             self.state.as_bytes(|state| {

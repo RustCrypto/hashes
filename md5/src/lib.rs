@@ -26,11 +26,12 @@
 //! [1]: https://en.wikipedia.org/wiki/MD5
 //! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
-#![doc(html_logo_url =
-    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 extern crate block_buffer;
-#[macro_use] extern crate opaque_debug;
-#[macro_use] pub extern crate digest;
+#[macro_use]
+extern crate opaque_debug;
+#[macro_use]
+pub extern crate digest;
 #[cfg(feature = "asm")]
 extern crate md5_asm as utils;
 #[cfg(feature = "std")]
@@ -41,13 +42,13 @@ mod utils;
 
 use utils::compress;
 
+use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
-use block_buffer::byteorder::{LE, ByteOrder};
 
-pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput, Reset};
-use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U16, U64};
+use digest::generic_array::GenericArray;
+pub use digest::Digest;
+use digest::{BlockInput, FixedOutput, Input, Reset};
 
 mod consts;
 
@@ -79,7 +80,8 @@ impl Md5 {
     fn finalize(&mut self) {
         let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer.len64_padding::<LE, _>(l, |d| compress(state, convert(d)));
+        self.buffer
+            .len64_padding::<LE, _>(l, |d| compress(state, convert(d)));
     }
 }
 
@@ -95,7 +97,8 @@ impl Input for Md5 {
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
         let self_state = &mut self.state;
-        self.buffer.input(input, |d| compress(self_state, convert(d)));
+        self.buffer
+            .input(input, |d| compress(self_state, convert(d)));
     }
 }
 

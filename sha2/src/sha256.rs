@@ -1,10 +1,10 @@
-use digest::{Input, BlockInput, FixedOutput, Reset};
-use digest::generic_array::GenericArray;
-use digest::generic_array::typenum::{U28, U32, U64};
+use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
-use block_buffer::byteorder::{BE, ByteOrder};
+use digest::generic_array::typenum::{U28, U32, U64};
+use digest::generic_array::GenericArray;
+use digest::{BlockInput, FixedOutput, Input, Reset};
 
-use consts::{STATE_LEN, H224, H256};
+use consts::{H224, H256, STATE_LEN};
 
 #[cfg(not(feature = "asm"))]
 use sha256_utils::compress256;
@@ -22,7 +22,9 @@ struct Engine256State {
 }
 
 impl Engine256State {
-    fn new(h: &[u32; STATE_LEN]) -> Engine256State { Engine256State { h: *h } }
+    fn new(h: &[u32; STATE_LEN]) -> Engine256State {
+        Engine256State { h: *h }
+    }
 
     #[cfg(not(feature = "asm-aarch64"))]
     pub fn process_block(&mut self, block: &Block) {
@@ -66,13 +68,15 @@ impl Engine256 {
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += (input.len() as u64) << 3;
         let self_state = &mut self.state;
-        self.buffer.input(input, |input| self_state.process_block(input));
+        self.buffer
+            .input(input, |input| self_state.process_block(input));
     }
 
     fn finish(&mut self) {
         let self_state = &mut self.state;
         let l = self.len;
-        self.buffer.len64_padding::<BE, _>(l, |b| self_state.process_block(b));
+        self.buffer
+            .len64_padding::<BE, _>(l, |b| self_state.process_block(b));
     }
 
     fn reset(&mut self, h: &[u32; STATE_LEN]) {
@@ -82,7 +86,6 @@ impl Engine256 {
     }
 }
 
-
 /// The SHA-256 hash algorithm with the SHA-256 initial hash value.
 #[derive(Clone)]
 pub struct Sha256 {
@@ -90,7 +93,11 @@ pub struct Sha256 {
 }
 
 impl Default for Sha256 {
-    fn default() -> Self { Sha256 { engine: Engine256::new(&H256) } }
+    fn default() -> Self {
+        Sha256 {
+            engine: Engine256::new(&H256),
+        }
+    }
 }
 
 impl BlockInput for Sha256 {
@@ -128,7 +135,11 @@ pub struct Sha224 {
 }
 
 impl Default for Sha224 {
-    fn default() -> Self { Sha224 { engine: Engine256::new(&H224) } }
+    fn default() -> Self {
+        Sha224 {
+            engine: Engine256::new(&H224),
+        }
+    }
 }
 
 impl BlockInput for Sha224 {

@@ -9,17 +9,21 @@ pub struct Matrix<R: ArrayLength<GenericArray<u8, C>>, C: ArrayLength<u8>> {
 }
 
 impl<R, C> Default for Matrix<R, C>
-    where R: ArrayLength<GenericArray<u8, C>>,
-          C: ArrayLength<u8>,
+where
+    R: ArrayLength<GenericArray<u8, C>>,
+    C: ArrayLength<u8>,
 {
     fn default() -> Self {
-        Matrix { state: GenericArray::default() }
+        Matrix {
+            state: GenericArray::default(),
+        }
     }
 }
 
 impl<R, C> Index<usize> for Matrix<R, C>
-    where R: ArrayLength<GenericArray<u8, C>>,
-          C: ArrayLength<u8>,
+where
+    R: ArrayLength<GenericArray<u8, C>>,
+    C: ArrayLength<u8>,
 {
     type Output = GenericArray<u8, C>;
 
@@ -29,8 +33,9 @@ impl<R, C> Index<usize> for Matrix<R, C>
 }
 
 impl<R, C> IndexMut<usize> for Matrix<R, C>
-    where R: ArrayLength<GenericArray<u8, C>>,
-          C: ArrayLength<u8>,
+where
+    R: ArrayLength<GenericArray<u8, C>>,
+    C: ArrayLength<u8>,
 {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.state[index]
@@ -57,8 +62,9 @@ fn poly_mul(a: u8, b: usize) -> usize {
 }
 
 impl<R, C> Matrix<R, C>
-    where R: ArrayLength<GenericArray<u8, C>>,
-          C: ArrayLength<u8>,
+where
+    R: ArrayLength<GenericArray<u8, C>>,
+    C: ArrayLength<u8>,
 {
     pub fn rows(&self) -> usize {
         R::to_usize()

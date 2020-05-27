@@ -26,20 +26,21 @@
 //! [1]: https://en.wikipedia.org/wiki/RIPEMD
 //! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
-#![doc(html_logo_url =
-    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 extern crate block_buffer;
-#[macro_use] extern crate opaque_debug;
-#[macro_use] pub extern crate digest;
+#[macro_use]
+extern crate opaque_debug;
+#[macro_use]
+pub extern crate digest;
 #[cfg(feature = "std")]
 extern crate std;
 
-pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput, Reset};
+use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
-use block_buffer::byteorder::{LE, ByteOrder};
-use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U20, U64};
+use digest::generic_array::GenericArray;
+pub use digest::Digest;
+use digest::{BlockInput, FixedOutput, Input, Reset};
 
 mod block;
 use block::{process_msg_block, DIGEST_BUF_LEN, H0};
@@ -83,7 +84,8 @@ impl FixedOutput for Ripemd160 {
         {
             let h = &mut self.h;
             let l = self.len << 3;
-            self.buffer.len64_padding::<LE, _>(l, |b| process_msg_block(h, b));
+            self.buffer
+                .len64_padding::<LE, _>(l, |b| process_msg_block(h, b));
         }
 
         let mut out = GenericArray::default();

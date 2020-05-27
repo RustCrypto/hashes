@@ -19,16 +19,17 @@ impl<T: Safe> AsBytes for [T] {
     #[inline]
     fn as_bytes(&self) -> &[u8] {
         unsafe {
-            slice::from_raw_parts(self.as_ptr() as *const u8,
-                                  self.len() * mem::size_of::<T>())
+            slice::from_raw_parts(self.as_ptr() as *const u8, self.len() * mem::size_of::<T>())
         }
     }
 
     #[inline]
     fn as_mut_bytes(&mut self) -> &mut [u8] {
         unsafe {
-            slice::from_raw_parts_mut(self.as_mut_ptr() as *mut u8,
-                                      self.len() * mem::size_of::<T>())
+            slice::from_raw_parts_mut(
+                self.as_mut_ptr() as *mut u8,
+                self.len() * mem::size_of::<T>(),
+            )
         }
     }
 }

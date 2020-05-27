@@ -36,7 +36,6 @@ pub extern crate digest;
 #[cfg(feature = "std")]
 extern crate std;
 
-
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U40, U64};

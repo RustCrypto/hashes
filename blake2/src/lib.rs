@@ -85,27 +85,25 @@
 //! [2]: https://github.com/cesarb/blake2-rfc
 
 #![no_std]
-#![doc(html_logo_url =
-    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 #![warn(missing_docs)]
-
 #![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]
 #![cfg_attr(feature = "simd_asm", feature(asm))]
 
-#[macro_use] extern crate opaque_debug;
-#[macro_use] pub extern crate digest;
-
+#[macro_use]
+extern crate opaque_debug;
+#[macro_use]
+pub extern crate digest;
 
 pub use crypto_mac;
 
 #[cfg(feature = "std")]
 extern crate std;
 
-mod consts;
 mod as_bytes;
+mod consts;
 
 mod simd;
-
 
 #[macro_use]
 mod blake2;
@@ -113,6 +111,6 @@ mod blake2;
 mod blake2b;
 mod blake2s;
 
-pub use digest::Digest;
 pub use crate::blake2b::{Blake2b, VarBlake2b};
 pub use crate::blake2s::{Blake2s, VarBlake2s};
+pub use digest::Digest;

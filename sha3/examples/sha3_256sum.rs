@@ -1,6 +1,6 @@
 extern crate sha3;
 
-use sha3::{Sha3_256, Digest};
+use sha3::{Digest, Sha3_256};
 use std::env;
 use std::fs;
 use std::io::{self, Read};

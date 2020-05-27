@@ -1,10 +1,10 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
 
+use block_buffer::byteorder::{ByteOrder, BE};
 use consts::{BLOCK_LEN, K0, K1, K2, K3};
-use block_buffer::byteorder::{BE, ByteOrder};
-use simd::u32x4;
-use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::U64;
+use digest::generic_array::GenericArray;
+use simd::u32x4;
 
 type Block = GenericArray<u8, U64>;
 
@@ -78,25 +78,31 @@ fn sha1rnds4c(abcd: u32x4, msg: u32x4) -> u32x4 {
     let mut e = 0u32;
 
     macro_rules! bool3ary_202 {
-        ($a:expr, $b:expr, $c:expr) => ($c ^ ($a & ($b ^ $c)))
+        ($a:expr, $b:expr, $c:expr) => {
+            $c ^ ($a & ($b ^ $c))
+        };
     } // Choose, MD5F, SHA1C
 
-    e = e.wrapping_add(a.rotate_left(5))
+    e = e
+        .wrapping_add(a.rotate_left(5))
         .wrapping_add(bool3ary_202!(b, c, d))
         .wrapping_add(t);
     b = b.rotate_left(30);
 
-    d = d.wrapping_add(e.rotate_left(5))
+    d = d
+        .wrapping_add(e.rotate_left(5))
         .wrapping_add(bool3ary_202!(a, b, c))
         .wrapping_add(u);
     a = a.rotate_left(30);
 
-    c = c.wrapping_add(d.rotate_left(5))
+    c = c
+        .wrapping_add(d.rotate_left(5))
         .wrapping_add(bool3ary_202!(e, a, b))
         .wrapping_add(v);
     e = e.rotate_left(30);
 
-    b = b.wrapping_add(c.rotate_left(5))
+    b = b
+        .wrapping_add(c.rotate_left(5))
         .wrapping_add(bool3ary_202!(d, e, a))
         .wrapping_add(w);
     d = d.rotate_left(30);
@@ -111,25 +117,31 @@ fn sha1rnds4p(abcd: u32x4, msg: u32x4) -> u32x4 {
     let mut e = 0u32;
 
     macro_rules! bool3ary_150 {
-        ($a:expr, $b:expr, $c:expr) => ($a ^ $b ^ $c)
+        ($a:expr, $b:expr, $c:expr) => {
+            $a ^ $b ^ $c
+        };
     } // Parity, XOR, MD5H, SHA1P
 
-    e = e.wrapping_add(a.rotate_left(5))
+    e = e
+        .wrapping_add(a.rotate_left(5))
         .wrapping_add(bool3ary_150!(b, c, d))
         .wrapping_add(t);
     b = b.rotate_left(30);
 
-    d = d.wrapping_add(e.rotate_left(5))
+    d = d
+        .wrapping_add(e.rotate_left(5))
         .wrapping_add(bool3ary_150!(a, b, c))
         .wrapping_add(u);
     a = a.rotate_left(30);
 
-    c = c.wrapping_add(d.rotate_left(5))
+    c = c
+        .wrapping_add(d.rotate_left(5))
         .wrapping_add(bool3ary_150!(e, a, b))
         .wrapping_add(v);
     e = e.rotate_left(30);
 
-    b = b.wrapping_add(c.rotate_left(5))
+    b = b
+        .wrapping_add(c.rotate_left(5))
         .wrapping_add(bool3ary_150!(d, e, a))
         .wrapping_add(w);
     d = d.rotate_left(30);
@@ -144,25 +156,31 @@ fn sha1rnds4m(abcd: u32x4, msg: u32x4) -> u32x4 {
     let mut e = 0u32;
 
     macro_rules! bool3ary_232 {
-        ($a:expr, $b:expr, $c:expr) => (($a & $b) ^ ($a & $c) ^ ($b & $c))
+        ($a:expr, $b:expr, $c:expr) => {
+            ($a & $b) ^ ($a & $c) ^ ($b & $c)
+        };
     } // Majority, SHA1M
 
-    e = e.wrapping_add(a.rotate_left(5))
+    e = e
+        .wrapping_add(a.rotate_left(5))
         .wrapping_add(bool3ary_232!(b, c, d))
         .wrapping_add(t);
     b = b.rotate_left(30);
 
-    d = d.wrapping_add(e.rotate_left(5))
+    d = d
+        .wrapping_add(e.rotate_left(5))
         .wrapping_add(bool3ary_232!(a, b, c))
         .wrapping_add(u);
     a = a.rotate_left(30);
 
-    c = c.wrapping_add(d.rotate_left(5))
+    c = c
+        .wrapping_add(d.rotate_left(5))
         .wrapping_add(bool3ary_232!(e, a, b))
         .wrapping_add(v);
     e = e.rotate_left(30);
 
-    b = b.wrapping_add(c.rotate_left(5))
+    b = b
+        .wrapping_add(c.rotate_left(5))
         .wrapping_add(bool3ary_232!(d, e, a))
         .wrapping_add(w);
     d = d.rotate_left(30);
@@ -172,17 +190,16 @@ fn sha1rnds4m(abcd: u32x4, msg: u32x4) -> u32x4 {
 
 /// Process a block with the SHA-1 algorithm.
 fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
-
     macro_rules! schedule {
-        ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => (
+        ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => {
             sha1msg2(sha1msg1($v0, $v1) ^ $v2, $v3)
-        )
+        };
     }
 
     macro_rules! rounds4 {
-        ($h0:ident, $h1:ident, $wk:expr, $i:expr) => (
+        ($h0:ident, $h1:ident, $wk:expr, $i:expr) => {
             sha1_digest_round_x4($h0, sha1_first_half($h1, $wk), $i)
-        )
+        };
     }
 
     // Rounds 0..20

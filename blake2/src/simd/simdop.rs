@@ -5,8 +5,9 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
+#[cfg(feature = "simd")]
+use crate::simd::simdint;
 use crate::simd::simdty::{u32x4, u64x4};
-#[cfg(feature = "simd")] use crate::simd::simdint;
 
 use core::ops::{Add, BitXor, Shl, Shr};
 
@@ -24,10 +25,12 @@ macro_rules! impl_ops {
             #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn add(self, rhs: Self) -> Self::Output {
-                $vec::new(self.0.wrapping_add(rhs.0),
-                          self.1.wrapping_add(rhs.1),
-                          self.2.wrapping_add(rhs.2),
-                          self.3.wrapping_add(rhs.3))
+                $vec::new(
+                    self.0.wrapping_add(rhs.0),
+                    self.1.wrapping_add(rhs.1),
+                    self.2.wrapping_add(rhs.2),
+                    self.3.wrapping_add(rhs.3),
+                )
             }
         }
 
@@ -43,10 +46,12 @@ macro_rules! impl_ops {
             #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn bitxor(self, rhs: Self) -> Self::Output {
-                $vec::new(self.0 ^ rhs.0,
-                          self.1 ^ rhs.1,
-                          self.2 ^ rhs.2,
-                          self.3 ^ rhs.3)
+                $vec::new(
+                    self.0 ^ rhs.0,
+                    self.1 ^ rhs.1,
+                    self.2 ^ rhs.2,
+                    self.3 ^ rhs.3,
+                )
             }
         }
 
@@ -62,10 +67,12 @@ macro_rules! impl_ops {
             #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn shl(self, rhs: Self) -> Self::Output {
-                $vec::new(self.0 << rhs.0,
-                          self.1 << rhs.1,
-                          self.2 << rhs.2,
-                          self.3 << rhs.3)
+                $vec::new(
+                    self.0 << rhs.0,
+                    self.1 << rhs.1,
+                    self.2 << rhs.2,
+                    self.3 << rhs.3,
+                )
             }
         }
 
@@ -81,13 +88,15 @@ macro_rules! impl_ops {
             #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn shr(self, rhs: Self) -> Self::Output {
-                $vec::new(self.0 >> rhs.0,
-                          self.1 >> rhs.1,
-                          self.2 >> rhs.2,
-                          self.3 >> rhs.3)
+                $vec::new(
+                    self.0 >> rhs.0,
+                    self.1 >> rhs.1,
+                    self.2 >> rhs.2,
+                    self.3 >> rhs.3,
+                )
             }
         }
-    }
+    };
 }
 
 impl_ops!(u32x4);

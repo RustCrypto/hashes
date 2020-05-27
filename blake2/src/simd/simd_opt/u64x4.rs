@@ -16,7 +16,7 @@ pub fn rotate_right_const(vec: u64x4, n: u32) -> u64x4 {
         32 => rotate_right_32(vec),
         24 => rotate_right_24(vec),
         16 => rotate_right_16(vec),
-         _ => rotate_right_any(vec, n),
+        _ => rotate_right_any(vec, n),
     }
 }
 
@@ -39,11 +39,7 @@ fn rotate_right_any(vec: u64x4, n: u32) -> u64x4 {
 fn rotate_right_32(vec: u64x4) -> u64x4 {
     if cfg!(any(target_feature = "sse2", target_feature = "neon")) {
         // 2 x pshufd (SSE2) / vpshufd (AVX2) / 2 x vrev (NEON)
-        transmute_shuffle!(u32x8, simd_shuffle8, vec,
-                           [1, 0,
-                            3, 2,
-                            5, 4,
-                            7, 6])
+        transmute_shuffle!(u32x8, simd_shuffle8, vec, [1, 0, 3, 2, 5, 4, 7, 6])
     } else {
         rotate_right_any(vec, 32)
     }
@@ -52,18 +48,24 @@ fn rotate_right_32(vec: u64x4) -> u64x4 {
 #[cfg(feature = "simd_opt")]
 #[inline(always)]
 fn rotate_right_24(vec: u64x4) -> u64x4 {
-    if cfg!(all(feature = "simd_asm",
-                target_feature = "neon",
-                target_arch = "arm")) {
+    if cfg!(all(
+        feature = "simd_asm",
+        target_feature = "neon",
+        target_arch = "arm"
+    )) {
         // 4 x vext (NEON)
         rotate_right_vext(vec, 3)
     } else if cfg!(target_feature = "ssse3") {
         // 2 x pshufb (SSSE3) / vpshufb (AVX2)
-        transmute_shuffle!(u8x32, simd_shuffle32, vec,
-                           [ 3,  4,  5,  6,  7,  0,  1,  2,
-                            11, 12, 13, 14, 15,  8,  9, 10,
-                            19, 20, 21, 22, 23, 16, 17, 18,
-                            27, 28, 29, 30, 31, 24, 25, 26])
+        transmute_shuffle!(
+            u8x32,
+            simd_shuffle32,
+            vec,
+            [
+                3, 4, 5, 6, 7, 0, 1, 2, 11, 12, 13, 14, 15, 8, 9, 10, 19, 20, 21, 22, 23, 16, 17,
+                18, 27, 28, 29, 30, 31, 24, 25, 26
+            ]
+        )
     } else {
         rotate_right_any(vec, 24)
     }
@@ -72,33 +74,38 @@ fn rotate_right_24(vec: u64x4) -> u64x4 {
 #[cfg(feature = "simd_opt")]
 #[inline(always)]
 fn rotate_right_16(vec: u64x4) -> u64x4 {
-    if cfg!(all(feature = "simd_asm",
-                target_feature = "neon",
-                target_arch = "arm")) {
+    if cfg!(all(
+        feature = "simd_asm",
+        target_feature = "neon",
+        target_arch = "arm"
+    )) {
         // 4 x vext (NEON)
         rotate_right_vext(vec, 2)
     } else if cfg!(target_feature = "ssse3") {
         // 2 x pshufb (SSSE3) / vpshufb (AVX2)
-        transmute_shuffle!(u8x32, simd_shuffle32, vec,
-                           [ 2,  3,  4,  5,  6,  7,  0,  1,
-                            10, 11, 12, 13, 14, 15,  8,  9,
-                            18, 19, 20, 21, 22, 23, 16, 17,
-                            26, 27, 28, 29, 30, 31, 24, 25])
+        transmute_shuffle!(
+            u8x32,
+            simd_shuffle32,
+            vec,
+            [
+                2, 3, 4, 5, 6, 7, 0, 1, 10, 11, 12, 13, 14, 15, 8, 9, 18, 19, 20, 21, 22, 23, 16,
+                17, 26, 27, 28, 29, 30, 31, 24, 25
+            ]
+        )
     } else if cfg!(target_feature = "sse2") {
         // 2 x pshuflw+pshufhw (SSE2)
-        transmute_shuffle!(u16x16, simd_shuffle16, vec,
-                           [ 1,  2,  3,  0,
-                             5,  6,  7,  4,
-                             9, 10, 11,  8,
-                            13, 14, 15, 12])
+        transmute_shuffle!(
+            u16x16,
+            simd_shuffle16,
+            vec,
+            [1, 2, 3, 0, 5, 6, 7, 4, 9, 10, 11, 8, 13, 14, 15, 12]
+        )
     } else {
         rotate_right_any(vec, 16)
     }
 }
 
-#[cfg(all(feature = "simd_asm",
-          target_feature = "neon",
-          target_arch = "arm"))]
+#[cfg(all(feature = "simd_asm", target_feature = "neon", target_arch = "arm"))]
 mod simd_asm_neon_arm {
     use crate::simd::simdty::{u64x2, u64x4};
 
@@ -125,13 +132,11 @@ mod simd_asm_neon_arm {
     }
 }
 
-#[cfg(all(feature = "simd_asm",
-          target_feature = "neon",
-          target_arch = "arm"))]
+#[cfg(all(feature = "simd_asm", target_feature = "neon", target_arch = "arm"))]
 use self::simd_asm_neon_arm::rotate_right_vext;
 
 #[cfg(feature = "simd_opt")]
-#[cfg(not(all(feature = "simd_asm",
-              target_feature = "neon",
-              target_arch = "arm")))]
-fn rotate_right_vext(_vec: u64x4, _n: u8) -> u64x4 { unreachable!() }
+#[cfg(not(all(feature = "simd_asm", target_feature = "neon", target_arch = "arm")))]
+fn rotate_right_vext(_vec: u64x4, _n: u8) -> u64x4 {
+    unreachable!()
+}

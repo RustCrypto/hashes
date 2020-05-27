@@ -38,10 +38,11 @@
 //! [1]: https://en.wikipedia.org/wiki/Whirlpool_(hash_function)
 //! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
-#![doc(html_logo_url =
-    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-#[macro_use] extern crate opaque_debug;
-#[macro_use] pub extern crate digest;
+#![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#[macro_use]
+extern crate opaque_debug;
+#[macro_use]
+pub extern crate digest;
 extern crate block_buffer;
 extern crate byte_tools;
 #[cfg(feature = "std")]
@@ -54,21 +55,20 @@ mod utils;
 
 use utils::compress;
 
-pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput, Reset};
-use byte_tools::zero;
-use block_buffer::BlockBuffer;
 use block_buffer::block_padding::Iso7816;
 #[cfg(not(feature = "asm"))]
-use block_buffer::byteorder::{BE, ByteOrder};
-use digest::generic_array::GenericArray;
+use block_buffer::byteorder::{ByteOrder, BE};
+use block_buffer::BlockBuffer;
+use byte_tools::zero;
 use digest::generic_array::typenum::U64;
+use digest::generic_array::GenericArray;
+pub use digest::Digest;
+use digest::{BlockInput, FixedOutput, Input, Reset};
 
 #[cfg(not(feature = "asm"))]
 mod consts;
 
 type BlockSize = U64;
-
 
 /// Structure representing the state of a Whirlpool computation
 #[derive(Clone)]
@@ -99,17 +99,20 @@ fn convert(block: &GenericArray<u8, U64>) -> &[u8; 64] {
 }
 
 impl Whirlpool {
-    #![cfg_attr(feature = "cargo-clippy", allow(clippy::identity_op, clippy::double_parens))]
+    #![cfg_attr(
+        feature = "cargo-clippy",
+        allow(clippy::identity_op, clippy::double_parens)
+    )]
     fn update_len(&mut self, len: u64) {
         let len_bits = [
-            ( len >> (56 + 5))         as u8,
+            (len >> (56 + 5)) as u8,
             ((len >> (48 + 5)) & 0xff) as u8,
             ((len >> (40 + 5)) & 0xff) as u8,
             ((len >> (32 + 5)) & 0xff) as u8,
             ((len >> (24 + 5)) & 0xff) as u8,
             ((len >> (16 + 5)) & 0xff) as u8,
-            ((len >> ( 8 + 5)) & 0xff) as u8,
-            ((len >> ( 0 + 5)) & 0xff) as u8,
+            ((len >> (8 + 5)) & 0xff) as u8,
+            ((len >> (0 + 5)) & 0xff) as u8,
             ((len << 3) & 0xff) as u8,
         ];
 
@@ -137,7 +140,9 @@ impl Whirlpool {
         // padding
         let hash = &mut self.hash;
         let pos = self.buffer.position();
-        let buf = self.buffer.pad_with::<Iso7816>()
+        let buf = self
+            .buffer
+            .pad_with::<Iso7816>()
             .expect("we never use input_lazy");
 
         if pos + 1 > self.bit_length.len() {
@@ -186,7 +191,9 @@ impl Reset for Whirlpool {
     fn reset(&mut self) {
         self.bit_length = [0u8; 32];
         self.buffer.reset();
-        for v in self.hash.iter_mut() { *v = 0; }
+        for v in self.hash.iter_mut() {
+            *v = 0;
+        }
     }
 }
 

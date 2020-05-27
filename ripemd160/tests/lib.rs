@@ -4,9 +4,14 @@
 extern crate digest;
 extern crate ripemd160;
 
-use digest::dev::{one_million_a, digest_test};
+use digest::dev::{digest_test, one_million_a};
 
-new_test!(ripemd160_main, "ripemd160", ripemd160::Ripemd160, digest_test);
+new_test!(
+    ripemd160_main,
+    "ripemd160",
+    ripemd160::Ripemd160,
+    digest_test
+);
 
 #[test]
 fn ripemd160_1million_a() {

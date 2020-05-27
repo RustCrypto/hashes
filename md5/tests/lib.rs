@@ -3,7 +3,7 @@
 extern crate digest;
 extern crate md5;
 
-use digest::dev::{one_million_a, digest_test};
+use digest::dev::{digest_test, one_million_a};
 
 new_test!(md5_main, "md5", md5::Md5, digest_test);
 

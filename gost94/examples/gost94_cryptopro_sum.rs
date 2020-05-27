@@ -1,6 +1,6 @@
 extern crate gost94;
 
-use gost94::{Gost94CryptoPro, Digest};
+use gost94::{Digest, Gost94CryptoPro};
 use std::env;
 use std::fs;
 use std::io::{self, Read};

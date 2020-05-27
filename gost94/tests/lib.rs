@@ -3,10 +3,15 @@
 extern crate digest;
 extern crate gost94;
 
-use digest::dev::{one_million_a, digest_test};
+use digest::dev::{digest_test, one_million_a};
 
 new_test!(gost94_test_main, "test", gost94::Gost94Test, digest_test);
-new_test!(gost94_cryptopro_main, "cryptopro", gost94::Gost94CryptoPro, digest_test);
+new_test!(
+    gost94_cryptopro_main,
+    "cryptopro",
+    gost94::Gost94CryptoPro,
+    digest_test
+);
 
 #[test]
 fn gost94_test_1million_a() {
