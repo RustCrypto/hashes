@@ -27,6 +27,3 @@ std = ["digest/std", "byteorder/std", "crypto-mac/std"]
 simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
-
-[badges]
-travis-ci = { repository = "RustCrypto/hashes" }

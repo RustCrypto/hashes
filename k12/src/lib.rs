@@ -1,9 +1,12 @@
-//! An implementation of the KangarooTwelve cryptographic hash algorithm,
-//! based on the reference implementation:
+//! Experimental pure Rust implementation of the KangarooTwelve
+//! cryptographic hash algorithm, based on the reference implementation:
 //!
 //! <https://github.com/gvanas/KeccakCodePackage/blob/master/Standalone/kangaroo_twelve-reference/K12.py>
 //!
 //! Some optimisations copied from: <https://github.com/RustCrypto/hashes/tree/master/sha3/src>
+
+// Based off this translation originally by Diggory Hardy:
+// <https://github.com/dhardy/hash-bench/blob/master/src/k12.rs>
 
 #![no_std]
 

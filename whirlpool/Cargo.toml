@@ -24,6 +24,3 @@ hex-literal = "0.1"
 default = ["std"]
 std = ["digest/std"]
 asm = ["whirlpool-asm"]
-
-[badges]
-travis-ci = { repository = "RustCrypto/hashes" }

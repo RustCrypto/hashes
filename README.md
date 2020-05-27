@@ -1,4 +1,4 @@
-# RustCrypto: hashes [![Build Status](https://travis-ci.org/RustCrypto/hashes.svg?branch=master)](https://travis-ci.org/RustCrypto/hashes)
+# RustCrypto: hashes
 
 Collection of [cryptographic hash functions][1] written in pure Rust.
 
