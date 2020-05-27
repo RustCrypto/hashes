@@ -1,8 +1,8 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
 
-use simd::u32x4;
+use block_buffer::byteorder::{ByteOrder, BE};
 use consts::{BLOCK_LEN, K32X4};
-use block_buffer::byteorder::{BE, ByteOrder};
+use simd::u32x4;
 
 /// Not an intrinsic, but works like an unaligned load.
 #[inline]
@@ -19,13 +19,12 @@ fn sha256swap(v0: u32x4) -> u32x4 {
 /// Emulates `llvm.x86.sha256msg1` intrinsic.
 // #[inline]
 fn sha256msg1(v0: u32x4, v1: u32x4) -> u32x4 {
-
     // sigma 0 on vectors
     #[inline]
     fn sigma0x4(x: u32x4) -> u32x4 {
-        ((x >> u32x4( 7,  7,  7,  7)) | (x << u32x4(25, 25, 25, 25))) ^
-        ((x >> u32x4(18, 18, 18, 18)) | (x << u32x4(14, 14, 14, 14))) ^
-         (x >> u32x4( 3,  3,  3,  3))
+        ((x >> u32x4(7, 7, 7, 7)) | (x << u32x4(25, 25, 25, 25)))
+            ^ ((x >> u32x4(18, 18, 18, 18)) | (x << u32x4(14, 14, 14, 14)))
+            ^ (x >> u32x4(3, 3, 3, 3))
     }
 
     v0 + sigma0x4(sha256load(v0, v1))
@@ -34,9 +33,10 @@ fn sha256msg1(v0: u32x4, v1: u32x4) -> u32x4 {
 /// Emulates `llvm.x86.sha256msg2` intrinsic.
 // #[inline]
 fn sha256msg2(v4: u32x4, v3: u32x4) -> u32x4 {
-
     macro_rules! sigma1 {
-        ($a:expr) => ($a.rotate_right(17) ^ $a.rotate_right(19) ^ ($a >> 10))
+        ($a:expr) => {
+            $a.rotate_right(17) ^ $a.rotate_right(19) ^ ($a >> 10)
+        };
     }
 
     let u32x4(x3, x2, x1, x0) = v4;
@@ -59,18 +59,25 @@ fn sha256_schedule_x4(v0: u32x4, v1: u32x4, v2: u32x4, v3: u32x4) -> u32x4 {
 /// Emulates `llvm.x86.sha256rnds2` intrinsic.
 // #[inline]
 fn sha256_digest_round_x2(cdgh: u32x4, abef: u32x4, wk: u32x4) -> u32x4 {
-
     macro_rules! big_sigma0 {
-        ($a:expr) => (($a.rotate_right(2) ^ $a.rotate_right(13) ^ $a.rotate_right(22)))
+        ($a:expr) => {
+            ($a.rotate_right(2) ^ $a.rotate_right(13) ^ $a.rotate_right(22))
+        };
     }
     macro_rules! big_sigma1 {
-        ($a:expr) => (($a.rotate_right(6) ^ $a.rotate_right(11) ^ $a.rotate_right(25)))
+        ($a:expr) => {
+            ($a.rotate_right(6) ^ $a.rotate_right(11) ^ $a.rotate_right(25))
+        };
     }
     macro_rules! bool3ary_202 {
-        ($a:expr, $b:expr, $c:expr) => ($c ^ ($a & ($b ^ $c)))
+        ($a:expr, $b:expr, $c:expr) => {
+            $c ^ ($a & ($b ^ $c))
+        };
     } // Choose, MD5F, SHA1C
     macro_rules! bool3ary_232 {
-        ($a:expr, $b:expr, $c:expr) => (($a & $b) ^ ($a & $c) ^ ($b & $c))
+        ($a:expr, $b:expr, $c:expr) => {
+            ($a & $b) ^ ($a & $c) ^ ($b & $c)
+        };
     } // Majority, SHA1M
 
     let u32x4(_, _, wk1, wk0) = wk;
@@ -83,8 +90,16 @@ fn sha256_digest_round_x2(cdgh: u32x4, abef: u32x4, wk: u32x4) -> u32x4 {
         .wrapping_add(wk0)
         .wrapping_add(h0);
     let y0 = big_sigma0!(a0).wrapping_add(bool3ary_232!(a0, b0, c0));
-    let (a1, b1, c1, d1, e1, f1, g1, h1) =
-        (x0.wrapping_add(y0), a0, b0, c0, x0.wrapping_add(d0), e0, f0, g0);
+    let (a1, b1, c1, d1, e1, f1, g1, h1) = (
+        x0.wrapping_add(y0),
+        a0,
+        b0,
+        c0,
+        x0.wrapping_add(d0),
+        e0,
+        f0,
+        g0,
+    );
 
     // a round
     let x1 = big_sigma1!(e1)
@@ -92,8 +107,16 @@ fn sha256_digest_round_x2(cdgh: u32x4, abef: u32x4, wk: u32x4) -> u32x4 {
         .wrapping_add(wk1)
         .wrapping_add(h1);
     let y1 = big_sigma0!(a1).wrapping_add(bool3ary_232!(a1, b1, c1));
-    let (a2, b2, _, _, e2, f2, _, _) =
-        (x1.wrapping_add(y1), a1, b1, c1, x1.wrapping_add(d1), e1, f1, g1);
+    let (a2, b2, _, _, e2, f2, _, _) = (
+        x1.wrapping_add(y1),
+        a1,
+        b1,
+        c1,
+        x1.wrapping_add(d1),
+        e1,
+        f1,
+        g1,
+    );
 
     u32x4(a2, b2, e2, f2)
 }
@@ -103,18 +126,16 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
     let k = &K32X4;
 
     macro_rules! schedule {
-        ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => (
+        ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => {
             sha256msg2(sha256msg1($v0, $v1) + sha256load($v2, $v3), $v3)
-        )
+        };
     }
 
     macro_rules! rounds4 {
-        ($abef:ident, $cdgh:ident, $rest:expr) => {
-            {
-                $cdgh = sha256_digest_round_x2($cdgh, $abef, $rest);
-                $abef = sha256_digest_round_x2($abef, $cdgh, sha256swap($rest));
-            }
-        }
+        ($abef:ident, $cdgh:ident, $rest:expr) => {{
+            $cdgh = sha256_digest_round_x2($cdgh, $abef, $rest);
+            $abef = sha256_digest_round_x2($abef, $cdgh, sha256swap($rest));
+        }};
     }
 
     let mut abef = u32x4(state[0], state[1], state[4], state[5]);

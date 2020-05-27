@@ -1,5 +1,5 @@
+use block_buffer::byteorder::{ByteOrder, LE};
 use keccak;
-use block_buffer::byteorder::{LE, ByteOrder};
 
 const PLEN: usize = 25;
 
@@ -14,14 +14,12 @@ impl Sha3State {
         debug_assert_eq!(block.len() % 8, 0);
 
         if cfg!(target_endian = "little") {
-            let state = unsafe {
-                &mut *(self.state.as_mut_ptr() as *mut [u8; 8*PLEN])
-            };
+            let state = unsafe { &mut *(self.state.as_mut_ptr() as *mut [u8; 8 * PLEN]) };
             for (d, i) in state.iter_mut().zip(block) {
                 *d ^= *i;
             }
         } else if cfg!(target_endian = "big") {
-            let n = block.len()/8;
+            let n = block.len() / 8;
             let mut buf = [0u64; 21];
             let buf = &mut buf[..n];
             LE::read_u64_into(block, buf);
@@ -34,12 +32,12 @@ impl Sha3State {
     }
 
     #[inline(always)]
-    pub(crate) fn as_bytes<F: FnOnce(&[u8; 8*PLEN])>(&self, f: F) {
+    pub(crate) fn as_bytes<F: FnOnce(&[u8; 8 * PLEN])>(&self, f: F) {
         let mut data_copy;
-        let data_ref: &[u8; 8*PLEN] = if cfg!(target_endian = "little") {
-            unsafe { &*(self.state.as_ptr() as *const [u8; 8*PLEN]) }
+        let data_ref: &[u8; 8 * PLEN] = if cfg!(target_endian = "little") {
+            unsafe { &*(self.state.as_ptr() as *const [u8; 8 * PLEN]) }
         } else {
-            data_copy = [0u8; 8*PLEN];
+            data_copy = [0u8; 8 * PLEN];
             LE::write_u64_into(&self.state, &mut data_copy);
             &data_copy
         };

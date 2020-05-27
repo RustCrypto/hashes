@@ -1,9 +1,9 @@
 extern crate streebog;
 
-use streebog::{Streebog512, Digest};
 use std::env;
 use std::fs;
 use std::io::{self, Read};
+use streebog::{Digest, Streebog512};
 
 const BUFFER_SIZE: usize = 1024;
 

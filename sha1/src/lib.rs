@@ -26,28 +26,43 @@
 //! [1]: https://en.wikipedia.org/wiki/SHA-1
 //! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
-#![doc(html_logo_url =
-    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 
 // Give relevant error messages if the user tries to enable AArch64 asm on unsupported platforms.
-#[cfg(all(feature = "asm-aarch64", target_arch = "aarch64", not(target_os = "linux")))]
+#[cfg(all(
+    feature = "asm-aarch64",
+    target_arch = "aarch64",
+    not(target_os = "linux")
+))]
 compile_error!("Your OS isn’t yet supported for runtime-checking of AArch64 features.");
 #[cfg(all(feature = "asm-aarch64", not(target_arch = "aarch64")))]
 compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" on non-AArch64 systems.");
-#[cfg(all(feature = "asm-aarch64", target_arch = "aarch64", target_feature = "crypto"))]
+#[cfg(all(
+    feature = "asm-aarch64",
+    target_arch = "aarch64",
+    target_feature = "crypto"
+))]
 compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" when building for AArch64 systems with crypto extensions.");
-#[cfg(all(not(feature = "asm-aarch64"), feature = "asm", target_arch = "aarch64", not(target_feature = "crypto"), target_os = "linux"))]
+#[cfg(all(
+    not(feature = "asm-aarch64"),
+    feature = "asm",
+    target_arch = "aarch64",
+    not(target_feature = "crypto"),
+    target_os = "linux"
+))]
 compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm detected at runtime, or build with the crypto extensions support, for instance with RUSTFLAGS='-C target-cpu=native' on a compatible CPU.");
 
 extern crate block_buffer;
-#[macro_use] extern crate opaque_debug;
-#[macro_use] pub extern crate digest;
-#[cfg(feature = "std")]
-extern crate std;
+#[macro_use]
+extern crate opaque_debug;
+#[macro_use]
+pub extern crate digest;
 #[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
 extern crate fake_simd as simd;
 #[cfg(feature = "asm-aarch64")]
 extern crate libc;
+#[cfg(feature = "std")]
+extern crate std;
 
 #[cfg(feature = "asm")]
 extern crate sha1_asm;
@@ -78,15 +93,15 @@ mod utils;
 #[cfg(not(feature = "asm"))]
 use utils::compress;
 
-pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput, Reset};
-use digest::generic_array::GenericArray;
-use digest::generic_array::typenum::{U20, U64};
+use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
-use block_buffer::byteorder::{BE, ByteOrder};
+use digest::generic_array::typenum::{U20, U64};
+use digest::generic_array::GenericArray;
+pub use digest::Digest;
+use digest::{BlockInput, FixedOutput, Input, Reset};
 
 mod consts;
-use consts::{STATE_LEN, H};
+use consts::{H, STATE_LEN};
 
 /// Structure representing the state of a SHA-1 computation
 #[derive(Clone)]
@@ -98,7 +113,11 @@ pub struct Sha1 {
 
 impl Default for Sha1 {
     fn default() -> Self {
-        Sha1{ h: H, len: 0u64, buffer: Default::default() }
+        Sha1 {
+            h: H,
+            len: 0u64,
+            buffer: Default::default(),
+        }
     }
 }
 
@@ -123,10 +142,11 @@ impl FixedOutput for Sha1 {
         {
             let state = &mut self.h;
             let l = self.len << 3;
-            self.buffer.len64_padding::<BE, _>(l, |d| compress(state, d));
+            self.buffer
+                .len64_padding::<BE, _>(l, |d| compress(state, d));
         }
         let mut out = GenericArray::default();
-        BE::write_u32_into(&self.h,&mut out);
+        BE::write_u32_into(&self.h, &mut out);
         out
     }
 }

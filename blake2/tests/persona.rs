@@ -1,8 +1,6 @@
 #[macro_use]
 extern crate hex_literal;
 
-
-
 use blake2::{Blake2b, Blake2s, Digest};
 
 #[test]
@@ -11,7 +9,10 @@ fn blake2s_persona() {
     let persona = "personal";
     let persona_bytes = persona.as_bytes();
     let ctx = Blake2s::with_params(&key_bytes, &[], persona_bytes);
-    assert_eq!(ctx.result().as_slice(), &hex!("25a4ee63b594aed3f88a971e1877ef7099534f9097291f88fb86c79b5e70d022")[..]);
+    assert_eq!(
+        ctx.result().as_slice(),
+        &hex!("25a4ee63b594aed3f88a971e1877ef7099534f9097291f88fb86c79b5e70d022")[..]
+    );
 }
 
 #[test]

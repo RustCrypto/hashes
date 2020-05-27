@@ -26,23 +26,24 @@
 //! [1]: https://en.wikipedia.org/wiki/MD4
 //! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
-#![doc(html_logo_url =
-    "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
-#[macro_use] extern crate opaque_debug;
-#[macro_use] pub extern crate digest;
-extern crate fake_simd as simd;
+#[macro_use]
+extern crate opaque_debug;
+#[macro_use]
+pub extern crate digest;
 extern crate block_buffer;
+extern crate fake_simd as simd;
 #[cfg(feature = "std")]
 extern crate std;
 
-pub use digest::Digest;
-use digest::{Input, BlockInput, FixedOutput, Reset};
+use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
-use block_buffer::byteorder::{LE, ByteOrder};
-use simd::u32x4;
-use digest::generic_array::GenericArray;
 use digest::generic_array::typenum::{U16, U64};
+use digest::generic_array::GenericArray;
+pub use digest::Digest;
+use digest::{BlockInput, FixedOutput, Input, Reset};
+use simd::u32x4;
 
 // initial values for Md4State
 const S: u32x4 = u32x4(0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476);
@@ -81,13 +82,17 @@ impl Md4State {
         }
 
         fn op2(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-            a.wrapping_add(g(b, c, d)).wrapping_add(k)
-                .wrapping_add(0x5A82_7999).rotate_left(s)
+            a.wrapping_add(g(b, c, d))
+                .wrapping_add(k)
+                .wrapping_add(0x5A82_7999)
+                .rotate_left(s)
         }
 
         fn op3(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-            a.wrapping_add(h(b, c, d)).wrapping_add(k)
-                .wrapping_add(0x6ED9_EBA1).rotate_left(s)
+            a.wrapping_add(h(b, c, d))
+                .wrapping_add(k)
+                .wrapping_add(0x6ED9_EBA1)
+                .rotate_left(s)
         }
 
         let mut a = self.s.0;
@@ -128,14 +133,17 @@ impl Md4State {
 }
 
 impl Default for Md4State {
-    fn default() -> Self { Md4State { s: S } }
+    fn default() -> Self {
+        Md4State { s: S }
+    }
 }
 
 impl Md4 {
     fn finalize(&mut self) {
         let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer.len64_padding::<LE, _>(l, |d| state.process_block(d))
+        self.buffer
+            .len64_padding::<LE, _>(l, |d| state.process_block(d))
     }
 }
 
@@ -150,7 +158,8 @@ impl Input for Md4 {
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
         let self_state = &mut self.state;
-        self.buffer.input(input, |d: &Block| self_state.process_block(d));
+        self.buffer
+            .input(input, |d: &Block| self_state.process_block(d));
     }
 }
 

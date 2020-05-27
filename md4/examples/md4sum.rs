@@ -1,6 +1,6 @@
 extern crate md4;
 
-use md4::{Md4, Digest};
+use md4::{Digest, Md4};
 use std::env;
 use std::fs;
 use std::io::{self, Read};

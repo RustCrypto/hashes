@@ -1,19 +1,17 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::needless_range_loop))]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
-use digest::{Input, BlockInput, FixedOutput, Reset};
-use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;
-use digest::generic_array::GenericArray;
+use block_buffer::byteorder::{ByteOrder, LE};
+use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::U32;
-use block_buffer::byteorder::{LE, ByteOrder};
+use digest::generic_array::GenericArray;
+use digest::{BlockInput, FixedOutput, Input, Reset};
 
 pub(crate) type Block = [u8; 32];
 
 const C: Block = [
-    0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
-    0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00,
-    0x00, 0xff, 0xff, 0x00, 0xff, 0x00, 0x00, 0xff,
-    0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0xff,
+    0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00,
+    0x00, 0xff, 0xff, 0x00, 0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0xff,
 ];
 
 pub type SBox = [[u8; 16]; 8];
@@ -21,8 +19,8 @@ pub type SBox = [[u8; 16]; 8];
 fn sbox(a: u32, s: &SBox) -> u32 {
     let mut v = 0;
     for i in 0..8 {
-        let shft = 4*i;
-        let k = ((a & (0b1111u32 << shft) ) >> shft) as usize;
+        let shft = 4 * i;
+        let k = ((a & (0b1111u32 << shft)) >> shft) as usize;
         v += u32::from(s[i][k]) << shft;
     }
     v
@@ -56,7 +54,7 @@ fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
 fn x(a: &Block, b: &Block) -> Block {
     let mut out = Block::default();
     for i in 0..32 {
-        out[i] = a[i]^b[i];
+        out[i] = a[i] ^ b[i];
     }
     out
 }
@@ -67,12 +65,11 @@ fn x_mut(a: &mut Block, b: &Block) {
     }
 }
 
-
 fn a(x: Block) -> Block {
     let mut out = Block::default();
     out[..24].clone_from_slice(&x[8..]);
     for i in 0..8 {
-        out[24+i] = x[i]^x[i+8];
+        out[24 + i] = x[i] ^ x[i + 8];
     }
     out
 }
@@ -82,12 +79,11 @@ fn p(y: Block) -> Block {
 
     for i in 0..4 {
         for k in 0..8 {
-            out[i+4*k] = y[8*i+k];
+            out[i + 4 * k] = y[8 * i + k];
         }
     }
     out
 }
-
 
 fn psi(block: &mut Block) {
     let mut out = Block::default();
@@ -172,7 +168,6 @@ impl Gost94State {
                 over = a.overflowing_add(*b);
                 *a = over.0;
             }
-
         }
     }
 
@@ -188,7 +183,9 @@ impl Gost94State {
                 if over {
                     let (res, over) = self.n[3].overflowing_add(1);
                     self.n[3] = res;
-                    if over { panic!("Message longer than 2^256-1")}
+                    if over {
+                        panic!("Message longer than 2^256-1")
+                    }
                 }
             }
         }
@@ -242,7 +239,9 @@ impl FixedOutput for Gost94 {
             let self_state = &mut self.state;
 
             if self.buffer.position() != 0 {
-                let block = self.buffer.pad_with::<ZeroPadding>()
+                let block = self
+                    .buffer
+                    .pad_with::<ZeroPadding>()
                     .expect("we never use input_lazy");
                 self_state.process_block(block);
             }

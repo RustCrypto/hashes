@@ -1,12 +1,12 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::needless_range_loop, clippy::inline_always))]
-use digest::{Input, BlockInput, FixedOutput, Reset};
-use digest::generic_array::typenum::{Unsigned, U64};
-use digest::generic_array::{GenericArray, ArrayLength};
-use block_buffer::BlockBuffer;
 use block_buffer::block_padding::ZeroPadding;
-use block_buffer::byteorder::{LE, ByteOrder};
+use block_buffer::byteorder::{ByteOrder, LE};
+use block_buffer::BlockBuffer;
 use byte_tools::copy;
 use core::marker::PhantomData;
+use digest::generic_array::typenum::{Unsigned, U64};
+use digest::generic_array::{ArrayLength, GenericArray};
+use digest::{BlockInput, FixedOutput, Input, Reset};
 
 use consts::{BLOCK_SIZE, C};
 use table::SHUFFLED_LIN_TABLE;
@@ -30,10 +30,10 @@ fn lps(h: &mut Block, n: &Block) {
 
     for i in 0..4 {
         for j in 0..8 {
-            let b = h[2*i + 8*j] as usize;
-            buf[2*i] ^= SHUFFLED_LIN_TABLE[j][b];
-            let b = h[2*i+1 + 8*j] as usize;
-            buf[2*i+1] ^= SHUFFLED_LIN_TABLE[j][b];
+            let b = h[2 * i + 8 * j] as usize;
+            buf[2 * i] ^= SHUFFLED_LIN_TABLE[j][b];
+            let b = h[2 * i + 1 + 8 * j] as usize;
+            buf[2 * i + 1] ^= SHUFFLED_LIN_TABLE[j][b];
         }
     }
 
@@ -56,7 +56,7 @@ impl StreebogState {
         }
 
         for i in 0..64 {
-            self.h[i] ^= block[i] ^ key[i]  ^ m[i];
+            self.h[i] ^= block[i] ^ key[i] ^ m[i];
         }
     }
 
@@ -101,42 +101,60 @@ pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
     digest_size: PhantomData<DigestSize>,
 }
 
-impl<N> Default for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> Default for Streebog<N>
+where
+    N: ArrayLength<u8> + Copy,
+{
     fn default() -> Self {
         let h = match N::to_usize() {
             64 => [0u8; 64],
             32 => [1u8; 64],
-            _ => unreachable!()
+            _ => unreachable!(),
         };
         Streebog {
             buffer: Default::default(),
-            state: StreebogState { h, n: [0u8; 64], sigma: [0u8; 64] },
+            state: StreebogState {
+                h,
+                n: [0u8; 64],
+                sigma: [0u8; 64],
+            },
             digest_size: Default::default(),
         }
     }
 }
 
-
-impl<N> BlockInput for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> BlockInput for Streebog<N>
+where
+    N: ArrayLength<u8> + Copy,
+{
     type BlockSize = U64;
 }
 
-impl<N> Input for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> Input for Streebog<N>
+where
+    N: ArrayLength<u8> + Copy,
+{
     fn input<B: AsRef<[u8]>>(&mut self, input: B) {
         let self_state = &mut self.state;
-        self.buffer.input(input.as_ref(),
-            |d| self_state.process_block(d, BLOCK_SIZE as u8));
+        self.buffer.input(input.as_ref(), |d| {
+            self_state.process_block(d, BLOCK_SIZE as u8)
+        });
     }
 }
 
-impl<N> FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> FixedOutput for Streebog<N>
+where
+    N: ArrayLength<u8> + Copy,
+{
     type OutputSize = N;
 
     fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
         let mut self_state = self.state;
         let pos = self.buffer.position();
 
-        let block = self.buffer.pad_with::<ZeroPadding>()
+        let block = self
+            .buffer
+            .pad_with::<ZeroPadding>()
             .expect("we never use input_lazy");
         block[pos] = 1;
         self_state.process_block(block, pos as u8);
@@ -151,13 +169,16 @@ impl<N> FixedOutput for Streebog<N>  where N: ArrayLength<u8> + Copy {
     }
 }
 
-impl<N> Reset for Streebog<N>  where N: ArrayLength<u8> + Copy {
+impl<N> Reset for Streebog<N>
+where
+    N: ArrayLength<u8> + Copy,
+{
     fn reset(&mut self) {
         self.buffer.reset();
         self.state.h = match N::to_usize() {
             64 => [0u8; 64],
             32 => [1u8; 64],
-            _ => unreachable!()
+            _ => unreachable!(),
         };
         self.state.n = [0; 64];
         self.state.sigma = [0; 64];

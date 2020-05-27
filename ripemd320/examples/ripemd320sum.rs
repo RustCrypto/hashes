@@ -1,6 +1,6 @@
 extern crate ripemd320;
 
-use ripemd320::{Ripemd320, Digest};
+use ripemd320::{Digest, Ripemd320};
 use std::env;
 use std::fs;
 use std::io::{self, Read};

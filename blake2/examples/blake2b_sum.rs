@@ -1,5 +1,3 @@
-
-
 use blake2::{Blake2b, Digest};
 use std::env;
 use std::fs;

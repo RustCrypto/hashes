@@ -1,15 +1,15 @@
-use digest::{Input, BlockInput, FixedOutput, Reset};
-use digest::generic_array::GenericArray;
-use digest::generic_array::typenum::{U28, U32, U48, U64, U128};
+use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
-use block_buffer::byteorder::{BE, ByteOrder};
+use digest::generic_array::typenum::{U128, U28, U32, U48, U64};
+use digest::generic_array::GenericArray;
+use digest::{BlockInput, FixedOutput, Input, Reset};
 
-use consts::{STATE_LEN, H384, H512, H512_TRUNC_224, H512_TRUNC_256};
+use consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};
 
-#[cfg(any(not(feature = "asm"), target_arch = "aarch64"))]
-use sha512_utils::compress512;
 #[cfg(all(feature = "asm", not(target_arch = "aarch64")))]
 use sha2_asm::compress512;
+#[cfg(any(not(feature = "asm"), target_arch = "aarch64"))]
+use sha512_utils::compress512;
 
 type BlockSize = U128;
 type Block = GenericArray<u8, BlockSize>;
@@ -22,10 +22,12 @@ struct Engine512State {
 }
 
 impl Engine512State {
-    fn new(h: &[u64; 8]) -> Engine512State { Engine512State { h: *h } }
+    fn new(h: &[u64; 8]) -> Engine512State {
+        Engine512State { h: *h }
+    }
 
     pub fn process_block(&mut self, block: &Block) {
-        let block = unsafe { &*(block.as_ptr() as *const [u8; 128])};
+        let block = unsafe { &*(block.as_ptr() as *const [u8; 128]) };
         compress512(&mut self.h, block);
     }
 }
@@ -51,7 +53,9 @@ impl Engine512 {
     fn input(&mut self, input: &[u8]) {
         let (res, over) = self.len.1.overflowing_add((input.len() as u64) << 3);
         self.len.1 = res;
-        if over { self.len.0 += 1; }
+        if over {
+            self.len.0 += 1;
+        }
         let self_state = &mut self.state;
         self.buffer.input(input, |d| self_state.process_block(d));
     }
@@ -59,7 +63,8 @@ impl Engine512 {
     fn finish(&mut self) {
         let self_state = &mut self.state;
         let (hi, lo) = self.len;
-        self.buffer.len128_padding_be(hi, lo, |d| self_state.process_block(d));
+        self.buffer
+            .len128_padding_be(hi, lo, |d| self_state.process_block(d));
     }
 
     fn reset(&mut self, h: &[u64; STATE_LEN]) {
@@ -69,7 +74,6 @@ impl Engine512 {
     }
 }
 
-
 /// The SHA-512 hash algorithm with the SHA-512 initial hash value.
 #[derive(Clone)]
 pub struct Sha512 {
@@ -77,7 +81,11 @@ pub struct Sha512 {
 }
 
 impl Default for Sha512 {
-    fn default() -> Self { Sha512 { engine: Engine512::new(&H512) } }
+    fn default() -> Self {
+        Sha512 {
+            engine: Engine512::new(&H512),
+        }
+    }
 }
 
 impl BlockInput for Sha512 {
@@ -116,7 +124,11 @@ pub struct Sha384 {
 }
 
 impl Default for Sha384 {
-    fn default() -> Self { Sha384 { engine: Engine512::new(&H384) } }
+    fn default() -> Self {
+        Sha384 {
+            engine: Engine512::new(&H384),
+        }
+    }
 }
 
 impl BlockInput for Sha384 {
@@ -156,7 +168,9 @@ pub struct Sha512Trunc256 {
 
 impl Default for Sha512Trunc256 {
     fn default() -> Self {
-        Sha512Trunc256 { engine: Engine512::new(&H512_TRUNC_256) }
+        Sha512Trunc256 {
+            engine: Engine512::new(&H512_TRUNC_256),
+        }
     }
 }
 
@@ -197,7 +211,9 @@ pub struct Sha512Trunc224 {
 
 impl Default for Sha512Trunc224 {
     fn default() -> Self {
-        Sha512Trunc224 { engine: Engine512::new(&H512_TRUNC_224) }
+        Sha512Trunc224 {
+            engine: Engine512::new(&H512_TRUNC_224),
+        }
     }
 }
 

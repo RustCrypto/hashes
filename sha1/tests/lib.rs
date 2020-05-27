@@ -3,7 +3,7 @@
 extern crate digest;
 extern crate sha1;
 
-use digest::dev::{one_million_a, digest_test};
+use digest::dev::{digest_test, one_million_a};
 
 new_test!(sha1_main, "sha1", sha1::Sha1, digest_test);
 

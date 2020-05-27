@@ -1,18 +1,19 @@
 use core::ops::Div;
 
-use digest;
-use block_buffer::BlockBuffer;
 use block_buffer::byteorder::BE;
-use digest::generic_array::{ArrayLength, GenericArray};
+use block_buffer::BlockBuffer;
+use digest;
 use digest::generic_array::typenum::{Quot, U8};
+use digest::generic_array::{ArrayLength, GenericArray};
 
-use state::{GroestlState, xor_generic_array};
+use state::{xor_generic_array, GroestlState};
 
 #[derive(Clone)]
 pub struct Groestl<BlockSize>
-    where BlockSize: ArrayLength<u8> + Div<U8> + Default,
-          BlockSize::ArrayType: Copy,
-          Quot<BlockSize, U8>: ArrayLength<u8>,
+where
+    BlockSize: ArrayLength<u8> + Div<U8> + Default,
+    BlockSize::ArrayType: Copy,
+    Quot<BlockSize, U8>: ArrayLength<u8>,
 {
     buffer: BlockBuffer<BlockSize>,
     state: GroestlState<BlockSize>,
@@ -20,10 +21,11 @@ pub struct Groestl<BlockSize>
 }
 
 impl<BlockSize> Groestl<BlockSize>
-    where BlockSize: ArrayLength<u8> + Div<U8> + Default,
-          BlockSize::ArrayType: Copy,
-          Quot<BlockSize, U8>: ArrayLength<u8>,
-          Self: Clone
+where
+    BlockSize: ArrayLength<u8> + Div<U8> + Default,
+    BlockSize::ArrayType: Copy,
+    Quot<BlockSize, U8>: ArrayLength<u8>,
+    Self: Clone,
 {
     pub fn new(output_size: usize) -> Result<Self, digest::InvalidOutputSize> {
         match BlockSize::to_usize() {
@@ -31,25 +33,28 @@ impl<BlockSize> Groestl<BlockSize>
                 if output_size <= 32 || output_size > 64 {
                     return Err(digest::InvalidOutputSize);
                 }
-            },
+            }
             64 => {
                 if output_size == 0 || output_size > 32 {
                     return Err(digest::InvalidOutputSize);
                 }
-            },
+            }
             _ => unreachable!(),
         };
 
         let state = GroestlState::new(output_size);
-        Ok(Groestl{ buffer: Default::default(), state, output_size })
+        Ok(Groestl {
+            buffer: Default::default(),
+            state,
+            output_size,
+        })
     }
 
     pub fn process(&mut self, input: &[u8]) {
         let state = &mut self.state;
-        self.buffer.input(
-            input,
-            |b: &GenericArray<u8, BlockSize>| { state.compress(b); },
-        );
+        self.buffer.input(input, |b: &GenericArray<u8, BlockSize>| {
+            state.compress(b);
+        });
     }
 
     pub fn finalize(&mut self) -> GenericArray<u8, BlockSize> {

@@ -26,7 +26,6 @@ macro_rules! impl_state {
 
 macro_rules! sha3_impl {
     ($state:ident, $output_size:ident, $rate:ident, $padding:ty, $doc:expr) => {
-
         impl_state!($state, $rate, $padding, $doc);
 
         impl BlockInput for $state {
@@ -63,7 +62,7 @@ macro_rules! sha3_impl {
 
         impl_opaque_debug!($state);
         impl_write!($state);
-    }
+    };
 }
 
 macro_rules! shake_impl {
@@ -95,5 +94,5 @@ macro_rules! shake_impl {
 
         impl_opaque_debug!($state);
         impl_write!($state);
-    }
+    };
 }

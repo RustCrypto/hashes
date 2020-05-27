@@ -1,9 +1,9 @@
 extern crate whirlpool;
 
-use whirlpool::{Whirlpool, Digest};
 use std::env;
 use std::fs;
 use std::io::{self, Read};
+use whirlpool::{Digest, Whirlpool};
 
 const BUFFER_SIZE: usize = 1024;
 
