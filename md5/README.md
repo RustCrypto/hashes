@@ -10,6 +10,19 @@ Pure Rust implementation of the [MD5 hash function][1].
 
 [Documentation][docs-link]
 
+## ⚠️ Security Warning
+
+This crate is provided for the purposes of legacy interoperability with
+protocols and systems which mandate the use of MD5.
+
+However, MD5 is [cryptographically broken and unsuitable for further use][2].
+
+Collision attacks against MD5 are both practical and trivial, and
+[theoretical attacks against MD5's preimage resistance have been found][3].
+
+[RFC6151][4] advises no new IETF protocols can be designed MD5-based constructions,
+including HMAC-MD5.
+
 ## Minimum Supported Rust Version
 
 Rust **1.41** or higher.
@@ -51,3 +64,6 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [1]: https://en.wikipedia.org/wiki/MD5
+[2]: https://www.kb.cert.org/vuls/id/836068
+[3]: https://dl.acm.org/citation.cfm?id=1724151
+[4]: https://tools.ietf.org/html/rfc6151
