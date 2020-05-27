@@ -1,9 +1,10 @@
 [package]
 name = "ripemd320"
 version = "0.8.0"
+description = "RIPEMD-320 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "RIPEMD-320 hash function"
+readme = "README.md"
 documentation = "https://docs.rs/ripemd320"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "ripemd320", "hash", "digest"]

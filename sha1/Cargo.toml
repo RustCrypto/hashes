@@ -1,9 +1,10 @@
 [package]
 name = "sha-1"
 version = "0.8.2"
+description = "SHA-1 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "SHA-1 hash function"
+readme = "README.md"
 documentation = "https://docs.rs/sha-1"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha1", "hash", "digest"]

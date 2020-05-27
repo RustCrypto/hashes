@@ -1,9 +1,10 @@
 [package]
 name = "md2"
 version = "0.8.0"
-authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
+authors = ["RustCrypto Developers"]
 description = "MD2 hash function"
+readme = "README.md"
 documentation = "https://docs.rs/md2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md2", "hash", "digest"]

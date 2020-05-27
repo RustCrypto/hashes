@@ -1,9 +1,10 @@
 [package]
 name = "whirlpool"
 version = "0.8.1"
+description = "Whirlpool hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "Whirlpool hash function"
+readme = "README.md"
 documentation = "https://docs.rs/whirlpool"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "whirlpool", "hash", "digest"]

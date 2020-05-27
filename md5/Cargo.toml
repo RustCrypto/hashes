@@ -1,9 +1,10 @@
 [package]
 name = "md-5"
 version = "0.8.0"
+description = "MD5 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "MD5 hash function"
+readme = "README.md"
 documentation = "https://docs.rs/md-5"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md5", "hash", "digest"]

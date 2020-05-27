@@ -1,12 +1,13 @@
 [package]
 name = "sha2"
 version = "0.8.2"
-authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
 description = """
 Pure Rust implementation of the SHA-2 hash function family
 including SHA-224, SHA-256, SHA-384, and SHA-512.
 """
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
 documentation = "https://docs.rs/sha2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha2", "hash", "digest"]
