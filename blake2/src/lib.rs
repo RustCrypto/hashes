@@ -14,7 +14,7 @@
 //! let mut hasher = Blake2b::new();
 //!
 //! // write input message
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //!
 //! // read hash digest and consume hasher
 //! let res = hasher.result();
@@ -25,7 +25,7 @@
 //!
 //! // same example for `Blake2s`:
 //! let mut hasher = Blake2s::new();
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //! let res = hasher.result();
 //! assert_eq!(res[..], hex!("
 //!     9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b
@@ -38,15 +38,15 @@
 //! ## Variable output size
 //!
 //! If you need variable sized output you can use `VarBlake2b` and `VarBlake2s`
-//! which support variable output sizes through `VariableOutput` trait. `Input`
+//! which support variable output sizes through `VariableOutput` trait. `Update`
 //! trait has to be imported as well.
 //!
 //! ```rust
 //! use blake2::VarBlake2b;
-//! use blake2::digest::{Input, VariableOutput};
+//! use blake2::digest::{Update, VariableOutput};
 //!
 //! let mut hasher = VarBlake2b::new(10).unwrap();
-//! hasher.input(b"my_input");
+//! hasher.update(b"my_input");
 //! hasher.variable_result(|res| {
 //!     assert_eq!(res, [44, 197, 92, 132, 228, 22, 146, 78, 100, 0])
 //! })
@@ -58,22 +58,22 @@
 //!
 //! ```rust
 //! use blake2::Blake2b;
-//! use blake2::crypto_mac::Mac;
+//! use blake2::crypto_mac::{Mac, NewMac};
 //!
 //! let mut hasher = Blake2b::new_varkey(b"my key").unwrap();
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //!
-//! // `result` has type `MacResult` which is a thin wrapper around array of
-//! // bytes for providing constant time equality check
+//! // `result` has type `crypto_mac::Output` which is a thin wrapper around
+//! // a byte array and provides a constant time equality check
 //! let result = hasher.result();
-//! // To get underlying array use `code` method, but be carefull, since
-//! // incorrect use of the code value may permit timing attacks which defeat
-//! // the security provided by the `MacResult`
-//! let code_bytes = result.code();
+//! // To get underlying array use the `into_bytes` method, but be careful,
+//! // since incorrect use of the code value may permit timing attacks which
+//! // defeat the security provided by the `crypto_mac::Output`
+//! let code_bytes = result.into_bytes();
 //!
 //! // To verify the message it's recommended to use `verify` method
 //! let mut hasher = Blake2b::new_varkey(b"my key").unwrap();
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //! // `verify` return `Ok(())` if code is correct, `Err(MacError)` otherwise
 //! hasher.verify(&code_bytes).unwrap();
 //! ```
@@ -83,6 +83,7 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
 //! [2]: https://github.com/cesarb/blake2-rfc
+
 #![no_std]
 #![doc(html_logo_url =
     "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
@@ -93,9 +94,9 @@
 
 #[macro_use] extern crate opaque_debug;
 #[macro_use] pub extern crate digest;
-extern crate byte_tools;
-extern crate byteorder;
-pub extern crate crypto_mac;
+
+
+pub use crypto_mac;
 
 #[cfg(feature = "std")]
 extern crate std;
@@ -113,5 +114,5 @@ mod blake2b;
 mod blake2s;
 
 pub use digest::Digest;
-pub use blake2b::{Blake2b, VarBlake2b};
-pub use blake2s::{Blake2s, VarBlake2s};
+pub use crate::blake2b::{Blake2b, VarBlake2b};
+pub use crate::blake2s::{Blake2s, VarBlake2s};

@@ -7,7 +7,7 @@
 
 #![cfg_attr(feature = "clippy", allow(clippy::inline_always))]
 
-use simd::simdty::u64x4;
+use crate::simd::simdty::u64x4;
 
 #[cfg(feature = "simd_opt")]
 #[inline(always)]
@@ -100,7 +100,7 @@ fn rotate_right_16(vec: u64x4) -> u64x4 {
           target_feature = "neon",
           target_arch = "arm"))]
 mod simd_asm_neon_arm {
-    use simd::simdty::{u64x2, u64x4};
+    use crate::simd::simdty::{u64x2, u64x4};
 
     #[inline(always)]
     fn vext_u64(vec: u64x2, b: u8) -> u64x2 {
@@ -115,7 +115,7 @@ mod simd_asm_neon_arm {
 
     #[inline(always)]
     pub fn rotate_right_vext(vec: u64x4, b: u8) -> u64x4 {
-        use simd::simdint::{simd_shuffle2, simd_shuffle4};
+        use crate::simd::simdint::{simd_shuffle2, simd_shuffle4};
 
         unsafe {
             let tmp0 = vext_u64(simd_shuffle2(vec, vec, [0, 1]), b);

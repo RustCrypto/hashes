@@ -9,7 +9,7 @@
 #![allow(non_camel_case_types)]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::inline_always))]
 
-use as_bytes::Safe;
+use crate::as_bytes::Safe;
 
 #[cfg(feature = "simd")]
 macro_rules! decl_simd {

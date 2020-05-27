@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate hex_literal;
 
-extern crate blake2;
+
 
 use blake2::{Blake2b, Blake2s, Digest};
 

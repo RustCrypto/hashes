@@ -1,5 +1,5 @@
 use digest::generic_array::typenum::{U64, U128};
-use consts::BLAKE2B_IV;
+use crate::consts::BLAKE2B_IV;
 
 blake2_impl!(VarBlake2b, Blake2b, u64, u64x4, read_u64, U64, U128,
     32, 24, 16, 63, BLAKE2B_IV,

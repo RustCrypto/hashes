@@ -1,7 +1,5 @@
 #![no_std]
 #![feature(test)]
-#[macro_use]
-extern crate digest;
-extern crate blake2;
 
+use digest::bench;
 bench!(blake2::Blake2s);
