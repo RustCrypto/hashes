@@ -2,7 +2,7 @@ macro_rules! gost94_impl {
     ($state:ident, $sbox:expr) => {
         use digest::generic_array::typenum::U32;
         use digest::generic_array::GenericArray;
-        use digest::{BlockInput, FixedOutput, Input, Reset};
+        use digest::{BlockInput, FixedOutput, Reset, Update};
         use $crate::gost94::{Block, Gost94, SBox};
 
         #[derive(Clone)]
@@ -22,10 +22,10 @@ macro_rules! gost94_impl {
             type BlockSize = U32;
         }
 
-        impl Input for $state {
-            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        impl Update for $state {
+            fn update(&mut self, input: impl AsRef<[u8]>) {
                 let input = input.as_ref();
-                self.sh.input(input);
+                self.sh.update(input);
             }
         }
 
