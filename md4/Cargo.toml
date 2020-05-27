@@ -1,9 +1,10 @@
 [package]
 name = "md4"
 version = "0.8.0"
+description = "MD4 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "MD4 hash function"
+readme = "README.md"
 documentation = "https://docs.rs/md4"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md4", "hash", "digest"]

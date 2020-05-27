@@ -1,9 +1,10 @@
 [package]
 name = "shabal"
 version = "0.2.0"
+description = "Shabal hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "Shabal hash functions"
+readme = "README.md"
 documentation = "https://docs.rs/shabal"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "shabal", "hash", "digest"]

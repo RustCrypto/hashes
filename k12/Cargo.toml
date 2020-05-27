@@ -1,9 +1,10 @@
 [package]
 name = "k12"
 version = "0.0.1"
+description = "Experimental pure Rust implementation of the KangarooTwelve hash function"
 authors = ["Diggory Hardy <github1@dhardy.name>"]
 license = "Apache-2.0 OR MIT"
-description = "Experimental pure Rust implementation of the KangarooTwelve hash function"
+readme = "README.md"
 documentation = "https://docs.rs/k12"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "hash", "digest"]

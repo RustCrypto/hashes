@@ -1,9 +1,10 @@
 [package]
 name = "blake2"
 version = "0.8.1"
+description = "BLAKE2 hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "BLAKE2 hash functions"
+readme = "README.md"
 documentation = "https://docs.rs/blake2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "blake2", "hash", "digest"]

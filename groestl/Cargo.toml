@@ -1,9 +1,10 @@
 [package]
 name = "groestl"
 version = "0.8.0"
+description = "Grøstl hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "Grøstl hash function"
+readme = "README.md"
 documentation = "https://docs.rs/groestl"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "groestl", "grostl", "hash", "digest"]
