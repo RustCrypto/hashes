@@ -32,8 +32,8 @@ macro_rules! sha3_impl {
             type BlockSize = $rate;
         }
 
-        impl Input for $state {
-            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        impl Update for $state {
+            fn update(&mut self, input: impl AsRef<[u8]>) {
                 self.absorb(input.as_ref())
             }
         }
@@ -69,8 +69,8 @@ macro_rules! shake_impl {
     ($state:ident, $rate:ident, $padding:ty, $doc:expr) => {
         impl_state!($state, $rate, $padding, $doc);
 
-        impl Input for $state {
-            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        impl Update for $state {
+            fn update(&mut self, input: impl AsRef<[u8]>) {
                 self.absorb(input.as_ref())
             }
         }

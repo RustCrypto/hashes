@@ -14,6 +14,7 @@ impl Sha3State {
         debug_assert_eq!(block.len() % 8, 0);
 
         if cfg!(target_endian = "little") {
+            #[allow(unsafe_code)]
             let state = unsafe { &mut *(self.state.as_mut_ptr() as *mut [u8; 8 * PLEN]) };
             for (d, i) in state.iter_mut().zip(block) {
                 *d ^= *i;
@@ -35,7 +36,10 @@ impl Sha3State {
     pub(crate) fn as_bytes<F: FnOnce(&[u8; 8 * PLEN])>(&self, f: F) {
         let mut data_copy;
         let data_ref: &[u8; 8 * PLEN] = if cfg!(target_endian = "little") {
-            unsafe { &*(self.state.as_ptr() as *const [u8; 8 * PLEN]) }
+            #[allow(unsafe_code)]
+            unsafe {
+                &*(self.state.as_ptr() as *const [u8; 8 * PLEN])
+            }
         } else {
             data_copy = [0u8; 8 * PLEN];
             LE::write_u64_into(&self.state, &mut data_copy);

@@ -5,20 +5,21 @@ description = "SHA-3 (Keccak) hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
+edition = "2018"
 documentation = "https://docs.rs/sha3"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha3", "keccak", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.8"
-block-buffer = "0.7"
+digest = { version = "0.9.0-pre", git = "https://github.com/RustCrypto/traits" }
+block-buffer = { version = "0.7", git = "https://github.com/RustCrypto/utils" }
 byte-tools = "0.3"
 opaque-debug = "0.2"
 keccak = "0.1"
 
 [dev-dependencies]
-digest = { version = "0.8", features = ["dev"] }
+digest = { version = "0.9.0-pre", features = ["dev"], git = "https://github.com/RustCrypto/traits" }
 hex-literal = "0.1"
 
 [features]

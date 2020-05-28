@@ -1,5 +1,5 @@
+use crate::state::Sha3State;
 use digest::XofReader;
-use state::Sha3State;
 #[cfg(feature = "std")]
 use std::io;
 
