@@ -12,15 +12,15 @@ keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "= 0.9.0-pre", git = "https://github.com/RustCrypto/traits" }
+digest = "= 0.9.0-pre"
 byte-tools = "0.3"
 byteorder = { version = "1", default-features = false }
-crypto-mac = { version = "= 0.8.0-pre", git = "https://github.com/rustcrypto/traits" }
+crypto-mac = "= 0.8.0-pre"
 opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "= 0.9.0-pre", features = ["dev"], git = "https://github.com/rustcrypto/traits" }
-crypto-mac = { version = "0.8.0-pre", features = ["dev"], git = "https://github.com/rustcrypto/traits" }
+digest = { version = "= 0.9.0-pre", features = ["dev"] }
+crypto-mac = { version = "0.8.0-pre", features = ["dev"] }
 hex-literal = "0.1"
 
 [features]
