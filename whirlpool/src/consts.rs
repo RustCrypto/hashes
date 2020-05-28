@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
+#![allow(clippy::unreadable_literal)]
 
 pub static R: usize = 10;
 

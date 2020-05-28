@@ -1,7 +1,6 @@
 #![no_std]
 #[macro_use]
 extern crate digest;
-use sha3;
 
 use digest::dev::{digest_test, xof_test};
 

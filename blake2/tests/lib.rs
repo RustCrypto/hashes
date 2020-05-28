@@ -1,7 +1,6 @@
 #![no_std]
 #[macro_use]
 extern crate digest;
-use blake2;
 
 use digest::dev::{digest_test, variable_test};
 

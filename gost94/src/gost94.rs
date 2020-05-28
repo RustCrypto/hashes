@@ -1,3 +1,5 @@
+#![allow(clippy::many_single_char_names)]
+
 use block_buffer::block_padding::ZeroPadding;
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
@@ -16,11 +18,14 @@ pub type SBox = [[u8; 16]; 8];
 
 fn sbox(a: u32, s: &SBox) -> u32 {
     let mut v = 0;
+
+    #[allow(clippy::needless_range_loop)]
     for i in 0..8 {
         let shft = 4 * i;
         let k = ((a & (0b1111u32 << shft)) >> shft) as usize;
         v += u32::from(s[i][k]) << shft;
     }
+
     v
 }
 
@@ -28,6 +33,7 @@ fn g(a: u32, k: u32, s: &SBox) -> u32 {
     sbox(a.wrapping_add(k), s).rotate_left(11)
 }
 
+#[allow(clippy::needless_range_loop)]
 fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
     let mut k = [0u32; 8];
     let mut a = LE::read_u32(&msg[0..4]);
@@ -46,6 +52,7 @@ fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
         b = a;
         a = t;
     }
+
     LE::write_u32_into(&[b, a], msg);
 }
 
@@ -196,6 +203,7 @@ impl Gost94State {
     }
 }
 
+/// GOST94
 #[derive(Clone)]
 pub struct Gost94 {
     buffer: BlockBuffer<U32>,
@@ -204,7 +212,7 @@ pub struct Gost94 {
 }
 
 impl Gost94 {
-    // Create new GOST94 instance with given S-Box and IV
+    /// Create new [`Gost94`] instance with given S-Box and IV
     pub fn new(s: SBox, h: Block) -> Self {
         let n = Default::default();
         let sigma = Default::default();

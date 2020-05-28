@@ -5,9 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-#![allow(dead_code)]
-#![allow(non_camel_case_types)]
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::inline_always))]
+#![allow(dead_code, non_camel_case_types)]
 
 use crate::as_bytes::Safe;
 
@@ -65,7 +63,6 @@ pub type u16x16 = Simd16<u16>;
 
 pub type u8x32 = Simd32<u8>;
 
-#[cfg_attr(feature = "clippy", allow(clippy::inline_always))]
 impl<T> Simd4<T> {
     #[inline(always)]
     pub fn new(e0: T, e1: T, e2: T, e3: T) -> Simd4<T> {

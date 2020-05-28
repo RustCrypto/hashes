@@ -5,6 +5,7 @@ macro_rules! gost94_impl {
         use digest::{BlockInput, FixedOutput, Reset, Update};
         use $crate::gost94::{Block, Gost94, SBox};
 
+        /// GOST94 state
         #[derive(Clone)]
         pub struct $state {
             sh: Gost94,
