@@ -4,7 +4,7 @@
 
 #[macro_use]
 extern crate digest;
-extern crate ripemd320;
+use ripemd320;
 
 use digest::dev::{digest_test, one_million_a};
 
