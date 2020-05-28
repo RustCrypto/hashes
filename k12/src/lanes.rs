@@ -1,18 +1,4 @@
-/// Copied from `arrayref` crate
-macro_rules! array_ref {
-    ($arr:expr, $offset:expr, $len:expr) => {{
-        #[allow(unsafe_code)]
-        {
-            #[inline]
-            unsafe fn as_array<T>(slice: &[T]) -> &[T; $len] {
-                &*(slice.as_ptr() as *const [_; $len])
-            }
-            let offset = $offset;
-            let slice = &$arr[offset..offset + $len];
-            unsafe { as_array(slice) }
-        }
-    }};
-}
+#![allow(clippy::unreadable_literal)]
 
 macro_rules! REPEAT4 {
     ($e: expr) => {
@@ -104,6 +90,7 @@ pub fn keccak(lanes: &mut [u64; 25]) {
     let mut c = [0u64; 5];
     let (mut x, mut y): (usize, usize);
 
+    #[allow(clippy::needless_range_loop)]
     for round in 0..12 {
         // θ
         FOR5!(x, 1, {

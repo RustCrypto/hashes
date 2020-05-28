@@ -1,5 +1,5 @@
 #![no_std]
 #![feature(test)]
 
-use digst::bench;
+use digest::bench;
 bench!(streebog::Streebog256);

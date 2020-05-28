@@ -1,5 +1,4 @@
 use block_buffer::byteorder::{ByteOrder, LE};
-use keccak;
 
 const PLEN: usize = 25;
 

@@ -136,7 +136,7 @@ impl EngineState {
     }
 
     #[inline]
-    #[cfg_attr(feature = "cargo-clippy", allow(clippy::too_many_arguments))]
+    #[allow(clippy::too_many_arguments)]
     fn perm_elt(
         &mut self,
         xa0: usize,

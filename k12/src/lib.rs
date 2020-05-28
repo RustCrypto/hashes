@@ -22,7 +22,7 @@ mod lanes;
 
 // TODO(tarcieri): eliminate usage of `Vec`
 use alloc::vec::Vec;
-use core::cmp::min;
+use core::{cmp::min, convert::TryInto};
 use digest::{Update, XofReader};
 
 /// The KangarooTwelve extendable-output function (XOF).
@@ -112,9 +112,12 @@ impl XofReader for KangarooTwelve {
             let mut node_star = Vec::new();
             node_star.extend_from_slice(slices[0]);
             node_star.extend_from_slice(&[3, 0, 0, 0, 0, 0, 0, 0]);
+
+            #[allow(clippy::needless_range_loop)]
             for i in 0..n - 1 {
                 node_star.extend_from_slice(&intermediate[i][..]);
             }
+
             node_star.extend_from_slice(&right_encode(n - 1));
             node_star.extend_from_slice(b"\xFF\xFF");
 
@@ -175,29 +178,20 @@ fn f(input: &[u8], suffix: u8, mut output_len: usize) -> Vec<u8> {
     output
 }
 
-#[allow(unsafe_code)]
-fn read_u64(bytes: &[u8; 8]) -> u64 {
-    unsafe { *(bytes as *const _ as *const u64) }.to_le()
-}
-
-#[allow(unsafe_code)]
-fn write_u64(val: u64) -> [u8; 8] {
-    unsafe { *(&val.to_le() as *const u64 as *const _) }
-}
-
 fn keccak(state: &mut [u8; 200]) {
     let mut lanes = [0u64; 25];
     let mut y;
     for x in 0..5 {
         FOR5!(y, 5, {
-            lanes[x + y] = read_u64(array_ref!(state, 8 * (x + y), 8));
+            let pos = 8 * (x + y);
+            lanes[x + y] = u64::from_le_bytes(state[pos..(pos + 8)].try_into().unwrap());
         });
     }
     lanes::keccak(&mut lanes);
     for x in 0..5 {
         FOR5!(y, 5, {
             let i = 8 * (x + y);
-            state[i..i + 8].copy_from_slice(&write_u64(lanes[x + y]));
+            state[i..i + 8].copy_from_slice(&lanes[x + y].to_le_bytes());
         });
     }
 }

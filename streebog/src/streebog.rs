@@ -1,4 +1,3 @@
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::needless_range_loop, clippy::inline_always))]
 use block_buffer::block_padding::ZeroPadding;
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
@@ -50,6 +49,7 @@ impl StreebogState {
 
         lps(&mut key, n);
 
+        #[allow(clippy::needless_range_loop)]
         for i in 0..12 {
             lps(&mut block, &key);
             lps(&mut key, &C[i]);

@@ -30,6 +30,7 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 #![deny(unsafe_code)]
 #![warn(rust_2018_idioms)]
+#![allow(clippy::many_single_char_names)]
 
 #[macro_use]
 extern crate opaque_debug;

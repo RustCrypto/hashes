@@ -2,7 +2,7 @@ use core::ops::Div;
 
 use block_buffer::byteorder::BE;
 use block_buffer::BlockBuffer;
-use digest;
+
 use digest::generic_array::typenum::{Quot, U8};
 use digest::generic_array::{ArrayLength, GenericArray};
 

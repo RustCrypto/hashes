@@ -3,7 +3,7 @@
 //!
 //! It was created using `gen_table` function
 
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
+#![allow(clippy::unreadable_literal)]
 
 pub const SHUFFLED_LIN_TABLE: [[u64; 256]; 8] = [
     [

@@ -2,7 +2,6 @@
 #![no_std]
 #[macro_use]
 extern crate digest;
-use ripemd160;
 
 use digest::dev::{digest_test, one_million_a};
 

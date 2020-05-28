@@ -5,8 +5,6 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::inline_always))]
-
 mod simd_opt;
 mod simdint;
 mod simdop;
