@@ -12,7 +12,7 @@
 //! let mut hasher = Gost94Test::new();
 //!
 //! // process input message
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 32]
@@ -29,7 +29,7 @@
 //! [2]: https://github.com/RustCrypto/hashes
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-extern crate block_buffer;
+
 #[macro_use]
 pub extern crate digest;
 #[macro_use]
@@ -47,7 +47,7 @@ mod test_param;
 
 pub use digest::Digest;
 
-pub use cryptopro::Gost94CryptoPro;
-pub use gost94::Gost94;
-pub use s2015::Gost94s2015;
-pub use test_param::Gost94Test;
+pub use crate::cryptopro::Gost94CryptoPro;
+pub use crate::gost94::Gost94;
+pub use crate::s2015::Gost94s2015;
+pub use crate::test_param::Gost94Test;

@@ -1,11 +1,9 @@
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::needless_range_loop))]
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
 use block_buffer::block_padding::ZeroPadding;
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::U32;
 use digest::generic_array::GenericArray;
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
 pub(crate) type Block = [u8; 32];
 
@@ -222,8 +220,8 @@ impl BlockInput for Gost94 {
     type BlockSize = U32;
 }
 
-impl Input for Gost94 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Gost94 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
         let self_state = &mut self.state;
         self_state.update_n(input.len());
