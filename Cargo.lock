@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 [[package]]
 name = "blake2"
-version = "0.8.1"
+version = "0.9.0-pre"
 dependencies = [
  "byte-tools",
  "byteorder",
@@ -95,7 +95,7 @@ dependencies = [
 
 [[package]]
 name = "gost94"
-version = "0.8.0"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -105,7 +105,7 @@ dependencies = [
 
 [[package]]
 name = "groestl"
-version = "0.8.0"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -134,7 +134,7 @@ dependencies = [
 
 [[package]]
 name = "k12"
-version = "0.0.1"
+version = "0.1.0-pre"
 dependencies = [
  "digest",
  "hex-literal",
@@ -154,7 +154,7 @@ checksum = "9457b06509d27052635f90d6466700c65095fdf75409b3fbdd903e988b886f49"
 
 [[package]]
 name = "md-5"
-version = "0.8.0"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -165,7 +165,7 @@ dependencies = [
 
 [[package]]
 name = "md2"
-version = "0.8.0"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -175,7 +175,7 @@ dependencies = [
 
 [[package]]
 name = "md4"
-version = "0.8.0"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -216,7 +216,7 @@ checksum = "38c47dcb1594802de8c02f3b899e2018c78291168a22c281be21ea0fb4796842"
 
 [[package]]
 name = "ripemd160"
-version = "0.8.0"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -226,7 +226,7 @@ dependencies = [
 
 [[package]]
 name = "ripemd320"
-version = "0.8.0"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -236,7 +236,7 @@ dependencies = [
 
 [[package]]
 name = "sha-1"
-version = "0.8.2"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -258,7 +258,7 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.8.2"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -280,7 +280,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.8.2"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "byte-tools",
@@ -292,7 +292,7 @@ dependencies = [
 
 [[package]]
 name = "shabal"
-version = "0.2.0"
+version = "0.3.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
@@ -302,7 +302,7 @@ dependencies = [
 
 [[package]]
 name = "streebog"
-version = "0.8.0"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "byte-tools",
@@ -325,7 +325,7 @@ checksum = "373c8a200f9e67a0c95e62a4f52fbf80c23b4381c05a17845531982fa99e6b33"
 
 [[package]]
 name = "whirlpool"
-version = "0.8.1"
+version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "byte-tools",
