@@ -12,7 +12,7 @@
 //! let mut hasher = Md5::new();
 //!
 //! // process input message
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 16]
@@ -25,9 +25,12 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD5
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-extern crate block_buffer;
+#![deny(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms)]
+
 #[macro_use]
 extern crate opaque_debug;
 #[macro_use]
@@ -40,7 +43,7 @@ extern crate std;
 #[cfg(not(feature = "asm"))]
 mod utils;
 
-use utils::compress;
+use crate::utils::compress;
 
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
@@ -48,7 +51,7 @@ use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U16, U64};
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
 mod consts;
 
@@ -72,7 +75,10 @@ impl Default for Md5 {
 
 #[inline(always)]
 fn convert(d: &GenericArray<u8, U64>) -> &[u8; 64] {
-    unsafe { &*(d.as_ptr() as *const [u8; 64]) }
+    #[allow(unsafe_code)]
+    unsafe {
+        &*(d.as_ptr() as *const [u8; 64])
+    }
 }
 
 impl Md5 {
@@ -89,9 +95,9 @@ impl BlockInput for Md5 {
     type BlockSize = U64;
 }
 
-impl Input for Md5 {
+impl Update for Md5 {
     #[inline]
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
         // Unlike Sha1 and Sha2, the length value in MD5 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.

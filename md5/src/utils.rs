@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::inline_always, clippy::many_single_char_names))]
 
+use crate::consts::RC;
 use block_buffer::byteorder::{ByteOrder, LE};
-use consts::RC;
 
 #[inline(always)]
 fn op_f(w: u32, x: u32, y: u32, z: u32, m: u32, c: u32, s: u32) -> u32 {
