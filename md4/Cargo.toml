@@ -5,19 +5,20 @@ description = "MD4 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
+edition = "2018"
 documentation = "https://docs.rs/md4"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md4", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.8"
-block-buffer = "0.7"
+digest = { version = "0.9.0-pre", git = "https://github.com/RustCrypto/traits" }
+block-buffer = { version = "0.7", git = "https://github.com/RustCrypto/utils" }
 fake-simd = "0.1"
 opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "0.8", features = ["dev"] }
+digest = { version = "0.9.0-pre", features = ["dev"], git = "https://github.com/RustCrypto/traits" }
 hex-literal = "0.1"
 
 [features]

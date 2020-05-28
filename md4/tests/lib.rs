@@ -1,7 +1,7 @@
 #![no_std]
 #[macro_use]
 extern crate digest;
-extern crate md4;
+use md4;
 
 use digest::dev::{digest_test, one_million_a};
 
