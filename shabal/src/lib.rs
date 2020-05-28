@@ -23,7 +23,7 @@
 //! let mut hasher = Shabal256::new();
 //!
 //! // process input message
-//! hasher.input(b"helloworld");
+//! hasher.update(b"helloworld");
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 32]
@@ -36,10 +36,12 @@
 //!
 //! [1]: https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![deny(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms)]
 
-extern crate block_buffer;
 #[macro_use]
 extern crate opaque_debug;
 #[macro_use]
@@ -50,5 +52,5 @@ extern crate std;
 mod consts;
 mod shabal;
 
+pub use crate::shabal::{Shabal192, Shabal224, Shabal256, Shabal384, Shabal512};
 pub use digest::Digest;
-pub use shabal::{Shabal192, Shabal224, Shabal256, Shabal384, Shabal512};
