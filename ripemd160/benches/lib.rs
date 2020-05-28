@@ -1,7 +1,5 @@
 #![no_std]
 #![feature(test)]
-#[macro_use]
-extern crate digest;
-extern crate ripemd160;
 
+use digest::bench;
 bench!(ripemd160::Ripemd160);

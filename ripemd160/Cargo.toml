@@ -1,21 +1,23 @@
 [package]
 name = "ripemd160"
 version = "0.8.0"
+description = "RIPEMD-160 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "RIPEMD-160 hash function"
+readme = "README.md"
+edition = "2018"
 documentation = "https://docs.rs/ripemd160"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "ripemd160", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.8"
-block-buffer = "0.7"
+digest = { version = "0.9.0-pre", git = "https://github.com/RustCrypto/traits" }
+block-buffer = { version = "0.7", git = "https://github.com/RustCrypto/utils" }
 opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "0.8", features = ["dev"] }
+digest = { version = "0.9.0-pre", features = ["dev"], git = "https://github.com/RustCrypto/traits" }
 hex-literal = "0.1"
 
 [features]
