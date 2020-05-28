@@ -12,13 +12,13 @@ keywords = ["crypto", "md4", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "0.9.0-pre", git = "https://github.com/RustCrypto/traits" }
-block-buffer = { version = "0.7", git = "https://github.com/RustCrypto/utils" }
+digest = "0.9.0-pre"
+block-buffer = "0.7"
 fake-simd = "0.1"
 opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "0.9.0-pre", features = ["dev"], git = "https://github.com/RustCrypto/traits" }
+digest = { version = "0.9.0-pre", features = ["dev"] }
 hex-literal = "0.1"
 
 [features]

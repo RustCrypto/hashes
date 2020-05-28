@@ -12,10 +12,10 @@ keywords = ["crypto", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "0.9.0-pre", git = "https://github.com/RustCrypto/traits" }
+digest = "0.9.0-pre"
 
 [dev-dependencies]
-digest = { version = "0.9.0-pre", features = ["dev"], git = "https://github.com/RustCrypto/traits" }
+digest = { version = "0.9.0-pre", features = ["dev"] }
 hex-literal = "0.1"
 
 [features]
