@@ -4,9 +4,9 @@ use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U24, U28, U32, U48, U64};
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
-use consts::{
+use crate::consts::{
     A_INIT_192, A_INIT_224, A_INIT_256, A_INIT_384, A_INIT_512, B_INIT_192, B_INIT_224, B_INIT_256,
     B_INIT_384, B_INIT_512, C_INIT_192, C_INIT_224, C_INIT_256, C_INIT_384, C_INIT_512,
 };
@@ -37,11 +37,13 @@ impl EngineState {
     }
 
     fn process_block(&mut self, block: &Block) {
+        #[allow(unsafe_code)]
         let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
         compress(self, block);
     }
 
     fn process_final_block(&mut self, block: &Block) {
+        #[allow(unsafe_code)]
         let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
         compress_final(self, block);
     }
@@ -269,8 +271,8 @@ impl BlockInput for Shabal512 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Shabal512 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Shabal512 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         self.engine.input(input.as_ref());
     }
 }
@@ -311,8 +313,8 @@ impl BlockInput for Shabal384 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Shabal384 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Shabal384 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         self.engine.input(input.as_ref());
     }
 }
@@ -353,8 +355,8 @@ impl BlockInput for Shabal256 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Shabal256 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Shabal256 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         self.engine.input(input.as_ref());
     }
 }
@@ -395,8 +397,8 @@ impl BlockInput for Shabal224 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Shabal224 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Shabal224 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         self.engine.input(input.as_ref());
     }
 }
@@ -437,8 +439,8 @@ impl BlockInput for Shabal192 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Shabal192 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Shabal192 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         self.engine.input(input.as_ref());
     }
 }

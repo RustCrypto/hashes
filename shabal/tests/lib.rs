@@ -1,9 +1,7 @@
 #![no_std]
-#[macro_use]
-extern crate digest;
-extern crate shabal;
 
 use digest::dev::{digest_test, one_million_a};
+use digest::new_test;
 
 new_test!(shabal192_main, "shabal192", shabal::Shabal192, digest_test);
 new_test!(shabal224_main, "shabal224", shabal::Shabal224, digest_test);

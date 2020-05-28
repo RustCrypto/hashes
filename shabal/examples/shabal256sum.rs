@@ -1,5 +1,3 @@
-extern crate shabal;
-
 use shabal::{Digest, Shabal256};
 use std::env;
 use std::fs;
@@ -25,7 +23,7 @@ fn process<D: Digest + Default, R: Read>(reader: &mut R, name: &str) {
             Ok(n) => n,
             Err(_) => return,
         };
-        sh.input(&buffer[..n]);
+        sh.update(&buffer[..n]);
         if n == 0 || n < BUFFER_SIZE {
             break;
         }
