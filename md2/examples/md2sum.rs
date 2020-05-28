@@ -1,5 +1,3 @@
-extern crate md2;
-
 use md2::{Digest, Md2};
 use std::env;
 use std::fs;
@@ -17,7 +15,7 @@ fn process<R: Read>(reader: &mut R, name: &str) {
             Ok(n) => n,
             Err(_) => return,
         };
-        sh.input(&buffer[..n]);
+        sh.update(&buffer[..n]);
         if n == 0 || n < BUFFER_SIZE {
             break;
         }
