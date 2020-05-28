@@ -14,6 +14,7 @@
 #![warn(missing_docs, rust_2018_idioms)]
 
 // TODO(tarcieri): eliminate alloc requirement
+#[macro_use]
 extern crate alloc;
 
 #[macro_use]
@@ -22,6 +23,7 @@ mod lanes;
 // TODO(tarcieri): eliminate usage of `Vec`
 use alloc::vec::Vec;
 use core::cmp::min;
+use digest::{Update, XofReader};
 
 /// The KangarooTwelve extendable-output function (XOF).
 #[derive(Debug, Default)]
@@ -29,34 +31,63 @@ pub struct KangarooTwelve {
     /// Input to be processed
     // TODO(tarcieri): don't store input in a `Vec`
     buffer: Vec<u8>,
+
+    /// Customization string to apply
+    // TODO(tarcieri): don't store customization in a `Vec`
+    customization: Vec<u8>,
+
+    /// Has the XOF output already been consumed?
+    // TODO(tarcieri): allow `XofReader::result` to be called multiple times
+    finished: bool,
 }
 
 impl KangarooTwelve {
-    /// Create a new [`KangarooTwelve`] instance
+    /// Create a new [`KangarooTwelve`] instance.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Create a new [`KangarooTwelve`] instance with the given customization.
+    pub fn new_with_customization(customization: impl AsRef<[u8]>) -> Self {
+        Self {
+            buffer: Vec::new(),
+            customization: customization.as_ref().into(),
+            finished: false,
+        }
+    }
+
+    /// Get the result as a `Vec<u8>`
+    pub fn result_vec(mut self, length: usize) -> Vec<u8> {
+        let mut output = vec![0u8; length];
+        self.read(&mut output);
+        output
+    }
+}
+
+impl Update for KangarooTwelve {
     /// Input data into the hash function
-    pub fn input(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
+    fn update(&mut self, bytes: impl AsRef<[u8]>) {
+        self.buffer.extend_from_slice(bytes.as_ref());
     }
+}
 
-    /// Chained input into the hash function
-    pub fn chain(mut self, bytes: &[u8]) -> Self {
-        self.input(bytes);
-        self
-    }
+impl XofReader for KangarooTwelve {
+    /// Get the resulting output of the function.
+    ///
+    /// Panics if called multiple times on the same instance (TODO: don't panic!)
+    fn read(&mut self, output: &mut [u8]) {
+        assert!(
+            !self.finished,
+            "K12 doesn't support multiple XofReader invocations yet"
+        );
 
-    /// Get the resulting output of the function
-    pub fn result(self, customization: impl AsRef<[u8]>, output_len: usize) -> Vec<u8> {
         let b = 8192;
         let c = 256;
 
         let mut slice = Vec::new(); // S
-        slice.extend_from_slice(self.buffer.as_ref());
-        slice.extend_from_slice(customization.as_ref());
-        slice.extend_from_slice(&right_encode(customization.as_ref().len())[..]);
+        slice.extend_from_slice(&self.buffer);
+        slice.extend_from_slice(&self.customization);
+        slice.extend_from_slice(&right_encode(self.customization.len())[..]);
 
         // === Cut the input string into chunks of b bytes ===
         let n = (slice.len() + b - 1) / b;
@@ -66,9 +97,10 @@ impl KangarooTwelve {
             slices.push(&slice[i * b..ub]);
         }
 
-        if n == 1 {
+        // TODO(tarcieri): get rid of intermediate output buffer
+        let tmp_buffer = if n == 1 {
             // === Process the tree with only a final node ===
-            f(slices[0], 0x07, output_len)
+            f(slices[0], 0x07, output.len())
         } else {
             // === Process the tree with kangaroo hopping ===
             // TODO: in parallel
@@ -86,8 +118,11 @@ impl KangarooTwelve {
             node_star.extend_from_slice(&right_encode(n - 1));
             node_star.extend_from_slice(b"\xFF\xFF");
 
-            f(&node_star[..], 0x06, output_len)
-        }
+            f(&node_star[..], 0x06, output.len())
+        };
+
+        output.copy_from_slice(&tmp_buffer);
+        self.finished = true;
     }
 }
 
@@ -213,7 +248,7 @@ mod test {
     fn empty() {
         // Source: reference paper
         assert_eq!(
-            KangarooTwelve::new().chain(b"").result(b"", 32),
+            KangarooTwelve::new().chain(b"").result_vec(32),
             read_bytes(
                 "1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
                 1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5"
@@ -221,7 +256,7 @@ mod test {
         );
 
         assert_eq!(
-            KangarooTwelve::new().chain(b"").result(b"", 64),
+            KangarooTwelve::new().chain(b"").result_vec(64),
             read_bytes(
                 "1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
                 1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5 42 69 c0 56 b8 c8 2e
@@ -230,7 +265,7 @@ mod test {
         );
 
         assert_eq!(
-            KangarooTwelve::new().chain(b"").result("", 10032)[10000..],
+            KangarooTwelve::new().chain(b"").result_vec(10032)[10000..],
             read_bytes(
                 "e8 dc 56 36 42 f7 22 8c 84
                 68 4c 89 84 05 d3 a8 34 79 91 58 c0 79 b1 28 80 27 7a 1d 28 e2 ff 6d"
@@ -261,7 +296,7 @@ mod test {
         {
             let len = 17usize.pow(i);
             let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
-            let result = KangarooTwelve::new().chain(&m).result("", 32);
+            let result = KangarooTwelve::new().chain(&m).result_vec(32);
             assert_eq!(result, read_bytes(expected[i as usize]));
         }
     }
@@ -282,7 +317,9 @@ mod test {
             let m: Vec<u8> = iter::repeat(0xFF).take(2usize.pow(i) - 1).collect();
             let len = 41usize.pow(i);
             let c: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
-            let result = KangarooTwelve::new().chain(&m).result(c, 32);
+            let result = KangarooTwelve::new_with_customization(c)
+                .chain(&m)
+                .result_vec(32);
             assert_eq!(result, read_bytes(expected[i as usize]));
         }
     }
