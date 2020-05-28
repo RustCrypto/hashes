@@ -2,14 +2,14 @@ use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U128, U28, U32, U48, U64};
 use digest::generic_array::GenericArray;
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
-use consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};
+use crate::consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};
 
+#[cfg(any(not(feature = "asm"), target_arch = "aarch64"))]
+use crate::sha512_utils::compress512;
 #[cfg(all(feature = "asm", not(target_arch = "aarch64")))]
 use sha2_asm::compress512;
-#[cfg(any(not(feature = "asm"), target_arch = "aarch64"))]
-use sha512_utils::compress512;
 
 type BlockSize = U128;
 type Block = GenericArray<u8, BlockSize>;
@@ -50,7 +50,7 @@ impl Engine512 {
         }
     }
 
-    fn input(&mut self, input: &[u8]) {
+    fn update(&mut self, input: &[u8]) {
         let (res, over) = self.len.1.overflowing_add((input.len() as u64) << 3);
         self.len.1 = res;
         if over {
@@ -92,9 +92,9 @@ impl BlockInput for Sha512 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Sha512 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
-        self.engine.input(input.as_ref());
+impl Update for Sha512 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
+        self.engine.update(input.as_ref());
     }
 }
 
@@ -135,9 +135,9 @@ impl BlockInput for Sha384 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Sha384 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
-        self.engine.input(input.as_ref());
+impl Update for Sha384 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
+        self.engine.update(input.as_ref());
     }
 }
 
@@ -178,9 +178,9 @@ impl BlockInput for Sha512Trunc256 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Sha512Trunc256 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
-        self.engine.input(input.as_ref());
+impl Update for Sha512Trunc256 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
+        self.engine.update(input.as_ref());
     }
 }
 
@@ -221,9 +221,9 @@ impl BlockInput for Sha512Trunc224 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Sha512Trunc224 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
-        self.engine.input(input.as_ref());
+impl Update for Sha512Trunc224 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
+        self.engine.update(input.as_ref());
     }
 }
 

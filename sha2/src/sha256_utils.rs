@@ -1,8 +1,8 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
 
+use crate::consts::{BLOCK_LEN, K32X4};
+use crate::simd::u32x4;
 use block_buffer::byteorder::{ByteOrder, BE};
-use consts::{BLOCK_LEN, K32X4};
-use simd::u32x4;
 
 /// Not an intrinsic, but works like an unaligned load.
 #[inline]
