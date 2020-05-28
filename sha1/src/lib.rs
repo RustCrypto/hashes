@@ -12,7 +12,7 @@
 //! let mut hasher = Sha1::new();
 //!
 //! // process input message
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 20]
@@ -25,8 +25,11 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/SHA-1
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![deny(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms)]
 
 // Give relevant error messages if the user tries to enable AArch64 asm on unsupported platforms.
 #[cfg(all(
@@ -52,7 +55,6 @@ compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" when build
 ))]
 compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm detected at runtime, or build with the crypto extensions support, for instance with RUSTFLAGS='-C target-cpu=native' on a compatible CPU.");
 
-extern crate block_buffer;
 #[macro_use]
 extern crate opaque_debug;
 #[macro_use]
@@ -69,6 +71,7 @@ extern crate sha1_asm;
 #[cfg(all(feature = "asm", not(feature = "asm-aarch64")))]
 #[inline(always)]
 fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
+    #[allow(unsafe_code)]
     let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
     sha1_asm::compress(state, block);
 }
@@ -81,6 +84,7 @@ fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
     // that macro is stabilised and https://github.com/rust-lang/rfcs/pull/2725 is implemented
     // to let us use it on no_std.
     if aarch64::sha1_supported() {
+        #[allow(unsafe_code)]
         let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
         sha1_asm::compress(state, block);
     } else {
@@ -91,17 +95,17 @@ fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
 #[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
 mod utils;
 #[cfg(not(feature = "asm"))]
-use utils::compress;
+use crate::utils::compress;
 
 use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U20, U64};
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
 mod consts;
-use consts::{H, STATE_LEN};
+use crate::consts::{H, STATE_LEN};
 
 /// Structure representing the state of a SHA-1 computation
 #[derive(Clone)]
@@ -125,8 +129,8 @@ impl BlockInput for Sha1 {
     type BlockSize = U64;
 }
 
-impl Input for Sha1 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Sha1 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
         // Assumes that `length_bits<<3` will not overflow
         self.len += input.len() as u64;

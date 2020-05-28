@@ -1,10 +1,10 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
 
+use crate::consts::{BLOCK_LEN, K0, K1, K2, K3};
+use crate::simd::u32x4;
 use block_buffer::byteorder::{ByteOrder, BE};
-use consts::{BLOCK_LEN, K0, K1, K2, K3};
 use digest::generic_array::typenum::U64;
 use digest::generic_array::GenericArray;
-use simd::u32x4;
 
 type Block = GenericArray<u8, U64>;
 
