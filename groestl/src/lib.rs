@@ -19,7 +19,7 @@
 //! let mut hasher = Groestl256::default();
 //!
 //! // process input message
-//! hasher.input(b"my message");
+//! hasher.update(b"my message");
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 32]
@@ -34,13 +34,17 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/Grøstl
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-#[macro_use]
-extern crate opaque_debug;
+
+// TODO: import all digest macros via 2018 module syntax
 #[macro_use]
 pub extern crate digest;
-extern crate block_buffer;
+
+#[macro_use]
+extern crate opaque_debug;
+
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -48,7 +52,7 @@ use digest::generic_array::typenum::{Unsigned, U128, U28, U32, U48, U64};
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
 use digest::InvalidOutputSize;
-use digest::{BlockInput, FixedOutput, Input, Reset, VariableOutput};
+use digest::{BlockInput, FixedOutput, Reset, Update, VariableOutput};
 
 mod consts;
 mod groestl;
@@ -57,7 +61,7 @@ mod state;
 #[macro_use]
 mod macros;
 
-use groestl::Groestl;
+use crate::groestl::Groestl;
 
 impl_groestl!(Groestl512, U64, U128);
 impl_groestl!(Groestl384, U48, U128);

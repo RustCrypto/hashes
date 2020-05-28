@@ -1,10 +1,10 @@
 use core::ops::Div;
 
+use crate::consts::{B, C_P, C_Q, SBOX, SHIFTS_P, SHIFTS_P_WIDE, SHIFTS_Q, SHIFTS_Q_WIDE};
+use crate::matrix::Matrix;
 use block_buffer::byteorder::{ByteOrder, BE};
-use consts::{B, C_P, C_Q, SBOX, SHIFTS_P, SHIFTS_P_WIDE, SHIFTS_Q, SHIFTS_Q_WIDE};
 use digest::generic_array::typenum::{Quot, U8};
 use digest::generic_array::{ArrayLength, GenericArray};
-use matrix::Matrix;
 
 #[derive(Copy, Clone)]
 pub struct GroestlState<BlockSize>
@@ -189,7 +189,7 @@ where
 #[cfg(test)]
 mod test {
     use super::{xor_generic_array, GroestlState};
-    use consts::{C_P, C_Q, SHIFTS_P};
+    use crate::consts::{C_P, C_Q, SHIFTS_P};
     use digest::generic_array::typenum::U64;
     use digest::generic_array::GenericArray;
 
