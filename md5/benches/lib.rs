@@ -1,7 +1,5 @@
 #![no_std]
 #![feature(test)]
-#[macro_use]
-extern crate digest;
-extern crate md5;
 
+use digest::bench;
 bench!(md5::Md5);
