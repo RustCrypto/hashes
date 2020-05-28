@@ -11,6 +11,8 @@ including SHA-224, SHA-256, SHA-384, and SHA-512.
 
 [Documentation][docs-link]
 
+<img src="https://raw.githubusercontent.com/RustCrypto/meta/master/img/hashes/sha2.png" width="480px">
+
 ## Minimum Supported Rust Version
 
 Rust **1.41** or higher.
