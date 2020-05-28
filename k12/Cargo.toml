@@ -1,6 +1,6 @@
 [package]
 name = "k12"
-version = "0.0.1"
+version = "0.1.0-pre"
 description = "Experimental pure Rust implementation of the KangarooTwelve hash function"
 authors = ["Diggory Hardy <github1@dhardy.name>"]
 license = "Apache-2.0 OR MIT"

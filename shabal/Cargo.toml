@@ -1,6 +1,6 @@
 [package]
 name = "shabal"
-version = "0.2.0"
+version = "0.3.0-pre"
 description = "Shabal hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
