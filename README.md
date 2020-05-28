@@ -12,51 +12,53 @@ bare-metal or WebAssembly programming.
 standards is not a primary concern, we strongly recommend to use either
 BLAKE2, SHA-2 or SHA-3.
 
-| Name | Crates.io  | Documentation  | Build Status | [Security Level] |
-|------|------------|----------------|--------------|------------------|
-| [BLAKE2](https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2) | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | ![build](https://github.com/rustcrypto/hashes/workflows/blake2/badge.svg?branch=master&event=push) | :green_heart: |
-| [GOST94](https://en.wikipedia.org/wiki/GOST_(hash_function)) (GOST R 34.11-94) | [![crates.io](https://img.shields.io/crates/v/gost94.svg)](https://crates.io/crates/gost94) | [![Documentation](https://docs.rs/gost94/badge.svg)](https://docs.rs/gost94) | ![build](https://github.com/rustcrypto/hashes/workflows/gost94/badge.svg?branch=master&event=push) | :yellow_heart: |
-| [Grøstl](https://en.wikipedia.org/wiki/Grøstl) (Groestl) | [![crates.io](https://img.shields.io/crates/v/groestl.svg)](https://crates.io/crates/groestl) | [![Documentation](https://docs.rs/groestl/badge.svg)](https://docs.rs/groestl) | ![build](https://github.com/rustcrypto/hashes/workflows/groestl/badge.svg?branch=master&event=push) | :green_heart: |
-| [KangarooTwelve](https://keccak.team/kangarootwelve.html) | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | ![build](https://github.com/rustcrypto/hashes/workflows/k12/badge.svg?branch=master&event=push) | :green_heart: |
-| [MD2](https://en.wikipedia.org/wiki/MD2_(cryptography)) | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) |  [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | ![build](https://github.com/rustcrypto/hashes/workflows/md2/badge.svg?branch=master&event=push) | :broken_heart: |
-| [MD4](https://en.wikipedia.org/wiki/MD4) | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) |  [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![build](https://github.com/rustcrypto/hashes/workflows/md4/badge.svg?branch=master&event=push) | :broken_heart: |
-| [MD5](https://en.wikipedia.org/wiki/MD5) [:exclamation:](#crate-names) | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![build](https://github.com/rustcrypto/hashes/workflows/md5/badge.svg?branch=master&event=push) | :broken_heart: |
-| [RIPEMD-160](https://en.wikipedia.org/wiki/RIPEMD) | [![crates.io](https://img.shields.io/crates/v/ripemd160.svg)](https://crates.io/crates/ripemd160) |  [![Documentation](https://docs.rs/ripemd160/badge.svg)](https://docs.rs/ripemd160) | ![build](https://github.com/rustcrypto/hashes/workflows/ripemd160/badge.svg?branch=master&event=push) | :green_heart: |
-| [RIPEMD-320](https://en.wikipedia.org/wiki/RIPEMD) | [![crates.io](https://img.shields.io/crates/v/ripemd320.svg)](https://crates.io/crates/ripemd320) |  [![Documentation](https://docs.rs/ripemd320/badge.svg)](https://docs.rs/ripemd320) | ![build](https://github.com/rustcrypto/hashes/workflows/ripemd320/badge.svg?branch=master&event=push) | :green_heart:* |
-| [SHA-1](https://en.wikipedia.org/wiki/SHA-1) [:exclamation:](#crate-names) | [![crates.io](https://img.shields.io/crates/v/sha-1.svg)](https://crates.io/crates/sha-1) | [![Documentation](https://docs.rs/sha-1/badge.svg)](https://docs.rs/sha-1) | ![build](https://github.com/rustcrypto/hashes/workflows/sha1/badge.svg?branch=master&event=push) | :broken_heart: |
-| [SHA-2](https://en.wikipedia.org/wiki/SHA-2) | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) |  [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![build](https://github.com/rustcrypto/hashes/workflows/sha2/badge.svg?branch=master&event=push) | :green_heart: |
-| [SHA-3](https://en.wikipedia.org/wiki/SHA-3) (Keccak) | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) |  [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![build](https://github.com/rustcrypto/hashes/workflows/sha3/badge.svg?branch=master&event=push) | :green_heart: |
-| [SHABAL](https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf) | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) |  [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![build](https://github.com/rustcrypto/hashes/workflows/shabal/badge.svg?branch=master&event=push) | :green_heart: |
-| [Streebog](https://en.wikipedia.org/wiki/Streebog) (GOST R 34.11-2012) | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) |  [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | ![build](https://github.com/rustcrypto/hashes/workflows/streebog/badge.svg?branch=master&event=push) | :yellow_heart: |
-| [Whirlpool](https://en.wikipedia.org/wiki/Whirlpool_(cryptography)) | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) |  [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![build](https://github.com/rustcrypto/hashes/workflows/whirlpool/badge.svg?branch=master&event=push) | :green_heart: |
+| Name        | Algorithm  | Crates.io | Documentation | Build Status | [Security] |
+|-------------|------------|-----------|---------------|--------------|------------|
+| `blake2`    | [BLAKE2] | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | ![build](https://github.com/rustcrypto/hashes/workflows/blake2/badge.svg?branch=master&event=push) | :green_heart: |
+| `gost94`    | [GOST94] (GOST R 34.11-94) | [![crates.io](https://img.shields.io/crates/v/gost94.svg)](https://crates.io/crates/gost94) | [![Documentation](https://docs.rs/gost94/badge.svg)](https://docs.rs/gost94) | ![build](https://github.com/rustcrypto/hashes/workflows/gost94/badge.svg?branch=master&event=push) | :yellow_heart: |
+| `groestl`   | [Grøstl] (Groestl) | [![crates.io](https://img.shields.io/crates/v/groestl.svg)](https://crates.io/crates/groestl) | [![Documentation](https://docs.rs/groestl/badge.svg)](https://docs.rs/groestl) | ![build](https://github.com/rustcrypto/hashes/workflows/groestl/badge.svg?branch=master&event=push) | :green_heart: |
+| `k12`       | [KangarooTwelve] | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | ![build](https://github.com/rustcrypto/hashes/workflows/k12/badge.svg?branch=master&event=push) | :green_heart: |
+| `md2`       | [MD2] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) |  [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | ![build](https://github.com/rustcrypto/hashes/workflows/md2/badge.svg?branch=master&event=push) | :broken_heart: |
+| `md4`       | [MD4] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) |  [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![build](https://github.com/rustcrypto/hashes/workflows/md4/badge.svg?branch=master&event=push) | :broken_heart: |
+| `md-5` [:exclamation:] | [MD5]  | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![build](https://github.com/rustcrypto/hashes/workflows/md5/badge.svg?branch=master&event=push) | :broken_heart: |
+| `ripemd160` | [RIPEMD-160] | [![crates.io](https://img.shields.io/crates/v/ripemd160.svg)](https://crates.io/crates/ripemd160) |  [![Documentation](https://docs.rs/ripemd160/badge.svg)](https://docs.rs/ripemd160) | ![build](https://github.com/rustcrypto/hashes/workflows/ripemd160/badge.svg?branch=master&event=push) | :green_heart: |
+| `ripemd320` | [RIPEMD-320] | [![crates.io](https://img.shields.io/crates/v/ripemd320.svg)](https://crates.io/crates/ripemd320) |  [![Documentation](https://docs.rs/ripemd320/badge.svg)](https://docs.rs/ripemd320) | ![build](https://github.com/rustcrypto/hashes/workflows/ripemd320/badge.svg?branch=master&event=push) | :green_heart:* |
+| `sha-1` [:exclamation:] | [SHA-1] | [![crates.io](https://img.shields.io/crates/v/sha-1.svg)](https://crates.io/crates/sha-1) | [![Documentation](https://docs.rs/sha-1/badge.svg)](https://docs.rs/sha-1) | ![build](https://github.com/rustcrypto/hashes/workflows/sha1/badge.svg?branch=master&event=push) | :broken_heart: |
+| `sha2`      | [SHA-2] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) |  [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![build](https://github.com/rustcrypto/hashes/workflows/sha2/badge.svg?branch=master&event=push) | :green_heart: |
+| `sha3`      | [SHA-3] (Keccak) | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) |  [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![build](https://github.com/rustcrypto/hashes/workflows/sha3/badge.svg?branch=master&event=push) | :green_heart: |
+| `shabal`    | [SHABAL] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) |  [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![build](https://github.com/rustcrypto/hashes/workflows/shabal/badge.svg?branch=master&event=push) | :green_heart: |
+| `streebog`  | [Streebog] (GOST R 34.11-2012) | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) |  [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | ![build](https://github.com/rustcrypto/hashes/workflows/streebog/badge.svg?branch=master&event=push) | :yellow_heart: |
+| `whirlpool` | [Whirlpool] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) |  [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![build](https://github.com/rustcrypto/hashes/workflows/whirlpool/badge.svg?branch=master&event=push) | :green_heart: |
 
-[Security Level]: https://en.wikipedia.org/wiki/Hash_function_security_summary
 \* RIPEMD-320 provides only the same security as RIPEMD-160
 
-### Security Level Legend
-
-The following describes the security level ratings associated with each
-hash function (i.e. algorithms, not the specific implementation):
-
-| Heart | Description |
-|-------|-------------|
-| :green_heart: | No known successful attacks |
-| :yellow_heart: | Theoretical break: security lower than claimed |
-| :broken_heart: | Attack demonstrated in practice: avoid if at all possible |
-
-### Minimum Supported Rust Version (MSRV)
-All crates in this repository support Rust 1.21 or higher. In future
-minimally supported version of Rust can be changed, but it will be done with
-a minor version bump.
+[Security]: https://en.wikipedia.org/wiki/Hash_function_security_summary
+[:exclamation:]: #crate-names
 
 ### Crate names
-
 Whenever possible crates are published under the the same name as the crate
 folder. Owners of `md5` and `sha1` crates declined
 ([1](https://github.com/stainless-steel/md5/pull/2),
 [2](https://github.com/mitsuhiko/rust-sha1/issues/17)) to participate in this
 project. This is why crates marked by :exclamation: are published under
 `md-5` and `sha-1` names respectively.
+
+### Security Level Legend
+The following describes the security level ratings associated with each
+hash function (i.e. algorithms, not the specific implementation):
+
+| Heart          | Description |
+|----------------|-------------|
+| :green_heart:  | No known successful attacks |
+| :yellow_heart: | Theoretical break: security lower than claimed |
+| :broken_heart: | Attack demonstrated in practice: avoid if at all possible |
+
+See the [Security] page on Wikipedia for more information.
+
+### Minimum Supported Rust Version (MSRV)
+All crates in this repository support Rust 1.21 or higher. In future
+minimally supported version of Rust can be changed, but it will be done with
+a minor version bump.
 
 ## Usage
 Let us demonstrate how to use crates in this repository using BLAKE2b as an
@@ -183,9 +185,29 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
 
+[//]: # (footnotes)
+
 [1]: https://en.wikipedia.org/wiki/Cryptographic_hash_function
 [2]: https://docs.rs/generic-array
 [3]: https://doc.rust-lang.org/std/io/trait.Read.html
 [4]: https://doc.rust-lang.org/std/io/trait.Write.html
 [5]: https://en.wikipedia.org/wiki/Hash-based_message_authentication_code
 [6]: https://github.com/RustCrypto/MACs
+
+[//]: # (algorithms)
+
+[BLAKE2]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
+[GOST94]: https://en.wikipedia.org/wiki/GOST_(hash_function)
+[Grøstl]: https://en.wikipedia.org/wiki/Grøstl
+[KangarooTwelve]: https://keccak.team/kangarootwelve.html
+[MD2]: https://en.wikipedia.org/wiki/MD2_(cryptography)
+[MD4]: https://en.wikipedia.org/wiki/MD4
+[MD5]: https://en.wikipedia.org/wiki/MD5
+[RIPEMD-160]: https://en.wikipedia.org/wiki/RIPEMD
+[RIPEMD-320]: https://en.wikipedia.org/wiki/RIPEMD
+[SHA-1]: https://en.wikipedia.org/wiki/SHA-1
+[SHA-2]: https://en.wikipedia.org/wiki/SHA-2
+[SHA-3]: https://en.wikipedia.org/wiki/SHA-3
+[SHABAL]: https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
+[Streebog]: https://en.wikipedia.org/wiki/Streebog
+[Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(cryptography)
