@@ -9,7 +9,11 @@
 // <https://github.com/dhardy/hash-bench/blob/master/src/k12.rs>
 
 #![no_std]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![deny(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms)]
 
+// TODO(tarcieri): eliminate alloc requirement
 extern crate alloc;
 
 #[macro_use]
@@ -136,9 +140,12 @@ fn f(input: &[u8], suffix: u8, mut output_len: usize) -> Vec<u8> {
     output
 }
 
+#[allow(unsafe_code)]
 fn read_u64(bytes: &[u8; 8]) -> u64 {
     unsafe { *(bytes as *const _ as *const u64) }.to_le()
 }
+
+#[allow(unsafe_code)]
 fn write_u64(val: u64) -> [u8; 8] {
     unsafe { *(&val.to_le() as *const u64 as *const _) }
 }

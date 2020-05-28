@@ -1,6 +1,7 @@
 /// Copied from `arrayref` crate
 macro_rules! array_ref {
     ($arr:expr, $offset:expr, $len:expr) => {{
+        #[allow(unsafe_code)]
         {
             #[inline]
             unsafe fn as_array<T>(slice: &[T]) -> &[T; $len] {
