@@ -1,7 +1,5 @@
 #![no_std]
 #![feature(test)]
-#[macro_use]
-extern crate digest;
-use streebog;
 
+use digst::bench;
 bench!(streebog::Streebog256);

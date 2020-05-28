@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::identity_op, clippy::needless_range_loop, clippy::double_parens))]
 
+use crate::consts::*;
 use block_buffer::byteorder::{ByteOrder, BE};
-use consts::*;
 
 pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
     let mut k = [0u64; 8];

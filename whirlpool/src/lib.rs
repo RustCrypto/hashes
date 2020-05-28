@@ -22,7 +22,7 @@
 //! // create a hasher object, to use it do not forget to import `Digest` trait
 //! let mut hasher = Whirlpool::new();
 //! // write input message
-//! hasher.input(b"Hello Whirlpool");
+//! hasher.update(b"Hello Whirlpool");
 //! // read hash digest (it will consume hasher)
 //! let result = hasher.result();
 //!
@@ -37,14 +37,17 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/Whirlpool_(hash_function)
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![deny(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms)]
+
 #[macro_use]
 extern crate opaque_debug;
 #[macro_use]
 pub extern crate digest;
-extern crate block_buffer;
-extern crate byte_tools;
+
 #[cfg(feature = "std")]
 extern crate std;
 #[cfg(feature = "asm")]
@@ -53,7 +56,7 @@ extern crate whirlpool_asm as utils;
 #[cfg(not(feature = "asm"))]
 mod utils;
 
-use utils::compress;
+use crate::utils::compress;
 
 use block_buffer::block_padding::Iso7816;
 #[cfg(not(feature = "asm"))]
@@ -63,7 +66,7 @@ use byte_tools::zero;
 use digest::generic_array::typenum::U64;
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
 #[cfg(not(feature = "asm"))]
 mod consts;
@@ -95,7 +98,10 @@ impl Default for Whirlpool {
 }
 
 fn convert(block: &GenericArray<u8, U64>) -> &[u8; 64] {
-    unsafe { &*(block.as_ptr() as *const [u8; 64]) }
+    #[allow(unsafe_code)]
+    unsafe {
+        &*(block.as_ptr() as *const [u8; 64])
+    }
 }
 
 impl Whirlpool {
@@ -159,8 +165,8 @@ impl BlockInput for Whirlpool {
     type BlockSize = BlockSize;
 }
 
-impl Input for Whirlpool {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Whirlpool {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
         self.update_len(input.len() as u64);
         let hash = &mut self.hash;
