@@ -25,7 +25,7 @@
 //! let mut hasher = Sha3_256::new();
 //!
 //! // write input message
-//! hasher.input(b"abc");
+//! hasher.update(b"abc");
 //!
 //! // read hash digest
 //! let result = hasher.result();
@@ -40,12 +40,12 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/SHA-3
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-#![deny(missing_docs, warnings)]
-extern crate block_buffer;
-extern crate byte_tools;
-extern crate keccak;
+#![deny(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms)]
+
 #[macro_use]
 extern crate opaque_debug;
 #[macro_use]
@@ -59,7 +59,7 @@ use digest::generic_array::typenum::{
 };
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
-use digest::{BlockInput, ExtendableOutput, FixedOutput, Input, Reset};
+use digest::{BlockInput, ExtendableOutput, FixedOutput, Reset, Update};
 
 mod paddings;
 #[macro_use]
@@ -67,8 +67,8 @@ mod macros;
 mod reader;
 mod state;
 
-pub use reader::Sha3XofReader;
-use state::Sha3State;
+pub use crate::reader::Sha3XofReader;
+use crate::state::Sha3State;
 
 sha3_impl!(
     Keccak224,
