@@ -2,6 +2,6 @@
 #![feature(test)]
 #[macro_use]
 extern crate digest;
-extern crate md4;
+use md4;
 
 bench!(md4::Md4);

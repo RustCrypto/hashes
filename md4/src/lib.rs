@@ -12,7 +12,7 @@
 //! let mut hasher = Md4::new();
 //!
 //! // process input message
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 16]
@@ -25,25 +25,28 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/MD4
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-#![cfg_attr(feature = "cargo-clippy", allow(clippy::many_single_char_names))]
+#![deny(unsafe_code)]
+#![warn(rust_2018_idioms)]
+
 #[macro_use]
 extern crate opaque_debug;
 #[macro_use]
 pub extern crate digest;
-extern crate block_buffer;
+
 extern crate fake_simd as simd;
 #[cfg(feature = "std")]
 extern crate std;
 
+use crate::simd::u32x4;
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U16, U64};
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
-use digest::{BlockInput, FixedOutput, Input, Reset};
-use simd::u32x4;
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
 // initial values for Md4State
 const S: u32x4 = u32x4(0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476);
@@ -151,8 +154,8 @@ impl BlockInput for Md4 {
     type BlockSize = U64;
 }
 
-impl Input for Md4 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Md4 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
         // Unlike Sha1 and Sha2, the length value in MD4 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
