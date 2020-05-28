@@ -6,7 +6,7 @@ use digest;
 use digest::generic_array::typenum::{Quot, U8};
 use digest::generic_array::{ArrayLength, GenericArray};
 
-use state::{xor_generic_array, GroestlState};
+use crate::state::{xor_generic_array, GroestlState};
 
 #[derive(Clone)]
 pub struct Groestl<BlockSize>

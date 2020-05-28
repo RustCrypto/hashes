@@ -17,8 +17,8 @@ macro_rules! impl_groestl {
             type BlockSize = $block;
         }
 
-        impl Input for $state {
-            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        impl Update for $state {
+            fn update(&mut self, input: impl AsRef<[u8]>) {
                 let input = input.as_ref();
                 self.groestl.process(input);
             }
@@ -56,8 +56,8 @@ macro_rules! impl_variable_groestl {
             type BlockSize = $block;
         }
 
-        impl Input for $state {
-            fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+        impl Update for $state {
+            fn update(&mut self, input: impl AsRef<[u8]>) {
                 self.groestl.process(input.as_ref());
             }
         }

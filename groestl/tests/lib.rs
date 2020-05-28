@@ -1,9 +1,6 @@
 #![no_std]
-#[macro_use]
-extern crate digest;
-extern crate groestl;
 
-use digest::dev::digest_test;
+use digest::{dev::digest_test, new_test};
 
 new_test!(
     groestl_224_main,
