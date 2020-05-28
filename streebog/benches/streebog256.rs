@@ -2,6 +2,6 @@
 #![feature(test)]
 #[macro_use]
 extern crate digest;
-extern crate streebog;
+use streebog;
 
 bench!(streebog::Streebog256);

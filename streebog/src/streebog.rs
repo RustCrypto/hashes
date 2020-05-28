@@ -4,12 +4,12 @@ use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use byte_tools::copy;
 use core::marker::PhantomData;
-use digest::generic_array::typenum::{Unsigned, U64};
+use digest::generic_array::typenum::U64;
 use digest::generic_array::{ArrayLength, GenericArray};
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
-use consts::{BLOCK_SIZE, C};
-use table::SHUFFLED_LIN_TABLE;
+use crate::consts::{BLOCK_SIZE, C};
+use crate::table::SHUFFLED_LIN_TABLE;
 
 type Block = [u8; 64];
 
@@ -85,8 +85,9 @@ impl StreebogState {
     }
 
     fn process_block(&mut self, block: &GenericArray<u8, U64>, msg_len: u8) {
-        let n = self.n;
+        #[allow(unsafe_code)]
         let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
+        let n = self.n;
         self.g(&n, block);
         self.update_n(msg_len);
         self.update_sigma(block);
@@ -130,11 +131,11 @@ where
     type BlockSize = U64;
 }
 
-impl<N> Input for Streebog<N>
+impl<N> Update for Streebog<N>
 where
     N: ArrayLength<u8> + Copy,
 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         let self_state = &mut self.state;
         self.buffer.input(input.as_ref(), |d| {
             self_state.process_block(d, BLOCK_SIZE as u8)

@@ -1,7 +1,7 @@
 #![no_std]
 #[macro_use]
 extern crate digest;
-extern crate streebog;
+use streebog;
 
 use digest::dev::digest_test;
 

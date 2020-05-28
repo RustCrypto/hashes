@@ -2075,7 +2075,7 @@ pub const SHUFFLED_LIN_TABLE: [[u64; 256]; 8] = [
 #[cfg(test)]
 mod test {
     use super::SHUFFLED_LIN_TABLE;
-    use consts::{A, P};
+    use crate::consts::{A, P};
 
     fn gen_table() -> [[u64; 256]; 8] {
         let mut table: [[u64; 256]; 8] = [[0; 256]; 8];
