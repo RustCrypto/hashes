@@ -12,7 +12,7 @@
 //! let mut hasher = Ripemd160::new();
 //!
 //! // process input message
-//! hasher.input(b"Hello world!");
+//! hasher.update(b"Hello world!");
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 20]
@@ -25,9 +25,12 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/RIPEMD
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-extern crate block_buffer;
+#![deny(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms)]
+
 #[macro_use]
 extern crate opaque_debug;
 #[macro_use]
@@ -40,10 +43,10 @@ use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U20, U64};
 use digest::generic_array::GenericArray;
 pub use digest::Digest;
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
 mod block;
-use block::{process_msg_block, DIGEST_BUF_LEN, H0};
+use crate::block::{process_msg_block, DIGEST_BUF_LEN, H0};
 
 /// Structure representing the state of a Ripemd160 computation
 #[derive(Clone)]
@@ -67,8 +70,8 @@ impl BlockInput for Ripemd160 {
     type BlockSize = U64;
 }
 
-impl Input for Ripemd160 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
+impl Update for Ripemd160 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += input.len() as u64;
