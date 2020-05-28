@@ -29,7 +29,7 @@
 //! let mut hasher = Sha256::new();
 //!
 //! // write input message
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //!
 //! // read hash digest and consume hasher
 //! let result = hasher.result();
@@ -40,7 +40,7 @@
 //!
 //! // same for Sha512
 //! let mut hasher = Sha512::new();
-//! hasher.input(b"hello world");
+//! hasher.update(b"hello world");
 //! let result = hasher.result();
 //!
 //! assert_eq!(result[..], hex!("
@@ -57,6 +57,7 @@
 
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
+#![warn(missing_docs, rust_2018_idioms)]
 
 // Give relevant error messages if the user tries to enable AArch64 asm on unsupported platforms.
 #[cfg(all(
@@ -82,7 +83,6 @@ compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" when build
 ))]
 compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm detected at runtime, or build with the crypto extensions support, for instance with RUSTFLAGS='-C target-cpu=native' on a compatible CPU.");
 
-extern crate block_buffer;
 extern crate fake_simd as simd;
 #[macro_use]
 extern crate opaque_debug;
@@ -105,10 +105,10 @@ mod sha512;
 #[cfg(any(not(feature = "asm"), target_arch = "aarch64", feature = "compress"))]
 mod sha512_utils;
 
+pub use crate::sha256::{Sha224, Sha256};
+pub use crate::sha512::{Sha384, Sha512, Sha512Trunc224, Sha512Trunc256};
 pub use digest::Digest;
-pub use sha256::{Sha224, Sha256};
 #[cfg(feature = "compress")]
 pub use sha256_utils::compress256;
-pub use sha512::{Sha384, Sha512, Sha512Trunc224, Sha512Trunc256};
 #[cfg(feature = "compress")]
 pub use sha512_utils::compress512;

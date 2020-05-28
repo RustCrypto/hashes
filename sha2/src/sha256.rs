@@ -2,12 +2,12 @@ use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U28, U32, U64};
 use digest::generic_array::GenericArray;
-use digest::{BlockInput, FixedOutput, Input, Reset};
+use digest::{BlockInput, FixedOutput, Reset, Update};
 
-use consts::{H224, H256, STATE_LEN};
+use crate::consts::{H224, H256, STATE_LEN};
 
 #[cfg(not(feature = "asm"))]
-use sha256_utils::compress256;
+use crate::sha256_utils::compress256;
 #[cfg(feature = "asm")]
 use sha2_asm::compress256;
 
@@ -64,7 +64,7 @@ impl Engine256 {
         }
     }
 
-    fn input(&mut self, input: &[u8]) {
+    fn update(&mut self, input: &[u8]) {
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += (input.len() as u64) << 3;
         let self_state = &mut self.state;
@@ -104,9 +104,9 @@ impl BlockInput for Sha256 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Sha256 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
-        self.engine.input(input.as_ref());
+impl Update for Sha256 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
+        self.engine.update(input.as_ref());
     }
 }
 
@@ -146,9 +146,9 @@ impl BlockInput for Sha224 {
     type BlockSize = BlockSize;
 }
 
-impl Input for Sha224 {
-    fn input<B: AsRef<[u8]>>(&mut self, input: B) {
-        self.engine.input(input.as_ref());
+impl Update for Sha224 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
+        self.engine.update(input.as_ref());
     }
 }
 

@@ -1,7 +1,5 @@
 #![no_std]
 #![feature(test)]
-#[macro_use]
-extern crate digest;
-extern crate sha2;
 
+use digest::bench;
 bench!(sha2::Sha256);

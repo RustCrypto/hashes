@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 #![cfg_attr(feature = "cargo-clippy", allow(clippy::unreadable_literal))]
 
-use simd::u32x4;
-use simd::u64x2;
+use crate::simd::u32x4;
+use crate::simd::u64x2;
 
 pub const STATE_LEN: usize = 8;
 pub const BLOCK_LEN: usize = 16;
