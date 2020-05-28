@@ -19,7 +19,7 @@
 //! // create a hasher object, to use it do not forget to import `Digest` trait
 //! let mut hasher = Streebog256::new();
 //! // write input message
-//! hasher.input(b"my message");
+//! hasher.update(b"my message");
 //! // read hash digest (it will consume hasher)
 //! let result = hasher.result();
 //!
@@ -29,7 +29,7 @@
 //!
 //! // same for Streebog512
 //! let mut hasher = Streebog512::new();
-//! hasher.input(b"my message");
+//! hasher.update(b"my message");
 //! let result = hasher.result();
 //!
 //! assert_eq!(result[..], hex!("
@@ -43,10 +43,12 @@
 //!
 //! [1]: https://en.wikipedia.org/wiki/Streebog
 //! [2]: https://github.com/RustCrypto/hashes
+
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-extern crate block_buffer;
-extern crate byte_tools;
+#![deny(unsafe_code)]
+#![warn(missing_docs, rust_2018_idioms)]
+
 #[macro_use]
 pub extern crate digest;
 #[macro_use]
@@ -57,13 +59,16 @@ extern crate std;
 use digest::generic_array::typenum::{U32, U64};
 pub use digest::Digest;
 #[cfg(feature = "std")]
-use digest::Input;
+use digest::Update;
 
 mod consts;
 mod streebog;
 mod table;
 
+/// Streebog256
 pub type Streebog256 = streebog::Streebog<U32>;
+
+/// Streebog512
 pub type Streebog512 = streebog::Streebog<U64>;
 
 impl_opaque_debug!(Streebog512);
