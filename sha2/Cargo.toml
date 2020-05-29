@@ -15,15 +15,15 @@ keywords = ["crypto", "sha2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "0.9.0-pre", git = "https://github.com/RustCrypto/traits" }
-block-buffer = { version = "0.7", git = "https://github.com/RustCrypto/utils" }
+digest = { version = "0.9.0-pre" }
+block-buffer = { version = "0.7" }
 fake-simd = "0.1"
 opaque-debug = "0.2"
 sha2-asm = { version = "0.5", optional = true }
 libc = { version = "0.2.68", optional = true }
 
 [dev-dependencies]
-digest = { version = "0.9.0-pre", features = ["dev"], git = "https://github.com/RustCrypto/traits" }
+digest = { version = "0.9.0-pre", features = ["dev"] }
 hex-literal = "0.1"
 
 [features]
