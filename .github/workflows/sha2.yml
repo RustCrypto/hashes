@@ -7,9 +7,14 @@ on:
       - "Cargo.*"
   push:
     branches: master
-    paths:
-      - "sha2/**"
-      - "Cargo.*"
+
+defaults:
+  run:
+    working-directory: sha2
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-Dwarnings"
 
 jobs:
   build:
@@ -31,7 +36,7 @@ jobs:
           target: ${{ matrix.target }}
           override: true
       - run: cargo build --no-default-features --release --target ${{ matrix.target }}
-        working-directory: sha2
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -47,8 +52,5 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
       - run: cargo test --no-default-features
-        working-directory: sha2
       - run: cargo test
-        working-directory: sha2
       - run: cargo test --features asm
-        working-directory: sha2

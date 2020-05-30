@@ -11,6 +11,14 @@ on:
       - "md5/**"
       - "Cargo.*"
 
+defaults:
+  run:
+    working-directory: md5
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-Dwarnings"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,7 +39,7 @@ jobs:
           target: ${{ matrix.target }}
           override: true
       - run: cargo build --no-default-features --release --target ${{ matrix.target }}
-        working-directory: md5
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -47,10 +55,6 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
       - run: cargo check
-        working-directory: md5
       - run: cargo test --no-default-features
-        working-directory: md5
       - run: cargo test
-        working-directory: md5
       - run: cargo test --features asm
-        working-directory: md5

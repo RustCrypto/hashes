@@ -7,9 +7,14 @@ on:
       - "Cargo.*"
   push:
     branches: master
-    paths:
-      - "blake2/**"
-      - "Cargo.*"
+
+defaults:
+  run:
+    working-directory: blake2
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-Dwarnings"
 
 jobs:
   build:
@@ -31,7 +36,7 @@ jobs:
           target: ${{ matrix.target }}
           override: true
       - run: cargo build --no-default-features --release --target ${{ matrix.target }}
-        working-directory: blake2
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -47,9 +52,7 @@ jobs:
         toolchain: ${{ matrix.rust }}
         override: true
     - run: cargo test --no-default-features
-      working-directory: blake2
     - run: cargo test
-      working-directory: blake2
   simd:
     runs-on: ubuntu-latest
     steps:
@@ -60,8 +63,5 @@ jobs:
           toolchain: nightly
           override: true
       - run: cargo test --features simd
-        working-directory: blake2
       - run: cargo test --features simd_opt
-        working-directory: blake2
       - run: cargo test --features simd_asm
-        working-directory: blake2

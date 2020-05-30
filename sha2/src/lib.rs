@@ -85,8 +85,6 @@ extern crate fake_simd as simd;
 extern crate opaque_debug;
 #[cfg(feature = "asm-aarch64")]
 extern crate libc;
-#[cfg(feature = "asm")]
-extern crate sha2_asm;
 #[cfg(feature = "std")]
 extern crate std;
 

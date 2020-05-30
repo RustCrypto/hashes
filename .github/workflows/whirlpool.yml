@@ -7,9 +7,14 @@ on:
       - "Cargo.*"
   push:
     branches: master
-    paths:
-      - "whirlpool/**"
-      - "Cargo.*"
+
+defaults:
+  run:
+    working-directory: whirlpool
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-Dwarnings"
 
 jobs:
   build:
@@ -30,8 +35,8 @@ jobs:
           toolchain: ${{ matrix.rust }}
           target: ${{ matrix.target }}
           override: true
-      - working-directory: whirlpool
-        run: cargo build --no-default-features --release --target ${{ matrix.target }}
+      - run: cargo build --no-default-features --release --target ${{ matrix.target }}
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -46,11 +51,8 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.rust }}
           override: true
-      - working-directory: whirlpool
-        run: |
-          cargo check --all-features
-          cargo test --no-default-features
-          cargo test
-          cargo test --features asm
-          cargo test --all-features
-
+      - run: cargo check --all-features
+      - run: cargo test --no-default-features
+      - run: cargo test
+      - run: cargo test --features asm
+      - run: cargo test --all-features
