@@ -1,5 +1,4 @@
 #![no_std]
 #![feature(test)]
 
-use digest::bench;
-bench!(sha2::Sha256);
+digest::bench!(sha2::Sha256);

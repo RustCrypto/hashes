@@ -3,10 +3,8 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate md4;
-//! # fn main() {
 //! use md4::{Md4, Digest};
+//! use hex_literal::hex;
 //!
 //! // create a Md4 hasher instance
 //! let mut hasher = Md4::new();
@@ -18,7 +16,6 @@
 //! // which in this case is equivalent to [u8; 16]
 //! let result = hasher.result();
 //! assert_eq!(result[..], hex!("aa010fbc1d14c795d86ef98c95479d17"));
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -34,19 +31,19 @@
 
 #[macro_use]
 extern crate opaque_debug;
-#[macro_use]
-pub extern crate digest;
-
 extern crate fake_simd as simd;
+
 #[cfg(feature = "std")]
 extern crate std;
+
+pub use digest::{self, Digest};
 
 use crate::simd::u32x4;
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U16, U64};
 use digest::generic_array::GenericArray;
-pub use digest::Digest;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
 
 // initial values for Md4State

@@ -14,9 +14,7 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate shabal;
-//! # fn main() {
+//! use hex_literal::hex;
 //! use shabal::{Shabal256, Digest};
 //!
 //! // create a Shabal256 hasher instance
@@ -29,7 +27,6 @@
 //! // which in this case is equivalent to [u8; 32]
 //! let result = hasher.result();
 //! assert_eq!(result[..], hex!("d945dee21ffca23ac232763aa9cac6c15805f144db9d6c97395437e01c8595a8"));
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -44,8 +41,6 @@
 
 #[macro_use]
 extern crate opaque_debug;
-#[macro_use]
-pub extern crate digest;
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -53,4 +48,4 @@ mod consts;
 mod shabal;
 
 pub use crate::shabal::{Shabal192, Shabal224, Shabal256, Shabal384, Shabal512};
-pub use digest::Digest;
+pub use digest::{self, Digest};

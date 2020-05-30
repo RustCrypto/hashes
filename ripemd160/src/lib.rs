@@ -3,9 +3,7 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate ripemd160;
-//! # fn main() {
+//! use hex_literal::hex;
 //! use ripemd160::{Ripemd160, Digest};
 //!
 //! // create a RIPEMD-160 hasher instance
@@ -18,7 +16,6 @@
 //! // which in this case is equivalent to [u8; 20]
 //! let result = hasher.result();
 //! assert_eq!(result[..], hex!("7f772647d88750add82d8e1a7a3e5c0902a346a3"));
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -33,16 +30,16 @@
 
 #[macro_use]
 extern crate opaque_debug;
-#[macro_use]
-pub extern crate digest;
 #[cfg(feature = "std")]
 extern crate std;
+
+pub use digest::{self, Digest};
 
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U20, U64};
 use digest::generic_array::GenericArray;
-pub use digest::Digest;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
 
 mod block;

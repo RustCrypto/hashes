@@ -10,10 +10,8 @@
 //! you to specify a digest size between 33 and 64 inclusive.
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate groestl;
-//! # fn main() {
 //! use groestl::{Digest, Groestl256};
+//! use hex_literal::hex;
 //!
 //! // create a Groestl-256 hasher instance
 //! let mut hasher = Groestl256::default();
@@ -27,7 +25,6 @@
 //! assert_eq!(result[..], hex!("
 //!     dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86
 //! "));
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -40,19 +37,17 @@
 #![deny(unsafe_code)]
 #![warn(rust_2018_idioms)]
 
-// TODO: import all digest macros via 2018 module syntax
-#[macro_use]
-pub extern crate digest;
-
 #[macro_use]
 extern crate opaque_debug;
 
 #[cfg(feature = "std")]
 extern crate std;
 
+pub use digest::{self, Digest};
+
 use digest::generic_array::typenum::{Unsigned, U128, U28, U32, U48, U64};
 use digest::generic_array::GenericArray;
-pub use digest::Digest;
+use digest::impl_write;
 use digest::InvalidOutputSize;
 use digest::{BlockInput, FixedOutput, Reset, Update, VariableOutput};
 

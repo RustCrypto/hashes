@@ -2,10 +2,8 @@
 //! [1] https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
 #![no_std]
 
-#[macro_use]
-extern crate digest;
-
 use digest::dev::{digest_test, one_million_a};
+use digest::new_test;
 
 new_test!(
     ripemd320_main,

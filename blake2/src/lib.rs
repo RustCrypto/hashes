@@ -5,10 +5,8 @@
 //! `Blake2b` can be used in the following way:
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate blake2;
-//! # fn main() {
 //! use blake2::{Blake2b, Blake2s, Digest};
+//! use hex_literal::hex;
 //!
 //! // create a Blake2b object
 //! let mut hasher = Blake2b::new();
@@ -30,7 +28,6 @@
 //! assert_eq!(res[..], hex!("
 //!     9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b
 //! ")[..]);
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes](https://github.com/RustCrypto/hashes) readme.
@@ -92,10 +89,6 @@
 
 #[macro_use]
 extern crate opaque_debug;
-#[macro_use]
-pub extern crate digest;
-
-pub use crypto_mac;
 
 #[cfg(feature = "std")]
 extern crate std;
@@ -111,6 +104,8 @@ mod blake2;
 mod blake2b;
 mod blake2s;
 
+pub use crypto_mac;
+pub use digest::{self, Digest};
+
 pub use crate::blake2b::{Blake2b, VarBlake2b};
 pub use crate::blake2s::{Blake2s, VarBlake2s};
-pub use digest::Digest;

@@ -2,6 +2,7 @@ macro_rules! gost94_impl {
     ($state:ident, $sbox:expr) => {
         use digest::generic_array::typenum::U32;
         use digest::generic_array::GenericArray;
+        use digest::impl_write;
         use digest::{BlockInput, FixedOutput, Reset, Update};
         use $crate::gost94::{Block, Gost94, SBox};
 

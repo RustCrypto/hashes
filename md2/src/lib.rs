@@ -3,10 +3,8 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate md2;
-//! # fn main() {
 //! use md2::{Md2, Digest};
+//! use hex_literal::hex;
 //!
 //! // create a Md2 hasher instance
 //! let mut hasher = Md2::new();
@@ -18,7 +16,6 @@
 //! // which in this case is equivalent to [u8; 16]
 //! let result = hasher.result();
 //! assert_eq!(result[..], hex!("d9cce882ee690a5c1ce70beff3a78c77"));
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -34,17 +31,16 @@
 #[macro_use]
 extern crate opaque_debug;
 
-#[macro_use]
-pub extern crate digest;
-
 #[cfg(feature = "std")]
 extern crate std;
+
+pub use digest::{self, Digest};
 
 use block_buffer::block_padding::Pkcs7;
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::U16;
 use digest::generic_array::GenericArray;
-pub use digest::Digest;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
 
 mod consts;

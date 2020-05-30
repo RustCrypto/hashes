@@ -1,9 +1,8 @@
 //! Test messages from FIPS 180-1
 #![no_std]
-#[macro_use]
-extern crate digest;
 
 use digest::dev::{digest_test, one_million_a};
+use digest::new_test;
 
 new_test!(
     ripemd160_main,

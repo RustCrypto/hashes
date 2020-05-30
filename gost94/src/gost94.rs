@@ -5,6 +5,7 @@ use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::U32;
 use digest::generic_array::GenericArray;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
 
 pub(crate) type Block = [u8; 32];

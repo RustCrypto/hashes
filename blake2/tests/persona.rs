@@ -1,7 +1,5 @@
-#[macro_use]
-extern crate hex_literal;
-
 use blake2::{Blake2b, Blake2s, Digest};
+use hex_literal::hex;
 
 #[test]
 fn blake2s_persona() {

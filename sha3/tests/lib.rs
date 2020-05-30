@@ -1,8 +1,7 @@
 #![no_std]
-#[macro_use]
-extern crate digest;
 
 use digest::dev::{digest_test, xof_test};
+use digest::new_test;
 
 new_test!(keccak_224, "keccak_224", sha3::Keccak224, digest_test);
 new_test!(keccak_256, "keccak_256", sha3::Keccak256, digest_test);
