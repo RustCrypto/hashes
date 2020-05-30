@@ -13,6 +13,7 @@ macro_rules! blake2_impl {
         use digest::InvalidOutputSize;
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::{U4, Unsigned};
+        use digest::impl_write;
         use core::cmp;
         use core::ops::Div;
         use byte_tools::{copy, zero};

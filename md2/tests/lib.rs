@@ -1,10 +1,8 @@
 #![no_std]
-#[macro_use]
-extern crate digest;
 
 use digest::dev::{digest_test, one_million_a};
 
-new_test!(md2_main, "md2", md2::Md2, digest_test);
+digest::new_test!(md2_main, "md2", md2::Md2, digest_test);
 
 #[test]
 fn md2_1million_a() {

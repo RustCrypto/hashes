@@ -1,5 +1,4 @@
 #![no_std]
 #![feature(test)]
 
-use digest::bench;
-bench!(groestl::Groestl256);
+digest::bench!(groestl::Groestl256);

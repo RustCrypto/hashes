@@ -1,8 +1,7 @@
 #![no_std]
-#[macro_use]
-extern crate digest;
 
 use digest::dev::{digest_test, one_million_a};
+use digest::new_test;
 
 new_test!(sha224_main, "sha224", sha2::Sha224, digest_test);
 new_test!(sha256_main, "sha256", sha2::Sha256, digest_test);

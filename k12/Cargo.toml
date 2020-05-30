@@ -12,11 +12,11 @@ keywords = ["crypto", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.9.0-pre"
+digest = "= 0.9.0-pre"
 
 [dev-dependencies]
-digest = { version = "0.9.0-pre", features = ["dev"] }
-hex-literal = "0.1"
+digest = { version = "= 0.9.0-pre", features = ["dev"] }
+hex-literal = "0.2"
 
 [features]
 default = ["std"]

@@ -3,7 +3,7 @@ use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U24, U28, U32, U48, U64};
 use digest::generic_array::GenericArray;
-pub use digest::Digest;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
 
 use crate::consts::{

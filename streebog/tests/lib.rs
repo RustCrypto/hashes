@@ -1,8 +1,7 @@
 #![no_std]
-#[macro_use]
-extern crate digest;
 
 use digest::dev::digest_test;
+use digest::new_test;
 
 new_test!(
     streebog256_main,

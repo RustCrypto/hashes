@@ -62,7 +62,7 @@ checksum = "7bbb73db36c1246e9034e307d0fba23f9a2e251faa47ade70c1bd252220c8311"
 [[package]]
 name = "crypto-mac"
 version = "0.8.0-pre"
-source = "git+https://github.com/rustcrypto/traits#d8c0b4d50b14f2161a47aa6014a7bdfecc10e017"
+source = "git+https://github.com/rustcrypto/traits#9ddbee690cdd461050f1609966f37f7cc20c3861"
 dependencies = [
  "blobby",
  "generic-array",
@@ -72,7 +72,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.9.0-pre"
-source = "git+https://github.com/rustcrypto/traits#d8c0b4d50b14f2161a47aa6014a7bdfecc10e017"
+source = "git+https://github.com/rustcrypto/traits#9ddbee690cdd461050f1609966f37f7cc20c3861"
 dependencies = [
  "blobby",
  "generic-array",
@@ -115,9 +115,9 @@ dependencies = [
 
 [[package]]
 name = "hex-literal"
-version = "0.1.4"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddc2928beef125e519d69ae1baa8c37ea2e0d3848545217f6db0179c5eb1d639"
+checksum = "961de220ec9a91af2e1e5bd80d02109155695e516771762381ef8581317066e0"
 dependencies = [
  "hex-literal-impl",
  "proc-macro-hack",
@@ -125,9 +125,9 @@ dependencies = [
 
 [[package]]
 name = "hex-literal-impl"
-version = "0.1.2"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "520870c3213943eb8d7803e80180d12a6c7ceb4ae74602544529d1643dc4ddda"
+checksum = "9d4c5c844e2fee0bf673d54c2c177f1713b3d2af2ff6e666b49cb7572e6cf42d"
 dependencies = [
  "proc-macro-hack",
 ]
@@ -201,18 +201,9 @@ checksum = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
 
 [[package]]
 name = "proc-macro-hack"
-version = "0.4.2"
+version = "0.5.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "463bf29e7f11344e58c9e01f171470ab15c925c6822ad75028cc1c0e1d1eb63b"
-dependencies = [
- "proc-macro-hack-impl",
-]
-
-[[package]]
-name = "proc-macro-hack-impl"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38c47dcb1594802de8c02f3b899e2018c78291168a22c281be21ea0fb4796842"
+checksum = "7e0456befd48169b9f13ef0f0ad46d492cf9d2dbb918bcf38e01eed4ce3ec5e4"
 
 [[package]]
 name = "ripemd160"
@@ -313,9 +304,9 @@ dependencies = [
 
 [[package]]
 name = "subtle"
-version = "2.2.2"
+version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c65d530b10ccaeac294f349038a597e435b18fb456aadd0840a623f83b9e941"
+checksum = "502d53007c02d7605a05df1c1a73ee436952781653da5d0bf57ad608f66932c1"
 
 [[package]]
 name = "typenum"

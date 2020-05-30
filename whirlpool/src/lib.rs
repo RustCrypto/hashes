@@ -14,10 +14,8 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate whirlpool;
-//! # fn main() {
 //! use whirlpool::{Whirlpool, Digest};
+//! use hex_literal::hex;
 //!
 //! // create a hasher object, to use it do not forget to import `Digest` trait
 //! let mut hasher = Whirlpool::new();
@@ -30,7 +28,6 @@
 //!     8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c
 //!     a373816495e63db0fff2ff25f75aa7162f332c9f518c3036456502a8414d300a
 //! ")[..]);
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -45,16 +42,17 @@
 
 #[macro_use]
 extern crate opaque_debug;
-#[macro_use]
-pub extern crate digest;
 
 #[cfg(feature = "std")]
 extern crate std;
+
 #[cfg(feature = "asm")]
 extern crate whirlpool_asm as utils;
 
 #[cfg(not(feature = "asm"))]
 mod utils;
+
+pub use digest::Digest;
 
 use crate::utils::compress;
 
@@ -65,7 +63,7 @@ use block_buffer::BlockBuffer;
 use byte_tools::zero;
 use digest::generic_array::typenum::U64;
 use digest::generic_array::GenericArray;
-pub use digest::Digest;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
 
 #[cfg(not(feature = "asm"))]

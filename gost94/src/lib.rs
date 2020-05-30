@@ -3,10 +3,8 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate gost94;
-//! # fn main() {
 //! use gost94::{Gost94Test, Digest};
+//! use hex_literal::hex;
 //!
 //! // create a Gost94 hasher instance with test S-box
 //! let mut hasher = Gost94Test::new();
@@ -20,7 +18,6 @@
 //! assert_eq!(result[..], hex!("
 //!     1bb6ce69d2e895a78489c87a0712a2f40258d1fae3a4666c23f8f487bef0e22a
 //! "));
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -32,8 +29,6 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[macro_use]
-pub extern crate digest;
 #[macro_use]
 extern crate opaque_debug;
 #[cfg(feature = "std")]
@@ -47,7 +42,7 @@ mod gost94;
 mod s2015;
 mod test_param;
 
-pub use digest::Digest;
+pub use digest::{self, Digest};
 
 pub use crate::cryptopro::Gost94CryptoPro;
 pub use crate::gost94::Gost94;

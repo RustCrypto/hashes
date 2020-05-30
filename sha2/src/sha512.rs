@@ -2,6 +2,7 @@ use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U128, U28, U32, U48, U64};
 use digest::generic_array::GenericArray;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
 
 use crate::consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};

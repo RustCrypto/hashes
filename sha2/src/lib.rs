@@ -20,9 +20,7 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate sha2;
-//! # fn main() {
+//! use hex_literal::hex;
 //! use sha2::{Sha256, Sha512, Digest};
 //!
 //! // create a Sha256 object
@@ -47,7 +45,6 @@
 //!     309ecc489c12d6eb4cc40f50c902f2b4d0ed77ee511a7c7a9bcd3ca86d4cd86f
 //!     989dd35bc5ff499670da34255b45b0cfd830e81f605dcf7dc5542e93ae9cd76f
 //! ")[..]);
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -86,8 +83,6 @@ compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use
 extern crate fake_simd as simd;
 #[macro_use]
 extern crate opaque_debug;
-#[macro_use]
-pub extern crate digest;
 #[cfg(feature = "asm-aarch64")]
 extern crate libc;
 #[cfg(feature = "asm")]
@@ -107,7 +102,7 @@ mod sha512_utils;
 
 pub use crate::sha256::{Sha224, Sha256};
 pub use crate::sha512::{Sha384, Sha512, Sha512Trunc224, Sha512Trunc256};
-pub use digest::Digest;
+pub use digest::{self, Digest};
 #[cfg(feature = "compress")]
 pub use sha256_utils::compress256;
 #[cfg(feature = "compress")]

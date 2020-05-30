@@ -11,10 +11,8 @@
 //! An example of using `Streebog256` and `Streebog256` is:
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate streebog;
-//! # fn main() {
 //! use streebog::{Digest, Streebog256, Streebog512};
+//! use hex_literal::hex;
 //!
 //! // create a hasher object, to use it do not forget to import `Digest` trait
 //! let mut hasher = Streebog256::new();
@@ -36,7 +34,6 @@
 //!     c40cc26c37a683c74459820d884b766d9c96697a8d168c0272db8f4ecca2935b
 //!     4164ede98fc9c8d2bafb1249b238676c81f5b97f98c393b99fdf2dc961391484
 //! ")[..]);
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -50,20 +47,21 @@
 #![warn(missing_docs, rust_2018_idioms)]
 
 #[macro_use]
-pub extern crate digest;
-#[macro_use]
 extern crate opaque_debug;
+
 #[cfg(feature = "std")]
 extern crate std;
-
-use digest::generic_array::typenum::{U32, U64};
-pub use digest::Digest;
-#[cfg(feature = "std")]
-use digest::Update;
 
 mod consts;
 mod streebog;
 mod table;
+
+pub use digest::{self, Digest};
+
+use digest::generic_array::typenum::{U32, U64};
+use digest::impl_write;
+#[cfg(feature = "std")]
+use digest::Update;
 
 /// Streebog256
 pub type Streebog256 = streebog::Streebog<U32>;

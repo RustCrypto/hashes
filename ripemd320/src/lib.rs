@@ -3,9 +3,7 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate ripemd320;
-//! # fn main() {
+//! use hex_literal::hex;
 //! use ripemd320::{Ripemd320, Digest};
 //!
 //! // create a RIPEMD-320 hasher instance
@@ -19,7 +17,6 @@
 //! let expected = hex!("f1c1c231d301abcf2d7daae0269ff3e7bc68e623ad723aa068d316b056d26b7d1bb6f0cc0f28336d");
 //! let result = hasher.result();
 //! assert_eq!(&result[..], &expected[..]);
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -34,20 +31,22 @@
 
 #[macro_use]
 extern crate opaque_debug;
-#[macro_use]
-pub extern crate digest;
+
 #[cfg(feature = "std")]
 extern crate std;
+
+mod block;
+
+pub use digest::{self, Digest};
+
+use crate::block::{process_msg_block, DIGEST_BUF_LEN, H0};
 
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U40, U64};
 use digest::generic_array::GenericArray;
-pub use digest::Digest;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
-
-mod block;
-use crate::block::{process_msg_block, DIGEST_BUF_LEN, H0};
 
 /// Structure representing the state of a ripemd320 computation
 #[derive(Clone)]

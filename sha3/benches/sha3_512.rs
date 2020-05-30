@@ -1,5 +1,4 @@
 #![no_std]
 #![feature(test)]
 
-use digest::bench;
-bench!(sha3::Sha3_512);
+digest::bench!(sha3::Sha3_512);

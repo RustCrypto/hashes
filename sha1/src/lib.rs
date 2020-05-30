@@ -3,9 +3,7 @@
 //! # Usage
 //!
 //! ```rust
-//! # #[macro_use] extern crate hex_literal;
-//! # extern crate sha1;
-//! # fn main() {
+//! use hex_literal::hex;
 //! use sha1::{Sha1, Digest};
 //!
 //! // create a Sha1 object
@@ -18,7 +16,6 @@
 //! // which in this case is equivalent to [u8; 20]
 //! let result = hasher.result();
 //! assert_eq!(result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
-//! # }
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -38,6 +35,7 @@
     not(target_os = "linux")
 ))]
 compile_error!("Your OS isn’t yet supported for runtime-checking of AArch64 features.");
+
 #[cfg(all(feature = "asm-aarch64", not(target_arch = "aarch64")))]
 compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" on non-AArch64 systems.");
 #[cfg(all(
@@ -46,6 +44,7 @@ compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" on non-AAr
     target_feature = "crypto"
 ))]
 compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" when building for AArch64 systems with crypto extensions.");
+
 #[cfg(all(
     not(feature = "asm-aarch64"),
     feature = "asm",
@@ -57,55 +56,34 @@ compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use
 
 #[macro_use]
 extern crate opaque_debug;
-#[macro_use]
-pub extern crate digest;
 #[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
 extern crate fake_simd as simd;
 #[cfg(feature = "asm-aarch64")]
 extern crate libc;
+#[cfg(feature = "asm")]
+extern crate sha1_asm;
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(feature = "asm")]
-extern crate sha1_asm;
-#[cfg(all(feature = "asm", not(feature = "asm-aarch64")))]
-#[inline(always)]
-fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
-    #[allow(unsafe_code)]
-    let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
-    sha1_asm::compress(state, block);
-}
 #[cfg(feature = "asm-aarch64")]
 mod aarch64;
-#[cfg(feature = "asm-aarch64")]
-#[inline(always)]
-fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
-    // TODO: Replace this platform-specific call with is_aarch64_feature_detected!("sha1") once
-    // that macro is stabilised and https://github.com/rust-lang/rfcs/pull/2725 is implemented
-    // to let us use it on no_std.
-    if aarch64::sha1_supported() {
-        #[allow(unsafe_code)]
-        let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
-        sha1_asm::compress(state, block);
-    } else {
-        utils::compress(state, block);
-    }
-}
-
+mod consts;
 #[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
 mod utils;
-#[cfg(not(feature = "asm"))]
-use crate::utils::compress;
+
+pub use digest::{self, Digest};
+
+use crate::consts::{H, STATE_LEN};
 
 use block_buffer::byteorder::{ByteOrder, BE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U20, U64};
 use digest::generic_array::GenericArray;
-pub use digest::Digest;
+use digest::impl_write;
 use digest::{BlockInput, FixedOutput, Reset, Update};
 
-mod consts;
-use crate::consts::{H, STATE_LEN};
+#[cfg(not(feature = "asm"))]
+use crate::utils::compress;
 
 /// Structure representing the state of a SHA-1 computation
 #[derive(Clone)]
@@ -160,6 +138,29 @@ impl Reset for Sha1 {
         self.h = H;
         self.len = 0;
         self.buffer.reset();
+    }
+}
+
+#[cfg(all(feature = "asm", not(feature = "asm-aarch64")))]
+#[inline(always)]
+fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
+    #[allow(unsafe_code)]
+    let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
+    sha1_asm::compress(state, block);
+}
+
+#[cfg(feature = "asm-aarch64")]
+#[inline(always)]
+fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
+    // TODO: Replace this platform-specific call with is_aarch64_feature_detected!("sha1") once
+    // that macro is stabilised and https://github.com/rust-lang/rfcs/pull/2725 is implemented
+    // to let us use it on no_std.
+    if aarch64::sha1_supported() {
+        #[allow(unsafe_code)]
+        let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
+        sha1_asm::compress(state, block);
+    } else {
+        utils::compress(state, block);
     }
 }
 

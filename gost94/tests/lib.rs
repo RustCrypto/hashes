@@ -1,8 +1,7 @@
 #![no_std]
-#[macro_use]
-extern crate digest;
 
 use digest::dev::{digest_test, one_million_a};
+use digest::new_test;
 
 new_test!(gost94_test_main, "test", gost94::Gost94Test, digest_test);
 new_test!(
