@@ -12,12 +12,12 @@ keywords = ["crypto", "md2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.9.0-pre"
-block-buffer = "0.7"
+digest = "= 0.9.0-pre"
+block-buffer = "= 0.8.0-pre"
 opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "0.9.0-pre", features = ["dev"] }
+digest = { version = "= 0.9.0-pre", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]
