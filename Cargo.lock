@@ -23,8 +23,8 @@ dependencies = [
 
 [[package]]
 name = "block-buffer"
-version = "0.7.3"
-source = "git+https://github.com/RustCrypto/utils#b4c5b5485ce2b3fd4184bec8aed4730dfe37c132"
+version = "0.8.0-pre"
+source = "git+https://github.com/RustCrypto/utils#a0e48018d38545935152cd1715382bc1984b5699"
 dependencies = [
  "block-padding",
  "byte-tools",
@@ -62,7 +62,7 @@ checksum = "7bbb73db36c1246e9034e307d0fba23f9a2e251faa47ade70c1bd252220c8311"
 [[package]]
 name = "crypto-mac"
 version = "0.8.0-pre"
-source = "git+https://github.com/rustcrypto/traits#9ddbee690cdd461050f1609966f37f7cc20c3861"
+source = "git+https://github.com/rustcrypto/traits#f1ae0b0bf1187f0c0a90bd07caa66710240daca5"
 dependencies = [
  "blobby",
  "generic-array",
@@ -72,7 +72,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.9.0-pre"
-source = "git+https://github.com/rustcrypto/traits#9ddbee690cdd461050f1609966f37f7cc20c3861"
+source = "git+https://github.com/rustcrypto/traits#f1ae0b0bf1187f0c0a90bd07caa66710240daca5"
 dependencies = [
  "blobby",
  "generic-array",
@@ -334,5 +334,3 @@ checksum = "cbb23be8b0dec6fafef14563c42ec98bbfc33f2a97ed5bc99cd8b50ea5c68097"
 dependencies = [
  "cc",
 ]
-
-
