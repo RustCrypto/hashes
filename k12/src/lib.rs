@@ -14,7 +14,6 @@
 #![warn(missing_docs, rust_2018_idioms)]
 
 // TODO(tarcieri): eliminate alloc requirement
-#[macro_use]
 extern crate alloc;
 
 pub use digest;
@@ -25,7 +24,7 @@ mod lanes;
 // TODO(tarcieri): eliminate usage of `Vec`
 use alloc::vec::Vec;
 use core::{cmp::min, convert::TryInto};
-use digest::{Update, XofReader};
+use digest::{ExtendableOutput, Update, XofReader};
 
 /// The KangarooTwelve extendable-output function (XOF).
 #[derive(Debug, Default)]
@@ -37,10 +36,6 @@ pub struct KangarooTwelve {
     /// Customization string to apply
     // TODO(tarcieri): don't store customization in a `Vec`
     customization: Vec<u8>,
-
-    /// Has the XOF output already been consumed?
-    // TODO(tarcieri): allow `XofReader::result` to be called multiple times
-    finished: bool,
 }
 
 impl KangarooTwelve {
@@ -54,15 +49,7 @@ impl KangarooTwelve {
         Self {
             buffer: Vec::new(),
             customization: customization.as_ref().into(),
-            finished: false,
         }
-    }
-
-    /// Get the result as a `Vec<u8>`
-    pub fn finalize_vec(mut self, length: usize) -> Vec<u8> {
-        let mut output = vec![0u8; length];
-        self.read(&mut output);
-        output
     }
 }
 
@@ -73,14 +60,46 @@ impl Update for KangarooTwelve {
     }
 }
 
-impl XofReader for KangarooTwelve {
+impl ExtendableOutput for KangarooTwelve {
+    type Reader = Reader;
+
+    fn finalize_xof(self) -> Self::Reader {
+        Reader {
+            buffer: self.buffer,
+            customization: self.customization,
+            finished: false,
+        }
+    }
+}
+
+/// Extensible output reader.
+///
+/// NOTE: this presently only supports one invocation and will *panic* if
+/// [`XofReader::read`] is invoked on it multiple times.
+#[derive(Debug, Default)]
+pub struct Reader {
+    /// Input to be processed
+    // TODO(tarcieri): don't store input in a `Vec`
+    buffer: Vec<u8>,
+
+    /// Customization string to apply
+    // TODO(tarcieri): don't store customization in a `Vec`
+    customization: Vec<u8>,
+
+    /// Has the XOF output already been consumed?
+    // TODO(tarcieri): allow `XofReader::result` to be called multiple times
+    finished: bool,
+}
+
+// TODO(tarcieri): factor more of this logic into the `KangarooTwelve` type
+impl XofReader for Reader {
     /// Get the resulting output of the function.
     ///
     /// Panics if called multiple times on the same instance (TODO: don't panic!)
     fn read(&mut self, output: &mut [u8]) {
         assert!(
             !self.finished,
-            "K12 doesn't support multiple XofReader invocations yet"
+            "not yet implemented: multiple XofReader::read invocations unsupported"
         );
 
         let b = 8192;
