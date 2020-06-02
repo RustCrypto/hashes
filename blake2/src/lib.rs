@@ -15,7 +15,7 @@
 //! hasher.update(b"hello world");
 //!
 //! // read hash digest and consume hasher
-//! let res = hasher.result();
+//! let res = hasher.finalize();
 //! assert_eq!(res[..], hex!("
 //!     021ced8799296ceca557832ab941a50b4a11f83478cf141f51f933f653ab9fbc
 //!     c05a037cddbed06e309bf334942c4e58cdf1a46e237911ccd7fcf9787cbc7fd0
@@ -24,7 +24,7 @@
 //! // same example for `Blake2s`:
 //! let mut hasher = Blake2s::new();
 //! hasher.update(b"hello world");
-//! let res = hasher.result();
+//! let res = hasher.finalize();
 //! assert_eq!(res[..], hex!("
 //!     9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b
 //! ")[..]);
@@ -44,7 +44,7 @@
 //!
 //! let mut hasher = VarBlake2b::new(10).unwrap();
 //! hasher.update(b"my_input");
-//! hasher.variable_result(|res| {
+//! hasher.finalize_variable(|res| {
 //!     assert_eq!(res, [44, 197, 92, 132, 228, 22, 146, 78, 100, 0])
 //! })
 //! ```
@@ -62,7 +62,7 @@
 //!
 //! // `result` has type `crypto_mac::Output` which is a thin wrapper around
 //! // a byte array and provides a constant time equality check
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //! // To get underlying array use the `into_bytes` method, but be careful,
 //! // since incorrect use of the code value may permit timing attacks which
 //! // defeat the security provided by the `crypto_mac::Output`

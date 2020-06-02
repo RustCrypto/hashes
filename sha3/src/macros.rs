@@ -41,7 +41,7 @@ macro_rules! sha3_impl {
         impl FixedOutput for $state {
             type OutputSize = $output_size;
 
-            fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+            fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
                 self.apply_padding();
 
                 let mut out = GenericArray::default();
@@ -78,7 +78,7 @@ macro_rules! shake_impl {
         impl ExtendableOutput for $state {
             type Reader = Sha3XofReader;
 
-            fn xof_result(mut self) -> Sha3XofReader {
+            fn finalize_xof(mut self) -> Sha3XofReader {
                 self.apply_padding();
                 let r = $rate::to_usize();
                 Sha3XofReader::new(self.state.clone(), r)

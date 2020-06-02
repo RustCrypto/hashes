@@ -26,7 +26,7 @@
 //! hasher.update(b"abc");
 //!
 //! // read hash digest
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
 //!     3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532

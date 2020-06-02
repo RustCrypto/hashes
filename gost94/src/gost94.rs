@@ -241,7 +241,7 @@ impl Update for Gost94 {
 impl FixedOutput for Gost94 {
     type OutputSize = U32;
 
-    fn fixed_result(mut self) -> GenericArray<u8, U32> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, U32> {
         {
             let self_state = &mut self.state;
 

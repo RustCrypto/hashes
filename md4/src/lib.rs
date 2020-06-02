@@ -14,7 +14,7 @@
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 16]
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("aa010fbc1d14c795d86ef98c95479d17"));
 //! ```
 //!
@@ -140,7 +140,7 @@ impl Default for Md4State {
 }
 
 impl Md4 {
-    fn finalize(&mut self) {
+    fn finalize_inner(&mut self) {
         let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
         self.buffer
@@ -167,8 +167,8 @@ impl Update for Md4 {
 impl FixedOutput for Md4 {
     type OutputSize = U16;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        self.finalize();
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+        self.finalize_inner();
 
         let mut out = GenericArray::default();
         LE::write_u32(&mut out[0..4], self.state.s.0);

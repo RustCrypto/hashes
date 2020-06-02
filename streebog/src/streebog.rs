@@ -149,7 +149,7 @@ where
 {
     type OutputSize = N;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         let mut self_state = self.state;
         let pos = self.buffer.position();
 

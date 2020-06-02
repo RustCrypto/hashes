@@ -22,7 +22,7 @@
 //! // write input message
 //! hasher.update(b"Hello Whirlpool");
 //! // read hash digest (it will consume hasher)
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
 //!     8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c
@@ -47,7 +47,7 @@ extern crate opaque_debug;
 extern crate std;
 
 #[cfg(feature = "asm")]
-extern crate whirlpool_asm as utils;
+use whirlpool_asm as utils;
 
 #[cfg(not(feature = "asm"))]
 mod utils;
@@ -140,7 +140,7 @@ impl Whirlpool {
         }
     }
 
-    fn finalize(&mut self) {
+    fn finalize_inner(&mut self) {
         // padding
         let hash = &mut self.hash;
         let pos = self.buffer.position();
@@ -176,8 +176,8 @@ impl FixedOutput for Whirlpool {
     type OutputSize = U64;
 
     #[cfg(not(feature = "asm"))]
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        self.finalize();
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+        self.finalize_inner();
 
         let mut out = GenericArray::default();
         BE::write_u64_into(&self.hash[..], &mut out);
@@ -185,8 +185,8 @@ impl FixedOutput for Whirlpool {
     }
 
     #[cfg(feature = "asm")]
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
-        self.finalize();
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+        self.finalize_inner();
         GenericArray::clone_from_slice(&self.hash)
     }
 }

@@ -59,7 +59,7 @@ impl KangarooTwelve {
     }
 
     /// Get the result as a `Vec<u8>`
-    pub fn result_vec(mut self, length: usize) -> Vec<u8> {
+    pub fn finalize_vec(mut self, length: usize) -> Vec<u8> {
         let mut output = vec![0u8; length];
         self.read(&mut output);
         output

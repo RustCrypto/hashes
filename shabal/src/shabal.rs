@@ -280,7 +280,7 @@ impl Update for Shabal512 {
 impl FixedOutput for Shabal512 {
     type OutputSize = U64;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         LE::write_u32_into(&self.engine.state.b[0..16], out.as_mut_slice());
@@ -322,7 +322,7 @@ impl Update for Shabal384 {
 impl FixedOutput for Shabal384 {
     type OutputSize = U48;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         LE::write_u32_into(&self.engine.state.b[4..16], out.as_mut_slice());
@@ -364,7 +364,7 @@ impl Update for Shabal256 {
 impl FixedOutput for Shabal256 {
     type OutputSize = U32;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         LE::write_u32_into(&self.engine.state.b[8..16], out.as_mut_slice());
@@ -406,7 +406,7 @@ impl Update for Shabal224 {
 impl FixedOutput for Shabal224 {
     type OutputSize = U28;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         LE::write_u32_into(&self.engine.state.b[9..16], out.as_mut_slice());
@@ -448,7 +448,7 @@ impl Update for Shabal192 {
 impl FixedOutput for Shabal192 {
     type OutputSize = U24;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         LE::write_u32_into(&self.engine.state.b[10..16], out.as_mut_slice());

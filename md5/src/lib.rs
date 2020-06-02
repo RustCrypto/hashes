@@ -14,7 +14,7 @@
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 16]
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("5eb63bbbe01eeed093cb22bb8f5acdc3"));
 //! ```
 //!
@@ -81,7 +81,7 @@ fn convert(d: &GenericArray<u8, U64>) -> &[u8; 64] {
 
 impl Md5 {
     #[inline]
-    fn finalize(&mut self) {
+    fn finalize_inner(&mut self) {
         let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
         self.buffer
@@ -110,9 +110,9 @@ impl FixedOutput for Md5 {
     type OutputSize = U16;
 
     #[inline]
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         let mut out = GenericArray::default();
-        self.finalize();
+        self.finalize_inner();
         LE::write_u32_into(&self.state, &mut out);
         out
     }

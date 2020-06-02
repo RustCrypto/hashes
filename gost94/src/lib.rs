@@ -14,7 +14,7 @@
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 32]
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("
 //!     1bb6ce69d2e895a78489c87a0712a2f40258d1fae3a4666c23f8f487bef0e22a
 //! "));

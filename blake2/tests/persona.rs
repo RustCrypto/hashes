@@ -8,7 +8,7 @@ fn blake2s_persona() {
     let persona_bytes = persona.as_bytes();
     let ctx = Blake2s::with_params(&key_bytes, &[], persona_bytes);
     assert_eq!(
-        ctx.result().as_slice(),
+        ctx.finalize().as_slice(),
         &hex!("25a4ee63b594aed3f88a971e1877ef7099534f9097291f88fb86c79b5e70d022")[..]
     );
 }
@@ -19,5 +19,5 @@ fn blake2b_persona() {
     let persona = "personal";
     let persona_bytes = persona.as_bytes();
     let ctx = Blake2b::with_params(&key_bytes, &[], persona_bytes);
-    assert_eq!(ctx.result().as_slice(), &hex!("03de3b295dcfc3b25b05abb09bc95fe3e9ff3073638badc68101d1e42019d0771dd07525a3aae8318e92c5e5d967ba92e4810d0021d7bf3b49da0b4b4a8a4e1f")[..]);
+    assert_eq!(ctx.finalize().as_slice(), &hex!("03de3b295dcfc3b25b05abb09bc95fe3e9ff3073638badc68101d1e42019d0771dd07525a3aae8318e92c5e5d967ba92e4810d0021d7bf3b49da0b4b4a8a4e1f")[..]);
 }

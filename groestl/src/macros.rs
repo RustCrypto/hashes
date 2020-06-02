@@ -27,7 +27,7 @@ macro_rules! impl_groestl {
         impl FixedOutput for $state {
             type OutputSize = $output;
 
-            fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+            fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
                 let block = self.groestl.finalize();
                 let n = block.len() - Self::OutputSize::to_usize();
                 GenericArray::clone_from_slice(&block[n..])
@@ -76,7 +76,7 @@ macro_rules! impl_variable_groestl {
                 self.groestl.output_size
             }
 
-            fn variable_result<F: FnOnce(&[u8])>(mut self, f: F) {
+            fn finalize_variable<F: FnOnce(&[u8])>(mut self, f: F) {
                 let block = self.groestl.finalize();
                 let n = block.len() - self.groestl.output_size;
                 f(&block[n..]);
