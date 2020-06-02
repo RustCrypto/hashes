@@ -1,5 +1,8 @@
 use core::iter;
-use k12::{digest::Update, KangarooTwelve};
+use k12::{
+    digest::{ExtendableOutput, Update},
+    KangarooTwelve,
+};
 
 fn read_bytes<T: AsRef<[u8]>>(s: T) -> Vec<u8> {
     fn b(c: u8) -> u8 {
