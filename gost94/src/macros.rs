@@ -34,8 +34,8 @@ macro_rules! gost94_impl {
         impl FixedOutput for $state {
             type OutputSize = U32;
 
-            fn fixed_result(self) -> GenericArray<u8, Self::OutputSize> {
-                self.sh.fixed_result()
+            fn finalize_fixed(self) -> GenericArray<u8, Self::OutputSize> {
+                self.sh.finalize_fixed()
             }
         }
 

@@ -30,7 +30,7 @@ fn read_bytes<T: AsRef<[u8]>>(s: T) -> Vec<u8> {
 fn empty() {
     // Source: reference paper
     assert_eq!(
-        KangarooTwelve::new().chain(b"").result_vec(32),
+        KangarooTwelve::new().chain(b"").finalize_vec(32),
         read_bytes(
             "1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
                 1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5"
@@ -38,7 +38,7 @@ fn empty() {
     );
 
     assert_eq!(
-        KangarooTwelve::new().chain(b"").result_vec(64),
+        KangarooTwelve::new().chain(b"").finalize_vec(64),
         read_bytes(
             "1a c2 d4 50 fc 3b 42 05 d1 9d a7 bf ca
                 1b 37 51 3c 08 03 57 7a c7 16 7f 06 fe 2c e1 f0 ef 39 e5 42 69 c0 56 b8 c8 2e
@@ -47,7 +47,7 @@ fn empty() {
     );
 
     assert_eq!(
-        KangarooTwelve::new().chain(b"").result_vec(10032)[10000..],
+        KangarooTwelve::new().chain(b"").finalize_vec(10032)[10000..],
         read_bytes(
             "e8 dc 56 36 42 f7 22 8c 84
                 68 4c 89 84 05 d3 a8 34 79 91 58 c0 79 b1 28 80 27 7a 1d 28 e2 ff 6d"
@@ -78,7 +78,7 @@ fn pat_m() {
     {
         let len = 17usize.pow(i);
         let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
-        let result = KangarooTwelve::new().chain(&m).result_vec(32);
+        let result = KangarooTwelve::new().chain(&m).finalize_vec(32);
         assert_eq!(result, read_bytes(expected[i as usize]));
     }
 }
@@ -101,7 +101,7 @@ fn pat_c() {
         let c: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
         let result = KangarooTwelve::new_with_customization(c)
             .chain(&m)
-            .result_vec(32);
+            .finalize_vec(32);
         assert_eq!(result, read_bytes(expected[i as usize]));
     }
 }

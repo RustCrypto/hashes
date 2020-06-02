@@ -14,7 +14,7 @@
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 20]
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
 //! ```
 //!
@@ -56,10 +56,6 @@ compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use
 
 #[macro_use]
 extern crate opaque_debug;
-#[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
-extern crate fake_simd as simd;
-#[cfg(feature = "asm-aarch64")]
-extern crate libc;
 #[cfg(feature = "asm")]
 extern crate sha1_asm;
 #[cfg(feature = "std")]
@@ -84,6 +80,9 @@ use digest::{BlockInput, FixedOutput, Reset, Update};
 
 #[cfg(not(feature = "asm"))]
 use crate::utils::compress;
+
+#[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
+use fake_simd as simd;
 
 /// Structure representing the state of a SHA-1 computation
 #[derive(Clone)]
@@ -120,7 +119,7 @@ impl Update for Sha1 {
 impl FixedOutput for Sha1 {
     type OutputSize = U20;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         {
             let state = &mut self.h;
             let l = self.len << 3;

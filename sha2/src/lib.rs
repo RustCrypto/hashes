@@ -30,7 +30,7 @@
 //! hasher.update(b"hello world");
 //!
 //! // read hash digest and consume hasher
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
 //!     b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
@@ -39,7 +39,7 @@
 //! // same for Sha512
 //! let mut hasher = Sha512::new();
 //! hasher.update(b"hello world");
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
 //!     309ecc489c12d6eb4cc40f50c902f2b4d0ed77ee511a7c7a9bcd3ca86d4cd86f
@@ -80,11 +80,9 @@ compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" when build
 ))]
 compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm detected at runtime, or build with the crypto extensions support, for instance with RUSTFLAGS='-C target-cpu=native' on a compatible CPU.");
 
-extern crate fake_simd as simd;
 #[macro_use]
 extern crate opaque_debug;
-#[cfg(feature = "asm-aarch64")]
-extern crate libc;
+
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -105,3 +103,5 @@ pub use digest::{self, Digest};
 pub use sha256_utils::compress256;
 #[cfg(feature = "compress")]
 pub use sha512_utils::compress512;
+
+use fake_simd as simd;

@@ -290,7 +290,7 @@ macro_rules! blake2_impl {
                 self.n
             }
 
-            fn variable_result<F: FnOnce(&[u8])>(self, f: F) {
+            fn finalize_variable<F: FnOnce(&[u8])>(self, f: F) {
                 let n = self.n;
                 let res = self.finalize_with_flag(0);
                 f(&res[..n]);
@@ -343,7 +343,7 @@ macro_rules! blake2_impl {
         impl FixedOutput for $fix_state {
             type OutputSize = $bytes;
 
-            fn fixed_result(self) -> Output {
+            fn finalize_fixed(self) -> Output {
                 self.state.finalize_with_flag(0)
             }
         }
@@ -381,7 +381,7 @@ macro_rules! blake2_impl {
                 <Self as Reset>::reset(self)
             }
 
-            fn result(self) -> crypto_mac::Output<Self> {
+            fn finalize(self) -> crypto_mac::Output<Self> {
                 crypto_mac::Output::new(self.state.finalize_with_flag(0))
             }
         }

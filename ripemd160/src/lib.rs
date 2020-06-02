@@ -14,7 +14,7 @@
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 20]
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("7f772647d88750add82d8e1a7a3e5c0902a346a3"));
 //! ```
 //!
@@ -80,7 +80,7 @@ impl Update for Ripemd160 {
 impl FixedOutput for Ripemd160 {
     type OutputSize = U20;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         {
             let h = &mut self.h;
             let l = self.len << 3;

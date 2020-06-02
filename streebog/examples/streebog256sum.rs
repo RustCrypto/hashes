@@ -28,7 +28,7 @@ fn process<D: Digest + Default, R: Read>(reader: &mut R, name: &str) {
             break;
         }
     }
-    print_result(&sh.result(), name);
+    print_result(&sh.finalize(), name);
 }
 
 fn main() {

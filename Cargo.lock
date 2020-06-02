@@ -24,7 +24,7 @@ dependencies = [
 [[package]]
 name = "block-buffer"
 version = "0.8.0-pre"
-source = "git+https://github.com/RustCrypto/utils#a0e48018d38545935152cd1715382bc1984b5699"
+source = "git+https://github.com/RustCrypto/utils#2aae8a40556e166e9ca06aebc944091dda24b769"
 dependencies = [
  "block-padding",
  "byte-tools",
@@ -62,7 +62,7 @@ checksum = "7bbb73db36c1246e9034e307d0fba23f9a2e251faa47ade70c1bd252220c8311"
 [[package]]
 name = "crypto-mac"
 version = "0.8.0-pre"
-source = "git+https://github.com/rustcrypto/traits#f1ae0b0bf1187f0c0a90bd07caa66710240daca5"
+source = "git+https://github.com/rustcrypto/traits#88bdef68d6b8da01249391b74b265499dfd76a37"
 dependencies = [
  "blobby",
  "generic-array",
@@ -72,7 +72,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.9.0-pre"
-source = "git+https://github.com/rustcrypto/traits#f1ae0b0bf1187f0c0a90bd07caa66710240daca5"
+source = "git+https://github.com/rustcrypto/traits#88bdef68d6b8da01249391b74b265499dfd76a37"
 dependencies = [
  "blobby",
  "generic-array",
@@ -125,9 +125,9 @@ dependencies = [
 
 [[package]]
 name = "hex-literal-impl"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d4c5c844e2fee0bf673d54c2c177f1713b3d2af2ff6e666b49cb7572e6cf42d"
+checksum = "853f769599eb31de176303197b7ba4973299c38c7a7604a6bc88c3eef05b9b46"
 dependencies = [
  "proc-macro-hack",
 ]

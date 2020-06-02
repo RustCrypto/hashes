@@ -14,7 +14,7 @@
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 16]
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("d9cce882ee690a5c1ce70beff3a78c77"));
 //! ```
 //!
@@ -110,7 +110,7 @@ impl Update for Md2 {
 impl FixedOutput for Md2 {
     type OutputSize = U16;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         let buf = self
             .buffer
             .pad_with::<Pkcs7>()

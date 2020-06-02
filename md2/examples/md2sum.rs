@@ -20,7 +20,7 @@ fn process<R: Read>(reader: &mut R, name: &str) {
             break;
         }
     }
-    println!("{:x}\t{}", &sh.result(), name);
+    println!("{:x}\t{}", &sh.finalize(), name);
 }
 
 fn main() {

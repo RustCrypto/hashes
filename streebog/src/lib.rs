@@ -19,7 +19,7 @@
 //! // write input message
 //! hasher.update(b"my message");
 //! // read hash digest (it will consume hasher)
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
 //!     a47752ba9491bd1d52dd5dcea6d8c08e9b1ee70c42a2fc3e0d1a2852468c1329
@@ -28,7 +28,7 @@
 //! // same for Streebog512
 //! let mut hasher = Streebog512::new();
 //! hasher.update(b"my message");
-//! let result = hasher.result();
+//! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
 //!     c40cc26c37a683c74459820d884b766d9c96697a8d168c0272db8f4ecca2935b

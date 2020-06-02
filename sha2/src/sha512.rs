@@ -102,7 +102,7 @@ impl Update for Sha512 {
 impl FixedOutput for Sha512 {
     type OutputSize = U64;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::default();
@@ -145,7 +145,7 @@ impl Update for Sha384 {
 impl FixedOutput for Sha384 {
     type OutputSize = U48;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::default();
@@ -188,7 +188,7 @@ impl Update for Sha512Trunc256 {
 impl FixedOutput for Sha512Trunc256 {
     type OutputSize = U32;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::default();
@@ -231,7 +231,7 @@ impl Update for Sha512Trunc224 {
 impl FixedOutput for Sha512Trunc224 {
     type OutputSize = U28;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
 
         let mut out = GenericArray::default();

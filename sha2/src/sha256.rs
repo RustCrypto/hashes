@@ -114,7 +114,7 @@ impl Update for Sha256 {
 impl FixedOutput for Sha256 {
     type OutputSize = U32;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         BE::write_u32_into(&self.engine.state.h, out.as_mut_slice());
@@ -156,7 +156,7 @@ impl Update for Sha224 {
 impl FixedOutput for Sha224 {
     type OutputSize = U28;
 
-    fn fixed_result(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
         self.engine.finish();
         let mut out = GenericArray::default();
         BE::write_u32_into(&self.engine.state.h[..7], out.as_mut_slice());
