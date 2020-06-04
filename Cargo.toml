@@ -19,5 +19,4 @@ members = [
 
 [patch.crates-io]
 digest = { git = "https://github.com/RustCrypto/traits" }
-block-buffer = { git = "https://github.com/RustCrypto/utils" }
 crypto-mac = { git = "https://github.com/rustcrypto/traits" }
