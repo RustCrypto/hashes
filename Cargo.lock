@@ -62,8 +62,9 @@ checksum = "7bbb73db36c1246e9034e307d0fba23f9a2e251faa47ade70c1bd252220c8311"
 
 [[package]]
 name = "crypto-mac"
-version = "0.8.0-pre"
-source = "git+https://github.com/rustcrypto/traits#7f2b98d31f704b55c502a685632bd2ea4bd5dd6c"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b584a330336237c1eecd3e94266efb216c56ed91225d634cb2991c5f3fd1aeab"
 dependencies = [
  "blobby",
  "generic-array",
