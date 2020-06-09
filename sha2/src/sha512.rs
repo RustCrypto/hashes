@@ -1,14 +1,20 @@
-use block_buffer::byteorder::{ByteOrder, BE};
-use block_buffer::BlockBuffer;
-use digest::generic_array::typenum::{U128, U28, U32, U48, U64};
-use digest::generic_array::GenericArray;
-use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
+//! SHA-512
 
 use crate::consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};
+use block_buffer::{
+    byteorder::{ByteOrder, BE},
+    BlockBuffer,
+};
+use digest::impl_write;
+use digest::{
+    consts::{U128, U28, U32, U48, U64},
+    generic_array::GenericArray,
+};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 #[cfg(any(not(feature = "asm"), target_arch = "aarch64"))]
 use crate::sha512_utils::compress512;
+
 #[cfg(all(feature = "asm", not(target_arch = "aarch64")))]
 use sha2_asm::compress512;
 
@@ -99,15 +105,12 @@ impl Update for Sha512 {
     }
 }
 
-impl FixedOutput for Sha512 {
+impl FixedOutputDirty for Sha512 {
     type OutputSize = U64;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-
-        let mut out = GenericArray::default();
         BE::write_u64_into(&self.engine.state.h[..], out.as_mut_slice());
-        out
     }
 }
 
@@ -142,15 +145,12 @@ impl Update for Sha384 {
     }
 }
 
-impl FixedOutput for Sha384 {
+impl FixedOutputDirty for Sha384 {
     type OutputSize = U48;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-
-        let mut out = GenericArray::default();
         BE::write_u64_into(&self.engine.state.h[..6], out.as_mut_slice());
-        out
     }
 }
 
@@ -185,15 +185,12 @@ impl Update for Sha512Trunc256 {
     }
 }
 
-impl FixedOutput for Sha512Trunc256 {
+impl FixedOutputDirty for Sha512Trunc256 {
     type OutputSize = U32;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-
-        let mut out = GenericArray::default();
         BE::write_u64_into(&self.engine.state.h[..4], out.as_mut_slice());
-        out
     }
 }
 
@@ -228,16 +225,13 @@ impl Update for Sha512Trunc224 {
     }
 }
 
-impl FixedOutput for Sha512Trunc224 {
+impl FixedOutputDirty for Sha512Trunc224 {
     type OutputSize = U28;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-
-        let mut out = GenericArray::default();
         BE::write_u64_into(&self.engine.state.h[..3], &mut out[..24]);
         BE::write_u32(&mut out[24..28], (self.engine.state.h[3] >> 32) as u32);
-        out
     }
 }
 

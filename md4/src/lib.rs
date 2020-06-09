@@ -31,7 +31,6 @@
 
 #[macro_use]
 extern crate opaque_debug;
-extern crate fake_simd as simd;
 
 #[cfg(feature = "std")]
 extern crate std;
@@ -41,10 +40,13 @@ pub use digest::{self, Digest};
 use crate::simd::u32x4;
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
-use digest::generic_array::typenum::{U16, U64};
-use digest::generic_array::GenericArray;
 use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
+use digest::{
+    consts::{U16, U64},
+    generic_array::GenericArray,
+};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
+use fake_simd as simd;
 
 // initial values for Md4State
 const S: u32x4 = u32x4(0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476);
@@ -164,19 +166,16 @@ impl Update for Md4 {
     }
 }
 
-impl FixedOutput for Md4 {
+impl FixedOutputDirty for Md4 {
     type OutputSize = U16;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.finalize_inner();
 
-        let mut out = GenericArray::default();
         LE::write_u32(&mut out[0..4], self.state.s.0);
         LE::write_u32(&mut out[4..8], self.state.s.1);
         LE::write_u32(&mut out[8..12], self.state.s.2);
         LE::write_u32(&mut out[12..16], self.state.s.3);
-
-        out
     }
 }
 

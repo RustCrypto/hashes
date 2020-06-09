@@ -58,8 +58,9 @@ mod table;
 
 pub use digest::{self, Digest};
 
-use digest::generic_array::typenum::{U32, U64};
+use digest::consts::{U32, U64};
 use digest::impl_write;
+
 #[cfg(feature = "std")]
 use digest::Update;
 

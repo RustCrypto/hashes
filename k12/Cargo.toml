@@ -15,7 +15,7 @@ categories = ["cryptography", "no-std"]
 digest = { version = "= 0.9.0-pre", features = ["alloc"] }
 
 [dev-dependencies]
-digest = { version = "= 0.9.0-pre", features = ["dev"] }
+digest = { version = "= 0.9.0-pre", features = ["alloc", "dev"] }
 hex-literal = "0.2"
 
 [features]

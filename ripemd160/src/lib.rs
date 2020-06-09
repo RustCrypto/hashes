@@ -30,20 +30,22 @@
 
 #[macro_use]
 extern crate opaque_debug;
+
 #[cfg(feature = "std")]
 extern crate std;
 
+mod block;
+
 pub use digest::{self, Digest};
 
-use block_buffer::byteorder::{ByteOrder, LE};
-use block_buffer::BlockBuffer;
-use digest::generic_array::typenum::{U20, U64};
-use digest::generic_array::GenericArray;
-use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
-
-mod block;
 use crate::block::{process_msg_block, DIGEST_BUF_LEN, H0};
+use block_buffer::{
+    byteorder::{ByteOrder, LE},
+    BlockBuffer,
+};
+use digest::consts::{U20, U64};
+use digest::impl_write;
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 /// Structure representing the state of a Ripemd160 computation
 #[derive(Clone)]
@@ -77,20 +79,16 @@ impl Update for Ripemd160 {
     }
 }
 
-impl FixedOutput for Ripemd160 {
+impl FixedOutputDirty for Ripemd160 {
     type OutputSize = U20;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
-        {
-            let h = &mut self.h;
-            let l = self.len << 3;
-            self.buffer
-                .len64_padding::<LE, _>(l, |b| process_msg_block(h, b));
-        }
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
+        let h = &mut self.h;
+        let l = self.len << 3;
+        self.buffer
+            .len64_padding::<LE, _>(l, |b| process_msg_block(h, b));
 
-        let mut out = GenericArray::default();
         LE::write_u32_into(&self.h, &mut out[..]);
-        out
     }
 }
 

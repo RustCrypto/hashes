@@ -45,12 +45,6 @@ extern crate std;
 
 pub use digest::{self, Digest};
 
-use digest::generic_array::typenum::{Unsigned, U128, U28, U32, U48, U64};
-use digest::generic_array::GenericArray;
-use digest::impl_write;
-use digest::InvalidOutputSize;
-use digest::{BlockInput, FixedOutput, Reset, Update, VariableOutput};
-
 mod consts;
 mod groestl;
 mod matrix;
@@ -59,6 +53,10 @@ mod state;
 mod macros;
 
 use crate::groestl::Groestl;
+use digest::consts::{U128, U28, U32, U48, U64};
+use digest::generic_array::typenum::Unsigned;
+use digest::impl_write;
+use digest::{BlockInput, FixedOutputDirty, InvalidOutputSize, Reset, Update, VariableOutputDirty};
 
 impl_groestl!(Groestl512, U64, U128);
 impl_groestl!(Groestl384, U48, U128);

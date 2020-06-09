@@ -74,7 +74,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.9.0-pre"
-source = "git+https://github.com/rustcrypto/traits#7f2b98d31f704b55c502a685632bd2ea4bd5dd6c"
+source = "git+https://github.com/RustCrypto/traits#b6c5fad59c4079b915a1df20c47bf3154b3612b1"
 dependencies = [
  "blobby",
  "generic-array",

@@ -1,11 +1,15 @@
-use block_buffer::block_padding::ZeroPadding;
-use block_buffer::byteorder::{ByteOrder, LE};
-use block_buffer::BlockBuffer;
+//! Streebog (GOST R 34.11-2012)
+
+use block_buffer::{
+    block_padding::ZeroPadding,
+    byteorder::{ByteOrder, LE},
+    BlockBuffer,
+};
 use byte_tools::copy;
 use core::marker::PhantomData;
-use digest::generic_array::typenum::U64;
+use digest::consts::U64;
 use digest::generic_array::{ArrayLength, GenericArray};
-use digest::{BlockInput, FixedOutput, Reset, Update};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 use crate::consts::{BLOCK_SIZE, C};
 use crate::table::SHUFFLED_LIN_TABLE;
@@ -143,13 +147,13 @@ where
     }
 }
 
-impl<N> FixedOutput for Streebog<N>
+impl<N> FixedOutputDirty for Streebog<N>
 where
     N: ArrayLength<u8> + Copy,
 {
     type OutputSize = N;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, N>) {
         let mut self_state = self.state;
         let pos = self.buffer.position();
 
@@ -166,7 +170,7 @@ where
         self_state.g(&[0u8; 64], &sigma);
 
         let n = BLOCK_SIZE - Self::OutputSize::to_usize();
-        GenericArray::clone_from_slice(&self_state.h[n..])
+        out.copy_from_slice(&self_state.h[n..])
     }
 }
 

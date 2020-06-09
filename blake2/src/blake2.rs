@@ -9,7 +9,7 @@ macro_rules! blake2_impl {
         use $crate::simd::{Vector4, $vec};
 
         use byteorder::{ByteOrder, LittleEndian};
-        use digest::{Update, BlockInput, FixedOutput, VariableOutput, Reset};
+        use digest::{Update, BlockInput, FixedOutputDirty, VariableOutputDirty, Reset};
         use digest::InvalidOutputSize;
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::{U4, Unsigned};
@@ -204,12 +204,12 @@ macro_rules! blake2_impl {
             }
 
             #[doc(hidden)]
-            pub fn finalize_last_node(self) -> Output {
+            pub fn finalize_last_node(mut self) -> Output {
                 self.finalize_with_flag(!0)
             }
 
 
-            fn finalize_with_flag(mut self, f1: $word) -> Output {
+            fn finalize_with_flag(&mut self, f1: $word) -> Output {
                 let off = self.t as usize % (2 * $bytes::to_usize());
                 if off != 0 {
                     zero(&mut self.m.as_mut_bytes()[off..]);
@@ -278,7 +278,7 @@ macro_rules! blake2_impl {
             }
         }
 
-        impl VariableOutput for $state {
+        impl VariableOutputDirty for $state {
             fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
                 if output_size == 0 || output_size > $bytes::to_usize() {
                     return Err(InvalidOutputSize);
@@ -290,14 +290,14 @@ macro_rules! blake2_impl {
                 self.n
             }
 
-            fn finalize_variable<F: FnOnce(&[u8])>(self, f: F) {
+            fn finalize_variable_dirty(&mut self, f: impl FnOnce(&[u8])) {
                 let n = self.n;
                 let res = self.finalize_with_flag(0);
                 f(&res[..n]);
             }
         }
 
-        impl  Reset for $state {
+        impl Reset for $state {
             fn reset(&mut self) {
                 self.t = self.t0;
                 self.m = self.m0;
@@ -340,15 +340,15 @@ macro_rules! blake2_impl {
             }
         }
 
-        impl FixedOutput for $fix_state {
+        impl FixedOutputDirty for $fix_state {
             type OutputSize = $bytes;
 
-            fn finalize_fixed(self) -> Output {
-                self.state.finalize_with_flag(0)
+            fn finalize_into_dirty(&mut self, out: &mut Output)  {
+                out.copy_from_slice(&self.state.finalize_with_flag(0));
             }
         }
 
-        impl  Reset for $fix_state {
+        impl Reset for $fix_state {
             fn reset(&mut self) {
                 self.state.reset()
             }
@@ -381,7 +381,7 @@ macro_rules! blake2_impl {
                 <Self as Reset>::reset(self)
             }
 
-            fn finalize(self) -> crypto_mac::Output<Self> {
+            fn finalize(mut self) -> crypto_mac::Output<Self> {
                 crypto_mac::Output::new(self.state.finalize_with_flag(0))
             }
         }

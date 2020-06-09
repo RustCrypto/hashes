@@ -1,10 +1,14 @@
+//! Shabal
+
 use block_buffer::block_padding::Iso7816;
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
-use digest::generic_array::typenum::{U24, U28, U32, U48, U64};
-use digest::generic_array::GenericArray;
 use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
+use digest::{
+    consts::{U24, U28, U32, U48, U64},
+    generic_array::GenericArray,
+};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 use crate::consts::{
     A_INIT_192, A_INIT_224, A_INIT_256, A_INIT_384, A_INIT_512, B_INIT_192, B_INIT_224, B_INIT_256,
@@ -277,14 +281,12 @@ impl Update for Shabal512 {
     }
 }
 
-impl FixedOutput for Shabal512 {
+impl FixedOutputDirty for Shabal512 {
     type OutputSize = U64;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let mut out = GenericArray::default();
         LE::write_u32_into(&self.engine.state.b[0..16], out.as_mut_slice());
-        out
     }
 }
 
@@ -319,14 +321,12 @@ impl Update for Shabal384 {
     }
 }
 
-impl FixedOutput for Shabal384 {
+impl FixedOutputDirty for Shabal384 {
     type OutputSize = U48;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let mut out = GenericArray::default();
         LE::write_u32_into(&self.engine.state.b[4..16], out.as_mut_slice());
-        out
     }
 }
 
@@ -361,14 +361,12 @@ impl Update for Shabal256 {
     }
 }
 
-impl FixedOutput for Shabal256 {
+impl FixedOutputDirty for Shabal256 {
     type OutputSize = U32;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let mut out = GenericArray::default();
-        LE::write_u32_into(&self.engine.state.b[8..16], out.as_mut_slice());
-        out
+        LE::write_u32_into(&self.engine.state.b[8..16], out);
     }
 }
 
@@ -403,14 +401,12 @@ impl Update for Shabal224 {
     }
 }
 
-impl FixedOutput for Shabal224 {
+impl FixedOutputDirty for Shabal224 {
     type OutputSize = U28;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let mut out = GenericArray::default();
-        LE::write_u32_into(&self.engine.state.b[9..16], out.as_mut_slice());
-        out
+        LE::write_u32_into(&self.engine.state.b[9..16], out);
     }
 }
 
@@ -445,14 +441,12 @@ impl Update for Shabal192 {
     }
 }
 
-impl FixedOutput for Shabal192 {
+impl FixedOutputDirty for Shabal192 {
     type OutputSize = U24;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let mut out = GenericArray::default();
-        LE::write_u32_into(&self.engine.state.b[10..16], out.as_mut_slice());
-        out
+        LE::write_u32_into(&self.engine.state.b[10..16], out);
     }
 }
 

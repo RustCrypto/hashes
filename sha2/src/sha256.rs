@@ -1,14 +1,20 @@
-use block_buffer::byteorder::{ByteOrder, BE};
-use block_buffer::BlockBuffer;
-use digest::generic_array::typenum::{U28, U32, U64};
-use digest::generic_array::GenericArray;
-use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
+//! SHA-256
 
 use crate::consts::{H224, H256, STATE_LEN};
+use block_buffer::{
+    byteorder::{ByteOrder, BE},
+    BlockBuffer,
+};
+use digest::impl_write;
+use digest::{
+    consts::{U28, U32, U64},
+    generic_array::GenericArray,
+};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 #[cfg(not(feature = "asm"))]
 use crate::sha256_utils::compress256;
+
 #[cfg(feature = "asm")]
 use sha2_asm::compress256;
 
@@ -111,14 +117,12 @@ impl Update for Sha256 {
     }
 }
 
-impl FixedOutput for Sha256 {
+impl FixedOutputDirty for Sha256 {
     type OutputSize = U32;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let mut out = GenericArray::default();
         BE::write_u32_into(&self.engine.state.h, out.as_mut_slice());
-        out
     }
 }
 
@@ -153,14 +157,12 @@ impl Update for Sha224 {
     }
 }
 
-impl FixedOutput for Sha224 {
+impl FixedOutputDirty for Sha224 {
     type OutputSize = U28;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let mut out = GenericArray::default();
         BE::write_u32_into(&self.engine.state.h[..7], out.as_mut_slice());
-        out
     }
 }
 

@@ -10,10 +10,11 @@
 
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 // TODO(tarcieri): eliminate alloc requirement
+#[macro_use]
 extern crate alloc;
 
 pub use digest;
@@ -23,8 +24,8 @@ mod lanes;
 
 // TODO(tarcieri): eliminate usage of `Vec`
 use alloc::vec::Vec;
-use core::{cmp::min, convert::TryInto};
-use digest::{ExtendableOutput, Update, XofReader};
+use core::{cmp::min, convert::TryInto, mem};
+use digest::{ExtendableOutputDirty, Reset, Update, XofReader};
 
 /// The KangarooTwelve extendable-output function (XOF).
 #[derive(Debug, Default)]
@@ -60,15 +61,27 @@ impl Update for KangarooTwelve {
     }
 }
 
-impl ExtendableOutput for KangarooTwelve {
+impl ExtendableOutputDirty for KangarooTwelve {
     type Reader = Reader;
 
-    fn finalize_xof(self) -> Self::Reader {
+    fn finalize_xof_dirty(&mut self) -> Self::Reader {
+        let mut buffer = vec![];
+        let mut customization = vec![];
+
+        mem::swap(&mut self.buffer, &mut buffer);
+        mem::swap(&mut self.customization, &mut customization);
+
         Reader {
-            buffer: self.buffer,
-            customization: self.customization,
+            buffer,
+            customization,
             finished: false,
         }
+    }
+}
+
+impl Reset for KangarooTwelve {
+    fn reset(&mut self) {
+        self.buffer.clear();
     }
 }
 

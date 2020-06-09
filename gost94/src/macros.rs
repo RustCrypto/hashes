@@ -1,9 +1,8 @@
 macro_rules! gost94_impl {
     ($state:ident, $sbox:expr) => {
-        use digest::generic_array::typenum::U32;
-        use digest::generic_array::GenericArray;
         use digest::impl_write;
-        use digest::{BlockInput, FixedOutput, Reset, Update};
+        use digest::{consts::U32, generic_array::GenericArray};
+        use digest::{BlockInput, FixedOutputDirty, Reset, Update};
         use $crate::gost94::{Block, Gost94, SBox};
 
         /// GOST94 state
@@ -31,11 +30,11 @@ macro_rules! gost94_impl {
             }
         }
 
-        impl FixedOutput for $state {
+        impl FixedOutputDirty for $state {
             type OutputSize = U32;
 
-            fn finalize_fixed(self) -> GenericArray<u8, Self::OutputSize> {
-                self.sh.finalize_fixed()
+            fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U32>) {
+                self.sh.finalize_into_dirty(out)
             }
         }
 
