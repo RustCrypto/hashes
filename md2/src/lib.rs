@@ -36,12 +36,10 @@ extern crate std;
 
 pub use digest::{self, Digest};
 
-use block_buffer::block_padding::Pkcs7;
-use block_buffer::BlockBuffer;
-use digest::generic_array::typenum::U16;
-use digest::generic_array::GenericArray;
+use block_buffer::{block_padding::Pkcs7, BlockBuffer};
 use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
+use digest::{consts::U16, generic_array::GenericArray};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 mod consts;
 
@@ -107,18 +105,21 @@ impl Update for Md2 {
     }
 }
 
-impl FixedOutput for Md2 {
+impl FixedOutputDirty for Md2 {
     type OutputSize = U16;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         let buf = self
             .buffer
             .pad_with::<Pkcs7>()
             .expect("we never use input_lazy");
+
         self.state.process_block(buf);
+
         let checksum = self.state.checksum;
         self.state.process_block(&checksum);
-        GenericArray::clone_from_slice(&self.state.x[0..16])
+
+        out.copy_from_slice(&self.state.x[0..16]);
     }
 }
 

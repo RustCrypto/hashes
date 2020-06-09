@@ -3,10 +3,9 @@
 use block_buffer::block_padding::ZeroPadding;
 use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
-use digest::generic_array::typenum::U32;
-use digest::generic_array::GenericArray;
 use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
+use digest::{consts::U32, generic_array::GenericArray};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 pub(crate) type Block = [u8; 32];
 
@@ -238,31 +237,30 @@ impl Update for Gost94 {
     }
 }
 
-impl FixedOutput for Gost94 {
+impl FixedOutputDirty for Gost94 {
     type OutputSize = U32;
 
-    fn finalize_fixed(mut self) -> GenericArray<u8, U32> {
-        {
-            let self_state = &mut self.state;
+    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U32>) {
+        let self_state = &mut self.state;
 
-            if self.buffer.position() != 0 {
-                let block = self
-                    .buffer
-                    .pad_with::<ZeroPadding>()
-                    .expect("we never use input_lazy");
-                self_state.process_block(block);
-            }
+        if self.buffer.position() != 0 {
+            let block = self
+                .buffer
+                .pad_with::<ZeroPadding>()
+                .expect("we never use input_lazy");
 
-            let mut buf = Block::default();
-
-            LE::write_u64_into(&self_state.n, &mut buf);
-            self_state.f(&buf);
-
-            LE::write_u64_into(&self_state.sigma, &mut buf);
-            self_state.f(&buf);
+            self_state.process_block(block);
         }
 
-        GenericArray::clone_from_slice(&self.state.h)
+        let mut buf = Block::default();
+
+        LE::write_u64_into(&self_state.n, &mut buf);
+        self_state.f(&buf);
+
+        LE::write_u64_into(&self_state.sigma, &mut buf);
+        self_state.f(&buf);
+
+        out.copy_from_slice(&self.state.h);
     }
 }
 

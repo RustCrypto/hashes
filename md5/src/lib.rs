@@ -49,7 +49,7 @@ use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U16, U64};
 use digest::generic_array::GenericArray;
 use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 mod consts;
 
@@ -106,15 +106,13 @@ impl Update for Md5 {
     }
 }
 
-impl FixedOutput for Md5 {
+impl FixedOutputDirty for Md5 {
     type OutputSize = U16;
 
     #[inline]
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
-        let mut out = GenericArray::default();
+    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U16>) {
         self.finalize_inner();
-        LE::write_u32_into(&self.state, &mut out);
-        out
+        LE::write_u32_into(&self.state, out);
     }
 }
 

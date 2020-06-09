@@ -52,22 +52,21 @@ use whirlpool_asm as utils;
 #[cfg(not(feature = "asm"))]
 mod utils;
 
+#[cfg(not(feature = "asm"))]
+mod consts;
+
 pub use digest::Digest;
 
 use crate::utils::compress;
 
-use block_buffer::block_padding::Iso7816;
-#[cfg(not(feature = "asm"))]
-use block_buffer::byteorder::{ByteOrder, BE};
-use block_buffer::BlockBuffer;
+use block_buffer::{block_padding::Iso7816, BlockBuffer};
 use byte_tools::zero;
-use digest::generic_array::typenum::U64;
-use digest::generic_array::GenericArray;
 use digest::impl_write;
-use digest::{BlockInput, FixedOutput, Reset, Update};
+use digest::{consts::U64, generic_array::GenericArray};
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 #[cfg(not(feature = "asm"))]
-mod consts;
+use block_buffer::byteorder::{ByteOrder, BE};
 
 type BlockSize = U64;
 
@@ -172,22 +171,19 @@ impl Update for Whirlpool {
     }
 }
 
-impl FixedOutput for Whirlpool {
+impl FixedOutputDirty for Whirlpool {
     type OutputSize = U64;
 
     #[cfg(not(feature = "asm"))]
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U64>) {
         self.finalize_inner();
-
-        let mut out = GenericArray::default();
-        BE::write_u64_into(&self.hash[..], &mut out);
-        out
+        BE::write_u64_into(&self.hash[..], out);
     }
 
     #[cfg(feature = "asm")]
-    fn finalize_fixed(mut self) -> GenericArray<u8, Self::OutputSize> {
+    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U64>) {
         self.finalize_inner();
-        GenericArray::clone_from_slice(&self.hash)
+        out.copy_from_slice(&self.hash)
     }
 }
 
