@@ -1,6 +1,6 @@
 #![allow(clippy::many_single_char_names)]
-use core::convert::TryInto;
 use crate::consts::{BLOCK_LEN, K32X4};
+use core::convert::TryInto;
 
 #[inline(always)]
 fn shl(v: [u32; 4], o: u32) -> [u32; 4] {

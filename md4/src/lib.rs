@@ -162,8 +162,8 @@ impl Update for Md4 {
         // Unlike Sha1 and Sha2, the length value in MD4 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
-        let state = &mut self.state;
-        self.buffer.input_block(input, |d: &Block| state.process_block(d));
+        let s = &mut self.state;
+        self.buffer.input_block(input, |d| s.process_block(d));
     }
 }
 

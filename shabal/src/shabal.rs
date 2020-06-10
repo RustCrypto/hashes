@@ -1,7 +1,7 @@
 //! Shabal
-use core::convert::TryInto;
 use block_buffer::block_padding::Iso7816;
 use block_buffer::BlockBuffer;
+use core::convert::TryInto;
 use digest::impl_write;
 use digest::{
     consts::{U24, U28, U32, U48, U64},
@@ -241,7 +241,7 @@ impl Engine256 {
 
     fn input(&mut self, input: &[u8]) {
         let s = &mut self.state;
-        self.buffer.input_block(input, |input| s.process_block(input));
+        self.buffer.input_block(input, |b| s.process_block(b));
     }
 
     fn finish(&mut self) {

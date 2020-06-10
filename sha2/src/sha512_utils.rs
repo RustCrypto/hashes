@@ -1,6 +1,6 @@
 #![allow(clippy::many_single_char_names)]
-use core::convert::TryInto;
 use crate::consts::{BLOCK_LEN, K64X2};
+use core::convert::TryInto;
 
 #[inline(always)]
 fn add(a: [u64; 2], b: [u64; 2]) -> [u64; 2] {
@@ -43,7 +43,13 @@ pub fn sha512_schedule_x2(v0: [u64; 2], v1: [u64; 2], v4to5: [u64; 2], v7: [u64;
 }
 
 /// Performs one round of the SHA-512 message block digest.
-pub fn sha512_digest_round(ae: [u64; 2], bf: [u64; 2], cg: [u64; 2], dh: [u64; 2], wk0: u64) -> [u64; 2] {
+pub fn sha512_digest_round(
+    ae: [u64; 2],
+    bf: [u64; 2],
+    cg: [u64; 2],
+    dh: [u64; 2],
+    wk0: u64,
+) -> [u64; 2] {
     macro_rules! big_sigma0 {
         ($a:expr) => {
             ($a.rotate_right(28) ^ $a.rotate_right(34) ^ $a.rotate_right(39))

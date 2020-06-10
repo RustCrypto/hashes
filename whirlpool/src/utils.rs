@@ -1,5 +1,5 @@
-use core::convert::TryInto;
 use crate::consts::*;
+use core::convert::TryInto;
 
 pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
     let mut k = [0u64; 8];

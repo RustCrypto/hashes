@@ -1,9 +1,6 @@
 //! Streebog (GOST R 34.11-2012)
 
-use block_buffer::{
-    block_padding::ZeroPadding,
-    BlockBuffer,
-};
+use block_buffer::{block_padding::ZeroPadding, BlockBuffer};
 use core::marker::PhantomData;
 use digest::consts::U64;
 use digest::generic_array::{ArrayLength, GenericArray};
@@ -141,9 +138,8 @@ where
 {
     fn update(&mut self, input: impl AsRef<[u8]>) {
         let s = &mut self.state;
-        self.buffer.input_block(input.as_ref(), |d| {
-            s.process_block(d, BLOCK_SIZE as u8)
-        });
+        self.buffer
+            .input_block(input.as_ref(), |d| s.process_block(d, BLOCK_SIZE as u8));
     }
 }
 

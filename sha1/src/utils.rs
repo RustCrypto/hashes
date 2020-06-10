@@ -1,6 +1,6 @@
 #![allow(clippy::many_single_char_names)]
-use core::convert::TryInto;
 use crate::consts::{BLOCK_LEN, K0, K1, K2, K3};
+use core::convert::TryInto;
 use digest::generic_array::typenum::U64;
 use digest::generic_array::GenericArray;
 
@@ -18,12 +18,7 @@ fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
 
 #[inline(always)]
 fn xor(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
-    [
-        a[0] ^ b[0],
-        a[1] ^ b[1],
-        a[2] ^ b[2],
-        a[3] ^ b[3],
-    ]
+    [a[0] ^ b[0], a[1] ^ b[1], a[2] ^ b[2], a[3] ^ b[3]]
 }
 
 /// Not an intrinsic, but gets the first element of a vector.
@@ -43,7 +38,7 @@ pub fn sha1_first_add(e: u32, w0: [u32; 4]) -> [u32; 4] {
 fn sha1msg1(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
     let [_, _, w2, w3] = a;
     let [w4, w5, _, _] = b;
-    [a[0]^w2, a[1]^w3, a[2]^w4, a[3]^w5]
+    [a[0] ^ w2, a[1] ^ w3, a[2] ^ w4, a[3] ^ w5]
 }
 
 /// Emulates `llvm.x86.sha1msg2` intrinsic.

@@ -1,7 +1,7 @@
 #![allow(clippy::many_single_char_names)]
-use core::convert::TryInto;
 use block_buffer::block_padding::ZeroPadding;
 use block_buffer::BlockBuffer;
+use core::convert::TryInto;
 use digest::impl_write;
 use digest::{consts::U32, generic_array::GenericArray};
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
@@ -235,9 +235,9 @@ impl BlockInput for Gost94 {
 impl Update for Gost94 {
     fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
-        let self_state = &mut self.state;
-        self_state.update_n(input.len());
-        self.buffer.input_block(input, |d| self_state.process_block(d));
+        let s = &mut self.state;
+        s.update_n(input.len());
+        self.buffer.input_block(input, |d| s.process_block(d));
     }
 }
 

@@ -1,6 +1,6 @@
 #![allow(clippy::many_single_char_names)]
-use core::convert::TryInto;
 use crate::consts::RC;
+use core::convert::TryInto;
 
 #[inline(always)]
 fn op_f(w: u32, x: u32, y: u32, z: u32, m: u32, c: u32, s: u32) -> u32 {

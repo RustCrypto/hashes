@@ -72,7 +72,7 @@ impl Engine256 {
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += (input.len() as u64) << 3;
         let s = &mut self.state;
-        self.buffer.input_block(input, |input| s.process_block(input));
+        self.buffer.input_block(input, |b| s.process_block(b));
     }
 
     fn finish(&mut self) {

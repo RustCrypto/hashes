@@ -81,9 +81,9 @@ fn convert(d: &GenericArray<u8, U64>) -> &[u8; 64] {
 impl Md5 {
     #[inline]
     fn finalize_inner(&mut self) {
-        let state = &mut self.state;
+        let s = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer.len64_padding_le(l, |d| compress(state, convert(d)));
+        self.buffer.len64_padding_le(l, |d| compress(s, convert(d)));
     }
 }
 

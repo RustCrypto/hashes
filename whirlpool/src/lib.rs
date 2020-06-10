@@ -163,7 +163,8 @@ impl Update for Whirlpool {
         let input = input.as_ref();
         self.update_len(input.len() as u64);
         let hash = &mut self.hash;
-        self.buffer.input_block(input, |b| compress(hash, convert(b)));
+        self.buffer
+            .input_block(input, |b| compress(hash, convert(b)));
     }
 }
 

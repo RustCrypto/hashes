@@ -62,7 +62,8 @@ impl Engine512 {
 
     fn finish(&mut self) {
         let s = &mut self.state;
-        self.buffer.len128_padding_be(self.len, |d| s.process_block(d));
+        self.buffer
+            .len128_padding_be(self.len, |d| s.process_block(d));
     }
 
     fn reset(&mut self, h: &[u64; STATE_LEN]) {
