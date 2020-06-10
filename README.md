@@ -30,6 +30,8 @@ BLAKE2, SHA-2 or SHA-3.
 | `streebog`  | [Streebog] (GOST R 34.11-2012) | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) |  [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | ![build](https://github.com/rustcrypto/hashes/workflows/streebog/badge.svg?branch=master&event=push) | :yellow_heart: |
 | `whirlpool` | [Whirlpool] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) |  [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![build](https://github.com/rustcrypto/hashes/workflows/whirlpool/badge.svg?branch=master&event=push) | :green_heart: |
 
+NOTE: the [BLAKE3 crate](https://github.com/BLAKE3-team/BLAKE3) implements the `digest` (and `crypto-mac`) traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
+
 \* RIPEMD-320 provides only the same security as RIPEMD-160
 
 [Security]: https://en.wikipedia.org/wiki/Hash_function_security_summary
