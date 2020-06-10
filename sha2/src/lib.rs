@@ -103,5 +103,3 @@ pub use digest::{self, Digest};
 pub use sha256_utils::compress256;
 #[cfg(feature = "compress")]
 pub use sha512_utils::compress512;
-
-use fake_simd as simd;
