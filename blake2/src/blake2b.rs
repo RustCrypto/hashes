@@ -6,7 +6,6 @@ blake2_impl!(
     Blake2b,
     u64,
     u64x4,
-    read_u64,
     U64,
     U128,
     32,

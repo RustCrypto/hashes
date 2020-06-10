@@ -1,6 +1,6 @@
 macro_rules! blake2_impl {
     (
-        $state:ident, $fix_state:ident, $word:ident, $vec:ident, $pack:ident, $bytes:ident,
+        $state:ident, $fix_state:ident, $word:ident, $vec:ident, $bytes:ident,
         $block_size:ident, $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr,
         $vardoc:expr, $doc:expr,
     ) => {
@@ -8,14 +8,12 @@ macro_rules! blake2_impl {
         use $crate::as_bytes::AsBytes;
         use $crate::simd::{Vector4, $vec};
 
-        use byteorder::{ByteOrder, LittleEndian};
         use digest::{Update, BlockInput, FixedOutputDirty, VariableOutputDirty, Reset};
         use digest::InvalidOutputSize;
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::{U4, Unsigned};
         use digest::impl_write;
-        use core::cmp;
-        use core::ops::Div;
+        use core::{cmp, convert::TryInto, ops::Div};
         use crypto_mac::{InvalidKeyLength, Mac, NewMac};
 
         type Output = GenericArray<u8, $bytes>;
@@ -107,11 +105,11 @@ macro_rules! blake2_impl {
                     for i in 0..salt.len() {
                         padded_salt[i] = salt[i];
                     }
-                    p[4] = LittleEndian::$pack(&padded_salt[0 .. length/2]);
-                    p[5] = LittleEndian::$pack(&padded_salt[length/2 .. padded_salt.len()]);
+                    p[4] = $word::from_le_bytes(padded_salt[0 .. length/2].try_into().unwrap());
+                    p[5] = $word::from_le_bytes(padded_salt[length/2 .. padded_salt.len()].try_into().unwrap());
                 } else {
-                    p[4] = LittleEndian::$pack(&salt[0 .. salt.len()/2]);
-                    p[5] = LittleEndian::$pack(&salt[salt.len()/2 .. salt.len()]);
+                    p[4] = $word::from_le_bytes(salt[0 .. salt.len()/2].try_into().unwrap());
+                    p[5] = $word::from_le_bytes(salt[salt.len()/2 .. salt.len()].try_into().unwrap());
                 }
 
                 // persona is also two words long
@@ -120,11 +118,11 @@ macro_rules! blake2_impl {
                     for i in 0..persona.len() {
                         padded_persona[i] = persona[i];
                     }
-                    p[6] = LittleEndian::$pack(&padded_persona[0 .. length/2]);
-                    p[7] = LittleEndian::$pack(&padded_persona[length/2 .. padded_persona.len()]);
+                    p[6] = $word::from_le_bytes(padded_persona[0 .. length/2].try_into().unwrap());
+                    p[7] = $word::from_le_bytes(padded_persona[length/2 .. padded_persona.len()].try_into().unwrap());
                 } else {
-                    p[6] = LittleEndian::$pack(&persona[0 .. length/2]);
-                    p[7] = LittleEndian::$pack(&persona[length/2 .. persona.len()]);
+                    p[6] = $word::from_le_bytes(persona[0 .. length/2].try_into().unwrap());
+                    p[7] = $word::from_le_bytes(persona[length/2 .. persona.len()].try_into().unwrap());
                 }
 
                 let mut state = Self::with_parameter_block(&p);

@@ -4,7 +4,6 @@
 name = "blake2"
 version = "0.9.0-pre"
 dependencies = [
- "byteorder",
  "crypto-mac",
  "digest",
  "hex-literal",
@@ -22,8 +21,9 @@ dependencies = [
 
 [[package]]
 name = "block-buffer"
-version = "0.9.0-pre"
-source = "git+https://github.com/RustCrypto/utils#dcb2b89047c28444beb5a901f2ace4b296a5d9fe"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
 dependencies = [
  "block-padding",
  "generic-array",
@@ -31,8 +31,9 @@ dependencies = [
 
 [[package]]
 name = "block-padding"
-version = "0.2.0-pre"
-source = "git+https://github.com/RustCrypto/utils#dcb2b89047c28444beb5a901f2ace4b296a5d9fe"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c98bfd7c112b6399fef97cc0614af1cd375b27a112e552ce60f94c1b5f13cb74"
 
 [[package]]
 name = "byteorder"

@@ -13,7 +13,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.9"
-block-buffer = { version = "0.9.0-pre", features = ["block-padding"] }
+block-buffer = { version = "0.9", features = ["block-padding"] }
 opaque-debug = "0.2"
 
 [dev-dependencies]
