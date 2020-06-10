@@ -210,7 +210,7 @@ checksum = "7e0456befd48169b9f13ef0f0ad46d492cf9d2dbb918bcf38e01eed4ce3ec5e4"
 
 [[package]]
 name = "ripemd160"
-version = "0.9.0-pre"
+version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",

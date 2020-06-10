@@ -1,6 +1,6 @@
 [package]
 name = "ripemd160"
-version = "0.9.0-pre"
+version = "0.9.0"
 description = "RIPEMD-160 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
