@@ -20,6 +20,7 @@ new_test!(
 /// Test vectors from:
 /// https://github.com/gost-engine/engine/blob/master/test/01-digest.t
 #[test]
+#[rustfmt::skip]
 fn gost_engine_tests() {
     use digest::Digest;
     use hex_literal::hex;
