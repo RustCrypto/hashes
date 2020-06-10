@@ -39,10 +39,7 @@ mod block;
 pub use digest::{self, Digest};
 
 use crate::block::{process_msg_block, DIGEST_BUF_LEN, H0};
-use block_buffer::{
-    byteorder::{ByteOrder, LE},
-    BlockBuffer,
-};
+use block_buffer::BlockBuffer;
 use digest::consts::{U20, U64};
 use digest::impl_write;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
@@ -75,7 +72,7 @@ impl Update for Ripemd160 {
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += input.len() as u64;
         let h = &mut self.h;
-        self.buffer.input(input, |b| process_msg_block(h, b));
+        self.buffer.input_block(input, |b| process_msg_block(h, b));
     }
 }
 
@@ -85,10 +82,11 @@ impl FixedOutputDirty for Ripemd160 {
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         let h = &mut self.h;
         let l = self.len << 3;
-        self.buffer
-            .len64_padding::<LE, _>(l, |b| process_msg_block(h, b));
+        self.buffer.len64_padding_le(l, |b| process_msg_block(h, b));
 
-        LE::write_u32_into(&self.h, &mut out[..]);
+        for (chunk, v) in out.chunks_exact_mut(4).zip(self.h.iter()) {
+            chunk.copy_from_slice(&v.to_le_bytes());
+        }
     }
 }
 

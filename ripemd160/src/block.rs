@@ -1,4 +1,4 @@
-use block_buffer::byteorder::{ByteOrder, LE};
+use core::convert::TryInto;
 use digest::generic_array::typenum::U64;
 use digest::generic_array::GenericArray;
 
@@ -117,7 +117,9 @@ macro_rules! process_block(
 
 pub fn process_msg_block(h: &mut [u32; DIGEST_BUF_LEN], data: &Block) {
     let mut w = [0u32; WORK_BUF_LEN];
-    LE::read_u32_into(data, &mut w[0..16]);
+    for (o, chunk) in w.iter_mut().zip(data.chunks_exact(4)) {
+        *o = u32::from_le_bytes(chunk.try_into().unwrap());
+    }
     process_block!(h, w[..],
     // Round 1
         round1: h_ordering 0, 1, 2, 3, 4; data_index  0; roll_shift 11

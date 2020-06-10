@@ -1,10 +1,7 @@
 //! SHA-512
 
 use crate::consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};
-use block_buffer::{
-    byteorder::{ByteOrder, BE},
-    BlockBuffer,
-};
+use block_buffer::BlockBuffer;
 use digest::impl_write;
 use digest::{
     consts::{U128, U28, U32, U48, U64},
@@ -43,7 +40,7 @@ impl Engine512State {
 /// contains the logic necessary to perform the final calculations.
 #[derive(Clone)]
 struct Engine512 {
-    len: (u64, u64), // TODO: replace with u128 on MSRV bump
+    len: u128,
     buffer: BlockBuffer<BlockSize>,
     state: Engine512State,
 }
@@ -51,31 +48,26 @@ struct Engine512 {
 impl Engine512 {
     fn new(h: &[u64; STATE_LEN]) -> Engine512 {
         Engine512 {
-            len: (0, 0),
+            len: 0,
             buffer: Default::default(),
             state: Engine512State::new(h),
         }
     }
 
     fn update(&mut self, input: &[u8]) {
-        let (res, over) = self.len.1.overflowing_add((input.len() as u64) << 3);
-        self.len.1 = res;
-        if over {
-            self.len.0 += 1;
-        }
-        let self_state = &mut self.state;
-        self.buffer.input(input, |d| self_state.process_block(d));
+        self.len += (input.len() as u128) << 3;
+        let s = &mut self.state;
+        self.buffer.input_block(input, |d| s.process_block(d));
     }
 
     fn finish(&mut self) {
-        let self_state = &mut self.state;
-        let (hi, lo) = self.len;
+        let s = &mut self.state;
         self.buffer
-            .len128_padding_be(hi, lo, |d| self_state.process_block(d));
+            .len128_padding_be(self.len, |d| s.process_block(d));
     }
 
     fn reset(&mut self, h: &[u64; STATE_LEN]) {
-        self.len = (0, 0);
+        self.len = 0;
         self.buffer.reset();
         self.state = Engine512State::new(h);
     }
@@ -110,7 +102,10 @@ impl FixedOutputDirty for Sha512 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        BE::write_u64_into(&self.engine.state.h[..], out.as_mut_slice());
+        let h = self.engine.state.h;
+        for (chunk, v) in out.chunks_exact_mut(8).zip(h.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
     }
 }
 
@@ -150,7 +145,10 @@ impl FixedOutputDirty for Sha384 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        BE::write_u64_into(&self.engine.state.h[..6], out.as_mut_slice());
+        let h = &self.engine.state.h[..6];
+        for (chunk, v) in out.chunks_exact_mut(8).zip(h.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
     }
 }
 
@@ -190,7 +188,10 @@ impl FixedOutputDirty for Sha512Trunc256 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        BE::write_u64_into(&self.engine.state.h[..4], out.as_mut_slice());
+        let h = &self.engine.state.h[..4];
+        for (chunk, v) in out.chunks_exact_mut(8).zip(h.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
     }
 }
 
@@ -230,8 +231,11 @@ impl FixedOutputDirty for Sha512Trunc224 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        BE::write_u64_into(&self.engine.state.h[..3], &mut out[..24]);
-        BE::write_u32(&mut out[24..28], (self.engine.state.h[3] >> 32) as u32);
+        let h = &self.engine.state.h;
+        for (chunk, v) in out.chunks_exact_mut(8).zip(h[..3].iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
+        out[24..28].copy_from_slice(&h[3].to_be_bytes()[..4]);
     }
 }
 

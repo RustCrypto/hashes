@@ -1,11 +1,6 @@
 //! Streebog (GOST R 34.11-2012)
 
-use block_buffer::{
-    block_padding::ZeroPadding,
-    byteorder::{ByteOrder, LE},
-    BlockBuffer,
-};
-use byte_tools::copy;
+use block_buffer::{block_padding::ZeroPadding, BlockBuffer};
 use core::marker::PhantomData;
 use digest::consts::U64;
 use digest::generic_array::{ArrayLength, GenericArray};
@@ -40,7 +35,9 @@ fn lps(h: &mut Block, n: &Block) {
         }
     }
 
-    LE::write_u64_into(&buf, h);
+    for (chunk, v) in h.chunks_exact_mut(8).zip(buf.iter()) {
+        chunk.copy_from_slice(&v.to_le_bytes());
+    }
 }
 
 impl StreebogState {
@@ -48,8 +45,8 @@ impl StreebogState {
         let mut key = [0u8; 64];
         let mut block = [0u8; 64];
 
-        copy(&self.h, &mut key);
-        copy(m, &mut block);
+        key.copy_from_slice(&self.h);
+        block.copy_from_slice(m);
 
         lps(&mut key, n);
 
@@ -140,10 +137,9 @@ where
     N: ArrayLength<u8> + Copy,
 {
     fn update(&mut self, input: impl AsRef<[u8]>) {
-        let self_state = &mut self.state;
-        self.buffer.input(input.as_ref(), |d| {
-            self_state.process_block(d, BLOCK_SIZE as u8)
-        });
+        let s = &mut self.state;
+        self.buffer
+            .input_block(input.as_ref(), |d| s.process_block(d, BLOCK_SIZE as u8));
     }
 }
 

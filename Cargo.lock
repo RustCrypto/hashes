@@ -4,8 +4,6 @@
 name = "blake2"
 version = "0.9.0"
 dependencies = [
- "byte-tools",
- "byteorder",
  "crypto-mac",
  "digest",
  "hex-literal",
@@ -23,30 +21,19 @@ dependencies = [
 
 [[package]]
 name = "block-buffer"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbcf92448676f82bb7a334c58bbce8b0d43580fb5362a9d608b18879d12a3d31"
+checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
 dependencies = [
  "block-padding",
- "byte-tools",
- "byteorder",
  "generic-array",
 ]
 
 [[package]]
 name = "block-padding"
-version = "0.1.5"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa79dedbb091f449f1f39e53edf88d5dbe95f895dae6135a8d7b881fb5af73f5"
-dependencies = [
- "byte-tools",
-]
-
-[[package]]
-name = "byte-tools"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3b5ca7a04898ad4bcd41c90c5285445ff5b791899bb1b0abdd2a2aa791211d7"
+checksum = "c98bfd7c112b6399fef97cc0614af1cd375b27a112e552ce60f94c1b5f13cb74"
 
 [[package]]
 name = "byteorder"
@@ -80,12 +67,6 @@ dependencies = [
  "blobby",
  "generic-array",
 ]
-
-[[package]]
-name = "fake-simd"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
 
 [[package]]
 name = "generic-array"
@@ -182,7 +163,6 @@ version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
- "fake-simd",
  "hex-literal",
  "opaque-debug",
 ]
@@ -234,7 +214,6 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",
- "fake-simd",
  "hex-literal",
  "libc",
  "opaque-debug",
@@ -256,7 +235,6 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",
- "fake-simd",
  "hex-literal",
  "libc",
  "opaque-debug",
@@ -277,7 +255,6 @@ name = "sha3"
 version = "0.9.0"
 dependencies = [
  "block-buffer",
- "byte-tools",
  "digest",
  "hex-literal",
  "keccak",
@@ -299,7 +276,6 @@ name = "streebog"
 version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
- "byte-tools",
  "digest",
  "hex-literal",
  "opaque-debug",
@@ -322,7 +298,6 @@ name = "whirlpool"
 version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
- "byte-tools",
  "digest",
  "hex-literal",
  "opaque-debug",

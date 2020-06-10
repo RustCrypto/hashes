@@ -35,10 +35,9 @@ extern crate opaque_debug;
 #[cfg(feature = "std")]
 extern crate std;
 
+use core::convert::TryInto;
 pub use digest::{self, Digest};
 
-use crate::simd::u32x4;
-use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::impl_write;
 use digest::{
@@ -46,16 +45,15 @@ use digest::{
     generic_array::GenericArray,
 };
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
-use fake_simd as simd;
 
 // initial values for Md4State
-const S: u32x4 = u32x4(0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476);
+const S: [u32; 4] = [0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476];
 
 type Block = GenericArray<u8, U64>;
 
 #[derive(Copy, Clone)]
 struct Md4State {
-    s: u32x4,
+    s: [u32; 4],
 }
 
 /// The MD4 hasher
@@ -98,14 +96,16 @@ impl Md4State {
                 .rotate_left(s)
         }
 
-        let mut a = self.s.0;
-        let mut b = self.s.1;
-        let mut c = self.s.2;
-        let mut d = self.s.3;
+        let mut a = self.s[0];
+        let mut b = self.s[1];
+        let mut c = self.s[2];
+        let mut d = self.s[3];
 
         // load block to data
         let mut data = [0u32; 16];
-        LE::read_u32_into(input, &mut data);
+        for (o, chunk) in data.iter_mut().zip(input.chunks_exact(4)) {
+            *o = u32::from_le_bytes(chunk.try_into().unwrap());
+        }
 
         // round 1
         for &i in &[0, 4, 8, 12] {
@@ -131,7 +131,10 @@ impl Md4State {
             b = op3(b, c, d, a, data[i + 12], 15);
         }
 
-        self.s = self.s + u32x4(a, b, c, d);
+        self.s[0] = self.s[0].wrapping_add(a);
+        self.s[1] = self.s[1].wrapping_add(b);
+        self.s[2] = self.s[2].wrapping_add(c);
+        self.s[3] = self.s[3].wrapping_add(d);
     }
 }
 
@@ -145,8 +148,7 @@ impl Md4 {
     fn finalize_inner(&mut self) {
         let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer
-            .len64_padding::<LE, _>(l, |d| state.process_block(d))
+        self.buffer.len64_padding_le(l, |d| state.process_block(d))
     }
 }
 
@@ -160,9 +162,8 @@ impl Update for Md4 {
         // Unlike Sha1 and Sha2, the length value in MD4 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
-        let self_state = &mut self.state;
-        self.buffer
-            .input(input, |d: &Block| self_state.process_block(d));
+        let s = &mut self.state;
+        self.buffer.input_block(input, |d| s.process_block(d));
     }
 }
 
@@ -172,10 +173,9 @@ impl FixedOutputDirty for Md4 {
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.finalize_inner();
 
-        LE::write_u32(&mut out[0..4], self.state.s.0);
-        LE::write_u32(&mut out[4..8], self.state.s.1);
-        LE::write_u32(&mut out[8..12], self.state.s.2);
-        LE::write_u32(&mut out[12..16], self.state.s.3);
+        for (chunk, v) in out.chunks_exact_mut(4).zip(self.state.s.iter()) {
+            chunk.copy_from_slice(&v.to_le_bytes());
+        }
     }
 }
 

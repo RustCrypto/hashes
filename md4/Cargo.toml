@@ -13,8 +13,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.9"
-block-buffer = "0.8"
-fake-simd = "0.1"
+block-buffer = "0.9"
 opaque-debug = "0.2"
 
 [dev-dependencies]

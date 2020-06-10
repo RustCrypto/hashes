@@ -1,80 +1,93 @@
 #![allow(clippy::many_single_char_names)]
-
 use crate::consts::{BLOCK_LEN, K0, K1, K2, K3};
-use crate::simd::u32x4;
-use block_buffer::byteorder::{ByteOrder, BE};
+use core::convert::TryInto;
 use digest::generic_array::typenum::U64;
 use digest::generic_array::GenericArray;
 
 type Block = GenericArray<u8, U64>;
 
+#[inline(always)]
+fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
+    [
+        a[0].wrapping_add(b[0]),
+        a[1].wrapping_add(b[1]),
+        a[2].wrapping_add(b[2]),
+        a[3].wrapping_add(b[3]),
+    ]
+}
+
+#[inline(always)]
+fn xor(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
+    [a[0] ^ b[0], a[1] ^ b[1], a[2] ^ b[2], a[3] ^ b[3]]
+}
+
 /// Not an intrinsic, but gets the first element of a vector.
 #[inline]
-pub fn sha1_first(w0: u32x4) -> u32 {
-    w0.0
+pub fn sha1_first(w0: [u32; 4]) -> u32 {
+    w0[0]
 }
 
 /// Not an intrinsic, but adds a word to the first element of a vector.
 #[inline]
-pub fn sha1_first_add(e: u32, w0: u32x4) -> u32x4 {
-    let u32x4(a, b, c, d) = w0;
-    u32x4(e.wrapping_add(a), b, c, d)
+pub fn sha1_first_add(e: u32, w0: [u32; 4]) -> [u32; 4] {
+    let [a, b, c, d] = w0;
+    [e.wrapping_add(a), b, c, d]
 }
 
 /// Emulates `llvm.x86.sha1msg1` intrinsic.
-fn sha1msg1(a: u32x4, b: u32x4) -> u32x4 {
-    let u32x4(_, _, w2, w3) = a;
-    let u32x4(w4, w5, _, _) = b;
-    a ^ u32x4(w2, w3, w4, w5)
+fn sha1msg1(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
+    let [_, _, w2, w3] = a;
+    let [w4, w5, _, _] = b;
+    [a[0] ^ w2, a[1] ^ w3, a[2] ^ w4, a[3] ^ w5]
 }
 
 /// Emulates `llvm.x86.sha1msg2` intrinsic.
-fn sha1msg2(a: u32x4, b: u32x4) -> u32x4 {
-    let u32x4(x0, x1, x2, x3) = a;
-    let u32x4(_, w13, w14, w15) = b;
+fn sha1msg2(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
+    let [x0, x1, x2, x3] = a;
+    let [_, w13, w14, w15] = b;
 
     let w16 = (x0 ^ w13).rotate_left(1);
     let w17 = (x1 ^ w14).rotate_left(1);
     let w18 = (x2 ^ w15).rotate_left(1);
     let w19 = (x3 ^ w16).rotate_left(1);
 
-    u32x4(w16, w17, w18, w19)
+    [w16, w17, w18, w19]
 }
 
 /// Performs 4 rounds of the message schedule update.
 /*
-pub fn sha1_schedule_x4(v0: u32x4, v1: u32x4, v2: u32x4, v3: u32x4) -> u32x4 {
+pub fn sha1_schedule_x4(v0: [u32; 4], v1: [u32; 4], v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
     sha1msg2(sha1msg1(v0, v1) ^ v2, v3)
 }
 */
 
 /// Emulates `llvm.x86.sha1nexte` intrinsic.
 #[inline]
-fn sha1_first_half(abcd: u32x4, msg: u32x4) -> u32x4 {
+fn sha1_first_half(abcd: [u32; 4], msg: [u32; 4]) -> [u32; 4] {
     sha1_first_add(sha1_first(abcd).rotate_left(30), msg)
 }
 
 /// Emulates `llvm.x86.sha1rnds4` intrinsic.
 /// Performs 4 rounds of the message block digest.
-fn sha1_digest_round_x4(abcd: u32x4, work: u32x4, i: i8) -> u32x4 {
-    const K0V: u32x4 = u32x4(K0, K0, K0, K0);
-    const K1V: u32x4 = u32x4(K1, K1, K1, K1);
-    const K2V: u32x4 = u32x4(K2, K2, K2, K2);
-    const K3V: u32x4 = u32x4(K3, K3, K3, K3);
+fn sha1_digest_round_x4(abcd: [u32; 4], work: [u32; 4], i: i8) -> [u32; 4] {
+    const K0V: [u32; 4] = [K0, K0, K0, K0];
+    const K1V: [u32; 4] = [K1, K1, K1, K1];
+    const K2V: [u32; 4] = [K2, K2, K2, K2];
+    const K3V: [u32; 4] = [K3, K3, K3, K3];
 
     match i {
-        0 => sha1rnds4c(abcd, work + K0V),
-        1 => sha1rnds4p(abcd, work + K1V),
-        2 => sha1rnds4m(abcd, work + K2V),
-        3 => sha1rnds4p(abcd, work + K3V),
+        0 => sha1rnds4c(abcd, add(work, K0V)),
+        1 => sha1rnds4p(abcd, add(work, K1V)),
+        2 => sha1rnds4m(abcd, add(work, K2V)),
+        3 => sha1rnds4p(abcd, add(work, K3V)),
         _ => unreachable!("unknown icosaround index"),
     }
 }
 
 /// Not an intrinsic, but helps emulate `llvm.x86.sha1rnds4` intrinsic.
-fn sha1rnds4c(abcd: u32x4, msg: u32x4) -> u32x4 {
-    let u32x4(mut a, mut b, mut c, mut d) = abcd;
-    let u32x4(t, u, v, w) = msg;
+fn sha1rnds4c(abcd: [u32; 4], msg: [u32; 4]) -> [u32; 4] {
+    let [mut a, mut b, mut c, mut d] = abcd;
+    let [t, u, v, w] = msg;
     let mut e = 0u32;
 
     macro_rules! bool3ary_202 {
@@ -107,13 +120,13 @@ fn sha1rnds4c(abcd: u32x4, msg: u32x4) -> u32x4 {
         .wrapping_add(w);
     d = d.rotate_left(30);
 
-    u32x4(b, c, d, e)
+    [b, c, d, e]
 }
 
 /// Not an intrinsic, but helps emulate `llvm.x86.sha1rnds4` intrinsic.
-fn sha1rnds4p(abcd: u32x4, msg: u32x4) -> u32x4 {
-    let u32x4(mut a, mut b, mut c, mut d) = abcd;
-    let u32x4(t, u, v, w) = msg;
+fn sha1rnds4p(abcd: [u32; 4], msg: [u32; 4]) -> [u32; 4] {
+    let [mut a, mut b, mut c, mut d] = abcd;
+    let [t, u, v, w] = msg;
     let mut e = 0u32;
 
     macro_rules! bool3ary_150 {
@@ -146,13 +159,13 @@ fn sha1rnds4p(abcd: u32x4, msg: u32x4) -> u32x4 {
         .wrapping_add(w);
     d = d.rotate_left(30);
 
-    u32x4(b, c, d, e)
+    [b, c, d, e]
 }
 
 /// Not an intrinsic, but helps emulate `llvm.x86.sha1rnds4` intrinsic.
-fn sha1rnds4m(abcd: u32x4, msg: u32x4) -> u32x4 {
-    let u32x4(mut a, mut b, mut c, mut d) = abcd;
-    let u32x4(t, u, v, w) = msg;
+fn sha1rnds4m(abcd: [u32; 4], msg: [u32; 4]) -> [u32; 4] {
+    let [mut a, mut b, mut c, mut d] = abcd;
+    let [t, u, v, w] = msg;
     let mut e = 0u32;
 
     macro_rules! bool3ary_232 {
@@ -185,14 +198,14 @@ fn sha1rnds4m(abcd: u32x4, msg: u32x4) -> u32x4 {
         .wrapping_add(w);
     d = d.rotate_left(30);
 
-    u32x4(b, c, d, e)
+    [b, c, d, e]
 }
 
 /// Process a block with the SHA-1 algorithm.
 fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
     macro_rules! schedule {
         ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => {
-            sha1msg2(sha1msg1($v0, $v1) ^ $v2, $v3)
+            sha1msg2(xor(sha1msg1($v0, $v1), $v2), $v3)
         };
     }
 
@@ -203,15 +216,15 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
     }
 
     // Rounds 0..20
-    // TODO: replace with `u32x4::load`
-    let mut h0 = u32x4(state[0], state[1], state[2], state[3]);
-    let mut w0 = u32x4(block[0], block[1], block[2], block[3]);
+    // TODO: replace with `[u32; 4]::load`
+    let mut h0 = [state[0], state[1], state[2], state[3]];
+    let mut w0 = [block[0], block[1], block[2], block[3]];
     let mut h1 = sha1_digest_round_x4(h0, sha1_first_add(state[4], w0), 0);
-    let mut w1 = u32x4(block[4], block[5], block[6], block[7]);
+    let mut w1 = [block[4], block[5], block[6], block[7]];
     h0 = rounds4!(h1, h0, w1, 0);
-    let mut w2 = u32x4(block[8], block[9], block[10], block[11]);
+    let mut w2 = [block[8], block[9], block[10], block[11]];
     h1 = rounds4!(h0, h1, w2, 0);
-    let mut w3 = u32x4(block[12], block[13], block[14], block[15]);
+    let mut w3 = [block[12], block[13], block[14], block[15]];
     h0 = rounds4!(h1, h0, w3, 0);
     let mut w4 = schedule!(w0, w1, w2, w3);
     h1 = rounds4!(h0, h1, w4, 0);
@@ -253,7 +266,7 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
     h0 = rounds4!(h1, h0, w4, 3);
 
     let e = sha1_first(h1).rotate_left(30);
-    let u32x4(a, b, c, d) = h0;
+    let [a, b, c, d] = h0;
 
     state[0] = state[0].wrapping_add(a);
     state[1] = state[1].wrapping_add(b);
@@ -312,6 +325,8 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
 ///
 pub fn compress(state: &mut [u32; 5], block: &Block) {
     let mut block_u32 = [0u32; BLOCK_LEN];
-    BE::read_u32_into(block, &mut block_u32[..]);
+    for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
+        *o = u32::from_be_bytes(chunk.try_into().unwrap());
+    }
     sha1_digest_block_u32(state, &block_u32);
 }
