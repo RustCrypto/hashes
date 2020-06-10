@@ -16,3 +16,6 @@ members = [
     "streebog",
     "whirlpool",
 ]
+
+[profile.dev]
+opt-level = 2
