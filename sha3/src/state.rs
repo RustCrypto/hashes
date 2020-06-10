@@ -1,4 +1,4 @@
-use block_buffer::byteorder::{ByteOrder, LE};
+use core::convert::TryInto;
 
 const PLEN: usize = 25;
 
@@ -22,7 +22,9 @@ impl Sha3State {
             let n = block.len() / 8;
             let mut buf = [0u64; 21];
             let buf = &mut buf[..n];
-            LE::read_u64_into(block, buf);
+            for (o, chunk) in buf.iter_mut().zip(block.chunks_exact(8)) {
+                *o = u64::from_le_bytes(chunk.try_into().unwrap());
+            }
             for (d, i) in self.state[..n].iter_mut().zip(buf) {
                 *d ^= *i;
             }
@@ -41,7 +43,10 @@ impl Sha3State {
             }
         } else {
             data_copy = [0u8; 8 * PLEN];
-            LE::write_u64_into(&self.state, &mut data_copy);
+
+            for (chunk, v) in data_copy.chunks_exact_mut(8).zip(self.state.iter()) {
+                chunk.copy_from_slice(&v.to_le_bytes());
+            }
             &data_copy
         };
         f(data_ref);

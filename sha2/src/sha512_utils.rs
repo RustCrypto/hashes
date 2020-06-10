@@ -1,8 +1,7 @@
 #![allow(clippy::many_single_char_names)]
-
+use core::convert::TryInto;
 use crate::consts::{BLOCK_LEN, K64X2};
 use crate::simd::u64x2;
-use block_buffer::byteorder::{ByteOrder, BE};
 
 /// Not an intrinsic, but works like an unaligned load.
 #[inline]
@@ -290,6 +289,8 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
 ///
 pub fn compress512(state: &mut [u64; 8], block: &[u8; 128]) {
     let mut block_u64 = [0u64; BLOCK_LEN];
-    BE::read_u64_into(block, &mut block_u64[..]);
+    for (o, chunk) in block_u64.iter_mut().zip(block.chunks_exact(8)) {
+        *o = u64::from_be_bytes(chunk.try_into().unwrap());
+    }
     sha512_digest_block_u64(state, &block_u64);
 }

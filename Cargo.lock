@@ -4,7 +4,6 @@
 name = "blake2"
 version = "0.9.0-pre"
 dependencies = [
- "byte-tools",
  "byteorder",
  "crypto-mac",
  "digest",
@@ -23,30 +22,17 @@ dependencies = [
 
 [[package]]
 name = "block-buffer"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbcf92448676f82bb7a334c58bbce8b0d43580fb5362a9d608b18879d12a3d31"
+version = "0.9.0-pre"
+source = "git+https://github.com/RustCrypto/utils#dcb2b89047c28444beb5a901f2ace4b296a5d9fe"
 dependencies = [
  "block-padding",
- "byte-tools",
- "byteorder",
  "generic-array",
 ]
 
 [[package]]
 name = "block-padding"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa79dedbb091f449f1f39e53edf88d5dbe95f895dae6135a8d7b881fb5af73f5"
-dependencies = [
- "byte-tools",
-]
-
-[[package]]
-name = "byte-tools"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3b5ca7a04898ad4bcd41c90c5285445ff5b791899bb1b0abdd2a2aa791211d7"
+version = "0.2.0-pre"
+source = "git+https://github.com/RustCrypto/utils#dcb2b89047c28444beb5a901f2ace4b296a5d9fe"
 
 [[package]]
 name = "byteorder"
@@ -182,7 +168,6 @@ version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
  "digest",
- "fake-simd",
  "hex-literal",
  "opaque-debug",
 ]
@@ -234,7 +219,6 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",
- "fake-simd",
  "hex-literal",
  "libc",
  "opaque-debug",
@@ -277,7 +261,6 @@ name = "sha3"
 version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
- "byte-tools",
  "digest",
  "hex-literal",
  "keccak",
@@ -299,7 +282,6 @@ name = "streebog"
 version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
- "byte-tools",
  "digest",
  "hex-literal",
  "opaque-debug",
@@ -322,7 +304,6 @@ name = "whirlpool"
 version = "0.9.0-pre"
 dependencies = [
  "block-buffer",
- "byte-tools",
  "digest",
  "hex-literal",
  "opaque-debug",

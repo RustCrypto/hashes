@@ -60,13 +60,9 @@ pub use digest::Digest;
 use crate::utils::compress;
 
 use block_buffer::{block_padding::Iso7816, BlockBuffer};
-use byte_tools::zero;
 use digest::impl_write;
 use digest::{consts::U64, generic_array::GenericArray};
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
-
-#[cfg(not(feature = "asm"))]
-use block_buffer::byteorder::{ByteOrder, BE};
 
 type BlockSize = U64;
 
@@ -150,7 +146,7 @@ impl Whirlpool {
 
         if pos + 1 > self.bit_length.len() {
             compress(hash, convert(buf));
-            zero(&mut buf[..(pos + 1)]);
+            buf[..(pos + 1)].iter_mut().for_each(|b| *b = 0);
         }
 
         buf[32..].copy_from_slice(&self.bit_length);
@@ -167,7 +163,7 @@ impl Update for Whirlpool {
         let input = input.as_ref();
         self.update_len(input.len() as u64);
         let hash = &mut self.hash;
-        self.buffer.input(input, |b| compress(hash, convert(b)));
+        self.buffer.input_block(input, |b| compress(hash, convert(b)));
     }
 }
 
@@ -177,7 +173,9 @@ impl FixedOutputDirty for Whirlpool {
     #[cfg(not(feature = "asm"))]
     fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U64>) {
         self.finalize_inner();
-        BE::write_u64_into(&self.hash[..], out);
+        for (chunk, v) in out.chunks_exact_mut(8).zip(self.hash.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
     }
 
     #[cfg(feature = "asm")]

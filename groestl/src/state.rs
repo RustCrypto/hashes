@@ -2,7 +2,6 @@ use core::ops::Div;
 
 use crate::consts::{B, C_P, C_Q, SBOX, SHIFTS_P, SHIFTS_P_WIDE, SHIFTS_Q, SHIFTS_Q_WIDE};
 use crate::matrix::Matrix;
-use block_buffer::byteorder::{ByteOrder, BE};
 use digest::generic_array::typenum::{Quot, U8};
 use digest::generic_array::{ArrayLength, GenericArray};
 
@@ -47,7 +46,8 @@ where
         let output_bits = output_size * 8;
 
         let mut state = GenericArray::default();
-        BE::write_u64(&mut state[block_bytes - 8..], output_bits as u64);
+        let n = output_bits as u64;
+        state[block_bytes - 8..].copy_from_slice(&n.to_be_bytes());
         let rounds = match block_bytes {
             128 => 14,
             64 => 10,

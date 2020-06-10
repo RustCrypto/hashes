@@ -16,7 +16,6 @@ macro_rules! blake2_impl {
         use digest::impl_write;
         use core::cmp;
         use core::ops::Div;
-        use byte_tools::{copy, zero};
         use crypto_mac::{InvalidKeyLength, Mac, NewMac};
 
         type Output = GenericArray<u8, $bytes>;
@@ -212,7 +211,7 @@ macro_rules! blake2_impl {
             fn finalize_with_flag(&mut self, f1: $word) -> Output {
                 let off = self.t as usize % (2 * $bytes::to_usize());
                 if off != 0 {
-                    zero(&mut self.m.as_mut_bytes()[off..]);
+                    self.m.as_mut_bytes()[off..].iter_mut().for_each(|b| *b = 0);
                 }
 
                 self.compress(!0, f1);
@@ -388,5 +387,12 @@ macro_rules! blake2_impl {
 
         impl_opaque_debug!($fix_state);
         impl_write!($fix_state);
+
+        fn copy(src: &[u8], dst: &mut [u8]) {
+            assert!(dst.len() >= src.len());
+            unsafe {
+                core::ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+            }
+        }
     }
 }

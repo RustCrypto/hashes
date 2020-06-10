@@ -1,10 +1,7 @@
 //! SHA-256
 
 use crate::consts::{H224, H256, STATE_LEN};
-use block_buffer::{
-    byteorder::{ByteOrder, BE},
-    BlockBuffer,
-};
+use block_buffer::BlockBuffer;
 use digest::impl_write;
 use digest::{
     consts::{U28, U32, U64},
@@ -74,16 +71,14 @@ impl Engine256 {
     fn update(&mut self, input: &[u8]) {
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += (input.len() as u64) << 3;
-        let self_state = &mut self.state;
-        self.buffer
-            .input(input, |input| self_state.process_block(input));
+        let s = &mut self.state;
+        self.buffer.input_block(input, |input| s.process_block(input));
     }
 
     fn finish(&mut self) {
-        let self_state = &mut self.state;
+        let s = &mut self.state;
         let l = self.len;
-        self.buffer
-            .len64_padding::<BE, _>(l, |b| self_state.process_block(b));
+        self.buffer.len64_padding_be(l, |b| s.process_block(b));
     }
 
     fn reset(&mut self, h: &[u32; STATE_LEN]) {
@@ -122,7 +117,10 @@ impl FixedOutputDirty for Sha256 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        BE::write_u32_into(&self.engine.state.h, out.as_mut_slice());
+        let h = self.engine.state.h;
+        for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
     }
 }
 
@@ -162,7 +160,10 @@ impl FixedOutputDirty for Sha224 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        BE::write_u32_into(&self.engine.state.h[..7], out.as_mut_slice());
+        let h = &self.engine.state.h[..7];
+        for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
     }
 }
 

@@ -1,8 +1,7 @@
 #![allow(clippy::many_single_char_names)]
-
+use core::convert::TryInto;
 use crate::consts::{BLOCK_LEN, K32X4};
 use crate::simd::u32x4;
-use block_buffer::byteorder::{ByteOrder, BE};
 
 /// Not an intrinsic, but works like an unaligned load.
 #[inline]
@@ -282,6 +281,8 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
 ///  support in LLVM (and GCC, etc.).
 pub fn compress256(state: &mut [u32; 8], block: &[u8; 64]) {
     let mut block_u32 = [0u32; BLOCK_LEN];
-    BE::read_u32_into(block, &mut block_u32[..]);
+    for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
+        *o = u32::from_be_bytes(chunk.try_into().unwrap());
+    }
     sha256_digest_block_u32(state, &block_u32);
 }

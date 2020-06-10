@@ -1,5 +1,5 @@
+use core::convert::TryInto;
 use crate::consts::*;
-use block_buffer::byteorder::{ByteOrder, BE};
 
 pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
     let mut k = [0u64; 8];
@@ -7,7 +7,9 @@ pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
     let mut state = [0u64; 8];
     let mut l = [0u64; 8];
 
-    BE::read_u64_into(&buffer[..], &mut block);
+    for (o, chunk) in block.iter_mut().zip(buffer.chunks_exact(8)) {
+        *o = u64::from_be_bytes(chunk.try_into().unwrap());
+    }
     k.copy_from_slice(hash);
 
     for i in 0..8 {

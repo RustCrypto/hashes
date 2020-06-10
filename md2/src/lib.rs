@@ -101,7 +101,7 @@ impl Update for Md2 {
     fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
         let self_state = &mut self.state;
-        self.buffer.input(input, |d| self_state.process_block(d));
+        self.buffer.input_block(input, |d| self_state.process_block(d));
     }
 }
 

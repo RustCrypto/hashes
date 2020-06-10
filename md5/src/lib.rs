@@ -44,7 +44,6 @@ pub use digest::{self, Digest};
 
 use crate::utils::compress;
 
-use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U16, U64};
 use digest::generic_array::GenericArray;
@@ -84,8 +83,7 @@ impl Md5 {
     fn finalize_inner(&mut self) {
         let state = &mut self.state;
         let l = (self.length_bytes << 3) as u64;
-        self.buffer
-            .len64_padding::<LE, _>(l, |d| compress(state, convert(d)));
+        self.buffer.len64_padding_le(l, |d| compress(state, convert(d)));
     }
 }
 
@@ -100,9 +98,8 @@ impl Update for Md5 {
         // Unlike Sha1 and Sha2, the length value in MD5 is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
-        let self_state = &mut self.state;
-        self.buffer
-            .input(input, |d| compress(self_state, convert(d)));
+        let s = &mut self.state;
+        self.buffer.input_block(input, |d| compress(s, convert(d)));
     }
 }
 
@@ -112,7 +109,9 @@ impl FixedOutputDirty for Md5 {
     #[inline]
     fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U16>) {
         self.finalize_inner();
-        LE::write_u32_into(&self.state, out);
+        for (chunk, v) in out.chunks_exact_mut(4).zip(self.state.iter()) {
+            chunk.copy_from_slice(&v.to_le_bytes());
+        }
     }
 }
 

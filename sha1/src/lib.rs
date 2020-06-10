@@ -70,19 +70,13 @@ mod utils;
 pub use digest::{self, Digest};
 
 use crate::consts::{H, STATE_LEN};
-use block_buffer::{
-    byteorder::{ByteOrder, BE},
-    BlockBuffer,
-};
+use block_buffer::BlockBuffer;
 use digest::consts::{U20, U64};
 use digest::impl_write;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 #[cfg(not(feature = "asm"))]
 use crate::utils::compress;
-
-#[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
-use fake_simd as simd;
 
 #[cfg(feature = "asm")]
 use digest::generic_array::GenericArray;
@@ -115,7 +109,7 @@ impl Update for Sha1 {
         // Assumes that `length_bits<<3` will not overflow
         self.len += input.len() as u64;
         let state = &mut self.h;
-        self.buffer.input(input, |d| compress(state, d));
+        self.buffer.input_block(input, |d| compress(state, d));
     }
 }
 
@@ -123,13 +117,12 @@ impl FixedOutputDirty for Sha1 {
     type OutputSize = U20;
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
-        let state = &mut self.h;
+        let s = &mut self.h;
         let l = self.len << 3;
-
-        self.buffer
-            .len64_padding::<BE, _>(l, |d| compress(state, d));
-
-        BE::write_u32_into(&self.h, out);
+        self.buffer.len64_padding_be(l, |d| compress(s, d));
+        for (chunk, v) in out.chunks_exact_mut(4).zip(self.h.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
     }
 }
 

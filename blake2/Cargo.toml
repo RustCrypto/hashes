@@ -13,7 +13,6 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.9"
-byte-tools = "0.3"
 byteorder = { version = "1", default-features = false }
 crypto-mac = "0.8"
 opaque-debug = "0.2"

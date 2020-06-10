@@ -1,8 +1,5 @@
 use core::ops::Div;
-
-use block_buffer::byteorder::BE;
 use block_buffer::BlockBuffer;
-
 use digest::generic_array::typenum::{Quot, U8};
 use digest::generic_array::{ArrayLength, GenericArray};
 
@@ -52,7 +49,7 @@ where
 
     pub fn process(&mut self, input: &[u8]) {
         let state = &mut self.state;
-        self.buffer.input(input, |b: &GenericArray<u8, BlockSize>| {
+        self.buffer.input_block(input, |b: &GenericArray<u8, BlockSize>| {
             state.compress(b);
         });
     }
@@ -65,7 +62,7 @@ where
             } else {
                 state.num_blocks + 1
             };
-            self.buffer.len64_padding::<BE, _>(l, |b| state.compress(b));
+            self.buffer.len64_padding_be(l, |b| state.compress(b));
             xor_generic_array(&state.p(&state.state), &state.state)
         };
 

@@ -11,8 +11,8 @@ macro_rules! impl_state {
 
         impl $state {
             fn absorb(&mut self, input: &[u8]) {
-                let self_state = &mut self.state;
-                self.buffer.input(input, |b| self_state.absorb_block(b));
+                let s = &mut self.state;
+                self.buffer.input_block(input, |b| s.absorb_block(b));
             }
 
             fn apply_padding(&mut self) {

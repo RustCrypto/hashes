@@ -1,7 +1,6 @@
 #![allow(clippy::many_single_char_names)]
-
+use core::convert::TryInto;
 use crate::consts::RC;
-use block_buffer::byteorder::{ByteOrder, LE};
 
 #[inline(always)]
 fn op_f(w: u32, x: u32, y: u32, z: u32, m: u32, c: u32, s: u32) -> u32 {
@@ -50,7 +49,9 @@ pub fn compress(state: &mut [u32; 4], input: &[u8; 64]) {
     let mut d = state[3];
 
     let mut data = [0u32; 16];
-    LE::read_u32_into(input, &mut data);
+    for (o, chunk) in data.iter_mut().zip(input.chunks_exact(4)) {
+        *o = u32::from_le_bytes(chunk.try_into().unwrap());
+    }
 
     // round 1
     a = op_f(a, b, c, d, data[0], RC[0], 7);

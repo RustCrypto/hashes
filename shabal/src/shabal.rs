@@ -1,7 +1,6 @@
 //! Shabal
-
+use core::convert::TryInto;
 use block_buffer::block_padding::Iso7816;
-use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::impl_write;
 use digest::{
@@ -241,8 +240,8 @@ impl Engine256 {
     }
 
     fn input(&mut self, input: &[u8]) {
-        let state = &mut self.state;
-        self.buffer.input(input, |input| state.process_block(input));
+        let s = &mut self.state;
+        self.buffer.input_block(input, |input| s.process_block(input));
     }
 
     fn finish(&mut self) {
@@ -286,7 +285,10 @@ impl FixedOutputDirty for Shabal512 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        LE::write_u32_into(&self.engine.state.b[0..16], out.as_mut_slice());
+        let b = &self.engine.state.b[0..16];
+        for (chunk, v) in out.chunks_exact_mut(4).zip(b.iter()) {
+            chunk.copy_from_slice(&v.to_le_bytes());
+        }
     }
 }
 
@@ -326,7 +328,10 @@ impl FixedOutputDirty for Shabal384 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        LE::write_u32_into(&self.engine.state.b[4..16], out.as_mut_slice());
+        let b = &self.engine.state.b[4..16];
+        for (chunk, v) in out.chunks_exact_mut(4).zip(b.iter()) {
+            chunk.copy_from_slice(&v.to_le_bytes());
+        }
     }
 }
 
@@ -366,7 +371,10 @@ impl FixedOutputDirty for Shabal256 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        LE::write_u32_into(&self.engine.state.b[8..16], out);
+        let b = &self.engine.state.b[8..16];
+        for (chunk, v) in out.chunks_exact_mut(4).zip(b.iter()) {
+            chunk.copy_from_slice(&v.to_le_bytes());
+        }
     }
 }
 
@@ -406,7 +414,10 @@ impl FixedOutputDirty for Shabal224 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        LE::write_u32_into(&self.engine.state.b[9..16], out);
+        let b = &self.engine.state.b[9..16];
+        for (chunk, v) in out.chunks_exact_mut(4).zip(b.iter()) {
+            chunk.copy_from_slice(&v.to_le_bytes());
+        }
     }
 }
 
@@ -446,7 +457,10 @@ impl FixedOutputDirty for Shabal192 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        LE::write_u32_into(&self.engine.state.b[10..16], out);
+        let b = &self.engine.state.b[10..16];
+        for (chunk, v) in out.chunks_exact_mut(4).zip(b.iter()) {
+            chunk.copy_from_slice(&v.to_le_bytes());
+        }
     }
 }
 
@@ -470,8 +484,10 @@ impl_write!(Shabal192);
 
 #[inline]
 fn read_m(input: &[u8; 64]) -> [u32; 16] {
-    let mut m = [0; 16];
-    LE::read_u32_into(input, &mut m);
+    let mut m = [0u32; 16];
+    for (o, chunk) in m.iter_mut().zip(input.chunks_exact(4)) {
+        *o = u32::from_le_bytes(chunk.try_into().unwrap());
+    }
     m
 }
 

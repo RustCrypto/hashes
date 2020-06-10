@@ -1,7 +1,6 @@
 #![allow(clippy::many_single_char_names)]
-
+use core::convert::TryInto;
 use block_buffer::block_padding::ZeroPadding;
-use block_buffer::byteorder::{ByteOrder, LE};
 use block_buffer::BlockBuffer;
 use digest::impl_write;
 use digest::{consts::U32, generic_array::GenericArray};
@@ -36,9 +35,11 @@ fn g(a: u32, k: u32, s: &SBox) -> u32 {
 #[allow(clippy::needless_range_loop)]
 fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
     let mut k = [0u32; 8];
-    let mut a = LE::read_u32(&msg[0..4]);
-    let mut b = LE::read_u32(&msg[4..8]);
-    LE::read_u32_into(&key, &mut k);
+    let mut a = u32::from_le_bytes(msg[0..4].try_into().unwrap());
+    let mut b = u32::from_le_bytes(msg[4..8].try_into().unwrap());
+    for (o, chunk) in k.iter_mut().zip(key.chunks_exact(4)) {
+        *o = u32::from_le_bytes(chunk.try_into().unwrap());
+    }
 
     for _ in 0..3 {
         for i in 0..8 {
@@ -53,7 +54,8 @@ fn encrypt(msg: &mut [u8], key: Block, sbox: &SBox) {
         a = t;
     }
 
-    LE::write_u32_into(&[b, a], msg);
+    msg[0..4].copy_from_slice(&b.to_le_bytes());
+    msg[4..8].copy_from_slice(&a.to_le_bytes());
 }
 
 fn x(a: &Block, b: &Block) -> Block {
@@ -163,7 +165,9 @@ impl Gost94State {
 
     fn update_sigma(&mut self, m: &Block) {
         let mut buf = [0u64; 4];
-        LE::read_u64_into(m, &mut buf);
+        for (o, chunk) in buf.iter_mut().zip(m.chunks_exact(8)) {
+            *o = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
         let mut over = (0u64, false);
         for (a, b) in self.sigma.iter_mut().zip(buf.iter()) {
             if over.1 {
@@ -233,7 +237,7 @@ impl Update for Gost94 {
         let input = input.as_ref();
         let self_state = &mut self.state;
         self_state.update_n(input.len());
-        self.buffer.input(input, |d| self_state.process_block(d));
+        self.buffer.input_block(input, |d| self_state.process_block(d));
     }
 }
 
@@ -253,11 +257,14 @@ impl FixedOutputDirty for Gost94 {
         }
 
         let mut buf = Block::default();
-
-        LE::write_u64_into(&self_state.n, &mut buf);
+        for (o, v) in buf.chunks_exact_mut(8).zip(self_state.n.iter()) {
+            o.copy_from_slice(&v.to_le_bytes());
+        }
         self_state.f(&buf);
 
-        LE::write_u64_into(&self_state.sigma, &mut buf);
+        for (o, v) in buf.chunks_exact_mut(8).zip(self_state.sigma.iter()) {
+            o.copy_from_slice(&v.to_le_bytes());
+        }
         self_state.f(&buf);
 
         out.copy_from_slice(&self.state.h);
