@@ -52,7 +52,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           override: true
       - run: cargo check --all-features
-      - run: cargo test --no-default-features
+      - run: cargo test --release --no-default-features
       - run: cargo test
-      - run: cargo test --all-features
+      - run: cargo test --release --all-features
 
