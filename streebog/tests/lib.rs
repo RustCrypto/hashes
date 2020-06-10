@@ -1,7 +1,7 @@
-#![no_std]
-
 use digest::dev::digest_test;
 use digest::new_test;
+
+// Test vectors from: https://github.com/gost-engine/engine
 
 new_test!(
     streebog256_main,
