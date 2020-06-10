@@ -2,8 +2,8 @@ use digest::dev::digest_test;
 use digest::new_test;
 use streebog::{Streebog256, Streebog512};
 
-// Tests vectors from: https://github.com/gost-engine/engine
-
+// Test vectors from:
+// https://github.com/gost-engine/engine/tree/master/etalon
 new_test!(streebog256_main, "streebog256", Streebog256, digest_test);
 new_test!(streebog512_main, "streebog512", Streebog512, digest_test);
 
