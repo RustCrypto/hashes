@@ -12,14 +12,14 @@ keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "= 0.9.0-pre"
+digest = "0.9"
 byte-tools = "0.3"
 byteorder = { version = "1", default-features = false }
 crypto-mac = "0.8"
 opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "= 0.9.0-pre", features = ["dev"] }
+digest = { version = "0.9", features = ["dev"] }
 crypto-mac = { version = "0.8", features = ["dev"] }
 hex-literal = "0.2"
 
