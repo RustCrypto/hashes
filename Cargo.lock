@@ -274,7 +274,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.9.0-pre"
+version = "0.9.0"
 dependencies = [
  "block-buffer",
  "byte-tools",
