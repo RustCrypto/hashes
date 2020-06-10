@@ -12,14 +12,14 @@ keywords = ["crypto", "sha3", "keccak", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "= 0.9.0-pre"
+digest = "0.9"
 block-buffer = "0.8"
 byte-tools = "0.3"
 opaque-debug = "0.2"
 keccak = "0.1"
 
 [dev-dependencies]
-digest = { version = "= 0.9.0-pre", features = ["dev"] }
+digest = { version = "0.9", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]

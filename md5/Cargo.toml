@@ -15,13 +15,13 @@ categories = ["cryptography", "no-std"]
 name = "md5"
 
 [dependencies]
-digest = "= 0.9.0-pre"
+digest = "0.9"
 block-buffer = "0.8"
 md5-asm = { version = "0.4", optional = true}
 opaque-debug = "0.2"
 
 [dev-dependencies]
-digest = { version = "= 0.9.0-pre", features = ["dev"] }
+digest = { version = "0.9", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]
