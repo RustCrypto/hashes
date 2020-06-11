@@ -32,20 +32,14 @@ fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
     ]
 }
 
-/// Not an intrinsic, but works like an unaligned load.
-#[inline]
 fn sha256load(v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
     [v3[3], v2[0], v2[1], v2[2]]
 }
 
-/// Not an intrinsic, but useful for swapping vectors.
-#[inline]
 fn sha256swap(v0: [u32; 4]) -> [u32; 4] {
     [v0[2], v0[3], v0[0], v0[1]]
 }
 
-/// Emulates `llvm.x86.sha256msg1` intrinsic.
-// #[inline]
 fn sha256msg1(v0: [u32; 4], v1: [u32; 4]) -> [u32; 4] {
     // sigma 0 on vectors
     #[inline]
@@ -59,8 +53,6 @@ fn sha256msg1(v0: [u32; 4], v1: [u32; 4]) -> [u32; 4] {
     add(v0, sigma0x4(sha256load(v0, v1)))
 }
 
-/// Emulates `llvm.x86.sha256msg2` intrinsic.
-// #[inline]
 fn sha256msg2(v4: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
     macro_rules! sigma1 {
         ($a:expr) => {
@@ -79,14 +71,6 @@ fn sha256msg2(v4: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
     [w19, w18, w17, w16]
 }
 
-/*
-/// Performs 4 rounds of the SHA-256 message schedule update.
-fn sha256_schedule_x4(v0: [u32; 4], v1: [u32; 4], v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
-    sha256msg2(sha256msg1(v0, v1) + sha256load(v2, v3), v3)
-}*/
-
-/// Emulates `llvm.x86.sha256rnds2` intrinsic.
-// #[inline]
 fn sha256_digest_round_x2(cdgh: [u32; 4], abef: [u32; 4], wk: [u32; 4]) -> [u32; 4] {
     macro_rules! big_sigma0 {
         ($a:expr) => {
@@ -170,6 +154,7 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
     let mut abef = [state[0], state[1], state[4], state[5]];
     let mut cdgh = [state[2], state[3], state[6], state[7]];
 
+
     // Rounds 0..64
     let mut w0 = [block[3], block[2], block[1], block[0]];
     rounds4!(abef, cdgh, add(k[0], w0));
@@ -179,6 +164,7 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
     rounds4!(abef, cdgh, add(k[2], w2));
     let mut w3 = [block[15], block[14], block[13], block[12]];
     rounds4!(abef, cdgh, add(k[3], w3));
+
     let mut w4 = schedule!(w0, w1, w2, w3);
     rounds4!(abef, cdgh, add(k[4], w4));
     w0 = schedule!(w1, w2, w3, w4);
@@ -217,102 +203,16 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-/// Process a block with the SHA-256 algorithm. (See more...)
-///
-/// Internally, this uses functions which resemble the new Intel SHA instruction
-/// sets, and so it's data locality properties may improve performance. However,
-/// to benefit the most from this implementation, replace these functions with
-/// x86 intrinsics to get a possible speed boost.
-///
-/// # Implementation
-///
-/// The `Sha256` algorithm is implemented with functions that resemble the new
-/// Intel SHA instruction set extensions. These intructions fall into two
-/// categories: message schedule calculation, and the message block 64-round
-/// digest calculation. The schedule-related instructions allow 4 rounds to be
-/// calculated as:
-///
-/// ```ignore
-/// use std::simd::[u32; 4];
-/// use self::crypto::sha2::{
-///     sha256msg1,
-///     sha256msg2,
-///     sha256load
-/// };
-///
-/// fn schedule4_data(work: &mut [[u32; 4]], w: &[u32]) {
-///
-///     // this is to illustrate the data order
-///     work[0] = [w[3], w[2], w[1], w[0]);
-///     work[1] = [w[7], w[6], w[5], w[4]);
-///     work[2] = [w[11], w[10], w[9], w[8]);
-///     work[3] = [w[15], w[14], w[13], w[12]);
-/// }
-///
-/// fn schedule4_work(work: &mut [[u32; 4]], t: usize) {
-///
-///     // this is the core expression
-///     work[t] = sha256msg2(sha256msg1(work[t - 4], work[t - 3]) +
-///                          sha256load(work[t - 2], work[t - 1]),
-///                          work[t - 1])
-/// }
-/// ```
-///
-/// instead of 4 rounds of:
-///
-/// ```ignore
-/// fn schedule_work(w: &mut [u32], t: usize) {
-///     w[t] = sigma1!(w[t - 2]) + w[t - 7] + sigma0!(w[t - 15]) + w[t - 16];
-/// }
-/// ```
-///
-/// and the digest-related instructions allow 4 rounds to be calculated as:
-///
-/// ```ignore
-/// use std::simd::[u32; 4];
-/// use self::crypto::sha2::{K32X4,
-///     sha256rnds2,
-///     sha256swap
-/// };
-///
-/// fn rounds4(state: &mut [u32; 8], work: &mut [[u32; 4]], t: usize) {
-///     let [a, b, c, d, e, f, g, h]: [u32; 8] = *state;
-///
-///     // this is to illustrate the data order
-///     let mut abef = [a, b, e, f);
-///     let mut cdgh = [c, d, g, h);
-///     let temp = K32X4[t] + work[t];
-///
-///     // this is the core expression
-///     cdgh = sha256rnds2(cdgh, abef, temp);
-///     abef = sha256rnds2(abef, cdgh, sha256swap(temp));
-///
-///     *state = [abef[0], abef[1], cdgh[0], cdgh[1],
-///               abef[2], abef[3], cdgh[2], cdgh[3]];
-/// }
-/// ```
-///
-/// instead of 4 rounds of:
-///
-/// ```ignore
-/// fn round(state: &mut [u32; 8], w: &mut [u32], t: usize) {
-///     let [a, b, c, mut d, e, f, g, mut h]: [u32; 8] = *state;
-///
-///     h += big_sigma1!(e) +   choose!(e, f, g) + K32[t] + w[t]; d += h;
-///     h += big_sigma0!(a) + majority!(a, b, c);
-///
-///     *state = [h, a, b, c, d, e, f, g];
-/// }
-/// ```
-///
-/// **NOTE**: It is important to note, however, that these instructions are not
-/// implemented by any CPU (at the time of this writing), and so they are
-/// emulated in this library until the instructions become more common, and gain
-///  support in LLVM (and GCC, etc.).
-pub fn compress256(state: &mut [u32; 8], block: &[u8; 64]) {
+pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     let mut block_u32 = [0u32; BLOCK_LEN];
-    for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
-        *o = u32::from_be_bytes(chunk.try_into().unwrap());
+    // since LLVM can't properly use aliasing yet it will make
+    // unnecessary state stores without this copy
+    let mut state_cpy = *state;
+    for block in blocks {
+        for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
+            *o = u32::from_be_bytes(chunk.try_into().unwrap());
+        }
+        sha256_digest_block_u32(&mut state_cpy, &block_u32);
     }
-    sha256_digest_block_u32(state, &block_u32);
+    *state = state_cpy;
 }

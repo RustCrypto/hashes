@@ -1,5 +1,3 @@
-#![no_std]
-
 use digest::dev::{digest_test, one_million_a};
 use digest::new_test;
 

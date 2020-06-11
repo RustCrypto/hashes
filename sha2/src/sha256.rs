@@ -1,62 +1,20 @@
 //! SHA-256
-
 use crate::consts::{H224, H256, STATE_LEN};
+use crate::sha256_compress::compress256;
 use block_buffer::BlockBuffer;
-use digest::impl_write;
-use digest::{
-    consts::{U28, U32, U64},
-    generic_array::GenericArray,
-};
+use core::slice::from_ref;
+use digest::consts::{U28, U32, U64};
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
-#[cfg(not(feature = "asm"))]
-use crate::sha256_utils::compress256;
-
-#[cfg(feature = "asm")]
-use sha2_asm::compress256;
-
 type BlockSize = U64;
-type Block = GenericArray<u8, BlockSize>;
 
-/// A structure that represents that state of a digest computation for the
-/// SHA-2 512 family of digest functions
-#[derive(Clone)]
-struct Engine256State {
-    h: [u32; 8],
-}
-
-impl Engine256State {
-    fn new(h: &[u32; STATE_LEN]) -> Engine256State {
-        Engine256State { h: *h }
-    }
-
-    #[cfg(not(feature = "asm-aarch64"))]
-    pub fn process_block(&mut self, block: &Block) {
-        let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
-        compress256(&mut self.h, block);
-    }
-
-    #[cfg(feature = "asm-aarch64")]
-    pub fn process_block(&mut self, block: &Block) {
-        let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
-        // TODO: Replace this platform-specific call with is_aarch64_feature_detected!("sha2") once
-        // that macro is stabilised and https://github.com/rust-lang/rfcs/pull/2725 is implemented
-        // to let us use it on no_std.
-        if ::aarch64::sha2_supported() {
-            compress256(&mut self.h, block);
-        } else {
-            ::sha256_utils::compress256(&mut self.h, block);
-        }
-    }
-}
-
-/// A structure that keeps track of the state of the Sha-256 operation and
+/// Structure that keeps state of the Sha-256 operation and
 /// contains the logic necessary to perform the final calculations.
 #[derive(Clone)]
 struct Engine256 {
     len: u64,
     buffer: BlockBuffer<BlockSize>,
-    state: Engine256State,
+    state: [u32; 8],
 }
 
 impl Engine256 {
@@ -64,7 +22,7 @@ impl Engine256 {
         Engine256 {
             len: 0,
             buffer: Default::default(),
-            state: Engine256State::new(h),
+            state: *h,
         }
     }
 
@@ -72,19 +30,20 @@ impl Engine256 {
         // Assumes that input.len() can be converted to u64 without overflow
         self.len += (input.len() as u64) << 3;
         let s = &mut self.state;
-        self.buffer.input_block(input, |b| s.process_block(b));
+        self.buffer.input_blocks(input, |b| compress256(s, b));
     }
 
     fn finish(&mut self) {
         let s = &mut self.state;
         let l = self.len;
-        self.buffer.len64_padding_be(l, |b| s.process_block(b));
+        self.buffer
+            .len64_padding_be(l, |b| compress256(s, from_ref(b)));
     }
 
     fn reset(&mut self, h: &[u32; STATE_LEN]) {
         self.len = 0;
         self.buffer.reset();
-        self.state = Engine256State::new(h);
+        self.state = *h;
     }
 }
 
@@ -117,8 +76,8 @@ impl FixedOutputDirty for Sha256 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let h = self.engine.state.h;
-        for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
+        let s = self.engine.state;
+        for (chunk, v) in out.chunks_exact_mut(4).zip(s.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
     }
@@ -160,8 +119,8 @@ impl FixedOutputDirty for Sha224 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let h = &self.engine.state.h[..7];
-        for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
+        let s = &self.engine.state[..7];
+        for (chunk, v) in out.chunks_exact_mut(4).zip(s.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
     }
@@ -173,8 +132,8 @@ impl Reset for Sha224 {
     }
 }
 
-impl_opaque_debug!(Sha224);
-impl_opaque_debug!(Sha256);
+opaque_debug::impl_opaque_debug!(Sha224);
+opaque_debug::impl_opaque_debug!(Sha256);
 
-impl_write!(Sha224);
-impl_write!(Sha256);
+digest::impl_write!(Sha224);
+digest::impl_write!(Sha256);

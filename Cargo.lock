@@ -241,6 +241,7 @@ name = "sha2"
 version = "0.9.0"
 dependencies = [
  "block-buffer",
+ "cfg-if",
  "digest",
  "hex-literal",
  "libc",
