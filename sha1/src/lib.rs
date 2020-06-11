@@ -54,32 +54,20 @@ compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" when build
 ))]
 compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm detected at runtime, or build with the crypto extensions support, for instance with RUSTFLAGS='-C target-cpu=native' on a compatible CPU.");
 
-#[macro_use]
-extern crate opaque_debug;
-#[cfg(feature = "asm")]
-extern crate sha1_asm;
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(feature = "asm-aarch64")]
-mod aarch64;
 mod consts;
-#[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
-mod utils;
+mod compress;
 
-pub use digest::{self, Digest};
-
-use crate::consts::{H, STATE_LEN};
 use block_buffer::BlockBuffer;
+pub use digest::{self, Digest};
 use digest::consts::{U20, U64};
 use digest::impl_write;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
+use crate::consts::{H, STATE_LEN};
+use crate::compress::compress;
 
-#[cfg(not(feature = "asm"))]
-use crate::utils::compress;
-
-#[cfg(feature = "asm")]
-use digest::generic_array::GenericArray;
 
 /// Structure representing the state of a SHA-1 computation
 #[derive(Clone)]
@@ -109,7 +97,7 @@ impl Update for Sha1 {
         // Assumes that `length_bits<<3` will not overflow
         self.len += input.len() as u64;
         let state = &mut self.h;
-        self.buffer.input_block(input, |d| compress(state, d));
+        self.buffer.input_blocks(input, |d| compress(state, d));
     }
 }
 
@@ -119,7 +107,7 @@ impl FixedOutputDirty for Sha1 {
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         let s = &mut self.h;
         let l = self.len << 3;
-        self.buffer.len64_padding_be(l, |d| compress(s, d));
+        self.buffer.len64_padding_be(l, |d| compress(s, core::slice::from_ref(d)));
         for (chunk, v) in out.chunks_exact_mut(4).zip(self.h.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
@@ -134,28 +122,5 @@ impl Reset for Sha1 {
     }
 }
 
-#[cfg(all(feature = "asm", not(feature = "asm-aarch64")))]
-#[inline(always)]
-fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
-    #[allow(unsafe_code)]
-    let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
-    sha1_asm::compress(state, block);
-}
-
-#[cfg(feature = "asm-aarch64")]
-#[inline(always)]
-fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
-    // TODO: Replace this platform-specific call with is_aarch64_feature_detected!("sha1") once
-    // that macro is stabilised and https://github.com/rust-lang/rfcs/pull/2725 is implemented
-    // to let us use it on no_std.
-    if aarch64::sha1_supported() {
-        #[allow(unsafe_code)]
-        let block: &[u8; 64] = unsafe { core::mem::transmute(block) };
-        sha1_asm::compress(state, block);
-    } else {
-        utils::compress(state, block);
-    }
-}
-
-impl_opaque_debug!(Sha1);
+opaque_debug::impl_opaque_debug!(Sha1);
 impl_write!(Sha1);

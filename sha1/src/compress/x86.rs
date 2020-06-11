@@ -1,0 +1,125 @@
+#![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#![allow(unsafe_code)]
+
+#[cfg(target_arch = "x86_64")]
+use core::arch::x86_64::*;
+#[cfg(target_arch = "x86")]
+use core::arch::x86::*;
+
+#[cfg(not(target_feature = "sha"))]
+fn sha1_supported() -> bool {
+    true
+}
+
+#[cfg(target_feature = "sha")]
+fn sha1_supported() -> bool {
+    true
+}
+
+macro_rules! rounds4 {
+    ($h0:ident, $h1:ident, $wk:expr, $i:expr) => {
+        _mm_sha1rnds4_epu32($h0, _mm_sha1nexte_epu32($h1, $wk), $i)
+    };
+}
+
+macro_rules! schedule {
+    ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => {
+        _mm_sha1msg2_epu32(_mm_xor_si128(_mm_sha1msg1_epu32($v0, $v1), $v2), $v3)
+    };
+}
+
+#[target_feature(enable = "sha,ssse3,sse4.1")]
+unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+    #[allow(non_snake_case)]
+    let MASK: __m128i = _mm_set_epi64x(0x0001020304050607, 0x08090a0b0c0d0e0f);
+
+    let mut state_abcd = _mm_set_epi32(
+        state[0] as i32,
+        state[1] as i32,
+        state[2] as i32,
+        state[3] as i32,
+    );
+    let mut state_e = _mm_set_epi32(
+        state[4] as i32,
+        0,
+        0,
+        0,
+    );
+
+    for block in blocks {
+        let block_ptr = block.as_ptr() as *const __m128i;
+
+        let h0 = state_abcd;
+        let e0 = state_e;
+
+        let mut w0 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(0)), MASK);
+        let mut w1 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(1)), MASK);
+        let mut w2 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(2)), MASK);
+        let mut w3 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(3)), MASK);
+
+        // Rounds 0..20
+        let mut h1 = _mm_sha1rnds4_epu32(h0, _mm_add_epi32(e0, w0), 0);
+        let mut h0 = rounds4!(h1, h0, w1, 0);
+        h1 = rounds4!(h0, h1, w2, 0);
+        h0 = rounds4!(h1, h0, w3, 0);
+        let mut w4 = schedule!(w0, w1, w2, w3);
+        h1 = rounds4!(h0, h1, w4, 0);
+
+        // Rounds 20..40
+        w0 = schedule!(w1, w2, w3, w4);
+        h0 = rounds4!(h1, h0, w0, 1);
+        w1 = schedule!(w2, w3, w4, w0);
+        h1 = rounds4!(h0, h1, w1, 1);
+        w2 = schedule!(w3, w4, w0, w1);
+        h0 = rounds4!(h1, h0, w2, 1);
+        w3 = schedule!(w4, w0, w1, w2);
+        h1 = rounds4!(h0, h1, w3, 1);
+        w4 = schedule!(w0, w1, w2, w3);
+        h0 = rounds4!(h1, h0, w4, 1);
+
+        // Rounds 40..60
+        w0 = schedule!(w1, w2, w3, w4);
+        h1 = rounds4!(h0, h1, w0, 2);
+        w1 = schedule!(w2, w3, w4, w0);
+        h0 = rounds4!(h1, h0, w1, 2);
+        w2 = schedule!(w3, w4, w0, w1);
+        h1 = rounds4!(h0, h1, w2, 2);
+        w3 = schedule!(w4, w0, w1, w2);
+        h0 = rounds4!(h1, h0, w3, 2);
+        w4 = schedule!(w0, w1, w2, w3);
+        h1 = rounds4!(h0, h1, w4, 2);
+
+        // Rounds 60..80
+        w0 = schedule!(w1, w2, w3, w4);
+        h0 = rounds4!(h1, h0, w0, 3);
+        w1 = schedule!(w2, w3, w4, w0);
+        h1 = rounds4!(h0, h1, w1, 3);
+        w2 = schedule!(w3, w4, w0, w1);
+        h0 = rounds4!(h1, h0, w2, 3);
+        w3 = schedule!(w4, w0, w1, w2);
+        h1 = rounds4!(h0, h1, w3, 3);
+        w4 = schedule!(w0, w1, w2, w3);
+        h0 = rounds4!(h1, h0, w4, 3);
+
+        state_abcd = _mm_add_epi32(state_abcd, h0);
+        state_e = _mm_sha1nexte_epu32(h1, state_e);
+    }
+
+    state[0] = _mm_extract_epi32(state_abcd, 3) as u32;
+    state[1] = _mm_extract_epi32(state_abcd, 2) as u32;
+    state[2] = _mm_extract_epi32(state_abcd, 1) as u32;
+    state[3] = _mm_extract_epi32(state_abcd, 0) as u32;
+    state[4] = _mm_extract_epi32(state_e, 3) as u32;
+}
+
+pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+    // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
+    // after stabilization
+    if sha1_supported() {
+        unsafe {
+            digest_blocks(state, blocks);
+        }
+    } else {
+        super::soft::compress(state, blocks);
+    }
+}
