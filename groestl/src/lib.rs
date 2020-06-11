@@ -37,9 +37,6 @@
 #![deny(unsafe_code)]
 #![warn(rust_2018_idioms)]
 
-#[macro_use]
-extern crate opaque_debug;
-
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -55,7 +52,6 @@ mod macros;
 use crate::groestl::Groestl;
 use digest::consts::{U128, U28, U32, U48, U64};
 use digest::generic_array::typenum::Unsigned;
-use digest::impl_write;
 use digest::{BlockInput, FixedOutputDirty, InvalidOutputSize, Reset, Update, VariableOutputDirty};
 
 impl_groestl!(Groestl512, U64, U128);

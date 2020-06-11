@@ -1,6 +1,6 @@
 macro_rules! gost94_impl {
     ($state:ident, $sbox:expr) => {
-        use digest::{consts::U32, impl_write, BlockInput, FixedOutputDirty, Reset, Update};
+        use digest::{consts::U32, BlockInput, FixedOutputDirty, Reset, Update};
         use $crate::gost94::{Block, Gost94, SBox};
 
         /// GOST94 state
@@ -42,7 +42,7 @@ macro_rules! gost94_impl {
             }
         }
 
-        impl_opaque_debug!($state);
-        impl_write!($state);
+        opaque_debug::implement!($state);
+        digest::impl_write!($state);
     };
 }

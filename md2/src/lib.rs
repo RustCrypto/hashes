@@ -28,16 +28,12 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[macro_use]
-extern crate opaque_debug;
-
 #[cfg(feature = "std")]
 extern crate std;
 
 pub use digest::{self, Digest};
 
 use block_buffer::{block_padding::Pkcs7, BlockBuffer};
-use digest::impl_write;
 use digest::{consts::U16, generic_array::GenericArray};
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
@@ -130,5 +126,5 @@ impl Reset for Md2 {
     }
 }
 
-impl_opaque_debug!(Md2);
-impl_write!(Md2);
+opaque_debug::implement!(Md2);
+digest::impl_write!(Md2);

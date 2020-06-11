@@ -12,7 +12,6 @@ macro_rules! blake2_impl {
         use digest::InvalidOutputSize;
         use digest::generic_array::GenericArray;
         use digest::generic_array::typenum::{U4, Unsigned};
-        use digest::impl_write;
         use core::{cmp, convert::TryInto, ops::Div};
         use crypto_mac::{InvalidKeyLength, Mac, NewMac};
 
@@ -302,8 +301,8 @@ macro_rules! blake2_impl {
             }
         }
 
-        impl_opaque_debug!($state);
-        impl_write!($state);
+        opaque_debug::implement!($state);
+        digest::impl_write!($state);
 
 
         #[derive(Clone)]
@@ -383,8 +382,8 @@ macro_rules! blake2_impl {
             }
         }
 
-        impl_opaque_debug!($fix_state);
-        impl_write!($fix_state);
+        opaque_debug::implement!($fix_state);
+        digest::impl_write!($fix_state);
 
         fn copy(src: &[u8], dst: &mut [u8]) {
             assert!(dst.len() >= src.len());

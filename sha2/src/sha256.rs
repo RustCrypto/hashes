@@ -2,7 +2,6 @@
 
 use crate::consts::{H224, H256, STATE_LEN};
 use block_buffer::BlockBuffer;
-use digest::impl_write;
 use digest::{
     consts::{U28, U32, U64},
     generic_array::GenericArray,
@@ -173,8 +172,8 @@ impl Reset for Sha224 {
     }
 }
 
-impl_opaque_debug!(Sha224);
-impl_opaque_debug!(Sha256);
+opaque_debug::implement!(Sha224);
+opaque_debug::implement!(Sha256);
 
-impl_write!(Sha224);
-impl_write!(Sha256);
+digest::impl_write!(Sha224);
+digest::impl_write!(Sha256);

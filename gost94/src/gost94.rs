@@ -2,7 +2,6 @@
 use block_buffer::block_padding::ZeroPadding;
 use block_buffer::BlockBuffer;
 use core::convert::TryInto;
-use digest::impl_write;
 use digest::{consts::U32, generic_array::GenericArray};
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
@@ -280,5 +279,5 @@ impl Reset for Gost94 {
     }
 }
 
-impl_opaque_debug!(Gost94);
-impl_write!(Gost94);
+opaque_debug::implement!(Gost94);
+digest::impl_write!(Gost94);

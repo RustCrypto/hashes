@@ -2,7 +2,6 @@
 
 use crate::consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};
 use block_buffer::BlockBuffer;
-use digest::impl_write;
 use digest::{
     consts::{U128, U28, U32, U48, U64},
     generic_array::GenericArray,
@@ -245,12 +244,12 @@ impl Reset for Sha512Trunc224 {
     }
 }
 
-impl_opaque_debug!(Sha384);
-impl_opaque_debug!(Sha512);
-impl_opaque_debug!(Sha512Trunc224);
-impl_opaque_debug!(Sha512Trunc256);
+opaque_debug::implement!(Sha384);
+opaque_debug::implement!(Sha512);
+opaque_debug::implement!(Sha512Trunc224);
+opaque_debug::implement!(Sha512Trunc256);
 
-impl_write!(Sha384);
-impl_write!(Sha512);
-impl_write!(Sha512Trunc224);
-impl_write!(Sha512Trunc256);
+digest::impl_write!(Sha384);
+digest::impl_write!(Sha512);
+digest::impl_write!(Sha512Trunc224);
+digest::impl_write!(Sha512Trunc256);
