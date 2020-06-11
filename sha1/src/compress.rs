@@ -8,7 +8,7 @@ cfg_if::cfg_if! {
         use aarch64::compress as compress_inner;
     } else if #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))] {
         // TODO: replace after sha1-asm rework
-        fn compress_inner(state: &mut [u32; 5], blocks: &[u8; 64]) {
+        fn compress_inner(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
             for block in blocks {
                 sha1_asm::compress(state, block);
             }

@@ -34,7 +34,7 @@ unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i) -> __m128
 
 macro_rules! rounds4 {
     ($abef:ident, $cdgh:ident, $rest:expr, $i:expr) => {{
-        let k = &crate::consts::K32X4[$i];
+        let k = crate::consts::K32X4[$i];
         let kv = _mm_set_epi32(k[0] as i32, k[1] as i32, k[2] as i32, k[3] as i32);
         let t1 = _mm_add_epi32($rest, kv);
         $cdgh = _mm_sha256rnds2_epu32($cdgh, $abef, t1);
