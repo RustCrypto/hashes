@@ -5,26 +5,6 @@ use core::arch::x86_64::*;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 
-#[cfg(not(all(
-    target_feature = "sha",
-    target_feature = "sse2",
-    target_feature = "ssse3",
-    target_feature = "sse4.1",
-)))]
-fn is_supported() -> bool {
-    false
-}
-
-#[cfg(all(
-    target_feature = "sha",
-    target_feature = "sse2",
-    target_feature = "ssse3",
-    target_feature = "sse4.1",
-))]
-fn is_supported() -> bool {
-    true
-}
-
 unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i) -> __m128i {
     let t1 = _mm_sha256msg1_epu32(v0, v1);
     let t2 = _mm_alignr_epi8(v3, v2, 4);
@@ -56,7 +36,7 @@ macro_rules! schedule_rounds4 {
 
 // we use unaligned loads with `__m128i` pointers
 #[allow(clippy::cast_ptr_alignment)]
-#[target_feature(enable = "sha,ssse3,sse4.1")]
+#[target_feature(enable = "sha,sse2,ssse3,sse4.1")]
 unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     #[allow(non_snake_case)]
     let MASK: __m128i = _mm_set_epi64x(
@@ -118,7 +98,7 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
-    if is_supported() {
+    if cpuid_bool::cpuid_bool!("sha", "sse2", "ssse3", "sse4.1") {
         unsafe {
             digest_blocks(state, blocks);
         }

@@ -6,26 +6,6 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
-#[cfg(not(all(
-    target_feature = "sha",
-    target_feature = "sse2",
-    target_feature = "ssse3",
-    target_feature = "sse4.1",
-)))]
-fn sha1_supported() -> bool {
-    false
-}
-
-#[cfg(all(
-    target_feature = "sha",
-    target_feature = "sse2",
-    target_feature = "ssse3",
-    target_feature = "sse4.1",
-))]
-fn sha1_supported() -> bool {
-    true
-}
-
 macro_rules! rounds4 {
     ($h0:ident, $h1:ident, $wk:expr, $i:expr) => {
         _mm_sha1rnds4_epu32($h0, _mm_sha1nexte_epu32($h1, $wk), $i)
@@ -49,7 +29,7 @@ macro_rules! schedule_rounds4 {
     };
 }
 
-#[target_feature(enable = "sha,ssse3,sse4.1")]
+#[target_feature(enable = "sha,sse2,ssse3,sse4.1")]
 unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     #[allow(non_snake_case)]
     let MASK: __m128i = _mm_set_epi64x(0x0001_0203_0405_0607, 0x0809_0A0B_0C0D_0E0F);
@@ -118,7 +98,7 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
 pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
-    if sha1_supported() {
+    if cpuid_bool::cpuid_bool!("sha", "sse2", "ssse3", "sse4.1") {
         unsafe {
             digest_blocks(state, blocks);
         }

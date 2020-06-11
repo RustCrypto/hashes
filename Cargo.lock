@@ -54,6 +54,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
+name = "cpuid-bool"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6d375c433320f6c5057ae04a04376eef4d04ce2801448cf8863a78da99107be4"
+
+[[package]]
 name = "crypto-mac"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -220,6 +226,7 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "cfg-if",
+ "cpuid-bool",
  "digest",
  "hex-literal",
  "libc",
@@ -242,6 +249,7 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "cfg-if",
+ "cpuid-bool",
  "digest",
  "hex-literal",
  "libc",
