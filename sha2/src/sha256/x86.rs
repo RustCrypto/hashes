@@ -31,7 +31,7 @@ unsafe fn add_k(v: __m128i, i: usize) -> __m128i {
     _mm_add_epi32(v, t)
 }
 
-unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i, ) -> __m128i {
+unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i) -> __m128i {
     let t1 = _mm_sha256msg1_epu32(v0, v1);
     let t2 = _mm_alignr_epi8(v3, v2, 4);
     let t3 = _mm_add_epi32(t1, t2);
@@ -39,9 +39,22 @@ unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i, ) -> __m1
 }
 
 macro_rules! rounds4 {
-    ($abef:ident, $cdgh:ident, $rest:expr) => {{
-        $cdgh = _mm_sha256rnds2_epu32($cdgh, $abef, $rest);
-        $abef = _mm_sha256rnds2_epu32($abef, $cdgh, _mm_shuffle_epi32($rest, 0x0E));
+    ($abef:ident, $cdgh:ident, $rest:expr, $i:expr) => {{
+        let t1 = add_k($rest, $i);
+        $cdgh = _mm_sha256rnds2_epu32($cdgh, $abef, t1);
+        let t2 = _mm_shuffle_epi32(t1, 0x0E);
+        $abef = _mm_sha256rnds2_epu32($abef, $cdgh, t2);
+    }};
+}
+
+macro_rules! schedule_rounds4 {
+    (
+        $abef:ident, $cdgh:ident,
+        $w0:expr, $w1:expr, $w2:expr, $w3:expr, $w4:expr,
+        $i: expr
+    ) => {{
+        $w4 = schedule($w0, $w1, $w2, $w3);
+        rounds4!($abef, $cdgh, $w4, $i)
     }};
 }
 
@@ -73,36 +86,24 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         let mut w1 = _mm_shuffle_epi8(_mm_loadu_si128(data_ptr.add(1)), MASK);
         let mut w2 = _mm_shuffle_epi8(_mm_loadu_si128(data_ptr.add(2)), MASK);
         let mut w3 = _mm_shuffle_epi8( _mm_loadu_si128(data_ptr.add(3)), MASK);
+        let mut w4;
 
-        rounds4!(abef, cdgh, add_k(w0, 0));
-        rounds4!(abef, cdgh, add_k(w1, 1));
-        rounds4!(abef, cdgh, add_k(w2, 2));
-        rounds4!(abef, cdgh, add_k(w3, 3));
-
-        let mut w4 = schedule(w0, w1, w2, w3);
-        rounds4!(abef, cdgh, add_k(w4, 4));
-        w0 = schedule(w1, w2, w3, w4);
-        rounds4!(abef, cdgh, add_k(w0, 5));
-        w1 = schedule(w2, w3, w4, w0);
-        rounds4!(abef, cdgh, add_k(w1, 6));
-        w2 = schedule(w3, w4, w0, w1);
-        rounds4!(abef, cdgh, add_k(w2, 7));
-        w3 = schedule(w4, w0, w1, w2);
-        rounds4!(abef, cdgh, add_k(w3, 8));
-        w4 = schedule(w0, w1, w2, w3);
-        rounds4!(abef, cdgh, add_k(w4, 9));
-        w0 = schedule(w1, w2, w3, w4);
-        rounds4!(abef, cdgh, add_k(w0, 10));
-        w1 = schedule(w2, w3, w4, w0);
-        rounds4!(abef, cdgh, add_k(w1, 11));
-        w2 = schedule(w3, w4, w0, w1);
-        rounds4!(abef, cdgh, add_k(w2, 12));
-        w3 = schedule(w4, w0, w1, w2);
-        rounds4!(abef, cdgh, add_k(w3, 13));
-        w4 = schedule(w0, w1, w2, w3);
-        rounds4!(abef, cdgh, add_k(w4, 14));
-        w0 = schedule(w1, w2, w3, w4);
-        rounds4!(abef, cdgh, add_k(w0, 15));
+        rounds4!(abef, cdgh, w0, 0);
+        rounds4!(abef, cdgh, w1, 1);
+        rounds4!(abef, cdgh, w2, 2);
+        rounds4!(abef, cdgh, w3, 3);
+        schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 4);
+        schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 5);
+        schedule_rounds4!(abef, cdgh, w2, w3, w4, w0, w1, 6);
+        schedule_rounds4!(abef, cdgh, w3, w4, w0, w1, w2, 7);
+        schedule_rounds4!(abef, cdgh, w4, w0, w1, w2, w3, 8);
+        schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 9);
+        schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 10);
+        schedule_rounds4!(abef, cdgh, w2, w3, w4, w0, w1, 11);
+        schedule_rounds4!(abef, cdgh, w3, w4, w0, w1, w2, 12);
+        schedule_rounds4!(abef, cdgh, w4, w0, w1, w2, w3, 13);
+        schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 14);
+        schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 15);
 
         abef = _mm_add_epi32(abef, abef_save);
         cdgh = _mm_add_epi32(cdgh, cdgh_save);
