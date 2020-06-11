@@ -53,8 +53,8 @@ mod consts;
 mod streebog;
 mod table;
 
-pub use digest::{self, Digest};
 use digest::consts::{U32, U64};
+pub use digest::{self, Digest};
 
 #[cfg(feature = "std")]
 use digest::Update;
