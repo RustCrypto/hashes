@@ -1,5 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use crate::consts::{BLOCK_LEN, K32X4};
+use crate::consts::BLOCK_LEN;
 use core::convert::TryInto;
 
 #[inline(always)]
@@ -134,61 +134,62 @@ fn sha256_digest_round_x2(cdgh: [u32; 4], abef: [u32; 4], wk: [u32; 4]) -> [u32;
     [a2, b2, e2, f2]
 }
 
+fn schedule(v0: [u32; 4], v1: [u32; 4], v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
+    let t1 = sha256msg1(v0, v1);
+    let t2 = sha256load(v2, v3);
+    let t3 = add(t1, t2);
+    sha256msg2(t3, v3)
+}
+
+macro_rules! rounds4 {
+    ($abef:ident, $cdgh:ident, $rest:expr, $i:expr) => {{
+        let t1 = add($rest, crate::consts::K32X4[$i]);
+        $cdgh = sha256_digest_round_x2($cdgh, $abef, t1);
+        let t2 = sha256swap(t1);
+        $abef = sha256_digest_round_x2($abef, $cdgh, t2);
+    }};
+}
+
+macro_rules! schedule_rounds4 {
+    (
+        $abef:ident, $cdgh:ident,
+        $w0:expr, $w1:expr, $w2:expr, $w3:expr, $w4:expr,
+        $i: expr
+    ) => {{
+        $w4 = schedule($w0, $w1, $w2, $w3);
+        rounds4!($abef, $cdgh, $w4, $i);
+    }};
+}
+
 /// Process a block with the SHA-256 algorithm.
 fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
-    let k = &K32X4;
-
-    macro_rules! schedule {
-        ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => {
-            sha256msg2(add(sha256msg1($v0, $v1), sha256load($v2, $v3)), $v3)
-        };
-    }
-
-    macro_rules! rounds4 {
-        ($abef:ident, $cdgh:ident, $rest:expr) => {{
-            $cdgh = sha256_digest_round_x2($cdgh, $abef, $rest);
-            $abef = sha256_digest_round_x2($abef, $cdgh, sha256swap($rest));
-        }};
-    }
-
     let mut abef = [state[0], state[1], state[4], state[5]];
     let mut cdgh = [state[2], state[3], state[6], state[7]];
 
 
     // Rounds 0..64
     let mut w0 = [block[3], block[2], block[1], block[0]];
-    rounds4!(abef, cdgh, add(k[0], w0));
     let mut w1 = [block[7], block[6], block[5], block[4]];
-    rounds4!(abef, cdgh, add(k[1], w1));
     let mut w2 = [block[11], block[10], block[9], block[8]];
-    rounds4!(abef, cdgh, add(k[2], w2));
     let mut w3 = [block[15], block[14], block[13], block[12]];
-    rounds4!(abef, cdgh, add(k[3], w3));
+    let mut w4;
 
-    let mut w4 = schedule!(w0, w1, w2, w3);
-    rounds4!(abef, cdgh, add(k[4], w4));
-    w0 = schedule!(w1, w2, w3, w4);
-    rounds4!(abef, cdgh, add(k[5], w0));
-    w1 = schedule!(w2, w3, w4, w0);
-    rounds4!(abef, cdgh, add(k[6], w1));
-    w2 = schedule!(w3, w4, w0, w1);
-    rounds4!(abef, cdgh, add(k[7], w2));
-    w3 = schedule!(w4, w0, w1, w2);
-    rounds4!(abef, cdgh, add(k[8], w3));
-    w4 = schedule!(w0, w1, w2, w3);
-    rounds4!(abef, cdgh, add(k[9], w4));
-    w0 = schedule!(w1, w2, w3, w4);
-    rounds4!(abef, cdgh, add(k[10], w0));
-    w1 = schedule!(w2, w3, w4, w0);
-    rounds4!(abef, cdgh, add(k[11], w1));
-    w2 = schedule!(w3, w4, w0, w1);
-    rounds4!(abef, cdgh, add(k[12], w2));
-    w3 = schedule!(w4, w0, w1, w2);
-    rounds4!(abef, cdgh, add(k[13], w3));
-    w4 = schedule!(w0, w1, w2, w3);
-    rounds4!(abef, cdgh, add(k[14], w4));
-    w0 = schedule!(w1, w2, w3, w4);
-    rounds4!(abef, cdgh, add(k[15], w0));
+    rounds4!(abef, cdgh, w0, 0);
+    rounds4!(abef, cdgh, w1, 1);
+    rounds4!(abef, cdgh, w2, 2);
+    rounds4!(abef, cdgh, w3, 3);
+    schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 4);
+    schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 5);
+    schedule_rounds4!(abef, cdgh, w2, w3, w4, w0, w1, 6);
+    schedule_rounds4!(abef, cdgh, w3, w4, w0, w1, w2, 7);
+    schedule_rounds4!(abef, cdgh, w4, w0, w1, w2, w3, 8);
+    schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 9);
+    schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 10);
+    schedule_rounds4!(abef, cdgh, w2, w3, w4, w0, w1, 11);
+    schedule_rounds4!(abef, cdgh, w3, w4, w0, w1, w2, 12);
+    schedule_rounds4!(abef, cdgh, w4, w0, w1, w2, w3, 13);
+    schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 14);
+    schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 15);
 
     let [a, b, e, f] = abef;
     let [c, d, g, h] = cdgh;

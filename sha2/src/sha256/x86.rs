@@ -12,7 +12,7 @@ use core::arch::x86::*;
     target_feature = "sse4.1",
 )))]
 fn is_supported() -> bool {
-    true
+    false
 }
 
 #[cfg(all(
@@ -25,12 +25,6 @@ fn is_supported() -> bool {
     true
 }
 
-unsafe fn add_k(v: __m128i, i: usize) -> __m128i {
-    let k = &crate::consts::K32X4[i];
-    let t = _mm_set_epi32(k[0] as i32, k[1] as i32, k[2] as i32, k[3] as i32);
-    _mm_add_epi32(v, t)
-}
-
 unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i) -> __m128i {
     let t1 = _mm_sha256msg1_epu32(v0, v1);
     let t2 = _mm_alignr_epi8(v3, v2, 4);
@@ -40,7 +34,9 @@ unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i) -> __m128
 
 macro_rules! rounds4 {
     ($abef:ident, $cdgh:ident, $rest:expr, $i:expr) => {{
-        let t1 = add_k($rest, $i);
+        let k = &crate::consts::K32X4[$i];
+        let kv = _mm_set_epi32(k[0] as i32, k[1] as i32, k[2] as i32, k[3] as i32);
+        let t1 = _mm_add_epi32($rest, kv);
         $cdgh = _mm_sha256rnds2_epu32($cdgh, $abef, t1);
         let t2 = _mm_shuffle_epi32(t1, 0x0E);
         $abef = _mm_sha256rnds2_epu32($abef, $cdgh, t2);
@@ -54,7 +50,7 @@ macro_rules! schedule_rounds4 {
         $i: expr
     ) => {{
         $w4 = schedule($w0, $w1, $w2, $w3);
-        rounds4!($abef, $cdgh, $w4, $i)
+        rounds4!($abef, $cdgh, $w4, $i);
     }};
 }
 
