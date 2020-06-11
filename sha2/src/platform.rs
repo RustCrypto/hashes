@@ -20,7 +20,7 @@ impl Implementation {
                 return sha_impl;
             }
         }
-        #[cfg(feature = "asm")]
+        #[cfg(any(feature = "asm", feature = "asm-aarch64"))]
         {
             if let Some(asm_impl) = Self::asm_if_supported() {
                 return asm_impl;
@@ -37,24 +37,35 @@ impl Implementation {
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     #[allow(unreachable_code)]
     pub fn sha_if_supported() -> Option<Self> {
-        // Check whether sha support is assumed by the build.
-        #[cfg(target_feature = "sha")]
-        {
+        use raw_cpuid::CpuId;
+
+        // Use raw_cpuid instead of is_x86_feature_detected, to ensure the check
+        // never happens at compile time.
+        let cpuid = CpuId::new();
+        let is_runtime_ok = cpuid
+            .get_extended_feature_info()
+            .map(|info| info.has_sha())
+            .unwrap_or_default();
+
+        // Make sure this computer actually supports it
+        if is_runtime_ok {
             return Some(Implementation(Platform::Sha));
         }
-        // Otherwise dynamically check for support if we can.
-        #[cfg(feature = "std")]
-        {
-            if std::is_x86_feature_detected!("sha") {
-                return Some(Implementation(Platform::Sha));
-            }
-        }
+
         None
     }
 
-    #[cfg(feature = "asm")]
+    #[cfg(any(feature = "asm", feature = "asm-arch64"))]
     pub fn asm_if_supported() -> Option<Self> {
-        return Some(Implementation(Platform::Asm));
+        #[cfg(feature = "asm-aarch64")]
+        let supported = ::aarch64::sha2_supported();
+        #[cfg(not(feature = "asm-aarch64"))]
+        let supported = false;
+
+        if supported {
+            return Some(Implementation(Platform::Asm));
+        }
+        None
     }
 
     #[inline]

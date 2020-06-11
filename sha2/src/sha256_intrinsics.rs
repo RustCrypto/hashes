@@ -1,3 +1,5 @@
+#![allow(clippy::cast_ptr_alignment)] // Safe to cast without alignment checks as the loads and stores do not require alignment.
+
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
@@ -6,7 +8,6 @@ use core::arch::x86_64::*;
 /// Process a block with the SHA-256 algorithm.
 /// Based on https://github.com/noloader/SHA-Intrinsics/blob/master/sha256-x86.c
 #[inline]
-#[target_feature(enable = "sha")]
 pub unsafe fn compress256(state: &mut [u32; 8], block: &[u8; 64]) {
     // TODO: Process multiple blocks
 
@@ -48,7 +49,7 @@ pub unsafe fn compress256(state: &mut [u32; 8], block: &[u8; 64]) {
         cdgh_save = state1;
 
         // Rounds 0-3
-        msg = _mm_loadu_si128(block.as_ptr().add(block_offset + 0) as *const __m128i);
+        msg = _mm_loadu_si128(block.as_ptr().add(block_offset) as *const __m128i);
         msg0 = _mm_shuffle_epi8(msg, MASK);
         msg = _mm_add_epi32(
             msg0,
@@ -261,6 +262,6 @@ pub unsafe fn compress256(state: &mut [u32; 8], block: &[u8; 64]) {
     state1 = _mm_alignr_epi8(state1, tmp, 8); // ABEF
 
     // Save state
-    _mm_storeu_si128(state.as_ptr().add(0) as *mut __m128i, state0);
-    _mm_storeu_si128(state.as_ptr().add(4) as *mut __m128i, state1);
+    _mm_storeu_si128(state.as_mut_ptr().add(0) as *mut __m128i, state0);
+    _mm_storeu_si128(state.as_mut_ptr().add(4) as *mut __m128i, state1);
 }
