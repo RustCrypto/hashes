@@ -34,5 +34,5 @@ std = ["digest/std"]
 asm = ["sha2-asm", "libc"]
 compress = []
 
-# DEPRECATED: use `asm` isntead
+# DEPRECATED: use `asm` instead
 asm-aarch64 = ["asm"]
