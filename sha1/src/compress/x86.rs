@@ -6,12 +6,22 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
-#[cfg(not(target_feature = "sha"))]
+#[cfg(not(all(
+    target_feature = "sha",
+    target_feature = "sse2",
+    target_feature = "ssse3",
+    target_feature = "sse4.1",
+)))]
 fn sha1_supported() -> bool {
-    true
+    false
 }
 
-#[cfg(target_feature = "sha")]
+#[cfg(all(
+    target_feature = "sha",
+    target_feature = "sse2",
+    target_feature = "ssse3",
+    target_feature = "sse4.1",
+))]
 fn sha1_supported() -> bool {
     true
 }

@@ -175,7 +175,7 @@ fn sha1rnds4m(abcd: [u32; 4], msg: [u32; 4]) -> [u32; 4] {
     [b, c, d, e]
 }
 
-/// Process a block with the SHA-1 algorithm.
+#[inline(always)]
 fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
     macro_rules! schedule {
         ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => {
@@ -250,10 +250,14 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
 
 pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     let mut block_u32 = [0u32; BLOCK_LEN];
+    // since LLVM can't properly use aliasing yet it will make
+    // unnecessary state stores without this copy
+    let mut state_cpy = *state;
     for block in blocks.iter() {
         for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
             *o = u32::from_be_bytes(chunk.try_into().unwrap());
         }
-        sha1_digest_block_u32(state, &block_u32);
+        sha1_digest_block_u32(&mut state_cpy, &block_u32);
     }
+    *state = state_cpy;
 }

@@ -6,8 +6,6 @@ mod aarch64;
 mod soft;
 mod x86;
 
-type Block = GenericArray<u8, U64>;
-
 cfg_if::cfg_if! {
     if #[cfg(feature = "asm-aarch64")] {
         use aarch64::compress as compress_inner;
@@ -25,12 +23,10 @@ cfg_if::cfg_if! {
     }
 }
 
-pub fn compress(state: &mut [u32; 5], blocks: &[Block]) {
+pub fn compress(state: &mut [u32; 5], blocks: &[GenericArray<u8, U64>]) {
     // SAFETY: GenericArray<u8, U64> and [u8; 64] have
     // exactly the same memory layout
     #[allow(unsafe_code)]
-    let blocks: &[[u8; 64]] = unsafe {
-        &*(blocks as *const [Block] as *const [[u8; 64]])
-    };
+    let blocks: &[[u8; 64]] = unsafe { &*(blocks as *const _ as *const [[u8; 64]]) };
     compress_inner(state, blocks);
 }
