@@ -58,8 +58,8 @@ macro_rules! sha3_impl {
             }
         }
 
-        impl_opaque_debug!($state);
-        impl_write!($state);
+        opaque_debug::implement!($state);
+        digest::impl_write!($state);
     };
 }
 
@@ -90,7 +90,7 @@ macro_rules! shake_impl {
             }
         }
 
-        impl_opaque_debug!($state);
-        impl_write!($state);
+        opaque_debug::implement!($state);
+        digest::impl_write!($state);
     };
 }

@@ -29,9 +29,6 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[macro_use]
-extern crate opaque_debug;
-
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -43,7 +40,6 @@ use crate::block::{process_msg_block, DIGEST_BUF_LEN, H0};
 
 use block_buffer::BlockBuffer;
 use digest::consts::{U40, U64};
-use digest::impl_write;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 /// Structure representing the state of a ripemd320 computation
@@ -99,5 +95,5 @@ impl Reset for Ripemd320 {
     }
 }
 
-impl_opaque_debug!(Ripemd320);
-impl_write!(Ripemd320);
+opaque_debug::implement!(Ripemd320);
+digest::impl_write!(Ripemd320);

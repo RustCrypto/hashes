@@ -40,8 +40,8 @@ macro_rules! impl_groestl {
             }
         }
 
-        impl_opaque_debug!($state);
-        impl_write!($state);
+        opaque_debug::implement!($state);
+        digest::impl_write!($state);
     };
 }
 
@@ -89,7 +89,7 @@ macro_rules! impl_variable_groestl {
             }
         }
 
-        impl_opaque_debug!($state);
-        impl_write!($state);
+        opaque_debug::implement!($state);
+        digest::impl_write!($state);
     };
 }

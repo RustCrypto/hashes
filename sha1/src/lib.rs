@@ -54,8 +54,6 @@ compile_error!("Enable the \"asm\" feature instead of \"asm-aarch64\" when build
 ))]
 compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use asm detected at runtime, or build with the crypto extensions support, for instance with RUSTFLAGS='-C target-cpu=native' on a compatible CPU.");
 
-#[macro_use]
-extern crate opaque_debug;
 #[cfg(feature = "asm")]
 extern crate sha1_asm;
 #[cfg(feature = "std")]
@@ -72,7 +70,6 @@ pub use digest::{self, Digest};
 use crate::consts::{H, STATE_LEN};
 use block_buffer::BlockBuffer;
 use digest::consts::{U20, U64};
-use digest::impl_write;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 #[cfg(not(feature = "asm"))]
@@ -157,5 +154,5 @@ fn compress(state: &mut [u32; 5], block: &GenericArray<u8, U64>) {
     }
 }
 
-impl_opaque_debug!(Sha1);
-impl_write!(Sha1);
+opaque_debug::implement!(Sha1);
+digest::impl_write!(Sha1);

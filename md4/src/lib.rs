@@ -29,9 +29,6 @@
 #![warn(rust_2018_idioms)]
 #![allow(clippy::many_single_char_names)]
 
-#[macro_use]
-extern crate opaque_debug;
-
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -39,7 +36,6 @@ use core::convert::TryInto;
 pub use digest::{self, Digest};
 
 use block_buffer::BlockBuffer;
-use digest::impl_write;
 use digest::{
     consts::{U16, U64},
     generic_array::GenericArray,
@@ -187,5 +183,5 @@ impl Reset for Md4 {
     }
 }
 
-impl_opaque_debug!(Md4);
-impl_write!(Md4);
+opaque_debug::implement!(Md4);
+digest::impl_write!(Md4);

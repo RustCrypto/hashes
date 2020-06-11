@@ -2,7 +2,6 @@
 use block_buffer::block_padding::Iso7816;
 use block_buffer::BlockBuffer;
 use core::convert::TryInto;
-use digest::impl_write;
 use digest::{
     consts::{U24, U28, U32, U48, U64},
     generic_array::GenericArray,
@@ -470,17 +469,17 @@ impl Reset for Shabal192 {
     }
 }
 
-impl_opaque_debug!(Shabal512);
-impl_opaque_debug!(Shabal384);
-impl_opaque_debug!(Shabal256);
-impl_opaque_debug!(Shabal224);
-impl_opaque_debug!(Shabal192);
+opaque_debug::implement!(Shabal512);
+opaque_debug::implement!(Shabal384);
+opaque_debug::implement!(Shabal256);
+opaque_debug::implement!(Shabal224);
+opaque_debug::implement!(Shabal192);
 
-impl_write!(Shabal512);
-impl_write!(Shabal384);
-impl_write!(Shabal256);
-impl_write!(Shabal224);
-impl_write!(Shabal192);
+digest::impl_write!(Shabal512);
+digest::impl_write!(Shabal384);
+digest::impl_write!(Shabal256);
+digest::impl_write!(Shabal224);
+digest::impl_write!(Shabal192);
 
 #[inline]
 fn read_m(input: &[u8; 64]) -> [u32; 16] {

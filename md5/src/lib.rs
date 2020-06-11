@@ -28,9 +28,6 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[macro_use]
-extern crate opaque_debug;
-
 #[cfg(feature = "asm")]
 extern crate md5_asm as utils;
 
@@ -47,7 +44,6 @@ use crate::utils::compress;
 use block_buffer::BlockBuffer;
 use digest::generic_array::typenum::{U16, U64};
 use digest::generic_array::GenericArray;
-use digest::impl_write;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 mod consts;
@@ -123,5 +119,5 @@ impl Reset for Md5 {
     }
 }
 
-impl_opaque_debug!(Md5);
-impl_write!(Md5);
+opaque_debug::implement!(Md5);
+digest::impl_write!(Md5);

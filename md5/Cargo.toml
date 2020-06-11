@@ -18,7 +18,7 @@ name = "md5"
 digest = "0.9"
 block-buffer = "0.9"
 md5-asm = { version = "0.4", optional = true}
-opaque-debug = "0.2"
+opaque-debug = "0.3"
 
 [dev-dependencies]
 digest = { version = "0.9", features = ["dev"] }

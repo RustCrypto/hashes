@@ -40,9 +40,6 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[macro_use]
-extern crate opaque_debug;
-
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -60,7 +57,6 @@ pub use digest::Digest;
 use crate::utils::compress;
 
 use block_buffer::{block_padding::Iso7816, BlockBuffer};
-use digest::impl_write;
 use digest::{consts::U64, generic_array::GenericArray};
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
@@ -196,5 +192,5 @@ impl Reset for Whirlpool {
     }
 }
 
-impl_opaque_debug!(Whirlpool);
-impl_write!(Whirlpool);
+opaque_debug::implement!(Whirlpool);
+digest::impl_write!(Whirlpool);

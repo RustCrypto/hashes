@@ -39,8 +39,6 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[macro_use]
-extern crate opaque_debug;
 #[cfg(feature = "std")]
 extern crate std;
 
