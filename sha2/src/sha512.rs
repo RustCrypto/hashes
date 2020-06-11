@@ -217,10 +217,10 @@ impl Reset for Sha512Trunc224 {
     }
 }
 
-opaque_debug::impl_opaque_debug!(Sha384);
-opaque_debug::impl_opaque_debug!(Sha512);
-opaque_debug::impl_opaque_debug!(Sha512Trunc224);
-opaque_debug::impl_opaque_debug!(Sha512Trunc256);
+opaque_debug::implement!(Sha384);
+opaque_debug::implement!(Sha512);
+opaque_debug::implement!(Sha512Trunc224);
+opaque_debug::implement!(Sha512Trunc256);
 
 digest::impl_write!(Sha384);
 digest::impl_write!(Sha512);

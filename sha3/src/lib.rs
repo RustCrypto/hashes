@@ -43,9 +43,6 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[macro_use]
-extern crate opaque_debug;
-
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -54,7 +51,6 @@ pub use digest::{self, Digest};
 use block_buffer::BlockBuffer;
 use digest::consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72};
 use digest::generic_array::typenum::Unsigned;
-use digest::impl_write;
 use digest::{BlockInput, ExtendableOutputDirty, FixedOutputDirty, Reset, Update};
 
 mod paddings;

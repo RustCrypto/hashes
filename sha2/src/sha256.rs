@@ -132,8 +132,8 @@ impl Reset for Sha224 {
     }
 }
 
-opaque_debug::impl_opaque_debug!(Sha224);
-opaque_debug::impl_opaque_debug!(Sha256);
+opaque_debug::implement!(Sha224);
+opaque_debug::implement!(Sha256);
 
 digest::impl_write!(Sha224);
 digest::impl_write!(Sha256);

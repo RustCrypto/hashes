@@ -95,5 +95,5 @@ impl Reset for Sha1 {
     }
 }
 
-opaque_debug::impl_opaque_debug!(Sha1);
+opaque_debug::implement!(Sha1);
 digest::impl_write!(Sha1);

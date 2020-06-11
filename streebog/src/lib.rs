@@ -46,9 +46,6 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[macro_use]
-extern crate opaque_debug;
-
 #[cfg(feature = "std")]
 extern crate std;
 
@@ -56,10 +53,8 @@ mod consts;
 mod streebog;
 mod table;
 
-pub use digest::{self, Digest};
-
 use digest::consts::{U32, U64};
-use digest::impl_write;
+pub use digest::{self, Digest};
 
 #[cfg(feature = "std")]
 use digest::Update;
@@ -70,8 +65,8 @@ pub type Streebog256 = streebog::Streebog<U32>;
 /// Streebog512
 pub type Streebog512 = streebog::Streebog<U64>;
 
-impl_opaque_debug!(Streebog512);
-impl_opaque_debug!(Streebog256);
+opaque_debug::implement!(Streebog512);
+opaque_debug::implement!(Streebog256);
 
-impl_write!(Streebog512);
-impl_write!(Streebog256);
+digest::impl_write!(Streebog512);
+digest::impl_write!(Streebog256);
