@@ -1,10 +1,10 @@
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #![allow(unsafe_code)]
 
-#[cfg(target_arch = "x86_64")]
-use core::arch::x86_64::*;
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
+#[cfg(target_arch = "x86_64")]
+use core::arch::x86_64::*;
 
 #[cfg(not(target_feature = "sha"))]
 fn sha1_supported() -> bool {
@@ -31,7 +31,7 @@ macro_rules! schedule {
 #[target_feature(enable = "sha,ssse3,sse4.1")]
 unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     #[allow(non_snake_case)]
-    let MASK: __m128i = _mm_set_epi64x(0x0001020304050607, 0x08090a0b0c0d0e0f);
+    let MASK: __m128i = _mm_set_epi64x(0x0001_0203_0405_0607, 0x0809_0A0B_0C0D_0E0F);
 
     let mut state_abcd = _mm_set_epi32(
         state[0] as i32,
@@ -39,12 +39,7 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
         state[2] as i32,
         state[3] as i32,
     );
-    let mut state_e = _mm_set_epi32(
-        state[4] as i32,
-        0,
-        0,
-        0,
-    );
+    let mut state_e = _mm_set_epi32(state[4] as i32, 0, 0, 0);
 
     for block in blocks {
         let block_ptr = block.as_ptr() as *const __m128i;

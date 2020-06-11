@@ -1,9 +1,9 @@
-use digest::generic_array::GenericArray;
 use digest::consts::U64;
+use digest::generic_array::GenericArray;
 
+mod aarch64;
 #[cfg(any(not(feature = "asm"), feature = "asm-aarch64"))]
 mod soft;
-mod aarch64;
 mod x86;
 
 type Block = GenericArray<u8, U64>;

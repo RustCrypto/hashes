@@ -57,17 +57,16 @@ compile_error!("Enable the \"asm-aarch64\" feature on AArch64 if you want to use
 #[cfg(feature = "std")]
 extern crate std;
 
-mod consts;
 mod compress;
+mod consts;
 
+use crate::compress::compress;
+use crate::consts::{H, STATE_LEN};
 use block_buffer::BlockBuffer;
-pub use digest::{self, Digest};
 use digest::consts::{U20, U64};
 use digest::impl_write;
+pub use digest::{self, Digest};
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
-use crate::consts::{H, STATE_LEN};
-use crate::compress::compress;
-
 
 /// Structure representing the state of a SHA-1 computation
 #[derive(Clone)]
@@ -107,7 +106,8 @@ impl FixedOutputDirty for Sha1 {
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         let s = &mut self.h;
         let l = self.len << 3;
-        self.buffer.len64_padding_be(l, |d| compress(s, core::slice::from_ref(d)));
+        self.buffer
+            .len64_padding_be(l, |d| compress(s, core::slice::from_ref(d)));
         for (chunk, v) in out.chunks_exact_mut(4).zip(self.h.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
