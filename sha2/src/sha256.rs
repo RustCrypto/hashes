@@ -1,9 +1,9 @@
 //! SHA-256
 use crate::consts::{H224, H256, STATE_LEN};
-use crate::sha256_compress::compress256;
 use block_buffer::BlockBuffer;
 use core::slice::from_ref;
 use digest::consts::{U28, U32, U64};
+use digest::generic_array::GenericArray;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
 type BlockSize = U64;
@@ -137,3 +137,33 @@ opaque_debug::impl_opaque_debug!(Sha256);
 
 digest::impl_write!(Sha224);
 digest::impl_write!(Sha256);
+
+cfg_if::cfg_if! {
+    if #[cfg(all(feature = "asm", target_arch = "aarch64", target_os = "linux"))] {
+        mod soft;
+        mod aarch64;
+        use aarch64::compress;
+    } else if #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))] {
+        // TODO: replace after sha2-asm rework
+        fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+            for block in blocks {
+                sha2_asm::compress256(state, block);
+            }
+        }
+    } else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
+        mod soft;
+        mod x86;
+        use x86::compress;
+    } else {
+        mod soft;
+        use soft::compress;
+    }
+}
+
+pub fn compress256(state: &mut [u32; 8], blocks: &[GenericArray<u8, U64>]) {
+    // SAFETY: GenericArray<u8, U64> and [u8; 64] have
+    // exactly the same memory layout
+    #[allow(unsafe_code)]
+    let blocks: &[[u8; 64]] = unsafe { &*(blocks as *const _ as *const [[u8; 64]]) };
+    compress(state, blocks)
+}

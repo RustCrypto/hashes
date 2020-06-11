@@ -61,14 +61,12 @@ extern crate std;
 
 mod consts;
 mod sha256;
-mod sha256_compress;
 mod sha512;
-mod sha512_compress;
 
-pub use crate::sha256::{Sha224, Sha256};
-pub use crate::sha512::{Sha384, Sha512, Sha512Trunc224, Sha512Trunc256};
+pub use sha256::{Sha224, Sha256};
+pub use sha512::{Sha384, Sha512, Sha512Trunc224, Sha512Trunc256};
 pub use digest::{self, Digest};
 #[cfg(feature = "compress")]
-pub use sha256_compress::compress256;
+pub use sha256::compress256;
 #[cfg(feature = "compress")]
-pub use sha512_compress::compress512;
+pub use sha512::compress512;

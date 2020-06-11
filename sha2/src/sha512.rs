@@ -3,9 +3,8 @@ use crate::consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};
 use block_buffer::BlockBuffer;
 use core::slice::from_ref;
 use digest::consts::{U128, U28, U32, U48, U64};
+use digest::generic_array::GenericArray;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
-
-use crate::sha512_compress::compress512;
 
 type BlockSize = U128;
 
@@ -227,3 +226,25 @@ digest::impl_write!(Sha384);
 digest::impl_write!(Sha512);
 digest::impl_write!(Sha512Trunc224);
 digest::impl_write!(Sha512Trunc256);
+
+cfg_if::cfg_if! {
+    if #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))] {
+        // TODO: replace after sha2-asm rework
+        fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+            for block in blocks {
+                sha2_asm::compress512(state, block);
+            }
+        }
+    } else {
+        mod soft;
+        use soft::compress;
+    }
+}
+
+pub fn compress512(state: &mut [u64; 8], blocks: &[GenericArray<u8, U128>]) {
+    // SAFETY: GenericArray<u8, U128> and [u8; 128] have
+    // exactly the same memory layout
+    #[allow(unsafe_code)]
+    let blocks: &[[u8; 128]] = unsafe { &*(blocks as *const _ as *const [[u8; 128]]) };
+    compress(state, blocks)
+}
