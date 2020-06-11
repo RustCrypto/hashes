@@ -175,68 +175,67 @@ fn sha1rnds4m(abcd: [u32; 4], msg: [u32; 4]) -> [u32; 4] {
     [b, c, d, e]
 }
 
+macro_rules! rounds4 {
+    ($h0:ident, $h1:ident, $wk:expr, $i:expr) => {
+        sha1_digest_round_x4($h0, sha1_first_half($h1, $wk), $i)
+    };
+}
+
+macro_rules! schedule {
+    ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => {
+        sha1msg2(xor(sha1msg1($v0, $v1), $v2), $v3)
+    };
+}
+
+macro_rules! schedule_rounds4 {
+    (
+        $h0:ident, $h1:ident,
+        $w0:expr, $w1:expr, $w2:expr, $w3:expr, $w4:expr,
+        $i:expr
+    ) => {
+        $w4 = schedule!($w0, $w1, $w2, $w3);
+        $h1 = rounds4!($h0, $h1, $w4, $i);
+    };
+}
+
 #[inline(always)]
 fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
-    macro_rules! schedule {
-        ($v0:expr, $v1:expr, $v2:expr, $v3:expr) => {
-            sha1msg2(xor(sha1msg1($v0, $v1), $v2), $v3)
-        };
-    }
+    let mut w0 = [block[0], block[1], block[2], block[3]];
+    let mut w1 = [block[4], block[5], block[6], block[7]];
+    let mut w2 = [block[8], block[9], block[10], block[11]];
+    let mut w3 = [block[12], block[13], block[14], block[15]];
+    let mut w4;
 
-    macro_rules! rounds4 {
-        ($h0:ident, $h1:ident, $wk:expr, $i:expr) => {
-            sha1_digest_round_x4($h0, sha1_first_half($h1, $wk), $i)
-        };
-    }
+    let mut h0 = [state[0], state[1], state[2], state[3]];
+    let mut h1 = sha1_first_add(state[4], w0);
 
     // Rounds 0..20
-    let mut h0 = [state[0], state[1], state[2], state[3]];
-    let mut w0 = [block[0], block[1], block[2], block[3]];
-    let mut h1 = sha1_digest_round_x4(h0, sha1_first_add(state[4], w0), 0);
-    let mut w1 = [block[4], block[5], block[6], block[7]];
+    h1 = sha1_digest_round_x4(h0, h1, 0);
     h0 = rounds4!(h1, h0, w1, 0);
-    let mut w2 = [block[8], block[9], block[10], block[11]];
     h1 = rounds4!(h0, h1, w2, 0);
-    let mut w3 = [block[12], block[13], block[14], block[15]];
     h0 = rounds4!(h1, h0, w3, 0);
-    let mut w4 = schedule!(w0, w1, w2, w3);
-    h1 = rounds4!(h0, h1, w4, 0);
+    schedule_rounds4!(h0, h1, w0, w1, w2, w3, w4, 0);
 
     // Rounds 20..40
-    w0 = schedule!(w1, w2, w3, w4);
-    h0 = rounds4!(h1, h0, w0, 1);
-    w1 = schedule!(w2, w3, w4, w0);
-    h1 = rounds4!(h0, h1, w1, 1);
-    w2 = schedule!(w3, w4, w0, w1);
-    h0 = rounds4!(h1, h0, w2, 1);
-    w3 = schedule!(w4, w0, w1, w2);
-    h1 = rounds4!(h0, h1, w3, 1);
-    w4 = schedule!(w0, w1, w2, w3);
-    h0 = rounds4!(h1, h0, w4, 1);
+    schedule_rounds4!(h1, h0, w1, w2, w3, w4, w0, 1);
+    schedule_rounds4!(h0, h1, w2, w3, w4, w0, w1, 1);
+    schedule_rounds4!(h1, h0, w3, w4, w0, w1, w2, 1);
+    schedule_rounds4!(h0, h1, w4, w0, w1, w2, w3, 1);
+    schedule_rounds4!(h1, h0, w0, w1, w2, w3, w4, 1);
 
     // Rounds 40..60
-    w0 = schedule!(w1, w2, w3, w4);
-    h1 = rounds4!(h0, h1, w0, 2);
-    w1 = schedule!(w2, w3, w4, w0);
-    h0 = rounds4!(h1, h0, w1, 2);
-    w2 = schedule!(w3, w4, w0, w1);
-    h1 = rounds4!(h0, h1, w2, 2);
-    w3 = schedule!(w4, w0, w1, w2);
-    h0 = rounds4!(h1, h0, w3, 2);
-    w4 = schedule!(w0, w1, w2, w3);
-    h1 = rounds4!(h0, h1, w4, 2);
+    schedule_rounds4!(h0, h1, w1, w2, w3, w4, w0, 2);
+    schedule_rounds4!(h1, h0, w2, w3, w4, w0, w1, 2);
+    schedule_rounds4!(h0, h1, w3, w4, w0, w1, w2, 2);
+    schedule_rounds4!(h1, h0, w4, w0, w1, w2, w3, 2);
+    schedule_rounds4!(h0, h1, w0, w1, w2, w3, w4, 2);
 
     // Rounds 60..80
-    w0 = schedule!(w1, w2, w3, w4);
-    h0 = rounds4!(h1, h0, w0, 3);
-    w1 = schedule!(w2, w3, w4, w0);
-    h1 = rounds4!(h0, h1, w1, 3);
-    w2 = schedule!(w3, w4, w0, w1);
-    h0 = rounds4!(h1, h0, w2, 3);
-    w3 = schedule!(w4, w0, w1, w2);
-    h1 = rounds4!(h0, h1, w3, 3);
-    w4 = schedule!(w0, w1, w2, w3);
-    h0 = rounds4!(h1, h0, w4, 3);
+    schedule_rounds4!(h1, h0, w1, w2, w3, w4, w0, 3);
+    schedule_rounds4!(h0, h1, w2, w3, w4, w0, w1, 3);
+    schedule_rounds4!(h1, h0, w3, w4, w0, w1, w2, 3);
+    schedule_rounds4!(h0, h1, w4, w0, w1, w2, w3, 3);
+    schedule_rounds4!(h1, h0, w0, w1, w2, w3, w4, 3);
 
     let e = h1[0].rotate_left(30);
     let [a, b, c, d] = h0;

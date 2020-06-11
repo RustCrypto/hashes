@@ -38,6 +38,17 @@ macro_rules! schedule {
     };
 }
 
+macro_rules! schedule_rounds4 {
+    (
+        $h0:ident, $h1:ident,
+        $w0:expr, $w1:expr, $w2:expr, $w3:expr, $w4:expr,
+        $i:expr
+    ) => {
+        $w4 = schedule!($w0, $w1, $w2, $w3);
+        $h1 = rounds4!($h0, $h1, $w4, $i);
+    };
+}
+
 #[target_feature(enable = "sha,ssse3,sse4.1")]
 unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     #[allow(non_snake_case)]
@@ -56,57 +67,42 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
         #[allow(clippy::cast_ptr_alignment)]
         let block_ptr = block.as_ptr() as *const __m128i;
 
-        let h0 = state_abcd;
-        let e0 = state_e;
-
         let mut w0 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(0)), MASK);
         let mut w1 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(1)), MASK);
         let mut w2 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(2)), MASK);
         let mut w3 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(3)), MASK);
+        let mut w4;
+
+        let mut h0 = state_abcd;
+        let mut h1 = _mm_add_epi32(state_e, w0);
 
         // Rounds 0..20
-        let mut h1 = _mm_sha1rnds4_epu32(h0, _mm_add_epi32(e0, w0), 0);
-        let mut h0 = rounds4!(h1, h0, w1, 0);
+        h1 = _mm_sha1rnds4_epu32(h0, h1, 0);
+        h0 = rounds4!(h1, h0, w1, 0);
         h1 = rounds4!(h0, h1, w2, 0);
         h0 = rounds4!(h1, h0, w3, 0);
-        let mut w4 = schedule!(w0, w1, w2, w3);
-        h1 = rounds4!(h0, h1, w4, 0);
+        schedule_rounds4!(h0, h1, w0, w1, w2, w3, w4, 0);
 
         // Rounds 20..40
-        w0 = schedule!(w1, w2, w3, w4);
-        h0 = rounds4!(h1, h0, w0, 1);
-        w1 = schedule!(w2, w3, w4, w0);
-        h1 = rounds4!(h0, h1, w1, 1);
-        w2 = schedule!(w3, w4, w0, w1);
-        h0 = rounds4!(h1, h0, w2, 1);
-        w3 = schedule!(w4, w0, w1, w2);
-        h1 = rounds4!(h0, h1, w3, 1);
-        w4 = schedule!(w0, w1, w2, w3);
-        h0 = rounds4!(h1, h0, w4, 1);
+        schedule_rounds4!(h1, h0, w1, w2, w3, w4, w0, 1);
+        schedule_rounds4!(h0, h1, w2, w3, w4, w0, w1, 1);
+        schedule_rounds4!(h1, h0, w3, w4, w0, w1, w2, 1);
+        schedule_rounds4!(h0, h1, w4, w0, w1, w2, w3, 1);
+        schedule_rounds4!(h1, h0, w0, w1, w2, w3, w4, 1);
 
         // Rounds 40..60
-        w0 = schedule!(w1, w2, w3, w4);
-        h1 = rounds4!(h0, h1, w0, 2);
-        w1 = schedule!(w2, w3, w4, w0);
-        h0 = rounds4!(h1, h0, w1, 2);
-        w2 = schedule!(w3, w4, w0, w1);
-        h1 = rounds4!(h0, h1, w2, 2);
-        w3 = schedule!(w4, w0, w1, w2);
-        h0 = rounds4!(h1, h0, w3, 2);
-        w4 = schedule!(w0, w1, w2, w3);
-        h1 = rounds4!(h0, h1, w4, 2);
+        schedule_rounds4!(h0, h1, w1, w2, w3, w4, w0, 2);
+        schedule_rounds4!(h1, h0, w2, w3, w4, w0, w1, 2);
+        schedule_rounds4!(h0, h1, w3, w4, w0, w1, w2, 2);
+        schedule_rounds4!(h1, h0, w4, w0, w1, w2, w3, 2);
+        schedule_rounds4!(h0, h1, w0, w1, w2, w3, w4, 2);
 
         // Rounds 60..80
-        w0 = schedule!(w1, w2, w3, w4);
-        h0 = rounds4!(h1, h0, w0, 3);
-        w1 = schedule!(w2, w3, w4, w0);
-        h1 = rounds4!(h0, h1, w1, 3);
-        w2 = schedule!(w3, w4, w0, w1);
-        h0 = rounds4!(h1, h0, w2, 3);
-        w3 = schedule!(w4, w0, w1, w2);
-        h1 = rounds4!(h0, h1, w3, 3);
-        w4 = schedule!(w0, w1, w2, w3);
-        h0 = rounds4!(h1, h0, w4, 3);
+        schedule_rounds4!(h1, h0, w1, w2, w3, w4, w0, 3);
+        schedule_rounds4!(h0, h1, w2, w3, w4, w0, w1, 3);
+        schedule_rounds4!(h1, h0, w3, w4, w0, w1, w2, 3);
+        schedule_rounds4!(h0, h1, w4, w0, w1, w2, w3, 3);
+        schedule_rounds4!(h1, h0, w0, w1, w2, w3, w4, 3);
 
         state_abcd = _mm_add_epi32(state_abcd, h0);
         state_e = _mm_sha1nexte_epu32(h1, state_e);
