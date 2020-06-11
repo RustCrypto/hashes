@@ -42,6 +42,8 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     let mut state_e = _mm_set_epi32(state[4] as i32, 0, 0, 0);
 
     for block in blocks {
+        // SAFETY: we use only unaligned loads with this pointer
+        #[allow(clippy::cast_ptr_alignment)]
         let block_ptr = block.as_ptr() as *const __m128i;
 
         let h0 = state_abcd;

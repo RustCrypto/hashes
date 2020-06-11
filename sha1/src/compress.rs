@@ -29,6 +29,8 @@ pub fn compress(state: &mut [u32; 5], blocks: &[Block]) {
     // SAFETY: GenericArray<u8, U64> and [u8; 64] have
     // exactly the same memory layout
     #[allow(unsafe_code)]
-    let blocks: &[[u8; 64]] = unsafe { core::mem::transmute(blocks) };
+    let blocks: &[[u8; 64]] = unsafe {
+        &*(blocks as *const [Block] as *const [[u8; 64]])
+    };
     compress_inner(state, blocks);
 }
