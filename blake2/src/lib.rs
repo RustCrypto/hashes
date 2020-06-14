@@ -94,10 +94,14 @@ extern crate std;
 mod blake2;
 
 mod blake2b;
+mod blake2bp;
 mod blake2s;
+mod blake2sp;
 
 pub use crypto_mac;
 pub use digest::{self, Digest};
 
 pub use crate::blake2b::{Blake2b, VarBlake2b};
+pub use crate::blake2bp::{Blake2bp, VarBlake2bp};
 pub use crate::blake2s::{Blake2s, VarBlake2s};
+pub use crate::blake2sp::{Blake2sp, VarBlake2sp};

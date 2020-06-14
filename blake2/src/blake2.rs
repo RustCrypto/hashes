@@ -28,20 +28,10 @@ macro_rules! blake2_impl {
             /// make sure to compare codes in constant time! It can be done
             /// for example by using `subtle` crate.
             pub fn new_keyed(key: &[u8], output_size: usize) -> Self {
-                Self::with_params(key, &[], &[], output_size)
-            }
-
-            /// Creates a new hashing context with the full set of sequential-mode parameters.
-            pub fn with_params(key: &[u8], salt: &[u8], persona: &[u8], output_size: usize) -> Self {
                 let mut upstream_params = <$upstream_params>::new();
-                upstream_params
-                    .key(key)
-                    .salt(salt)
-                    .personal(persona)
-                    .hash_length(output_size);
-
+                upstream_params.key(key);
+                upstream_params.hash_length(output_size);
                 let upstream_state = upstream_params.to_state();
-
                 Self { upstream_params, upstream_state, output_size }
             }
 
@@ -98,24 +88,11 @@ macro_rules! blake2_impl {
             upstream_state: $upstream_state,
         }
 
-        impl $fix_state {
-            /// Creates a new hashing context with the full set of sequential-mode parameters.
-            pub fn with_params(key: &[u8], salt: &[u8], persona: &[u8]) -> Self {
-                let mut upstream_params = <$upstream_params>::new();
-                upstream_params
-                    .key(key)
-                    .salt(salt)
-                    .personal(persona);
-
-                let upstream_state = upstream_params.to_state();
-
-                Self { upstream_params, upstream_state }
-            }
-        }
-
         impl Default for $fix_state {
             fn default() -> Self {
-                Self::with_params(&[], &[], &[])
+                let upstream_params = <$upstream_params>::new();
+                let upstream_state = upstream_params.to_state();
+                Self { upstream_params, upstream_state }
             }
         }
 
@@ -147,14 +124,20 @@ macro_rules! blake2_impl {
             type KeySize = $key_bytes_typenum;
 
             fn new(key: &GenericArray<u8, $key_bytes_typenum>) -> Self {
-                Self::with_params(&key[..], &[], &[])
+                let mut upstream_params = <$upstream_params>::new();
+                upstream_params.key(&key[..]);
+                let upstream_state = upstream_params.to_state();
+                Self { upstream_params, upstream_state }
             }
 
             fn new_varkey(key: &[u8]) -> Result<Self, InvalidKeyLength> {
                 if key.len() > <$key_bytes_typenum>::to_usize() {
                     Err(InvalidKeyLength)
                 } else {
-                    Ok(Self::with_params(key, &[], &[]))
+                    let mut upstream_params = <$upstream_params>::new();
+                    upstream_params.key(key);
+                    let upstream_state = upstream_params.to_state();
+                    Ok(Self { upstream_params, upstream_state })
                 }
             }
         }
