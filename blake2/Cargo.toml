@@ -12,6 +12,8 @@ keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
+blake2b_simd = { version = "0.5.10", default-features = false }
+blake2s_simd = { version = "0.5.10", default-features = false }
 digest = "0.9"
 crypto-mac = "0.8"
 opaque-debug = "0.3"
@@ -23,7 +25,7 @@ hex-literal = "0.2"
 
 [features]
 default = ["std"]
-std = ["digest/std", "crypto-mac/std"]
+std = ["digest/std", "crypto-mac/std", "blake2b_simd/std", "blake2s_simd/std"]
 simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]

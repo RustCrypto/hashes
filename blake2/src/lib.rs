@@ -90,11 +90,6 @@
 #[cfg(feature = "std")]
 extern crate std;
 
-mod as_bytes;
-mod consts;
-
-mod simd;
-
 #[macro_use]
 mod blake2;
 
