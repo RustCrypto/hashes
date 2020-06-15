@@ -26,6 +26,3 @@ hex-literal = "0.2"
 [features]
 default = ["std"]
 std = ["digest/std", "crypto-mac/std", "blake2b_simd/std", "blake2s_simd/std"]
-simd = []
-simd_opt = ["simd"]
-simd_asm = ["simd_opt"]

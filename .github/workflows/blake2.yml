@@ -53,15 +53,3 @@ jobs:
         override: true
     - run: cargo test --no-default-features
     - run: cargo test
-  simd:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          override: true
-      - run: cargo test --features simd
-      - run: cargo test --features simd_opt
-      - run: cargo test --features simd_asm
