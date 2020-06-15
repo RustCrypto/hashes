@@ -74,8 +74,8 @@ dual licensed as above, without any additional terms or conditions.
 [docs-link]: https://docs.rs/shabal/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
-[build-image]: https://github.com/RustCrypto/hashes/workflows/sha1/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Asha1
+[build-image]: https://github.com/RustCrypto/hashes/workflows/shabal/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Ashabal
 
 [//]: # (general links)
 
