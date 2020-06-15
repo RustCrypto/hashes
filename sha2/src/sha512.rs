@@ -1,47 +1,20 @@
 //! SHA-512
-
 use crate::consts::{H384, H512, H512_TRUNC_224, H512_TRUNC_256, STATE_LEN};
 use block_buffer::BlockBuffer;
-use digest::{
-    consts::{U128, U28, U32, U48, U64},
-    generic_array::GenericArray,
-};
+use core::slice::from_ref;
+use digest::consts::{U128, U28, U32, U48, U64};
+use digest::generic_array::GenericArray;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
-#[cfg(any(not(feature = "asm"), target_arch = "aarch64"))]
-use crate::sha512_utils::compress512;
-
-#[cfg(all(feature = "asm", not(target_arch = "aarch64")))]
-use sha2_asm::compress512;
-
 type BlockSize = U128;
-type Block = GenericArray<u8, BlockSize>;
 
-/// A structure that represents that state of a digest computation for the
-/// SHA-2 512 family of digest functions
-#[derive(Clone)]
-struct Engine512State {
-    h: [u64; 8],
-}
-
-impl Engine512State {
-    fn new(h: &[u64; 8]) -> Engine512State {
-        Engine512State { h: *h }
-    }
-
-    pub fn process_block(&mut self, block: &Block) {
-        let block = unsafe { &*(block.as_ptr() as *const [u8; 128]) };
-        compress512(&mut self.h, block);
-    }
-}
-
-/// A structure that keeps track of the state of the Sha-512 operation and
+/// Structure that keeps state of the Sha-512 operation and
 /// contains the logic necessary to perform the final calculations.
 #[derive(Clone)]
 struct Engine512 {
     len: u128,
     buffer: BlockBuffer<BlockSize>,
-    state: Engine512State,
+    state: [u64; 8],
 }
 
 impl Engine512 {
@@ -49,26 +22,26 @@ impl Engine512 {
         Engine512 {
             len: 0,
             buffer: Default::default(),
-            state: Engine512State::new(h),
+            state: *h,
         }
     }
 
     fn update(&mut self, input: &[u8]) {
         self.len += (input.len() as u128) << 3;
         let s = &mut self.state;
-        self.buffer.input_block(input, |d| s.process_block(d));
+        self.buffer.input_blocks(input, |b| compress512(s, b));
     }
 
     fn finish(&mut self) {
         let s = &mut self.state;
         self.buffer
-            .len128_padding_be(self.len, |d| s.process_block(d));
+            .len128_padding_be(self.len, |d| compress512(s, from_ref(d)));
     }
 
     fn reset(&mut self, h: &[u64; STATE_LEN]) {
         self.len = 0;
         self.buffer.reset();
-        self.state = Engine512State::new(h);
+        self.state = *h;
     }
 }
 
@@ -101,8 +74,8 @@ impl FixedOutputDirty for Sha512 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let h = self.engine.state.h;
-        for (chunk, v) in out.chunks_exact_mut(8).zip(h.iter()) {
+        let s = self.engine.state;
+        for (chunk, v) in out.chunks_exact_mut(8).zip(s.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
     }
@@ -144,8 +117,8 @@ impl FixedOutputDirty for Sha384 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let h = &self.engine.state.h[..6];
-        for (chunk, v) in out.chunks_exact_mut(8).zip(h.iter()) {
+        let s = &self.engine.state[..6];
+        for (chunk, v) in out.chunks_exact_mut(8).zip(s.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
     }
@@ -187,8 +160,8 @@ impl FixedOutputDirty for Sha512Trunc256 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let h = &self.engine.state.h[..4];
-        for (chunk, v) in out.chunks_exact_mut(8).zip(h.iter()) {
+        let s = &self.engine.state[..4];
+        for (chunk, v) in out.chunks_exact_mut(8).zip(s.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
     }
@@ -230,11 +203,11 @@ impl FixedOutputDirty for Sha512Trunc224 {
 
     fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
         self.engine.finish();
-        let h = &self.engine.state.h;
-        for (chunk, v) in out.chunks_exact_mut(8).zip(h[..3].iter()) {
+        let s = &self.engine.state;
+        for (chunk, v) in out.chunks_exact_mut(8).zip(s[..3].iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
-        out[24..28].copy_from_slice(&h[3].to_be_bytes()[..4]);
+        out[24..28].copy_from_slice(&s[3].to_be_bytes()[..4]);
     }
 }
 
@@ -253,3 +226,25 @@ digest::impl_write!(Sha384);
 digest::impl_write!(Sha512);
 digest::impl_write!(Sha512Trunc224);
 digest::impl_write!(Sha512Trunc256);
+
+cfg_if::cfg_if! {
+    if #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))] {
+        // TODO: replace after sha2-asm rework
+        fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+            for block in blocks {
+                sha2_asm::compress512(state, block);
+            }
+        }
+    } else {
+        mod soft;
+        use soft::compress;
+    }
+}
+
+pub fn compress512(state: &mut [u64; 8], blocks: &[GenericArray<u8, U128>]) {
+    // SAFETY: GenericArray<u8, U128> and [u8; 128] have
+    // exactly the same memory layout
+    #[allow(unsafe_code)]
+    let blocks: &[[u8; 128]] = unsafe { &*(blocks as *const _ as *const [[u8; 128]]) };
+    compress(state, blocks)
+}

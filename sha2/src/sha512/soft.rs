@@ -2,13 +2,11 @@
 use crate::consts::{BLOCK_LEN, K64X2};
 use core::convert::TryInto;
 
-#[inline(always)]
 fn add(a: [u64; 2], b: [u64; 2]) -> [u64; 2] {
     [a[0].wrapping_add(b[0]), a[1].wrapping_add(b[1])]
 }
 
 /// Not an intrinsic, but works like an unaligned load.
-#[inline]
 fn sha512load(v0: [u64; 2], v1: [u64; 2]) -> [u64; 2] {
     [v1[1], v0[0]]
 }
@@ -202,105 +200,17 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-/// Process a block with the SHA-512 algorithm. (See more...)
-///
-/// Internally, this uses functions that resemble the new Intel SHA
-/// instruction set extensions, but since no architecture seems to
-/// have any designs, these may not be the final designs if and/or when
-/// there are instruction set extensions with SHA-512. So to summarize:
-/// SHA-1 and SHA-256 are being implemented in hardware soon (at the time
-/// of this writing), but it doesn't look like SHA-512 will be hardware
-/// accelerated any time soon.
-///
-/// # Implementation
-///
-/// These functions fall into two categories: message schedule calculation, and
-/// the message block 64-round digest calculation. The schedule-related
-/// functions allow 4 rounds to be calculated as:
-///
-/// ```ignore
-/// use std::simd::[u64; 2];
-/// use self::crypto::sha2::{
-///     sha512msg,
-///     sha512load
-/// };
-///
-/// fn schedule4_data(work: &mut [[u64; 2]], w: &[u64]) {
-///
-///     // this is to illustrate the data order
-///     work[0] = [w[1], w[0]);
-///     work[1] = [w[3], w[2]);
-///     work[2] = [w[5], w[4]);
-///     work[3] = [w[7], w[6]);
-///     work[4] = [w[9], w[8]);
-///     work[5] = [w[11], w[10]);
-///     work[6] = [w[13], w[12]);
-///     work[7] = [w[15], w[14]);
-/// }
-///
-/// fn schedule4_work(work: &mut [[u64; 2]], t: usize) {
-///
-///     // this is the core expression
-///     work[t] = sha512msg(work[t - 8],
-///                         work[t - 7],
-///                         sha512load(work[t - 4], work[t - 3]),
-///                         work[t - 1]);
-/// }
-/// ```
-///
-/// instead of 4 rounds of:
-///
-/// ```ignore
-/// fn schedule_work(w: &mut [u64], t: usize) {
-///     w[t] = sigma1!(w[t - 2]) + w[t - 7] + sigma0!(w[t - 15]) + w[t - 16];
-/// }
-/// ```
-///
-/// and the digest-related functions allow 4 rounds to be calculated as:
-///
-/// ```ignore
-/// use std::simd::[u64; 2];
-/// use self::crypto::sha2::{K64X2, sha512rnd};
-///
-/// fn rounds4(state: &mut [u64; 8], work: &mut [[u64; 2]], t: usize) {
-///     let [a, b, c, d, e, f, g, h]: [u64; 8] = *state;
-///
-///     // this is to illustrate the data order
-///     let mut ae = [a, e);
-///     let mut bf = [b, f);
-///     let mut cg = [c, g);
-///     let mut dh = [d, h);
-///     let [w1, w0) = K64X2[2*t]     + work[2*t];
-///     let [w3, w2) = K64X2[2*t + 1] + work[2*t + 1];
-///
-///     // this is the core expression
-///     dh = sha512rnd(ae, bf, cg, dh, w0);
-///     cg = sha512rnd(dh, ae, bf, cg, w1);
-///     bf = sha512rnd(cg, dh, ae, bf, w2);
-///     ae = sha512rnd(bf, cg, dh, ae, w3);
-///
-///     *state = [ae[0], bf[0], cg[0], dh[0],
-///               ae[1], bf[1], cg[1], dh[1]];
-/// }
-/// ```
-///
-/// instead of 4 rounds of:
-///
-/// ```ignore
-/// fn round(state: &mut [u64; 8], w: &mut [u64], t: usize) {
-///     let [a, b, c, mut d, e, f, g, mut h]: [u64; 8] = *state;
-///
-///     h += big_sigma1!(e) +   choose!(e, f, g) + K64[t] + w[t]; d += h;
-///     h += big_sigma0!(a) + majority!(a, b, c);
-///
-///     *state = [h, a, b, c, d, e, f, g];
-/// }
-/// ```
-///
-pub fn compress512(state: &mut [u64; 8], block: &[u8; 128]) {
-    let mut block_u64 = [0u64; BLOCK_LEN];
-    for (o, chunk) in block_u64.iter_mut().zip(block.chunks_exact(8)) {
-        *o = u64::from_be_bytes(chunk.try_into().unwrap());
+
+pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+    let mut block_u32 = [0u64; BLOCK_LEN];
+    // since LLVM can't properly use aliasing yet it will make
+    // unnecessary state stores without this copy
+    let mut state_cpy = *state;
+    for block in blocks {
+        for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(8)) {
+            *o = u64::from_be_bytes(chunk.try_into().unwrap());
+        }
+        sha512_digest_block_u64(&mut state_cpy, &block_u32);
     }
-    sha512_digest_block_u64(state, &block_u64);
+    *state = state_cpy;
 }
