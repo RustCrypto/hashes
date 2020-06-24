@@ -156,7 +156,7 @@ macro_rules! blake2_impl {
 
                     t0: 0,
                     m0: [0; 16],
-                    h0: h0,
+                    h0,
                 }
             }
 
