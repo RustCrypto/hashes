@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.9.1 (2020-06-24)
+### Added
+- x86 hardware acceleration of SHA-256 via SHA extension instrinsics. ([#167])
+
+[#167]: https://github.com/RustCrypto/hashes/pull/167
+
 ## 0.9.0 (2020-06-09)
 ### Changed
 - Update to `digest` v0.9 release; MSRV 1.41+ ([#155])
