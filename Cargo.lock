@@ -150,7 +150,7 @@ checksum = "9457b06509d27052635f90d6466700c65095fdf75409b3fbdd903e988b886f49"
 
 [[package]]
 name = "md-5"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "block-buffer",
  "digest",
@@ -202,7 +202,7 @@ checksum = "7e0456befd48169b9f13ef0f0ad46d492cf9d2dbb918bcf38e01eed4ce3ec5e4"
 
 [[package]]
 name = "ripemd160"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "block-buffer",
  "digest",
@@ -268,7 +268,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "block-buffer",
  "digest",

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.9.1 (2020-06-28)
+### Changed
+- Update to `block-buffer` v0.9 ([#164])
+- Update to `opaque-debug` v0.3 ([#168])
+
+[#164]: https://github.com/RustCrypto/hashes/pull/164
+[#168]: https://github.com/RustCrypto/hashes/pull/168
+
 ## 0.9.0 (2020-06-09)
 ### Changed
 - Update to `digest` v0.9 release; MSRV 1.41+ ([#155])
