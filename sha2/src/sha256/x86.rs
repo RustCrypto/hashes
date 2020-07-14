@@ -95,6 +95,7 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     _mm_storeu_si128(state_ptr_mut.add(1), hgef);
 }
 
+#[cfg(feature = "cpuid_bool")]
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
@@ -105,4 +106,10 @@ pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     } else {
         super::soft::compress(state, blocks);
     }
+}
+
+/// Use `is_x86_feature_detected` in sgx environment in the future
+#[cfg(not(feature = "cpuid_bool"))]
+pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+    super::soft::compress(state, blocks);
 }
