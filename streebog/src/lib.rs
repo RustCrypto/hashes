@@ -1,14 +1,7 @@
-//! An implementation of the [Streebog][1] cryptographic hash function. It's
-//! officially known as GOST R 34.11-2012.
+//! An implementation of the [Streebog] cryptographic hash function defined
+//! in GOST R 34.11-2012.
 //!
-//! This implementation returns digest result using little-endian encoding
-//! in the form of array with least significant octets first, thus compared to
-//! specifications which uses big-endian result will have "reversed" order of
-//! octets.
-//!
-//! # Usage
-//!
-//! An example of using `Streebog256` and `Streebog256` is:
+//! # Example
 //!
 //! ```rust
 //! use streebog::{Digest, Streebog256, Streebog512};
@@ -36,10 +29,10 @@
 //! ")[..]);
 //! ```
 //!
-//! Also see [RustCrypto/hashes][2] readme.
+//! Also see [RustCrypto/hashes][1] readme.
 //!
-//! [1]: https://en.wikipedia.org/wiki/Streebog
-//! [2]: https://github.com/RustCrypto/hashes
+//! [Streebog]: https://en.wikipedia.org/wiki/Streebog
+//! [1]: https://github.com/RustCrypto/hashes
 
 #![no_std]
 #![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo_small.png")]
@@ -59,10 +52,10 @@ pub use digest::{self, Digest};
 #[cfg(feature = "std")]
 use digest::Update;
 
-/// Streebog256
+/// Streebog-256 cryptographic hash function
 pub type Streebog256 = streebog::Streebog<U32>;
 
-/// Streebog512
+/// Streebog-256 cryptographic hash function
 pub type Streebog512 = streebog::Streebog<U64>;
 
 opaque_debug::implement!(Streebog512);
