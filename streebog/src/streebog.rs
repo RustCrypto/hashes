@@ -1,5 +1,3 @@
-//! Streebog (GOST R 34.11-2012)
-
 use block_buffer::{block_padding::ZeroPadding, BlockBuffer};
 use core::marker::PhantomData;
 use digest::consts::U64;
