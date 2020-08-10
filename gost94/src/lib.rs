@@ -26,7 +26,10 @@
 //! [2]: https://github.com/RustCrypto/hashes
 
 #![no_std]
-#![doc(html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg")]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
+)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 #[cfg(feature = "std")]
