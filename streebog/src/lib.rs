@@ -1,7 +1,9 @@
 //! An implementation of the [Streebog] cryptographic hash function defined
 //! in GOST R 34.11-2012.
 //!
-//! # Example
+//! # Usage
+//! Hasher functionality is expressed via traits defined in the [`digest`]
+//! crate.
 //!
 //! ```rust
 //! use streebog::{Digest, Streebog256, Streebog512};
@@ -10,7 +12,9 @@
 //! // create a hasher object, to use it do not forget to import `Digest` trait
 //! let mut hasher = Streebog256::new();
 //! // write input message
-//! hasher.update(b"my message");
+//! hasher.update(b"my");
+//! hasher.update(b" ");
+//! hasher.update(b"message");
 //! // read hash digest (it will consume hasher)
 //! let result = hasher.finalize();
 //!
@@ -29,10 +33,10 @@
 //! ")[..]);
 //! ```
 //!
-//! Also see [RustCrypto/hashes][1] readme.
+//! See [RustCrypto/hashes][1] readme for additional examples.
 //!
 //! [Streebog]: https://en.wikipedia.org/wiki/Streebog
-//! [1]: https://github.com/RustCrypto/hashes
+//! [1]: https://github.com/RustCrypto/hashes/blob/master/README.md#usage
 
 #![no_std]
 #![doc(
@@ -58,7 +62,7 @@ use digest::Update;
 /// Streebog-256 cryptographic hash function
 pub type Streebog256 = streebog::Streebog<U32>;
 
-/// Streebog-256 cryptographic hash function
+/// Streebog-512 cryptographic hash function
 pub type Streebog512 = streebog::Streebog<U64>;
 
 opaque_debug::implement!(Streebog512);
