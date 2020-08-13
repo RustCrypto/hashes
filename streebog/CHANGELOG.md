@@ -7,13 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.9.2 (2020-08-13)
 ### Changed
-- Documentation update (#[185])
+- Documentation update ([#185])
 
 [#185]: https://github.com/RustCrypto/hashes/pull/185
 
 ## 0.9.1 (2020-08-10)
 ### Changed
-- Documentation update (#[184])
+- Documentation update ([#184])
 
 [#184]: https://github.com/RustCrypto/hashes/pull/184
 
