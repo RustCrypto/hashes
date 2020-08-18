@@ -13,12 +13,12 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.9"
-crypto-mac = "0.8"
+crypto-mac = "0.9"
 opaque-debug = "0.3"
 
 [dev-dependencies]
 digest = { version = "0.9", features = ["dev"] }
-crypto-mac = { version = "0.8", features = ["dev"] }
+crypto-mac = { version = "0.9", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]
