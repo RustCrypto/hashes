@@ -171,7 +171,9 @@ impl Gost94State {
         for (a, b) in self.sigma.iter_mut().zip(buf.iter()) {
             if over.1 {
                 over = a.overflowing_add(*b);
-                *a = over.0 + 1;
+                let temp_overflow = over.0.overflowing_add(1);
+                *a = temp_overflow.0;
+                over.1 |= temp_overflow.1;
             } else {
                 over = a.overflowing_add(*b);
                 *a = over.0;
