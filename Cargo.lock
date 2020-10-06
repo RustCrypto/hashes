@@ -91,7 +91,7 @@ dependencies = [
 
 [[package]]
 name = "gost94"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",

@@ -4,6 +4,7 @@
 [![Docs][docs-image]][docs-link]
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
+[![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
 Pure Rust implementation of the [BLAKE2 hash function][1] family.
@@ -44,6 +45,8 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/blake2/badge.svg
 [docs-link]: https://docs.rs/blake2/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
+[chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
+[chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
 [rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
 [build-image]: https://github.com/RustCrypto/hashes/workflows/blake2/badge.svg?branch=master
 [build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Ablake2
