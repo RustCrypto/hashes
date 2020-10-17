@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use crate::pi::Pi;
 use std::convert::{TryInto, TryFrom};
 use std::array::TryFromSliceError;
@@ -69,6 +71,38 @@ fn shift_and_truncate(slice_or: &[u8]) -> [u8; R] {
     truncated
 }
 
+/// Vector XORing. Given the s input bits of the function, we derive a set of w indexes
+/// $(W_i)_{i\in[0;w-1]}$ between $0$ and $n - 1$. The value of each $W_i$ is computed
+/// from the inputs bits like this:
+/// $W_i = i \times (n / w) + IV_i + M_i \times 2^{r / w}.
+/// todo: verify that the output type is what is expected. Maybe we don't need such a big
+/// integer.
+fn computing_W_indices(input_vector: [u8; R], message: [u8; S - R]) -> Vec<u128> {
+    let mut W_indices: Vec<u128> = Vec::with_capacity(W);
+    for i in 0..W {
+        let input_vector_i = input_vector[(i * R/W)..(i + 1)*R/W];
+        let message_i = message[(i * (S-R)/W)..(i+1)*(S-R/W)];
+
+        W_indices.push((i * N/W) as u128 + convert(&input_vector_i) + convert(&message_i) << ((R/W) as u128));
+    }
+
+    W_indices
+
+    // then we take vector floor(W_i / r), we shift it to the right >> W_i mod r positions,
+    // and truncate it to r bits (why the truncation). We XOR these values for the
+    // w values.
+}
+
+/// Convert array of bits to u128
+fn convert(bits: &[u8]) -> u128 {
+    let mut result: u128 = 0;
+    bits.iter().for_each(|&bit| {
+        result <<= 1;
+        result ^= bit as u128;
+    });
+    result
+}
+
 /// Function to compute the ceiling of a / b. Note that this is not a generic function for the
 /// ceiling. It is only valid for our context, that we know that p is not divisible by 8 (only
 /// time we'll use the ceiling
@@ -77,11 +111,14 @@ fn ceiling(a: usize, b: usize) -> usize {
     a/b + 1 as usize
 }
 
-// Blocks of size s - r, which are padded with the r-bit IV, to obtain s bits, which are input
-// to the compression function. This function outputs r bits, which are used to chain to the
-// next iteration.
 
+
+/// Blocks of size s - r, which are padded with the r-bit IV, to obtain s bits, which are input
+/// to the compression function. This function outputs r bits, which are used to chain to the
+/// next iteration.
 pub fn compress(message_block: [u8; S - R], iv_block: [u8; R])  {
+    // Start here
 
+    // before Whirpool
 }
 
