@@ -68,22 +68,8 @@ fn computing_W_indices(input_vector: [u8; R], message: [u8; S - R]) -> [u128; W]
     // w values.
 }
 
-/// Final XOR, just before table 3. Note that I'm not sure about the size of vectors V. I
-/// think it is R, but double check.
-fn final_xor(initial_vectors: Vec<[u8; R]>, w_indices: [u128; W]) -> [u8; R] {
-    let final_xor_vector = 0 << R;
-    for i in 0..W {
-        let index_vector = w_indices[i] / R as u128;
-        let shift = w_indices[i] % R as u128;
-        // now we truncate to R bits
-
-    }
-
-    initial_vectors[0]
-}
-
 /// This function servers the purpose presented in table 3, of breaking a bit array into
-/// batches of size not multiple of 8. Note that the IV will be broken allways in size 8, which
+/// batches of size not multiple of 8. Note that the IV will be broken always in size 8, which
 /// is quite convenient. Also, the only numbers we'll have to worry for are 5 and 6.
 fn dividing_bits(input_bits: &[u8], size_batches: usize) -> [u8; W] {
     if size_batches > 6 {
@@ -113,26 +99,6 @@ fn dividing_bits(input_bits: &[u8], size_batches: usize) -> [u8; W] {
     new_bits
 }
 
-/// Convert array of bits to u128
-fn convert(bits: &[u8]) -> u128 {
-    let mut result: u128 = 0;
-    bits.iter().for_each(|&bit| {
-        result <<= 1;
-        result ^= bit as u128;
-    });
-    result
-}
-
-/// Function to compute the ceiling of a / b. Note that this is not a generic function for the
-/// ceiling. It is only valid for our context, that we know that p is not divisible by 8 (only
-/// time we'll use the ceiling
-fn ceiling(a: usize, b: usize) -> usize {
-    // a/b + (a%b == 1) as u32
-    a/b + 1 as usize
-}
-
-
-
 /// Blocks of size s - r, which are padded with the r-bit IV, to obtain s bits, which are input
 /// to the compression function. This function outputs r bits, which are used to chain to the
 /// next iteration.
@@ -144,7 +110,7 @@ pub fn compress(message_block: [u8; S - R], iv_block: [u8; R]) -> [u8; OUTPUT_SI
     for i in 0..W {
         let chosen_vec = w_indices[i] / R as u128;
         let shift_value = w_indices[i] % R as u128;
-        let mut vector = define_iv(w_indices[i] as usize);
+        let mut vector = define_iv(chosen_vec as usize);
         // shift the array
         shift_array(&mut vector, shift_value);
         // truncate array
@@ -166,7 +132,7 @@ pub fn compress(message_block: [u8; S - R], iv_block: [u8; R]) -> [u8; OUTPUT_SI
     result
 }
 
-// todo: we are always assuming that the bits are compete. This might not be the case everywhere
+// todo: we are always assuming that the bits are complete. This might not be the case everywhere
 pub fn shift_array(array: &mut [u8; SIZE_VECTORS], shift_value: u128) {
     let byte_shift = shift_value / 8;
     let bit_shift = shift_value % 8;
@@ -185,4 +151,3 @@ pub fn shift_array(array: &mut [u8; SIZE_VECTORS], shift_value: u128) {
         xored_vector = bit_vector << (8 - bit_shift as u8);
     }
 }
-
