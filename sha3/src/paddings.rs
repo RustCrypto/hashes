@@ -11,7 +11,7 @@ macro_rules! impl_padding {
             #[inline(always)]
             fn pad_block(block: &mut [u8], pos: usize) -> Result<(), PadError> {
                 if pos >= block.len() {
-                    Err(PadError)?
+                    return Err(PadError);
                 }
                 block[pos] = $pad;
                 block[pos + 1..].iter_mut().for_each(|b| *b = 0);

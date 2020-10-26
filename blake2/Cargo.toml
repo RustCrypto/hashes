@@ -1,6 +1,6 @@
 [package]
 name = "blake2"
-version = "0.9.0"
+version = "0.9.1"
 description = "BLAKE2 hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
