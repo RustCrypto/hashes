@@ -49,7 +49,7 @@ pub fn define_iv(index: usize) -> [u8; SIZE_VECTORS] {
 /// $W_i = i \times (n / w) + IV_i + M_i \times 2^{r / w}.
 /// todo: verify that the output type is what is expected. Maybe we don't need such a big
 /// integer.
-fn computing_W_indices(input_vector: [u8; R], message: [u8; S - R]) -> [u128; W] {
+fn computing_W_indices(input_vector: [u8; R], message: &[u8; S - R]) -> [u128; W] {
     let mut W_indices: [u128; W] = [0; W];
     let divided_message: [u8; W] = dividing_bits(&message, (S-R)/W);
     // todo: we are clearly delcaring unnecesary variables. For the moment keep for readability.
@@ -102,11 +102,11 @@ fn dividing_bits(input_bits: &[u8], size_batches: usize) -> [u8; W] {
 /// Blocks of size s - r, which are padded with the r-bit IV, to obtain s bits, which are input
 /// to the compression function. This function outputs r bits, which are used to chain to the
 /// next iteration.
-pub fn compress(message_block: [u8; S - R], iv_block: [u8; R]) -> [u8; OUTPUT_SIZE]  {
+pub fn compress(hash: &mut [u8; R], message_block: &[u8; S - R]){
     // Start here
     let mut initial_vector = [0u8; R / 8];
 
-    let w_indices = computing_W_indices(iv_block, message_block);
+    let w_indices = computing_W_indices(hash, message_block);
     for i in 0..W {
         let chosen_vec = w_indices[i] / R as u128;
         let shift_value = w_indices[i] % R as u128;
@@ -117,12 +117,16 @@ pub fn compress(message_block: [u8; S - R], iv_block: [u8; R]) -> [u8; OUTPUT_SI
         let mut truncated = [0u8; R / 8];
         truncated.copy_from_slice(&vector[..R / 8]);
 
-        // Now we do the OR with the original vector
+        // Now we do the OR with all vectors
         initial_vector.iter_mut()
             .zip(truncated.iter())
             .for_each(|(x1, x2)| *x1 ^= *x2);
     }
 
+    hash = initial_vector
+}
+
+pub fn final_compression(initial_vector: [u8; R]) -> [u8; OUTPUT_SIZE] {
     // Now we use Whirpool
     let mut result = [0u8; OUTPUT_SIZE];
     let mut hasher = Whirlpool::new();

@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 whirlpool = "0.9"
+digest = "0.9.0"
 
 [dev-dependencies]
 rand = "0.7.3"

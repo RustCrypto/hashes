@@ -4,7 +4,6 @@ use whirlpool::{Whirlpool, Digest};
 use std::str;
 
 fn main() {
-    println!("{:?}", result);
     let mut b: u8 = 0b00001101;
     let mut c: u8 = 0b00001110;
     let mut rotated: u8 = b >> 1;
