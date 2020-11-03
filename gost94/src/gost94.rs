@@ -172,8 +172,8 @@ impl Gost94State {
 
     fn update_n(&mut self, len: usize) {
         let mut carry = 0;
-        adc(&mut self.n[0], (len << 3) as u64, &mut carry);
-        adc(&mut self.n[1], (len >> 61) as u64, &mut carry);
+        adc(&mut self.n[0], (len as u64) << 3, &mut carry);
+        adc(&mut self.n[1], (len as u64) >> 61, &mut carry);
         adc(&mut self.n[2], 0, &mut carry);
         adc(&mut self.n[3], 0, &mut carry);
     }
