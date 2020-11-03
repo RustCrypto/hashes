@@ -1,6 +1,6 @@
 [package]
 name = "sha-1"
-version = "0.9.1"
+version = "0.9.2"
 description = "SHA-1 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -35,6 +35,8 @@ hex-literal = "0.2"
 default = ["std"]
 std = ["digest/std"]
 asm = ["sha1-asm", "libc"]
+# Force software implementation
+force-soft = []
 
 # DEPRECATED: use `asm` instead
 asm-aarch64 = ["asm"]

@@ -139,7 +139,10 @@ digest::impl_write!(Sha224);
 digest::impl_write!(Sha256);
 
 cfg_if::cfg_if! {
-    if #[cfg(all(feature = "asm", target_arch = "aarch64", target_os = "linux"))] {
+    if #[cfg(feature = "force-soft")] {
+        mod soft;
+        use soft::compress;
+    } else if #[cfg(all(feature = "asm", target_arch = "aarch64", target_os = "linux"))] {
         mod soft;
         mod aarch64;
         use aarch64::compress;
