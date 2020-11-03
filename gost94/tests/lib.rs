@@ -67,3 +67,12 @@ fn gost_engine_tests() {
         hex!("e5d3ac4ea3f67896c51ff919cedb9405ad771e39f0f2eab103624f9a758e506f"),
     );
 }
+
+#[test]
+fn arithmetic_overflow_regression() {
+    use digest::Digest;
+
+    let mut h = gost94::Gost94Test::default();
+    h.update(&include_bytes!("data/arithmetic_overflow.bin")[..]);
+    h.finalize().as_slice();
+}
