@@ -228,7 +228,10 @@ digest::impl_write!(Sha512Trunc224);
 digest::impl_write!(Sha512Trunc256);
 
 cfg_if::cfg_if! {
-    if #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))] {
+    if #[cfg(feature = "force-soft")] {
+        mod soft;
+        use soft::compress;
+    } else if #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))] {
         // TODO: replace after sha2-asm rework
         fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
             for block in blocks {
