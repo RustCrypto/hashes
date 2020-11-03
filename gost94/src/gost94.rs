@@ -163,42 +163,19 @@ impl Gost94State {
     }
 
     fn update_sigma(&mut self, m: &Block) {
-        let mut buf = [0u64; 4];
-        for (o, chunk) in buf.iter_mut().zip(m.chunks_exact(8)) {
-            *o = u64::from_le_bytes(chunk.try_into().unwrap());
-        }
-        let mut over = (0u64, false);
-        for (a, b) in self.sigma.iter_mut().zip(buf.iter()) {
-            if over.1 {
-                over = a.overflowing_add(*b);
-                let temp_overflow = over.0.overflowing_add(1);
-                *a = temp_overflow.0;
-                over.1 |= temp_overflow.1;
-            } else {
-                over = a.overflowing_add(*b);
-                *a = over.0;
-            }
+        let mut carry = 0;
+        for (a, chunk) in self.sigma.iter_mut().zip(m.chunks_exact(8)) {
+            let b = u64::from_le_bytes(chunk.try_into().unwrap());
+            adc(a, b, &mut carry);
         }
     }
 
     fn update_n(&mut self, len: usize) {
-        let (res, over) = self.n[0].overflowing_add((len as u64) << 3);
-        self.n[0] = res;
-        if over {
-            let (res, over) = self.n[1].overflowing_add(1 + ((len as u64) >> 61));
-            self.n[1] = res;
-            if over {
-                let (res, over) = self.n[2].overflowing_add(1);
-                self.n[2] = res;
-                if over {
-                    let (res, over) = self.n[3].overflowing_add(1);
-                    self.n[3] = res;
-                    if over {
-                        panic!("Message longer than 2^256-1")
-                    }
-                }
-            }
-        }
+        let mut carry = 0;
+        adc(&mut self.n[0], (len << 3) as u64, &mut carry);
+        adc(&mut self.n[1], (len >> 61) as u64, &mut carry);
+        adc(&mut self.n[2], 0, &mut carry);
+        adc(&mut self.n[3], 0, &mut carry);
     }
 
     fn process_block(&mut self, block: &GenericArray<u8, U32>) {
@@ -279,6 +256,13 @@ impl Reset for Gost94 {
         self.state.h = self.h0;
         self.state.sigma = Default::default();
     }
+}
+
+#[inline(always)]
+fn adc(a: &mut u64, b: u64, carry: &mut u64) {
+    let ret = (*a as u128) + (b as u128) + (*carry as u128);
+    *a = ret as u64;
+    *carry = (ret >> 64) as u64;
 }
 
 opaque_debug::implement!(Gost94);
