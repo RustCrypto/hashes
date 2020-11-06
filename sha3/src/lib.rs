@@ -11,11 +11,12 @@
 //! * `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512` (NIST submission
 //!    without padding changes)
 //!
-//! # Usage
+//! # Examples
 //!
-//! An example of using `SHA3-256` is:
+//! Output size of `SHA3-256` is fixed output, so its functionality is usually
+//! accessed via the `Digest` trait:
 //!
-//! ```rust
+//! ```
 //! use hex_literal::hex;
 //! use sha3::{Digest, Sha3_256};
 //!
@@ -31,6 +32,23 @@
 //! assert_eq!(result[..], hex!("
 //!     3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532
 //! ")[..]);
+//! ```
+//!
+//! `SHAKE` functions have an extendable output, so finalization method returns
+//! XOF reader from which results of arbitrary length can be read. Note that
+//! these functions do not implement `Digest`, so lower-level traits have to
+//! be imported:
+//!
+//! ```
+//! use sha3::{Shake128, digest::{Update, ExtendableOutput, XofReader}};
+//!
+//! let mut hasher = Shake128::default();
+//! hasher.update(b"abc");
+//! let mut reader = hasher.finalize_xof();
+//! let mut res1 = [0u8; 32];
+//! reader.read(&mut res2);
+//! // with enabled `std` feature the output can be read into `Box<[u8]>`
+//! let res2 = reader.read_boxed(42);
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
