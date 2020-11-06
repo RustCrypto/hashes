@@ -13,7 +13,7 @@
 //!
 //! # Examples
 //!
-//! Output size of `SHA3-256` is fixed output, so its functionality is usually
+//! Output size of SHA3-256 is fixed, so its functionality is usually
 //! accessed via the `Digest` trait:
 //!
 //! ```
@@ -34,7 +34,7 @@
 //! ")[..]);
 //! ```
 //!
-//! `SHAKE` functions have an extendable output, so finalization method returns
+//! SHAKE functions have an extendable output, so finalization method returns
 //! XOF reader from which results of arbitrary length can be read. Note that
 //! these functions do not implement `Digest`, so lower-level traits have to
 //! be imported:
