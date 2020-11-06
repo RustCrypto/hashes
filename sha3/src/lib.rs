@@ -49,9 +49,6 @@
 //! let mut res1 = [0u8; 10];
 //! reader.read(&mut res1);
 //! assert_eq!(res1, hex!("5881092dd818bf5cf8a3"));
-//! // with enabled `std` feature the output can be read into `Box<[u8]>`
-//! let res2 = reader.read_boxed(7);
-//! assert_eq!(res2[..], hex!("ddb793fbcba740"));
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
