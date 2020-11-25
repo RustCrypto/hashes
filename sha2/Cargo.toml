@@ -35,6 +35,6 @@ hex-literal = "0.2"
 default = ["std"]
 std = ["digest/std"]
 asm = ["sha2-asm", "libc"]
-compress = []   # Expose compress function
+compress = [] # Expose compress function
 force-soft = [] # Force software implementation
 asm-aarch64 = ["asm"] # DEPRECATED: use `asm` instead
