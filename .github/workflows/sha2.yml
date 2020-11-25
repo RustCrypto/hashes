@@ -115,3 +115,27 @@ jobs:
           override: true
       - uses: msys2/setup-msys2@v2
       - run: cargo test --target ${{ matrix.target }} --release
+
+  # Cross-compiled tests
+  cross:
+    strategy:
+      matrix:
+        include:
+          # ARM64
+          #- target: aarch64-unknown-linux-gnu
+          #  rust: 1.41.0 # MSRV
+          - target: aarch64-unknown-linux-gnu
+            rust: stable
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
+          override: true
+      - run: cargo install cross
+      - run: cross test --target ${{ matrix.target }} --release
+      - run: cross test --target ${{ matrix.target }} --release --features asm
