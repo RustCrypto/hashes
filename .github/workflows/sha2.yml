@@ -91,3 +91,27 @@ jobs:
       - run: cargo test --release --no-default-features
       - run: cargo test --release
       - run: cargo test --release --features asm
+
+  # Windows tests
+  windows:
+    strategy:
+      matrix:
+        include:
+          # 64-bit Windows (GNU)
+          # TODO(tarcieri): try re-enabling this when we bump MSRV
+          #- target: x86_64-pc-windows-gnu
+          #  toolchain: 1.41.0 # MSRV
+          - target: x86_64-pc-windows-gnu
+            toolchain: stable
+
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.target }}
+          override: true
+      - uses: msys2/setup-msys2@v2
+      - run: cargo test --target ${{ matrix.target }} --release
