@@ -14,7 +14,7 @@ pub const H0: [u32; DIGEST_BUF_LEN] = [
     0xc3d2_e1f0,
     0x7654_3210,
     0xfedc_ba98,
-    0x89a_bcdef,
+    0x89ab_cdef,
     0x0123_4567,
     0x3c2d_1e0f,
 ];
