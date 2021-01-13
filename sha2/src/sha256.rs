@@ -147,7 +147,6 @@ cfg_if::cfg_if! {
         mod aarch64;
         use aarch64::compress;
     } else if #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))] {
-        // TODO: replace after sha2-asm rework
         fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
             for block in blocks {
                 sha2_asm::compress256(state, block);
