@@ -1,4 +1,4 @@
-# RustCrypto: hashes [![Project Chat][chat-image]][chat-link]
+# RustCrypto: hashes [![Project Chat][chat-image]][chat-link] [![dependency status](https://deps.rs/repo/github/RustCrypto/hashes/status.svg)](https://deps.rs/repo/github/RustCrypto/hashes)
 
 Collection of [cryptographic hash functions][1] written in pure Rust.
 
