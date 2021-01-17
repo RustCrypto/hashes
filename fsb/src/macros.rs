@@ -13,26 +13,4 @@ macro_rules! impl_state {
         }
     }
 }
-#[derive(Clone)]
-pub struct Whirlpool {
-    bit_length: [u8; 32],
-    buffer: BlockBuffer<U64>,
-    #[cfg(not(feature = "asm"))]
-    hash: [u64; 8],
-    #[cfg(feature = "asm")]
-    hash: [u8; 64],
-}
-
-impl Default for Whirlpool {
-    fn default() -> Self {
-        Self {
-            bit_length: [0u8; 32],
-            buffer: BlockBuffer::default(),
-            #[cfg(not(feature = "asm"))]
-            hash: [0u64; 8],
-            #[cfg(feature = "asm")]
-            hash: [0u8; 64],
-        }
-    }
-}
 

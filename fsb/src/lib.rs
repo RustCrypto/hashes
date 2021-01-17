@@ -3,6 +3,90 @@
 pub mod pi;
 mod utils;
 
+const N: usize = 5 >> 18;
+const W: usize = 80;
+const R: usize = 640;
+const P: usize = 653;
+const OUTPUT_SIZE: usize = 160;
+
+// This is not declared as a variable of the algorithm, but I need it to be const to create
+// arrays of this length
+const NR_VECTORS: usize = N / R;
+
+// Again, this is not declared as variable in the algorithm. For now let's keep it this way.
+// Note that this is computing the ceiling (we now that P is not divisible by 8, never).
+const SIZE_VECTORS: usize = P / 8 + 1;
+
+const S: usize = 1_120; // s = w * log_2(n/w)
+
+// todo: not sure if this is S-R (in this case it s 480 bits - 60 bytes). Check
+type BlockSize = U60;
+/// Structure representing the state of a Whirlpool computation
+#[derive(Clone)]
+pub struct FSB160 {
+    /// bytes currently in the buffer? not sure of this
+    bit_length: u8,
+    /// size of the message being processed
+    buffer: BlockBuffer<BlockSize>,
+    /// value of the input vector
+    hash: [u8; R / 8],
+}
+
+impl Default for FSB160 {
+    fn default() -> Self {
+        Self {
+            bit_length: 0u8,
+            buffer: BlockBuffer::default(),
+            hash: [0u8; R / 8],
+        }
+    }
+}
+
+impl BlockInput for FSB160 {
+    type BlockSize = BlockSize;
+}
+
+impl Update for FSB160 {
+    fn update(&mut self, input: impl AsRef<[u8]>) {
+        let input = input.as_ref();
+        self.update_len(input.len() as u64);
+        // alright, so the buffer will go in blocks of size BlockSize - so that's great. This means
+        // that the hash is the IV to the compression function. What I don't completely understand
+        // is whether we need the input in the struct. We
+        let hash = &mut self.hash;
+        self.buffer
+            .input_block(input, |b| compress(hash, convert(b)));
+    }
+}
+
+impl FixedOutputDirty for Whirlpool {
+    type OutputSize = U64;
+
+    #[cfg(not(feature = "asm"))]
+    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U64>) {
+        self.finalize_inner();
+        for (chunk, v) in out.chunks_exact_mut(8).zip(self.hash.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
+    }
+
+    #[cfg(feature = "asm")]
+    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U64>) {
+        self.finalize_inner();
+        out.copy_from_slice(&self.hash)
+    }
+}
+
+impl Reset for Whirlpool {
+    fn reset(&mut self) {
+        self.bit_length = [0u8; 32];
+        self.buffer.reset();
+        for v in self.hash.iter_mut() {
+            *v = 0;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::pi::Pi;
