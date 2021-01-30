@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.9.3 (2021-01-30)
 ### Changed
-- Use the SHA extension backend with enabled `asm` feature. ([#223])
+- Use the SHA extension backend with enabled `asm` feature. ([#224])
 
-[#223]: https://github.com/RustCrypto/hashes/pull/223
+[#224]: https://github.com/RustCrypto/hashes/pull/224
 
 ## 0.9.2 (2020-11-04)
 ### Added
