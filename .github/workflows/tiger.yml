@@ -57,4 +57,3 @@ jobs:
       - run: cargo check
       - run: cargo test --no-default-features
       - run: cargo test
-      - run: cargo test --features asm
