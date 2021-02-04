@@ -1,0 +1,25 @@
+[package]
+name = "tiger"
+version = "0.1.2"
+description = "Tiger hash function"
+authors = ["Ulrik Mikaelsson <ulrik.mikaelsson@gmail.com>", "RustCrypto Developers"]
+license = "Apache-2.0"
+readme = "README.md"
+edition = "2018"
+documentation = "https://docs.rs/tiger"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "hash", "tiger", "digest"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+digest = "0.9"
+block-buffer = { version = "0.9", features = ["block-padding"] }
+byteorder = "1.4.2"
+
+[dev-dependencies]
+digest = { version = "0.9", features = ["dev"] }
+hex-literal = "0.2"
+
+[features]
+default = ["std"]
+std = ["digest/std"]
