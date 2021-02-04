@@ -5,11 +5,11 @@
 
 pub use digest;
 
-use byteorder::{ByteOrder, LE };
 use block_buffer::{
     generic_array::typenum::consts::U64 as BB_U64, generic_array::GenericArray as BB_GenericArray,
     BlockBuffer,
 };
+use byteorder::{ByteOrder, LE};
 use digest::generic_array::typenum::{U24, U64};
 use digest::generic_array::GenericArray;
 
@@ -77,7 +77,8 @@ impl Tiger {
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes += input.len() as u64;
         let self_state = &mut self.state;
-        self.buffer.input_block(input, |d| Self::compress(self_state, d));
+        self.buffer
+            .input_block(input, |d| Self::compress(self_state, d));
     }
 
     #[inline]
