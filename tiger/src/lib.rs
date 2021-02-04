@@ -79,8 +79,7 @@ impl Tiger {
         self.state
     }
 
-    pub fn consume(&mut self, input: &[u8]) {
-        println!("tiger: consume: {:?}", input);
+    fn consume(&mut self, input: &[u8]) {
         // Unlike Sha1 and Sha2, the length value in Tiger is defined as
         // the length of the message mod 2^64 - ie: integer overflow is OK.
         self.length_bytes += input.len() as u64;
