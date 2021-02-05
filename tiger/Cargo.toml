@@ -1,6 +1,6 @@
 [package]
 name = "tiger"
-version = "0.0.0"
+version = "0.1.0"
 description = "Tiger hash function"
 authors = ["Ulrik Mikaelsson <ulrik.mikaelsson@gmail.com>", "RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
