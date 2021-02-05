@@ -306,7 +306,7 @@ checksum = "502d53007c02d7605a05df1c1a73ee436952781653da5d0bf57ad608f66932c1"
 
 [[package]]
 name = "tiger"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "block-buffer",
  "byteorder",
