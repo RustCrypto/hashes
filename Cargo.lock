@@ -260,9 +260,9 @@ dependencies = [
 
 [[package]]
 name = "sha2-asm"
-version = "0.5.5"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7c2f225be6502f2134e6bbb35bb5e2957e41ffa0495ed08bce2e2b4ca885da4"
+checksum = "fee305b109498bc7fb1c7dd809ad95a9fcd1861dfd13e2197ea81cdd2be4490e"
 dependencies = [
  "cc",
 ]
