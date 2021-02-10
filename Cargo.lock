@@ -237,9 +237,9 @@ dependencies = [
 
 [[package]]
 name = "sha1-asm"
-version = "0.4.4"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9dae2289dd5f5dc67fb0f341a5676c5c197415c51ce7345ae1bd0d36a6cbbfc"
+checksum = "f5f1b2260fd0a1567fec804f1f746847f03b8360be62d2e95f096f3c37f997dc"
 dependencies = [
  "cc",
 ]
