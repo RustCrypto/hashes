@@ -1,4 +1,4 @@
-# RustCrypto: hashes [![Project Chat][chat-image]][chat-link] [![dependency status][deps-image]][deps]
+# RustCrypto: hashes [![Project Chat][chat-image]][chat-link] [![dependency status][deps-image]][deps-link]
 
 Collection of [cryptographic hash functions][1] written in pure Rust.
 
@@ -199,7 +199,7 @@ dual licensed as above, without any additional terms or conditions.
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
 [deps-image]: https://deps.rs/repo/github/RustCrypto/hashes/status.svg
-[deps]: https://deps.rs/repo/github/RustCrypto/hashes
+[deps-link]: https://deps.rs/repo/github/RustCrypto/hashes
 
 [//]: # (footnotes)
 
