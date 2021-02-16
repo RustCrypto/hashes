@@ -24,6 +24,7 @@
 //! [2]: https://github.com/RustCrypto/hashes
 
 #![no_std]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
@@ -37,6 +38,9 @@ extern crate std;
 mod compress;
 mod consts;
 
+#[cfg(feature = "compress")]
+pub use crate::compress::compress;
+#[cfg(not(feature = "compress"))]
 use crate::compress::compress;
 use crate::consts::{H, STATE_LEN};
 use block_buffer::BlockBuffer;
