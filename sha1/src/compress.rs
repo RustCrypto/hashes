@@ -28,6 +28,7 @@ cfg_if::cfg_if! {
     }
 }
 
+/// SHA-1 compression function
 pub fn compress(state: &mut [u32; 5], blocks: &[GenericArray<u8, U64>]) {
     // SAFETY: GenericArray<u8, U64> and [u8; 64] have
     // exactly the same memory layout

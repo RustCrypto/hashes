@@ -37,6 +37,9 @@ extern crate std;
 mod compress;
 mod consts;
 
+#[cfg(feature = "compress")]
+pub use crate::compress::compress;
+#[cfg(not(feature = "compress"))]
 use crate::compress::compress;
 use crate::consts::{H, STATE_LEN};
 use block_buffer::BlockBuffer;
