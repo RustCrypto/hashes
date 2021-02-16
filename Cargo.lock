@@ -5,9 +5,8 @@ name = "blake2"
 version = "0.9.1"
 dependencies = [
  "crypto-mac",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
 ]
 
 [[package]]
@@ -20,10 +19,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "block-buffer"
-version = "0.9.0"
+name = "blobby"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4152116fd6e9dadb291ae18fc1ec3575ed6d84c29642d97890f4b4a3417297e4"
+checksum = "fc52553543ecb104069b0ff9e0fcc5c739ad16202935528a112d974e8f1a4ee8"
+
+[[package]]
+name = "block-buffer"
+version = "0.10.0-pre.2"
+source = "git+https://github.com/RustCrypto/utils?branch=lazy#5730141d1970a047242cfb1e5b65d06db1486d90"
 dependencies = [
  "block-padding",
  "generic-array",
@@ -31,9 +35,11 @@ dependencies = [
 
 [[package]]
 name = "block-padding"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c98bfd7c112b6399fef97cc0614af1cd375b27a112e552ce60f94c1b5f13cb74"
+version = "0.3.0-pre"
+source = "git+https://github.com/RustCrypto/utils?branch=lazy#5730141d1970a047242cfb1e5b65d06db1486d90"
+dependencies = [
+ "generic-array",
+]
 
 [[package]]
 name = "byteorder"
@@ -60,12 +66,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8aebca1129a03dc6dc2b127edd729435bbc4a37e1d5f4d7513165089ceb02634"
 
 [[package]]
-name = "crypto-mac"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b584a330336237c1eecd3e94266efb216c56ed91225d634cb2991c5f3fd1aeab"
+name = "crypto-common"
+version = "0.1.0"
+source = "git+https://github.com/RustCrypto/traits?branch=common#cacb281b9a5fcf64b925802e0dbdcd50b595fc06"
 dependencies = [
- "blobby",
+ "block-buffer",
+ "generic-array",
+]
+
+[[package]]
+name = "crypto-mac"
+version = "0.11.0-pre"
+source = "git+https://github.com/RustCrypto/traits?branch=common#cacb281b9a5fcf64b925802e0dbdcd50b595fc06"
+dependencies = [
+ "blobby 0.3.0",
+ "crypto-common",
  "generic-array",
  "subtle",
 ]
@@ -76,7 +91,17 @@ version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3dd60d1080a57a05ab032377049e0591415d2b31afd7028356dbf3cc6dcb066"
 dependencies = [
- "blobby",
+ "blobby 0.1.2",
+ "generic-array",
+]
+
+[[package]]
+name = "digest"
+version = "0.10.0-pre.3"
+source = "git+https://github.com/RustCrypto/traits?branch=common#cacb281b9a5fcf64b925802e0dbdcd50b595fc06"
+dependencies = [
+ "blobby 0.3.0",
+ "crypto-common",
  "generic-array",
 ]
 
@@ -94,20 +119,16 @@ dependencies = [
 name = "gost94"
 version = "0.9.1"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
 ]
 
 [[package]]
 name = "groestl"
 version = "0.9.0"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
 ]
 
 [[package]]
@@ -133,7 +154,7 @@ dependencies = [
 name = "k12"
 version = "0.1.0"
 dependencies = [
- "digest",
+ "digest 0.9.0",
  "hex-literal",
 ]
 
@@ -153,47 +174,35 @@ checksum = "b7282d924be3275cec7f6756ff4121987bc6481325397dde6ba3e7802b1a8b1c"
 name = "md-5"
 version = "0.9.1"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
  "md5-asm",
- "opaque-debug",
 ]
 
 [[package]]
 name = "md2"
 version = "0.9.0"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
 ]
 
 [[package]]
 name = "md4"
 version = "0.9.0"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
 ]
 
 [[package]]
 name = "md5-asm"
-version = "0.4.3"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b47e5a1261ecd6ba951d1ad392534743310e513ef1e2609023368798829f33e"
+checksum = "73b9a6f25ec11ea27e22d7fc8beafda909da44ece95f63e94f1eeb23d19bb5c7"
 dependencies = [
  "cc",
 ]
-
-[[package]]
-name = "opaque-debug"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
 name = "proc-macro-hack"
@@ -202,67 +211,51 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99c605b9a0adc77b7211c6b1f722dcb613d68d66859a44f3d485a6da332b0598"
 
 [[package]]
-name = "ripemd160"
-version = "0.9.1"
+name = "ripemd"
+version = "0.10.0"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
-]
-
-[[package]]
-name = "ripemd320"
-version = "0.9.0"
-dependencies = [
- "block-buffer",
- "digest",
- "hex-literal",
- "opaque-debug",
 ]
 
 [[package]]
 name = "sha-1"
 version = "0.9.4"
 dependencies = [
- "block-buffer",
  "cfg-if",
  "cpuid-bool",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
  "libc",
- "opaque-debug",
  "sha1-asm",
 ]
 
 [[package]]
 name = "sha1-asm"
-version = "0.4.4"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9dae2289dd5f5dc67fb0f341a5676c5c197415c51ce7345ae1bd0d36a6cbbfc"
+checksum = "f5f1b2260fd0a1567fec804f1f746847f03b8360be62d2e95f096f3c37f997dc"
 dependencies = [
  "cc",
 ]
 
 [[package]]
 name = "sha2"
-version = "0.9.3"
+version = "0.9.2"
 dependencies = [
- "block-buffer",
  "cfg-if",
  "cpuid-bool",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
  "libc",
- "opaque-debug",
  "sha2-asm",
 ]
 
 [[package]]
 name = "sha2-asm"
-version = "0.5.5"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7c2f225be6502f2134e6bbb35bb5e2957e41ffa0495ed08bce2e2b4ca885da4"
+checksum = "fee305b109498bc7fb1c7dd809ad95a9fcd1861dfd13e2197ea81cdd2be4490e"
 dependencies = [
  "cc",
 ]
@@ -271,46 +264,38 @@ dependencies = [
 name = "sha3"
 version = "0.9.1"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
  "keccak",
- "opaque-debug",
 ]
 
 [[package]]
 name = "shabal"
 version = "0.3.0"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
 ]
 
 [[package]]
 name = "streebog"
 version = "0.9.2"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
 ]
 
 [[package]]
 name = "subtle"
-version = "2.2.3"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "502d53007c02d7605a05df1c1a73ee436952781653da5d0bf57ad608f66932c1"
+checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "tiger"
 version = "0.1.0"
 dependencies = [
- "block-buffer",
- "byteorder",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
 ]
 
@@ -330,18 +315,16 @@ checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
 name = "whirlpool"
 version = "0.9.0"
 dependencies = [
- "block-buffer",
- "digest",
+ "digest 0.10.0-pre.3",
  "hex-literal",
- "opaque-debug",
  "whirlpool-asm",
 ]
 
 [[package]]
 name = "whirlpool-asm"
-version = "0.5.2"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbb23be8b0dec6fafef14563c42ec98bbfc33f2a97ed5bc99cd8b50ea5c68097"
+checksum = "4b0930846e800a97c78fd09a494b25d1f0780be9face03b7a05151e3104a8284"
 dependencies = [
  "cc",
 ]

@@ -1,22 +1,21 @@
 //! An implementation of the [GOST R 34.11-94][1] cryptographic hash algorithm.
 //!
 //! # Usage
-//!
 //! ```rust
-//! use gost94::{Gost94Test, Digest};
+//! use gost94::{Gost94CryptoPro, Digest};
 //! use hex_literal::hex;
 //!
-//! // create a Gost94 hasher instance with test S-box
-//! let mut hasher = Gost94Test::new();
+//! // create Gost94 hasher instance with CryptoPro params
+//! let mut hasher = Gost94CryptoPro::new();
 //!
 //! // process input message
-//! hasher.update(b"hello world");
+//! hasher.update("The quick brown fox jumps over the lazy dog");
 //!
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 32]
 //! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("
-//!     1bb6ce69d2e895a78489c87a0712a2f40258d1fae3a4666c23f8f487bef0e22a
+//!     9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76
 //! "));
 //! ```
 //!
@@ -35,17 +34,19 @@
 #[cfg(feature = "std")]
 extern crate std;
 
-#[macro_use]
-mod macros;
+use digest::core_api::CoreWrapper;
 
-mod cryptopro;
-mod gost94;
-mod s2015;
-mod test_param;
+mod gost94_core;
+/// GOST94 parameters.
+pub mod params;
 
 pub use digest::{self, Digest};
 
-pub use crate::cryptopro::Gost94CryptoPro;
-pub use crate::gost94::Gost94;
-pub use crate::s2015::Gost94s2015;
-pub use crate::test_param::Gost94Test;
+pub use gost94_core::Gost94Core;
+
+/// GOST94 hash function with CryptoPro parameters.
+pub type Gost94CryptoPro = CoreWrapper<Gost94Core<params::CryptoProParam>>;
+/// GOST94 hash function with S-box defined in GOST R 34.12-2015.
+pub type Gost94s2015 = CoreWrapper<Gost94Core<params::S2015Param>>;
+/// GOST94 hash function with test parameters.
+pub type Gost94Test = CoreWrapper<Gost94Core<params::TestParam>>;

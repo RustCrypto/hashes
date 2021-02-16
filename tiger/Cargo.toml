@@ -2,7 +2,7 @@
 name = "tiger"
 version = "0.1.0"
 description = "Tiger hash function"
-authors = ["Ulrik Mikaelsson <ulrik.mikaelsson@gmail.com>", "RustCrypto Developers"]
+authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 edition = "2018"
@@ -12,12 +12,10 @@ keywords = ["crypto", "hash", "tiger", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.9"
-block-buffer = { version = "0.9", features = ["block-padding"] }
-byteorder = { version = "1", default-features = false }
+digest = { version = "0.10.0-pre.3", features = ["core-api", "block-padding"] }
 
 [dev-dependencies]
-digest = { version = "0.9", features = ["dev"] }
+digest = { version = "0.10.0-pre.3", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]

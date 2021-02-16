@@ -2,34 +2,29 @@
 //! in GOST R 34.11-2012.
 //!
 //! # Usage
-//! Hasher functionality is expressed via traits defined in the [`digest`]
-//! crate.
-//!
 //! ```rust
 //! use streebog::{Digest, Streebog256, Streebog512};
 //! use hex_literal::hex;
 //!
-//! // create a hasher object, to use it do not forget to import `Digest` trait
+//! // create Streebog256 hasher state
 //! let mut hasher = Streebog256::new();
 //! // write input message
-//! hasher.update(b"my");
-//! hasher.update(b" ");
-//! hasher.update(b"message");
+//! hasher.update("The quick brown fox jumps over the lazy dog");
 //! // read hash digest (it will consume hasher)
 //! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
-//!     a47752ba9491bd1d52dd5dcea6d8c08e9b1ee70c42a2fc3e0d1a2852468c1329
+//!     3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4
 //! ")[..]);
 //!
 //! // same for Streebog512
 //! let mut hasher = Streebog512::new();
-//! hasher.update(b"my message");
+//! hasher.update("The quick brown fox jumps over the lazy dog.");
 //! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
-//!     c40cc26c37a683c74459820d884b766d9c96697a8d168c0272db8f4ecca2935b
-//!     4164ede98fc9c8d2bafb1249b238676c81f5b97f98c393b99fdf2dc961391484
+//!     fe0c42f267d921f940faa72bd9fcf84f9f1bd7e9d055e9816e4c2ace1ec83be8
+//!     2d2957cd59b86e123d8f5adee80b3ca08a017599a9fc1a14d940cf87c77df070
 //! ")[..]);
 //! ```
 //!
@@ -43,7 +38,6 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
 )]
-#![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 #[cfg(feature = "std")]
@@ -51,22 +45,10 @@ extern crate std;
 
 mod consts;
 mod streebog;
+mod streebog256;
+mod streebog512;
 mod table;
 
-use digest::consts::{U32, U64};
 pub use digest::{self, Digest};
-
-#[cfg(feature = "std")]
-use digest::Update;
-
-/// Streebog-256 cryptographic hash function
-pub type Streebog256 = streebog::Streebog<U32>;
-
-/// Streebog-512 cryptographic hash function
-pub type Streebog512 = streebog::Streebog<U64>;
-
-opaque_debug::implement!(Streebog512);
-opaque_debug::implement!(Streebog256);
-
-digest::impl_write!(Streebog512);
-digest::impl_write!(Streebog256);
+pub use streebog256::{Streebog256, Streebog256Core};
+pub use streebog512::{Streebog512, Streebog512Core};

@@ -7,8 +7,7 @@ members = [
     "md2",
     "md4",
     "md5",
-    "ripemd160",
-    "ripemd320",
+    "ripemd",
     "sha1",
     "sha2",
     "sha3",
@@ -20,3 +19,8 @@ members = [
 
 [profile.dev]
 opt-level = 2
+
+[patch.crates-io]
+digest = { git = "https://github.com/RustCrypto/traits", branch = "common" }
+crypto-mac = { git = "https://github.com/RustCrypto/traits", branch = "common" }
+block-buffer = { git = "https://github.com/RustCrypto/utils", branch = "lazy" }

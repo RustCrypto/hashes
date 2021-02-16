@@ -5,11 +5,11 @@
 //! `Blake2b` can be used in the following way:
 //!
 //! ```rust
-//! use blake2::{Blake2b, Blake2s, Digest};
+//! use blake2::{Blake2b512, Blake2s256, Digest};
 //! use hex_literal::hex;
 //!
-//! // create a Blake2b object
-//! let mut hasher = Blake2b::new();
+//! // create a Blake2b512 object
+//! let mut hasher = Blake2b512::new();
 //!
 //! // write input message
 //! hasher.update(b"hello world");
@@ -21,8 +21,8 @@
 //!     c05a037cddbed06e309bf334942c4e58cdf1a46e237911ccd7fcf9787cbc7fd0
 //! ")[..]);
 //!
-//! // same example for `Blake2s`:
-//! let mut hasher = Blake2s::new();
+//! // same example for Blake2s256:
+//! let mut hasher = Blake2s256::new();
 //! hasher.update(b"hello world");
 //! let res = hasher.finalize();
 //! assert_eq!(res[..], hex!("
@@ -39,13 +39,14 @@
 //! trait has to be imported as well.
 //!
 //! ```rust
-//! use blake2::VarBlake2b;
+//! use blake2::Blake2bVar;
 //! use blake2::digest::{Update, VariableOutput};
+//! use hex_literal::hex;
 //!
-//! let mut hasher = VarBlake2b::new(10).unwrap();
+//! let mut hasher = Blake2bVar::new(10).unwrap();
 //! hasher.update(b"my_input");
 //! hasher.finalize_variable(|res| {
-//!     assert_eq!(res, [44, 197, 92, 132, 228, 22, 146, 78, 100, 0])
+//!     assert_eq!(res, hex!("2cc55c84e416924e6400"))
 //! })
 //! ```
 //!
@@ -53,7 +54,7 @@
 //!
 //! BLAKE2 can be used as a MAC without any additional constructs:
 //!
-//! ```rust
+//! ```rust,ignore
 //! use blake2::Blake2b;
 //! use blake2::crypto_mac::{Mac, NewMac};
 //!
@@ -93,19 +94,86 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+pub use crypto_mac;
+pub use digest::{self, Digest};
+
+use core::{convert::TryInto, ops::Div};
+// use crypto_mac::{InvalidKeyLength, Mac, NewMac, FromKey};
+use core::fmt;
+use digest::{
+    block_buffer::LazyBlockBuffer,
+    core_api::{
+        AlgorithmName, CoreWrapper, CtVariableCoreWrapper, RtVariableCoreWrapper, UpdateCore,
+        VariableOutputCore,
+    },
+    generic_array::{
+        typenum::{Unsigned, U128, U32, U4, U64},
+        GenericArray,
+    },
+    InvalidOutputSize,
+};
+
 mod as_bytes;
 mod consts;
 
 mod simd;
 
 #[macro_use]
-mod blake2;
+mod macros;
 
-mod blake2b;
-mod blake2s;
+// mod blake2b;
+// mod blake2s;
 
-pub use crypto_mac;
-pub use digest::{self, Digest};
+use as_bytes::AsBytes;
+use consts::{BLAKE2B_IV, BLAKE2S_IV};
+use simd::{u32x4, u64x4, Vector4};
 
-pub use crate::blake2b::{Blake2b, VarBlake2b};
-pub use crate::blake2s::{Blake2s, VarBlake2s};
+blake2_impl!(
+    Blake2bVarCore,
+    "Blake2b",
+    u64,
+    u64x4,
+    U64,
+    U128,
+    32,
+    24,
+    16,
+    63,
+    BLAKE2B_IV,
+    "Blake2b instance with a variable output.",
+    "Blake2b instance with a fixed output.",
+);
+
+/// BLAKE2b which allows to choose output size at runtime.
+pub type Blake2bVar = RtVariableCoreWrapper<Blake2bVarCore>;
+/// Core hasher state of BLAKE2b generic over output size.
+pub type Blake2bCore<OutSize> = CtVariableCoreWrapper<Blake2bVarCore, OutSize>;
+/// BLAKE2b generic over output size.
+pub type Blake2b<OutSize> = CoreWrapper<Blake2bCore<OutSize>>;
+/// BLAKE2b-512 hasher state.
+pub type Blake2b512 = Blake2b<U64>;
+
+blake2_impl!(
+    Blake2sVarCore,
+    "Blake2s",
+    u32,
+    u32x4,
+    U32,
+    U64,
+    16,
+    12,
+    8,
+    7,
+    BLAKE2S_IV,
+    "Blake2s instance with a variable output.",
+    "Blake2s instance with a fixed output.",
+);
+
+/// BLAKE2s which allows to choose output size at runtime.
+pub type Blake2sVar = RtVariableCoreWrapper<Blake2sVarCore>;
+/// Core hasher state of BLAKE2s generic over output size.
+pub type Blake2sCore<OutSize> = CtVariableCoreWrapper<Blake2sVarCore, OutSize>;
+/// BLAKE2s generic over output size.
+pub type Blake2s<OutSize> = CoreWrapper<Blake2sCore<OutSize>>;
+/// BLAKE2s-256 hasher state.
+pub type Blake2s256 = Blake2s<U32>;

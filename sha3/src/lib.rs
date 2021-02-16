@@ -64,100 +64,117 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[cfg(feature = "std")]
-extern crate std;
-
 pub use digest::{self, Digest};
 
-use block_buffer::BlockBuffer;
-use digest::consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72};
-use digest::generic_array::typenum::Unsigned;
-use digest::{BlockInput, ExtendableOutputDirty, FixedOutputDirty, Reset, Update};
+use core::fmt;
+use digest::{
+    block_buffer::BlockBuffer,
+    consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72},
+    core_api::{
+        AlgorithmName, CoreWrapper, ExtendableOutputCore, FixedOutputCore, UpdateCore,
+        XofReaderCore, XofReaderCoreWrapper,
+    },
+    generic_array::GenericArray,
+    Reset,
+};
 
 mod paddings;
 #[macro_use]
 mod macros;
-mod reader;
 mod state;
 
-pub use crate::reader::Sha3XofReader;
 use crate::state::Sha3State;
 
 sha3_impl!(
+    Keccak224Core,
     Keccak224,
     U28,
     U144,
     paddings::Keccak,
-    "Keccak-224 hash function."
+    "Keccak-224",
 );
 sha3_impl!(
+    Keccak256Core,
     Keccak256,
     U32,
     U136,
     paddings::Keccak,
-    "Keccak-256 hash function."
+    "Keccak-256",
 );
 sha3_impl!(
+    Keccak384Core,
     Keccak384,
     U48,
     U104,
     paddings::Keccak,
-    "Keccak-384 hash function."
+    "Keccak-384",
 );
 sha3_impl!(
+    Keccak512Core,
     Keccak512,
     U64,
     U72,
     paddings::Keccak,
-    "Keccak-512 hash function."
+    "Keccak-512",
 );
 
 sha3_impl!(
+    Keccak256FullCore,
     Keccak256Full,
     U200,
     U136,
     paddings::Keccak,
-    "SHA-3 variant used in CryptoNight."
+    "SHA-3 CryptoNight variant",
 );
 
 sha3_impl!(
+    Sha3_224Core,
     Sha3_224,
     U28,
     U144,
     paddings::Sha3,
-    "SHA-3-224 hash function."
+    "SHA-3-224",
 );
 sha3_impl!(
+    Sha3_256Core,
     Sha3_256,
     U32,
     U136,
     paddings::Sha3,
-    "SHA-3-256 hash function."
+    "SHA-3-256",
 );
 sha3_impl!(
+    Sha3_384Core,
     Sha3_384,
     U48,
     U104,
     paddings::Sha3,
-    "SHA-3-384 hash function."
+    "SHA-3-384",
 );
 sha3_impl!(
+    Sha3_512Core,
     Sha3_512,
     U64,
     U72,
     paddings::Sha3,
-    "SHA-3-512 hash function."
+    "SHA-3-512",
 );
 
 shake_impl!(
+    Shake128Core,
     Shake128,
+    Shake128ReaderCore,
+    Shake128Reader,
     U168,
     paddings::Shake,
-    "SHAKE128 extendable output (XOF) hash function"
+    "SHAKE128",
 );
 shake_impl!(
+    Shake256Core,
     Shake256,
+    Shake256ReaderCore,
+    Shake256Reader,
     U136,
     paddings::Shake,
-    "SHAKE256 extendable output (XOF) hash function"
+    "SHAKE256",
 );

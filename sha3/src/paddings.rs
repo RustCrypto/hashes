@@ -1,27 +1,23 @@
-use block_buffer::block_padding::{PadError, Padding, UnpadError};
+use digest::block_buffer::block_padding::{generic_array::ArrayLength, Block, Padding, UnpadError};
 
 macro_rules! impl_padding {
     ($name:ident, $pad:expr) => {
-        // it does not work with empty enum as it required to have Default impl
-        // for it for some unclear reason.
         #[derive(Copy, Clone, Default)]
         pub struct $name;
 
-        impl Padding for $name {
-            #[inline(always)]
-            fn pad_block(block: &mut [u8], pos: usize) -> Result<(), PadError> {
-                if pos >= block.len() {
-                    return Err(PadError);
+        impl<B: ArrayLength<u8>> Padding<B> for $name {
+            #[inline]
+            fn pad(block: &mut Block<B>, pos: usize) {
+                if pos >= B::USIZE {
+                    panic!("`pos` is bigger or equal to block size");
                 }
                 block[pos] = $pad;
                 block[pos + 1..].iter_mut().for_each(|b| *b = 0);
                 let n = block.len();
                 block[n - 1] |= 0x80;
-                Ok(())
             }
 
-            #[inline(always)]
-            fn unpad(_data: &[u8]) -> Result<&[u8], UnpadError> {
+            fn unpad(_: &Block<B>) -> Result<&[u8], UnpadError> {
                 unimplemented!();
             }
         }

@@ -1,8 +1,5 @@
-use block_buffer::{block_padding::ZeroPadding, BlockBuffer};
-use core::marker::PhantomData;
-use digest::consts::U64;
-use digest::generic_array::{ArrayLength, GenericArray};
-use digest::{BlockInput, FixedOutputDirty, Reset, Update};
+use core::convert::TryInto;
+use digest::{block_buffer::BlockBuffer, consts::U64, generic_array::GenericArray};
 
 use crate::consts::{BLOCK_SIZE, C};
 use crate::table::SHUFFLED_LIN_TABLE;
@@ -10,10 +7,10 @@ use crate::table::SHUFFLED_LIN_TABLE;
 type Block = [u8; 64];
 
 #[derive(Copy, Clone)]
-struct StreebogState {
-    h: Block,
-    n: Block,
-    sigma: Block,
+pub(crate) struct StreebogState {
+    pub(crate) h: Block,
+    pub(crate) n: [u64; 8],
+    pub(crate) sigma: [u64; 8],
 }
 
 #[inline(always)]
@@ -33,9 +30,7 @@ fn lps(h: &mut Block, n: &Block) {
         }
     }
 
-    for (chunk, v) in h.chunks_exact_mut(8).zip(buf.iter()) {
-        chunk.copy_from_slice(&v.to_le_bytes());
-    }
+    *h = to_bytes(&buf);
 }
 
 impl StreebogState {
@@ -60,126 +55,75 @@ impl StreebogState {
     }
 
     fn update_sigma(&mut self, m: &Block) {
+        let t = from_bytes(m);
         let mut carry = 0;
-        for (a, b) in self.sigma.iter_mut().zip(m.iter()) {
-            carry = (*a as u16) + (*b as u16) + (carry >> 8);
-            *a = (carry & 0xFF) as u8;
-        }
+        adc(&mut self.sigma[0], t[0], &mut carry);
+        adc(&mut self.sigma[1], t[1], &mut carry);
+        adc(&mut self.sigma[2], t[2], &mut carry);
+        adc(&mut self.sigma[3], t[3], &mut carry);
+        adc(&mut self.sigma[4], t[4], &mut carry);
+        adc(&mut self.sigma[5], t[5], &mut carry);
+        adc(&mut self.sigma[6], t[6], &mut carry);
+        adc(&mut self.sigma[7], t[7], &mut carry);
     }
 
-    fn update_n(&mut self, mut l: u8) {
-        let res = u16::from(self.n[0]) + (u16::from(l) << 3);
-        self.n[0] = (res & 0xff) as u8;
-        l = (res >> 8) as u8;
-
-        for a in self.n.iter_mut().skip(1) {
-            let (res, over) = (*a).overflowing_add(l);
-            *a = res;
-            if over {
-                l = 1;
-            } else {
-                break;
-            }
-        }
+    fn update_n(&mut self, len: u64) {
+        let mut carry = 0;
+        // note: `len` can not be bigger than block size,
+        // so `8*len` will never overflow
+        adc(&mut self.n[0], 8 * len, &mut carry);
+        adc(&mut self.n[1], 0, &mut carry);
+        adc(&mut self.n[2], 0, &mut carry);
+        adc(&mut self.n[3], 0, &mut carry);
+        adc(&mut self.n[4], 0, &mut carry);
+        adc(&mut self.n[5], 0, &mut carry);
+        adc(&mut self.n[6], 0, &mut carry);
+        adc(&mut self.n[7], 0, &mut carry);
     }
 
-    fn process_block(&mut self, block: &GenericArray<u8, U64>, msg_len: u8) {
-        #[allow(unsafe_code)]
+    fn compress(&mut self, block: &GenericArray<u8, U64>, msg_len: u64) {
         let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
-        let n = self.n;
-        self.g(&n, block);
+        self.g(&to_bytes(&self.n), block);
         self.update_n(msg_len);
         self.update_sigma(block);
     }
-}
 
-#[derive(Clone)]
-pub struct Streebog<DigestSize: ArrayLength<u8> + Copy> {
-    buffer: BlockBuffer<U64>,
-    state: StreebogState,
-    // Phantom data to tie digest size to the struct
-    digest_size: PhantomData<DigestSize>,
-}
-
-impl<N> Default for Streebog<N>
-where
-    N: ArrayLength<u8> + Copy,
-{
-    fn default() -> Self {
-        let h = match N::to_usize() {
-            64 => [0u8; 64],
-            32 => [1u8; 64],
-            _ => unreachable!(),
-        };
-        Streebog {
-            buffer: Default::default(),
-            state: StreebogState {
-                h,
-                n: [0u8; 64],
-                sigma: [0u8; 64],
-            },
-            digest_size: Default::default(),
+    pub(crate) fn update_blocks(&mut self, blocks: &[GenericArray<u8, U64>]) {
+        for block in blocks {
+            self.compress(block, BLOCK_SIZE as u64);
         }
     }
-}
 
-impl<N> BlockInput for Streebog<N>
-where
-    N: ArrayLength<u8> + Copy,
-{
-    type BlockSize = U64;
-}
-
-impl<N> Update for Streebog<N>
-where
-    N: ArrayLength<u8> + Copy,
-{
-    fn update(&mut self, input: impl AsRef<[u8]>) {
-        let s = &mut self.state;
-        self.buffer
-            .input_block(input.as_ref(), |d| s.process_block(d, BLOCK_SIZE as u8));
+    pub(crate) fn finalize(&mut self, buffer: &mut BlockBuffer<U64>) {
+        let pos = buffer.get_pos();
+        // note that it's guaranteed that `compress` will be called only once
+        buffer.digest_pad(1, &[], |b| self.compress(b, pos as u64));
+        self.g(&[0u8; 64], &to_bytes(&self.n));
+        self.g(&[0u8; 64], &to_bytes(&self.sigma));
     }
 }
 
-impl<N> FixedOutputDirty for Streebog<N>
-where
-    N: ArrayLength<u8> + Copy,
-{
-    type OutputSize = N;
-
-    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, N>) {
-        let mut self_state = self.state;
-        let pos = self.buffer.position();
-
-        let block = self
-            .buffer
-            .pad_with::<ZeroPadding>()
-            .expect("we never use input_lazy");
-        block[pos] = 1;
-        self_state.process_block(block, pos as u8);
-
-        let n = self_state.n;
-        self_state.g(&[0u8; 64], &n);
-        let sigma = self_state.sigma;
-        self_state.g(&[0u8; 64], &sigma);
-
-        let n = BLOCK_SIZE - Self::OutputSize::to_usize();
-        out.copy_from_slice(&self_state.h[n..])
-    }
+#[inline(always)]
+fn adc(a: &mut u64, b: u64, carry: &mut u64) {
+    let ret = (*a as u128) + (b as u128) + (*carry as u128);
+    *a = ret as u64;
+    *carry = (ret >> 64) as u64;
 }
 
-impl<N> Reset for Streebog<N>
-where
-    N: ArrayLength<u8> + Copy,
-{
-    fn reset(&mut self) {
-        self.buffer.reset();
-        self.state.h = match N::to_usize() {
-            64 => [0u8; 64],
-            32 => [1u8; 64],
-            _ => unreachable!(),
-        };
-        self.state.n = [0; 64];
-        self.state.sigma = [0; 64];
+#[inline(always)]
+fn to_bytes(b: &[u64; 8]) -> Block {
+    let mut t = [0; 64];
+    for (chunk, v) in t.chunks_exact_mut(8).zip(b.iter()) {
+        chunk.copy_from_slice(&v.to_le_bytes());
     }
+    t
+}
+
+#[inline(always)]
+fn from_bytes(b: &Block) -> [u64; 8] {
+    let mut t = [0u64; 8];
+    for (v, chunk) in t.iter_mut().zip(b.chunks_exact(8)) {
+        *v = u64::from_le_bytes(chunk.try_into().unwrap());
+    }
+    t
 }

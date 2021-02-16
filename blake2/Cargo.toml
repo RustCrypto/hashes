@@ -12,17 +12,17 @@ keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.9"
-crypto-mac = "0.8"
-opaque-debug = "0.3"
+digest = { version = "0.10.0-pre.3", features = ["core-api"] }
+crypto-mac = "0.11.0-pre"
 
 [dev-dependencies]
-digest = { version = "0.9", features = ["dev"] }
-crypto-mac = { version = "0.8", features = ["dev"] }
+digest = { version = "0.10.0-pre.3", features = ["dev"] }
+crypto-mac = { version = "0.11.0-pre", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]
 default = ["std"]
+reset = []
 std = ["digest/std", "crypto-mac/std"]
 simd = []
 simd_opt = ["simd"]

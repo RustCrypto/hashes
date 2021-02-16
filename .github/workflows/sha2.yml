@@ -136,6 +136,11 @@ jobs:
           toolchain: ${{ matrix.rust }}
           target: ${{ matrix.target }}
           override: true
-      - run: cargo install cross
+      - name: Install precompiled cross
+        run: |
+          export URL=$(curl -s https://api.github.com/repos/rust-embedded/cross/releases/latest | jq -r '.assets[] | select(.name | contains("x86_64-unknown-linux-gnu.tar.gz")) | .browser_download_url')
+          wget -O /tmp/binaries.tar.gz $URL
+          tar -C /tmp -xzf /tmp/binaries.tar.gz
+          mv /tmp/cross ~/.cargo/bin
       - run: cross test --target ${{ matrix.target }} --release
       - run: cross test --target ${{ matrix.target }} --release --features asm

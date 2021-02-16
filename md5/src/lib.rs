@@ -28,99 +28,109 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
 )]
-#![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 #[cfg(feature = "asm")]
-extern crate md5_asm as utils;
-
-#[cfg(feature = "std")]
-extern crate std;
+extern crate md5_asm as compress;
 
 #[cfg(not(feature = "asm"))]
-mod utils;
+mod compress;
 
 pub use digest::{self, Digest};
 
-use crate::utils::compress;
+use compress::compress;
 
-use block_buffer::BlockBuffer;
-use digest::generic_array::typenum::{U16, U64};
-use digest::generic_array::GenericArray;
-use digest::{BlockInput, FixedOutputDirty, Reset, Update};
+use core::{fmt, slice::from_ref};
+use digest::{
+    block_buffer::BlockBuffer,
+    core_api::{AlgorithmName, CoreWrapper, FixedOutputCore, UpdateCore},
+    generic_array::{
+        typenum::{Unsigned, U16, U64},
+        GenericArray,
+    },
+    Reset,
+};
 
-mod consts;
+type BlockSize = U64;
+type Block = GenericArray<u8, BlockSize>;
+const BLOCK_SIZE: usize = BlockSize::USIZE;
 
-/// The MD5 hasher
+/// Core MD5 hasher state.
 #[derive(Clone)]
-pub struct Md5 {
-    length_bytes: u64,
-    buffer: BlockBuffer<U64>,
+pub struct Md5Core {
+    block_len: u64,
     state: [u32; 4],
 }
 
-impl Default for Md5 {
-    fn default() -> Self {
-        Md5 {
-            length_bytes: 0,
-            buffer: Default::default(),
-            state: consts::S0,
-        }
-    }
-}
+impl UpdateCore for Md5Core {
+    type BlockSize = BlockSize;
+    type Buffer = BlockBuffer<BlockSize>;
 
-#[inline(always)]
-fn convert(d: &GenericArray<u8, U64>) -> &[u8; 64] {
-    #[allow(unsafe_code)]
-    unsafe {
-        &*(d.as_ptr() as *const [u8; 64])
-    }
-}
-
-impl Md5 {
     #[inline]
-    fn finalize_inner(&mut self) {
-        let s = &mut self.state;
-        let l = (self.length_bytes << 3) as u64;
-        self.buffer.len64_padding_le(l, |d| compress(s, convert(d)));
+    fn update_blocks(&mut self, blocks: &[Block]) {
+        self.block_len = self.block_len.wrapping_add(blocks.len() as u64);
+        compress(&mut self.state, convert(blocks))
     }
 }
 
-impl BlockInput for Md5 {
-    type BlockSize = U64;
-}
-
-impl Update for Md5 {
-    #[inline]
-    fn update(&mut self, input: impl AsRef<[u8]>) {
-        let input = input.as_ref();
-        // Unlike Sha1 and Sha2, the length value in MD5 is defined as
-        // the length of the message mod 2^64 - ie: integer overflow is OK.
-        self.length_bytes = self.length_bytes.wrapping_add(input.len() as u64);
-        let s = &mut self.state;
-        self.buffer.input_block(input, |d| compress(s, convert(d)));
-    }
-}
-
-impl FixedOutputDirty for Md5 {
+impl FixedOutputCore for Md5Core {
     type OutputSize = U16;
 
     #[inline]
-    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U16>) {
-        self.finalize_inner();
-        for (chunk, v) in out.chunks_exact_mut(4).zip(self.state.iter()) {
+    fn finalize_fixed_core(
+        &mut self,
+        buffer: &mut BlockBuffer<Self::BlockSize>,
+        out: &mut GenericArray<u8, Self::OutputSize>,
+    ) {
+        let bit_len = self
+            .block_len
+            .wrapping_mul(Self::BlockSize::U64)
+            .wrapping_add(buffer.get_pos() as u64)
+            .wrapping_mul(8);
+        let mut s = self.state;
+        buffer.len64_padding_le(bit_len, |b| compress(&mut s, convert(from_ref(b))));
+        for (chunk, v) in out.chunks_exact_mut(4).zip(s.iter()) {
             chunk.copy_from_slice(&v.to_le_bytes());
         }
     }
 }
 
-impl Reset for Md5 {
-    fn reset(&mut self) {
-        self.state = consts::S0;
-        self.length_bytes = 0;
-        self.buffer.reset();
+impl Default for Md5Core {
+    #[inline]
+    fn default() -> Self {
+        Self {
+            block_len: 0,
+            state: [0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476],
+        }
     }
 }
 
-opaque_debug::implement!(Md5);
-digest::impl_write!(Md5);
+impl Reset for Md5Core {
+    #[inline]
+    fn reset(&mut self) {
+        *self = Default::default();
+    }
+}
+
+impl AlgorithmName for Md5Core {
+    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Md5")
+    }
+}
+
+impl fmt::Debug for Md5Core {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Md5Core { ... }")
+    }
+}
+
+/// MD5 hasher state.
+pub type Md5 = CoreWrapper<Md5Core>;
+
+#[inline(always)]
+fn convert(blocks: &[Block]) -> &[[u8; BLOCK_SIZE]] {
+    // SAFETY: GenericArray<u8, U64> and [u8; 64] have
+    // exactly the same memory layout
+    let p = blocks.as_ptr() as *const [u8; BLOCK_SIZE];
+    unsafe { core::slice::from_raw_parts(p, blocks.len()) }
+}
