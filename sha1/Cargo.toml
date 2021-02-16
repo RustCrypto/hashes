@@ -40,3 +40,7 @@ force-soft = [] # Force software implementation
 
 # DEPRECATED: use `asm` instead
 asm-aarch64 = ["asm"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
