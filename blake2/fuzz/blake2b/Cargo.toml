@@ -1,0 +1,32 @@
+
+[package]
+name = "blake2b_simd-fuzz"
+version = "0.0.0"
+authors = ["Kirk Baird"]
+publish = false
+edition = "2018"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = { version = "0.3", features = ["arbitrary-derive"] }
+
+[dependencies.blake2b_simd]
+path = ".."
+
+# Prevent this from interfering with workspaces
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "fuzz_updates"
+path = "fuzz_targets/fuzz_updates.rs"
+
+[[bin]]
+name = "fuzz_blake2b"
+path = "fuzz_targets/fuzz_blake2b.rs"
+
+[[bin]]
+name = "fuzz_blake2bp"
+path = "fuzz_targets/fuzz_blake2bp.rs"
