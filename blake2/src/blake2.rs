@@ -386,10 +386,7 @@ macro_rules! blake2_impl {
         digest::impl_write!($fix_state);
 
         fn copy(src: &[u8], dst: &mut [u8]) {
-            assert!(dst.len() >= src.len());
-            unsafe {
-                core::ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
-            }
+            dst[..src.len()].copy_from_slice(src);
         }
     }
 }
