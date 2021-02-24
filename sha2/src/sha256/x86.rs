@@ -95,10 +95,12 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     _mm_storeu_si128(state_ptr_mut.add(1), hgef);
 }
 
+cpuid_bool::new!(shani_cpuid, "sha", "sse2", "ssse3", "sse4.1");
+
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
-    if cpuid_bool::cpuid_bool!("sha", "sse2", "ssse3", "sse4.1") {
+    if shani_cpuid::get() {
         unsafe {
             digest_blocks(state, blocks);
         }
