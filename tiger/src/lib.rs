@@ -120,6 +120,7 @@ impl Tiger {
     }
 
     #[inline]
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     fn round(a: &mut u64, b: &mut u64, c: &mut u64, x: &u64, mul: u8) {
         *c ^= *x;
         let mut c_: [u8; 8] = Default::default();

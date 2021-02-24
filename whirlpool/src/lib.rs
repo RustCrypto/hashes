@@ -145,7 +145,7 @@ impl Whirlpool {
 
         if pos + 1 > self.bit_length.len() {
             compress(hash, convert(buf));
-            buf[..(pos + 1)].iter_mut().for_each(|b| *b = 0);
+            buf[..=pos].iter_mut().for_each(|b| *b = 0);
         }
 
         buf[32..].copy_from_slice(&self.bit_length);
