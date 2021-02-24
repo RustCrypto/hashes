@@ -17,7 +17,7 @@ pub fn compress(hash: &mut [u64; 8], buffer: &[u8; 64]) {
     }
 
     #[allow(clippy::needless_range_loop)]
-    for r in 1..(R + 1) {
+    for r in 1..=R {
         for i in 0..8 {
             l[i] = C0[(k[(i) % 8] >> 56) as usize]
                 ^ C1[((k[(7 + i) % 8] >> 48) & 0xff) as usize]
