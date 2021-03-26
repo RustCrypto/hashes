@@ -289,6 +289,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "sm3"
+version = "0.1.0"
+dependencies = [
+ "block-buffer",
+ "digest",
+ "hex-literal",
+ "opaque-debug",
+]
+
+[[package]]
 name = "streebog"
 version = "0.9.2"
 dependencies = [
