@@ -1,28 +1,32 @@
 #![allow(non_snake_case)]
 
 use crate::pi::Pi;
-use std::convert::{TryInto, TryFrom};
-use std::array::TryFromSliceError;
-use std::os::macos::raw::pthread_t;
 use whirlpool::{Whirlpool, Digest};
 
 use std::str;
 
 const N: usize = 5 >> 18;
+// number of indexes
 const W: usize = 80;
+
 const R: usize = 640;
+pub const SIZE_OUTPUT_COMPRESS: usize = R / 8;
 const P: usize = 653;
-const OUTPUT_SIZE: usize = 160;
+const S: usize = 1_120;
+const SIZE_INPUT_COMPRESS: usize = S / 8; // s = w * log_2(n/w)
+
+const HASH_OUTPUT_SIZE: usize = 160 / 8;
+
+pub const SIZE_MSG_CHUNKS: usize = SIZE_INPUT_COMPRESS - SIZE_OUTPUT_COMPRESS;
 
 // This is not declared as a variable of the algorithm, but I need it to be const to create
-// arrays of this length
+// arrays of this length. This represents the number of V vectors.
 const NR_VECTORS: usize = N / R;
 
 // Again, this is not declared as variable in the algorithm. For now let's keep it this way.
 // Note that this is computing the ceiling (we now that P is not divisible by 8, never).
 const SIZE_VECTORS: usize = P / 8 + 1;
 
-const S: usize = 1_120; // s = w * log_2(n/w)
 
 pub fn define_iv(index: usize) -> [u8; SIZE_VECTORS] {
     // Now we take SIZE_VECTORS times b = n / r entries of Pi. In this way we'll have b vectors of p bits
@@ -49,30 +53,26 @@ pub fn define_iv(index: usize) -> [u8; SIZE_VECTORS] {
 /// $W_i = i \times (n / w) + IV_i + M_i \times 2^{r / w}.
 /// todo: verify that the output type is what is expected. Maybe we don't need such a big
 /// integer.
-fn computing_W_indices(input_vector: [u8; R], message: &[u8; S - R]) -> [u128; W] {
+fn computing_W_indices(input_vector: &[u8; SIZE_OUTPUT_COMPRESS], message: &[u8; SIZE_MSG_CHUNKS]) -> [u128; W] {
     let mut W_indices: [u128; W] = [0; W];
-    let divided_message: [u8; W] = dividing_bits(&message, (S-R)/W);
+    let divided_message: [u8; W] = dividing_bits(message, (SIZE_INPUT_COMPRESS - SIZE_OUTPUT_COMPRESS) / (W / 8) ); // The / 8 is because we need to recover the factor we've removed due to the bytes
     // todo: we are clearly delcaring unnecesary variables. For the moment keep for readability.
-    for i in 0..W {
+    for i in 0..(W) {
         let input_vector_i = input_vector[i]; // r/w is always 8, see table 3
-        let message_i = divided_message[i];
+        let message_i = divided_message[i] as u128;
 
-        W_indices[i] = ((i * N/W) as u128 + input_vector_i as u128 +
-                           (message_i << (R/W) as u8) as u128);
+        W_indices[i] = (i * N/W) as u128 + input_vector_i as u128 +
+                           (message_i << (SIZE_OUTPUT_COMPRESS / W) as u8);
     }
 
     W_indices
-
-    // then we take vector floor(W_i / r), we shift it to the right >> W_i mod r positions,
-    // and truncate it to r bits (why the truncation?). We XOR these values for the
-    // w values.
 }
 
 /// This function servers the purpose presented in table 3, of breaking a bit array into
 /// batches of size not multiple of 8. Note that the IV will be broken always in size 8, which
 /// is quite convenient. Also, the only numbers we'll have to worry for are 5 and 6.
 fn dividing_bits(input_bits: &[u8], size_batches: usize) -> [u8; W] {
-    if size_batches > 6 {
+    if size_batches != 5usize && size_batches != 6usize {
         panic!("Expecting batches of size 5 or 6. Other values do not follow \
         the standard specification")
     }
@@ -102,20 +102,20 @@ fn dividing_bits(input_bits: &[u8], size_batches: usize) -> [u8; W] {
 /// Blocks of size s - r, which are padded with the r-bit IV, to obtain s bits, which are input
 /// to the compression function. This function outputs r bits, which are used to chain to the
 /// next iteration.
-pub fn compress(hash: &mut [u8; R], message_block: &[u8; S - R]){
-    // Start here
-    let mut initial_vector = [0u8; R / 8];
+pub fn compress(hash: &mut [u8; SIZE_OUTPUT_COMPRESS], message_block: &[u8; SIZE_MSG_CHUNKS]){
+    // Start here. todo: I'm not sure of this initialisation. But let's try to compile for now.
+    let mut initial_vector = [0u8; SIZE_OUTPUT_COMPRESS];
 
     let w_indices = computing_W_indices(hash, message_block);
     for i in 0..W {
-        let chosen_vec = w_indices[i] / R as u128;
-        let shift_value = w_indices[i] % R as u128;
+        let chosen_vec = w_indices[i] / SIZE_OUTPUT_COMPRESS as u128;
+        let shift_value = w_indices[i] % SIZE_OUTPUT_COMPRESS as u128;
         let mut vector = define_iv(chosen_vec as usize);
         // shift the array
         shift_array(&mut vector, shift_value);
         // truncate array
-        let mut truncated = [0u8; R / 8];
-        truncated.copy_from_slice(&vector[..R / 8]);
+        let mut truncated = [0u8; SIZE_OUTPUT_COMPRESS];
+        truncated.copy_from_slice(&vector[..SIZE_OUTPUT_COMPRESS]);
 
         // Now we do the OR with all vectors
         initial_vector.iter_mut()
@@ -123,35 +123,38 @@ pub fn compress(hash: &mut [u8; R], message_block: &[u8; S - R]){
             .for_each(|(x1, x2)| *x1 ^= *x2);
     }
 
-    hash = initial_vector
+    *hash = initial_vector;
 }
 
-pub fn final_compression(initial_vector: [u8; R]) -> [u8; OUTPUT_SIZE] {
+pub fn final_compression(initial_vector: [u8; SIZE_OUTPUT_COMPRESS]) -> [u8; HASH_OUTPUT_SIZE] {
     // Now we use Whirpool
-    let mut result = [0u8; OUTPUT_SIZE];
+    let mut result = [0u8; HASH_OUTPUT_SIZE];
     let mut hasher = Whirlpool::new();
-    // todo: careful here, with the bits out of bound
-    hasher.update(str::from_utf8(&initial_vector).unwrap());
-    result.copy_from_slice(&hasher.finalize()[..OUTPUT_SIZE]);
+
+    hasher.update(&initial_vector);
+    result.copy_from_slice(&hasher.finalize()[..HASH_OUTPUT_SIZE]);
     result
 }
 
-// todo: we are always assuming that the bits are complete. This might not be the case everywhere
 pub fn shift_array(array: &mut [u8; SIZE_VECTORS], shift_value: u128) {
-    let byte_shift = shift_value / 8;
-    let bit_shift = shift_value % 8;
+    let byte_shift = (shift_value / 8) as u8;
+    let bit_shift = (shift_value % 8) as u8;
 
+    // First we rotate the bytes
     array.rotate_right(byte_shift as usize);
-    // First we get the last bits, which will be the first bits. We expect that all but the first
-    // P % 8 are 0.
-    let last_bits = array.last().expect("Input array should be non-empty") << (8 - bit_shift as u8);
+    // Then, we rotate bits, only if necessary
+    if bit_shift != 0 {
+        // First we get the last bits, which will be the first bits. We expect that all but the first
+        // P % 8 are 0.
+        let last_bits = array.last().expect("Input array should be non-empty") << (8 - bit_shift as u8);
 
-    // Now we shift the rest of the vector. This should work. Maybe not the most idiomatic, but
-    // the logic seems correct.
-    let mut xored_vector = last_bits;
-    for index in 0..SIZE_VECTORS {
-        let bit_vector = array[index];
-        array[index] = xored_vector | (bit_vector >> bit_shift as u8);
-        xored_vector = bit_vector << (8 - bit_shift as u8);
+        // Now we shift the rest of the vector. This should work. Maybe not the most idiomatic, but
+        // the logic seems correct.
+        let mut xored_vector = last_bits;
+        for index in 0..SIZE_VECTORS {
+            let bit_vector = array[index];
+            array[index] = xored_vector | (bit_vector >> bit_shift as u8);
+            xored_vector = bit_vector.clone() << (8 - bit_shift as u8);
+        }
     }
 }

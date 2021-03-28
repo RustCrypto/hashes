@@ -1,9 +1,23 @@
 use fsb_rust::pi::Pi;
+use hex_literal::hex;
 
 use whirlpool::{Whirlpool, Digest};
 use std::str;
+use fsb_rust::*;
 
 fn main() {
+    let mut a: u8 = 0b11111111;
+    let shifted = a << 7u8;
+    // create a hasher object, to use it do not forget to import `Digest` trait
+    let mut hasher = FSB160::new();
+    // write input message
+    hasher.update(b"hello");
+    // read hash digest (it will consume hasher)
+    let result = hasher.finalize();
+
+    assert_eq!(result[..], hex!("6e8ce7998e4c46a4ca7c5e8f6498a5778140d14b")[..]);
+
+
     let mut b: u8 = 0b00001101;
     let mut c: u8 = 0b00001110;
     let mut rotated: u8 = b >> 1;
