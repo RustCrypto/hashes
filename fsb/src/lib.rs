@@ -1,8 +1,13 @@
 pub use digest::Digest;
 
-use digest::{consts::{U60, U20},  generic_array::GenericArray};
-use digest::{BlockInput, FixedOutputDirty, Reset, Update};
-use block_buffer::{BlockBuffer, block_padding::{AnsiX923, ZeroPadding}};
+use block_buffer::{
+    block_padding::{AnsiX923, ZeroPadding},
+    BlockBuffer,
+};
+use digest::{
+    consts::{U20, U60},
+    generic_array::GenericArray,
+};
 
 #[allow(dead_code)]
 // mod macros;
@@ -15,7 +20,6 @@ use utils::compress;
 use digest::consts::{U480, U160};
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
-
 use utils::*;
 
 // This is S-R. We'll have to see how we handle it in a macro.
@@ -24,9 +28,9 @@ type OutputSize = U20;
 /// Structure representing the state of a Whirlpool computation
 #[derive(Clone)]
 pub struct FSB160 {
-    /// bit size of the message till the current moment (the bit size is represented by a 64 bit
-    /// number)
-    bit_length: u64,
+    //    /// bit size of the message till the current moment (the bit size is represented by a 64 bit
+    //    /// number)
+    //    bit_length: u64,
     /// size of the message being processed
     buffer: BlockBuffer<BlockSize>,
     /// value of the input vector
@@ -34,9 +38,9 @@ pub struct FSB160 {
 }
 
 impl FSB160 {
-    fn update_len(&mut self, len: u64) {
-        self.bit_length += len;
-    }
+    //    fn update_len(&mut self, len: u64) {
+    //        self.bit_length += len;
+    //    }
     /// If there is enough place to pad with the size, we use AnsiX923, else, we first pad with
     /// zeros, and then a final blcok with AnsiX923.
     /// todo: seems that we don't need to input the size of the message, so maybe BlockBuffer
@@ -49,34 +53,34 @@ impl FSB160 {
         // position of the buffer
         let pos = self.buffer.position();
         if pos <= crate::SIZE_MSG_CHUNKS - 8 - 1 {
-            let buf = self
-                .buffer
-                .pad_with::<AnsiX923>()
-                .expect("we never use input_lazy");
-            compress(hash, convert(buf));
-        }
-        else {
-            let buf = self
-                .buffer
-                .pad_with::<ZeroPadding>()
-                .expect("we never use input_lazy");
-            compress(hash, convert(buf));
-
-            let buf = self
-                .buffer
-                .pad_with::<AnsiX923>()
-                .expect("we never use input_lazy");
-            compress(hash, convert(buf));
+            let mut padding = vec![0; crate::SIZE_MSG_CHUNKS - pos - 8];
+            padding[0] = 128u8;
+            padding.extend_from_slice(&helper_transform_usize(5usize));
+            self.buffer
+                .input_block(&padding, |b| compress(hash, convert(b)));
+        } else {
+            let mut padding = vec![0; crate::SIZE_MSG_CHUNKS - pos];
+            padding[0] = 128u8;
+            self.buffer
+                .input_block(&padding, |b| compress(hash, convert(b)));
+            self.finalize_inner();
         }
     }
 }
 
-// todo: do we need this unsafe function?
-fn convert(block: &GenericArray<u8, U60>) -> &[u8; 60] {
-    #[allow(unsafe_code)]
-        unsafe {
-        &*(block.as_ptr() as *const [u8; 60])
-    }
+// I'm trying to avoid use unsafe code for this transformation. We are certain that the size of the
+// buffer can be represented in 8 bytes. If not, todo: we need to panic
+// check the order of the bytes.
+fn helper_transform_usize(x: usize) -> [u8; 8] {
+    let b1: u8 = ((x >> 56) & 0xff) as u8;
+    let b2: u8 = ((x >> 48) & 0xff) as u8;
+    let b3: u8 = ((x >> 40) & 0xff) as u8;
+    let b4: u8 = ((x >> 32) & 0xff) as u8;
+    let b5: u8 = ((x >> 24) & 0xff) as u8;
+    let b6: u8 = ((x >> 16) & 0xff) as u8;
+    let b7: u8 = ((x >> 8) & 0xff) as u8;
+    let b8: u8 = (x & 0xff) as u8;
+    return [b1, b2, b3, b4, b5, b6, b7, b8];
 }
 
 fn convert(block: &GenericArray<u8, U480>) -> &[u8; BLOCKS_SIZE] {
@@ -89,15 +93,8 @@ fn convert(block: &GenericArray<u8, U480>) -> &[u8; BLOCKS_SIZE] {
 impl Default for FSB {
     fn default() -> Self {
         Self {
-<<<<<<< HEAD
-            message_length: 0u64,
-            buffer: BlockBuffer::default(),
-            hash: [0u8; R],
-=======
-            bit_length: 0u64,
             buffer: BlockBuffer::default(),
             hash: [0u8; crate::SIZE_OUTPUT_COMPRESS],
->>>>>>> compiled and ran, but test failing
         }
     }
 }
@@ -115,33 +112,12 @@ impl BlockInput for FSB {
 impl Update for FSB {
     fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
-        self.update_len(input.len() as u64);
-<<<<<<< HEAD
-=======
-
->>>>>>> compiled and ran, but test failing
         let hash = &mut self.hash;
         self.buffer
             .input_block(input, |b| compress(hash, convert(b)));
     }
 }
 
-<<<<<<< HEAD
-impl FixedOutputDirty for FSB {
-    type OutputSize = U160;
-
-    fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, U160>) {
-        self.finalize_inner();
-        for (chunk, v) in out.chunks_exact_mut(8).zip(self.hash.iter()) {
-            chunk.copy_from_slice(&v.to_be_bytes());
-        }
-    }
-}
-
-impl Reset for FSB {
-    fn reset(&mut self) {
-        self.message_length = 0u64;
-=======
 // todo: This function is unchecked
 impl FixedOutputDirty for FSB160 {
     type OutputSize = OutputSize;
@@ -155,21 +131,17 @@ impl FixedOutputDirty for FSB160 {
 
 impl Reset for FSB160 {
     fn reset(&mut self) {
->>>>>>> compiled and ran, but test failing
         self.buffer.reset();
-        self.hash = [0u8; R];
+        self.hash = [0u8; R / 8];
     }
-<<<<<<< HEAD
-}
-=======
 }
 
-digest::impl_write!(Whirlpool);
+digest::impl_write!(FSB160);
 
 #[cfg(test)]
 mod tests {
     use crate::pi::Pi;
-    use crate::{FSB160, Digest};
+    use crate::{helper_transform_usize, Digest, FSB160};
 
     #[test]
     fn test_hash_function() {
@@ -184,8 +156,16 @@ mod tests {
     }
 
     #[test]
+    fn ad_hoc_padding() {
+        let value = 128usize;
+        let byte_rpr = helper_transform_usize(value);
+
+        assert_eq!([0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 128u8], byte_rpr)
+    }
+
+    #[test]
     fn it_works() {
-//        assert_eq!(0xb9c0, 0xdcc0);
+        //        assert_eq!(0xb9c0, 0xdcc0);
         let mut b: u8 = 0b00001101;
         let mut c: u8 = 0b00001110;
         let mut rotated: u8 = b >> 1;
@@ -199,11 +179,10 @@ mod tests {
         assert_eq!(bin_b.rotate_left(1), bin_a);
 
         let xored: u16 = 0b10101001u16;
-        assert_eq!(bin_a^bin_b, xored);
+        assert_eq!(bin_a ^ bin_b, xored);
 
         let cc: u32 = 33u32;
         let aa = cc.rotate_left(3);
-
 
         // lets try to do the example of the paper of defining the IV with p = 13
         let nr_block = ceiling(13, 8);
@@ -216,12 +195,11 @@ mod tests {
             trial_pi[2 * i + 1] >>= 8 - shift;
         }
 
-//        assert_eq!(0xd8, trial_pi[1]);
+        //        assert_eq!(0xd8, trial_pi[1]);
     }
 
     /// Function to compute the ceiling of a / b.
     fn ceiling(a: u32, b: u32) -> u32 {
-        a/b + (a%b != 0) as u32
+        a / b + (a % b != 0) as u32
     }
 }
->>>>>>> compiled and ran, but test failing

@@ -37,8 +37,7 @@ pub fn padding(input_message: &[u8]) -> Vec<[u8; SIZE]> {
 
         last_block.copy_from_slice(&temp_block);
         padded_message.push(last_block);
-    }
-    else {
+    } else {
         let padding_size = SIZE - last_block_init_size;
         let mut padding = vec![0u8; padding_size];
         padding[0] = 0b1000000;
@@ -51,15 +50,14 @@ pub fn padding(input_message: &[u8]) -> Vec<[u8; SIZE]> {
         padded_message.push(additional_block);
     }
 
-
     padded_message
 }
 
 fn main() {
-    let random_bytes: Vec<u8> = (0..117).map(|_| { rand::random::<u8>() }).collect();
+    let random_bytes: Vec<u8> = (0..117).map(|_| rand::random::<u8>()).collect();
 
     let padded = padding(&random_bytes);
-    let size = &padded.last().unwrap()[(SIZE-8)..];
+    let size = &padded.last().unwrap()[(SIZE - 8)..];
     let expected_size = random_bytes.len().to_be_bytes();
     assert_eq!(size, &expected_size)
 }
