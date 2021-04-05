@@ -17,6 +17,7 @@ env:
   RUSTFLAGS: "-Dwarnings"
 
 jobs:
+  # Builds for no_std platforms
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -37,21 +38,111 @@ jobs:
           override: true
       - run: cargo build --no-default-features --release --target ${{ matrix.target }}
 
-  test:
-    runs-on: ubuntu-latest
+  # Linux tests
+  linux:
     strategy:
       matrix:
-        rust:
-          - 1.41.0 # MSRV
-          - stable
+        include:
+          # 32-bit Linux/x86
+          # *** NOTE: Currently broken with `asm` feature enabled! See:
+          #     https://github.com/RustCrypto/hashes/issues/251
+          #- target: i686-unknown-linux-gnu
+          #  rust: 1.41.0 # MSRV
+          #  deps: sudo apt update && sudo apt install gcc-multilib
+          #- target: i686-unknown-linux-gnu
+          #  rust: stable
+          #  deps: sudo apt update && sudo apt install gcc-multilib
+
+          # 64-bit Linux/x86_64
+          - target: x86_64-unknown-linux-gnu
+            rust: 1.41.0 # MSRV
+          - target: x86_64-unknown-linux-gnu
+            rust: stable
+
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
           override: true
-      - run: cargo test --no-default-features
-      - run: cargo test
-      - run: cargo test --features asm
-      - run: cargo test --all-features
+      - run: ${{ matrix.deps }}
+      - run: cargo test --target ${{ matrix.target }} --release --no-default-features
+      - run: cargo test --target ${{ matrix.target }} --release
+      - run: cargo test --target ${{ matrix.target }} --release --features asm
+      - run: cargo test --target ${{ matrix.target }} --release --all-features
+
+  # macOS tests
+  macos:
+    strategy:
+      matrix:
+        toolchain:
+          - 1.41.0 # MSRV
+          - stable
+
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          target: x86_64-apple-darwin
+          override: true
+      - run: cargo test --release --no-default-features
+      - run: cargo test --release
+      - run: cargo test --release --features asm
+      - run: cargo test --release --all-features
+
+  # Windows tests
+  windows:
+    strategy:
+      matrix:
+        include:
+          # 64-bit Windows (GNU)
+          # TODO(tarcieri): try re-enabling this when we bump MSRV
+          #- target: x86_64-pc-windows-gnu
+          #  toolchain: 1.41.0 # MSRV
+          - target: x86_64-pc-windows-gnu
+            toolchain: stable
+
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.target }}
+          override: true
+      - uses: msys2/setup-msys2@v2
+      - run: cargo test --target ${{ matrix.target }} --release
+
+  # Cross-compiled tests
+  # *** NOTE: Currently broken with `asm` feature enabled! See:
+  #     https://github.com/RustCrypto/hashes/issues/251
+  #
+  #  cross:
+  #    strategy:
+  #      matrix:
+  #        include:
+  #          # ARM64
+  #          - target: aarch64-unknown-linux-gnu
+  #            rust: 1.41.0 # MSRV
+  #          - target: aarch64-unknown-linux-gnu
+  #            rust: stable
+  #
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - uses: actions/checkout@v1
+  #      - uses: actions-rs/toolchain@v1
+  #        with:
+  #          profile: minimal
+  #          toolchain: ${{ matrix.rust }}
+  #          target: ${{ matrix.target }}
+  #          override: true
+  #      - run: cargo install cross
+  #      - run: cross test --target ${{ matrix.target }} --release
+  #      - run: cross test --target ${{ matrix.target }} --release --features asm
