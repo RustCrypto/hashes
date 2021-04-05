@@ -166,7 +166,6 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
     let mut abef = [state[0], state[1], state[4], state[5]];
     let mut cdgh = [state[2], state[3], state[6], state[7]];
 
-
     // Rounds 0..64
     let mut w0 = [block[3], block[2], block[1], block[0]];
     let mut w1 = [block[7], block[6], block[5], block[4]];

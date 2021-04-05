@@ -200,7 +200,6 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-
 pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     let mut block_u32 = [0u64; BLOCK_LEN];
     // since LLVM can't properly use aliasing yet it will make

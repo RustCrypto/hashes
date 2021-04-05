@@ -4,16 +4,15 @@ macro_rules! blake2_impl {
         $block_size:ident, $R1:expr, $R2:expr, $R3:expr, $R4:expr, $IV:expr,
         $vardoc:expr, $doc:expr,
     ) => {
-
         use $crate::as_bytes::AsBytes;
-        use $crate::simd::{Vector4, $vec};
+        use $crate::simd::{$vec, Vector4};
 
-        use digest::{Update, BlockInput, FixedOutputDirty, VariableOutputDirty, Reset};
-        use digest::InvalidOutputSize;
-        use digest::generic_array::GenericArray;
-        use digest::generic_array::typenum::{U4, Unsigned};
         use core::{cmp, convert::TryInto, ops::Div};
         use crypto_mac::{InvalidKeyLength, Mac, NewMac};
+        use digest::generic_array::typenum::{Unsigned, U4};
+        use digest::generic_array::GenericArray;
+        use digest::InvalidOutputSize;
+        use digest::{BlockInput, FixedOutputDirty, Reset, Update, VariableOutputDirty};
 
         type Output = GenericArray<u8, $bytes>;
 
@@ -31,9 +30,13 @@ macro_rules! blake2_impl {
         }
 
         #[inline(always)]
-        fn iv0() -> $vec { $vec::new($IV[0], $IV[1], $IV[2], $IV[3]) }
+        fn iv0() -> $vec {
+            $vec::new($IV[0], $IV[1], $IV[2], $IV[3])
+        }
         #[inline(always)]
-        fn iv1() -> $vec { $vec::new($IV[4], $IV[5], $IV[6], $IV[7]) }
+        fn iv1() -> $vec {
+            $vec::new($IV[4], $IV[5], $IV[6], $IV[7])
+        }
 
         #[inline(always)]
         fn quarter_round(v: &mut [$vec; 4], rd: u32, rb: u32, m: $vec) {
@@ -59,16 +62,12 @@ macro_rules! blake2_impl {
 
         #[inline(always)]
         fn round(v: &mut [$vec; 4], m: &[$word; 16], s: &[usize; 16]) {
-            quarter_round(v, $R1, $R2, $vec::gather(m,
-                                  s[ 0], s[ 2], s[ 4], s[ 6]));
-            quarter_round(v, $R3, $R4, $vec::gather(m,
-                                  s[ 1], s[ 3], s[ 5], s[ 7]));
+            quarter_round(v, $R1, $R2, $vec::gather(m, s[0], s[2], s[4], s[6]));
+            quarter_round(v, $R3, $R4, $vec::gather(m, s[1], s[3], s[5], s[7]));
 
             shuffle(v);
-            quarter_round(v, $R1, $R2, $vec::gather(m,
-                                  s[ 8], s[10], s[12], s[14]));
-            quarter_round(v, $R3, $R4, $vec::gather(m,
-                                  s[ 9], s[11], s[13], s[15]));
+            quarter_round(v, $R1, $R2, $vec::gather(m, s[8], s[10], s[12], s[14]));
+            quarter_round(v, $R3, $R4, $vec::gather(m, s[9], s[11], s[13], s[15]));
             unshuffle(v);
         }
 
@@ -83,45 +82,62 @@ macro_rules! blake2_impl {
             }
 
             /// Creates a new hashing context with the full set of sequential-mode parameters.
-            pub fn with_params(key: &[u8], salt: &[u8], persona: &[u8], output_size: usize) -> Self {
+            pub fn with_params(
+                key: &[u8],
+                salt: &[u8],
+                persona: &[u8],
+                output_size: usize,
+            ) -> Self {
                 let kk = key.len();
                 assert!(kk <= $bytes::to_usize());
                 assert!(output_size <= $bytes::to_usize());
 
                 // The number of bytes needed to express two words.
-                let length = $bytes::to_usize()/4;
+                let length = $bytes::to_usize() / 4;
                 assert!(salt.len() <= length);
                 assert!(persona.len() <= length);
 
                 // Build a parameter block
                 let mut p = [0 as $word; 8];
-                p[0] = 0x0101_0000 ^ ((kk as $word) << 8) ^
-                    (output_size as $word);
+                p[0] = 0x0101_0000 ^ ((kk as $word) << 8) ^ (output_size as $word);
 
                 // salt is two words long
                 if salt.len() < length {
-                    let mut padded_salt = GenericArray::<u8, <$bytes as Div<U4>>::Output>::default();
+                    let mut padded_salt =
+                        GenericArray::<u8, <$bytes as Div<U4>>::Output>::default();
                     for i in 0..salt.len() {
                         padded_salt[i] = salt[i];
                     }
-                    p[4] = $word::from_le_bytes(padded_salt[0 .. length/2].try_into().unwrap());
-                    p[5] = $word::from_le_bytes(padded_salt[length/2 .. padded_salt.len()].try_into().unwrap());
+                    p[4] = $word::from_le_bytes(padded_salt[0..length / 2].try_into().unwrap());
+                    p[5] = $word::from_le_bytes(
+                        padded_salt[length / 2..padded_salt.len()]
+                            .try_into()
+                            .unwrap(),
+                    );
                 } else {
-                    p[4] = $word::from_le_bytes(salt[0 .. salt.len()/2].try_into().unwrap());
-                    p[5] = $word::from_le_bytes(salt[salt.len()/2 .. salt.len()].try_into().unwrap());
+                    p[4] = $word::from_le_bytes(salt[0..salt.len() / 2].try_into().unwrap());
+                    p[5] =
+                        $word::from_le_bytes(salt[salt.len() / 2..salt.len()].try_into().unwrap());
                 }
 
                 // persona is also two words long
                 if persona.len() < length {
-                    let mut padded_persona = GenericArray::<u8, <$bytes as Div<U4>>::Output>::default();
+                    let mut padded_persona =
+                        GenericArray::<u8, <$bytes as Div<U4>>::Output>::default();
                     for i in 0..persona.len() {
                         padded_persona[i] = persona[i];
                     }
-                    p[6] = $word::from_le_bytes(padded_persona[0 .. length/2].try_into().unwrap());
-                    p[7] = $word::from_le_bytes(padded_persona[length/2 .. padded_persona.len()].try_into().unwrap());
+                    p[6] = $word::from_le_bytes(padded_persona[0..length / 2].try_into().unwrap());
+                    p[7] = $word::from_le_bytes(
+                        padded_persona[length / 2..padded_persona.len()]
+                            .try_into()
+                            .unwrap(),
+                    );
                 } else {
-                    p[6] = $word::from_le_bytes(persona[0 .. length/2].try_into().unwrap());
-                    p[7] = $word::from_le_bytes(persona[length/2 .. persona.len()].try_into().unwrap());
+                    p[6] = $word::from_le_bytes(persona[0..length / 2].try_into().unwrap());
+                    p[7] = $word::from_le_bytes(
+                        persona[length / 2..persona.len()].try_into().unwrap(),
+                    );
                 }
 
                 let mut state = Self::with_parameter_block(&p);
@@ -174,7 +190,9 @@ macro_rules! blake2_impl {
                     rest = &rest[part.len()..];
 
                     copy(part, &mut self.m.as_mut_bytes()[off..]);
-                    self.t = self.t.checked_add(part.len() as u64)
+                    self.t = self
+                        .t
+                        .checked_add(part.len() as u64)
                         .expect("hash data length overflow");
                 }
 
@@ -185,7 +203,9 @@ macro_rules! blake2_impl {
                     rest = &rest[part.len()..];
 
                     copy(part, &mut self.m.as_mut_bytes());
-                    self.t = self.t.checked_add(part.len() as u64)
+                    self.t = self
+                        .t
+                        .checked_add(part.len() as u64)
                         .expect("hash data length overflow");
                 }
 
@@ -194,7 +214,9 @@ macro_rules! blake2_impl {
                     self.compress(0, 0);
 
                     copy(rest, &mut self.m.as_mut_bytes());
-                    self.t = self.t.checked_add(rest.len() as u64)
+                    self.t = self
+                        .t
+                        .checked_add(rest.len() as u64)
                         .expect("hash data length overflow");
                 }
             }
@@ -203,7 +225,6 @@ macro_rules! blake2_impl {
             pub fn finalize_last_node(mut self) -> Output {
                 self.finalize_with_flag(!0)
             }
-
 
             fn finalize_with_flag(&mut self, f1: $word) -> Output {
                 let off = self.t as usize % (2 * $bytes::to_usize());
@@ -230,15 +251,10 @@ macro_rules! blake2_impl {
                 let t1 = match $bytes::to_u8() {
                     64 => 0,
                     32 => (self.t >> 32) as $word,
-                    _  => unreachable!(),
+                    _ => unreachable!(),
                 };
 
-                let mut v = [
-                    h[0],
-                    h[1],
-                    iv0(),
-                    iv1() ^ $vec::new(t0, t1, f0, f1),
-                ];
+                let mut v = [h[0], h[1], iv0(), iv1() ^ $vec::new(t0, t1, f0, f1)];
 
                 round(&mut v, m, &SIGMA[0]);
                 round(&mut v, m, &SIGMA[1]);
@@ -261,7 +277,9 @@ macro_rules! blake2_impl {
         }
 
         impl Default for $state {
-            fn default() -> Self { Self::new_keyed(&[], $bytes::to_usize()) }
+            fn default() -> Self {
+                Self::new_keyed(&[], $bytes::to_usize())
+            }
         }
 
         impl BlockInput for $state {
@@ -304,7 +322,6 @@ macro_rules! blake2_impl {
         opaque_debug::implement!($state);
         digest::impl_write!($state);
 
-
         #[derive(Clone)]
         #[doc=$doc]
         pub struct $fix_state {
@@ -339,7 +356,7 @@ macro_rules! blake2_impl {
         impl FixedOutputDirty for $fix_state {
             type OutputSize = $bytes;
 
-            fn finalize_into_dirty(&mut self, out: &mut Output)  {
+            fn finalize_into_dirty(&mut self, out: &mut Output) {
                 out.copy_from_slice(&self.state.finalize_with_flag(0));
             }
         }
@@ -371,7 +388,9 @@ macro_rules! blake2_impl {
         impl Mac for $fix_state {
             type OutputSize = $bytes;
 
-            fn update(&mut self, data: &[u8]) { self.state.update(data); }
+            fn update(&mut self, data: &[u8]) {
+                self.state.update(data);
+            }
 
             fn reset(&mut self) {
                 <Self as Reset>::reset(self)
@@ -391,5 +410,5 @@ macro_rules! blake2_impl {
                 core::ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
             }
         }
-    }
+    };
 }

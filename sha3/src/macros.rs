@@ -1,6 +1,5 @@
 macro_rules! impl_state {
     ($state:ident, $rate:ident, $padding:ty, $doc:expr) => {
-
         #[allow(non_camel_case_types)]
         #[derive(Clone, Default)]
         #[doc=$doc]
@@ -16,12 +15,14 @@ macro_rules! impl_state {
             }
 
             fn apply_padding(&mut self) {
-                let buf = self.buffer.pad_with::<$padding>()
+                let buf = self
+                    .buffer
+                    .pad_with::<$padding>()
                     .expect("we never use input_lazy");
                 self.state.absorb_block(buf);
             }
         }
-    }
+    };
 }
 
 macro_rules! sha3_impl {
