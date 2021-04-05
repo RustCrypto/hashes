@@ -6,9 +6,6 @@ use std::str;
 use whirlpool::{Digest, Whirlpool};
 
 fn main() {
-    let mut a = [2, 3, 4, 5, 6];
-    a.rotate_right(2);
-    assert_eq!(a, [5, 6, 2, 3, 4,]);
     // create a hasher object, to use it do not forget to import `Digest` trait
     let mut hasher = FSB160::new();
     // write input message

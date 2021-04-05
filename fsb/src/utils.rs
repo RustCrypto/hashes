@@ -6,7 +6,7 @@ use whirlpool::{Digest, Whirlpool};
 use std::str;
 use std::convert::TryInto;
 
-const N: usize = 5 >> 18;
+const N: usize = 5 << 18;
 // number of indexes
 const W: usize = 80;
 
@@ -16,7 +16,7 @@ const P: usize = 653;
 const S: usize = 1_120;
 const SIZE_INPUT_COMPRESS: usize = S / 8; // s = w * log_2(n/w)
 
-const HASH_OUTPUT_SIZE: usize = 160 / 8;
+const HASH_OUTPUT_SIZE: usize = 160 / 8; // size (in bits) divided by 8 (to bytes)
 
 pub const SIZE_MSG_CHUNKS: usize = SIZE_INPUT_COMPRESS - SIZE_OUTPUT_COMPRESS;
 
@@ -37,7 +37,7 @@ pub fn define_iv(index: usize) -> [u8; SIZE_VECTORS] {
     // todo: this can be a constant
     let shift = 8 - (P % 8) as u8;
 
-    // Now we change on each of the nr_vectors vectors. We shift right and left, basically to
+    // Now we change the last byte of the vector. We shift right and left, basically to
     // replace the last `shift` bits by zero. This is what I found to be most optimal.
     if let Some(last) = subset_pi.last_mut() {
         *last >>= shift;
@@ -52,7 +52,8 @@ pub fn define_iv(index: usize) -> [u8; SIZE_VECTORS] {
 /// from the inputs bits like this:
 /// $W_i = i \times (n / w) + IV_i + M_i \times 2^{r / w}.
 /// todo: verify that the output type is what is expected. Maybe we don't need such a big
-/// integer.
+/// integer. I think a u32 would be sufficient. Maybe a u16. Numbers are between 0 and N-1
+/// (see page 4 final line)
 fn computing_W_indices(
     input_vector: &[u8; SIZE_OUTPUT_COMPRESS],
     message: &[u8; SIZE_MSG_CHUNKS],
@@ -74,7 +75,7 @@ fn computing_W_indices(
 /// batches of size not multiple of 8. Note that the IV will be broken always in size 8, which
 /// is quite convenient. Also, the only numbers we'll have to worry for are 5 and 6.
 fn dividing_bits(input_bits: &[u8], size_batches: usize) -> [u8; W] {
-    if size_batches != 5usize && size_batches != 6usize {
+    if size_batches != 6usize { // size_batches != 5usize &&
         panic!(
             "Expecting batches of size 5 or 6. Other values do not follow \
         the standard specification"
@@ -118,7 +119,7 @@ pub fn compress(hash: &mut [u8; SIZE_OUTPUT_COMPRESS], message_block: &[u8; SIZE
         // shift and truncate the array
         let truncated = shift_and_truncate(&mut vector, shift_value);
 
-        // Now we do the OR with all vectors
+        // Now we do the XOR with all vectors
         initial_vector
             .iter_mut()
             .zip(truncated.iter())
@@ -163,29 +164,28 @@ pub fn shift_and_truncate(
     // plus two.
     // And the starting bit:
     // todo: double check that shift_value is always larger than P.
-    let starting_bit = 8 - ((shift_value - bits_in_cue) % 8);
+    let remaining_bits = (shift_value - bits_in_cue) % 8;
 
-    for position in 0..(bytes_to_shift - 2) {
-        truncated[position] ^= array[starting_byte + position] << starting_bit;
-        truncated[position] ^= array[starting_byte + position + 1] >> (8 - starting_bit);
+    for position in 0..(bytes_to_shift - 1) {
+        truncated[position] =
+            (
+                array[starting_byte + position] << (8 - remaining_bits) |
+                    array[starting_byte + position + 1] >> remaining_bits
+            );
     }
 
     // The last case is different, as we don't know if there are sufficient bits in the cue to fill
     // up a full byte. We have three cases: 1. where P % 8 (bits_in_cue) is larger than
     // starting_bit, 2. where it is equal, and 3. where it is smaller. But we can fill the bits, and
     // then decide how to proceed depending on the difference.
-    let difference = bits_in_cue.checked_sub(starting_bit);
-
-    truncated[bytes_to_shift - 2] ^= array[starting_byte + bytes_to_shift - 2] << starting_bit;
-    truncated[bytes_to_shift - 2] ^=
-        array[starting_byte + bytes_to_shift - 2 + 1] >> (8 - starting_bit);
+    let difference = bits_in_cue.checked_sub(8 - remaining_bits);
 
     match difference {
         Some(x) => {
             if x > 0 {
                 // the next position takes starting_bits from the byte with the remaining zeros, and
                 // `difference` from the first byte. Then we iterate by shifting 8 - difference bits.
-                truncated[bytes_to_shift - 1] ^= array[starting_byte + bytes_to_shift - 2] << starting_bit;
+                truncated[bytes_to_shift - 1] ^= array[starting_byte + bytes_to_shift - 2] << (8 - remaining_bits);
                 truncated[bytes_to_shift - 1] ^= array[0] >> x;
                 for (index, position) in (bytes_to_shift..SIZE_OUTPUT_COMPRESS).enumerate() {
                     truncated[position] ^= array[index] << (8 - x);
@@ -200,7 +200,7 @@ pub fn shift_and_truncate(
 
         },
         None => {
-            let positive_diff = starting_bit - bits_in_cue;
+            let positive_diff = (8 - remaining_bits) - bits_in_cue;
             // we need to fill the remainder with bits of the next byte.
             truncated[bytes_to_shift - 2] ^= array[0] >> (8 - positive_diff);
             for (index, position) in ((bytes_to_shift - 1)..SIZE_OUTPUT_COMPRESS).enumerate() {

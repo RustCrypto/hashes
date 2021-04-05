@@ -41,12 +41,8 @@ impl FSB160 {
     //    fn update_len(&mut self, len: u64) {
     //        self.bit_length += len;
     //    }
-    /// If there is enough place to pad with the size, we use AnsiX923, else, we first pad with
-    /// zeros, and then a final blcok with AnsiX923.
     /// todo: seems that we don't need to input the size of the message, so maybe BlockBuffer
     /// keeps the state locally.
-    /// todo: Check that the padding actually does what we want. Note in the PDF that there is a
-    /// specific order for the bytes of the padding.
     fn finalize_inner(&mut self) {
         // padding
         let hash = &mut self.hash;
@@ -63,7 +59,10 @@ impl FSB160 {
             padding[0] = 128u8;
             self.buffer
                 .input_block(&padding, |b| compress(hash, convert(b)));
-            self.finalize_inner();
+            let mut second_padding = vec![0; crate::SIZE_MSG_CHUNKS - 8];
+            second_padding.extend_from_slice(&helper_transform_usize(5usize));
+            self.buffer
+                .input_block(&second_padding, |b| compress(hash, convert(b)));
         }
     }
 }
@@ -122,6 +121,7 @@ impl Update for FSB {
 impl FixedOutputDirty for FSB160 {
     type OutputSize = OutputSize;
 
+    // todo: probably no need of dirty here.
     fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, OutputSize>) {
         self.finalize_inner();
         let final_whirpool = final_compression(self.hash);
