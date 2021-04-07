@@ -25,7 +25,7 @@ sha1-asm = { version = "0.4", optional = true }
 cpuid-bool = "0.2"
 
 [target.'cfg(all(target_arch = "aarch64", target_os = "linux"))'.dependencies]
-libc = { version = "0.2.88", optional = true }
+libc = { version = "0.2.93", optional = true }
 
 [dev-dependencies]
 digest = { version = "0.9", features = ["dev"] }
