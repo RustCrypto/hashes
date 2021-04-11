@@ -1,9 +1,6 @@
 pub use digest::Digest;
 
-use block_buffer::{
-    block_padding::{AnsiX923, ZeroPadding},
-    BlockBuffer,
-};
+use block_buffer::BlockBuffer;
 use digest::{
     consts::{U20, U60},
     generic_array::GenericArray,
@@ -28,9 +25,9 @@ type OutputSize = U20;
 /// Structure representing the state of a Whirlpool computation
 #[derive(Clone)]
 pub struct FSB160 {
-    //    /// bit size of the message till the current moment (the bit size is represented by a 64 bit
-    //    /// number)
-    //    bit_length: u64,
+    /// bit size of the message till the current moment (the bit size is represented by a 64 bit
+    /// number)
+    bit_length: u64,
     /// size of the message being processed
     buffer: BlockBuffer<BlockSize>,
     /// value of the input vector
@@ -38,11 +35,10 @@ pub struct FSB160 {
 }
 
 impl FSB160 {
-    //    fn update_len(&mut self, len: u64) {
-    //        self.bit_length += len;
-    //    }
-    /// todo: seems that we don't need to input the size of the message, so maybe BlockBuffer
-    /// keeps the state locally.
+    fn update_len(&mut self, len: u64) {
+        self.bit_length += len * 8;
+    }
+
     fn finalize_inner(&mut self) {
         // padding
         let hash = &mut self.hash;
@@ -51,7 +47,7 @@ impl FSB160 {
         if pos <= crate::SIZE_MSG_CHUNKS - 8 - 1 {
             let mut padding = vec![0; crate::SIZE_MSG_CHUNKS - pos - 8];
             padding[0] = 128u8;
-            padding.extend_from_slice(&helper_transform_usize(5usize));
+            padding.extend_from_slice(&helper_transform_usize(self.bit_length));
             self.buffer
                 .input_block(&padding, |b| compress(hash, convert(b)));
         } else {
@@ -60,7 +56,7 @@ impl FSB160 {
             self.buffer
                 .input_block(&padding, |b| compress(hash, convert(b)));
             let mut second_padding = vec![0; crate::SIZE_MSG_CHUNKS - 8];
-            second_padding.extend_from_slice(&helper_transform_usize(5usize));
+            second_padding.extend_from_slice(&helper_transform_usize(self.bit_length));
             self.buffer
                 .input_block(&second_padding, |b| compress(hash, convert(b)));
         }
@@ -68,9 +64,8 @@ impl FSB160 {
 }
 
 // I'm trying to avoid use unsafe code for this transformation. We are certain that the size of the
-// buffer can be represented in 8 bytes. If not, todo: we need to panic
-// check the order of the bytes.
-fn helper_transform_usize(x: usize) -> [u8; 8] {
+// buffer can be represented in 8 bytes.
+fn helper_transform_usize(x: u64) -> [u8; 8] {
     let b1: u8 = ((x >> 56) & 0xff) as u8;
     let b2: u8 = ((x >> 48) & 0xff) as u8;
     let b3: u8 = ((x >> 40) & 0xff) as u8;
@@ -111,17 +106,16 @@ impl BlockInput for FSB {
 impl Update for FSB {
     fn update(&mut self, input: impl AsRef<[u8]>) {
         let input = input.as_ref();
+
         let hash = &mut self.hash;
         self.buffer
             .input_block(input, |b| compress(hash, convert(b)));
     }
 }
 
-// todo: This function is unchecked
 impl FixedOutputDirty for FSB160 {
     type OutputSize = OutputSize;
 
-    // todo: probably no need of dirty here.
     fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, OutputSize>) {
         self.finalize_inner();
         let final_whirpool = final_compression(self.hash);
@@ -140,7 +134,7 @@ digest::impl_write!(FSB160);
 
 #[cfg(test)]
 mod tests {
-    use crate::pi::Pi;
+    use crate::pi::PI;
     use crate::{helper_transform_usize, Digest, FSB160};
 
     #[test]
@@ -188,7 +182,7 @@ mod tests {
         let nr_block = ceiling(13, 8);
 
         let shift = 8 - (13 % 8);
-        let mut trial_pi = Pi[..6].to_vec();
+        let mut trial_pi = PI[..6].to_vec();
 
         for i in 0..3 {
             trial_pi[2 * i + 1] <<= shift;

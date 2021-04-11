@@ -4,16 +4,12 @@ const S: usize = 1_120; // s = w * log_2(n/w)
 const R: usize = 640;
 const SIZE: usize = (S - R) / 8;
 
-// We are padding to bytes, while the paper does so to bits. Check how it is done in the
-// other hash libraries. todo: check
 // The following seems pretty complex for a padding. Sure there are better ways to do this.
 pub fn padding(input_message: &[u8]) -> Vec<[u8; SIZE]> {
     let mut padded_message: Vec<[u8; SIZE]> = Vec::new();
     let length = input_message.len();
     let nmbr_blocks = length / (SIZE);
     // we simply copy the first values of the input_message to the padded_message
-    // todo: consider using the following
-    // https://stackoverflow.com/questions/46867355/is-it-possible-to-split-a-vector-into-groups-of-10-with-iterators
     for index in 0..nmbr_blocks {
         let mut block = [0u8; SIZE];
         block.copy_from_slice(&input_message[(index * SIZE)..((index + 1) * SIZE)]);
