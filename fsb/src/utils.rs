@@ -64,8 +64,7 @@ fn computing_W_indices(
 /// batches of size not multiple of 8. Note that the IV will be broken always in size 8, which
 /// is quite convenient. Also, the only numbers we'll have to worry for are 5 and 6.
 fn dividing_bits(input_bits: &[u8; SIZE_MSG_CHUNKS], size_batches: usize) -> [u8; W] {
-    if size_batches != 6usize {
-        // size_batches != 5usize &&
+    if size_batches != 5usize && size_batches != 6usize {
         panic!(
             "Expecting batches of size 5 or 6. Other values do not follow \
         the standard specification"
@@ -74,7 +73,7 @@ fn dividing_bits(input_bits: &[u8; SIZE_MSG_CHUNKS], size_batches: usize) -> [u8
 
     let mut new_bits = [0u8; W];
     let shifting_factor = (8 - size_batches) as u8;
-    for i in 0..(W - 1) {
+    for (i, new_bit) in new_bits.iter_mut().enumerate().take(W - 1) {
         let position = i * size_batches;
         let initial_byte = position / 8;
         let initial_bit = position % 8;
@@ -82,11 +81,11 @@ fn dividing_bits(input_bits: &[u8; SIZE_MSG_CHUNKS], size_batches: usize) -> [u8
 
         // Might be a better way to do this function
         if switch == 1 {
-            new_bits[i] = (input_bits[initial_byte] << initial_bit as u8
+            *new_bit = (input_bits[initial_byte] << initial_bit as u8
                 | input_bits[initial_byte + 1] >> (8 - initial_bit as u8))
                 >> shifting_factor;
         } else {
-            new_bits[i] = (input_bits[initial_byte] << initial_bit as u8) >> shifting_factor;
+            *new_bit = (input_bits[initial_byte] << initial_bit as u8) >> shifting_factor;
         }
     }
     new_bits[W - 1] = (input_bits[SIZE_MSG_CHUNKS - 1] << 2) >> 2;
@@ -101,9 +100,9 @@ pub fn compress(hash: &mut [u8; SIZE_OUTPUT_COMPRESS], message_block: &[u8; SIZE
     let mut initial_vector = [0u8; SIZE_OUTPUT_COMPRESS];
 
     let w_indices = computing_W_indices(hash, message_block);
-    for i in 0..W {
-        let chosen_vec = w_indices[i] / R as u32;
-        let shift_value = w_indices[i] % R as u32;
+    for w_index in w_indices.iter() {
+        let chosen_vec = w_index / R as u32;
+        let shift_value = w_index % R as u32;
         let mut vector = define_iv(chosen_vec as usize);
         // shift and truncate the array
         let truncated = shift_and_truncate(&mut vector, shift_value);
@@ -137,9 +136,9 @@ pub fn shift_and_truncate(
     let mut truncated = [0u8; SIZE_OUTPUT_COMPRESS];
 
     if shift_value == 0 {
-        return array[..SIZE_OUTPUT_COMPRESS]
+        array[..SIZE_OUTPUT_COMPRESS]
             .try_into()
-            .expect("SIZE_VECTORS is always bigger than SIZE_OUTPUT_COMPRESS");
+            .expect("SIZE_VECTORS is always bigger than SIZE_OUTPUT_COMPRESS")
     } else if shift_value <= (bits_in_cue as u32) {
         let bytes_to_shift = 1;
         let starting_byte = (array_len - bytes_to_shift) as usize;
@@ -214,9 +213,8 @@ pub fn shift_and_truncate(
 
             truncated
         } else {
-            for position in 0..bytes_to_shift {
-                truncated[position] = array[starting_byte + position];
-            }
+            truncated[..bytes_to_shift]
+                .clone_from_slice(&array[starting_byte..(starting_byte + bytes_to_shift)]);
 
             // we need to fill the remainder with bits of the next byte.
             truncated[bytes_to_shift - 1] ^= array[0] >> bits_in_cue;

@@ -24,7 +24,7 @@ type BlockSize = U60;
 type OutputSize = U20;
 /// Structure representing the state of a Whirlpool computation
 #[derive(Clone)]
-pub struct FSB160 {
+pub struct Fsb160 {
     /// bit size of the message till the current moment (the bit size is represented by a 64 bit
     /// number)
     bit_length: u64,
@@ -34,7 +34,7 @@ pub struct FSB160 {
     hash: [u8; crate::SIZE_OUTPUT_COMPRESS],
 }
 
-impl FSB160 {
+impl Fsb160 {
     fn update_len(&mut self, len: u64) {
         self.bit_length += len * 8;
     }
@@ -44,7 +44,7 @@ impl FSB160 {
         let hash = &mut self.hash;
         // position of the buffer
         let pos = self.buffer.position();
-        if pos <= crate::SIZE_MSG_CHUNKS - 8 - 1 {
+        if pos < crate::SIZE_MSG_CHUNKS - 8 {
             let mut padding = vec![0; crate::SIZE_MSG_CHUNKS - pos - 8];
             padding[0] = 128u8;
             padding.extend_from_slice(&helper_transform_usize(self.bit_length));
@@ -74,7 +74,7 @@ fn helper_transform_usize(x: u64) -> [u8; 8] {
     let b6: u8 = ((x >> 16) & 0xff) as u8;
     let b7: u8 = ((x >> 8) & 0xff) as u8;
     let b8: u8 = (x & 0xff) as u8;
-    return [b1, b2, b3, b4, b5, b6, b7, b8];
+    [b1, b2, b3, b4, b5, b6, b7, b8]
 }
 
 fn convert(block: &GenericArray<u8, U480>) -> &[u8; BLOCKS_SIZE] {
@@ -113,7 +113,7 @@ impl Update for FSB {
     }
 }
 
-impl FixedOutputDirty for FSB160 {
+impl FixedOutputDirty for Fsb160 {
     type OutputSize = OutputSize;
 
     fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, OutputSize>) {
@@ -123,24 +123,24 @@ impl FixedOutputDirty for FSB160 {
     }
 }
 
-impl Reset for FSB160 {
+impl Reset for Fsb160 {
     fn reset(&mut self) {
         self.buffer.reset();
         self.hash = [0u8; R / 8];
     }
 }
 
-digest::impl_write!(FSB160);
+digest::impl_write!(Fsb160);
 
 #[cfg(test)]
 mod tests {
     use crate::pi::PI;
-    use crate::{helper_transform_usize, Digest, FSB160};
+    use crate::{helper_transform_usize, Digest, Fsb160};
 
     #[test]
     fn test_hash_function() {
         // create a hasher object, to use it do not forget to import `Digest` trait
-        let mut hasher = FSB160::new();
+        let mut hasher = Fsb160::new();
         // write input message
         hasher.update(b"Hello Whirlpool");
         // read hash digest (it will consume hasher)
