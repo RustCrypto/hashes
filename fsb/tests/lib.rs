@@ -1,7 +1,7 @@
 use hex_literal::hex;
 
 use digest::Digest;
-use fsb_rust::*;
+use fsb::*;
 
 #[test]
 fn main() {

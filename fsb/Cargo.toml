@@ -1,16 +1,19 @@
 [package]
-name = "fsb_rust"
+name = "fsb"
 version = "0.1.0"
-authors = ["iquerejeta <querejeta.inigo@gmail.com>"]
+description = "FSB hash function"
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "fsb", "hash", "digest"]
+categories = ["cryptography", "no-std"]
 
 [dependencies]
 whirlpool = "0.9"
-digest = "0.9.0"
+digest = "0.9"
 block-buffer = { version = "0.9", features = ["block-padding"] }
-hex-literal = "0.3.1"
 
 [dev-dependencies]
-rand = "0.7.3"
+hex-literal = "0.3.1"
