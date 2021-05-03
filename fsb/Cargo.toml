@@ -14,6 +14,7 @@ categories = ["cryptography", "no-std"]
 whirlpool = "0.9"
 digest = "0.9"
 block-buffer = { version = "0.9", features = ["block-padding"] }
+opaque-debug = "0.3"
 
 [dev-dependencies]
 hex-literal = "0.3.1"
