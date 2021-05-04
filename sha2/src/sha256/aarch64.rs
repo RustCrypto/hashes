@@ -10,7 +10,7 @@ pub fn sha2_supported() -> bool {
 #[cfg(target_os = "macos")]
 #[inline(always)]
 pub fn sha2_supported() -> bool {
-    // TODO: Verify this is true for all available chips.
+    // TODO: Use cpufeatures once support lands
     true
 }
 
