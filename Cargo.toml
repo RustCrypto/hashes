@@ -22,4 +22,4 @@ members = [
 opt-level = 2
 
 [patch.crates-io]
-sha2-asm = { git = "https://github.com/dignifiedquire/asm-hashes", branch = "arm-m1" }
+sha2-asm = { git = "https://github.com/RustCrypto/asm-hashes" }
