@@ -261,8 +261,9 @@ dependencies = [
 
 [[package]]
 name = "sha2-asm"
-version = "0.6.0"
-source = "git+https://github.com/dignifiedquire/asm-hashes?branch=arm-m1#8f5a9eb13e01220ce861225fa4e5c803d4749098"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c397a68de3079fa40e34eba871bea7f10de663f27f4c8b865c89ab47f103723"
 dependencies = [
  "cc",
 ]
