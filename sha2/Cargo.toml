@@ -19,7 +19,7 @@ digest = "0.9"
 block-buffer = "0.9"
 opaque-debug = "0.3"
 cfg-if = "1.0"
-sha2-asm = { version = "0.5", optional = true }
+sha2-asm = { version = "0.6", optional = true }
 
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
 cpuid-bool = "0.2"
@@ -38,3 +38,4 @@ asm = ["sha2-asm", "libc"]
 compress = [] # Expose compress function
 force-soft = [] # Force software implementation
 asm-aarch64 = ["asm"] # DEPRECATED: use `asm` instead
+
