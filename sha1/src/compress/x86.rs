@@ -95,7 +95,7 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     state[4] = _mm_extract_epi32(state_e, 3) as u32;
 }
 
-cpuid_bool::new!(shani_cpuid, "sha", "sse2", "ssse3", "sse4.1");
+cpufeatures::new!(shani_cpuid, "sha", "sse2", "ssse3", "sse4.1");
 
 pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
