@@ -70,6 +70,7 @@ jobs:
       - run: cargo test --target ${{ matrix.target }} --release --no-default-features
       - run: cargo test --target ${{ matrix.target }} --release
       - run: cargo test --target ${{ matrix.target }} --release --features asm
+      - run: cargo test --target ${{ matrix.target }} --release --all-features
 
   # macOS tests
   macos:
