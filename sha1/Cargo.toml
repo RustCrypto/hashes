@@ -21,11 +21,12 @@ opaque-debug = "0.3"
 cfg-if = "1.0"
 sha1-asm = { version = "0.4", optional = true }
 
-[target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
-cpufeatures = "0.1"
-
+[target.aarch64-apple-darwin.dependencies]
+cpufeatures = { version = "0.1", git = "https://github.com/rustcrypto/utils.git" }
 [target.'cfg(all(target_arch = "aarch64", target_os = "linux"))'.dependencies]
-libc = { version = "0.2.93", optional = true }
+cpufeatures = { version = "0.1", git = "https://github.com/rustcrypto/utils.git" }
+[target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
+cpufeatures = { version = "0.1", git = "https://github.com/rustcrypto/utils.git" }
 
 [dev-dependencies]
 digest = { version = "0.9", features = ["dev"] }
@@ -34,7 +35,7 @@ hex-literal = "0.2"
 [features]
 default = ["std"]
 std = ["digest/std"]
-asm = ["sha1-asm", "libc"]
+asm = ["sha1-asm"]
 compress = [] # Expose compress function
 force-soft = [] # Force software implementation
 

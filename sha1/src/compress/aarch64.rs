@@ -1,17 +1,16 @@
-#![cfg(feature = "asm-aarch64")]
-use libc::{getauxval, AT_HWCAP, HWCAP_SHA1};
+//! SHA-1 `aarch64` backend.
 
-fn sha1_supported() -> bool {
-    #[allow(unsafe_code)]
-    let hwcaps: u64 = unsafe { getauxval(AT_HWCAP) };
-    (hwcaps & HWCAP_SHA1) != 0
-}
+/// Per rustc target feature docs for `aarch64-unknown-linux-gnu` and
+/// `aarch64-apple-darwin` platforms, the `sha2` target feature enables
+/// SHA-1 as well:
+///
+/// > Enable SHA1 and SHA256 support.
+cpufeatures::new!(sha2_hwcap, "sha2");
 
 pub fn compress(state: &mut [u32; 5], blocks: &[u8; 64]) {
-    // TODO: Replace this platform-specific call with is_aarch64_feature_detected!("sha1") once
-    // that macro is stabilised and https://github.com/rust-lang/rfcs/pull/2725 is implemented
-    // to let us use it on no_std.
-    if sha1_supported() {
+    // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
+    // after stabilization
+    if sha2_hwcap::get() {
         for block in blocks {
             sha1_asm::compress(state, block);
         }
