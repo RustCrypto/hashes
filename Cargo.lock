@@ -61,6 +61,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5cd5a7748210e7ec1a9696610b1015e6e31fbf58f77a160801f124bd1c36592a"
 
 [[package]]
+name = "cpufeatures"
+version = "0.1.0"
+source = "git+https://github.com/rustcrypto/utils.git#fd95867b114152b75ef12271199976902698e3bd"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "crypto-mac"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -228,7 +236,7 @@ version = "0.9.5"
 dependencies = [
  "block-buffer",
  "cfg-if",
- "cpufeatures",
+ "cpufeatures 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "digest",
  "hex-literal",
  "libc",
@@ -251,10 +259,9 @@ version = "0.9.4"
 dependencies = [
  "block-buffer",
  "cfg-if",
- "cpufeatures",
+ "cpufeatures 0.1.0 (git+https://github.com/rustcrypto/utils.git)",
  "digest",
  "hex-literal",
- "libc",
  "opaque-debug",
  "sha2-asm",
 ]
