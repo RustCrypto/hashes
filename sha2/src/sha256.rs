@@ -163,6 +163,11 @@ cfg_if::cfg_if! {
     }
 }
 
+/// Raw SHA-256 compression function.
+///
+/// This is a low-level "hazmat" API which provides direct access to the core
+/// functionality of SHA-256.
+#[cfg_attr(docsrs, doc(cfg(feature = "compress")))]
 pub fn compress256(state: &mut [u32; 8], blocks: &[GenericArray<u8, U64>]) {
     // SAFETY: GenericArray<u8, U64> and [u8; 64] have
     // exactly the same memory layout
