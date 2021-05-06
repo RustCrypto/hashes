@@ -22,11 +22,11 @@ cfg-if = "1.0"
 sha1-asm = { version = "0.4", optional = true }
 
 [target.aarch64-apple-darwin.dependencies]
-cpufeatures = { version = "0.1", git = "https://github.com/rustcrypto/utils.git" }
+cpufeatures = "0.1.1"
 [target.'cfg(all(target_arch = "aarch64", target_os = "linux"))'.dependencies]
-cpufeatures = { version = "0.1", git = "https://github.com/rustcrypto/utils.git" }
+cpufeatures = "0.1.1"
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
-cpufeatures = { version = "0.1", git = "https://github.com/rustcrypto/utils.git" }
+cpufeatures = "0.1.1"
 
 [dev-dependencies]
 digest = { version = "0.9", features = ["dev"] }
