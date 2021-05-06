@@ -1,3 +1,5 @@
+//! SHA-256 `x86`/`x86_64` backend
+
 #![allow(clippy::many_single_char_names)]
 
 #[cfg(target_arch = "x86")]
