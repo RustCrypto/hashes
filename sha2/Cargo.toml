@@ -1,6 +1,6 @@
 [package]
 name = "sha2"
-version = "0.9.4"
+version = "0.9.5"
 description = """
 Pure Rust implementation of the SHA-2 hash function family
 including SHA-224, SHA-256, SHA-384, and SHA-512.
