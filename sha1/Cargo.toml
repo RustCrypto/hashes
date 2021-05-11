@@ -1,6 +1,6 @@
 [package]
 name = "sha-1"
-version = "0.9.5"
+version = "0.9.6"
 description = "SHA-1 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
