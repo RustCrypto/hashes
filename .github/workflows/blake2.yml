@@ -60,7 +60,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2021-05-01
           override: true
       - run: cargo test --features simd
       - run: cargo test --features simd_opt
