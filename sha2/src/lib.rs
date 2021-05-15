@@ -2,15 +2,15 @@
 //!
 //! There are 6 standard algorithms specified in the SHA-2 standard:
 //!
-//! * `Sha224`, which is the 32-bit `Sha256` algorithm with the result truncated
+//! * `Sha224`, which is the 8 x 32-bit `Sha256` algorithm with the result truncated
 //! to 224 bits.
-//! * `Sha256`, which is the 32-bit `Sha256` algorithm.
-//! * `Sha384`, which is the 64-bit `Sha512` algorithm with the result truncated
+//! * `Sha256`, which is the 8 x 32-bit `Sha256` algorithm.
+//! * `Sha384`, which is the 8 x 64-bit `Sha512` algorithm with the result truncated
 //! to 384 bits.
-//! * `Sha512`, which is the 64-bit `Sha512` algorithm.
-//! * `Sha512Trunc224`, which is the 64-bit `Sha512` algorithm with the result
+//! * `Sha512`, which is the 8 x 64-bit `Sha512` algorithm.
+//! * `Sha512Trunc224`, which is the 8 x 64-bit `Sha512` algorithm with the result
 //! truncated to 224 bits.
-//! * `Sha512Trunc256`, which is the 64-bit `Sha512` algorithm with the result
+//! * `Sha512Trunc256`, which is the 8 x 64-bit `Sha512` algorithm with the result
 //! truncated to 256 bits.
 //!
 //! Algorithmically, there are only 2 core algorithms: `Sha256` and `Sha512`.
