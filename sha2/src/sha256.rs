@@ -153,7 +153,7 @@ cfg_if::cfg_if! {
         }
         mod x86;
         use x86::compress;
-    } else if #[cfg(all(feature = "asm", target_arch = "aarch64", any(target_os = "macos", target_os = "linux")))] {
+    } else if #[cfg(all(feature = "asm", target_arch = "aarch64"))] {
         mod soft;
         mod aarch64;
         use aarch64::compress;
