@@ -20,8 +20,8 @@ There are 5 standard algorithms specified in the Shabal standard:
 * `Shabal384`, which is the `Shabal` algorithm with the result truncated to 384 bits.
 * `Shabal512`, which is the `Shabal` algorithm with the result not truncated.
 
-There is a single Shabal algorithm. All variants have different intialisation and apart
-Shabal512 truncate the result.
+There is a single Shabal algorithm. All variants have different initialisation and apart
+from Shabal512 all truncate the result.
 
 ## Usage
 
