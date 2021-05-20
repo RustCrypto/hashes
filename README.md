@@ -75,7 +75,7 @@ blake2 = "0.9"
 ```
 
 Note that crates in this repository have an enabled by default `std` feature.
-So if you plan to use the crate in `no_std` enviroments, don't forget to disable it:
+So if you plan to use the crate in `no_std` environments, don't forget to disable it:
 
 ```toml
 [dependencies]
@@ -116,7 +116,7 @@ let hash = Blake2b::new()
 println!("Result: {:x}", hash);
 ```
 
-If the whole message is available you also can use convinience `digest` method:
+If the whole message is available you also can use convenience `digest` method:
 
 ```Rust
 use blake2::{Blake2b, Digest};
