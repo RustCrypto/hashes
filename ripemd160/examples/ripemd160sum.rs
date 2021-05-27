@@ -23,7 +23,9 @@ fn process<D: Digest + Default, R: Read>(reader: &mut R, name: &str) {
             Ok(n) => n,
             Err(_) => return,
         };
-        sh.update(&buffer[..n - 1]);
+        if n > 0 {
+            sh.update(&buffer[..n - 1]);
+        }
         if n == 0 || n < BUFFER_SIZE {
             break;
         }
