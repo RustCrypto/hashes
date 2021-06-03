@@ -9,7 +9,7 @@
 //! (pre 2003)) were not used much anyway (both have never been recommended
 //! by NESSIE).
 //!
-//! For details see <http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html>.
+//! For details see [http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html](https://web.archive.org/web/20171129084214/http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html).
 //!
 //! # Usage
 //!
