@@ -1,6 +1,5 @@
 # RustCrypto: FSB
 
-<!---
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
 [![Build Status][build-image]][build-link]

@@ -1,11 +1,12 @@
 macro_rules! fsb_impl {
     (
         $state:ident, $state_num:expr, $blocksize:ident, $outputsize:ident, $n:expr, $w:expr,
-        $r:expr, $p:expr, $s:expr
+        $r:expr, $p:expr, $s:expr, $doc:expr
     ) => {
         use digest::consts::{$blocksize, $outputsize};
 
         #[derive(Clone)]
+        #[doc=$doc]
         pub struct $state {
             /// bit size of the message till the current moment (the bit size is represented by a 64 bit
             /// number)

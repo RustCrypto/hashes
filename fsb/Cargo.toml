@@ -11,7 +11,7 @@ keywords = ["crypto", "fsb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-whirlpool = "0.9"
+whirlpool = { version = "0.9", path = "../whirlpool", default-features = false }
 digest = "0.9"
 block-buffer = { version = "0.9", features = ["block-padding"] }
 opaque-debug = "0.3"
