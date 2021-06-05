@@ -47,8 +47,12 @@
 
 #![allow(non_snake_case)]
 
-// #[cfg(feature = "std")]
-// extern crate std;
+#[cfg(feature = "std")]
+extern crate std;
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+use alloc::vec;
 
 #[macro_use]
 mod macros;
