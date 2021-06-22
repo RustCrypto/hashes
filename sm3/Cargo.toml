@@ -1,0 +1,25 @@
+[package]
+name = "sm3"
+version = "0.1.0"
+description = "SM3 (OSCCA GM/T 0004-2012) hash function"
+authors = ["Tianjia Zhang <tianjia.zhang@linux.alibaba.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+edition = "2018"
+documentation = "https://docs.rs/sm3"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "sm3", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+digest = "0.9"
+block-buffer = "0.9"
+opaque-debug = "0.3"
+
+[dev-dependencies]
+digest = { version = "0.9", features = ["dev"] }
+hex-literal = "0.2"
+
+[features]
+default = ["std"]
+std = ["digest/std"]
