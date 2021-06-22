@@ -8,6 +8,7 @@ members = [
     "md4",
     "md5",
     "ripemd160",
+    "ripemd256",
     "ripemd320",
     "sha1",
     "sha2",
