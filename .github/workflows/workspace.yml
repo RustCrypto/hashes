@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.41.0 # MSRV
+          toolchain: 1.47.0
           components: clippy
           profile: minimal
           override: true

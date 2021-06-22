@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "fsb",
     "blake2",
     "gost94",
     "groestl",
