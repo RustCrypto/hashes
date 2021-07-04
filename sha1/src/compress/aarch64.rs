@@ -7,13 +7,11 @@
 /// > Enable SHA1 and SHA256 support.
 cpufeatures::new!(sha2_hwcap, "sha2");
 
-pub fn compress(state: &mut [u32; 5], blocks: &[u8; 64]) {
+pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
     if sha2_hwcap::get() {
-        for block in blocks {
-            sha1_asm::compress(state, block);
-        }
+        sha1_asm::compress(state, blocks);
     } else {
         super::soft::compress(state, blocks);
     }
