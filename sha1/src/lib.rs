@@ -1,4 +1,13 @@
-//! An implementation of the [SHA-1][1] cryptographic hash algorithm.
+//! Pure Rust implementation of the [SHA-1][1] cryptographic hash algorithm
+//! with optional hardware-specific optimizations.
+//!
+//! # 🚨 Warning: Cryptographically Broken! 🚨
+//!
+//! The SHA-1 hash function should be considered cryptographically broken and
+//! unsuitable for further use in any security critical capacity, as it is
+//! [practically vulnerable to chosen-prefix collisions][2].
+//!
+//! We provide this crate for legacy interoperability purposes only.
 //!
 //! # Usage
 //!
@@ -18,10 +27,11 @@
 //! assert_eq!(result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
 //! ```
 //!
-//! Also see [RustCrypto/hashes][2] readme.
+//! Also see [RustCrypto/hashes][3] readme.
 //!
 //! [1]: https://en.wikipedia.org/wiki/SHA-1
-//! [2]: https://github.com/RustCrypto/hashes
+//! [2]: https://sha-mbles.github.io/
+//! [3]: https://github.com/RustCrypto/hashes
 
 #![no_std]
 #![cfg_attr(docsrs, feature(doc_cfg))]
