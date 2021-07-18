@@ -11,6 +11,14 @@ Pure Rust implementation of the [SHA-1 hash function][1].
 
 [Documentation][docs-link]
 
+## 🚨 Warning: Cryptographically Broken 🚨
+
+The SHA-1 hash function should be considered cryptographically broken and
+unsuitable for further use in any security critical capacity, as it is
+[practically vulnerable to chosen-prefix collisions][2].
+
+We provide this crate for legacy interoperability purposes only.
+
 ## Minimum Supported Rust Version
 
 Rust **1.41** or higher.
@@ -54,3 +62,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [1]: https://en.wikipedia.org/wiki/SHA-1
+[2]: https://sha-mbles.github.io/
