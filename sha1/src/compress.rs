@@ -15,9 +15,7 @@ cfg_if::cfg_if! {
         #[cfg(feature = "asm")]
         mod soft {
             pub(crate) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
-                for block in blocks {
-                    sha1_asm::compress(state, block);
-                }
+                sha1_asm::compress(state, blocks)
             }
         }
         mod x86;
