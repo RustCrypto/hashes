@@ -37,21 +37,20 @@
 //! [1]: https://www.paris.inria.fr/secret/CBCrypto/index.php?pg=fsb
 //! [2]: https://github.com/RustCrypto/hashes
 
-// #![no_std]
+#![no_std]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
 )]
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
-
 #![allow(non_snake_case)]
+
+extern crate alloc;
 
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(not(feature = "std"))]
-extern crate alloc;
 use alloc::vec;
 
 #[macro_use]
@@ -63,13 +62,77 @@ use whirlpool::Whirlpool;
 
 use core::convert::TryInto;
 
-use block_buffer::BlockBuffer;
-use digest::{generic_array::GenericArray};
-use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 use crate::pi::PI;
+use block_buffer::BlockBuffer;
+use digest::generic_array::GenericArray;
+use digest::{BlockInput, FixedOutputDirty, Reset, Update};
 
-fsb_impl!(Fsb160, 160, U60, U20, 5 << 18, 80, 640, 653, 1120, "FSB-160 hash function.");
-fsb_impl!(Fsb224, 224, U84, U28, 7 << 18, 112, 896, 907, 1568, "FSB-224 hash function.");
-fsb_impl!(Fsb256, 256, U96, U32, 1 << 21, 128, 1024, 1061, 1792, "FSB-256 hash function.");
-fsb_impl!(Fsb384, 384, U115, U48, 23 << 16, 184, 1472, 1483, 2392, "FSB-384 hash function.");
-fsb_impl!(Fsb512, 512, U155, U64, 31 << 16, 248, 1984, 1987, 3224, "FSB-512 hash function.");
+// FSB-160
+fsb_impl!(
+    Fsb160,
+    160,
+    U60,
+    U20,
+    5 << 18,
+    80,
+    640,
+    653,
+    1120,
+    "FSB-160 hash function."
+);
+
+// FSB-224
+fsb_impl!(
+    Fsb224,
+    224,
+    U84,
+    U28,
+    7 << 18,
+    112,
+    896,
+    907,
+    1568,
+    "FSB-224 hash function."
+);
+
+// FSB-256
+fsb_impl!(
+    Fsb256,
+    256,
+    U96,
+    U32,
+    1 << 21,
+    128,
+    1024,
+    1061,
+    1792,
+    "FSB-256 hash function."
+);
+
+// FSB-384
+fsb_impl!(
+    Fsb384,
+    384,
+    U115,
+    U48,
+    23 << 16,
+    184,
+    1472,
+    1483,
+    2392,
+    "FSB-384 hash function."
+);
+
+// FSB-512
+fsb_impl!(
+    Fsb512,
+    512,
+    U155,
+    U64,
+    31 << 16,
+    248,
+    1984,
+    1987,
+    3224,
+    "FSB-512 hash function."
+);
