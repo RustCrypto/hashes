@@ -589,7 +589,7 @@ impl Hash {
 
     /// Convert the hash to a lowercase hexadecimal
     /// [`ArrayString`](https://docs.rs/arrayvec/0.4/arrayvec/struct.ArrayString.html).
-    pub fn to_hex(&self) -> HexString {
+    pub fn to_hex(self) -> HexString {
         bytes_to_hex(self.as_bytes())
     }
 }
@@ -607,14 +607,14 @@ fn bytes_to_hex(bytes: &[u8]) -> HexString {
 /// This implementation is constant time, if the two hashes are the same length.
 impl PartialEq for Hash {
     fn eq(&self, other: &Hash) -> bool {
-        constant_time_eq::constant_time_eq(&self.as_bytes(), &other.as_bytes())
+        constant_time_eq::constant_time_eq(self.as_bytes(), other.as_bytes())
     }
 }
 
 /// This implementation is constant time, if the slice is the same length as the hash.
 impl PartialEq<[u8]> for Hash {
     fn eq(&self, other: &[u8]) -> bool {
-        constant_time_eq::constant_time_eq(&self.as_bytes(), other)
+        constant_time_eq::constant_time_eq(self.as_bytes(), other)
     }
 }
 

@@ -8,17 +8,17 @@ pub const MAX_DEGREE: usize = 8;
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 pub const MAX_DEGREE: usize = 1;
 
-// Variants other than Portable are unreachable in no_std, unless CPU features
-// are explicitly enabled for the build with e.g. RUSTFLAGS="-C target-feature=avx2".
-// This might change in the future if is_x86_feature_detected moves into libcore.
+/// Variants other than Portable are unreachable in no_std, unless CPU features
+/// are explicitly enabled for the build with e.g. RUSTFLAGS="-C target-feature=avx2".
+/// This might change in the future if is_x86_feature_detected moves into libcore.
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Platform {
     Portable,
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    SSE41,
+    Sse41,
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    AVX2,
+    Avx2,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -53,13 +53,13 @@ impl Implementation {
         // Check whether SSE4.1 support is assumed by the build.
         #[cfg(target_feature = "sse4.1")]
         {
-            return Some(Implementation(Platform::SSE41));
+            return Some(Implementation(Platform::Sse41));
         }
         // Otherwise dynamically check for support if we can.
         #[cfg(feature = "std")]
         {
             if is_x86_feature_detected!("sse4.1") {
-                return Some(Implementation(Platform::SSE41));
+                return Some(Implementation(Platform::Sse41));
             }
         }
         None
@@ -71,13 +71,13 @@ impl Implementation {
         // Check whether AVX2 support is assumed by the build.
         #[cfg(target_feature = "avx2")]
         {
-            return Some(Implementation(Platform::AVX2));
+            return Some(Implementation(Platform::Avx2));
         }
         // Otherwise dynamically check for support if we can.
         #[cfg(feature = "std")]
         {
             if is_x86_feature_detected!("avx2") {
-                return Some(Implementation(Platform::AVX2));
+                return Some(Implementation(Platform::Avx2));
             }
         }
         None
@@ -86,9 +86,9 @@ impl Implementation {
     pub fn degree(&self) -> usize {
         match self.0 {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-            Platform::AVX2 => avx2::DEGREE,
+            Platform::Avx2 => avx2::DEGREE,
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-            Platform::SSE41 => sse41::DEGREE,
+            Platform::Sse41 => sse41::DEGREE,
             Platform::Portable => 1,
         }
     }
@@ -104,7 +104,7 @@ impl Implementation {
     ) {
         match self.0 {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-            Platform::AVX2 | Platform::SSE41 => unsafe {
+            Platform::Avx2 | Platform::Sse41 => unsafe {
                 sse41::compress1_loop(input, words, count, last_node, finalize, stride);
             },
             Platform::Portable => {
@@ -116,7 +116,7 @@ impl Implementation {
     pub fn compress4_loop(&self, jobs: &mut [Job<'_, '_>; 4], finalize: Finalize, stride: Stride) {
         match self.0 {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-            Platform::AVX2 | Platform::SSE41 => unsafe {
+            Platform::Avx2 | Platform::Sse41 => unsafe {
                 sse41::compress4_loop(jobs, finalize, stride)
             },
             _ => panic!("unsupported"),
@@ -126,7 +126,7 @@ impl Implementation {
     pub fn compress8_loop(&self, jobs: &mut [Job<'_, '_>; 8], finalize: Finalize, stride: Stride) {
         match self.0 {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-            Platform::AVX2 => unsafe { avx2::compress8_loop(jobs, finalize, stride) },
+            Platform::Avx2 => unsafe { avx2::compress8_loop(jobs, finalize, stride) },
             _ => panic!("unsupported"),
         }
     }
@@ -269,20 +269,20 @@ mod test {
         #[cfg(feature = "std")]
         {
             if is_x86_feature_detected!("avx2") {
-                assert_eq!(Platform::AVX2, Implementation::detect().0);
+                assert_eq!(Platform::Avx2, Implementation::detect().0);
                 assert_eq!(
-                    Platform::AVX2,
+                    Platform::Avx2,
                     Implementation::avx2_if_supported().unwrap().0
                 );
                 assert_eq!(
-                    Platform::SSE41,
+                    Platform::Sse41,
                     Implementation::sse41_if_supported().unwrap().0
                 );
             } else if is_x86_feature_detected!("sse4.1") {
-                assert_eq!(Platform::SSE41, Implementation::detect().0);
+                assert_eq!(Platform::Sse41, Implementation::detect().0);
                 assert!(Implementation::avx2_if_supported().is_none());
                 assert_eq!(
-                    Platform::SSE41,
+                    Platform::Sse41,
                     Implementation::sse41_if_supported().unwrap().0
                 );
             } else {
@@ -299,9 +299,9 @@ mod test {
     {
         // Chose counts to hit the relevant overflow cases.
         let counts = &[
-            (0 as Count),
-            ((1 as Count) << (8 * size_of::<Word>())) - BLOCKBYTES as Count,
-            (0 as Count).wrapping_sub(BLOCKBYTES as Count),
+            0_u64,
+            (1_u64 << (8 * size_of::<Word>())) - BLOCKBYTES as Count,
+            0_u64.wrapping_sub(BLOCKBYTES as Count),
         ];
         for &stride in &[Stride::Serial, Stride::Parallel] {
             let lengths = [

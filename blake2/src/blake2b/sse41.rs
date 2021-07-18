@@ -380,8 +380,8 @@ pub unsafe fn compress2_loop(jobs: &mut [Job<'_, '_>; DEGREE], finalize: Finaliz
     }
 
     let msg_ptrs = [jobs[0].input.as_ptr(), jobs[1].input.as_ptr()];
-    let mut h_vecs = transpose_state_vecs(&jobs);
-    let (mut counts_lo, mut counts_hi) = load_counts(&jobs);
+    let mut h_vecs = transpose_state_vecs(jobs);
+    let (mut counts_lo, mut counts_hi) = load_counts(jobs);
 
     // Prepare the final blocks (note, which could be empty if the input is
     // empty). Do all this before entering the main loop.

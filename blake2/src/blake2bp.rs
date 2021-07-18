@@ -464,7 +464,7 @@ fn finalize_root_words(
         Stride::Serial,
     );
     Hash {
-        bytes: crate::blake2b::state_words_to_bytes(&root_words),
+        bytes: crate::blake2b::state_words_to_bytes(root_words),
         len: hash_length,
     }
 }
@@ -537,7 +537,7 @@ pub(crate) mod test {
                         force_portable(&mut params);
                     }
                     let input = &buf[..num_blocks * BLOCKBYTES + extra];
-                    let expected = blake2bp_reference(&input);
+                    let expected = blake2bp_reference(input);
                     let mut state = params.to_state();
                     let found = state.update(input).finalize();
                     assert_eq!(expected, found);

@@ -800,8 +800,8 @@ pub unsafe fn compress4_loop(jobs: &mut [Job<'_, '_>; DEGREE], finalize: Finaliz
         jobs[2].input.as_ptr(),
         jobs[3].input.as_ptr(),
     ];
-    let mut h_vecs = transpose_state_vecs(&jobs);
-    let (mut counts_lo, mut counts_hi) = load_counts(&jobs);
+    let mut h_vecs = transpose_state_vecs(jobs);
+    let (mut counts_lo, mut counts_hi) = load_counts(jobs);
 
     // Prepare the final blocks (note, which could be empty if the input is
     // empty). Do all this before entering the main loop.

@@ -218,7 +218,7 @@ fn blake2xs_vectors() {
                 .key(key)
                 .hash_length(32)
                 .node_offset(combined_node_offset_xof_length)
-                .hash(&input_bytes)
+                .hash(input_bytes)
                 .as_bytes()
                 .to_vec();
             h0
@@ -233,7 +233,7 @@ fn blake2xs_vectors() {
                 .fanout(0)
                 .max_depth(0)
                 .node_offset(combined_node_offset_xof_length)
-                .hash(&input_bytes)
+                .hash(input_bytes)
                 .as_bytes()
                 .to_vec();
             b2_out
@@ -251,7 +251,7 @@ fn blake2xb_vectors() {
                 .key(key)
                 .hash_length(64)
                 .node_offset(combined_node_offset_xof_length)
-                .hash(&input_bytes)
+                .hash(input_bytes)
                 .as_bytes()
                 .to_vec();
             h0
@@ -266,7 +266,7 @@ fn blake2xb_vectors() {
                 .fanout(0)
                 .max_depth(0)
                 .node_offset(combined_node_offset_xof_length)
-                .hash(&input_bytes)
+                .hash(input_bytes)
                 .as_bytes()
                 .to_vec();
             b2_out
