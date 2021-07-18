@@ -86,6 +86,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "fsb"
+version = "0.1.0"
+dependencies = [
+ "block-buffer",
+ "digest",
+ "hex-literal",
+ "opaque-debug",
+ "whirlpool",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
