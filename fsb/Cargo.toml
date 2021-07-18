@@ -1,7 +1,7 @@
 [package]
 name = "fsb"
-version = "0.1.0"
 description = "FSB hash function"
+version = "0.0.1"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -18,3 +18,7 @@ opaque-debug = "0.3"
 
 [dev-dependencies]
 hex-literal = "0.2"
+
+[features]
+asm = ["whirlpool/asm"]
+std = ["whirlpool/std"]
