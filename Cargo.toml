@@ -14,6 +14,7 @@ members = [
     "sha2",
     "sha3",
     "shabal",
+    "sm3",
     "streebog",
     "tiger",
     "whirlpool",
