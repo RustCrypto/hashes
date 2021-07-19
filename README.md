@@ -23,6 +23,7 @@ BLAKE2, SHA-2 or SHA-3.
 | `md4`       | [MD4] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) |  [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | [![build](https://github.com/rustcrypto/hashes/workflows/md4/badge.svg?branch=master&event=push)](https://github.com/RustCrypto/hashes/actions?query=workflow:md4+branch:master) | :broken_heart: |
 | `md-5` [:exclamation:] | [MD5]  | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | [![build](https://github.com/rustcrypto/hashes/workflows/md5/badge.svg?branch=master&event=push)](https://github.com/RustCrypto/hashes/actions?query=workflow:md5+branch:master) | :broken_heart: |
 | `ripemd160` | [RIPEMD-160] | [![crates.io](https://img.shields.io/crates/v/ripemd160.svg)](https://crates.io/crates/ripemd160) |  [![Documentation](https://docs.rs/ripemd160/badge.svg)](https://docs.rs/ripemd160) | [![build](https://github.com/rustcrypto/hashes/workflows/ripemd160/badge.svg?branch=master&event=push)](https://github.com/RustCrypto/hashes/actions?query=workflow:ripemd160+branch:master) | :green_heart: |
+| `ripemd256` | [RIPEMD-256] | [![crates.io](https://img.shields.io/crates/v/ripemd256.svg)](https://crates.io/crates/ripemd256) |  [![Documentation](https://docs.rs/ripemd256/badge.svg)](https://docs.rs/ripemd256) | [![build](https://github.com/rustcrypto/hashes/workflows/ripemd256/badge.svg?branch=master&event=push)](https://github.com/RustCrypto/hashes/actions?query=workflow:ripemd256+branch:master) | :green_heart:* |
 | `ripemd320` | [RIPEMD-320] | [![crates.io](https://img.shields.io/crates/v/ripemd320.svg)](https://crates.io/crates/ripemd320) |  [![Documentation](https://docs.rs/ripemd320/badge.svg)](https://docs.rs/ripemd320) | [![build](https://github.com/rustcrypto/hashes/workflows/ripemd320/badge.svg?branch=master&event=push)](https://github.com/RustCrypto/hashes/actions?query=workflow:ripemd320+branch:master) | :green_heart:* |
 | `sha-1` [:exclamation:] | [SHA-1] | [![crates.io](https://img.shields.io/crates/v/sha-1.svg)](https://crates.io/crates/sha-1) | [![Documentation](https://docs.rs/sha-1/badge.svg)](https://docs.rs/sha-1) | [![build](https://github.com/rustcrypto/hashes/workflows/sha1/badge.svg?branch=master&event=push)](https://github.com/RustCrypto/hashes/actions?query=workflow:sha1+branch:master) | :broken_heart: |
 | `sha2`      | [SHA-2] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) |  [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | [![build](https://github.com/rustcrypto/hashes/workflows/sha2/badge.svg?branch=master&event=push)](https://github.com/RustCrypto/hashes/actions?query=workflow:sha2+branch:master) | :green_heart: |
@@ -35,7 +36,7 @@ BLAKE2, SHA-2 or SHA-3.
 
 NOTE: the [BLAKE3 crate](https://github.com/BLAKE3-team/BLAKE3) implements the `digest` (and `crypto-mac`) traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
 
-\* RIPEMD-320 provides only the same security as RIPEMD-160
+\* RIPEMD-256 provides only the same security as RIPEMD-128, and RIPEMD-320 provides only the same security as RIPEMD-160
 
 [Security]: https://en.wikipedia.org/wiki/Hash_function_security_summary
 [:exclamation:]: #crate-names
@@ -223,6 +224,7 @@ dual licensed as above, without any additional terms or conditions.
 [MD4]: https://en.wikipedia.org/wiki/MD4
 [MD5]: https://en.wikipedia.org/wiki/MD5
 [RIPEMD-160]: https://en.wikipedia.org/wiki/RIPEMD
+[RIPEMD-256]: https://en.wikipedia.org/wiki/RIPEMD
 [RIPEMD-320]: https://en.wikipedia.org/wiki/RIPEMD
 [SHA-1]: https://en.wikipedia.org/wiki/SHA-1
 [SHA-2]: https://en.wikipedia.org/wiki/SHA-2
