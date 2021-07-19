@@ -8,7 +8,7 @@ version = "0.9.1"
 dependencies = [
  "crypto-mac",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
 ]
 
@@ -112,7 +112,7 @@ version = "0.9.1"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
 ]
 
@@ -122,7 +122,7 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
 ]
 
@@ -135,6 +135,12 @@ dependencies = [
  "hex-literal-impl",
  "proc-macro-hack",
 ]
+
+[[package]]
+name = "hex-literal"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5af1f635ef1bc545d78392b136bfe1c9809e029023c84a3638a864a10b8819c8"
 
 [[package]]
 name = "hex-literal-impl"
@@ -150,7 +156,7 @@ name = "k12"
 version = "0.1.0"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
 ]
 
 [[package]]
@@ -171,7 +177,7 @@ version = "0.9.1"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "md5-asm",
  "opaque-debug",
 ]
@@ -182,7 +188,7 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
 ]
 
@@ -192,7 +198,7 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
 ]
 
@@ -223,7 +229,17 @@ version = "0.9.1"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
+ "opaque-debug",
+]
+
+[[package]]
+name = "ripemd256"
+version = "0.1.0"
+dependencies = [
+ "block-buffer",
+ "digest",
+ "hex-literal 0.3.1",
  "opaque-debug",
 ]
 
@@ -233,7 +249,7 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
 ]
 
@@ -245,7 +261,7 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
  "sha1-asm",
 ]
@@ -267,7 +283,7 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
  "sha2-asm",
 ]
@@ -287,7 +303,7 @@ version = "0.9.1"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "keccak",
  "opaque-debug",
 ]
@@ -298,7 +314,7 @@ version = "0.3.0"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
 ]
 
@@ -318,7 +334,7 @@ version = "0.9.2"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
 ]
 
@@ -335,7 +351,7 @@ dependencies = [
  "block-buffer",
  "byteorder",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
 ]
 
 [[package]]
@@ -356,7 +372,7 @@ version = "0.9.0"
 dependencies = [
  "block-buffer",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.1",
  "opaque-debug",
  "whirlpool-asm",
 ]
