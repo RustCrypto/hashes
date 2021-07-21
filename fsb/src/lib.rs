@@ -55,14 +55,15 @@ use alloc::vec;
 
 #[macro_use]
 mod macros;
-mod pi;
 
 pub use digest::{self, Digest};
 use whirlpool::Whirlpool;
 
 use core::convert::TryInto;
 
-use crate::pi::PI;
+// Double check this contains all values in the reference implementation
+static PI: &[u8; 272384] = include_bytes!("pi.bin");
+
 use block_buffer::BlockBuffer;
 use digest::generic_array::GenericArray;
 use digest::{BlockInput, FixedOutputDirty, Reset, Update};
