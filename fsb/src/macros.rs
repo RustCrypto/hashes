@@ -326,9 +326,8 @@ macro_rules! fsb_impl {
         impl Reset for $state {
             fn reset(&mut self) {
                 self.buffer.reset();
-                for v in self.hash.iter_mut() {
-                    *v = 0;
-                }
+                self.hash = [0u8; $r / 8];
+                self.bit_length = 0;
             }
         }
         opaque_debug::implement!($state);
