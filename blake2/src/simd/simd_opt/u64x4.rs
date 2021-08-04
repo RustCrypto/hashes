@@ -37,7 +37,7 @@ fn rotate_right_any(vec: u64x4, n: u32) -> u64x4 {
 fn rotate_right_32(vec: u64x4) -> u64x4 {
     if cfg!(any(target_feature = "sse2", target_feature = "neon")) {
         // 2 x pshufd (SSE2) / vpshufd (AVX2) / 2 x vrev (NEON)
-        transmute_shuffle!(u32x8, simd_shuffle8, vec, [1, 0, 3, 2, 5, 4, 7, 6])
+        transmute_shuffle!(u32x8, simd_shuffle8, vec, 8, [1, 0, 3, 2, 5, 4, 7, 6])
     } else {
         rotate_right_any(vec, 32)
     }
@@ -59,6 +59,7 @@ fn rotate_right_24(vec: u64x4) -> u64x4 {
             u8x32,
             simd_shuffle32,
             vec,
+            32,
             [
                 3, 4, 5, 6, 7, 0, 1, 2, 11, 12, 13, 14, 15, 8, 9, 10, 19, 20, 21, 22, 23, 16, 17,
                 18, 27, 28, 29, 30, 31, 24, 25, 26
@@ -85,6 +86,7 @@ fn rotate_right_16(vec: u64x4) -> u64x4 {
             u8x32,
             simd_shuffle32,
             vec,
+            32,
             [
                 2, 3, 4, 5, 6, 7, 0, 1, 10, 11, 12, 13, 14, 15, 8, 9, 18, 19, 20, 21, 22, 23, 16,
                 17, 26, 27, 28, 29, 30, 31, 24, 25
@@ -96,6 +98,7 @@ fn rotate_right_16(vec: u64x4) -> u64x4 {
             u16x16,
             simd_shuffle16,
             vec,
+            16,
             [1, 2, 3, 0, 5, 6, 7, 4, 9, 10, 11, 8, 13, 14, 15, 12]
         )
     } else {

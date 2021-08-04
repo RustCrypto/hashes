@@ -8,14 +8,15 @@
 #[allow(unused_macros)]
 #[cfg(feature = "simd")]
 macro_rules! transmute_shuffle {
-    ($tmp:ident, $shuffle:ident, $vec:expr, $idx:expr) => {
+    ($tmp:ident, $shuffle:ident, $vec:expr, $idx_n:expr, $idx:expr) => {
         unsafe {
             use crate::simd::simdint::$shuffle;
             use crate::simd::simdty::$tmp;
             use core::mem::transmute;
 
+            const IDX: [u32; $idx_n] = $idx;
             let tmp_i: $tmp = transmute($vec);
-            let tmp_o: $tmp = $shuffle(tmp_i, tmp_i, $idx);
+            let tmp_o: $tmp = $shuffle(tmp_i, tmp_i, IDX);
             transmute(tmp_o)
         }
     };
