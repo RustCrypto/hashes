@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "blake2"
-version = "0.9.1"
+version = "0.9.2"
 dependencies = [
  "crypto-mac",
  "digest",
