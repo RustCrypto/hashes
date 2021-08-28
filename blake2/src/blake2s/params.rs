@@ -1,6 +1,5 @@
 use super::{
-    backend, state_words_to_bytes, Hash, State, Word, BLOCKBYTES, IV, KEYBYTES, OUTBYTES,
-    PERSONALBYTES, SALTBYTES,
+    backend, state, Hash, State, Word, BLOCKBYTES, IV, KEYBYTES, OUTBYTES, PERSONALBYTES, SALTBYTES,
 };
 use arrayref::array_refs;
 use core::fmt;
@@ -109,7 +108,7 @@ impl Params {
             backend::Stride::Serial,
         );
         Hash {
-            bytes: state_words_to_bytes(&words),
+            bytes: state::words_to_bytes(&words),
             len: self.hash_length,
         }
     }

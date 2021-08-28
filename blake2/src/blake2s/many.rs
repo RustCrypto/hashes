@@ -44,7 +44,7 @@
 
 use super::{
     backend::{self, Finalize, Implementation, Job, LastNode, Stride},
-    state_words_to_bytes, Count, Hash, Params, State, Word, BLOCKBYTES,
+    state, Count, Hash, Params, State, Word, BLOCKBYTES,
 };
 use arrayref::array_mut_ref;
 use arrayvec::ArrayVec;
@@ -317,7 +317,7 @@ impl<'a> HashManyJob<'a> {
     pub fn to_hash(&self) -> Hash {
         debug_assert!(self.finished, "job hasn't been run yet");
         Hash {
-            bytes: state_words_to_bytes(&self.words),
+            bytes: state::words_to_bytes(&self.words),
             len: self.hash_length,
         }
     }

@@ -23,7 +23,7 @@
 
 use crate::blake2b::{
     backend::{Finalize, Implementation, Job, LastNode, Stride},
-    many, Count, Hash, Word, BLOCKBYTES, KEYBYTES, OUTBYTES,
+    many, state, Count, Hash, Word, BLOCKBYTES, KEYBYTES, OUTBYTES,
 };
 use core::{cmp, fmt, mem::size_of};
 
@@ -465,7 +465,7 @@ fn finalize_root_words(
         Stride::Serial,
     );
     Hash {
-        bytes: crate::blake2b::state_words_to_bytes(root_words),
+        bytes: state::words_to_bytes(root_words),
         len: hash_length,
     }
 }
