@@ -3,8 +3,8 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
-use super::{
-    guts::{
+use crate::blake2s::{
+    backend::{
         assemble_count, count_high, count_low, final_block, flag_word, input_debug_asserts,
         Finalize, Job, LastNode, Stride,
     },

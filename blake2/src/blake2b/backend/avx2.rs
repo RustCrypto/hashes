@@ -7,11 +7,11 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
-use super::guts::{
+use crate::blake2b::backend::{
     assemble_count, count_high, count_low, final_block, flag_word, input_debug_asserts, Finalize,
     Job, LastNode, Stride,
 };
-use super::{Count, Word, BLOCKBYTES, IV, SIGMA};
+use crate::blake2b::{Count, Word, BLOCKBYTES, IV, SIGMA};
 use arrayref::{array_refs, mut_array_refs};
 use core::cmp;
 use core::mem;

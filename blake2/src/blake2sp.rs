@@ -22,7 +22,7 @@
 //! ```
 
 use crate::blake2s::{
-    guts::{Finalize, Implementation, Job, LastNode, Stride},
+    backend::{Finalize, Implementation, Job, LastNode, Stride},
     many, Count, Hash, Word, BLOCKBYTES, KEYBYTES, OUTBYTES,
 };
 use core::{cmp, fmt, mem::size_of};

@@ -23,22 +23,16 @@
 //! assert_eq!("ee8ff4e9be887297cf79348dc35dab56", &hash.to_hex());
 //! ```
 
-use arrayref::{array_refs, mut_array_refs};
-use core::cmp;
-use core::fmt;
-use core::mem::size_of;
-
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-mod avx2;
-mod portable;
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-mod sse41;
-
-pub(crate) mod guts;
+pub(crate) mod backend;
 pub mod many;
 
 #[cfg(test)]
 mod test;
+
+use arrayref::{array_refs, mut_array_refs};
+use core::cmp;
+use core::fmt;
+use core::mem::size_of;
 
 pub(crate) type Word = u64;
 pub(crate) type Count = u128;
@@ -138,8 +132,8 @@ pub struct Params {
     node_offset: u64,
     node_depth: u8,
     inner_hash_length: u8,
-    last_node: guts::LastNode,
-    implementation: guts::Implementation,
+    last_node: backend::LastNode,
+    implementation: backend::Implementation,
 }
 
 impl Params {
@@ -159,8 +153,8 @@ impl Params {
             node_offset: 0,
             node_depth: 0,
             inner_hash_length: 0,
-            last_node: guts::LastNode::No,
-            implementation: guts::Implementation::detect(),
+            last_node: backend::LastNode::No,
+            implementation: backend::Implementation::detect(),
         }
     }
 
@@ -199,8 +193,8 @@ impl Params {
             &mut words,
             0,
             self.last_node,
-            guts::Finalize::Yes,
-            guts::Stride::Serial,
+            backend::Finalize::Yes,
+            backend::Stride::Serial,
         );
         Hash {
             bytes: state_words_to_bytes(&words),
@@ -314,9 +308,9 @@ impl Params {
     #[inline]
     pub fn last_node(&mut self, last_node: bool) -> &mut Self {
         self.last_node = if last_node {
-            guts::LastNode::Yes
+            backend::LastNode::Yes
         } else {
-            guts::LastNode::No
+            backend::LastNode::No
         };
         self
     }
@@ -374,9 +368,9 @@ pub struct State {
     count: Count,
     buf: [u8; BLOCKBYTES],
     buflen: u8,
-    last_node: guts::LastNode,
+    last_node: backend::LastNode,
     hash_length: u8,
-    implementation: guts::Implementation,
+    implementation: backend::Implementation,
     is_keyed: bool,
 }
 
@@ -423,8 +417,8 @@ impl State {
                     &mut self.words,
                     self.count,
                     self.last_node,
-                    guts::Finalize::No,
-                    guts::Stride::Serial,
+                    backend::Finalize::No,
+                    backend::Stride::Serial,
                 );
                 self.count = self.count.wrapping_add(BLOCKBYTES as Count);
                 self.buflen = 0;
@@ -446,8 +440,8 @@ impl State {
                 &mut self.words,
                 self.count,
                 self.last_node,
-                guts::Finalize::No,
-                guts::Stride::Serial,
+                backend::Finalize::No,
+                backend::Stride::Serial,
             );
             self.count = self.count.wrapping_add(end as Count);
             input = &input[end..];
@@ -469,8 +463,8 @@ impl State {
             &mut words_copy,
             self.count,
             self.last_node,
-            guts::Finalize::Yes,
-            guts::Stride::Serial,
+            backend::Finalize::Yes,
+            backend::Stride::Serial,
         );
         Hash {
             bytes: state_words_to_bytes(&words_copy),
@@ -488,9 +482,9 @@ impl State {
     /// [the BLAKE2 spec]: https://blake2.net/blake2.pdf
     pub fn set_last_node(&mut self, last_node: bool) -> &mut Self {
         self.last_node = if last_node {
-            guts::LastNode::Yes
+            backend::LastNode::Yes
         } else {
-            guts::LastNode::No
+            backend::LastNode::No
         };
         self
     }
@@ -645,11 +639,12 @@ pub(crate) fn paint_test_input(buf: &mut [u8]) {
 // This module is pub for internal benchmarks only. Please don't use it.
 #[doc(hidden)]
 pub mod benchmarks {
-    use super::*;
     use crate::blake2bp;
 
+    use super::*;
+
     pub fn force_portable(params: &mut Params) {
-        params.implementation = guts::Implementation::portable();
+        params.implementation = backend::Implementation::portable();
     }
 
     pub fn force_portable_blake2bp(params: &mut blake2bp::Params) {

@@ -4,8 +4,8 @@
 
 use arrayref::{array_ref, array_refs};
 
-use super::{
-    guts::{
+use crate::blake2b::{
+    backend::{
         count_high, count_low, final_block, flag_word, input_debug_asserts, Finalize, LastNode,
         Stride,
     },
@@ -21,16 +21,18 @@ use super::{
 #[inline(always)]
 fn g(v: &mut [Word; 16], a: usize, b: usize, c: usize, d: usize, x: Word, y: Word) {
     v[a] = v[a].wrapping_add(v[b]).wrapping_add(x);
+    v[d] = (v[d] ^ v[a]).rotate_right(32);
+    v[c] = v[c].wrapping_add(v[d]);
+    v[b] = (v[b] ^ v[c]).rotate_right(24);
+    v[a] = v[a].wrapping_add(v[b]).wrapping_add(y);
     v[d] = (v[d] ^ v[a]).rotate_right(16);
     v[c] = v[c].wrapping_add(v[d]);
-    v[b] = (v[b] ^ v[c]).rotate_right(12);
-    v[a] = v[a].wrapping_add(v[b]).wrapping_add(y);
-    v[d] = (v[d] ^ v[a]).rotate_right(8);
-    v[c] = v[c].wrapping_add(v[d]);
-    v[b] = (v[b] ^ v[c]).rotate_right(7);
+    v[b] = (v[b] ^ v[c]).rotate_right(63);
 }
 
-#[inline(always)]
+// This is too much inlining for some small chips like ARM Cortex-M0, so the
+// uninline_portable feature is provided to disable it.
+#[cfg_attr(not(feature = "uninline_portable"), inline(always))]
 fn round(r: usize, m: &[Word; 16], v: &mut [Word; 16]) {
     // Select the message schedule based on the round.
     let s = SIGMA[r];
@@ -108,6 +110,8 @@ fn compress_block(
     round(7, &m, &mut v);
     round(8, &m, &mut v);
     round(9, &m, &mut v);
+    round(10, &m, &mut v);
+    round(11, &m, &mut v);
 
     words[0] ^= v[0] ^ v[8];
     words[1] ^= v[1] ^ v[9];

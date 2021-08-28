@@ -1,3 +1,11 @@
+//! BLAKE2s backend.
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+mod avx2;
+mod portable;
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+mod sse41;
+
 use super::*;
 use arrayref::array_ref;
 use core::cmp;
@@ -257,9 +265,11 @@ pub fn input_debug_asserts(input: &[u8], finalize: Finalize) {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use arrayvec::ArrayVec;
     use core::mem::size_of;
+
+    use arrayvec::ArrayVec;
+
+    use super::*;
 
     #[test]
     fn test_detection() {

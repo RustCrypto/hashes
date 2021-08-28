@@ -43,7 +43,7 @@
 //! ```
 
 use super::{
-    guts::{self, Finalize, Implementation, Job, LastNode, Stride},
+    backend::{self, Finalize, Implementation, Job, LastNode, Stride},
     state_words_to_bytes, Count, Hash, Params, State, Word, BLOCKBYTES,
 };
 use arrayref::array_mut_ref;
@@ -59,7 +59,7 @@ use core::fmt;
 /// AVX-512 implementation, this constant will double on x86 targets. If that
 /// implementation is an optional feature (e.g. because it's nightly-only), the
 /// value of this constant will depend on that optional feature also.
-pub const MAX_DEGREE: usize = guts::MAX_DEGREE;
+pub const MAX_DEGREE: usize = backend::MAX_DEGREE;
 
 /// The parallelism degree of the implementation, detected at runtime. If you
 /// hash your inputs in small batches, making the batch size a multiple of
@@ -86,10 +86,10 @@ pub const MAX_DEGREE: usize = guts::MAX_DEGREE;
 /// [`hash_many`]: fn.hash_many.html
 /// [`MAX_DEGREE`]: constant.MAX_DEGREE.html
 pub fn degree() -> usize {
-    guts::Implementation::detect().degree()
+    backend::Implementation::detect().degree()
 }
 
-type JobsVec<'a, 'b> = ArrayVec<[Job<'a, 'b>; guts::MAX_DEGREE]>;
+type JobsVec<'a, 'b> = ArrayVec<[Job<'a, 'b>; backend::MAX_DEGREE]>;
 
 #[inline(always)]
 fn fill_jobs_vec<'a, 'b>(
@@ -268,7 +268,7 @@ pub struct HashManyJob<'a> {
     hash_length: u8,
     input: &'a [u8],
     finished: bool,
-    implementation: guts::Implementation,
+    implementation: backend::Implementation,
 }
 
 impl<'a> HashManyJob<'a> {
@@ -412,7 +412,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::blake2s::{guts, paint_test_input, BLOCKBYTES};
+    use crate::blake2s::{backend, paint_test_input, BLOCKBYTES};
     use arrayvec::ArrayVec;
 
     #[test]
@@ -434,7 +434,7 @@ mod test {
     #[test]
     fn test_hash_many() {
         // Use a length of inputs that will exercise all of the power-of-two loops.
-        const LEN: usize = 2 * guts::MAX_DEGREE - 1;
+        const LEN: usize = 2 * backend::MAX_DEGREE - 1;
 
         // Rerun LEN inputs LEN different times, with the empty input starting in a
         // different spot each time.
@@ -476,7 +476,7 @@ mod test {
     #[test]
     fn test_update_many() {
         // Use a length of inputs that will exercise all of the power-of-two loops.
-        const LEN: usize = 2 * guts::MAX_DEGREE - 1;
+        const LEN: usize = 2 * backend::MAX_DEGREE - 1;
 
         // Rerun LEN inputs LEN different times, with the empty input starting in a
         // different spot each time.
