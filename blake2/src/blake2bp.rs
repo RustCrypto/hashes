@@ -17,6 +17,7 @@
 //!     .update(b"bar")
 //!     .update(b"baz")
 //!     .finalize();
+//!
 //! assert_eq!("e69c7d2c42a5ac14948772231c68c552", &hash.to_hex());
 //! ```
 

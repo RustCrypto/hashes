@@ -1,23 +1,4 @@
-//! [![GitHub](https://img.shields.io/github/tag/oconnor663/blake2_simd.svg?label=GitHub)](https://github.com/oconnor663/blake2_simd) [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) [![Actions Status](https://github.com/oconnor663/blake2_simd/workflows/tests/badge.svg)](https://github.com/oconnor663/blake2_simd/actions)
-//!
-//! An implementation of the BLAKE2b and BLAKE2bp hash functions. See also
-//! [`blake2s_simd`](https://docs.rs/blake2s_simd).
-//!
-//! This crate includes:
-//!
-//! - 100% stable Rust.
-//! - SIMD implementations based on Samuel Neves' [`blake2-avx2`](https://github.com/sneves/blake2-avx2).
-//!   These are very fast. For benchmarks, see [the Performance section of the
-//!   README](https://github.com/oconnor663/blake2_simd#performance).
-//! - Portable, safe implementations for other platforms.
-//! - Dynamic CPU feature detection. Binaries include multiple implementations by default and
-//!   choose the fastest one the processor supports at runtime.
-//! - All the features from the [the BLAKE2 spec](https://blake2.net/blake2.pdf), like adjustable
-//!   length, keying, and associated data for tree hashing.
-//! - `no_std` support. The `std` Cargo feature is on by default, for CPU feature detection and
-//!   for implementing `std::io::Write`.
-//! - Support for computing multiple BLAKE2b hashes in parallel, matching the efficiency of
-//!   BLAKE2bp. See the [`many`](many/index.html) module.
+//! The BLAKE2b hash function: optimized for 64-bit CPUs.
 //!
 //! # Example
 //!
@@ -38,6 +19,7 @@
 //!     .update(b"bar")
 //!     .update(b"baz")
 //!     .finalize();
+//!
 //! assert_eq!("ee8ff4e9be887297cf79348dc35dab56", &hash.to_hex());
 //! ```
 
@@ -63,12 +45,16 @@ pub(crate) type Count = u128;
 
 /// The max hash length.
 pub const OUTBYTES: usize = 8 * size_of::<Word>();
+
 /// The max key length.
 pub const KEYBYTES: usize = 8 * size_of::<Word>();
+
 /// The max salt length.
 pub const SALTBYTES: usize = 2 * size_of::<Word>();
+
 /// The max personalization length.
 pub const PERSONALBYTES: usize = 2 * size_of::<Word>();
+
 /// The number input bytes passed to each call to the compression function. Small benchmarks need
 /// to use an even multiple of `BLOCKBYTES`, or else their apparent throughput will be low.
 pub const BLOCKBYTES: usize = 16 * size_of::<Word>();
