@@ -14,21 +14,21 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 arrayref = "0.3"
 arrayvec = { version = "0.5", default-features = false }
+crypto-mac = "0.8"
+digest = "0.9"
+opaque-debug = "0.3"
 subtle = ">=2, <2.5"
-#digest = "0.9"
-#crypto-mac = "0.8"
-#opaque-debug = "0.3"
 
 [dev-dependencies]
+crypto-mac = { version = "0.8", features = ["dev"] }
+digest = { version = "0.9", features = ["dev"] }
 hex = "0.4"
-lazy_static = "1.3.0"
-rand = "0.7.0"
-rand_chacha = "0.2.0"
+hex-literal = "0.2"
+lazy_static = "1.3"
+rand = "0.7"
+rand_chacha = "0.2"
 serde = { version = "1.0.91", features = ["derive"] }
 serde_json = "1.0.39"
-#digest = { version = "0.9", features = ["dev"] }
-#crypto-mac = { version = "0.8", features = ["dev"] }
-#hex-literal = "0.2"
 
 [features]
 default = ["blake2b", "blake2s"]

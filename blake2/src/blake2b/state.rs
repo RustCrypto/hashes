@@ -48,10 +48,12 @@ impl State {
             implementation: params.implementation,
             is_keyed: params.key_length > 0,
         };
+
         if state.is_keyed {
             state.buf = params.key_block;
             state.buflen = state.buf.len() as u8;
         }
+
         state
     }
 

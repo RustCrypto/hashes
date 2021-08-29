@@ -35,9 +35,16 @@ pub use self::{hash::Hash, params::Params, state::State};
 
 use crate::blake2sp;
 use core::{fmt, mem::size_of};
+use crypto_mac::{InvalidKeyLength, Mac, NewMac};
+use digest::{
+    consts::{U32, U64},
+    generic_array::GenericArray,
+    BlockInput, FixedOutputDirty, InvalidOutputSize, Reset, Update, VariableOutputDirty,
+};
 
 pub(crate) type Word = u32;
 pub(crate) type Count = u64;
+type Output = GenericArray<u8, U32>;
 
 /// The max hash length.
 pub const OUTBYTES: usize = 8 * size_of::<Word>();
@@ -86,6 +93,165 @@ const SIGMA: [[u8; 16]; 10] = [
 pub fn blake2s(input: &[u8]) -> Hash {
     Params::new().hash(input)
 }
+
+/// Blake2s instance with a fixed output.
+#[derive(Clone, Default)]
+pub struct Blake2s {
+    params: Params,
+    state: State,
+}
+
+impl Blake2s {
+    /// Creates a new hashing context with the full set of sequential-mode parameters.
+    pub fn with_params(key: &[u8], salt: &[u8], persona: &[u8]) -> Self {
+        Params::new()
+            .key(key)
+            .salt(salt)
+            .personal(persona)
+            .clone()
+            .into()
+    }
+}
+
+impl From<Params> for Blake2s {
+    fn from(params: Params) -> Self {
+        let state = params.to_state();
+        Self { params, state }
+    }
+}
+
+impl BlockInput for Blake2s {
+    type BlockSize = U64;
+}
+
+impl Update for Blake2s {
+    fn update(&mut self, data: impl AsRef<[u8]>) {
+        self.state.update(data.as_ref());
+    }
+}
+
+impl FixedOutputDirty for Blake2s {
+    type OutputSize = U32;
+
+    fn finalize_into_dirty(&mut self, out: &mut Output) {
+        let hash = self.state.finalize();
+        out.copy_from_slice(hash.as_bytes());
+    }
+}
+
+impl Reset for Blake2s {
+    fn reset(&mut self) {
+        self.state = self.params.to_state();
+    }
+}
+
+impl NewMac for Blake2s {
+    type KeySize = U32;
+
+    fn new(key: &GenericArray<u8, U32>) -> Self {
+        Params::new().key(key).clone().into()
+    }
+
+    fn new_varkey(key: &[u8]) -> Result<Self, InvalidKeyLength> {
+        Ok(Params::new().key(key).clone().into())
+    }
+}
+
+impl Mac for Blake2s {
+    type OutputSize = U32;
+
+    fn update(&mut self, data: &[u8]) {
+        self.state.update(data);
+    }
+
+    fn reset(&mut self) {
+        <Self as Reset>::reset(self)
+    }
+
+    fn finalize(self) -> crypto_mac::Output<Self> {
+        let mut output = GenericArray::<u8, Self::OutputSize>::default();
+        output.copy_from_slice(self.state.finalize().as_bytes());
+        crypto_mac::Output::new(output)
+    }
+}
+
+opaque_debug::implement!(Blake2s);
+digest::impl_write!(Blake2s);
+
+/// Blake2s instance with a variable output.
+#[derive(Clone, Default)]
+pub struct VarBlake2s {
+    params: Params,
+    state: State,
+}
+
+impl VarBlake2s {
+    /// Creates a new hashing context with a key.
+    ///
+    /// **WARNING!** If you plan to use it for variable output MAC, then
+    /// make sure to compare codes in constant time! It can be done
+    /// for example by using `subtle` crate.
+    pub fn new_keyed(key: &[u8], output_size: usize) -> Self {
+        Self::with_params(key, &[], &[], output_size)
+    }
+
+    /// Creates a new hashing context with the full set of sequential-mode parameters.
+    pub fn with_params(key: &[u8], salt: &[u8], persona: &[u8], output_size: usize) -> Self {
+        Params::new()
+            .key(key)
+            .salt(salt)
+            .personal(persona)
+            .hash_length(output_size)
+            .clone()
+            .into()
+    }
+
+    /// Updates the hashing context with more data.
+    fn update(&mut self, data: &[u8]) {
+        self.state.update(data.as_ref());
+    }
+}
+
+impl From<Params> for VarBlake2s {
+    fn from(params: Params) -> Self {
+        let state = params.to_state();
+        Self { params, state }
+    }
+}
+
+impl BlockInput for VarBlake2s {
+    type BlockSize = U64;
+}
+
+impl Update for VarBlake2s {
+    fn update(&mut self, data: impl AsRef<[u8]>) {
+        self.update(data.as_ref());
+    }
+}
+
+impl VariableOutputDirty for VarBlake2s {
+    fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
+        Ok(Params::new().hash_length(output_size).clone().into())
+    }
+
+    fn output_size(&self) -> usize {
+        self.params.hash_length as usize
+    }
+
+    fn finalize_variable_dirty(&mut self, f: impl FnOnce(&[u8])) {
+        let hash = self.state.finalize();
+        f(hash.as_bytes())
+    }
+}
+
+impl Reset for VarBlake2s {
+    fn reset(&mut self) {
+        self.state = self.params.to_state();
+    }
+}
+
+opaque_debug::implement!(VarBlake2s);
+digest::impl_write!(VarBlake2s);
 
 // Paint a byte pattern that won't repeat, so that we don't accidentally miss
 // buffer offset bugs. This is the same as what Bao uses in its tests.
