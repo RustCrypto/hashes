@@ -1,5 +1,6 @@
 use super::OUTBYTES;
 use core::fmt;
+use subtle::{Choice, ConstantTimeEq};
 
 type HexString = arrayvec::ArrayString<[u8; 2 * OUTBYTES]>;
 
@@ -43,17 +44,23 @@ fn bytes_to_hex(bytes: &[u8]) -> HexString {
     s
 }
 
+impl ConstantTimeEq for Hash {
+    fn ct_eq(&self, other: &Self) -> Choice {
+        self.as_bytes().ct_eq(other.as_bytes())
+    }
+}
+
 /// This implementation is constant time, if the two hashes are the same length.
 impl PartialEq for Hash {
     fn eq(&self, other: &Hash) -> bool {
-        constant_time_eq::constant_time_eq(self.as_bytes(), other.as_bytes())
+        self.ct_eq(other).into()
     }
 }
 
 /// This implementation is constant time, if the slice is the same length as the hash.
 impl PartialEq<[u8]> for Hash {
     fn eq(&self, other: &[u8]) -> bool {
-        constant_time_eq::constant_time_eq(self.as_bytes(), other)
+        self.as_bytes().ct_eq(other).into()
     }
 }
 
