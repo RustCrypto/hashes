@@ -103,8 +103,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
 )]
 #![warn(missing_docs, rust_2018_idioms)]
-// TODO(tarcieri): re-enable this and address the issues or disable at module-level
-#![allow(clippy::ptr_offset_with_cast)]
+#![allow(clippy::ptr_offset_with_cast)] // TODO(tarcieri): get rid of `arrayref`?
 
 #[cfg(feature = "std")]
 extern crate std;
