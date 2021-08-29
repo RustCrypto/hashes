@@ -1,5 +1,8 @@
 use super::*;
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+use crate::blake2sp;
+
 const EMPTY_HASH: &str = "69217a3079908094e11121d042354a7c1f55b6482ca1a51e1b250dfd1ed0eef9";
 const ABC_HASH: &str = "508c5e8c327c14e2e1a72ba34eeb452f37458b209ed63a294d999b4c86675982";
 const ONE_BLOCK_HASH: &str = "ae09db7cd54f42b490ef09b6bc541af688e4959bb8c53f359a6f56e38ab454a3";
@@ -115,6 +118,7 @@ fn test_all_parameters() {
     );
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_all_parameters_blake2sp() {
     let mut params = blake2sp::Params::new();
@@ -178,29 +182,34 @@ fn test_long_inner_hash_length_panics() {
     Params::new().inner_hash_length(OUTBYTES + 1);
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic]
 fn test_blake2sp_short_hash_length_panics() {
     blake2sp::Params::new().hash_length(0);
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic]
 fn test_blake2sp_long_hash_length_panics() {
     blake2sp::Params::new().hash_length(OUTBYTES + 1);
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic]
 fn test_blake2sp_long_key_panics() {
     blake2sp::Params::new().key(&[0; KEYBYTES + 1]);
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_blake2sp_max_offset_ok() {
     Params::new().node_offset((1 << 48) - 1);
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic]
 fn test_blake2sp_offset_too_large_panics() {

@@ -24,8 +24,11 @@
 //! ```
 
 pub(crate) mod backend;
-pub mod many;
 pub(crate) mod state;
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[cfg_attr(docsrs, doc(cfg(any(target_arch = "x86", target_arch = "x86_64"))))]
+pub mod many;
 
 mod hash;
 mod params;
@@ -280,10 +283,10 @@ pub(crate) fn paint_test_input(buf: &mut [u8]) {
 
 // This module is pub for internal benchmarks only. Please don't use it.
 #[doc(hidden)]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub mod benchmarks {
-    use crate::blake2bp;
-
     use super::*;
+    use crate::blake2bp;
 
     pub fn force_portable(params: &mut Params) {
         params.implementation = backend::Implementation::portable();

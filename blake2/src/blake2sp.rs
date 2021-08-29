@@ -27,9 +27,6 @@ use crate::blake2s::{
 };
 use core::{cmp, fmt, mem::size_of};
 
-#[cfg(feature = "std")]
-use std;
-
 pub(crate) const DEGREE: usize = 8;
 
 /// Compute the BLAKE2sp hash of a slice of bytes all at once, using default

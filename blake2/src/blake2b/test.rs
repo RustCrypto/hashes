@@ -1,4 +1,6 @@
 use super::*;
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 use crate::blake2bp;
 
 const EMPTY_HASH: &str = "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419\
@@ -120,6 +122,7 @@ fn test_all_parameters() {
     );
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 fn test_all_parameters_blake2bp() {
     let mut params = crate::blake2bp::Params::new();
@@ -183,18 +186,21 @@ fn test_long_inner_hash_length_panics() {
     Params::new().inner_hash_length(OUTBYTES + 1);
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic]
 fn test_blake2bp_short_hash_length_panics() {
     blake2bp::Params::new().hash_length(0);
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic]
 fn test_blake2bp_long_hash_length_panics() {
     blake2bp::Params::new().hash_length(OUTBYTES + 1);
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 #[test]
 #[should_panic]
 fn test_blake2bp_long_key_panics() {

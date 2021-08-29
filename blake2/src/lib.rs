@@ -98,6 +98,7 @@
 //! [the BLAKE2 spec]: https://blake2.net/blake2.pdf
 
 #![no_std]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
@@ -109,15 +110,19 @@
 extern crate std;
 
 #[cfg(feature = "blake2b")]
+#[cfg_attr(docsrs, doc(cfg(feature = "blake2b")))]
 pub mod blake2b;
-
-#[cfg(feature = "blake2b")]
+#[cfg(all(feature = "blake2b", any(target_arch = "x86", target_arch = "x86_64")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "blake2b")))]
+#[cfg_attr(docsrs, doc(cfg(any(target_arch = "x86", target_arch = "x86_64"))))]
 pub mod blake2bp;
 
 #[cfg(feature = "blake2s")]
+#[cfg_attr(docsrs, doc(cfg(feature = "blake2s")))]
 pub mod blake2s;
-
-#[cfg(feature = "blake2s")]
+#[cfg(all(feature = "blake2s", any(target_arch = "x86", target_arch = "x86_64")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "blake2s")))]
+#[cfg_attr(docsrs, doc(cfg(any(target_arch = "x86", target_arch = "x86_64"))))]
 pub mod blake2sp;
 
 pub use crypto_mac;

@@ -13,9 +13,6 @@ use core::cmp;
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub const MAX_DEGREE: usize = 8;
 
-#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
-pub const MAX_DEGREE: usize = 1;
-
 /// Variants other than Portable are unreachable in no_std, unless CPU features
 /// are explicitly enabled for the build with e.g. RUSTFLAGS="-C target-feature=avx2".
 /// This might change in the future if is_x86_feature_detected moves into libcore.
@@ -91,11 +88,10 @@ impl Implementation {
         None
     }
 
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     pub fn degree(&self) -> usize {
         match self.0 {
-            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             Platform::Avx2 => avx2::DEGREE,
-            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             Platform::Sse41 => sse41::DEGREE,
             Platform::Portable => 1,
         }
@@ -121,9 +117,9 @@ impl Implementation {
         }
     }
 
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     pub fn compress4_loop(&self, jobs: &mut [Job<'_, '_>; 4], finalize: Finalize, stride: Stride) {
         match self.0 {
-            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             Platform::Avx2 | Platform::Sse41 => unsafe {
                 sse41::compress4_loop(jobs, finalize, stride)
             },
@@ -131,9 +127,9 @@ impl Implementation {
         }
     }
 
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     pub fn compress8_loop(&self, jobs: &mut [Job<'_, '_>; 8], finalize: Finalize, stride: Stride) {
         match self.0 {
-            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             Platform::Avx2 => unsafe { avx2::compress8_loop(jobs, finalize, stride) },
             _ => panic!("unsupported"),
         }
@@ -194,7 +190,8 @@ impl LastNode {
 
 #[derive(Clone, Copy, Debug)]
 pub enum Stride {
-    Serial,   // BLAKE2b/BLAKE2s
+    Serial, // BLAKE2b/BLAKE2s
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     Parallel, // BLAKE2bp/BLAKE2sp
 }
 
@@ -202,6 +199,7 @@ impl Stride {
     pub fn padded_blockbytes(&self) -> usize {
         match self {
             Stride::Serial => BLOCKBYTES,
+            #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             Stride::Parallel => crate::blake2sp::DEGREE * BLOCKBYTES,
         }
     }
@@ -215,6 +213,7 @@ pub(crate) fn count_high(count: Count) -> Word {
     (count >> (8 * size_of::<Word>())) as Word
 }
 
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub(crate) fn assemble_count(low: Word, high: Word) -> Count {
     low as Count + ((high as Count) << (8 * size_of::<Word>()))
 }
