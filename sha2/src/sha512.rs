@@ -231,10 +231,17 @@ cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
         mod soft;
         use soft::compress;
-    } else if #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))] {
-        fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-            sha2_asm::compress512(state, blocks);
+    } else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
+        #[cfg(not(feature = "asm"))]
+        mod soft;
+        #[cfg(feature = "asm")]
+        mod soft {
+            fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+                sha2_asm::compress512(state, blocks);
+            }
         }
+        mod x86;
+        use x86::compress;
     } else {
         mod soft;
         use soft::compress;
