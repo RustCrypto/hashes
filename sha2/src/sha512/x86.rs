@@ -102,19 +102,15 @@ unsafe fn rounds_0_63_avx(
     let mut k64_idx: usize = SHA512_BLOCK_WORDS_NUM;
 
     for _ in 0..4 {
-        macro_rules! unrolled_iterations {
-            ($($j:literal),*) => {$(
-                let y = sha512_update_x_avx(x, &K64[k64_idx] as *const u64 as *const _);
+        for j in 0..8 {
+            let y = sha512_update_x_avx(x, &K64[k64_idx] as *const u64 as *const _);
 
-                sha_round(current_state, ms[WORDS_IN_VEC_AVX * $j]);
-                sha_round(current_state, ms[WORDS_IN_VEC_AVX * $j + 1]);
+            sha_round(current_state, ms[WORDS_IN_VEC_AVX * j]);
+            sha_round(current_state, ms[WORDS_IN_VEC_AVX * j + 1]);
 
-                _mm_store_si128(&mut ms[WORDS_IN_VEC_AVX * $j] as *const u64 as *mut _, y);
-                k64_idx += WORDS_IN_VEC_AVX;
-            )*};
+            _mm_store_si128(&mut ms[WORDS_IN_VEC_AVX * j] as *const u64 as *mut _, y);
+            k64_idx += WORDS_IN_VEC_AVX;
         }
-
-        unrolled_iterations!(0, 1, 2, 3, 4, 5, 6, 7);
     }
 }
 
@@ -128,55 +124,38 @@ unsafe fn rounds_0_63_avx2(
     let mut k64x2_idx: usize = 2 * SHA512_BLOCK_WORDS_NUM;
 
     for i in 1..5 {
-        macro_rules! unrolled_iterations {
-            ($($j:literal),*) => {$(
-                let y = sha512_update_x_avx2(x, &K64X4[k64x2_idx] as *const u64 as *const _);
+        for j in 0..8 {
+            let y = sha512_update_x_avx2(x, &K64X4[k64x2_idx] as *const u64 as *const _);
 
-                sha_round(current_state, ms[WORDS_IN_128_BIT_VEC * $j]);
-                sha_round(current_state, ms[WORDS_IN_128_BIT_VEC * $j + 1]);
+            sha_round(current_state, ms[WORDS_IN_128_BIT_VEC * j]);
+            sha_round(current_state, ms[WORDS_IN_128_BIT_VEC * j + 1]);
 
-                _mm_store_si128(
-                    &mut ms[WORDS_IN_128_BIT_VEC * $j] as *mut u64 as *mut _,
-                    _mm256_extracti128_si256::<0>(y),
-                );
-                _mm_store_si128(
-                    &mut t2[(16 * i) + WORDS_IN_128_BIT_VEC * $j] as *mut u64 as *mut _,
-                    _mm256_extracti128_si256::<1>(y),
-                );
+            _mm_store_si128(
+                &mut ms[WORDS_IN_128_BIT_VEC * j] as *mut u64 as *mut _,
+                _mm256_extracti128_si256::<0>(y),
+            );
+            _mm_store_si128(
+                &mut t2[(16 * i) + WORDS_IN_128_BIT_VEC * j] as *mut u64 as *mut _,
+                _mm256_extracti128_si256::<1>(y),
+            );
 
-                k64x2_idx += WORDS_IN_VEC_AVX2;
-            )*};
+            k64x2_idx += WORDS_IN_VEC_AVX2;
         }
-
-        unrolled_iterations!(0, 1, 2, 3, 4, 5, 6, 7);
     }
 }
 
 #[inline(always)]
 unsafe fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
-    macro_rules! unrolled_iterations {
-        ($($i:literal),*) => {$(
-            sha_round(current_state, ms[$i & 0xf]);
-        )*};
+    for i in 64..80 {
+        sha_round(current_state, ms[i & 0xf]);
     }
-
-    unrolled_iterations!(64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79);
 }
 
 #[inline(always)]
 unsafe fn process_second_block(current_state: &mut State, t2: RoundStates) {
-    macro_rules! unrolled_iterations {
-        ($($i:literal),*) => {$(
-            sha_round(current_state, t2[$i]);
-        )*};
+    for t2 in t2 {
+        sha_round(current_state, t2);
     }
-
-    unrolled_iterations!(
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-        25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-        71, 72, 73, 74, 75, 76, 77, 78, 79
-    );
 }
 
 #[inline(always)]
