@@ -236,7 +236,7 @@ cfg_if::cfg_if! {
         mod soft;
         #[cfg(feature = "asm")]
         mod soft {
-            fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+            pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
                 sha2_asm::compress512(state, blocks);
             }
         }
