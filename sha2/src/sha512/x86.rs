@@ -106,8 +106,8 @@ unsafe fn load_data_avx2(
 
     macro_rules! unrolled_iterations {
         ($($i:literal),*) => {$(
-            x[$i] = _mm256_insertf128_si256::<1>(x[$i], _mm_loadu_si128(data.add($i) as *const _));
-            x[$i] = _mm256_insertf128_si256::<0>(x[$i], _mm_loadu_si128(data.add($i + 1) as *const _));
+            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i) as *const _), 1);
+            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i + 1) as *const _), 0);
 
             x[$i] = _mm256_shuffle_epi8(x[$i], MASK);
             let y = _mm256_add_epi64(
@@ -117,11 +117,11 @@ unsafe fn load_data_avx2(
 
             _mm_store_si128(
                 &mut ms[2 * $i] as *mut u64 as *mut _,
-                _mm256_extracti128_si256::<0>(y),
+                _mm256_extracti128_si256(y, 0),
             );
             _mm_store_si128(
                 &mut t2[2 * $i] as *mut u64 as *mut _,
-                _mm256_extracti128_si256::<1>(y),
+                _mm256_extracti128_si256(y, 1),
             );
         )*};
     }
@@ -164,11 +164,11 @@ unsafe fn rounds_0_63_avx2(
 
             _mm_store_si128(
                 &mut ms[2 * j] as *mut u64 as *mut _,
-                _mm256_extracti128_si256::<0>(y),
+                _mm256_extracti128_si256(y, 0),
             );
             _mm_store_si128(
                 &mut t2[(16 * i) + 2 * j] as *mut u64 as *mut _,
-                _mm256_extracti128_si256::<1>(y),
+                _mm256_extracti128_si256(y, 1),
             );
 
             k64x4_idx += 4;
@@ -185,7 +185,7 @@ unsafe fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
 
 #[inline(always)]
 unsafe fn process_second_block(current_state: &mut State, t2: &RoundStates) {
-    for t2 in t2 {
+    for t2 in t2.iter() {
         sha_round(current_state, *t2);
     }
 }
@@ -258,50 +258,50 @@ macro_rules! fn_sha512_update_x {
     }) => {
         unsafe fn $name(x: &mut [$ty; 8], k64_p: *const $ty) -> $ty {
             // q[2:1]
-            let mut t0 = $ALIGNR8::<8>(x[1], x[0]);
+            let mut t0 = $ALIGNR8(x[1], x[0], 8);
             // q[10:9]
-            let mut t3 = $ALIGNR8::<8>(x[5], x[4]);
+            let mut t3 = $ALIGNR8(x[5], x[4], 8);
             // q[2:1] >> s0[0]
-            let mut t2 = $SRL64::<1>(t0);
+            let mut t2 = $SRL64(t0, 1);
             // q[1:0] + q[10:9]
             x[0] = $ADD64(x[0], t3);
             // q[2:1] >> s0[2]
-            t3 = $SRL64::<7>(t0);
+            t3 = $SRL64(t0, 7);
             // q[2:1] << (64 - s0[1])
-            let mut t1 = $SLL64::<{ 64 - 8 }>(t0);
+            let mut t1 = $SLL64(t0, 64 - 8);
             // (q[2:1] >> s0[2]) ^
             // (q[2:1] >> s0[0])
             t0 = $XOR(t3, t2);
             // q[2:1] >> s0[1]
-            t2 = $SRL64::<{ 8 - 1 }>(t2);
+            t2 = $SRL64(t2, 8 - 1);
             // (q[2:1] >> s0[2]) ^
             // (q[2:1] >> s0[0]) ^
             // q[2:1] << (64 - s0[1])
             t0 = $XOR(t0, t1);
             // q[2:1] << (64 - s0[0])
-            t1 = $SLL64::<{ 8 - 1 }>(t1);
+            t1 = $SLL64(t1, 8 - 1);
             // sigma1(q[2:1])
             t0 = $XOR(t0, t2);
             t0 = $XOR(t0, t1);
             // q[15:14] >> s1[2]
-            t3 = $SRL64::<6>(x[7]);
+            t3 = $SRL64(x[7], 6);
             // q[15:14] >> (64 - s1[1])
-            t2 = $SLL64::<{ 64 - 61 }>(x[7]);
+            t2 = $SLL64(x[7], 64 - 61);
             // q[1:0] + sigma0(q[2:1])
             x[0] = $ADD64(x[0], t0);
             // q[15:14] >> s1[0]
-            t1 = $SRL64::<19>(x[7]);
+            t1 = $SRL64(x[7], 19);
             // q[15:14] >> s1[2] ^
             // q[15:14] >> (64 - s1[1])
             t3 = $XOR(t3, t2);
             // q[15:14] >> (64 - s1[0])
-            t2 = $SLL64::<{ 61 - 19 }>(t2);
+            t2 = $SLL64(t2, 61 - 19);
             // q[15:14] >> s1[2] ^
             // q[15:14] >> (64 - s1[1] ^
             // q[15:14] >> s1[0]
             t3 = $XOR(t3, t1);
             // q[15:14] >> s1[1]
-            t1 = $SRL64::<{ 61 - 19 }>(t1);
+            t1 = $SRL64(t1, 61 - 19);
             // sigma1(q[15:14])
             t3 = $XOR(t3, t2);
             t3 = $XOR(t3, t1);
