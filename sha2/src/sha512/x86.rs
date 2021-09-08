@@ -9,9 +9,9 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
-use crate::consts::{K64, K64X4};
+use crate::consts::K64;
 
-cpufeatures::new!(avx2_cpuid, "avx", "avx2", "sse2", "sse3");
+cpufeatures::new!(avx2_cpuid, "avx2");
 
 pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
@@ -25,7 +25,7 @@ pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     }
 }
 
-#[target_feature(enable = "avx,avx2,sse2,sse3")]
+#[target_feature(enable = "avx2")]
 unsafe fn sha512_compress_x86_64_avx2(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     let mut start_block = 0;
 
@@ -110,10 +110,9 @@ unsafe fn load_data_avx2(
             x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i + 1) as *const _), 0);
 
             x[$i] = _mm256_shuffle_epi8(x[$i], MASK);
-            let y = _mm256_add_epi64(
-                x[$i],
-                _mm256_loadu_si256(&K64X4[4 * $i] as *const u64 as *const _),
-            );
+
+            let t = _mm_loadu_si128(K64.as_ptr().add($i * 2) as *const u64 as *const _);
+            let y = _mm256_add_epi64(x[$i], _mm256_set_m128i(t, t));
 
             _mm_store_si128(
                 &mut ms[2 * $i] as *mut u64 as *mut _,
@@ -135,7 +134,8 @@ unsafe fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &
 
     for _ in 0..4 {
         for j in 0..8 {
-            let y = sha512_update_x_avx(x, &K64[k64_idx] as *const u64 as *const _);
+            let k64 = _mm_loadu_si128(&K64[k64_idx] as *const u64 as *const _);
+            let y = sha512_update_x_avx(x, k64);
 
             sha_round(current_state, ms[2 * j]);
             sha_round(current_state, ms[2 * j + 1]);
@@ -153,11 +153,12 @@ unsafe fn rounds_0_63_avx2(
     ms: &mut MsgSchedule,
     t2: &mut RoundStates,
 ) {
-    let mut k64x4_idx: usize = 2 * SHA512_BLOCK_WORDS_NUM;
+    let mut k64x4_idx: usize = SHA512_BLOCK_WORDS_NUM;
 
     for i in 1..5 {
         for j in 0..8 {
-            let y = sha512_update_x_avx2(x, &K64X4[k64x4_idx] as *const u64 as *const _);
+            let t = _mm_loadu_si128(K64.as_ptr().add(k64x4_idx) as *const u64 as *const _);
+            let y = sha512_update_x_avx2(x, _mm256_set_m128i(t, t));
 
             sha_round(current_state, ms[2 * j]);
             sha_round(current_state, ms[2 * j + 1]);
@@ -171,7 +172,7 @@ unsafe fn rounds_0_63_avx2(
                 _mm256_extracti128_si256(y, 1),
             );
 
-            k64x4_idx += 4;
+            k64x4_idx += 2;
         }
     }
 }
@@ -249,14 +250,13 @@ unsafe fn accumulate_state(dst: &mut State, src: &State) {
 
 macro_rules! fn_sha512_update_x {
     ($name:ident, $ty:ident, {
-        LOAD = $LOAD:ident,
         ADD64 = $ADD64:ident,
         ALIGNR8 = $ALIGNR8:ident,
         SRL64 = $SRL64:ident,
         SLL64 = $SLL64:ident,
         XOR = $XOR:ident,
     }) => {
-        unsafe fn $name(x: &mut [$ty; 8], k64_p: *const $ty) -> $ty {
+        unsafe fn $name(x: &mut [$ty; 8], k64: $ty) -> $ty {
             // q[2:1]
             let mut t0 = $ALIGNR8(x[1], x[0], 8);
             // q[10:9]
@@ -320,13 +320,12 @@ macro_rules! fn_sha512_update_x {
             x[6] = x[7];
             x[7] = temp;
 
-            $ADD64(x[7], $LOAD(k64_p))
+            $ADD64(x[7], k64)
         }
     };
 }
 
 fn_sha512_update_x!(sha512_update_x_avx, __m128i, {
-        LOAD = _mm_loadu_si128,
         ADD64 = _mm_add_epi64,
         ALIGNR8 = _mm_alignr_epi8,
         SRL64 = _mm_srli_epi64,
@@ -335,7 +334,6 @@ fn_sha512_update_x!(sha512_update_x_avx, __m128i, {
 });
 
 fn_sha512_update_x!(sha512_update_x_avx2, __m256i, {
-        LOAD = _mm256_loadu_si256,
         ADD64 = _mm256_add_epi64,
         ALIGNR8 = _mm256_alignr_epi8,
         SRL64 = _mm256_srli_epi64,
