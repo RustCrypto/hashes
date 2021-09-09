@@ -271,7 +271,7 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.9.7"
+version = "0.9.8"
 dependencies = [
  "block-buffer",
  "cfg-if",
