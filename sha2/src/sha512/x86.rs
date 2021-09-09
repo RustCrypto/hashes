@@ -106,8 +106,8 @@ unsafe fn load_data_avx2(
 
     macro_rules! unrolled_iterations {
         ($($i:literal),*) => {$(
-            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i) as *const _), 1);
-            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i + 1) as *const _), 0);
+            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add(8 + $i) as *const _), 1);
+            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i) as *const _), 0);
 
             x[$i] = _mm256_shuffle_epi8(x[$i], MASK);
 
