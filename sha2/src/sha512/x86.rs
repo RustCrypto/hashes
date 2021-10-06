@@ -178,21 +178,21 @@ unsafe fn rounds_0_63_avx2(
 }
 
 #[inline(always)]
-unsafe fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
+fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
     for i in 64..80 {
         sha_round(current_state, ms[i & 0xf]);
     }
 }
 
 #[inline(always)]
-unsafe fn process_second_block(current_state: &mut State, t2: &RoundStates) {
+fn process_second_block(current_state: &mut State, t2: &RoundStates) {
     for t2 in t2.iter() {
         sha_round(current_state, *t2);
     }
 }
 
 #[inline(always)]
-unsafe fn sha_round(s: &mut State, x: u64) {
+fn sha_round(s: &mut State, x: u64) {
     macro_rules! big_sigma0 {
         ($a:expr) => {
             $a.rotate_right(28) ^ $a.rotate_right(34) ^ $a.rotate_right(39)
@@ -242,7 +242,7 @@ unsafe fn sha_round(s: &mut State, x: u64) {
 }
 
 #[inline(always)]
-unsafe fn accumulate_state(dst: &mut State, src: &State) {
+fn accumulate_state(dst: &mut State, src: &State) {
     for i in 0..SHA512_HASH_WORDS_NUM {
         dst[i] = dst[i].wrapping_add(src[i]);
     }
