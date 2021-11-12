@@ -31,3 +31,4 @@ macro_rules! impl_padding {
 impl_padding!(Keccak, 0x01);
 impl_padding!(Sha3, 0x06);
 impl_padding!(Shake, 0x1f);
+impl_padding!(CShake, 0x04);

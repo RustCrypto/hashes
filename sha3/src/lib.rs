@@ -67,8 +67,10 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+use block_buffer::block_padding::ZeroPadding;
 pub use digest::{self, Digest};
 
+use crate::paddings::{CShake, Shake};
 use block_buffer::BlockBuffer;
 use digest::consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72};
 use digest::generic_array::typenum::Unsigned;
@@ -161,3 +163,21 @@ shake_impl!(
     paddings::Shake,
     "SHAKE256 extendable output (XOF) hash function"
 );
+cshake_impl!(
+    CShake128,
+    U168,
+    "cSHAKE128 extendable output (XOF) hash function with customization"
+);
+cshake_impl!(
+    CShake256,
+    U136,
+    "cSHAKE256 extendable output (XOF) hash function with customization"
+);
+
+#[inline(always)]
+pub(crate) fn left_encode(val: u64, b: &mut [u8; 9]) -> &[u8] {
+    b[1..].copy_from_slice(&val.to_be_bytes());
+    let i = b[1..8].iter().take_while(|&&a| a == 0).count();
+    b[i] = (8 - i) as u8;
+    &b[i..]
+}
