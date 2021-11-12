@@ -19,7 +19,7 @@ opaque-debug = "0.3"
 [dev-dependencies]
 digest = { version = "0.9", features = ["dev"] }
 crypto-mac = { version = "0.8", features = ["dev"] }
-hex-literal = "0.2"
+hex-literal = "0.3"
 
 [features]
 default = ["std"]

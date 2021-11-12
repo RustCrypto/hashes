@@ -17,7 +17,7 @@ block-buffer = { version = "0.9", features = ["block-padding"] }
 opaque-debug = "0.3"
 
 [dev-dependencies]
-hex-literal = "0.2"
+hex-literal = "0.3"
 digest = { version = "0.9", features = ["dev"] }
 
 [features]

@@ -18,7 +18,7 @@ byteorder = { version = "1", default-features = false }
 
 [dev-dependencies]
 digest = { version = "0.9", features = ["dev"] }
-hex-literal = "0.2"
+hex-literal = "0.3"
 
 [features]
 default = ["std"]
