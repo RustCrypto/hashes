@@ -36,7 +36,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           target: ${{ matrix.target }}
           override: true
-      - run: cargo build --no-default-features --release --target ${{ matrix.target }}
+      - run: cargo build --no-default-features --target ${{ matrix.target }}
 
   # Linux tests
   linux:
@@ -69,10 +69,10 @@ jobs:
           target: ${{ matrix.target }}
           override: true
       - run: ${{ matrix.deps }}
-      - run: cargo test --target ${{ matrix.target }} --release --no-default-features
-      - run: cargo test --target ${{ matrix.target }} --release
-      - run: cargo test --target ${{ matrix.target }} --release --features asm
-      - run: cargo test --target ${{ matrix.target }} --release --all-features
+      - run: cargo test --target ${{ matrix.target }} --no-default-features
+      - run: cargo test --target ${{ matrix.target }}
+      - run: cargo test --target ${{ matrix.target }} --features asm
+      - run: cargo test --target ${{ matrix.target }} --all-features
 
   # macOS tests
   macos:
@@ -91,10 +91,10 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           target: x86_64-apple-darwin
           override: true
-      - run: cargo test --release --no-default-features
-      - run: cargo test --release
-      - run: cargo test --release --features asm
-      - run: cargo test --release --all-features
+      - run: cargo test --no-default-features
+      - run: cargo test
+      - run: cargo test --features asm
+      - run: cargo test --all-features
 
   # Windows tests
   windows:
@@ -118,7 +118,7 @@ jobs:
           target: ${{ matrix.target }}
           override: true
       - uses: msys2/setup-msys2@v2
-      - run: cargo test --target ${{ matrix.target }} --release
+      - run: cargo test --target ${{ matrix.target }}
 
   # Cross-compiled tests
   # *** NOTE: Currently broken with `asm` feature enabled! See:
@@ -144,5 +144,5 @@ jobs:
   #          target: ${{ matrix.target }}
   #          override: true
   #      - run: cargo install cross
-  #      - run: cross test --target ${{ matrix.target }} --release
-  #      - run: cross test --target ${{ matrix.target }} --release --features asm
+  #      - run: cross test --target ${{ matrix.target }}
+  #      - run: cross test --target ${{ matrix.target }} --features asm

@@ -25,52 +25,40 @@
 
 #![no_std]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_root_url = "https://docs.rs/md2/0.10.0"
 )]
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[cfg(feature = "std")]
-extern crate std;
-
 pub use digest::{self, Digest};
 
-use block_buffer::{block_padding::Pkcs7, BlockBuffer};
-use digest::{consts::U16, generic_array::GenericArray};
-use digest::{BlockInput, FixedOutputDirty, Reset, Update};
+use core::fmt;
+use digest::{
+    block_buffer::Eager,
+    consts::U16,
+    core_api::{
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
+        OutputSizeUser, Reset, UpdateCore,
+    },
+    HashMarker, Output,
+};
 
 mod consts;
 
-type Block = GenericArray<u8, U16>;
-
+/// Core MD2 hasher state.
 #[derive(Clone)]
-struct Md2State {
+pub struct Md2Core {
     x: [u8; 48],
-    checksum: Block,
+    checksum: Block<Self>,
 }
 
-impl Default for Md2State {
-    fn default() -> Self {
-        Self {
-            x: [0; 48],
-            checksum: Default::default(),
-        }
-    }
-}
-
-/// The MD2 hasher
-#[derive(Clone, Default)]
-pub struct Md2 {
-    buffer: BlockBuffer<U16>,
-    state: Md2State,
-}
-
-impl Md2State {
-    fn process_block(&mut self, input: &Block) {
+impl Md2Core {
+    fn compress(&mut self, block: &Block<Self>) {
         // Update state
         for j in 0..16 {
-            self.x[16 + j] = input[j];
+            self.x[16 + j] = block[j];
             self.x[32 + j] = self.x[16 + j] ^ self.x[j];
         }
 
@@ -86,48 +74,78 @@ impl Md2State {
         // Update checksum
         let mut l = self.checksum[15];
         for j in 0..16 {
-            self.checksum[j] ^= consts::S[(input[j] ^ l) as usize];
+            self.checksum[j] ^= consts::S[(block[j] ^ l) as usize];
             l = self.checksum[j];
         }
     }
 }
 
-impl BlockInput for Md2 {
+impl HashMarker for Md2Core {}
+
+impl BlockSizeUser for Md2Core {
     type BlockSize = U16;
 }
 
-impl Update for Md2 {
-    fn update(&mut self, input: impl AsRef<[u8]>) {
-        let input = input.as_ref();
-        let s = &mut self.state;
-        self.buffer.input_block(input, |d| s.process_block(d));
-    }
+impl BufferKindUser for Md2Core {
+    type BufferKind = Eager;
 }
 
-impl FixedOutputDirty for Md2 {
+impl OutputSizeUser for Md2Core {
     type OutputSize = U16;
+}
 
-    fn finalize_into_dirty(&mut self, out: &mut digest::Output<Self>) {
-        let buf = self
-            .buffer
-            .pad_with::<Pkcs7>()
-            .expect("we never use input_lazy");
-
-        self.state.process_block(buf);
-
-        let checksum = self.state.checksum;
-        self.state.process_block(&checksum);
-
-        out.copy_from_slice(&self.state.x[0..16]);
+impl UpdateCore for Md2Core {
+    #[inline]
+    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+        for block in blocks {
+            self.compress(block)
+        }
     }
 }
 
-impl Reset for Md2 {
+impl FixedOutputCore for Md2Core {
+    #[inline]
+    fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
+        let pos = buffer.get_pos();
+        let rem = buffer.remaining() as u8;
+        let block = buffer.pad_with_zeros();
+        block[pos..].iter_mut().for_each(|b| *b = rem);
+
+        self.compress(block);
+        let checksum = self.checksum;
+        self.compress(&checksum);
+        out.copy_from_slice(&self.x[0..16]);
+    }
+}
+
+impl Default for Md2Core {
+    #[inline]
+    fn default() -> Self {
+        Self {
+            x: [0; 48],
+            checksum: Default::default(),
+        }
+    }
+}
+
+impl Reset for Md2Core {
+    #[inline]
     fn reset(&mut self) {
-        self.state = Default::default();
-        self.buffer.reset();
+        *self = Default::default();
     }
 }
 
-opaque_debug::implement!(Md2);
-digest::impl_write!(Md2);
+impl AlgorithmName for Md2Core {
+    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Md2")
+    }
+}
+
+impl fmt::Debug for Md2Core {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Md2Core { ... }")
+    }
+}
+
+/// MD2 hasher state.
+pub type Md2 = CoreWrapper<Md2Core>;

@@ -1,56 +1,93 @@
 macro_rules! fsb_impl {
     (
-        $state:ident, $state_num:expr, $blocksize:ident, $outputsize:ident, $n:expr, $w:expr,
-        $r:expr, $p:expr, $s:expr, $doc:expr
+        $full_state:ident, $state:ident, $state_num:expr, $blocksize:ident, $outputsize:ident, $n:expr, $w:expr,
+        $r:expr, $p:expr, $s:expr, $full_doc:expr, $doc:expr,
     ) => {
         use digest::consts::{$blocksize, $outputsize};
 
         #[derive(Clone)]
         #[doc=$doc]
         pub struct $state {
-            /// bit size of the message till the current moment (the bit size is represented by a 64 bit
-            /// number)
-            bit_length: u64,
-            /// size of the message being processed
-            buffer: BlockBuffer<$blocksize>,
-            /// value of the input vector
-            hash: [u8; $r / 8],
+            blocks_len: u64,
+            state: [u8; $r / 8],
         }
 
+        impl HashMarker for $state {}
+
+        impl BlockSizeUser for $state {
+            type BlockSize = $blocksize;
+        }
+
+        impl OutputSizeUser for $state {
+            type OutputSize = $outputsize;
+        }
+
+        impl BufferKindUser for $state {
+            type BufferKind = Eager;
+        }
+
+        impl UpdateCore for $state {
+            #[inline]
+            fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+                self.blocks_len += blocks.len() as u64;
+                for block in blocks {
+                    Self::compress(&mut self.state, Self::convert(block));
+                }
+            }
+        }
+
+        impl FixedOutputCore for $state {
+            #[inline]
+            fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
+                let block_bytes = self.blocks_len * Self::BlockSize::U64;
+                let bit_len = 8 * (block_bytes + buffer.get_pos() as u64);
+                let mut h = self.state;
+                buffer.len64_padding_be(bit_len, |b| Self::compress(&mut h, Self::convert(b)));
+
+                let res = whirlpool::Whirlpool::digest(&h[..]);
+                let n = out.len();
+                out.copy_from_slice(&res[..n]);
+            }
+        }
+
+        impl Default for $state {
+            #[inline]
+            fn default() -> Self {
+                Self {
+                    blocks_len: 0u64,
+                    state: [0u8; $r / 8],
+                }
+            }
+        }
+
+        impl Reset for $state {
+            #[inline]
+            fn reset(&mut self) {
+                *self = Default::default();
+            }
+        }
+
+        impl AlgorithmName for $state {
+            fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(stringify!($full_state))
+            }
+        }
+
+        impl fmt::Debug for $state {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(concat!(stringify!($state), " { ... }"))
+            }
+        }
+
+        #[doc=$full_doc]
+        pub type $full_state = CoreWrapper<$state>;
+
         impl $state {
-            // constants
             const SIZE_OUTPUT_COMPRESS: usize = $r / 8;
             const SIZE_INPUT_COMPRESS: usize = $s / 8;
-            const HASH_OUTPUT_SIZE: usize = $state_num / 8;
             const SIZE_MSG_CHUNKS: usize = Self::SIZE_INPUT_COMPRESS - Self::SIZE_OUTPUT_COMPRESS;
             const SIZE_VECTORS: usize = $p / 8 + 1;
             const SHIFT: u8 = 8 - ($p % 8) as u8;
-
-            fn update_len(&mut self, len: u64) {
-                self.bit_length += len * 8;
-            }
-
-            fn finalize_inner(&mut self) {
-                let hash = &mut self.hash;
-                let pos = self.buffer.position();
-                if pos < Self::SIZE_MSG_CHUNKS - 8 {
-                    let mut padding = vec![0; Self::SIZE_MSG_CHUNKS - pos - 8];
-                    padding[0] = 128u8;
-                    padding.extend_from_slice(&Self::helper_transform_usize(self.bit_length));
-                    self.buffer
-                        .input_block(&padding, |b| Self::compress(hash, Self::convert(b)));
-                } else {
-                    let mut padding = vec![0; Self::SIZE_MSG_CHUNKS - pos];
-                    padding[0] = 128u8;
-                    self.buffer
-                        .input_block(&padding, |b| Self::compress(hash, Self::convert(b)));
-                    let mut second_padding = vec![0; Self::SIZE_MSG_CHUNKS - 8];
-                    second_padding
-                        .extend_from_slice(&Self::helper_transform_usize(self.bit_length));
-                    self.buffer
-                        .input_block(&second_padding, |b| Self::compress(hash, Self::convert(b)));
-                }
-            }
 
             fn define_iv(index: usize) -> [u8; Self::SIZE_VECTORS] {
                 let mut subset_pi: [u8; Self::SIZE_VECTORS] = [0u8; Self::SIZE_VECTORS];
@@ -72,21 +109,21 @@ macro_rules! fsb_impl {
             /// $(W_i)_{i\in[0;w-1]}$ between $0$ and $n - 1$. The value of each $W_i$ is computed
             /// from the inputs bits like this:
             /// $W_i = i \times (n / w) + IV_i + M_i \times 2^{r / w}.
-            fn computing_W_indices(
+            fn computing_w_indices(
                 input_vector: &[u8; Self::SIZE_OUTPUT_COMPRESS],
                 message: &[u8; Self::SIZE_MSG_CHUNKS],
             ) -> [u32; $w] {
-                let mut W_indices: [u32; $w] = [0; $w];
+                let mut wind: [u32; $w] = [0; $w];
                 let divided_message: [u8; $w] = Self::dividing_bits(message, ($s - $r) / $w);
                 for i in 0..($w) {
                     let message_i = divided_message[i] as u32;
 
-                    W_indices[i] = (i * $n / $w) as u32
+                    wind[i] = (i * $n / $w) as u32
                         + input_vector[i] as u32
                         + (message_i << ($r / $w) as u8);
                 }
 
-                W_indices
+                wind
             }
 
             /// This function servers the purpose presented in table 3, of breaking a bit array into
@@ -133,7 +170,7 @@ macro_rules! fsb_impl {
             ) {
                 let mut initial_vector = [0u8; Self::SIZE_OUTPUT_COMPRESS];
 
-                let w_indices = Self::computing_W_indices(hash, message_block);
+                let w_indices = Self::computing_w_indices(hash, message_block);
                 for w_index in w_indices.iter() {
                     let chosen_vec = w_index / $r as u32;
                     let shift_value = w_index % $r as u32;
@@ -149,18 +186,6 @@ macro_rules! fsb_impl {
                 *hash = initial_vector;
             }
 
-            fn final_compression(
-                initial_vector: [u8; Self::SIZE_OUTPUT_COMPRESS],
-            ) -> [u8; Self::HASH_OUTPUT_SIZE] {
-                // Now we use Whirpool
-                let mut result = [0u8; Self::HASH_OUTPUT_SIZE];
-                let mut hasher = Whirlpool::new();
-
-                Update::update(&mut hasher, &initial_vector);
-                result.copy_from_slice(&hasher.finalize()[..Self::HASH_OUTPUT_SIZE]);
-                result
-            }
-
             fn shift_and_truncate(
                 array: &mut [u8; Self::SIZE_VECTORS],
                 shift_value: u32,
@@ -170,9 +195,7 @@ macro_rules! fsb_impl {
                 let mut truncated = [0u8; Self::SIZE_OUTPUT_COMPRESS];
 
                 if shift_value == 0 {
-                    array[..Self::SIZE_OUTPUT_COMPRESS]
-                        .try_into()
-                        .expect("SIZE_VECTORS is always bigger than SIZE_OUTPUT_COMPRESS")
+                    truncated.copy_from_slice(&array[..Self::SIZE_OUTPUT_COMPRESS]);
                 } else if shift_value <= (bits_in_cue as u32) {
                     let bytes_to_shift = 1;
                     let starting_byte = (array_len - bytes_to_shift) as usize;
@@ -183,8 +206,6 @@ macro_rules! fsb_impl {
                         truncated[position] ^= array[position - 1] >> (8 - shift_value);
                         truncated[position] ^= array[position] << shift_value;
                     }
-
-                    truncated
                 } else {
                     // First we need to decide which is the last byte and bit that will go to the first position.
                     // Then, we build our truncated array from there. Recall that the last byte is not complete,
@@ -246,8 +267,6 @@ macro_rules! fsb_impl {
                                 }
                             }
                         }
-
-                        truncated
                     } else {
                         truncated[..bytes_to_shift].clone_from_slice(
                             &array[starting_byte..(starting_byte + bytes_to_shift)],
@@ -261,76 +280,14 @@ macro_rules! fsb_impl {
                             truncated[position] ^= array[index] << (8 - bits_in_cue);
                             truncated[position] ^= array[index + 1] >> bits_in_cue;
                         }
-                        truncated
                     }
                 }
-            }
-
-            // I'm trying to avoid use unsafe code for this transformation. We are certain that the bit
-            // size of the buffer can be represented in 8 bytes.
-            fn helper_transform_usize(x: u64) -> [u8; 8] {
-                let b1: u8 = ((x >> 56) & 0xff) as u8;
-                let b2: u8 = ((x >> 48) & 0xff) as u8;
-                let b3: u8 = ((x >> 40) & 0xff) as u8;
-                let b4: u8 = ((x >> 32) & 0xff) as u8;
-                let b5: u8 = ((x >> 24) & 0xff) as u8;
-                let b6: u8 = ((x >> 16) & 0xff) as u8;
-                let b7: u8 = ((x >> 8) & 0xff) as u8;
-                let b8: u8 = (x & 0xff) as u8;
-                [b1, b2, b3, b4, b5, b6, b7, b8]
+                truncated
             }
 
             fn convert(block: &GenericArray<u8, $blocksize>) -> &[u8; Self::SIZE_MSG_CHUNKS] {
-                #[allow(unsafe_code)]
-                unsafe {
-                    &*(block.as_ptr() as *const [u8; Self::SIZE_MSG_CHUNKS])
-                }
+                unsafe { &*(block.as_ptr() as *const [u8; Self::SIZE_MSG_CHUNKS]) }
             }
         }
-
-        impl Default for $state {
-            fn default() -> Self {
-                Self {
-                    bit_length: 0u64,
-                    buffer: BlockBuffer::default(),
-                    hash: [0u8; $r / 8],
-                }
-            }
-        }
-
-        impl BlockInput for $state {
-            type BlockSize = $blocksize;
-        }
-
-        impl Update for $state {
-            fn update(&mut self, input: impl AsRef<[u8]>) {
-                let input = input.as_ref();
-                self.update_len(input.len() as u64);
-
-                let hash = &mut self.hash;
-                self.buffer
-                    .input_block(input, |b| $state::compress(hash, $state::convert(b)));
-            }
-        }
-
-        impl FixedOutputDirty for $state {
-            type OutputSize = $outputsize;
-
-            fn finalize_into_dirty(&mut self, out: &mut GenericArray<u8, Self::OutputSize>) {
-                self.finalize_inner();
-                let final_whirpool = $state::final_compression(self.hash);
-                out.copy_from_slice(&final_whirpool)
-            }
-        }
-
-        impl Reset for $state {
-            fn reset(&mut self) {
-                self.buffer.reset();
-                self.hash = [0u8; $r / 8];
-                self.bit_length = 0;
-            }
-        }
-        opaque_debug::implement!($state);
-        digest::impl_write!($state);
     };
 }

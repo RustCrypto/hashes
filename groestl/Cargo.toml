@@ -1,6 +1,6 @@
 [package]
 name = "groestl"
-version = "0.9.0"
+version = "0.10.0" # Also update html_root_url in lib.rs when bumping this
 description = "Grøstl hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -12,12 +12,10 @@ keywords = ["crypto", "groestl", "grostl", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.9"
-block-buffer = "0.9"
-opaque-debug = "0.3"
+digest = "0.10"
 
 [dev-dependencies]
-digest = { version = "0.9", features = ["dev"] }
+digest = { version = "0.10", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]

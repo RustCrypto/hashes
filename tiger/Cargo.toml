@@ -1,8 +1,8 @@
 [package]
 name = "tiger"
-version = "0.1.0"
+version = "0.2.0" # Also update html_root_url in lib.rs when bumping this
 description = "Tiger hash function"
-authors = ["Ulrik Mikaelsson <ulrik.mikaelsson@gmail.com>", "RustCrypto Developers"]
+authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 edition = "2018"
@@ -12,12 +12,10 @@ keywords = ["crypto", "hash", "tiger", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.9"
-block-buffer = { version = "0.9", features = ["block-padding"] }
-byteorder = { version = "1", default-features = false }
+digest = "0.10"
 
 [dev-dependencies]
-digest = { version = "0.9", features = ["dev"] }
+digest = { version = "0.10", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]

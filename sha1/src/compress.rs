@@ -1,5 +1,5 @@
-use digest::consts::U64;
-use digest::generic_array::GenericArray;
+use crate::{Block, BlockSizeUser, Sha1Core};
+use digest::generic_array::typenum::Unsigned;
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
@@ -14,9 +14,7 @@ cfg_if::cfg_if! {
         mod soft;
         #[cfg(feature = "asm")]
         mod soft {
-            pub(crate) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
-                sha1_asm::compress(state, blocks)
-            }
+            pub use sha1_asm::compress;
         }
         mod x86;
         use x86::compress as compress_inner;
@@ -26,12 +24,15 @@ cfg_if::cfg_if! {
     }
 }
 
+const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
+
 /// SHA-1 compression function
 #[cfg_attr(docsrs, doc(cfg(feature = "compress")))]
-pub fn compress(state: &mut [u32; 5], blocks: &[GenericArray<u8, U64>]) {
+pub fn compress(state: &mut [u32; 5], blocks: &[Block<Sha1Core>]) {
     // SAFETY: GenericArray<u8, U64> and [u8; 64] have
     // exactly the same memory layout
     #[allow(unsafe_code)]
-    let blocks: &[[u8; 64]] = unsafe { &*(blocks as *const _ as *const [[u8; 64]]) };
+    let blocks: &[[u8; BLOCK_SIZE]] =
+        unsafe { &*(blocks as *const _ as *const [[u8; BLOCK_SIZE]]) };
     compress_inner(state, blocks);
 }
