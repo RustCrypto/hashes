@@ -1,6 +1,8 @@
 #![allow(clippy::many_single_char_names)]
-use crate::consts::{BLOCK_LEN, K0, K1, K2, K3};
+use super::BLOCK_SIZE;
 use core::convert::TryInto;
+
+const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
 
 #[inline(always)]
 fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
@@ -47,16 +49,11 @@ fn sha1_first_half(abcd: [u32; 4], msg: [u32; 4]) -> [u32; 4] {
 }
 
 fn sha1_digest_round_x4(abcd: [u32; 4], work: [u32; 4], i: i8) -> [u32; 4] {
-    const K0V: [u32; 4] = [K0, K0, K0, K0];
-    const K1V: [u32; 4] = [K1, K1, K1, K1];
-    const K2V: [u32; 4] = [K2, K2, K2, K2];
-    const K3V: [u32; 4] = [K3, K3, K3, K3];
-
     match i {
-        0 => sha1rnds4c(abcd, add(work, K0V)),
-        1 => sha1rnds4p(abcd, add(work, K1V)),
-        2 => sha1rnds4m(abcd, add(work, K2V)),
-        3 => sha1rnds4p(abcd, add(work, K3V)),
+        0 => sha1rnds4c(abcd, add(work, [K[0]; 4])),
+        1 => sha1rnds4p(abcd, add(work, [K[1]; 4])),
+        2 => sha1rnds4m(abcd, add(work, [K[2]; 4])),
+        3 => sha1rnds4p(abcd, add(work, [K[3]; 4])),
         _ => unreachable!("unknown icosaround index"),
     }
 }
@@ -247,8 +244,8 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
     state[4] = state[4].wrapping_add(e);
 }
 
-pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
-    let mut block_u32 = [0u32; BLOCK_LEN];
+pub fn compress(state: &mut [u32; 5], blocks: &[[u8; BLOCK_SIZE]]) {
+    let mut block_u32 = [0u32; BLOCK_SIZE / 4];
     // since LLVM can't properly use aliasing yet it will make
     // unnecessary state stores without this copy
     let mut state_cpy = *state;

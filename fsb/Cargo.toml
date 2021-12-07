@@ -1,7 +1,7 @@
 [package]
 name = "fsb"
 description = "FSB hash function"
-version = "0.0.2"
+version = "0.1.0" # Also update html_root_url in lib.rs when bumping this
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -11,15 +11,13 @@ keywords = ["crypto", "fsb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-whirlpool = { version = "0.9", path = "../whirlpool", default-features = false }
-digest = "0.9"
-block-buffer = { version = "0.9", features = ["block-padding"] }
-opaque-debug = "0.3"
+digest = "0.10"
+whirlpool = { version = "0.10", path = "../whirlpool", default-features = false }
 
 [dev-dependencies]
+digest = { version = "0.10", features = ["dev"] }
 hex-literal = "0.2"
-digest = { version = "0.9", features = ["dev"] }
 
 [features]
-asm = ["whirlpool/asm"]
-std = ["whirlpool/std"]
+default = ["std"]
+std = ["digest/std"]

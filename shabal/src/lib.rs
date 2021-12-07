@@ -26,7 +26,9 @@
 //! // acquire hash digest in the form of GenericArray,
 //! // which in this case is equivalent to [u8; 32]
 //! let result = hasher.finalize();
-//! assert_eq!(result[..], hex!("d945dee21ffca23ac232763aa9cac6c15805f144db9d6c97395437e01c8595a8"));
+//! assert_eq!(result[..], hex!("
+//!     d945dee21ffca23ac232763aa9cac6c15805f144db9d6c97395437e01c8595a8
+//! ")[..]);
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
@@ -36,8 +38,9 @@
 
 #![no_std]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_root_url = "https://docs.rs/shabal/0.4.0"
 )]
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
@@ -45,8 +48,25 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+#[rustfmt::skip]
 mod consts;
-mod shabal;
+mod core_api;
 
-pub use crate::shabal::{Shabal192, Shabal224, Shabal256, Shabal384, Shabal512};
+pub use core_api::ShabalVarCore;
 pub use digest::{self, Digest};
+
+use digest::{
+    consts::{U24, U28, U32, U48, U64},
+    core_api::{CoreWrapper, CtVariableCoreWrapper},
+};
+
+/// Shabal192 hasher.
+pub type Shabal192 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U24>>;
+/// Shabal224 hasher.
+pub type Shabal224 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U28>>;
+/// Shabal256 hasher.
+pub type Shabal256 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U32>>;
+/// Shabal384 hasher.
+pub type Shabal384 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U48>>;
+/// Shabal512 hasher.
+pub type Shabal512 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U64>>;

@@ -1,6 +1,6 @@
 [package]
 name = "k12"
-version = "0.1.0"
+version = "0.2.0" # Also update html_root_url in lib.rs when bumping this
 description = "Experimental pure Rust implementation of the KangarooTwelve hash function"
 authors = ["Diggory Hardy <github1@dhardy.name>"]
 license = "Apache-2.0 OR MIT"
@@ -12,10 +12,10 @@ keywords = ["crypto", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "0.9", features = ["alloc"] }
+digest = { version = "0.10", features = ["alloc"] }
 
 [dev-dependencies]
-digest = { version = "0.9", features = ["alloc", "dev"] }
+digest = { version = "0.10", features = ["alloc", "dev"] }
 hex-literal = "0.2"
 
 [features]

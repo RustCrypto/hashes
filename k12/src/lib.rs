@@ -10,8 +10,9 @@
 
 #![no_std]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_root_url = "https://docs.rs/k12/0.2.0"
 )]
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
@@ -28,7 +29,7 @@ mod lanes;
 // TODO(tarcieri): eliminate usage of `Vec`
 use alloc::vec::Vec;
 use core::{cmp::min, convert::TryInto, mem};
-use digest::{ExtendableOutputDirty, Reset, Update, XofReader};
+use digest::{ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update, XofReader};
 
 /// The KangarooTwelve extendable-output function (XOF).
 #[derive(Debug, Default)]
@@ -57,17 +58,28 @@ impl KangarooTwelve {
     }
 }
 
+impl HashMarker for KangarooTwelve {}
+
 impl Update for KangarooTwelve {
-    /// Input data into the hash function
-    fn update(&mut self, bytes: impl AsRef<[u8]>) {
-        self.buffer.extend_from_slice(bytes.as_ref());
+    fn update(&mut self, bytes: &[u8]) {
+        self.buffer.extend_from_slice(bytes);
     }
 }
 
-impl ExtendableOutputDirty for KangarooTwelve {
+impl ExtendableOutput for KangarooTwelve {
     type Reader = Reader;
 
-    fn finalize_xof_dirty(&mut self) -> Self::Reader {
+    fn finalize_xof(self) -> Self::Reader {
+        Reader {
+            buffer: self.buffer,
+            customization: self.customization,
+            finished: false,
+        }
+    }
+}
+
+impl ExtendableOutputReset for KangarooTwelve {
+    fn finalize_xof_reset(&mut self) -> Self::Reader {
         let mut buffer = vec![];
         let mut customization = vec![];
 

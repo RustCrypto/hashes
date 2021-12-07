@@ -38,7 +38,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           target: ${{ matrix.target }}
           override: true
-      - run: cargo build --no-default-features --release --target ${{ matrix.target }}
+      - run: cargo build --no-default-features --target ${{ matrix.target }}
 
   test:
     runs-on: ubuntu-latest

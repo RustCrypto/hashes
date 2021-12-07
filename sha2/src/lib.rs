@@ -1,21 +1,12 @@
 //! An implementation of the [SHA-2][1] cryptographic hash algorithms.
 //!
-//! There are 6 standard algorithms specified in the SHA-2 standard:
+//! There are 6 standard algorithms specified in the SHA-2 standard: [`Sha224`],
+//! [`Sha256`], [`Sha512_224`], [`Sha512_256`], [`Sha384`], and [`Sha512`].
 //!
-//! * `Sha224`, which is the 8 x 32-bit `Sha256` algorithm with the result truncated
-//! to 224 bits.
-//! * `Sha256`, which is the 8 x 32-bit `Sha256` algorithm.
-//! * `Sha384`, which is the 8 x 64-bit `Sha512` algorithm with the result truncated
-//! to 384 bits.
-//! * `Sha512`, which is the 8 x 64-bit `Sha512` algorithm.
-//! * `Sha512Trunc224`, which is the 8 x 64-bit `Sha512` algorithm with the result
-//! truncated to 224 bits.
-//! * `Sha512Trunc256`, which is the 8 x 64-bit `Sha512` algorithm with the result
-//! truncated to 256 bits.
-//!
-//! Algorithmically, there are only 2 core algorithms: `Sha256` and `Sha512`.
+//! Algorithmically, there are only 2 core algorithms: SHA-256 and SHA-512.
 //! All other algorithms are just applications of these with different initial
-//! hash values, and truncated to different digest bit lengths.
+//! hash values, and truncated to different digest bit lengths. The first two
+//! algorithms in the list are based on SHA-256, while the last three on SHA-512.
 //!
 //! # Usage
 //!
@@ -55,22 +46,41 @@
 #![no_std]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_root_url = "https://docs.rs/sha2/0.10.0"
 )]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[cfg(feature = "std")]
-extern crate std;
+pub use digest::{self, Digest};
 
+use digest::{
+    consts::{U28, U32, U48, U64},
+    core_api::{CoreWrapper, CtVariableCoreWrapper},
+};
+
+#[rustfmt::skip]
 mod consts;
+mod core_api;
 mod sha256;
 mod sha512;
 
-pub use digest::{self, Digest};
 #[cfg(feature = "compress")]
 pub use sha256::compress256;
-pub use sha256::{Sha224, Sha256};
 #[cfg(feature = "compress")]
 pub use sha512::compress512;
-pub use sha512::{Sha384, Sha512, Sha512Trunc224, Sha512Trunc256};
+
+pub use core_api::{Sha256VarCore, Sha512VarCore};
+
+/// SHA-224 hasher.
+pub type Sha224 = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore, U28>>;
+/// SHA-256 hasher.
+pub type Sha256 = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore, U32>>;
+/// SHA-512/224 hasher.
+pub type Sha512_224 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U28>>;
+/// SHA-512/256 hasher.
+pub type Sha512_256 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U32>>;
+/// SHA-384 hasher.
+pub type Sha384 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U48>>;
+/// SHA-512 hasher.
+pub type Sha512 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U64>>;
