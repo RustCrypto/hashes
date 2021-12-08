@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   renamed into `Blake2bVar` and `Blake2sVar` respectively. ([#217])
 
 ### Removed
-- `Blake2b` and `Blake2s` no longer support MAC functionality.
+- `Blake2b` and `Blake2s` no longer support MAC functionality. ([#217])
 
 ### Added
 - Separate `Blake2bMac` and `Blake2sMac` types generic over output size and `Blake2bMac512`
