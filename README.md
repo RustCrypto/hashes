@@ -97,14 +97,14 @@ println!("Result: {:x}", hash);
 
 In this example `hash` has type `GenericArray<u8, U32>`, which is a generic alternative to `[u8; 32]` defined in the [`generic-array`] crate.
 
-Alternatively, you can use chained approach, which is equivalent to the previous example:
+Alternatively, you can use a chained approach, which is equivalent to the previous example:
 
 ```rust
 use sha2::{Sha256, Digest};
 
 let hash = Sha256::new()
-    .chain(b"Hello world!")
-    .chain("String data")
+    .chain_update(b"Hello world!")
+    .chain_update("String data")
     .finalize();
 println!("Result: {:x}", hash);
 ```
