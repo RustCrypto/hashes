@@ -46,10 +46,7 @@ macro_rules! impl_sha3 {
 
                 self.state.absorb_block(block);
 
-                let n = out.len();
-                self.state.as_bytes(|state| {
-                    out.copy_from_slice(&state[..n]);
-                });
+                self.state.as_bytes(out);
             }
         }
 
@@ -183,10 +180,7 @@ macro_rules! impl_shake {
             #[inline]
             fn read_block(&mut self) -> Block<Self> {
                 let mut block = Block::<Self>::default();
-                let n = block.len();
-                self.state.as_bytes(|state| {
-                    block.copy_from_slice(&state[..n]);
-                });
+                self.state.as_bytes(&mut block);
                 self.state.apply_f();
                 block
             }
