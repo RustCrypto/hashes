@@ -12,22 +12,8 @@ impl Sha3State {
     pub(crate) fn absorb_block(&mut self, block: &[u8]) {
         debug_assert_eq!(block.len() % 8, 0);
 
-        if cfg!(target_endian = "little") {
-            #[allow(unsafe_code)]
-            let state = unsafe { &mut *(self.state.as_mut_ptr() as *mut [u8; 8 * PLEN]) };
-            for (d, i) in state.iter_mut().zip(block) {
-                *d ^= *i;
-            }
-        } else if cfg!(target_endian = "big") {
-            let n = block.len() / 8;
-            let mut buf = [0u64; 21];
-            let buf = &mut buf[..n];
-            for (o, chunk) in buf.iter_mut().zip(block.chunks_exact(8)) {
-                *o = u64::from_le_bytes(chunk.try_into().unwrap());
-            }
-            for (d, i) in self.state[..n].iter_mut().zip(buf) {
-                *d ^= *i;
-            }
+        for (b, s) in block.chunks_exact(8).zip(self.state.iter_mut()) {
+            *s ^= u64::from_le_bytes(b.try_into().unwrap());
         }
 
         keccak::f1600(&mut self.state);
