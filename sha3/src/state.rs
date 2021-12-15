@@ -34,22 +34,10 @@ impl Sha3State {
     }
 
     #[inline(always)]
-    pub(crate) fn as_bytes<F: FnOnce(&[u8; 8 * PLEN])>(&self, f: F) {
-        let mut data_copy;
-        let data_ref: &[u8; 8 * PLEN] = if cfg!(target_endian = "little") {
-            #[allow(unsafe_code)]
-            unsafe {
-                &*(self.state.as_ptr() as *const [u8; 8 * PLEN])
-            }
-        } else {
-            data_copy = [0u8; 8 * PLEN];
-
-            for (chunk, v) in data_copy.chunks_exact_mut(8).zip(self.state.iter()) {
-                chunk.copy_from_slice(&v.to_le_bytes());
-            }
-            &data_copy
-        };
-        f(data_ref);
+    pub(crate) fn as_bytes(&self, out: &mut [u8]) {
+        for (o, s) in out.chunks_mut(8).zip(self.state.iter()) {
+            o.copy_from_slice(&s.to_le_bytes()[..o.len()]);
+        }
     }
 
     #[inline(always)]
