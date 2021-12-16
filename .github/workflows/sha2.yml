@@ -3,6 +3,7 @@ name: sha2
 on:
   pull_request:
     paths:
+      - ".github/workflows/sha2.yml"
       - "sha2/**"
       - "Cargo.*"
   push:
@@ -13,23 +14,34 @@ defaults:
     working-directory: sha2
 
 env:
-  CARGO_INCREMENTAL: 0
+  MSRV: 1.41.0
   RUSTFLAGS: "-Dwarnings"
+  CARGO_INCREMENTAL: 0
 
 jobs:
+  set-msrv:
+    runs-on: ubuntu-latest
+    outputs:
+      msrv: ${{ steps.msrv.outputs.msrv }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: msrv
+        run: echo "::set-output name=msrv::$(echo $MSRV)"
+
   # Builds for no_std platforms
   build:
+    needs: set-msrv
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
-          - 1.41.0 # MSRV
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -40,12 +52,13 @@ jobs:
 
   # Linux tests
   linux:
+    needs: set-msrv
     strategy:
       matrix:
         include:
           # 32-bit Linux/x86
           - target: i686-unknown-linux-gnu
-            rust: 1.41.0 # MSRV
+            rust: ${{needs.set-msrv.outputs.msrv}}
             deps: sudo apt update && sudo apt install gcc-multilib
           - target: i686-unknown-linux-gnu
             rust: stable
@@ -53,13 +66,13 @@ jobs:
 
           # 64-bit Linux/x86_64
           - target: x86_64-unknown-linux-gnu
-            rust: 1.41.0 # MSRV
+            rust: ${{needs.set-msrv.outputs.msrv}}
           - target: x86_64-unknown-linux-gnu
             rust: stable
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -74,15 +87,16 @@ jobs:
 
   # macOS tests
   macos:
+    needs: set-msrv
     strategy:
       matrix:
         toolchain:
-          - 1.41.0 # MSRV
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
 
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -95,6 +109,7 @@ jobs:
 
   # Windows tests
   windows:
+    needs: set-msrv
     strategy:
       matrix:
         include:
@@ -107,7 +122,7 @@ jobs:
 
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -119,14 +134,21 @@ jobs:
 
   # Cross-compiled tests
   cross:
+    needs: set-msrv
     strategy:
       matrix:
+        rust:
+          - ${{needs.set-msrv.outputs.msrv}}
+          - stable
+        target:
+          - aarch64-unknown-linux-gnu
+          - mips-unknown-linux-gnu
+        features:
+          - default
         include:
-          # ARM64
-          #- target: aarch64-unknown-linux-gnu
-          #  rust: 1.41.0 # MSRV
-          - target: aarch64-unknown-linux-gnu
-            rust: stable
+            - rust: stable
+              target: aarch64-unknown-linux-gnu
+              features: asm
 
     runs-on: ubuntu-latest
     defaults:
@@ -134,18 +156,10 @@ jobs:
       # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
         working-directory: .
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/cross-tests
         with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
+          rust: ${{ matrix.rust }}
+          package: ${{ github.workflow }}
           target: ${{ matrix.target }}
-          override: true
-      - name: Install precompiled cross
-        run: |
-          export URL=$(curl -s https://api.github.com/repos/rust-embedded/cross/releases/latest | jq -r '.assets[] | select(.name | contains("x86_64-unknown-linux-gnu.tar.gz")) | .browser_download_url')
-          wget -O /tmp/binaries.tar.gz $URL
-          tar -C /tmp -xzf /tmp/binaries.tar.gz
-          mv /tmp/cross ~/.cargo/bin
-      - run: cross test --package sha2 --target ${{ matrix.target }}
-      - run: cross test --package sha2 --target ${{ matrix.target }} --features asm
+          features: ${{ matrix.features }}
