@@ -3,6 +3,7 @@ name: sha1
 on:
   pull_request:
     paths:
+      - ".github/workflows/sha1.yml"
       - "sha1/**"
       - "Cargo.*"
   push:
@@ -13,17 +14,28 @@ defaults:
     working-directory: sha1
 
 env:
-  CARGO_INCREMENTAL: 0
+  MSRV: 1.41.0
   RUSTFLAGS: "-Dwarnings"
+  CARGO_INCREMENTAL: 0
 
 jobs:
+  set-msrv:
+    runs-on: ubuntu-latest
+    outputs:
+      msrv: ${{ steps.msrv.outputs.msrv }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: msrv
+        run: echo "::set-output name=msrv::$(echo $MSRV)"
+
   # Builds for no_std platforms
   build:
+    needs: set-msrv
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
-          - 1.41.0 # MSRV
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - thumbv7em-none-eabi
@@ -40,6 +52,7 @@ jobs:
 
   # Linux tests
   linux:
+    needs: set-msrv
     strategy:
       matrix:
         include:
@@ -47,7 +60,7 @@ jobs:
           # *** NOTE: Currently broken with `asm` feature enabled! See:
           #     https://github.com/RustCrypto/hashes/issues/251
           #- target: i686-unknown-linux-gnu
-          #  rust: 1.41.0 # MSRV
+          #  rust: ${{needs.set-msrv.outputs.msrv}}
           #  deps: sudo apt update && sudo apt install gcc-multilib
           #- target: i686-unknown-linux-gnu
           #  rust: stable
@@ -55,13 +68,13 @@ jobs:
 
           # 64-bit Linux/x86_64
           - target: x86_64-unknown-linux-gnu
-            rust: 1.41.0 # MSRV
+            rust: ${{needs.set-msrv.outputs.msrv}}
           - target: x86_64-unknown-linux-gnu
             rust: stable
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -76,15 +89,16 @@ jobs:
 
   # macOS tests
   macos:
+    needs: set-msrv
     strategy:
       matrix:
         toolchain:
-          - 1.41.0 # MSRV
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
 
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -98,19 +112,20 @@ jobs:
 
   # Windows tests
   windows:
+    needs: set-msrv
     strategy:
       matrix:
         include:
           # 64-bit Windows (GNU)
           # TODO(tarcieri): try re-enabling this when we bump MSRV
           #- target: x86_64-pc-windows-gnu
-          #  toolchain: 1.41.0 # MSRV
+          #  toolchain: ${{needs.set-msrv.outputs.msrv}}
           - target: x86_64-pc-windows-gnu
             toolchain: stable
 
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -121,28 +136,35 @@ jobs:
       - run: cargo test --target ${{ matrix.target }}
 
   # Cross-compiled tests
-  # *** NOTE: Currently broken with `asm` feature enabled! See:
-  #     https://github.com/RustCrypto/hashes/issues/251
-  #
-  #  cross:
-  #    strategy:
-  #      matrix:
-  #        include:
-  #          # ARM64
-  #          - target: aarch64-unknown-linux-gnu
-  #            rust: 1.41.0 # MSRV
-  #          - target: aarch64-unknown-linux-gnu
-  #            rust: stable
-  #
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v1
-  #      - uses: actions-rs/toolchain@v1
-  #        with:
-  #          profile: minimal
-  #          toolchain: ${{ matrix.rust }}
-  #          target: ${{ matrix.target }}
-  #          override: true
-  #      - run: cargo install cross
-  #      - run: cross test --target ${{ matrix.target }}
-  #      - run: cross test --target ${{ matrix.target }} --features asm
+  cross:
+    needs: set-msrv
+    strategy:
+      matrix:
+        rust:
+          - ${{needs.set-msrv.outputs.msrv}}
+          - stable
+        target:
+          - aarch64-unknown-linux-gnu
+          - mips-unknown-linux-gnu
+        features:
+          - default
+  # **** NOTE: Currently broken with `asm` feature enabled! See:
+  #      https://github.com/RustCrypto/hashes/issues/251
+  #      include:
+  #          - rust: stable
+  #            target: aarch64-unknown-linux-gnu
+  #            features: asm
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+      # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/cross-tests
+        with:
+          rust: ${{ matrix.rust }}
+          package: ${{ github.workflow }}
+          target: ${{ matrix.target }}
+          features: ${{ matrix.features }}

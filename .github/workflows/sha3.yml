@@ -3,6 +3,7 @@ name: sha3
 on:
   pull_request:
     paths:
+      - ".github/workflows/sha3.yml"
       - "sha3/**"
       - "Cargo.*"
   push:
@@ -13,22 +14,33 @@ defaults:
     working-directory: sha3
 
 env:
-  CARGO_INCREMENTAL: 0
+  MSRV: 1.41.0
   RUSTFLAGS: "-Dwarnings"
+  CARGO_INCREMENTAL: 0
 
 jobs:
+  set-msrv:
+    runs-on: ubuntu-latest
+    outputs:
+      msrv: ${{ steps.msrv.outputs.msrv }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: msrv
+        run: echo "::set-output name=msrv::$(echo $MSRV)"
+
   build:
+    needs: set-msrv
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
-          - 1.41.0 # MSRV
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -38,14 +50,15 @@ jobs:
       - run: cargo build --no-default-features --target ${{ matrix.target }}
 
   test:
+    needs: set-msrv
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
-          - 1.41.0 # MSRV
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -55,3 +68,31 @@ jobs:
       - run: cargo test --no-default-features
       - run: cargo test
       - run: cargo test --all-features
+
+  # Cross-compiled tests
+  cross:
+    needs: set-msrv
+    strategy:
+      matrix:
+        rust:
+          - ${{needs.set-msrv.outputs.msrv}}
+          - stable
+        target:
+          - aarch64-unknown-linux-gnu
+          - mips-unknown-linux-gnu
+        features:
+          - default
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+      # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/cross-tests
+        with:
+          rust: ${{ matrix.rust }}
+          package: ${{ github.workflow }}
+          target: ${{ matrix.target }}
+          features: ${{ matrix.features }}
