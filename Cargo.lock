@@ -135,6 +135,7 @@ version = "0.2.1"
 dependencies = [
  "digest",
  "hex-literal",
+ "sha3 0.10.8",
 ]
 
 [[package]]
@@ -148,9 +149,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.142"
+version = "0.2.143"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a987beff54b60ffa6d51982e1aa1146bc42f19bd26be28b0586f252fccf5317"
+checksum = "edc207893e85c5d6be840e969b496b53d94cec8be2d501b214f50daa97fa8024"
 
 [[package]]
 name = "md-5"
@@ -246,6 +247,16 @@ version = "0.10.7"
 dependencies = [
  "digest",
  "hex-literal",
+ "keccak",
+]
+
+[[package]]
+name = "sha3"
+version = "0.10.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75872d278a8f37ef87fa0ddbda7802605cb18344497949862c0d4dcb291eba60"
+dependencies = [
+ "digest",
  "keccak",
 ]
 
