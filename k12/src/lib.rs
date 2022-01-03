@@ -1,12 +1,7 @@
 //! Experimental pure Rust implementation of the KangarooTwelve
 //! cryptographic hash algorithm, based on the reference implementation:
 //!
-//! <https://github.com/gvanas/KeccakCodePackage/blob/master/Standalone/kangaroo_twelve-reference/K12.py>
-//!
-//! Some optimisations copied from: <https://github.com/RustCrypto/hashes/tree/master/sha3/src>
-
-// Based off this translation originally by Diggory Hardy:
-// <https://github.com/dhardy/hash-bench/blob/master/src/k12.rs>
+//! <https://datatracker.ietf.org/doc/draft-irtf-cfrg-kangarootwelve/>
 
 #![no_std]
 #![doc(
@@ -16,242 +11,215 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-// TODO(tarcieri): eliminate alloc requirement
-#[macro_use]
-extern crate alloc;
-
 pub use digest;
 
-#[macro_use]
-mod lanes;
+use core::fmt;
+use digest::block_buffer::Eager;
+use digest::consts::{U128, U168};
+use digest::core_api::{
+    AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, ExtendableOutputCore,
+    UpdateCore, XofReaderCore, XofReaderCoreWrapper,
+};
+use digest::{ExtendableOutputReset, HashMarker, Reset, Update, XofReader};
 
-// TODO(tarcieri): eliminate usage of `Vec`
-use alloc::vec::Vec;
-use core::{cmp::min, convert::TryInto, mem};
-use digest::{ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update, XofReader};
+use sha3::{TurboShake128, TurboShake128Core, TurboShake128ReaderCore};
 
-/// The KangarooTwelve extendable-output function (XOF).
-#[derive(Debug, Default)]
-pub struct KangarooTwelve {
-    /// Input to be processed
-    // TODO(tarcieri): don't store input in a `Vec`
-    buffer: Vec<u8>,
+const CHUNK_SIZE: usize = 8192;
+const CHAINING_VALUE_SIZE: usize = 32;
+const LENGTH_ENCODE_SIZE: usize = 255;
 
-    /// Customization string to apply
-    // TODO(tarcieri): don't store customization in a `Vec`
-    customization: Vec<u8>,
+#[doc = "Core "]
+#[doc = "KangarooTwelve"]
+#[doc = " hasher state."]
+#[derive(Clone)]
+#[allow(non_camel_case_types)]
+pub struct KangarooTwelveCore<'cs> {
+    customization: &'cs [u8],
+    buffer: [u8; CHUNK_SIZE],
+    bufpos: usize,
+    final_tshk: TurboShake128,
+    chain_tshk: TurboShake128,
+    chain_length: usize,
 }
 
-impl KangarooTwelve {
-    /// Create a new [`KangarooTwelve`] instance.
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// Create a new [`KangarooTwelve`] instance with the given customization.
-    pub fn new_with_customization(customization: impl AsRef<[u8]>) -> Self {
+impl<'cs> KangarooTwelveCore<'cs> {
+    /// Creates a new KangarooTwelve instance with the given customization.
+    pub fn new(customization: &'cs [u8]) -> Self {
         Self {
-            buffer: Vec::new(),
-            customization: customization.as_ref().into(),
-        }
-    }
-}
-
-impl HashMarker for KangarooTwelve {}
-
-impl Update for KangarooTwelve {
-    fn update(&mut self, bytes: &[u8]) {
-        self.buffer.extend_from_slice(bytes);
-    }
-}
-
-impl ExtendableOutput for KangarooTwelve {
-    type Reader = Reader;
-
-    fn finalize_xof(self) -> Self::Reader {
-        Reader {
-            buffer: self.buffer,
-            customization: self.customization,
-            finished: false,
-        }
-    }
-}
-
-impl ExtendableOutputReset for KangarooTwelve {
-    fn finalize_xof_reset(&mut self) -> Self::Reader {
-        let mut buffer = vec![];
-        let mut customization = vec![];
-
-        mem::swap(&mut self.buffer, &mut buffer);
-        mem::swap(&mut self.customization, &mut customization);
-
-        Reader {
-            buffer,
             customization,
-            finished: false,
+            buffer: [0u8; CHUNK_SIZE],
+            bufpos: 0usize,
+            final_tshk: TurboShake128::from_core(<TurboShake128Core>::new(0x06)),
+            chain_tshk: TurboShake128::from_core(<TurboShake128Core>::new(0x0B)),
+            chain_length: 0usize,
         }
     }
 }
 
-impl Reset for KangarooTwelve {
-    fn reset(&mut self) {
-        self.buffer.clear();
+impl HashMarker for KangarooTwelveCore<'_> {}
+
+impl BlockSizeUser for KangarooTwelveCore<'_> {
+    type BlockSize = U128;
+}
+
+impl BufferKindUser for KangarooTwelveCore<'_> {
+    type BufferKind = Eager;
+}
+
+impl UpdateCore for KangarooTwelveCore<'_> {
+    #[inline]
+    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+        for block in blocks {
+            self.buffer[self.bufpos..self.bufpos + 128].clone_from_slice(block);
+            self.bufpos += 128;
+
+            if self.bufpos != CHUNK_SIZE {
+                continue;
+            }
+
+            if self.chain_length == 0 {
+                self.final_tshk.update(&self.buffer);
+                self.final_tshk
+                    .update(&[0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+            } else {
+                let mut result = [0u8; CHAINING_VALUE_SIZE];
+                self.chain_tshk.update(&self.buffer);
+                self.chain_tshk.finalize_xof_reset_into(&mut result);
+                self.final_tshk.update(&result);
+            }
+
+            self.chain_length += 1;
+            self.buffer = [0u8; CHUNK_SIZE];
+            self.bufpos = 0;
+        }
     }
 }
 
-/// Extensible output reader.
-///
-/// NOTE: this presently only supports one invocation and will *panic* if
-/// [`XofReader::read`] is invoked on it multiple times.
-#[derive(Debug, Default)]
-pub struct Reader {
-    /// Input to be processed
-    // TODO(tarcieri): don't store input in a `Vec`
-    buffer: Vec<u8>,
+impl ExtendableOutputCore for KangarooTwelveCore<'_> {
+    type ReaderCore = KangarooTwelveReaderCore;
 
-    /// Customization string to apply
-    // TODO(tarcieri): don't store customization in a `Vec`
-    customization: Vec<u8>,
+    #[inline]
+    fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
+        let mut lenbuf = [0u8; LENGTH_ENCODE_SIZE];
 
-    /// Has the XOF output already been consumed?
-    // TODO(tarcieri): allow `XofReader::result` to be called multiple times
-    finished: bool,
-}
-
-// TODO(tarcieri): factor more of this logic into the `KangarooTwelve` type
-impl XofReader for Reader {
-    /// Get the resulting output of the function.
-    ///
-    /// Panics if called multiple times on the same instance (TODO: don't panic!)
-    fn read(&mut self, output: &mut [u8]) {
-        assert!(
-            !self.finished,
-            "not yet implemented: multiple XofReader::read invocations unsupported"
+        // Digest customization
+        buffer.digest_blocks(self.customization, |block| self.update_blocks(block));
+        buffer.digest_blocks(
+            length_encode(self.customization.len(), &mut lenbuf),
+            |block| self.update_blocks(block),
         );
 
-        let b = 8192;
-        let c = 256;
+        // Read leftover data from buffer
+        self.buffer[self.bufpos..(self.bufpos + buffer.get_pos())]
+            .copy_from_slice(buffer.get_data());
+        self.bufpos += buffer.get_pos();
 
-        let mut slice = Vec::new(); // S
-        slice.extend_from_slice(&self.buffer);
-        slice.extend_from_slice(&self.customization);
-        slice.extend_from_slice(&right_encode(self.customization.len())[..]);
-
-        // === Cut the input string into chunks of b bytes ===
-        let n = (slice.len() + b - 1) / b;
-        let mut slices = Vec::with_capacity(n); // Si
-        for i in 0..n {
-            let ub = min((i + 1) * b, slice.len());
-            slices.push(&slice[i * b..ub]);
+        // Calculate final node
+        if self.chain_length == 0 {
+            // Input didnot exceed a single chaining value
+            let tshk = TurboShake128::from_core(<TurboShake128Core>::new(0x07))
+                .chain(&self.buffer[..self.bufpos])
+                .finalize_xof_reset();
+            return KangarooTwelveReaderCore { tshk };
         }
+        // Calculate last chaining value
+        let mut result = [0u8; CHAINING_VALUE_SIZE];
+        self.chain_tshk.update(&self.buffer[..self.bufpos]);
+        self.chain_tshk.finalize_xof_reset_into(&mut result);
+        self.final_tshk.update(&result);
+        // Pad final node calculation
+        self.final_tshk
+            .update(length_encode(self.chain_length, &mut lenbuf));
+        self.final_tshk.update(&[0xff, 0xff]);
 
-        // TODO(tarcieri): get rid of intermediate output buffer
-        let tmp_buffer = if n == 1 {
-            // === Process the tree with only a final node ===
-            f(slices[0], 0x07, output.len())
-        } else {
-            // === Process the tree with kangaroo hopping ===
-            // TODO: in parallel
-            let mut intermediate = Vec::with_capacity(n - 1); // CVi
-            for i in 0..n - 1 {
-                intermediate.push(f(slices[i + 1], 0x0B, c / 8));
-            }
-
-            let mut node_star = Vec::new();
-            node_star.extend_from_slice(slices[0]);
-            node_star.extend_from_slice(&[3, 0, 0, 0, 0, 0, 0, 0]);
-
-            #[allow(clippy::needless_range_loop)]
-            for i in 0..n - 1 {
-                node_star.extend_from_slice(&intermediate[i][..]);
-            }
-
-            node_star.extend_from_slice(&right_encode(n - 1));
-            node_star.extend_from_slice(b"\xFF\xFF");
-
-            f(&node_star[..], 0x06, output.len())
-        };
-
-        output.copy_from_slice(&tmp_buffer);
-        self.finished = true;
+        KangarooTwelveReaderCore {
+            tshk: self.final_tshk.finalize_xof_reset(),
+        }
     }
 }
 
-fn f(input: &[u8], suffix: u8, mut output_len: usize) -> Vec<u8> {
-    let mut state = [0u8; 200];
-    let max_block_size = 1344 / 8; // r, also known as rate in bytes
-
-    // === Absorb all the input blocks ===
-    // We unroll first loop, which allows simple copy
-    let mut block_size = min(input.len(), max_block_size);
-    state[0..block_size].copy_from_slice(&input[0..block_size]);
-
-    let mut offset = block_size;
-    while offset < input.len() {
-        keccak(&mut state);
-        block_size = min(input.len() - offset, max_block_size);
-        for i in 0..block_size {
-            // TODO: is this sufficiently optimisable or better to convert to u64 first?
-            state[i] ^= input[i + offset];
+impl Default for KangarooTwelveCore<'_> {
+    #[inline]
+    fn default() -> Self {
+        Self {
+            customization: &[],
+            buffer: [0u8; CHUNK_SIZE],
+            bufpos: 0usize,
+            final_tshk: TurboShake128::from_core(<TurboShake128Core>::new(0x06)),
+            chain_tshk: TurboShake128::from_core(<TurboShake128Core>::new(0x0B)),
+            chain_length: 0usize,
         }
-        offset += block_size;
-    }
-    if block_size == max_block_size {
-        // TODO: condition is nearly always false; tests pass without this.
-        // Why is it here?
-        keccak(&mut state);
-        block_size = 0;
-    }
-
-    // === Do the padding and switch to the squeezing phase ===
-    state[block_size] ^= suffix;
-    if ((suffix & 0x80) != 0) && (block_size == (max_block_size - 1)) {
-        // TODO: condition is almost always false — in fact tests pass without
-        // this block! So why is it here?
-        keccak(&mut state);
-    }
-    state[max_block_size - 1] ^= 0x80;
-    keccak(&mut state);
-
-    // === Squeeze out all the output blocks ===
-    let mut output = Vec::with_capacity(output_len);
-    while output_len > 0 {
-        block_size = min(output_len, max_block_size);
-        output.extend_from_slice(&state[0..block_size]);
-        output_len -= block_size;
-        if output_len > 0 {
-            keccak(&mut state);
-        }
-    }
-    output
-}
-
-fn keccak(state: &mut [u8; 200]) {
-    let mut lanes = [0u64; 25];
-    let mut y;
-    for x in 0..5 {
-        FOR5!(y, 5, {
-            let pos = 8 * (x + y);
-            lanes[x + y] = u64::from_le_bytes(state[pos..(pos + 8)].try_into().unwrap());
-        });
-    }
-    lanes::keccak(&mut lanes);
-    for x in 0..5 {
-        FOR5!(y, 5, {
-            let i = 8 * (x + y);
-            state[i..i + 8].copy_from_slice(&lanes[x + y].to_le_bytes());
-        });
     }
 }
 
-fn right_encode(mut x: usize) -> Vec<u8> {
-    let mut slice = Vec::new();
-    while x > 0 {
-        slice.push((x % 256) as u8);
-        x /= 256;
+impl Reset for KangarooTwelveCore<'_> {
+    #[inline]
+    fn reset(&mut self) {
+        *self = Self::new(self.customization);
     }
-    slice.reverse();
-    let len = slice.len();
-    slice.push(len as u8);
-    slice
+}
+
+impl AlgorithmName for KangarooTwelveCore<'_> {
+    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(stringify!(KangarooTwelve))
+    }
+}
+
+impl fmt::Debug for KangarooTwelveCore<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(concat!(stringify!(KangarooTwelveCore), " { ... }"))
+    }
+}
+
+#[doc = "Core "]
+#[doc = "KangarooTwelve"]
+#[doc = " reader state."]
+#[derive(Clone)]
+#[allow(non_camel_case_types)]
+pub struct KangarooTwelveReaderCore {
+    tshk: XofReaderCoreWrapper<TurboShake128ReaderCore>,
+}
+
+impl BlockSizeUser for KangarooTwelveReaderCore {
+    type BlockSize = U168; // TurboSHAKE128 block size
+}
+
+impl XofReaderCore for KangarooTwelveReaderCore {
+    #[inline]
+    fn read_block(&mut self) -> Block<Self> {
+        let mut block = Block::<Self>::default();
+        self.tshk.read(&mut block);
+        block
+    }
+}
+
+#[doc = "KangarooTwelve"]
+#[doc = " hasher state."]
+pub type KangarooTwelve<'cs> = CoreWrapper<KangarooTwelveCore<'cs>>;
+
+#[doc = "KangarooTwelve"]
+#[doc = " reader state."]
+pub type KangarooTwelveReader = XofReaderCoreWrapper<KangarooTwelveReaderCore>;
+
+fn length_encode(mut length: usize, buffer: &mut [u8; LENGTH_ENCODE_SIZE]) -> &mut [u8] {
+    let mut bufpos = 0usize;
+    while length > 0 {
+        buffer[bufpos] = (length % 256) as u8;
+        length /= 256;
+        bufpos += 1;
+    }
+    buffer[..bufpos].reverse();
+
+    buffer[bufpos] = bufpos as u8;
+    bufpos += 1;
+
+    &mut buffer[..bufpos]
+}
+
+#[test]
+fn test_length_encode() {
+    let mut buffer = [0u8; LENGTH_ENCODE_SIZE];
+    assert_eq!(length_encode(0, &mut buffer), &[0x00]);
+    assert_eq!(length_encode(12, &mut buffer), &[0x0C, 0x01]);
+    assert_eq!(length_encode(65538, &mut buffer), &[0x01, 0x00, 0x02, 0x03]);
 }
