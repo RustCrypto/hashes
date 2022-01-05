@@ -404,7 +404,9 @@ macro_rules! blake2_mac_impl {
                     key_block,
                     ..
                 } = self;
-                core.finalize_variable_core(buffer, out);
+                let mut full_res = Default::default();
+                core.finalize_variable_core(buffer, &mut full_res);
+                out.copy_from_slice(&full_res[..OutSize::USIZE]);
                 core.reset();
                 *buffer = LazyBuffer::new(key_block);
             }
