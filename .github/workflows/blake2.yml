@@ -45,14 +45,15 @@ jobs:
           - 1.41.0 # MSRV
           - stable
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ matrix.rust }}
-        override: true
-    - run: cargo test --no-default-features
-    - run: cargo test
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - run: cargo test --no-default-features
+      - run: cargo test
+      - run: cargo test --features reset
   simd:
     runs-on: ubuntu-latest
     steps:

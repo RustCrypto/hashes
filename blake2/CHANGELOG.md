@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Blake2b` and `Blake2s` renamed into `Blake2b512` and `Blake2s256` respectively.
   New `Blake2b` and `Blake2s` are generic over output size. `VarBlake2b` and `VarBlake2s`
   renamed into `Blake2bVar` and `Blake2sVar` respectively. ([#217])
+- Hasher reset functionality moved behind a new non-default feature, `reset`.
+  This must be enabled to use the methods `reset`, `finalize_reset` and `finalize_into_reset`.
 
 ### Removed
 - `Blake2b` and `Blake2s` no longer support MAC functionality. ([#217])
