@@ -181,7 +181,7 @@ fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
 
 #[inline(always)]
 fn process_second_block(current_state: &mut State, t2: &RoundStates) {
-    for t2 in cast_rs(t2) {
+    for t2 in cast_rs(t2).iter() {
         sha_round(current_state, *t2);
     }
 }
