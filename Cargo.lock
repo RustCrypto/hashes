@@ -212,7 +212,7 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "cfg-if",
  "cpufeatures",

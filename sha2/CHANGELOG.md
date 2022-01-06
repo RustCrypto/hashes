@@ -5,14 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.10.0 (2021-12-07)
+## 0.10.1 (2022-01-06)
+### Fixed
+- Bug in the AVX2 backend ([#345])
+
+## 0.10.0 (2021-12-07) [YANKED]
 ### Changed
 - Update to `digest` v0.10 ([#217])
 - Rename `Sha512Trunc224` and `Sha512Trunc256` to `Sha512_224` and `Sha512_256` respectively. ([#217])
 
 [#217]: https://github.com/RustCrypto/hashes/pull/217
 
-## 0.9.8 (2021-09-09)
+## 0.9.9 (2022-01-06)
+### Fixed
+- Backport [#345] bug fix for the AVX2 backend ([#346])
+
+[#345]: https://github.com/RustCrypto/hashes/pull/345
+[#346]: https://github.com/RustCrypto/hashes/pull/346
+
+## 0.9.8 (2021-09-09) [YANKED]
 ### Fixed
 - Bug in the AVX2 backend ([#314])
 
