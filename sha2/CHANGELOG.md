@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [#217]: https://github.com/RustCrypto/hashes/pull/217
 
-## 0.10.1 (2022-01-06)
+## 0.9.9 (2022-01-06)
 ### Fixed
 - Bug in the AVX2 backend ([#345])
 
