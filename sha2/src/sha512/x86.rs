@@ -336,10 +336,12 @@ fn_sha512_update_x!(sha512_update_x_avx2, __m256i, {
         XOR = _mm256_xor_si256,
 });
 
+#[inline(always)]
 fn cast_ms(ms: &MsgSchedule) -> &[u64; SHA512_BLOCK_WORDS_NUM] {
     unsafe { &*(ms as *const MsgSchedule as *const _) }
 }
 
+#[inline(always)]
 fn cast_rs(rs: &RoundStates) -> &[u64; SHA512_ROUNDS_NUM] {
     unsafe { &*(rs as *const RoundStates as *const _) }
 }
