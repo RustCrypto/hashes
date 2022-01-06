@@ -34,8 +34,8 @@ unsafe fn sha512_compress_x86_64_avx2(state: &mut [u64; 8], blocks: &[[u8; 128]]
         start_block += 1;
     }
 
-    let mut ms: MsgSchedule = Default::default();
-    let mut t2: RoundStates = [0u64; SHA512_ROUNDS_NUM];
+    let mut ms: MsgSchedule = [_mm_setzero_si128(); 8];
+    let mut t2: RoundStates = [_mm_setzero_si128(); 40];
     let mut x = [_mm256_setzero_si256(); 8];
 
     for i in (start_block..blocks.len()).step_by(2) {
@@ -56,7 +56,7 @@ unsafe fn sha512_compress_x86_64_avx2(state: &mut [u64; 8], blocks: &[[u8; 128]]
 
 #[inline(always)]
 unsafe fn sha512_compress_x86_64_avx(state: &mut [u64; 8], block: &[u8; 128]) {
-    let mut ms = Default::default();
+    let mut ms = [_mm_setzero_si128(); 8];
     let mut x = [_mm_setzero_si128(); 8];
 
     // Reduced to single iteration
@@ -82,7 +82,7 @@ unsafe fn load_data_avx(x: &mut [__m128i; 8], ms: &mut MsgSchedule, data: *const
                 _mm_loadu_si128(&K64[2 * $i] as *const u64 as *const _),
             );
 
-            _mm_store_si128(&mut ms[2 * $i] as *mut u64 as *mut _, y);
+            ms[$i] = y;
         )*};
     }
 
@@ -114,14 +114,8 @@ unsafe fn load_data_avx2(
             let t = _mm_loadu_si128(K64.as_ptr().add($i * 2) as *const u64 as *const _);
             let y = _mm256_add_epi64(x[$i], _mm256_set_m128i(t, t));
 
-            _mm_store_si128(
-                &mut ms[2 * $i] as *mut u64 as *mut _,
-                _mm256_extracti128_si256(y, 0),
-            );
-            _mm_store_si128(
-                &mut t2[2 * $i] as *mut u64 as *mut _,
-                _mm256_extracti128_si256(y, 1),
-            );
+            ms[$i] = _mm256_extracti128_si256(y, 0);
+            t2[$i] = _mm256_extracti128_si256(y, 1);
         )*};
     }
 
@@ -137,10 +131,13 @@ unsafe fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &
             let k64 = _mm_loadu_si128(&K64[k64_idx] as *const u64 as *const _);
             let y = sha512_update_x_avx(x, k64);
 
-            sha_round(current_state, ms[2 * j]);
-            sha_round(current_state, ms[2 * j + 1]);
+            {
+                let ms = cast_ms(ms);
+                sha_round(current_state, ms[2 * j]);
+                sha_round(current_state, ms[2 * j + 1]);
+            }
 
-            _mm_store_si128(&mut ms[2 * j] as *const u64 as *mut _, y);
+            ms[j] = y;
             k64_idx += 2;
         }
     }
@@ -160,17 +157,14 @@ unsafe fn rounds_0_63_avx2(
             let t = _mm_loadu_si128(K64.as_ptr().add(k64x4_idx) as *const u64 as *const _);
             let y = sha512_update_x_avx2(x, _mm256_set_m128i(t, t));
 
-            sha_round(current_state, ms[2 * j]);
-            sha_round(current_state, ms[2 * j + 1]);
+            {
+                let ms = cast_ms(ms);
+                sha_round(current_state, ms[2 * j]);
+                sha_round(current_state, ms[2 * j + 1]);
+            }
 
-            _mm_store_si128(
-                &mut ms[2 * j] as *mut u64 as *mut _,
-                _mm256_extracti128_si256(y, 0),
-            );
-            _mm_store_si128(
-                &mut t2[(16 * i) + 2 * j] as *mut u64 as *mut _,
-                _mm256_extracti128_si256(y, 1),
-            );
+            ms[j] = _mm256_extracti128_si256(y, 0);
+            t2[8 * i + j] = _mm256_extracti128_si256(y, 1);
 
             k64x4_idx += 2;
         }
@@ -179,6 +173,7 @@ unsafe fn rounds_0_63_avx2(
 
 #[inline(always)]
 fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
+    let ms = cast_ms(ms);
     for i in 64..80 {
         sha_round(current_state, ms[i & 0xf]);
     }
@@ -186,7 +181,7 @@ fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
 
 #[inline(always)]
 fn process_second_block(current_state: &mut State, t2: &RoundStates) {
-    for t2 in t2.iter() {
+    for t2 in cast_rs(t2) {
         sha_round(current_state, *t2);
     }
 }
@@ -341,9 +336,17 @@ fn_sha512_update_x!(sha512_update_x_avx2, __m256i, {
         XOR = _mm256_xor_si256,
 });
 
+fn cast_ms(ms: &MsgSchedule) -> &[u64; SHA512_BLOCK_WORDS_NUM] {
+    unsafe { &*(ms as *const MsgSchedule as *const _) }
+}
+
+fn cast_rs(rs: &RoundStates) -> &[u64; SHA512_ROUNDS_NUM] {
+    unsafe { &*(rs as *const RoundStates as *const _) }
+}
+
 type State = [u64; SHA512_HASH_WORDS_NUM];
-type MsgSchedule = [u64; SHA512_BLOCK_WORDS_NUM];
-type RoundStates = [u64; SHA512_ROUNDS_NUM];
+type MsgSchedule = [__m128i; SHA512_BLOCK_WORDS_NUM / 2];
+type RoundStates = [__m128i; SHA512_ROUNDS_NUM / 2];
 
 const SHA512_BLOCK_BYTE_LEN: usize = 128;
 const SHA512_ROUNDS_NUM: usize = 80;
