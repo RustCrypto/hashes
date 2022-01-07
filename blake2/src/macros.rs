@@ -358,7 +358,7 @@ macro_rules! blake2_mac_impl {
 
         impl<OutSize> OutputSizeUser for $name<OutSize>
         where
-            OutSize: ArrayLength<u8> + IsLessOrEqual<$max_size>,
+            OutSize: ArrayLength<u8> + IsLessOrEqual<$max_size> + 'static,
             LeEq<OutSize, $max_size>: NonZero,
         {
             type OutputSize = OutSize;
@@ -366,7 +366,7 @@ macro_rules! blake2_mac_impl {
 
         impl<OutSize> FixedOutput for $name<OutSize>
         where
-            OutSize: ArrayLength<u8> + IsLessOrEqual<$max_size>,
+            OutSize: ArrayLength<u8> + IsLessOrEqual<$max_size> + 'static,
             LeEq<OutSize, $max_size>: NonZero,
         {
             #[inline]
