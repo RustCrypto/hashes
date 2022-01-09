@@ -309,7 +309,7 @@ macro_rules! blake2_mac_impl {
             OutSize: ArrayLength<u8> + IsLessOrEqual<$max_size>,
             LeEq<OutSize, $max_size>: NonZero,
         {
-            type KeySize = <$hash as BlockSizeUser>::BlockSize;
+            type KeySize = $max_size;
         }
 
         impl<OutSize> KeyInit for $name<OutSize>
