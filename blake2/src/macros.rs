@@ -265,7 +265,7 @@ macro_rules! blake2_mac_impl {
             core: $hash,
             buffer: LazyBuffer<<$hash as BlockSizeUser>::BlockSize>,
             #[cfg(feature = "reset")]
-            key_block: Block<$hash>,
+            key_block: Key<Self>,
             _out: PhantomData<OutSize>,
         }
 
@@ -291,14 +291,17 @@ macro_rules! blake2_mac_impl {
                 if kl > bs || salt.len() > qbs || persona.len() > qbs {
                     return Err(InvalidLength);
                 }
-                let mut key_block = Block::<$hash>::default();
-                key_block[..kl].copy_from_slice(key);
-                let buffer = LazyBuffer::new(&key_block);
+                let mut padded_key = Block::<$hash>::default();
+                padded_key[..kl].copy_from_slice(key);
                 Ok(Self {
                     core: <$hash>::new_with_params(salt, persona, key.len(), OutSize::USIZE),
-                    buffer,
+                    buffer: LazyBuffer::new(&padded_key),
                     #[cfg(feature = "reset")]
-                    key_block,
+                    key_block: {
+                        let mut t = Key::<Self>::default();
+                        t[..kl].copy_from_slice(key);
+                        t
+                    },
                     _out: PhantomData,
                 })
             }
@@ -318,9 +321,12 @@ macro_rules! blake2_mac_impl {
             LeEq<OutSize, $max_size>: NonZero,
         {
             fn new(key: &Key<Self>) -> Self {
+                let kl = key.len();
+                let mut padded_key = Block::<$hash>::default();
+                padded_key[..kl].copy_from_slice(key);
                 Self {
                     core: <$hash>::new_with_params(key, &[], key.len(), OutSize::USIZE),
-                    buffer: LazyBuffer::new(key),
+                    buffer: LazyBuffer::new(&padded_key),
                     #[cfg(feature = "reset")]
                     key_block: key.clone(),
                     _out: PhantomData,
@@ -329,16 +335,20 @@ macro_rules! blake2_mac_impl {
 
             fn new_from_slice(key: &[u8]) -> Result<Self, InvalidLength> {
                 let kl = key.len();
-                if kl > <$hash as BlockSizeUser>::BlockSize::USIZE {
+                if kl > <Self as KeySizeUser>::KeySize::USIZE {
                     return Err(InvalidLength);
                 }
-                let mut key_block = Block::<$hash>::default();
-                key_block[..kl].copy_from_slice(key);
+                let mut padded_key = Block::<$hash>::default();
+                padded_key[..kl].copy_from_slice(key);
                 Ok(Self {
                     core: <$hash>::new_with_params(&[], &[], key.len(), OutSize::USIZE),
-                    buffer: LazyBuffer::new(&key_block),
+                    buffer: LazyBuffer::new(&padded_key),
                     #[cfg(feature = "reset")]
-                    key_block,
+                    key_block: {
+                        let mut t = Key::<Self>::default();
+                        t[..kl].copy_from_slice(key);
+                        t
+                    },
                     _out: PhantomData,
                 })
             }
@@ -386,7 +396,10 @@ macro_rules! blake2_mac_impl {
         {
             fn reset(&mut self) {
                 self.core.reset();
-                self.buffer = LazyBuffer::new(&self.key_block);
+                let kl = self.key_block.len();
+                let mut padded_key = Block::<$hash>::default();
+                padded_key[..kl].copy_from_slice(&self.key_block);
+                self.buffer = LazyBuffer::new(&padded_key);
             }
         }
 
@@ -401,14 +414,12 @@ macro_rules! blake2_mac_impl {
                 let Self {
                     core,
                     buffer,
-                    key_block,
                     ..
                 } = self;
                 let mut full_res = Default::default();
                 core.finalize_variable_core(buffer, &mut full_res);
                 out.copy_from_slice(&full_res[..OutSize::USIZE]);
-                core.reset();
-                *buffer = LazyBuffer::new(key_block);
+                self.reset();
             }
         }
 
