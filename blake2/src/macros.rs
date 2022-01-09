@@ -411,11 +411,7 @@ macro_rules! blake2_mac_impl {
         {
             #[inline]
             fn finalize_into_reset(&mut self, out: &mut Output<Self>) {
-                let Self {
-                    core,
-                    buffer,
-                    ..
-                } = self;
+                let Self { core, buffer, .. } = self;
                 let mut full_res = Default::default();
                 core.finalize_variable_core(buffer, &mut full_res);
                 out.copy_from_slice(&full_res[..OutSize::USIZE]);
