@@ -22,7 +22,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [MD5] | [`md-5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
-| [SHA-1] | [`sha-1`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/sha-1.svg)](https://crates.io/crates/sha-1) | [![Documentation](https://docs.rs/sha-1/badge.svg)](https://docs.rs/sha-1) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
+| [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [SHA-3] (Keccak) | [`sha3`] | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) | [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [SHABAL] | [`shabal`] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) | [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
@@ -39,9 +39,13 @@ NOTE: the [BLAKE3 crate](https://github.com/BLAKE3-team/BLAKE3) implements the `
 ### Crate Names
 
 Whenever possible crates are published under the the same name as the crate folder.
-Owners of `md5` and `sha1` declined ([1](https://github.com/stainless-steel/md5/pull/2), [2](https://github.com/mitsuhiko/rust-sha1/issues/17)) to participate in this project.
-Those crates do not implement the [`digest`] traits, so they are not interoperable with the RustCrypto ecosystem.
-This is why crates marked by :exclamation: are published under `md-5` and `sha-1` names, but the libraries themselves are named as `md5` and `sha1`, i.e. inside `use` statements you should use `sha1`/`md5`, not `sha_1`/`md_5`.
+Owners of `md5` [declined](https://github.com/stainless-steel/md5/pull/) to participate in this project.
+This crate does not implement the [`digest`] traits, so it is not interoperable with the RustCrypto ecosystem.
+This is why we publish our MD5 implementation as `md-5` and mark it with the :exclamation: mark.
+Note that the library itselv is named as `md5`, i.e. inside `use` statements you should use `md5`, not `md_5`.
+
+The SHA-1 implementation was previosuly published as `sha-1`, but migrated to `sha1` since v0.10.0.
+`sha-1` will continue to recieve v0.10.x patch updates, but will be deprecated after `sha1` v0.11 release.
 
 ### Security Level Legend
 
@@ -215,7 +219,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`md4`]: ./md4
 [`md-5`]: ./md-5
 [`ripemd`]: ./ripemd
-[`sha-1`]: ./sha1
+[`sha1`]: ./sha1
 [`sha2`]: ./sha2
 [`sha3`]: ./sha3
 [`shabal`]: ./shabal
