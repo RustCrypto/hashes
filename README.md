@@ -31,7 +31,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 
-NOTE: the [BLAKE3 crate](https://github.com/BLAKE3-team/BLAKE3) implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
+NOTE: the [`blake3`] crate implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
 
 [Security]: https://en.wikipedia.org/wiki/Hash_function_security_summary
 [:exclamation:]: #crate-names
@@ -231,6 +231,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [//]: # (footnotes)
 
 [1]: https://en.wikipedia.org/wiki/Cryptographic_hash_function
+[`blake3`]: https://github.com/BLAKE3-team/BLAKE3
 [`digest`]: https://docs.rs/digest
 [`Digest`]: https://docs.rs/digest/0.10.0/digest/trait.Digest.html
 [`Digest::digest`]: https://docs.rs/digest/0.10.0/digest/trait.Digest.html#tymethod.digest
