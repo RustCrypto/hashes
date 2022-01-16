@@ -96,10 +96,20 @@ hasher.update(data);
 hasher.update("String data");
 // Note that calling `finalize()` consumes hasher
 let hash = hasher.finalize();
-println!("Result: {:x}", hash);
+println!("Binary hash: {:?}", hash);
 ```
 
 In this example `hash` has type `GenericArray<u8, U32>`, which is a generic alternative to `[u8; 32]` defined in the [`generic-array`] crate.
+If you need to serialize hash value into string, you can use crates like [`base16ct`] and [`base64ct`]:
+```rust
+use base64ct::{Base64, Encoding};
+
+let base64_hash = Base64::encode_string(&hash);
+println!("Base64-encoded hash: {}", hex_hash);
+
+let hex_hash = base16ct::lower::encode_string(&hash);
+println!("Hex-encoded hash: {}", hex_hash);
+```
 
 Alternatively, you can use a chained approach, which is equivalent to the previous example:
 
@@ -110,7 +120,6 @@ let hash = Sha256::new()
     .chain_update(b"Hello world!")
     .chain_update("String data")
     .finalize();
-println!("Result: {:x}", hash);
 ```
 
 If a complete message is available, then you also can use the convenience [`Digest::digest`] method:
@@ -119,7 +128,6 @@ If a complete message is available, then you also can use the convenience [`Dige
 use sha2::{Sha256, Digest};
 
 let hash = Sha256::digest(b"my message");
-println!("Result: {:x}", hash);
 ```
 
 ### Hashing `Read`able Objects
@@ -134,9 +142,6 @@ let mut file = fs::File::open(&path)?;
 let mut hasher = Sha256::new();
 let n = io::copy(&mut file, &mut hasher)?;
 let hash = hasher.finalize();
-
-println!("Bytes processed: {}", n);
-println!("Hash value: {:x}", hash);
 ```
 
 ### Hash-based Message Authentication Code (HMAC)
@@ -180,10 +185,10 @@ fn dyn_hash(hasher: &mut dyn DynDigest, data: &[u8]) -> Box<[u8]> {
 let mut sha256_hasher = Sha256::default();
 let mut sha512_hasher = Sha512::default();
 
-let res1 = dyn_hash(&mut sha256_hasher, b"foo");
-let res2 = dyn_hash(&mut sha256_hasher, b"bar");
-let res3 = dyn_hash(&mut sha512_hasher, b"foo");
-let res4 = dyn_hash(&mut sha512_hasher, b"bar");
+let hash1 = dyn_hash(&mut sha256_hasher, b"foo");
+let hash2 = dyn_hash(&mut sha256_hasher, b"bar");
+let hash3 = dyn_hash(&mut sha512_hasher, b"foo");
+let hash4 = dyn_hash(&mut sha512_hasher, b"bar");
 ```
 
 ## License
@@ -232,6 +237,8 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 [1]: https://en.wikipedia.org/wiki/Cryptographic_hash_function
 [`blake3`]: https://github.com/BLAKE3-team/BLAKE3
+[`base16ct`]: https://docs.rs/base16ct
+[`base64ct`]: https://docs.rs/base64ct
 [`digest`]: https://docs.rs/digest
 [`Digest`]: https://docs.rs/digest/0.10.0/digest/trait.Digest.html
 [`Digest::digest`]: https://docs.rs/digest/0.10.0/digest/trait.Digest.html#tymethod.digest
