@@ -111,7 +111,7 @@ let hex_hash = base16ct::lower::encode_string(&hash);
 println!("Hex-encoded hash: {}", hex_hash);
 ```
 
-Alternatively, you can use a chained approach, which is equivalent to the previous example:
+Instead of calling `update`, you also can use a chained approach:
 
 ```rust
 use sha2::{Sha256, Digest};
@@ -122,7 +122,7 @@ let hash = Sha256::new()
     .finalize();
 ```
 
-If a complete message is available, then you also can use the convenience [`Digest::digest`] method:
+If a complete message is available, then you can use the convenience [`Digest::digest`] method:
 
 ```rust
 use sha2::{Sha256, Digest};
