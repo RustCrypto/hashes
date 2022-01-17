@@ -22,7 +22,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [MD5] | [`md-5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
-| [SHA-1] | [`sha-1`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/sha-1.svg)](https://crates.io/crates/sha-1) | [![Documentation](https://docs.rs/sha-1/badge.svg)](https://docs.rs/sha-1) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
+| [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [SHA-3] (Keccak) | [`sha3`] | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) | [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [SHABAL] | [`shabal`] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) | [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
@@ -31,7 +31,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 
-NOTE: the [BLAKE3 crate](https://github.com/BLAKE3-team/BLAKE3) implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
+NOTE: the [`blake3`] crate implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
 
 [Security]: https://en.wikipedia.org/wiki/Hash_function_security_summary
 [:exclamation:]: #crate-names
@@ -39,9 +39,13 @@ NOTE: the [BLAKE3 crate](https://github.com/BLAKE3-team/BLAKE3) implements the `
 ### Crate Names
 
 Whenever possible crates are published under the the same name as the crate folder.
-Owners of `md5` and `sha1` declined ([1](https://github.com/stainless-steel/md5/pull/2), [2](https://github.com/mitsuhiko/rust-sha1/issues/17)) to participate in this project.
-Those crates do not implement the [`digest`] traits, so they are not interoperable with the RustCrypto ecosystem.
-This is why crates marked by :exclamation: are published under `md-5` and `sha-1` names, but the libraries themselves are named as `md5` and `sha1`, i.e. inside `use` statements you should use `sha1`/`md5`, not `sha_1`/`md_5`.
+Owners of `md5` [declined](https://github.com/stainless-steel/md5/pull/) to participate in this project.
+This crate does not implement the [`digest`] traits, so it is not interoperable with the RustCrypto ecosystem.
+This is why we publish our MD5 implementation as `md-5` and mark it with the :exclamation: mark.
+Note that the library itselv is named as `md5`, i.e. inside `use` statements you should use `md5`, not `md_5`.
+
+The SHA-1 implementation was previosuly published as `sha-1`, but migrated to `sha1` since v0.10.0.
+`sha-1` will continue to recieve v0.10.x patch updates, but will be deprecated after `sha1` v0.11 release.
 
 ### Security Level Legend
 
@@ -92,12 +96,22 @@ hasher.update(data);
 hasher.update("String data");
 // Note that calling `finalize()` consumes hasher
 let hash = hasher.finalize();
-println!("Result: {:x}", hash);
+println!("Binary hash: {:?}", hash);
 ```
 
 In this example `hash` has type `GenericArray<u8, U32>`, which is a generic alternative to `[u8; 32]` defined in the [`generic-array`] crate.
+If you need to serialize hash value into string, you can use crates like [`base16ct`] and [`base64ct`]:
+```rust
+use base64ct::{Base64, Encoding};
 
-Alternatively, you can use a chained approach, which is equivalent to the previous example:
+let base64_hash = Base64::encode_string(&hash);
+println!("Base64-encoded hash: {}", hex_hash);
+
+let hex_hash = base16ct::lower::encode_string(&hash);
+println!("Hex-encoded hash: {}", hex_hash);
+```
+
+Instead of calling `update`, you also can use a chained approach:
 
 ```rust
 use sha2::{Sha256, Digest};
@@ -106,16 +120,14 @@ let hash = Sha256::new()
     .chain_update(b"Hello world!")
     .chain_update("String data")
     .finalize();
-println!("Result: {:x}", hash);
 ```
 
-If a complete message is available, then you also can use the convenience [`Digest::digest`] method:
+If a complete message is available, then you can use the convenience [`Digest::digest`] method:
 
 ```rust
 use sha2::{Sha256, Digest};
 
 let hash = Sha256::digest(b"my message");
-println!("Result: {:x}", hash);
 ```
 
 ### Hashing `Read`able Objects
@@ -130,9 +142,6 @@ let mut file = fs::File::open(&path)?;
 let mut hasher = Sha256::new();
 let n = io::copy(&mut file, &mut hasher)?;
 let hash = hasher.finalize();
-
-println!("Bytes processed: {}", n);
-println!("Hash value: {:x}", hash);
 ```
 
 ### Hash-based Message Authentication Code (HMAC)
@@ -176,10 +185,10 @@ fn dyn_hash(hasher: &mut dyn DynDigest, data: &[u8]) -> Box<[u8]> {
 let mut sha256_hasher = Sha256::default();
 let mut sha512_hasher = Sha512::default();
 
-let res1 = dyn_hash(&mut sha256_hasher, b"foo");
-let res2 = dyn_hash(&mut sha256_hasher, b"bar");
-let res3 = dyn_hash(&mut sha512_hasher, b"foo");
-let res4 = dyn_hash(&mut sha512_hasher, b"bar");
+let hash1 = dyn_hash(&mut sha256_hasher, b"foo");
+let hash2 = dyn_hash(&mut sha256_hasher, b"bar");
+let hash3 = dyn_hash(&mut sha512_hasher, b"foo");
+let hash4 = dyn_hash(&mut sha512_hasher, b"bar");
 ```
 
 ## License
@@ -215,7 +224,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`md4`]: ./md4
 [`md-5`]: ./md-5
 [`ripemd`]: ./ripemd
-[`sha-1`]: ./sha1
+[`sha1`]: ./sha1
 [`sha2`]: ./sha2
 [`sha3`]: ./sha3
 [`shabal`]: ./shabal
@@ -227,6 +236,9 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [//]: # (footnotes)
 
 [1]: https://en.wikipedia.org/wiki/Cryptographic_hash_function
+[`blake3`]: https://github.com/BLAKE3-team/BLAKE3
+[`base16ct`]: https://docs.rs/base16ct
+[`base64ct`]: https://docs.rs/base64ct
 [`digest`]: https://docs.rs/digest
 [`Digest`]: https://docs.rs/digest/0.10.0/digest/trait.Digest.html
 [`Digest::digest`]: https://docs.rs/digest/0.10.0/digest/trait.Digest.html#tymethod.digest

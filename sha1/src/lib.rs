@@ -29,16 +29,23 @@
 //!
 //! Also see [RustCrypto/hashes][3] readme.
 //!
+//! # Note for users of `sha1 v0.6`
+//!
+//! This crate has been transferred to the RustCrypto organization and uses
+//! implementation previously published as the `sha-1` crate. The previous
+//! zero dependencies version is now published as the [`sha1_smoll`] crate.
+//!
 //! [1]: https://en.wikipedia.org/wiki/SHA-1
 //! [2]: https://sha-mbles.github.io/
 //! [3]: https://github.com/RustCrypto/hashes
+//! [`sha1_smoll`]: https://github.com/mitsuhiko/sha1-smol/
 
 #![no_std]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
-    html_root_url = "https://docs.rs/sha-1/0.10.0"
+    html_root_url = "https://docs.rs/sha1/0.10.0"
 )]
 #![warn(missing_docs, rust_2018_idioms)]
 
