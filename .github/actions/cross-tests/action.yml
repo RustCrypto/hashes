@@ -22,7 +22,7 @@ runs:
           override: true
       - name: Install precompiled cross
         run: |
-          export URL=$(curl -s https://api.github.com/repos/rust-embedded/cross/releases/latest | \
+          export URL=$(curl -s https://api.github.com/repos/cross-rs/cross/releases/latest | \
             jq -r '.assets[] | select(.name | contains("x86_64-unknown-linux-gnu.tar.gz")) | .browser_download_url')
           wget -O /tmp/binaries.tar.gz $URL
           tar -C /tmp -xzf /tmp/binaries.tar.gz
