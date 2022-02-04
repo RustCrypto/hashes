@@ -20,7 +20,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [KangarooTwelve] | [`k12`] | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [MD2] | [`md2`] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) | [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
-| [MD5] | [`md-5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
+| [MD5] | [`md5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
@@ -222,7 +222,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`k12`]: ./k12
 [`md2`]: ./md2
 [`md4`]: ./md4
-[`md-5`]: ./md-5
+[`md5`]: ./md5
 [`ripemd`]: ./ripemd
 [`sha1`]: ./sha1
 [`sha2`]: ./sha2
