@@ -42,9 +42,9 @@ Whenever possible crates are published under the the same name as the crate fold
 Owners of `md5` [declined](https://github.com/stainless-steel/md5/pull/) to participate in this project.
 This crate does not implement the [`digest`] traits, so it is not interoperable with the RustCrypto ecosystem.
 This is why we publish our MD5 implementation as `md-5` and mark it with the :exclamation: mark.
-Note that the library itselv is named as `md5`, i.e. inside `use` statements you should use `md5`, not `md_5`.
+Note that the library itself is named as `md5`, i.e. inside `use` statements you should use `md5`, not `md_5`.
 
-The SHA-1 implementation was previosuly published as `sha-1`, but migrated to `sha1` since v0.10.0.
+The SHA-1 implementation was previously published as `sha-1`, but migrated to `sha1` since v0.10.0.
 `sha-1` will continue to recieve v0.10.x patch updates, but will be deprecated after `sha1` v0.11 release.
 
 ### Security Level Legend
