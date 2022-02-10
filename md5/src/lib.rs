@@ -48,7 +48,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::typenum::{Unsigned, U16, U64},
+    typenum::{Unsigned, U16, U64},
     HashMarker, Output,
 };
 /// Core MD5 hasher state.

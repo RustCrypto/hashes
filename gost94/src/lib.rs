@@ -31,6 +31,7 @@
     html_root_url = "https://docs.rs/gost94/0.10.0"
 )]
 #![warn(missing_docs, rust_2018_idioms)]
+#![forbid(unsafe_code)]
 
 #[cfg(feature = "std")]
 extern crate std;

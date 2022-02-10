@@ -1,4 +1,3 @@
-use super::{Block, Ripemd256Core};
 use core::{convert::TryInto, mem::swap};
 
 pub const DIGEST_BUF_LEN: usize = 8;
@@ -119,7 +118,7 @@ macro_rules! process_block(
     });
 );
 
-pub fn compress(h: &mut [u32; DIGEST_BUF_LEN], data: &Block<Ripemd256Core>) {
+pub fn compress(h: &mut [u32; DIGEST_BUF_LEN], data: &[u8; 64]) {
     let mut w = [0u32; WORK_BUF_LEN];
     for (o, chunk) in w.iter_mut().zip(data.chunks_exact(4)) {
         *o = u32::from_le_bytes(chunk.try_into().unwrap());

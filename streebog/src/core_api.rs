@@ -93,8 +93,7 @@ impl StreebogVarCore {
         adc(&mut self.n[7], 0, &mut carry);
     }
 
-    fn compress(&mut self, block: &GenBlock<Self>, msg_len: u64) {
-        let block = unsafe { &*(block.as_ptr() as *const [u8; 64]) };
+    fn compress(&mut self, block: &[u8; 64], msg_len: u64) {
         self.g(&to_bytes(&self.n), block);
         self.update_n(msg_len);
         self.update_sigma(block);
@@ -115,7 +114,7 @@ impl UpdateCore for StreebogVarCore {
     #[inline]
     fn update_blocks(&mut self, blocks: &[GenBlock<Self>]) {
         for block in blocks {
-            self.compress(block, BLOCK_SIZE as u64);
+            self.compress(block.as_ref(), BLOCK_SIZE as u64);
         }
     }
 }
@@ -143,7 +142,7 @@ impl VariableOutputCore for StreebogVarCore {
         let pos = buffer.get_pos();
         let block = buffer.pad_with_zeros();
         block[pos] = 1;
-        self.compress(block, pos as u64);
+        self.compress(block.as_ref(), pos as u64);
         self.g(&[0u8; 64], &to_bytes(&self.n));
         self.g(&[0u8; 64], &to_bytes(&self.sigma));
         out.copy_from_slice(&self.h);

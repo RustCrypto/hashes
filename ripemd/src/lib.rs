@@ -44,7 +44,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_root_url = "https://docs.rs/ripemd/0.1.0"
 )]
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub use digest::{self, Digest};
@@ -56,7 +56,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::typenum::{Unsigned, U20, U32, U40, U64},
+    typenum::{Unsigned, U20, U32, U40, U64},
     HashMarker, Output,
 };
 
@@ -98,7 +98,7 @@ macro_rules! impl_ripemd {
                 // Assumes that `block_len` does not overflow
                 self.block_len += blocks.len() as u64;
                 for block in blocks {
-                    $mod::compress(&mut self.h, block);
+                    $mod::compress(&mut self.h, block.as_ref());
                 }
             }
         }
@@ -109,7 +109,7 @@ macro_rules! impl_ripemd {
                 let bs = Self::BlockSize::U64;
                 let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
                 let mut h = self.h;
-                buffer.len64_padding_le(bit_len, |block| $mod::compress(&mut h, block));
+                buffer.len64_padding_le(bit_len, |block| $mod::compress(&mut h, block.as_ref()));
 
                 for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
                     chunk.copy_from_slice(&v.to_le_bytes());

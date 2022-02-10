@@ -1,7 +1,6 @@
 use super::tables::{T1, T2, T3, T4};
 use super::State;
 use core::convert::TryInto;
-use digest::generic_array::{typenum::U64, GenericArray};
 
 #[inline(always)]
 fn round(a: &mut u64, b: &mut u64, c: &mut u64, x: &u64, mul: u8) {
@@ -51,22 +50,20 @@ fn key_schedule(x: &mut [u64; 8]) {
     x[7] = x[7].wrapping_sub(x[6] ^ 0x0123_4567_89AB_CDEF);
 }
 
-pub(crate) fn compress(state: &mut State, blocks: &[GenericArray<u8, U64>]) {
+pub(crate) fn compress(state: &mut State, raw_block: &[u8; 64]) {
     let mut block: [u64; 8] = Default::default();
-    for raw_block in blocks {
-        for (o, chunk) in block.iter_mut().zip(raw_block.chunks_exact(8)) {
-            *o = u64::from_le_bytes(chunk.try_into().unwrap());
-        }
-        let [mut a, mut b, mut c] = *state;
-
-        pass(&mut a, &mut b, &mut c, &block, 5);
-        key_schedule(&mut block);
-        pass(&mut c, &mut a, &mut b, &block, 7);
-        key_schedule(&mut block);
-        pass(&mut b, &mut c, &mut a, &block, 9);
-
-        state[0] ^= a;
-        state[1] = b.wrapping_sub(state[1]);
-        state[2] = c.wrapping_add(state[2]);
+    for (o, chunk) in block.iter_mut().zip(raw_block.chunks_exact(8)) {
+        *o = u64::from_le_bytes(chunk.try_into().unwrap());
     }
+    let [mut a, mut b, mut c] = *state;
+
+    pass(&mut a, &mut b, &mut c, &block, 5);
+    key_schedule(&mut block);
+    pass(&mut c, &mut a, &mut b, &block, 7);
+    key_schedule(&mut block);
+    pass(&mut b, &mut c, &mut a, &block, 9);
+
+    state[0] ^= a;
+    state[1] = b.wrapping_sub(state[1]);
+    state[2] = c.wrapping_add(state[2]);
 }

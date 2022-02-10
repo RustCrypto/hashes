@@ -29,7 +29,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_root_url = "https://docs.rs/md4/0.10.0"
 )]
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 #![warn(rust_2018_idioms)]
 #![allow(clippy::many_single_char_names)]
 
@@ -42,7 +42,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::typenum::{Unsigned, U16, U64},
+    typenum::{Unsigned, U16, U64},
     HashMarker, Output,
 };
 

@@ -31,7 +31,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_root_url = "https://docs.rs/groestl/0.10.0"
 )]
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 #![warn(rust_2018_idioms)]
 
 pub use digest::{self, Digest};
@@ -44,7 +44,7 @@ use digest::{
         CtVariableCoreWrapper, OutputSizeUser, RtVariableCoreWrapper, TruncSide, UpdateCore,
         VariableOutputCore,
     },
-    generic_array::typenum::{Unsigned, U128, U28, U32, U48, U64},
+    typenum::{Unsigned, U128, U28, U32, U48, U64},
     HashMarker, InvalidOutputSize, Output,
 };
 
@@ -74,7 +74,7 @@ impl UpdateCore for GroestlShortVarCore {
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.blocks_len += blocks.len() as u64;
         for block in blocks {
-            compress512::compress(&mut self.state, block);
+            compress512::compress(&mut self.state, block.as_ref());
         }
     }
 }
@@ -104,7 +104,9 @@ impl VariableOutputCore for GroestlShortVarCore {
         } else {
             self.blocks_len + 1
         };
-        buffer.len64_padding_be(blocks_len, |b| compress512::compress(&mut self.state, b));
+        buffer.len64_padding_be(blocks_len, |block| {
+            compress512::compress(&mut self.state, block.as_ref())
+        });
         let res = compress512::p(&self.state);
         let n = compress512::COLS / 2;
         for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
@@ -160,7 +162,7 @@ impl UpdateCore for GroestlLongVarCore {
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.blocks_len += blocks.len() as u64;
         for block in blocks {
-            compress1024::compress(&mut self.state, block);
+            compress1024::compress(&mut self.state, block.as_ref());
         }
     }
 }
@@ -190,7 +192,9 @@ impl VariableOutputCore for GroestlLongVarCore {
         } else {
             self.blocks_len + 1
         };
-        buffer.len64_padding_be(blocks_len, |b| compress1024::compress(&mut self.state, b));
+        buffer.len64_padding_be(blocks_len, |block| {
+            compress1024::compress(&mut self.state, block.as_ref())
+        });
         let res = compress1024::p(&self.state);
         let n = compress1024::COLS / 2;
         for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {

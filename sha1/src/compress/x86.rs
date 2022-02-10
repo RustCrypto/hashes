@@ -1,7 +1,6 @@
 //! SHA-1 `x86`/`x86_64` backend
 
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-#![allow(unsafe_code)]
 
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;

@@ -1,7 +1,6 @@
 #![allow(clippy::needless_range_loop)]
 use crate::table::TABLE;
 use core::{convert::TryInto, u64};
-type Block = super::Block<super::GroestlShortVarCore>;
 
 pub(crate) const COLS: usize = 8;
 const ROUNDS: u64 = 10;
@@ -51,7 +50,7 @@ fn rndp(mut x: [u64; COLS], r: u64) -> [u64; COLS] {
     ]
 }
 
-pub(crate) fn compress(h: &mut [u64; COLS], block: &Block) {
+pub(crate) fn compress(h: &mut [u64; COLS], block: &[u8; 64]) {
     let mut q = [0u64; COLS];
     for (chunk, v) in block.chunks_exact(8).zip(q.iter_mut()) {
         *v = u64::from_be_bytes(chunk.try_into().unwrap());

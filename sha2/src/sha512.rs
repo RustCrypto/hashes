@@ -1,4 +1,4 @@
-use digest::generic_array::{typenum::U128, GenericArray};
+use digest::{generic_array::GenericArray, typenum::U128};
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {

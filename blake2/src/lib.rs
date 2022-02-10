@@ -94,10 +94,8 @@ use digest::{
         VariableOutputCore,
     },
     crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
-    generic_array::{
-        typenum::{IsLessOrEqual, LeEq, NonZero, Unsigned},
-        ArrayLength, GenericArray,
-    },
+    generic_array::{ArrayLength, GenericArray},
+    typenum::{IsLessOrEqual, LeEq, NonZero, Unsigned},
     FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update,
 };
 #[cfg(feature = "reset")]

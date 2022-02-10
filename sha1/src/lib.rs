@@ -58,7 +58,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::typenum::{Unsigned, U20, U64},
+    typenum::{Unsigned, U20, U64},
     HashMarker, Output,
 };
 
