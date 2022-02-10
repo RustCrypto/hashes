@@ -4,7 +4,6 @@ use core::{convert::TryInto, u64};
 
 pub(crate) const COLS: usize = 16;
 const ROUNDS: u64 = 14;
-type Block = super::Block<super::GroestlLongVarCore>;
 
 #[inline(always)]
 fn column(x: &[u64; COLS], c: [usize; 8]) -> u64 {
@@ -67,7 +66,7 @@ fn rndp(mut x: [u64; COLS], r: u64) -> [u64; COLS] {
     ]
 }
 
-pub(crate) fn compress(h: &mut [u64; COLS], block: &Block) {
+pub(crate) fn compress(h: &mut [u64; COLS], block: &[u8; 128]) {
     let mut q = [0u64; COLS];
     for (chunk, v) in block.chunks_exact(8).zip(q.iter_mut()) {
         *v = u64::from_be_bytes(chunk.try_into().unwrap());

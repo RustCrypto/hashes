@@ -6,7 +6,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
-    generic_array::typenum::{Unsigned, U128, U32, U64},
+    typenum::{Unsigned, U128, U32, U64},
     HashMarker, InvalidOutputSize, Output,
 };
 

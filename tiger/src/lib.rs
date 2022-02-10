@@ -31,19 +31,19 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_root_url = "https://docs.rs/tiger/0.2.0"
 )]
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub use digest::{self, Digest};
 
-use core::{fmt, slice::from_ref};
+use core::fmt;
 use digest::{
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::typenum::{Unsigned, U24, U64},
+    typenum::{Unsigned, U24, U64},
     HashMarker, Output,
 };
 
@@ -83,7 +83,9 @@ impl UpdateCore for TigerCore {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
-        compress(&mut self.state, blocks);
+        for block in blocks {
+            compress(&mut self.state, block.as_ref());
+        }
     }
 }
 
@@ -95,7 +97,7 @@ impl FixedOutputCore for TigerCore {
         let bit_len = 8 * (pos + bs * self.block_len);
 
         buffer.digest_pad(1, &bit_len.to_le_bytes(), |b| {
-            compress(&mut self.state, from_ref(b))
+            compress(&mut self.state, b.as_ref())
         });
         for (chunk, v) in out.chunks_exact_mut(8).zip(self.state.iter()) {
             chunk.copy_from_slice(&v.to_le_bytes());
@@ -155,7 +157,9 @@ impl UpdateCore for Tiger2Core {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
-        compress(&mut self.state, blocks);
+        for block in blocks {
+            compress(&mut self.state, block.as_ref());
+        }
     }
 }
 
@@ -166,7 +170,7 @@ impl FixedOutputCore for Tiger2Core {
         let pos = buffer.get_pos() as u64;
         let bit_len = 8 * (pos + bs * self.block_len);
 
-        buffer.len64_padding_le(bit_len, |b| compress(&mut self.state, from_ref(b)));
+        buffer.len64_padding_le(bit_len, |b| compress(&mut self.state, b.as_ref()));
         for (chunk, v) in out.chunks_exact_mut(8).zip(self.state.iter()) {
             chunk.copy_from_slice(&v.to_le_bytes());
         }

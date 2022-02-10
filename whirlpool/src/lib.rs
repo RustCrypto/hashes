@@ -53,14 +53,14 @@ use whirlpool_asm as compress;
 
 use compress::compress;
 
-use core::{fmt, slice::from_ref};
+use core::fmt;
 use digest::{
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::typenum::{Unsigned, U64},
+    typenum::{Unsigned, U64},
     HashMarker, Output,
 };
 
@@ -107,7 +107,7 @@ impl FixedOutputCore for WhirlpoolCore {
 
         let mut state = self.state;
         buffer.digest_pad(0x80, &buf, |block| {
-            compress(&mut state, convert(from_ref(block)))
+            compress(&mut state, convert(core::slice::from_ref(block)));
         });
 
         for (chunk, v) in out.chunks_exact_mut(8).zip(state.iter()) {

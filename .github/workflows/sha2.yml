@@ -134,11 +134,10 @@ jobs:
 
   # Cross-compiled tests
   cross:
-    needs: set-msrv
     strategy:
       matrix:
         rust:
-          - ${{needs.set-msrv.outputs.msrv}}
+          - 1.51 # 1.41-1.50 `--features` can't be used inside virtual manifest
           - stable
         target:
           - aarch64-unknown-linux-gnu

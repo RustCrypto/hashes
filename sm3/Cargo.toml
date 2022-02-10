@@ -12,10 +12,10 @@ keywords = ["crypto", "sm3", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10"
+digest = "0.10.2"
 
 [dev-dependencies]
-digest = { version = "0.10", features = ["dev"] }
+digest = { version = "0.10.2", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]

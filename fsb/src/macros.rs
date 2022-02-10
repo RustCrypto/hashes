@@ -31,7 +31,7 @@ macro_rules! fsb_impl {
             fn update_blocks(&mut self, blocks: &[Block<Self>]) {
                 self.blocks_len += blocks.len() as u64;
                 for block in blocks {
-                    Self::compress(&mut self.state, Self::convert(block));
+                    Self::compress(&mut self.state, block);
                 }
             }
         }
@@ -42,7 +42,7 @@ macro_rules! fsb_impl {
                 let block_bytes = self.blocks_len * Self::BlockSize::U64;
                 let bit_len = 8 * (block_bytes + buffer.get_pos() as u64);
                 let mut h = self.state;
-                buffer.len64_padding_be(bit_len, |b| Self::compress(&mut h, Self::convert(b)));
+                buffer.len64_padding_be(bit_len, |b| Self::compress(&mut h, b));
 
                 let res = whirlpool::Whirlpool::digest(&h[..]);
                 let n = out.len();
@@ -111,7 +111,7 @@ macro_rules! fsb_impl {
             /// $W_i = i \times (n / w) + IV_i + M_i \times 2^{r / w}.
             fn computing_w_indices(
                 input_vector: &[u8; Self::SIZE_OUTPUT_COMPRESS],
-                message: &[u8; Self::SIZE_MSG_CHUNKS],
+                message: &Block<Self>,
             ) -> [u32; $w] {
                 let mut wind: [u32; $w] = [0; $w];
                 let divided_message: [u8; $w] = Self::dividing_bits(message, ($s - $r) / $w);
@@ -129,10 +129,7 @@ macro_rules! fsb_impl {
             /// This function servers the purpose presented in table 3, of breaking a bit array into
             /// batches of size not multiple of 8. Note that the IV will be broken always in size 8, which
             /// is quite convenient. Also, the only numbers we'll have to worry for are 5 and 6.
-            fn dividing_bits(
-                input_bits: &[u8; Self::SIZE_MSG_CHUNKS],
-                size_batches: usize,
-            ) -> [u8; $w] {
+            fn dividing_bits(input_bits: &Block<Self>, size_batches: usize) -> [u8; $w] {
                 if size_batches != 5usize && size_batches != 6usize {
                     panic!(
                         "Expecting batches of size 5 or 6. Other values do not follow \
@@ -164,10 +161,7 @@ macro_rules! fsb_impl {
             }
 
             /// This function outputs r bits, which are used to chain to the next iteration.
-            fn compress(
-                hash: &mut [u8; Self::SIZE_OUTPUT_COMPRESS],
-                message_block: &[u8; Self::SIZE_MSG_CHUNKS],
-            ) {
+            fn compress(hash: &mut [u8; Self::SIZE_OUTPUT_COMPRESS], message_block: &Block<Self>) {
                 let mut initial_vector = [0u8; Self::SIZE_OUTPUT_COMPRESS];
 
                 let w_indices = Self::computing_w_indices(hash, message_block);
@@ -283,10 +277,6 @@ macro_rules! fsb_impl {
                     }
                 }
                 truncated
-            }
-
-            fn convert(block: &GenericArray<u8, $blocksize>) -> &[u8; Self::SIZE_MSG_CHUNKS] {
-                unsafe { &*(block.as_ptr() as *const [u8; Self::SIZE_MSG_CHUNKS]) }
             }
         }
     };

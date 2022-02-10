@@ -2,12 +2,11 @@
 use core::{convert::TryInto, fmt};
 use digest::{
     block_buffer::Eager,
-    consts::U32,
     core_api::{
         AlgorithmName, Block as TBlock, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::{typenum::Unsigned, GenericArray},
+    typenum::{Unsigned, U32},
     HashMarker, Output,
 };
 
@@ -191,8 +190,7 @@ impl<P: Gost94Params> Gost94Core<P> {
     }
 
     #[inline(always)]
-    fn compress(&mut self, block: &GenericArray<u8, U32>) {
-        let block = unsafe { &*(block.as_ptr() as *const [u8; 32]) };
+    fn compress(&mut self, block: &[u8; 32]) {
         self.f(block);
         self.update_sigma(block);
     }
@@ -217,7 +215,7 @@ impl<P: Gost94Params> UpdateCore for Gost94Core<P> {
     fn update_blocks(&mut self, blocks: &[TBlock<Self>]) {
         let len = Self::BlockSize::USIZE * blocks.len();
         self.update_n(len);
-        blocks.iter().for_each(|b| self.compress(b));
+        blocks.iter().for_each(|b| self.compress(b.as_ref()));
     }
 }
 
@@ -226,7 +224,7 @@ impl<P: Gost94Params> FixedOutputCore for Gost94Core<P> {
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         if buffer.get_pos() != 0 {
             self.update_n(buffer.get_pos());
-            self.compress(buffer.pad_with_zeros());
+            self.compress(buffer.pad_with_zeros().as_ref());
         }
 
         let mut buf = Block::default();
