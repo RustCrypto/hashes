@@ -14,19 +14,14 @@ defaults:
     working-directory: sha1
 
 env:
-  MSRV: 1.41.0
   RUSTFLAGS: "-Dwarnings"
   CARGO_INCREMENTAL: 0
 
 jobs:
   set-msrv:
-    runs-on: ubuntu-latest
-    outputs:
-      msrv: ${{ steps.msrv.outputs.msrv }}
-    steps:
-      - uses: actions/checkout@v2
-      - id: msrv
-        run: echo "::set-output name=msrv::$(echo $MSRV)"
+    uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
+    with:
+        msrv: 1.41.0
 
   # Builds for no_std platforms
   build:
