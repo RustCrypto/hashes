@@ -11,11 +11,11 @@ keywords = ["crypto", "fsb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10.2"
+digest = "0.10.3"
 whirlpool = { version = "0.10", path = "../whirlpool", default-features = false }
 
 [dev-dependencies]
-digest = { version = "0.10.2", features = ["dev"] }
+digest = { version = "0.10.3", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]

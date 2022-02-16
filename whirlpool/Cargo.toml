@@ -12,11 +12,11 @@ keywords = ["crypto", "whirlpool", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10.2"
+digest = "0.10.3"
 whirlpool-asm = { version = "0.6", optional = true}
 
 [dev-dependencies]
-digest = { version = "0.10.2", features = ["dev"] }
+digest = { version = "0.10.3", features = ["dev"] }
 hex-literal = "0.2"
 
 [features]
