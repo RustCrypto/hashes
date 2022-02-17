@@ -1,6 +1,6 @@
 [package]
 name = "md-5"
-version = "0.10.0" # Also update html_root_url in lib.rs when bumping this
+version = "0.10.1" # Also update html_root_url in lib.rs when bumping this
 description = "MD5 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -15,14 +15,14 @@ categories = ["cryptography", "no-std"]
 name = "md5"
 
 [dependencies]
-digest = "0.10.2"
+digest = "0.10.3"
 md5-asm = { version = "0.5", optional = true }
 
 [dev-dependencies]
-digest = { version = "0.10.2", features = ["dev"] }
-hex-literal = "0.2"
+digest = { version = "0.10.3", features = ["dev"] }
+hex-literal = "0.2.2"
 
 [features]
 default = ["std"]
 std = ["digest/std"]
-asm = ["md5-asm"]
+asm = ["md5-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
