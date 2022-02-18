@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "blake2"
-version = "0.10.3"
+version = "0.10.4"
 dependencies = [
  "digest",
  "hex-literal",
