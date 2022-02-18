@@ -72,3 +72,30 @@ jobs:
       - run: cargo test --features simd
       - run: cargo test --features simd_opt
       - run: cargo test --features simd_asm
+
+  # Cross-compiled tests
+  cross:
+    strategy:
+      matrix:
+        rust:
+          - 1.51 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - stable
+        target:
+          - aarch64-unknown-linux-gnu
+          - mips-unknown-linux-gnu
+        features:
+          - default
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+      # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/cross-tests
+        with:
+          rust: ${{ matrix.rust }}
+          package: ${{ github.workflow }}
+          target: ${{ matrix.target }}
+          features: ${{ matrix.features }}
