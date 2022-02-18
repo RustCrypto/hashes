@@ -3,6 +3,7 @@ name: blake2
 on:
   pull_request:
     paths:
+      - ".github/workflows/blake2.yml"
       - "blake2/**"
       - "Cargo.*"
   push:

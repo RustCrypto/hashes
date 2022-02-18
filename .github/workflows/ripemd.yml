@@ -3,6 +3,7 @@ name: ripemd
 on:
   pull_request:
     paths:
+      - ".github/workflows/ripemd.yml"
       - "ripemd/**"
       - "Cargo.*"
   push:

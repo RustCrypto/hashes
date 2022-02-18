@@ -3,6 +3,7 @@ name: groestl
 on:
   pull_request:
     paths:
+      - ".github/workflows/groestl.yml"
       - "groestl/**"
       - "Cargo.*"
   push:

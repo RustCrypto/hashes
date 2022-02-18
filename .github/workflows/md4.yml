@@ -3,6 +3,7 @@ name: md4
 on:
   pull_request:
     paths:
+      - ".github/workflows/md4.yml"
       - "md4/**"
       - "Cargo.*"
   push:

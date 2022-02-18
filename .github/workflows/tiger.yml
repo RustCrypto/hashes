@@ -3,6 +3,7 @@ name: tiger
 on:
   pull_request:
     paths:
+      - ".github/workflows/tiger.yml"
       - "tiger/**"
       - "Cargo.*"
   push:

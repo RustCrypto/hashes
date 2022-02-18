@@ -3,6 +3,7 @@ name: whirlpool
 on:
   pull_request:
     paths:
+      - ".github/workflows/whirlpool.yml"
       - "whirlpool/**"
       - "Cargo.*"
   push:

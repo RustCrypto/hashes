@@ -3,6 +3,7 @@ name: k12
 on:
   pull_request:
     paths:
+      - ".github/workflows/k12.yml"
       - "k12/**"
       - "Cargo.*"
   push:

@@ -3,6 +3,7 @@ name: streebog
 on:
   pull_request:
     paths:
+      - ".github/workflows/streebog.yml"
       - "streebog/**"
       - "Cargo.*"
   push:

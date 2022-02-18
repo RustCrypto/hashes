@@ -3,6 +3,7 @@ name: shabal
 on:
   pull_request:
     paths:
+      - ".github/workflows/shabal.yml"
       - "shabal/**"
       - "Cargo.*"
   push:

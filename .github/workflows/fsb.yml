@@ -3,6 +3,7 @@ name: fsb
 on:
   pull_request:
     paths:
+      - ".github/workflows/fsb.yml"
       - "fsb/**"
       - "Cargo.*"
   push:

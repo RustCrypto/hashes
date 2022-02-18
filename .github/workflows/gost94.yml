@@ -3,6 +3,7 @@ name: gost94
 on:
   pull_request:
     paths:
+      - ".github/workflows/gost94.yml"
       - "gost94/**"
       - "Cargo.*"
   push:
