@@ -3,6 +3,7 @@ name: blake2
 on:
   pull_request:
     paths:
+      - ".github/workflows/blake2.yml"
       - "blake2/**"
       - "Cargo.*"
   push:
@@ -38,18 +39,9 @@ jobs:
       - run: cargo build --no-default-features --target ${{ matrix.target }}
 
   minimal-versions:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly
-        override: true
-        profile: minimal
-    - run: rm ../Cargo.toml
-    - run: cargo update -Z minimal-versions
-    - run: cargo test --release
-    - run: cargo test --release --all-features
+    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+    with:
+        working-directory: ${{ github.workflow }}
 
   test:
     runs-on: ubuntu-latest
