@@ -14,19 +14,14 @@ defaults:
     working-directory: sha3
 
 env:
-  MSRV: 1.41.0
   RUSTFLAGS: "-Dwarnings"
   CARGO_INCREMENTAL: 0
 
 jobs:
   set-msrv:
-    runs-on: ubuntu-latest
-    outputs:
-      msrv: ${{ steps.msrv.outputs.msrv }}
-    steps:
-      - uses: actions/checkout@v2
-      - id: msrv
-        run: echo "::set-output name=msrv::$(echo $MSRV)"
+    uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
+    with:
+        msrv: 1.41.0
 
   build:
     needs: set-msrv
@@ -41,6 +36,7 @@ jobs:
           - wasm32-unknown-unknown
     steps:
       - uses: actions/checkout@v2
+      - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -48,6 +44,11 @@ jobs:
           target: ${{ matrix.target }}
           override: true
       - run: cargo build --no-default-features --target ${{ matrix.target }}
+
+  minimal-versions:
+    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+    with:
+        working-directory: ${{ github.workflow }}
 
   test:
     needs: set-msrv
@@ -59,6 +60,7 @@ jobs:
           - stable
     steps:
       - uses: actions/checkout@v2
+      - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -74,7 +76,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.51 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - 1.51.0 # 1.41-1.50 `--features` can't be used inside virtual manifest
           - stable
         target:
           - aarch64-unknown-linux-gnu

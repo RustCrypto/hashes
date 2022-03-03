@@ -1,6 +1,6 @@
 [package]
 name = "blake2"
-version = "0.10.2" # Also update html_root_url in lib.rs when bumping this
+version = "0.10.4" # Also update html_root_url in lib.rs when bumping this
 description = "BLAKE2 hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -12,11 +12,11 @@ keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "0.10.2", features = ["mac"] }
+digest = { version = "0.10.3", features = ["mac"] }
 
 [dev-dependencies]
-digest = { version = "0.10.2", features = ["dev"] }
-hex-literal = "0.2"
+digest = { version = "0.10.3", features = ["dev"] }
+hex-literal = "0.2.2"
 
 [features]
 default = ["std"]

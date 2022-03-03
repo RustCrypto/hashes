@@ -143,7 +143,7 @@ macro_rules! blake2_impl {
                 let mut m: [$word; 16] = Default::default();
                 let n = core::mem::size_of::<$word>();
                 for (v, chunk) in m.iter_mut().zip(block.chunks_exact(n)) {
-                    *v = $word::from_le_bytes(chunk.try_into().unwrap());
+                    *v = $word::from_ne_bytes(chunk.try_into().unwrap());
                 }
                 let h = &mut self.h;
 

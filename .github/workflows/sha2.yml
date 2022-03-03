@@ -14,19 +14,14 @@ defaults:
     working-directory: sha2
 
 env:
-  MSRV: 1.41.0
   RUSTFLAGS: "-Dwarnings"
   CARGO_INCREMENTAL: 0
 
 jobs:
   set-msrv:
-    runs-on: ubuntu-latest
-    outputs:
-      msrv: ${{ steps.msrv.outputs.msrv }}
-    steps:
-      - uses: actions/checkout@v2
-      - id: msrv
-        run: echo "::set-output name=msrv::$(echo $MSRV)"
+    uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
+    with:
+        msrv: 1.41.0
 
   # Builds for no_std platforms
   build:
@@ -42,6 +37,7 @@ jobs:
           - wasm32-unknown-unknown
     steps:
       - uses: actions/checkout@v2
+      - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -49,6 +45,11 @@ jobs:
           target: ${{ matrix.target }}
           override: true
       - run: cargo build --no-default-features --target ${{ matrix.target }}
+
+  minimal-versions:
+    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+    with:
+        working-directory: ${{ github.workflow }}
 
   # Linux tests
   linux:
@@ -73,6 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -90,17 +92,18 @@ jobs:
     needs: set-msrv
     strategy:
       matrix:
-        toolchain:
+        rust:
           - ${{needs.set-msrv.outputs.msrv}}
           - stable
 
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: ${{ matrix.toolchain }}
+          toolchain: ${{ matrix.rust }}
           target: x86_64-apple-darwin
           override: true
       - run: cargo test --no-default-features
@@ -118,15 +121,16 @@ jobs:
           #- target: x86_64-pc-windows-gnu
           #  toolchain: 1.41.0 # MSRV
           - target: x86_64-pc-windows-gnu
-            toolchain: stable
+            rust: stable
 
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: ${{ matrix.toolchain }}
+          toolchain: ${{ matrix.rust }}
           target: ${{ matrix.target }}
           override: true
       - uses: msys2/setup-msys2@v2
@@ -137,7 +141,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.51 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - 1.51.0 # 1.41-1.50 `--features` can't be used inside virtual manifest
           - stable
         target:
           - aarch64-unknown-linux-gnu

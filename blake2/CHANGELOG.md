@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.10.2 (2022-01-09)
+## 0.10.4 (2022-02-17)
+### Fixed
+- Bug on big-endian targets ([#366])
+
+[#366]: https://github.com/RustCrypto/hashes/pull/366
+
+## 0.10.3 (2022-02-17) [YANKED]
+### Fixed
+- Minimal versions build ([#363])
+
+[#363]: https://github.com/RustCrypto/hashes/pull/363
+
+## 0.10.2 (2022-01-09) [YANKED]
 ## Fixed
 - Rare compilation error by adding `'static` bound on `OutSize`. ([#347])
 - Values of `KeySize` associated type. ([#349])
@@ -13,13 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#347]: https://github.com/RustCrypto/hashes/pull/347
 [#349]: https://github.com/RustCrypto/hashes/pull/349
 
-## 0.10.1 (2022-01-05)
+## 0.10.1 (2022-01-05) [YANKED]
 ## Fixed
 - Compilation error with enabled `reset` feature. ([#342])
 
 [#342]: https://github.com/RustCrypto/hashes/pull/342
 
-## 0.10.0 (2021-12-07)
+## 0.10.0 (2021-12-07) [YANKED]
 ### Changed
 - Update to `digest` v0.10 and remove dependency on `crypto-mac` ([#217])
 - `Blake2b` and `Blake2s` renamed into `Blake2b512` and `Blake2s256` respectively.
