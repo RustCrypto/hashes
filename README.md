@@ -105,7 +105,7 @@ If you need to serialize hash value into string, you can use crates like [`base1
 use base64ct::{Base64, Encoding};
 
 let base64_hash = Base64::encode_string(&hash);
-println!("Base64-encoded hash: {}", hex_hash);
+println!("Base64-encoded hash: {}", base64_hash);
 
 let hex_hash = base16ct::lower::encode_string(&hash);
 println!("Hex-encoded hash: {}", hex_hash);
