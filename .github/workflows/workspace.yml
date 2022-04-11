@@ -17,7 +17,7 @@ jobs:
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.47.0
+          toolchain: 1.60.0
           components: clippy
           profile: minimal
           override: true

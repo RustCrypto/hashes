@@ -126,6 +126,8 @@ impl WhirlpoolCore {
     }
 }
 
+// derivable impl does not inline
+#[allow(clippy::derivable_impls)]
 impl Default for WhirlpoolCore {
     #[inline]
     fn default() -> Self {
