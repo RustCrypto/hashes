@@ -52,6 +52,7 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
         let mut w1 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(1)), MASK);
         let mut w2 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(2)), MASK);
         let mut w3 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(3)), MASK);
+        #[allow(clippy::needless_late_init)]
         let mut w4;
 
         let mut h0 = state_abcd;

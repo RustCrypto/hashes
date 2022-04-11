@@ -15,6 +15,7 @@ pub use self::simdty::{u32x4, u64x4};
 pub trait Vector4<T>: Copy {
     fn gather(src: &[T], i0: usize, i1: usize, i2: usize, i3: usize) -> Self;
 
+    #[allow(clippy::wrong_self_convention)]
     fn from_le(self) -> Self;
     fn to_le(self) -> Self;
 
