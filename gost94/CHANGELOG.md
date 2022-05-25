@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.11.0 (2022-05-25)
 ### Added
-- Gost 34.311-95 28147-89 UA version 1.2.804.2.1.1.1.1.2.1 OID
+- Gost 34.311-95 28147-89 UA version 1.2.804.2.1.1.1.1.2.1 OID ([#377])
+
+[#377]: https://github.com/RustCrypto/hashes/pull/377
 
 ## 0.10.1 (2022-02-17)
 ### Fixed
