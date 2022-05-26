@@ -89,7 +89,7 @@ dependencies = [
 
 [[package]]
 name = "gost94"
-version = "0.11.0"
+version = "0.10.2"
 dependencies = [
  "digest",
  "hex-literal",
