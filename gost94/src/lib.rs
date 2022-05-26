@@ -28,7 +28,7 @@
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
-    html_root_url = "https://docs.rs/gost94/0.10.1"
+    html_root_url = "https://docs.rs/gost94/0.10.2"
 )]
 #![warn(missing_docs, rust_2018_idioms)]
 #![forbid(unsafe_code)]
@@ -52,3 +52,6 @@ pub type Gost94CryptoPro = CoreWrapper<Gost94Core<params::CryptoProParam>>;
 pub type Gost94s2015 = CoreWrapper<Gost94Core<params::S2015Param>>;
 /// GOST94 hash function with test parameters.
 pub type Gost94Test = CoreWrapper<Gost94Core<params::TestParam>>;
+/// GOST94 hash function with UAPKI GOST 34.311-95 parameters
+/// (1.2.804.2.1.1.1.1.2.1 OID).
+pub type Gost94UA = CoreWrapper<Gost94Core<params::GOST28147UAParam>>;

@@ -68,3 +68,22 @@ impl Gost94Params for TestParam {
     const H0: Block = [0; 32];
     const NAME: &'static str = "Gost94Test";
 }
+
+/// S-Box defined in GOST 34.311-95 & GOST 28147:2009.
+#[derive(Copy, Clone, Default)]
+pub struct GOST28147UAParam;
+
+impl Gost94Params for GOST28147UAParam {
+    const S_BOX: SBox = [
+        [10, 9, 13, 6, 14, 11, 4, 5, 15, 1, 3, 12, 7, 0, 8, 2],
+        [8, 0, 12, 4, 9, 6, 7, 11, 2, 3, 1, 15, 5, 14, 10, 13],
+        [15, 6, 5, 8, 14, 11, 10, 4, 12, 0, 3, 7, 2, 9, 1, 13],
+        [3, 8, 13, 9, 6, 11, 15, 0, 2, 5, 12, 10, 4, 14, 1, 7],
+        [15, 8, 14, 9, 7, 2, 0, 13, 12, 6, 1, 5, 11, 4, 3, 10],
+        [2, 8, 9, 7, 5, 15, 0, 11, 12, 1, 13, 14, 10, 3, 6, 4],
+        [3, 8, 11, 5, 6, 4, 14, 10, 2, 12, 1, 7, 9, 15, 13, 0],
+        [1, 2, 3, 14, 6, 13, 11, 8, 15, 10, 12, 5, 7, 9, 0, 4],
+    ];
+    const H0: Block = [0; 32];
+    const NAME: &'static str = "Gost28147UA";
+}
