@@ -22,3 +22,4 @@ hex-literal = "0.2.2"
 [features]
 default = ["std"]
 std = ["digest/std"]
+reset = [] # Enable reset functionality

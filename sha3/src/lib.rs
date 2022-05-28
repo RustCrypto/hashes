@@ -76,6 +76,7 @@ use digest::{
         ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
         XofReaderCoreWrapper,
     },
+    generic_array::typenum::Unsigned,
     HashMarker, Output,
 };
 
@@ -89,6 +90,7 @@ use crate::state::Sha3State;
 const KECCAK: u8 = 0x01;
 const SHA3: u8 = 0x06;
 const SHAKE: u8 = 0x1f;
+const CSHAKE: u8 = 0x4;
 
 impl_sha3!(Keccak224Core, Keccak224, U28, U144, KECCAK, "Keccak-224");
 impl_sha3!(Keccak256Core, Keccak256, U32, U136, KECCAK, "Keccak-256");
@@ -127,3 +129,32 @@ impl_shake!(
     SHAKE,
     "SHAKE256",
 );
+
+impl_cshake!(
+    CShake128Core,
+    CShake128,
+    CShake128ReaderCore,
+    CShake128Reader,
+    U168,
+    SHAKE,
+    CSHAKE,
+    "CSHAKE128",
+);
+impl_cshake!(
+    CShake256Core,
+    CShake256,
+    CShake256ReaderCore,
+    CShake256Reader,
+    U136,
+    SHAKE,
+    CSHAKE,
+    "CSHAKE256",
+);
+
+#[inline(always)]
+pub(crate) fn left_encode(val: u64, b: &mut [u8; 9]) -> &[u8] {
+    b[1..].copy_from_slice(&val.to_be_bytes());
+    let i = b[1..8].iter().take_while(|&&a| a == 0).count();
+    b[i] = (8 - i) as u8;
+    &b[i..]
+}
