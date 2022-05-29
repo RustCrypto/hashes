@@ -40,15 +40,15 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (badges)
 
-[crate-image]: https://img.shields.io/crates/v/ripemd160.svg
-[crate-link]: https://crates.io/crates/ripemd160
-[docs-image]: https://docs.rs/ripemd160/badge.svg
-[docs-link]: https://docs.rs/ripemd160/
+[crate-image]: https://img.shields.io/crates/v/ripemd.svg
+[crate-link]: https://crates.io/crates/ripemd
+[docs-image]: https://docs.rs/ripemd/badge.svg
+[docs-link]: https://docs.rs/ripemd/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/ripemd160/badge.svg?branch=master
+[build-image]: https://github.com/RustCrypto/hashes/workflows/ripemd/badge.svg?branch=master
 [build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Aripemd160
 
 [//]: # (general links)
