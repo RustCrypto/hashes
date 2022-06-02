@@ -15,7 +15,7 @@ fn fsb160_rand() {
     feed_rand_16mib(&mut h);
     assert_eq!(
         h.finalize()[..],
-        hex!("454b28a8d158ad63ff59e3f761919c7581ee78d3")[..]
+        hex!("40b7538be5e51978690d1a92fe12a7f25f0a7f08")[..]
     );
 }
 
@@ -25,7 +25,7 @@ fn fsb224_rand() {
     feed_rand_16mib(&mut h);
     assert_eq!(
         h.finalize()[..],
-        hex!("80ef345c462dc88261355eaf44ee2bb7277d01db77b46b2828a918b6")[..]
+        hex!("0ec203ccec7cbf0cadd32e5dc069d0b4215a104c4dad5444944a0d09")[..]
     );
 }
 
@@ -35,7 +35,7 @@ fn fsb256_rand() {
     feed_rand_16mib(&mut h);
     assert_eq!(
         h.finalize()[..],
-        hex!("301cbfd7031de3568bf4c4ffa86c2295bde89937acc8ee470446b8c55b88334a")[..]
+        hex!("eecb42832a2b03bc91beb1a56ddf2973c962b1aeb22f278e9d78a7a8879ebba7")[..]
     );
 }
 
@@ -47,8 +47,8 @@ fn fsb384_rand() {
     assert_eq!(
         h.finalize()[..],
         hex!("
-            d11c0ea4ef363916ad8c2a4d8b4758bf0c36e4de93f2bbaeba037b0726c83179
-            0ec4e5d9d3e9d66e0810d391a00bf60e
+            f17533ed4d4484434715e63bc8e801c9cfe988c38d47d3b4be0409571360aa2f
+            b360b2804c14f606906b323e7901c09e
         ")[..]
     );
 }
@@ -61,8 +61,8 @@ fn fsb512_rand() {
     assert_eq!(
         h.finalize()[..],
         hex!("
-            eb15b6c3626e38141e4f17b3b89d7deed007c4ae727452010601bc4e16deef82
-            f81415566defb1aba3db9b1b14746bd81cf3689a0f79e6d00434ff4ca19b3e66
+            957a7733643e075ab7a3b04607800a6208a26b008bdaee759a3a635bb9b5b708
+            3531725783505468bf438f2a0a96163bbe0775468a11c93db9994c466b2e7d8c
         ")[..]
     );
 }
