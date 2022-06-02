@@ -197,8 +197,8 @@ macro_rules! fsb_impl {
                     truncated[0] = array[starting_byte] << (bits_in_cue - shift_value as u8);
                     truncated[0] ^= array[0] >> shift_value;
                     for position in 1..Self::SIZE_OUTPUT_COMPRESS {
-                        truncated[position] ^= array[position - 1] >> (8 - shift_value);
-                        truncated[position] ^= array[position] << shift_value;
+                        truncated[position] ^= array[position - 1] << (8 - shift_value);
+                        truncated[position] ^= array[position] >> shift_value;
                     }
                 } else {
                     // First we need to decide which is the last byte and bit that will go to the first position.
