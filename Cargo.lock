@@ -70,7 +70,7 @@ dependencies = [
 
 [[package]]
 name = "fsb"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "digest",
  "hex-literal",
@@ -138,9 +138,9 @@ checksum = "f9b7d56ba4a8344d6be9729995e6b06f928af29998cdf79fe390cbf6b1fee838"
 
 [[package]]
 name = "libc"
-version = "0.2.118"
+version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06e509672465a0504304aa87f9f176f2b2b716ed8fb105ebe5c02dc6dce96a94"
+checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
 
 [[package]]
 name = "md-5"
