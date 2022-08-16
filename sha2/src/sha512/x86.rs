@@ -11,12 +11,13 @@ use core::arch::x86_64::*;
 
 use crate::consts::K64;
 
+cpufeatures::new!(avx_cpuid, "avx");
 cpufeatures::new!(avx2_cpuid, "avx2");
 
 pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
-    if avx2_cpuid::get() {
+    if avx_cpuid::get() && avx2_cpuid::get() {
         unsafe {
             sha512_compress_x86_64_avx2(state, blocks);
         }
