@@ -175,20 +175,38 @@ hash_password::<Sha512>("my_password", "abcd", &mut buf2);
 If you want to use hash functions with trait objects, you can use the [`DynDigest`] trait:
 
 ```rust
-use sha2::{Sha256, Sha512, digest::DynDigest};
+use digest::DynDigest;
 
+// dynamic hash function
 fn dyn_hash(hasher: &mut dyn DynDigest, data: &[u8]) -> Box<[u8]> {
     hasher.update(data);
     hasher.finalize_reset()
 }
 
-let mut sha256_hasher = Sha256::default();
-let mut sha512_hasher = Sha512::default();
+// something like this when parsing user input, CLI arguments, etc.
+// DynDigest needs to be boxed here
+fn cli2digest(s: &str) -> Box<dyn DynDigest> {
+    match s {
+        "md5" => Box::new(md5::Md5::default()),
+        "sha1" => Box::new(sha1::Sha1::default()),
+        "sha224" => Box::new(sha2::Sha224::default()),
+        "sha256" => Box::new(sha2::Sha256::default()),
+        "sha384" => Box::new(sha2::Sha384::default()),
+        "sha512" => Box::new(sha2::Sha512::default()),
+        _ => unimplemented!("unsupported digest: {}", s),
+    }
+}
 
-let hash1 = dyn_hash(&mut sha256_hasher, b"foo");
-let hash2 = dyn_hash(&mut sha256_hasher, b"bar");
-let hash3 = dyn_hash(&mut sha512_hasher, b"foo");
-let hash4 = dyn_hash(&mut sha512_hasher, b"bar");
+let mut hasher1 = cli2digest("md5");
+let mut hasher2 = cli2digest("sha512");
+
+// the `&mut *hasher` is to DerefMut the value out of the Box
+// this is equivalent to `DerefMut::deref_mut(&mut hasher)`
+
+// can be reused due to `finalize_reset()`
+let hash1_1 = dyn_hash(&mut *hasher1, b"foo");
+let hash1_2 = dyn_hash(&mut *hasher1, b"bar");
+let hash2_1 = dyn_hash(&mut *hasher2, b"foo");
 ```
 
 ## License
