@@ -177,15 +177,15 @@ If you want to use hash functions with trait objects, you can use the [`DynDiges
 ```rust
 use digest::DynDigest;
 
-// dynamic hash function
-fn dyn_hash(hasher: &mut dyn DynDigest, data: &[u8]) -> Box<[u8]> {
+// Dynamic hash function
+fn use_hasher(hasher: &mut dyn DynDigest, data: &[u8]) -> Box<[u8]> {
     hasher.update(data);
     hasher.finalize_reset()
 }
 
-// something like this when parsing user input, CLI arguments, etc.
-// DynDigest needs to be boxed here
-fn cli2digest(s: &str) -> Box<dyn DynDigest> {
+// You can use something like this when parsing user input, CLI arguments, etc.
+// DynDigest needs to be boxed here, since function return should be sized.
+fn select_hasher(s: &str) -> Box<dyn DynDigest> {
     match s {
         "md5" => Box::new(md5::Md5::default()),
         "sha1" => Box::new(sha1::Sha1::default()),
@@ -197,16 +197,16 @@ fn cli2digest(s: &str) -> Box<dyn DynDigest> {
     }
 }
 
-let mut hasher1 = cli2digest("md5");
-let mut hasher2 = cli2digest("sha512");
+let mut hasher1 = select_hasher("md5");
+let mut hasher2 = select_hasher("sha512");
 
 // the `&mut *hasher` is to DerefMut the value out of the Box
 // this is equivalent to `DerefMut::deref_mut(&mut hasher)`
 
 // can be reused due to `finalize_reset()`
-let hash1_1 = dyn_hash(&mut *hasher1, b"foo");
-let hash1_2 = dyn_hash(&mut *hasher1, b"bar");
-let hash2_1 = dyn_hash(&mut *hasher2, b"foo");
+let hash1_1 = use_hasher(&mut *hasher1, b"foo");
+let hash1_2 = use_hasher(&mut *hasher1, b"bar");
+let hash2_1 = use_hasher(&mut *hasher2, b"foo");
 ```
 
 ## License
