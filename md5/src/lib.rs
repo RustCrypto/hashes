@@ -31,10 +31,10 @@
 )]
 #![warn(missing_docs, rust_2018_idioms)]
 
-#[cfg(feature = "asm")]
+#[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))]
 extern crate md5_asm as compress;
 
-#[cfg(not(feature = "asm"))]
+#[cfg(not(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64"))))]
 mod compress;
 
 pub use digest::{self, Digest};
