@@ -17,10 +17,10 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 digest = "0.10.3"
 cfg-if = "1.0"
-sha2-asm = { version = "0.6.1", optional = true }
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
 cpufeatures = "0.2"
+sha2-asm = { version = "0.6.1", optional = true }
 
 [dev-dependencies]
 digest = { version = "0.10.3", features = ["dev"] }
