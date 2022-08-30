@@ -1,6 +1,6 @@
 [package]
 name = "md2"
-version = "0.10.1" # Also update html_root_url in lib.rs when bumping this
+version = "0.10.1"
 license = "MIT OR Apache-2.0"
 authors = ["RustCrypto Developers"]
 description = "MD2 hash function"

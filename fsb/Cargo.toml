@@ -1,6 +1,6 @@
 [package]
 name = "fsb"
-version = "0.1.2" # Also update html_root_url in lib.rs when bumping this
+version = "0.1.2"
 description = "FSB hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"

@@ -1,6 +1,6 @@
 [package]
 name = "tiger"
-version = "0.2.1" # Also update html_root_url in lib.rs when bumping this
+version = "0.2.1"
 description = "Tiger hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"

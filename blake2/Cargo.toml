@@ -1,6 +1,6 @@
 [package]
 name = "blake2"
-version = "0.10.4" # Also update html_root_url in lib.rs when bumping this
+version = "0.10.4"
 description = "BLAKE2 hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
