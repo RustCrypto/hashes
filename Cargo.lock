@@ -144,7 +144,7 @@ checksum = "8371e4e5341c3a96db127eb2465ac681ced4c433e01dd0e938adbef26ba93ba5"
 
 [[package]]
 name = "md-5"
-version = "0.10.1"
+version = "0.10.2"
 dependencies = [
  "digest",
  "hex-literal",
@@ -192,7 +192,7 @@ dependencies = [
 
 [[package]]
 name = "sha1"
-version = "0.10.1"
+version = "0.10.2"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -212,7 +212,7 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.2"
+version = "0.10.3"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -291,7 +291,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "whirlpool"
-version = "0.10.1"
+version = "0.10.2"
 dependencies = [
  "digest",
  "hex-literal",

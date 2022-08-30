@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.2 (2022-08-30)
+### Changed
+- Ignore `asm` feature on unsupported targets ([#388])
+
+[#388]: https://github.com/RustCrypto/hashes/pull/388
+
 ## 0.10.1 (2022-02-17)
 ### Fixed
 - Minimal versions build ([#363])
