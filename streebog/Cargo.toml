@@ -1,6 +1,6 @@
 [package]
 name = "streebog"
-version = "0.10.1" # Also update html_root_url in lib.rs when bumping this
+version = "0.10.1"
 description = "Streebog (GOST R 34.11-2012) hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"

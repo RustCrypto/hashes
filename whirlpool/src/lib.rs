@@ -38,8 +38,7 @@
 #![no_std]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
-    html_root_url = "https://docs.rs/whirlpool/0.10.1"
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![warn(missing_docs, rust_2018_idioms)]
 

@@ -1,7 +1,6 @@
 [package]
 name = "sha1"
-version = "0.10.2" # Also update html_root_url in lib.rs when bumping this
-# on v0.10.x releases also release the sha-1 crate as well
+version = "0.10.2" # on v0.10.x releases also release the sha-1 crate as well
 description = "SHA-1 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
