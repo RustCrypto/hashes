@@ -1,5 +1,7 @@
 [workspace]
-resolver = "2"
+# This causes issues like https://github.com/RustCrypto/hashes/issues/396
+# Do not uncomment it until MSRV is bumped for the crates in this workspace.
+# resolver = "2"
 members = [
     "blake2",
     "fsb",
