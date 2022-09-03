@@ -1,6 +1,6 @@
 [package]
 name = "gost94"
-version = "0.10.2"
+version = "0.10.3"
 description = "GOST R 34.11-94 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"

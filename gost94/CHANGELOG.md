@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.3 (2022-09-03)
+### Fixed
+- MSRV issue caused by `resolver = "2"` ([#402])
+
+[#402]: https://github.com/RustCrypto/hashes/pull/402
+
 ## 0.10.2 (2022-05-26)
 ### Added
 - Gost 34.311-95 28147-89 UA version 1.2.804.2.1.1.1.1.2.1 OID ([#377])
