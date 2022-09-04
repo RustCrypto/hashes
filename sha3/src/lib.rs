@@ -77,6 +77,7 @@ use digest::{
         ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
         XofReaderCoreWrapper,
     },
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
     generic_array::typenum::Unsigned,
     HashMarker, Output,
 };

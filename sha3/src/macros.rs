@@ -78,6 +78,38 @@ macro_rules! impl_sha3 {
             }
         }
 
+        impl SerializableState for $name {
+            type SerializedStateSize = U200;
+
+            fn serialize(&self) -> SerializedState<Self> {
+                let mut serialized_state = SerializedState::<Self>::default();
+
+                for (val, chunk) in self
+                    .state
+                    .state
+                    .iter()
+                    .zip(serialized_state.chunks_exact_mut(8))
+                {
+                    chunk.copy_from_slice(&val.to_le_bytes());
+                }
+
+                serialized_state
+            }
+
+            fn deserialize(
+                serialized_state: &SerializedState<Self>,
+            ) -> Result<Self, DeserializeStateError> {
+                use core::convert::TryInto;
+
+                let mut state = Sha3State::default();
+                for (val, chunk) in state.state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+                    *val = u64::from_le_bytes(chunk.try_into().unwrap());
+                }
+
+                Ok(Self { state })
+            }
+        }
+
         #[doc = $alg_name]
         #[doc = " hasher state."]
         pub type $full_name = CoreWrapper<$name>;
