@@ -36,10 +36,15 @@ pub use digest::{self, Digest};
 use core::fmt;
 use digest::{
     block_buffer::Eager,
-    consts::U16,
+    consts::{U16, U48, U64},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
+    },
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
     },
     HashMarker, Output,
 };
@@ -49,9 +54,11 @@ mod consts;
 /// Core MD2 hasher state.
 #[derive(Clone)]
 pub struct Md2Core {
-    x: [u8; 48],
+    x: [u8; STATE_LEN],
     checksum: Block<Self>,
 }
+
+const STATE_LEN: usize = 48;
 
 impl Md2Core {
     fn compress(&mut self, block: &Block<Self>) {
@@ -63,7 +70,7 @@ impl Md2Core {
 
         let mut t = 0u8;
         for j in 0..18u8 {
-            for k in 0..48 {
+            for k in 0..STATE_LEN {
                 self.x[k] ^= consts::S[t as usize];
                 t = self.x[k];
             }
@@ -121,7 +128,7 @@ impl Default for Md2Core {
     #[inline]
     fn default() -> Self {
         Self {
-            x: [0; 48],
+            x: [0; STATE_LEN],
             checksum: Default::default(),
         }
     }
@@ -143,6 +150,25 @@ impl AlgorithmName for Md2Core {
 impl fmt::Debug for Md2Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Md2Core { ... }")
+    }
+}
+
+impl SerializableState for Md2Core {
+    type SerializedStateSize = U64;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        GenericArray::<_, U48>::from(self.x).concat(self.checksum)
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_x, serialized_checksum) = Split::<_, U48>::split(serialized_state);
+
+        Ok(Self {
+            x: (*serialized_x).into(),
+            checksum: *serialized_checksum,
+        })
     }
 }
 
