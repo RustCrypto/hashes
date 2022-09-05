@@ -17,7 +17,8 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U16, U64},
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::{Unsigned, U16, U24, U64},
     HashMarker, Output,
 };
 
@@ -40,11 +41,13 @@ const K2: Wu32 = W(0x6ED9_EBA1);
 #[derive(Clone)]
 pub struct Md4Core {
     block_len: W<u64>,
-    state: [Wu32; 4],
+    state: [Wu32; STATE_LEN],
 }
 
 /// MD4 hasher state
 pub type Md4 = CoreWrapper<Md4Core>;
+
+const STATE_LEN: usize = 4;
 
 impl HashMarker for Md4Core {}
 
@@ -134,7 +137,7 @@ impl Drop for Md4Core {
 #[cfg(feature = "zeroize")]
 impl ZeroizeOnDrop for Md4Core {}
 
-fn compress(state: &mut [Wu32; 4], input: &Block<Md4Core>) {
+fn compress(state: &mut [Wu32; STATE_LEN], input: &Block<Md4Core>) {
     fn f(x: Wu32, y: Wu32, z: Wu32) -> Wu32 {
         z ^ (x & (y ^ z))
     }
@@ -194,4 +197,34 @@ fn compress(state: &mut [Wu32; 4], input: &Block<Md4Core>) {
     state[1] += b;
     state[2] += c;
     state[3] += d;
+}
+
+impl SerializableState for Md4Core {
+    type SerializedStateSize = U24;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = SerializedState::<Self>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.0.to_le_bytes());
+        }
+
+        serialized_state[16..].copy_from_slice(&self.block_len.0.to_le_bytes());
+        serialized_state
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = serialized_state.split::<U16>();
+
+        let mut state = [W(0); STATE_LEN];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(4)) {
+            *val = W(u32::from_le_bytes(chunk.try_into().unwrap()));
+        }
+
+        let block_len = W(u64::from_le_bytes(*serialized_block_len.as_ref()));
+
+        Ok(Self { block_len, state })
+    }
 }
