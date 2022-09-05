@@ -41,15 +41,22 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U16, U64},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Unsigned, U16, U24, U64},
     HashMarker, Output,
 };
 
 #[derive(Clone)]
 pub struct Md4Core {
     block_len: u64,
-    state: [u32; 4],
+    state: [u32; STATE_LEN],
 }
+
+const STATE_LEN: usize = 4;
 
 impl HashMarker for Md4Core {}
 
@@ -122,10 +129,39 @@ impl fmt::Debug for Md4Core {
     }
 }
 
+impl SerializableState for Md4Core {
+    type SerializedStateSize = U24;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = GenericArray::<_, U16>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state.concat(self.block_len.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = Split::<_, U16>::split(serialized_state);
+
+        let mut state = [0; STATE_LEN];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(4)) {
+            *val = u32::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u64::from_le_bytes((*serialized_block_len).into());
+
+        Ok(Self { block_len, state })
+    }
+}
+
 /// MD4 hasher state.
 pub type Md4 = CoreWrapper<Md4Core>;
 
-fn compress(state: &mut [u32; 4], input: &Block<Md4Core>) {
+fn compress(state: &mut [u32; STATE_LEN], input: &Block<Md4Core>) {
     fn f(x: u32, y: u32, z: u32) -> u32 {
         (x & y) | (!x & z)
     }
