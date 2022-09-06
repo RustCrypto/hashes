@@ -2,12 +2,16 @@ use crate::consts;
 use core::{convert::TryInto, fmt, mem, num::Wrapping};
 use digest::{
     block_buffer::Eager,
-    consts::U64,
+    consts::{U184, U48, U64},
     core_api::{
         AlgorithmName, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
-    generic_array::GenericArray,
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
     HashMarker, InvalidOutputSize, Output,
 };
 
@@ -246,5 +250,57 @@ impl fmt::Debug for ShabalVarCore {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("ShabalVarCore { ... }")
+    }
+}
+
+impl SerializableState for ShabalVarCore {
+    type SerializedStateSize = U184;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_a = GenericArray::<_, U48>::default();
+        for (val, chunk) in self.a.iter().zip(serialized_a.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.0.to_le_bytes());
+        }
+
+        let mut serialized_b = GenericArray::<_, U64>::default();
+        for (val, chunk) in self.b.iter().zip(serialized_b.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.0.to_le_bytes());
+        }
+
+        let mut serialized_c = GenericArray::<_, U64>::default();
+        for (val, chunk) in self.c.iter().zip(serialized_c.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.0.to_le_bytes());
+        }
+
+        serialized_a
+            .concat(serialized_b)
+            .concat(serialized_c)
+            .concat(self.w.0.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_a, remaining_buffer) = Split::<_, U48>::split(serialized_state);
+        let mut a = [Wrapping(0); 12];
+        for (val, chunk) in a.iter_mut().zip(serialized_a.chunks_exact(4)) {
+            *val = Wrapping(u32::from_le_bytes(chunk.try_into().unwrap()));
+        }
+
+        let (serialized_b, remaining_buffer) = Split::<_, U64>::split(remaining_buffer);
+        let mut b = [Wrapping(0); 16];
+        for (val, chunk) in b.iter_mut().zip(serialized_b.chunks_exact(4)) {
+            *val = Wrapping(u32::from_le_bytes(chunk.try_into().unwrap()));
+        }
+
+        let (serialized_c, serialized_w) = Split::<_, U64>::split(remaining_buffer);
+        let mut c = [Wrapping(0); 16];
+        for (val, chunk) in c.iter_mut().zip(serialized_c.chunks_exact(4)) {
+            *val = Wrapping(u32::from_le_bytes(chunk.try_into().unwrap()));
+        }
+
+        let w = Wrapping(u64::from_le_bytes((*serialized_w).into()));
+
+        Ok(Self { a, b, c, w })
     }
 }
