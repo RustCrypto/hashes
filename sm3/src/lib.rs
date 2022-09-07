@@ -38,14 +38,19 @@
 
 pub use digest::{self, Digest};
 
-use core::{fmt, slice::from_ref};
+use core::{convert::TryInto, fmt, slice::from_ref};
 use digest::{
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U32, U64},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Unsigned, U32, U40, U64},
     HashMarker, Output,
 };
 
@@ -58,7 +63,7 @@ use compress::compress;
 #[derive(Clone)]
 pub struct Sm3Core {
     block_len: u64,
-    h: [u32; 8],
+    h: [u32; consts::H_LEN],
 }
 
 impl HashMarker for Sm3Core {}
@@ -123,6 +128,35 @@ impl AlgorithmName for Sm3Core {
 impl fmt::Debug for Sm3Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Sm3Core { ... }")
+    }
+}
+
+impl SerializableState for Sm3Core {
+    type SerializedStateSize = U40;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_h = GenericArray::<_, U32>::default();
+
+        for (val, chunk) in self.h.iter().zip(serialized_h.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_h.concat(self.block_len.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_h, serialized_block_len) = Split::<_, U32>::split(serialized_state);
+
+        let mut h = [0; consts::H_LEN];
+        for (val, chunk) in h.iter_mut().zip(serialized_h.chunks_exact(4)) {
+            *val = u32::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u64::from_le_bytes((*serialized_block_len).into());
+
+        Ok(Self { block_len, h })
     }
 }
 
