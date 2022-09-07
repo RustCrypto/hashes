@@ -35,14 +35,19 @@
 
 pub use digest::{self, Digest};
 
-use core::fmt;
+use core::{convert::TryInto, fmt};
 use digest::{
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U24, U64},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Unsigned, U24, U32, U64},
     HashMarker, Output,
 };
 
@@ -50,7 +55,8 @@ mod compress;
 mod tables;
 use compress::compress;
 
-type State = [u64; 3];
+type State = [u64; STATE_LEN];
+const STATE_LEN: usize = 3;
 const S0: State = [
     0x0123_4567_89AB_CDEF,
     0xFEDC_BA98_7654_3210,
@@ -131,6 +137,35 @@ impl fmt::Debug for TigerCore {
     }
 }
 
+impl SerializableState for TigerCore {
+    type SerializedStateSize = U32;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = GenericArray::<_, U24>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state.concat(self.block_len.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = Split::<_, U24>::split(serialized_state);
+
+        let mut state = [0; STATE_LEN];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u64::from_le_bytes((*serialized_block_len).into());
+
+        Ok(Self { state, block_len })
+    }
+}
+
 /// Core Tiger2 hasher state.
 #[derive(Clone)]
 pub struct Tiger2Core {
@@ -205,6 +240,35 @@ impl AlgorithmName for Tiger2Core {
 impl fmt::Debug for Tiger2Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Tiger2Core { ... }")
+    }
+}
+
+impl SerializableState for Tiger2Core {
+    type SerializedStateSize = U32;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = GenericArray::<_, U24>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state.concat(self.block_len.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = Split::<_, U24>::split(serialized_state);
+
+        let mut state = [0; STATE_LEN];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u64::from_le_bytes((*serialized_block_len).into());
+
+        Ok(Self { state, block_len })
     }
 }
 
