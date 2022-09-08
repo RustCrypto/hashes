@@ -52,23 +52,31 @@ use whirlpool_asm as compress;
 
 use compress::compress;
 
-use core::fmt;
+use core::{convert::TryInto, fmt};
 use digest::{
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U64},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Unsigned, U32, U64, U96},
     HashMarker, Output,
 };
 
 /// Core Whirlpool hasher state.
 #[derive(Clone)]
 pub struct WhirlpoolCore {
-    bit_len: [u64; 4],
-    state: [u64; 8],
+    bit_len: [u64; BITLEN_LEN],
+    state: [u64; STATE_LEN],
 }
+
+const STATE_LEN: usize = 8;
+const BITLEN_LEN: usize = 4;
 
 impl HashMarker for WhirlpoolCore {}
 
@@ -153,6 +161,47 @@ impl AlgorithmName for WhirlpoolCore {
 impl fmt::Debug for WhirlpoolCore {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("WhirlpoolCore { ... }")
+    }
+}
+
+impl SerializableState for WhirlpoolCore {
+    type SerializedStateSize = U96;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = GenericArray::<_, U64>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        let mut serialized_bit_len = GenericArray::<_, U32>::default();
+        for (val, chunk) in self
+            .bit_len
+            .iter()
+            .zip(serialized_bit_len.chunks_exact_mut(8))
+        {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state.concat(serialized_bit_len)
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_bit_len) = Split::<_, U64>::split(serialized_state);
+
+        let mut state = [0; STATE_LEN];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let mut bit_len = [0; BITLEN_LEN];
+        for (val, chunk) in bit_len.iter_mut().zip(serialized_bit_len.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        Ok(Self { state, bit_len })
     }
 }
 
