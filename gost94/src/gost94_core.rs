@@ -6,7 +6,12 @@ use digest::{
         AlgorithmName, Block as TBlock, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U32},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Unsigned, U32, U96},
     HashMarker, Output,
 };
 
@@ -271,5 +276,49 @@ impl<P: Gost94Params> fmt::Debug for Gost94Core<P> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         f.write_str(P::NAME)?;
         f.write_str("Core { .. }")
+    }
+}
+
+impl<P: Gost94Params> SerializableState for Gost94Core<P> {
+    type SerializedStateSize = U96;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let serialized_h = GenericArray::<_, U32>::from(self.h);
+
+        let mut serialized_n = GenericArray::<_, U32>::default();
+        for (val, chunk) in self.n.iter().zip(serialized_n.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        let mut serialized_sigma = GenericArray::<_, U32>::default();
+        for (val, chunk) in self.sigma.iter().zip(serialized_sigma.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_h.concat(serialized_n).concat(serialized_sigma)
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_h, remaining_buffer) = Split::<_, U32>::split(serialized_state);
+
+        let (serialized_n, serialized_sigma) = Split::<_, U32>::split(remaining_buffer);
+        let mut n = [0; 4];
+        for (val, chunk) in n.iter_mut().zip(serialized_n.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let mut sigma = [0; 4];
+        for (val, chunk) in sigma.iter_mut().zip(serialized_sigma.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        Ok(Self {
+            h: (*serialized_h).into(),
+            n,
+            sigma,
+            _m: core::marker::PhantomData,
+        })
     }
 }
