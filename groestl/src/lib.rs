@@ -35,7 +35,7 @@
 
 pub use digest::{self, Digest};
 
-use core::fmt;
+use core::{convert::TryInto, fmt};
 use digest::{
     block_buffer::Eager,
     core_api::{
@@ -43,7 +43,12 @@ use digest::{
         CtVariableCoreWrapper, OutputSizeUser, RtVariableCoreWrapper, TruncSide, UpdateCore,
         VariableOutputCore,
     },
-    typenum::{Unsigned, U128, U28, U32, U48, U64},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Unsigned, U128, U136, U28, U32, U48, U64, U72},
     HashMarker, InvalidOutputSize, Output,
 };
 
@@ -124,6 +129,35 @@ impl AlgorithmName for GroestlShortVarCore {
 impl fmt::Debug for GroestlShortVarCore {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("GroestlShortVarCore { ... }")
+    }
+}
+
+impl SerializableState for GroestlShortVarCore {
+    type SerializedStateSize = U72;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = GenericArray::<_, U64>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state.concat(self.blocks_len.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = Split::<_, U64>::split(serialized_state);
+
+        let mut state = [0; compress512::COLS];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let blocks_len = u64::from_le_bytes((*serialized_block_len).into());
+
+        Ok(Self { state, blocks_len })
     }
 }
 
@@ -212,6 +246,35 @@ impl AlgorithmName for GroestlLongVarCore {
 impl fmt::Debug for GroestlLongVarCore {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("GroestlLongVarCore { ... }")
+    }
+}
+
+impl SerializableState for GroestlLongVarCore {
+    type SerializedStateSize = U136;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = GenericArray::<_, U128>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state.concat(self.blocks_len.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_blocks_len) = Split::<_, U128>::split(serialized_state);
+
+        let mut state = [0; compress1024::COLS];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let blocks_len = u64::from_le_bytes((*serialized_blocks_len).into());
+
+        Ok(Self { state, blocks_len })
     }
 }
 
