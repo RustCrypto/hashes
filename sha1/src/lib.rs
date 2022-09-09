@@ -60,6 +60,8 @@ use digest::{
     typenum::{Unsigned, U20, U64},
     HashMarker, Output,
 };
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 
 mod compress;
 
@@ -140,6 +142,12 @@ impl fmt::Debug for Sha1Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Sha1Core { ... }")
     }
+}
+
+#[cfg(feature = "oid")]
+#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
+impl AssociatedOid for Sha1Core {
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.14.3.2.26");
 }
 
 /// SHA-1 hasher state.

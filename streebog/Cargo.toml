@@ -21,3 +21,4 @@ hex-literal = "0.2.2"
 [features]
 default = ["std"]
 std = ["digest/std"]
+oid = ["digest/oid"]

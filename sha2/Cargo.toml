@@ -29,6 +29,7 @@ hex-literal = "0.2.2"
 [features]
 default = ["std"]
 std = ["digest/std"]
+oid = ["digest/oid"]
 asm = ["sha2-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
 compress = [] # Expose compress functions
 force-soft = [] # Force software implementation
