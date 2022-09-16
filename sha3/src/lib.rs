@@ -67,6 +67,8 @@
 pub use digest::{self, Digest};
 
 use core::fmt;
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     block_buffer::Eager,
     consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72},
@@ -105,10 +107,42 @@ impl_sha3!(
     "SHA-3 CryptoNight variant",
 );
 
-impl_sha3!(Sha3_224Core, Sha3_224, U28, U144, SHA3, "SHA-3-224");
-impl_sha3!(Sha3_256Core, Sha3_256, U32, U136, SHA3, "SHA-3-256");
-impl_sha3!(Sha3_384Core, Sha3_384, U48, U104, SHA3, "SHA-3-384");
-impl_sha3!(Sha3_512Core, Sha3_512, U64, U72, SHA3, "SHA-3-512");
+impl_sha3!(
+    Sha3_224Core,
+    Sha3_224,
+    U28,
+    U144,
+    SHA3,
+    "SHA-3-224",
+    "2.16.840.1.101.3.4.2.7",
+);
+impl_sha3!(
+    Sha3_256Core,
+    Sha3_256,
+    U32,
+    U136,
+    SHA3,
+    "SHA-3-256",
+    "2.16.840.1.101.3.4.2.8",
+);
+impl_sha3!(
+    Sha3_384Core,
+    Sha3_384,
+    U48,
+    U104,
+    SHA3,
+    "SHA-3-384",
+    "2.16.840.1.101.3.4.2.9",
+);
+impl_sha3!(
+    Sha3_512Core,
+    Sha3_512,
+    U64,
+    U72,
+    SHA3,
+    "SHA-3-512",
+    "2.16.840.1.101.3.4.2.10",
+);
 
 impl_shake!(
     Shake128Core,
@@ -118,6 +152,7 @@ impl_shake!(
     U168,
     SHAKE,
     "SHAKE128",
+    "2.16.840.1.101.3.4.2.11",
 );
 impl_shake!(
     Shake256Core,
@@ -127,6 +162,7 @@ impl_shake!(
     U136,
     SHAKE,
     "SHAKE256",
+    "2.16.840.1.101.3.4.2.11",
 );
 
 impl_cshake!(
