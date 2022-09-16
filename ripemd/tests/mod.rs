@@ -16,7 +16,7 @@ fn ripemd128_1mil_a() {
     let mut h = Ripemd128::new();
     let buf = [b'a'; 1000];
     for _ in 0..1000 {
-        h.update(&buf);
+        h.update(&buf[..]);
     }
     assert_eq!(
         h.finalize(),
@@ -39,7 +39,7 @@ fn ripemd160_1mil_a() {
     let mut h = Ripemd160::new();
     let buf = [b'a'; 1000];
     for _ in 0..1000 {
-        h.update(&buf);
+        h.update(&buf[..]);
     }
     assert_eq!(
         h.finalize(),
