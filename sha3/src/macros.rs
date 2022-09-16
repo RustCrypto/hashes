@@ -82,6 +82,18 @@ macro_rules! impl_sha3 {
         #[doc = " hasher state."]
         pub type $full_name = CoreWrapper<$name>;
     };
+    (
+        $name:ident, $full_name:ident, $output_size:ident,
+        $rate:ident, $pad:expr, $alg_name:expr, $oid:literal $(,)?
+    ) => {
+        impl_sha3!($name, $full_name, $output_size, $rate, $pad, $alg_name);
+
+        #[cfg(feature = "oid")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
+        impl AssociatedOid for $name {
+            const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap($oid);
+        }
+    };
 }
 
 macro_rules! impl_shake {
