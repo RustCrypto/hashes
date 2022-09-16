@@ -58,12 +58,42 @@ fn ripemd160_rand() {
 }
 
 #[test]
+fn ripemd256_1mil_a() {
+    let mut h = Ripemd256::new();
+    let buf = [b'a'; 1000];
+    for _ in 0..1000 {
+        h.update(&buf[..]);
+    }
+    assert_eq!(
+        h.finalize(),
+        hex!("ac953744e10e31514c150d4d8d7b677342e33399788296e43ae4850ce4f97978").into()
+    );
+}
+
+#[test]
 fn ripemd256_rand() {
     let mut h = Ripemd256::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
         h.finalize()[..],
         hex!("6492ffe075896441b737900bdf58fc960e77477e42a2a61bc02c66fd689b69d0")[..]
+    );
+}
+
+#[test]
+#[rustfmt::skip]
+fn ripemd320_1mil_a() {
+    let mut h = Ripemd320::new();
+    let buf = [b'a'; 1000];
+    for _ in 0..1000 {
+        h.update(&buf[..]);
+    }
+    assert_eq!(
+        h.finalize(),
+        hex!("
+            bdee37f4371e20646b8b0d862dda16292ae36f40
+            965e8c8509e63d1dbddecc503e2b63eb9245bb66
+        ").into()
     );
 }
 
