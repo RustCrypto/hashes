@@ -64,9 +64,9 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.10.4"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e287ab672bc35c3dfc456f9da59473d8f60450cc57dc4dc350d5dccd000167a"
+checksum = "adfbc57365a37acbd2ebf2b64d7e69bb766e2fea813521ed536f5d0520dcf86c"
 dependencies = [
  "blobby",
  "block-buffer",
