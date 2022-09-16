@@ -2,8 +2,16 @@
 extern crate test;
 
 use digest::bench_update;
-use ripemd::{Ripemd160, Ripemd256, Ripemd320};
+use ripemd::{Ripemd128, Ripemd160, Ripemd256, Ripemd320};
 use test::Bencher;
+
+bench_update!(
+    Ripemd128::default();
+    ripemd128_10 10;
+    ripemd128_100 100;
+    ripemd128_1000 1000;
+    ripemd128_10000 10000;
+);
 
 bench_update!(
     Ripemd160::default();
