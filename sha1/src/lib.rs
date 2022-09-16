@@ -50,7 +50,7 @@
 
 pub use digest::{self, Digest};
 
-use core::{fmt, slice::from_ref};
+use core::{convert::TryInto, fmt, slice::from_ref};
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
@@ -59,7 +59,12 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U20, U64},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Unsigned, U20, U28, U64},
     HashMarker, Output,
 };
 
@@ -148,6 +153,35 @@ impl fmt::Debug for Sha1Core {
 #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl AssociatedOid for Sha1Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.14.3.2.26");
+}
+
+impl SerializableState for Sha1Core {
+    type SerializedStateSize = U28;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_h = GenericArray::<_, U20>::default();
+
+        for (val, chunk) in self.h.iter().zip(serialized_h.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_h.concat(self.block_len.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_h, serialized_block_len) = Split::<_, U20>::split(serialized_state);
+
+        let mut h = [0; STATE_LEN];
+        for (val, chunk) in h.iter_mut().zip(serialized_h.chunks_exact(4)) {
+            *val = u32::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u64::from_le_bytes((*serialized_block_len).into());
+
+        Ok(Self { h, block_len })
+    }
 }
 
 /// SHA-1 hasher state.
