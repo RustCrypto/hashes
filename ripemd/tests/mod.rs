@@ -12,12 +12,38 @@ new_test!(ripemd256_main, "ripemd256", Ripemd256, fixed_reset_test);
 new_test!(ripemd320_main, "ripemd320", Ripemd320, fixed_reset_test);
 
 #[test]
+fn ripemd128_1mil_a() {
+    let mut h = Ripemd128::new();
+    let buf = [b'a'; 1000];
+    for _ in 0..1000 {
+        h.update(&buf);
+    }
+    assert_eq!(
+        h.finalize(),
+        hex!("4a7f5723f954eba1216c9d8f6320431f").into()
+    );
+}
+
+#[test]
 fn ripemd128_rand() {
     let mut h = Ripemd128::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
         h.finalize()[..],
         hex!("01eb52529bcec15bd0cb4040ec998632")[..]
+    );
+}
+
+#[test]
+fn ripemd160_1mil_a() {
+    let mut h = Ripemd160::new();
+    let buf = [b'a'; 1000];
+    for _ in 0..1000 {
+        h.update(&buf);
+    }
+    assert_eq!(
+        h.finalize(),
+        hex!("52783243c1697bdbe16d37f97f68f08325dc1528").into()
     );
 }
 
