@@ -1,6 +1,6 @@
 [package]
 name = "sha2"
-version = "0.10.5"
+version = "0.10.6"
 description = """
 Pure Rust implementation of the SHA-2 hash function family
 including SHA-224, SHA-256, SHA-384, and SHA-512.
@@ -15,7 +15,7 @@ keywords = ["crypto", "sha2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10.3"
+digest = "0.10.4"
 cfg-if = "1.0"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
@@ -23,13 +23,13 @@ cpufeatures = "0.2"
 sha2-asm = { version = "0.6.1", optional = true }
 
 [dev-dependencies]
-digest = { version = "0.10.3", features = ["dev"] }
+digest = { version = "0.10.4", features = ["dev"] }
 hex-literal = "0.2.2"
 
 [features]
 default = ["std"]
 std = ["digest/std"]
-oid = ["digest/oid"]
+oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
 asm = ["sha2-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
 compress = [] # Expose compress functions
 force-soft = [] # Force software implementation

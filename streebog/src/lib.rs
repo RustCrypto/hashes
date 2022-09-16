@@ -44,13 +44,13 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     consts::{U32, U64},
     core_api::{CoreWrapper, CtVariableCoreWrapper},
     impl_oid_carrier,
 };
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 
 mod consts;
 mod core_api;

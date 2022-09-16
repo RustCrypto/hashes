@@ -51,6 +51,8 @@
 pub use digest::{self, Digest};
 
 use core::{fmt, slice::from_ref};
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     block_buffer::Eager,
     core_api::{
@@ -60,8 +62,6 @@ use digest::{
     typenum::{Unsigned, U20, U64},
     HashMarker, Output,
 };
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 
 mod compress;
 

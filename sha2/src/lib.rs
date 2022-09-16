@@ -53,13 +53,13 @@
 
 pub use digest::{self, Digest};
 
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     consts::{U28, U32, U48, U64},
     core_api::{CoreWrapper, CtVariableCoreWrapper},
     impl_oid_carrier,
 };
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 
 #[rustfmt::skip]
 mod consts;
