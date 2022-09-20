@@ -37,7 +37,7 @@ jobs:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
@@ -61,7 +61,7 @@ jobs:
           - ${{needs.set-msrv.outputs.msrv}}
           - stable
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
@@ -92,7 +92,7 @@ jobs:
       # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
         working-directory: .
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/cross-tests
         with:
           rust: ${{ matrix.rust }}
@@ -104,7 +104,7 @@ jobs:
   test-msrv:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: actions-rs/toolchain@v1
         with:
