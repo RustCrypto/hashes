@@ -41,6 +41,8 @@ pub use digest::{self, Digest};
 use compress::compress;
 
 use core::{fmt, slice::from_ref};
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     block_buffer::Eager,
     core_api::{
@@ -122,6 +124,12 @@ impl fmt::Debug for Md5Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Md5Core { ... }")
     }
+}
+
+#[cfg(feature = "oid")]
+#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
+impl AssociatedOid for Md5Core {
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.5");
 }
 
 /// MD5 hasher state.
