@@ -13,7 +13,7 @@ version = "0.1.0"
 dependencies = [
  "belt-block",
  "digest",
- "hex-literal",
+ "hex-literal 0.3.4",
 ]
 
 [[package]]
@@ -21,7 +21,7 @@ name = "blake2"
 version = "0.10.4"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -94,7 +94,7 @@ name = "fsb"
 version = "0.1.3"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
  "whirlpool",
 ]
 
@@ -113,7 +113,7 @@ name = "gost94"
 version = "0.10.3"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -121,7 +121,7 @@ name = "groestl"
 version = "0.10.1"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -133,6 +133,12 @@ dependencies = [
  "hex-literal-impl",
  "proc-macro-hack",
 ]
+
+[[package]]
+name = "hex-literal"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ebdb29d2ea9ed0083cd8cece49bbd968021bd99b0849edb4a9a7ee0fdf6a4e0"
 
 [[package]]
 name = "hex-literal-impl"
@@ -148,7 +154,7 @@ name = "k12"
 version = "0.2.1"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -168,7 +174,7 @@ name = "md-5"
 version = "0.10.5"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
  "md5-asm",
 ]
 
@@ -177,7 +183,7 @@ name = "md2"
 version = "0.10.1"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -185,7 +191,7 @@ name = "md4"
 version = "0.10.1"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -208,7 +214,7 @@ name = "ripemd"
 version = "0.1.3"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -218,7 +224,7 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
  "sha1-asm",
 ]
 
@@ -238,7 +244,7 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
  "sha2-asm",
 ]
 
@@ -256,7 +262,7 @@ name = "sha3"
 version = "0.10.5"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
  "keccak",
 ]
 
@@ -265,7 +271,7 @@ name = "shabal"
 version = "0.4.1"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -273,7 +279,7 @@ name = "sm3"
 version = "0.4.1"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -281,7 +287,7 @@ name = "streebog"
 version = "0.10.2"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -295,7 +301,7 @@ name = "tiger"
 version = "0.2.1"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
 ]
 
 [[package]]
@@ -315,7 +321,7 @@ name = "whirlpool"
 version = "0.10.4"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 0.2.2",
  "whirlpool-asm",
 ]
 

@@ -13,7 +13,7 @@ Pure Rust implementation of the [BelT] hash function specified in [STB 34.101.31
 
 ## Minimum Supported Rust Version
 
-Rust **1.41** or higher.
+Rust **1.57** or higher.
 
 Minimum supported Rust version can be changed in the future, but it will be
 done with a minor version bump.
@@ -43,7 +43,7 @@ dual licensed as above, without any additional terms or conditions.
 [crate-image]: https://img.shields.io/crates/v/belt-hash.svg
 [crate-link]: https://crates.io/crates/belt-hash
 [docs-image]: https://docs.rs/belt-hash/badge.svg
-[docs-link]: https://docs.rs/belt-hash/
+[docs-link]: https://docs.rs/belt-hash
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg

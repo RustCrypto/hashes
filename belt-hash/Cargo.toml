@@ -5,7 +5,8 @@ description = "BelT hash function (STB 34.101.31-2020)"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
+rust-version = "1.57"
 documentation = "https://docs.rs/belt-hash"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "belt", "stb", "hash", "digest"]
@@ -17,9 +18,13 @@ belt-block = { git = "https://github.com/RustCrypto/block-ciphers", branch = "be
 
 [dev-dependencies]
 digest = { version = "0.10.4", features = ["dev"] }
-hex-literal = "0.2.2"
+hex-literal = "0.3"
 
 [features]
 default = ["std"]
 std = ["digest/std"]
-oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
+oid = ["digest/oid"]
+
+# TODO: remove when crate will be part of the root workspace
+[profile.dev]
+opt-level = 2
