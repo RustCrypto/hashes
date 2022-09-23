@@ -3,6 +3,7 @@
 # Do not uncomment it until MSRV is bumped to 1.51 or higher.
 # resolver = "2"
 members = [
+    "belt-hash",
     "blake2",
     "fsb",
     "gost94",

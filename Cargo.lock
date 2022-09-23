@@ -3,6 +3,20 @@
 version = 3
 
 [[package]]
+name = "belt-block"
+version = "0.1.1"
+source = "git+https://github.com/RustCrypto/block-ciphers?branch=belt_raw#c04896e96172e1b35bed85522119c9505fa659cd"
+
+[[package]]
+name = "belt-hash"
+version = "0.1.0"
+dependencies = [
+ "belt-block",
+ "digest",
+ "hex-literal",
+]
+
+[[package]]
 name = "blake2"
 version = "0.10.4"
 dependencies = [
