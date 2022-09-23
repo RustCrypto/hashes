@@ -213,25 +213,28 @@ mod tests {
     /// Test vectors for the `belt-compress` functions from the
     /// specification (Table A.8).
     #[test]
-    #[rustfmt::skip]
     fn compress() {
-        let x = &hex!("
-            B194BAC8 0A08F53B 366D008E 584A5DE4
-            8504FA9D 1BB6C7AC 252E72C2 02FDCE0D
-            5BE3D612 17B96181 FE6786AD 716B890B
-            5CB0C0FF 33C356B8 35C405AE D8E07F99
-        ");
+        let x = &hex!(
+            "B194BAC8 0A08F53B 366D008E 584A5DE4"
+            "8504FA9D 1BB6C7AC 252E72C2 02FDCE0D"
+            "5BE3D612 17B96181 FE6786AD 716B890B"
+            "5CB0C0FF 33C356B8 35C405AE D8E07F99"
+        );
         let expected_s = &hex!("46FE7425 C9B181EB 41DFEE3E 72163D5A");
-        let expected_y = &hex!("
-            ED2F5481 D593F40D 87FCE37D 6BC1A2E1
-            B7D1A2CC 975C82D3 C0497488 C90D99D8
-        ");
-        let x1 = [get_u32(x, 0), get_u32(x, 1), get_u32(x, 2), get_u32(x, 3)];
-        let x2 = [get_u32(x, 4), get_u32(x, 5), get_u32(x, 6), get_u32(x, 7)];
-        let x34 = [
-            get_u32(x, 8), get_u32(x, 9), get_u32(x, 10), get_u32(x, 11),
-            get_u32(x, 12), get_u32(x, 13), get_u32(x, 14), get_u32(x, 15),
-        ];
+        let expected_y = &hex!(
+            "ED2F5481 D593F40D 87FCE37D 6BC1A2E1"
+            "B7D1A2CC 975C82D3 C0497488 C90D99D8"
+        );
+        let [mut x1, mut x2] = [[0; 4]; 2];
+        for i in 0..4 {
+            x1[i] = get_u32(x, i);
+            x2[i] = get_u32(x, 4 + i);
+        }
+        let mut x34 = [0; 8];
+        for i in 0..8 {
+            x34[i] = get_u32(x, 8 + i);
+        }
+
         let (s, y) = belt_compress(x1, x2, x34);
 
         let mut t = [0; 4];

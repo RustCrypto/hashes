@@ -18,7 +18,7 @@ belt-block = { version = "0.1.1", default-features = false }
 
 [dev-dependencies]
 digest = { version = "0.10.4", features = ["dev"] }
-hex-literal = "0.3"
+hex-literal = "0.3.3"
 
 [features]
 default = ["std"]
