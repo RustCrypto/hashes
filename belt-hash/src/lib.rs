@@ -50,7 +50,10 @@ use digest::{
     typenum::{Unsigned, U32},
     HashMarker, Output,
 };
+
 const U32_MASK: u128 = (1 << 32) - 1;
+const ENUM4: [usize; 4] = [0, 1, 2, 3];
+const ENUM8: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 7];
 
 /// Core BelT hasher state.
 #[derive(Clone)]
@@ -62,8 +65,8 @@ pub struct BeltHashCore {
 
 impl BeltHashCore {
     fn compress_block(&mut self, block: &Block<Self>) {
-        let x1 = [0, 1, 2, 3].map(|i| get_u32(block, i));
-        let x2 = [4, 5, 6, 7].map(|i| get_u32(block, i));
+        let x1 = ENUM4.map(|i| get_u32(block, i));
+        let x2 = ENUM4.map(|i| get_u32(block, 4 + i));
         let (t, h) = belt_compress(x1, x2, self.h);
         self.h = h;
         self.s.iter_mut().zip(t).for_each(|(s, t)| *s ^= t);
@@ -157,8 +160,8 @@ pub type BeltHash = CoreWrapper<BeltHashCore>;
 /// Compression function described in the section 6.3.2
 #[inline(always)]
 fn belt_compress(x1: [u32; 4], x2: [u32; 4], x34: [u32; 8]) -> ([u32; 4], [u32; 8]) {
-    let x3 = [0, 1, 2, 3].map(|i| x34[i]);
-    let x4 = [4, 5, 6, 7].map(|i| x34[i]);
+    let x3 = ENUM4.map(|i| x34[i]);
+    let x4 = ENUM4.map(|i| x34[4 + i]);
 
     // Step 2
     let t1 = belt_block_raw(xor(x3, x4), &concat(x1, x2));
@@ -176,12 +179,12 @@ fn belt_compress(x1: [u32; 4], x2: [u32; 4], x34: [u32; 8]) -> ([u32; 4], [u32; 
 #[inline(always)]
 fn xor(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
     // TODO: use array zip on stabilization and MSRV bump
-    [0, 1, 2, 3].map(|i| a[i] ^ b[i])
+    ENUM4.map(|i| a[i] ^ b[i])
 }
 
 #[inline(always)]
 fn concat(a: [u32; 4], b: [u32; 4]) -> [u32; 8] {
-    [a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3]]
+    ENUM8.map(|i| if i < 4 { a[i] } else { b[i - 4] })
 }
 
 #[inline(always)]
@@ -191,12 +194,12 @@ fn get_u32(block: &[u8], i: usize) -> u32 {
 
 #[inline(always)]
 fn encode_r(r: u128) -> [u32; 4] {
-    [1, 2, 3, 4].map(|i| ((r >> (32 * i)) & U32_MASK) as u32)
+    ENUM4.map(|i| ((r >> (32 * i)) & U32_MASK) as u32)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{belt_compress, get_u32};
+    use super::{belt_compress, get_u32, ENUM4, ENUM8};
     use hex_literal::hex;
 
     /// Test vectors for the `belt-compress` functions from the
@@ -214,28 +217,13 @@ mod tests {
             "ED2F5481 D593F40D 87FCE37D 6BC1A2E1"
             "B7D1A2CC 975C82D3 C0497488 C90D99D8"
         );
-        let [mut x1, mut x2] = [[0; 4]; 2];
-        for i in 0..4 {
-            x1[i] = get_u32(x, i);
-            x2[i] = get_u32(x, 4 + i);
-        }
-        let mut x34 = [0; 8];
-        for i in 0..8 {
-            x34[i] = get_u32(x, 8 + i);
-        }
+        let x1 = ENUM4.map(|i| get_u32(x, i));
+        let x2 = ENUM4.map(|i| get_u32(x, 4 + i));
+        let x34 = ENUM8.map(|i| get_u32(x, 8 + i));
 
         let (s, y) = belt_compress(x1, x2, x34);
 
-        let mut t = [0; 4];
-        for i in 0..4 {
-            t[i] = get_u32(expected_s, i);
-        }
-        assert_eq!(s, t);
-
-        let mut t = [0; 8];
-        for i in 0..8 {
-            t[i] = get_u32(expected_y, i);
-        }
-        assert_eq!(y, t);
+        assert_eq!(s, ENUM4.map(|i| get_u32(expected_s, i)));
+        assert_eq!(y, ENUM8.map(|i| get_u32(expected_y, i)));
     }
 }
