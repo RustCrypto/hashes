@@ -1,4 +1,4 @@
-//! Pure Rust implementation of the [BelT] hash function specified in 
+//! Pure Rust implementation of the [BelT] hash function specified in
 //! [STB 34.101.31-2020].
 //!
 //! # Usage
@@ -38,9 +38,9 @@
 pub use digest::{self, Digest};
 
 use belt_block::belt_block_raw;
+use core::fmt;
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
-use core::{convert::TryInto, fmt};
 use digest::{
     block_buffer::Eager,
     core_api::{
