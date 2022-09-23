@@ -62,18 +62,8 @@ pub struct BeltHashCore {
 
 impl BeltHashCore {
     fn compress_block(&mut self, block: &Block<Self>) {
-        let x1 = [
-            get_u32(block, 0),
-            get_u32(block, 1),
-            get_u32(block, 2),
-            get_u32(block, 3),
-        ];
-        let x2 = [
-            get_u32(block, 4),
-            get_u32(block, 5),
-            get_u32(block, 6),
-            get_u32(block, 7),
-        ];
+        let x1 = [0, 1, 2, 3].map(|i| get_u32(block, i));
+        let x2 = [4, 5, 6, 7].map(|i| get_u32(block, i));
         let (t, h) = belt_compress(x1, x2, self.h);
         self.h = h;
         self.s.iter_mut().zip(t).for_each(|(s, t)| *s ^= t);
@@ -113,16 +103,10 @@ impl FixedOutputCore for BeltHashCore {
             self.compress_block(block);
         }
         let bs = Self::BlockSize::USIZE as u128;
-        let r = 8 * ((bs * self.r) + pos as u128);
-        let r = [
-            (r & U32_MASK) as u32,
-            ((r >> 32) & U32_MASK) as u32,
-            ((r >> 64) & U32_MASK) as u32,
-            ((r >> 96) & U32_MASK) as u32,
-        ];
+        let r = encode_r(8 * ((bs * self.r) + pos as u128));
         let (_, y) = belt_compress(r, self.s, self.h);
-        for i in 0..8 {
-            out[4 * i..][..4].copy_from_slice(&y[i].to_le_bytes());
+        for (chunk, val) in out.chunks_exact_mut(4).zip(y) {
+            chunk.copy_from_slice(&val.to_le_bytes());
         }
     }
 }
@@ -173,8 +157,8 @@ pub type BeltHash = CoreWrapper<BeltHashCore>;
 /// Compression function described in the section 6.3.2
 #[inline(always)]
 fn belt_compress(x1: [u32; 4], x2: [u32; 4], x34: [u32; 8]) -> ([u32; 4], [u32; 8]) {
-    let x3 = [x34[0], x34[1], x34[2], x34[3]];
-    let x4 = [x34[4], x34[5], x34[6], x34[7]];
+    let x3 = [0, 1, 2, 3].map(|i| x34[i]);
+    let x4 = [4, 5, 6, 7].map(|i| x34[i]);
 
     // Step 2
     let t1 = belt_block_raw(xor(x3, x4), &concat(x1, x2));
@@ -183,8 +167,7 @@ fn belt_compress(x1: [u32; 4], x2: [u32; 4], x34: [u32; 8]) -> ([u32; 4], [u32; 
     let t2 = belt_block_raw(x1, &concat(s, x4));
     let y1 = xor(t2, x1);
     // Step 4
-    let s_neg = [!s[0], !s[1], !s[2], !s[3]];
-    let t3 = belt_block_raw(x2, &concat(s_neg, x3));
+    let t3 = belt_block_raw(x2, &concat(s.map(|v| !v), x3));
     let y2 = xor(t3, x2);
     // Step 5
     (s, concat(y1, y2))
@@ -192,7 +175,8 @@ fn belt_compress(x1: [u32; 4], x2: [u32; 4], x34: [u32; 8]) -> ([u32; 4], [u32; 
 
 #[inline(always)]
 fn xor(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
-    [a[0] ^ b[0], a[1] ^ b[1], a[2] ^ b[2], a[3] ^ b[3]]
+    // TODO: use array zip on stabilization and MSRV bump
+    [0, 1, 2, 3].map(|i| a[i] ^ b[i])
 }
 
 #[inline(always)]
@@ -203,6 +187,11 @@ fn concat(a: [u32; 4], b: [u32; 4]) -> [u32; 8] {
 #[inline(always)]
 fn get_u32(block: &[u8], i: usize) -> u32 {
     u32::from_le_bytes(block[4 * i..][..4].try_into().unwrap())
+}
+
+#[inline(always)]
+fn encode_r(r: u128) -> [u32; 4] {
+    [1, 2, 3, 4].map(|i| ((r >> (32 * i)) & U32_MASK) as u32)
 }
 
 #[cfg(test)]
