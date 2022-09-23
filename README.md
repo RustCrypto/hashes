@@ -231,9 +231,11 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [deps-image]: https://deps.rs/repo/github/RustCrypto/hashes/status.svg
 [deps-link]: https://deps.rs/repo/github/RustCrypto/hashes
 [msrv-1.41]: https://img.shields.io/badge/rustc-1.41.0+-blue.svg
+[msrv-1.57]: https://img.shields.io/badge/rustc-1.57.0+-blue.svg
 
 [//]: # (crates)
 
+[`belt-hash`]: ./belt-hash
 [`blake2`]: ./blake2
 [`fsb`]: ./fsb
 [`gost94`]: ./gost94
@@ -271,6 +273,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 [//]: # (algorithms)
 
+[BelT]: https://ru.wikipedia.org/wiki/BelT
 [BLAKE2]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
 [FSB]: https://en.wikipedia.org/wiki/Fast_syndrome-based_hash
 [GOST94]: https://en.wikipedia.org/wiki/GOST_(hash_function)

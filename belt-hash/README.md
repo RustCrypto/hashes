@@ -45,7 +45,7 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/belt-hash/badge.svg
 [docs-link]: https://docs.rs/belt-hash
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.57+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
 [build-image]: https://github.com/RustCrypto/hashes/workflows/belt-hash/badge.svg?branch=master
