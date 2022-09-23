@@ -21,6 +21,7 @@ members = [
     "tiger",
     "whirlpool",
 ]
+exclude = ["belt-hash"]
 
 [profile.dev]
 opt-level = 2
