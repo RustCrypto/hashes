@@ -5,7 +5,7 @@ macro_rules! fsb_impl {
     ) => {
         use digest::consts::{$blocksize, $outputsize};
 
-        #[derive(Clone)]
+        #[derive(Clone, SerializableState)]
         #[doc=$doc]
         pub struct $state {
             blocks_len: u64,

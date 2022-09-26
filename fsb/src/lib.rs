@@ -61,6 +61,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
+    crypto_common::{self, SerializableState},
     typenum::Unsigned,
     HashMarker, Output,
 };
