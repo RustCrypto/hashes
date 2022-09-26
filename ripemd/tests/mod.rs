@@ -1,5 +1,5 @@
 use digest::dev::{feed_rand_16mib, fixed_reset_test};
-use digest::new_test;
+use digest::{hash_serialization_test, new_test};
 use hex_literal::hex;
 use ripemd::{Digest, Ripemd128, Ripemd160, Ripemd256, Ripemd320};
 
@@ -10,6 +10,65 @@ new_test!(ripemd128_main, "ripemd128", Ripemd128, fixed_reset_test);
 new_test!(ripemd160_main, "ripemd160", Ripemd160, fixed_reset_test);
 new_test!(ripemd256_main, "ripemd256", Ripemd256, fixed_reset_test);
 new_test!(ripemd320_main, "ripemd320", Ripemd320, fixed_reset_test);
+
+#[rustfmt::skip]
+hash_serialization_test!(
+    ripemd128_serialization,
+    Ripemd128,
+    hex!("
+        4be201c3c174ca6a87dbc274d2a372eb
+        01000000000000000113000000000000
+        00000000000000000000000000000000
+        00000000000000000000000000000000
+        00000000000000000000000000000000
+        000000000000000000
+    ")
+);
+
+#[rustfmt::skip]
+hash_serialization_test!(
+    ripemd160_serialization,
+    Ripemd160,
+    hex!("
+        fe8fe28142dc4785457085ad85ac4a20
+        4127b66d010000000000000001130000
+        00000000000000000000000000000000
+        00000000000000000000000000000000
+        00000000000000000000000000000000
+        00000000000000000000000000
+    ")
+);
+
+#[rustfmt::skip]
+hash_serialization_test!(
+    ripemd256_serialization,
+    Ripemd256,
+    hex!("
+        adaa3eee80b1ebe8f5a2363a13ad15c6
+        1cac8a0942a88e8b075d9cdc788dd59e
+        01000000000000000113000000000000
+        00000000000000000000000000000000
+        00000000000000000000000000000000
+        00000000000000000000000000000000
+        000000000000000000
+    ")
+);
+
+#[rustfmt::skip]
+hash_serialization_test!(
+    ripemd320_serialization,
+    Ripemd320,
+    hex!("
+        b964693501716183244dc2f66453fe04
+        333677dadfc04919f1aa6b2e66684cce
+        665028f0f1253e090100000000000000
+        01130000000000000000000000000000
+        00000000000000000000000000000000
+        00000000000000000000000000000000
+        00000000000000000000000000000000
+        00
+    ")
+);
 
 #[test]
 fn ripemd128_1mil_a() {
