@@ -1,7 +1,9 @@
 use core::convert::TryInto;
+use digest::typenum::U20;
 
 pub const DIGEST_BUF_LEN: usize = 5;
 pub const WORK_BUF_LEN: usize = 16;
+pub type DigestBufByteLen = U20;
 
 pub const H0: [u32; DIGEST_BUF_LEN] = [
     0x6745_2301,

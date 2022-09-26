@@ -48,7 +48,7 @@
 
 pub use digest::{self, Digest};
 
-use core::fmt;
+use core::{convert::TryInto, fmt};
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
@@ -57,7 +57,12 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U16, U20, U32, U40, U64},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Sum, Unsigned, U16, U20, U32, U40, U64, U8},
     HashMarker, Output,
 };
 
@@ -147,6 +152,36 @@ macro_rules! impl_ripemd {
             #[inline]
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str(concat!("Ripemd", $alg_width, "Core { ... }"))
+            }
+        }
+
+        impl SerializableState for $name {
+            type SerializedStateSize = Sum<$mod::DigestBufByteLen, U8>;
+
+            fn serialize(&self) -> SerializedState<Self> {
+                let mut serialized_h = GenericArray::<_, $mod::DigestBufByteLen>::default();
+
+                for (val, chunk) in self.h.iter().zip(serialized_h.chunks_exact_mut(4)) {
+                    chunk.copy_from_slice(&val.to_le_bytes());
+                }
+
+                serialized_h.concat(self.block_len.to_le_bytes().into())
+            }
+
+            fn deserialize(
+                serialized_state: &SerializedState<Self>,
+            ) -> Result<Self, DeserializeStateError> {
+                let (serialized_h, serialized_block_len) =
+                    Split::<_, $mod::DigestBufByteLen>::split(serialized_state);
+
+                let mut h = [0; $mod::DIGEST_BUF_LEN];
+                for (val, chunk) in h.iter_mut().zip(serialized_h.chunks_exact(4)) {
+                    *val = u32::from_le_bytes(chunk.try_into().unwrap());
+                }
+
+                let block_len = u64::from_le_bytes((*serialized_block_len).into());
+
+                Ok(Self { h, block_len })
             }
         }
 

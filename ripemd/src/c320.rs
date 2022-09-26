@@ -1,8 +1,10 @@
 use core::{convert::TryInto, mem::swap};
+use digest::typenum::U40;
 
 pub const HALF_DIGEST_BUF_LEN: usize = 5;
 pub const DIGEST_BUF_LEN: usize = 10;
 pub const WORK_BUF_LEN: usize = 16;
+pub type DigestBufByteLen = U40;
 
 pub const H0: [u32; DIGEST_BUF_LEN] = [
     0x6745_2301,
