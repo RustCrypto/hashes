@@ -1,9 +1,9 @@
 macro_rules! fsb_impl {
     (
-        $full_state:ident, $state:ident, $state_num:expr, $blocksize:ident, $outputsize:ident, $n:expr, $w:expr,
-        $r:expr, $p:expr, $s:expr, $full_doc:expr, $doc:expr,
+        $full_state:ident, $state:ident, $state_num:expr, $blocksize:ident, $outputsize:ident, $statesize:ident,
+        $n:expr, $w:expr, $r:expr, $p:expr, $s:expr, $full_doc:expr, $doc:expr,
     ) => {
-        use digest::consts::{$blocksize, $outputsize};
+        use digest::consts::{$blocksize, $outputsize, $statesize};
 
         #[derive(Clone)]
         #[doc=$doc]
@@ -94,6 +94,31 @@ macro_rules! fsb_impl {
 
         #[cfg(feature = "zeroize")]
         impl ZeroizeOnDrop for $state {}
+
+        impl SerializableState for $state {
+            type SerializedStateSize = <$statesize as Add<U8>>::Output;
+
+            fn serialize(&self) -> SerializedState<Self> {
+                let mut serialized_state = SerializedState::<Self>::default();
+
+                serialized_state[..8].copy_from_slice(&self.blocks_len.to_le_bytes());
+                serialized_state[8..].copy_from_slice(&self.state[..]);
+
+                serialized_state
+            }
+
+            fn deserialize(
+                serialized_state: &SerializedState<Self>,
+            ) -> Result<Self, DeserializeStateError> {
+                let (serialized_block_len, serialized_state) = serialized_state.split::<U8>();
+
+                let mut state = [0; $r / 8];
+                state.copy_from_slice(serialized_state.as_ref());
+
+                let blocks_len = u64::from_le_bytes(*serialized_block_len.as_ref());
+                Ok(Self { state, blocks_len })
+            }
+        }
 
         impl $state {
             const SIZE_OUTPUT_COMPRESS: usize = $r / 8;
