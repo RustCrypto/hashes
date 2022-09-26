@@ -40,7 +40,7 @@ pub use digest::{self, Digest};
 
 use compress::compress;
 
-use core::{fmt, slice::from_ref};
+use core::{convert::TryInto, fmt, slice::from_ref};
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
@@ -49,15 +49,23 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U16, U64},
+    crypto_common::{DeserializeStateError, SerializableState, SerializedState},
+    generic_array::{
+        sequence::{Concat, Split},
+        GenericArray,
+    },
+    typenum::{Unsigned, U16, U24, U64},
     HashMarker, Output,
 };
+
 /// Core MD5 hasher state.
 #[derive(Clone)]
 pub struct Md5Core {
     block_len: u64,
-    state: [u32; 4],
+    state: [u32; STATE_LEN],
 }
+
+const STATE_LEN: usize = 4;
 
 impl HashMarker for Md5Core {}
 
@@ -130,6 +138,35 @@ impl fmt::Debug for Md5Core {
 #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl AssociatedOid for Md5Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.5");
+}
+
+impl SerializableState for Md5Core {
+    type SerializedStateSize = U24;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = GenericArray::<_, U16>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state.concat(self.block_len.to_le_bytes().into())
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = Split::<_, U16>::split(serialized_state);
+
+        let mut state = [0; STATE_LEN];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(4)) {
+            *val = u32::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u64::from_le_bytes((*serialized_block_len).into());
+
+        Ok(Self { state, block_len })
+    }
 }
 
 /// MD5 hasher state.
