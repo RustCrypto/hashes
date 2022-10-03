@@ -34,6 +34,8 @@
 pub use digest::{self, Digest};
 
 use core::fmt;
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     block_buffer::Eager,
     consts::U16,
@@ -144,6 +146,12 @@ impl fmt::Debug for Md2Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Md2Core { ... }")
     }
+}
+
+#[cfg(feature = "oid")]
+#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
+impl AssociatedOid for Md2Core {
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.2");
 }
 
 /// MD2 hasher state.
