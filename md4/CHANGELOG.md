@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.2 (UNRELEASED)
+### Added
+- Feature-gated OID support ([#418])
+
+[#418]: https://github.com/RustCrypto/hashes/pull/418
+
 ## 0.10.1 (2022-02-17)
 ### Fixed
 - Minimal versions build ([#363])
