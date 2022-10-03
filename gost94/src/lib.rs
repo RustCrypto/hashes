@@ -21,8 +21,17 @@
 //!
 //! Also see [RustCrypto/hashes][2] readme.
 //!
+//! # Associated OIDs.
+//! There can be a confusion regarding OIDs associated with declared types. According to the
+//! [RFC 4357][3], the OIDs 1.2.643.2.2.30.1 and 1.2.643.2.2.30.0 are used to identify the hash
+//! function parameter sets (CryptoPro vs Test ones). According to [RFC 4490][4] the OID
+//! 1.2.643.2.2.9 identifies the GOST 34.311-95 (former GOST R 34.11-94) function, but then it
+//! continues that this function MUST be used only with the CryptoPro parameter set.
+//!
 //! [1]: https://en.wikipedia.org/wiki/GOST_(hash_function)
 //! [2]: https://github.com/RustCrypto/hashes
+//! [3]: https://www.rfc-editor.org/rfc/rfc4357
+//! [4]: https://www.rfc-editor.org/rfc/rfc4490
 
 #![no_std]
 #![doc(
@@ -35,6 +44,8 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::core_api::CoreWrapper;
 
 mod gost94_core;
@@ -44,6 +55,17 @@ pub mod params;
 pub use digest::{self, Digest};
 
 pub use gost94_core::Gost94Core;
+
+#[cfg(feature = "oid")]
+impl AssociatedOid for Gost94Core<params::CryptoProParam> {
+    /// Per RFC 4490
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.643.2.2.9");
+}
+
+#[cfg(feature = "oid")]
+impl AssociatedOid for Gost94Core<params::GOST28147UAParam> {
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.804.2.1.1.1.1.2.1");
+}
 
 /// GOST94 hash function with CryptoPro parameters.
 pub type Gost94CryptoPro = CoreWrapper<Gost94Core<params::CryptoProParam>>;

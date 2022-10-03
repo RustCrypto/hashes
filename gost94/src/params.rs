@@ -1,3 +1,6 @@
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+
 pub(crate) type Block = [u8; 32];
 pub(crate) type SBox = [[u8; 16]; 8];
 
@@ -29,6 +32,12 @@ impl Gost94Params for CryptoProParam {
     ];
     const H0: Block = [0; 32];
     const NAME: &'static str = "Gost94CryptoPro";
+}
+
+#[cfg(feature = "oid")]
+impl AssociatedOid for CryptoProParam {
+    /// Per RFC 4357
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.643.2.2.30.1");
 }
 
 /// S-Box defined in GOST R 34.12-2015.
@@ -67,6 +76,12 @@ impl Gost94Params for TestParam {
     ];
     const H0: Block = [0; 32];
     const NAME: &'static str = "Gost94Test";
+}
+
+#[cfg(feature = "oid")]
+impl AssociatedOid for TestParam {
+    /// Per RFC 4357
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.643.2.2.30.0");
 }
 
 /// S-Box defined in GOST 34.311-95 & GOST 28147:2009.
