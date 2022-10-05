@@ -35,6 +35,8 @@
 pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt};
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     block_buffer::Eager,
     core_api::{
@@ -120,6 +122,12 @@ impl fmt::Debug for Md4Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Md4Core { ... }")
     }
+}
+
+#[cfg(feature = "oid")]
+#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
+impl AssociatedOid for Md4Core {
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.4");
 }
 
 /// MD4 hasher state.
