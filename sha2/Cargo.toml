@@ -19,7 +19,7 @@ digest = "0.10.4"
 cfg-if = "1.0"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
-cpufeatures = "0.2"
+cpufeatures = "0.2.5"
 sha2-asm = { version = "0.6.1", optional = true }
 
 [dev-dependencies]
