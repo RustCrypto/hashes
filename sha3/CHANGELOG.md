@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 0.10.5 (2022-09-16)
+### Fixed
+- XOF reader type aliases ([#427])
+
+[#427]: https://github.com/RustCrypto/hashes/pull/427
+
+## 0.10.5 (2022-09-16)
 ### Added
 - Feature-gated OID support ([#405])
 
