@@ -204,7 +204,7 @@ macro_rules! impl_shake {
 
         #[doc = $alg_name]
         #[doc = " reader state."]
-        pub type $reader_full = XofReaderCoreWrapper<$name>;
+        pub type $reader_full = XofReaderCoreWrapper<$reader>;
     };
     (
         $name:ident, $full_name:ident, $reader:ident, $reader_full:ident,
@@ -395,6 +395,6 @@ macro_rules! impl_cshake {
 
         #[doc = $alg_name]
         #[doc = " reader state."]
-        pub type $reader_full = XofReaderCoreWrapper<$name>;
+        pub type $reader_full = XofReaderCoreWrapper<$reader>;
     };
 }
