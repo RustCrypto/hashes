@@ -4,7 +4,7 @@
 
 Collection of [cryptographic hash functions][1] written in pure Rust.
 
-All algorithms reside in the separate crates and implemented using traits from [`digest`] crate.
+All algorithms reside in separate crates and are implemented using traits from [`digest`] crate.
 Additionally all crates do not require the standard library (i.e. `no_std` capable) and can be easily used for bare-metal or WebAssembly programming.
 
 ## Supported Algorithms
@@ -51,7 +51,7 @@ See the [Security] page on Wikipedia for more information.
 
 ### Crate Names
 
-Whenever possible crates are published under the the same name as the crate folder.
+Whenever possible crates are published under the same name as the crate folder.
 Owners of `md5` [declined](https://github.com/stainless-steel/md5/pull/) to participate in this project.
 This crate does not implement the [`digest`] traits, so it is not interoperable with the RustCrypto ecosystem.
 This is why we publish our MD5 implementation as `md-5` and mark it with the :exclamation: mark.
