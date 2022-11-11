@@ -325,7 +325,7 @@ macro_rules! blake2_mac_impl {
                 let mut padded_key = Block::<$hash>::default();
                 padded_key[..kl].copy_from_slice(key);
                 Self {
-                    core: <$hash>::new_with_params(key, &[], key.len(), OutSize::USIZE),
+                    core: <$hash>::new_with_params(&[], &[], key.len(), OutSize::USIZE),
                     buffer: LazyBuffer::new(&padded_key),
                     #[cfg(feature = "reset")]
                     key_block: key.clone(),
