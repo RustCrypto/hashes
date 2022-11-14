@@ -320,19 +320,12 @@ macro_rules! blake2_mac_impl {
             OutSize: ArrayLength<u8> + IsLessOrEqual<$max_size>,
             LeEq<OutSize, $max_size>: NonZero,
         {
+            #[inline]
             fn new(key: &Key<Self>) -> Self {
-                let kl = key.len();
-                let mut padded_key = Block::<$hash>::default();
-                padded_key[..kl].copy_from_slice(key);
-                Self {
-                    core: <$hash>::new_with_params(&[], &[], key.len(), OutSize::USIZE),
-                    buffer: LazyBuffer::new(&padded_key),
-                    #[cfg(feature = "reset")]
-                    key_block: key.clone(),
-                    _out: PhantomData,
-                }
+                Self::new_from_slice(key).expect("Key has correct length")
             }
 
+            #[inline]
             fn new_from_slice(key: &[u8]) -> Result<Self, InvalidLength> {
                 let kl = key.len();
                 if kl > <Self as KeySizeUser>::KeySize::USIZE {
