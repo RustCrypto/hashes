@@ -13,7 +13,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.10.4"
-keccak = "0.1"
+keccak = "0.1.3"
 
 [dev-dependencies]
 digest = { version = "0.10.4", features = ["dev"] }
@@ -22,5 +22,7 @@ hex-literal = "0.2.2"
 [features]
 default = ["std"]
 std = ["digest/std"]
+
+asm = ["keccak/asm"] # Enable ASM (currently ARMv8 only). WARNING: Bumps MSRV to 1.59
 oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
 reset = [] # Enable reset functionality
