@@ -25,3 +25,4 @@ reset = [] # Enable reset functionality
 simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
+size_opt = [] # Optimize for code size. Removes some `inline(always)`
