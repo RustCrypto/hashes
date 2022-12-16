@@ -5,11 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## UNREALEASED
+## 0.10.6 (2022-12-16)
+### Added
+- `size_opt` Cargo feature ([#440])
+
 ### Changed
 - Implement `KeyInit::new` in terms of `KeyInit::new_from_slice` ([#435])
 
 [#435]: https://github.com/RustCrypto/hashes/pull/435
+[#440]: https://github.com/RustCrypto/hashes/pull/440
 
 ## 0.10.5 (2022-11-11)
 ### Fixed
