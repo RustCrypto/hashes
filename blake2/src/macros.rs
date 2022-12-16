@@ -107,7 +107,7 @@ macro_rules! blake2_impl {
             fn compress(&mut self, block: &Block<Self>, f0: $word, f1: $word) {
                 use $crate::consts::SIGMA;
 
-                #[inline(always)]
+                #[cfg_attr(not(feature = "size_opt"), inline(always))]
                 fn quarter_round(v: &mut [$vec; 4], rd: u32, rb: u32, m: $vec) {
                     v[0] = v[0].wrapping_add(v[1]).wrapping_add(m.from_le());
                     v[3] = (v[3] ^ v[0]).rotate_right_const(rd);
@@ -115,21 +115,21 @@ macro_rules! blake2_impl {
                     v[1] = (v[1] ^ v[2]).rotate_right_const(rb);
                 }
 
-                #[inline(always)]
+                #[cfg_attr(not(feature = "size_opt"), inline(always))]
                 fn shuffle(v: &mut [$vec; 4]) {
                     v[1] = v[1].shuffle_left_1();
                     v[2] = v[2].shuffle_left_2();
                     v[3] = v[3].shuffle_left_3();
                 }
 
-                #[inline(always)]
+                #[cfg_attr(not(feature = "size_opt"), inline(always))]
                 fn unshuffle(v: &mut [$vec; 4]) {
                     v[1] = v[1].shuffle_right_1();
                     v[2] = v[2].shuffle_right_2();
                     v[3] = v[3].shuffle_right_3();
                 }
 
-                #[inline(always)]
+                #[cfg_attr(not(feature = "size_opt"), inline(always))]
                 fn round(v: &mut [$vec; 4], m: &[$word; 16], s: &[usize; 16]) {
                     quarter_round(v, $R1, $R2, $vec::gather(m, s[0], s[2], s[4], s[6]));
                     quarter_round(v, $R3, $R4, $vec::gather(m, s[1], s[3], s[5], s[7]));
