@@ -39,12 +39,12 @@ macro_rules! impl_sha3 {
             #[inline]
             fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
                 let pos = buffer.get_pos();
-                let block = buffer.pad_with_zeros();
+                let mut block = buffer.pad_with_zeros();
                 block[pos] = $pad;
                 let n = block.len();
                 block[n - 1] |= 0x80;
 
-                self.state.absorb_block(block);
+                self.state.absorb_block(&block);
 
                 self.state.as_bytes(out);
             }
@@ -135,12 +135,12 @@ macro_rules! impl_shake {
             #[inline]
             fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
                 let pos = buffer.get_pos();
-                let block = buffer.pad_with_zeros();
+                let mut block = buffer.pad_with_zeros();
                 block[pos] = $pad;
                 let n = block.len();
                 block[n - 1] |= 0x80;
 
-                self.state.absorb_block(block);
+                self.state.absorb_block(&block);
                 $reader {
                     state: self.state.clone(),
                 }
@@ -298,7 +298,7 @@ macro_rules! impl_cshake {
                         state.absorb_block(block);
                     }
                 });
-                state.absorb_block(buffer.pad_with_zeros());
+                state.absorb_block(&buffer.pad_with_zeros());
 
                 Self {
                     padding: $cshake_pad,
@@ -334,12 +334,12 @@ macro_rules! impl_cshake {
             #[inline]
             fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
                 let pos = buffer.get_pos();
-                let block = buffer.pad_with_zeros();
+                let mut block = buffer.pad_with_zeros();
                 block[pos] = self.padding;
                 let n = block.len();
                 block[n - 1] |= 0x80;
 
-                self.state.absorb_block(block);
+                self.state.absorb_block(&block);
                 $reader {
                     state: self.state.clone(),
                 }

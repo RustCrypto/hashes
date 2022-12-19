@@ -224,7 +224,7 @@ macro_rules! blake2_impl {
             ) {
                 self.t += buffer.get_pos() as u64;
                 let block = buffer.pad_with_zeros();
-                self.finalize_with_flag(block, 0, out);
+                self.finalize_with_flag(&block, 0, out);
             }
         }
 

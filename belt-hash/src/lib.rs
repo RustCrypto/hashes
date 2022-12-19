@@ -111,7 +111,7 @@ impl FixedOutputCore for BeltHashCore {
         let pos = buffer.get_pos();
         if pos != 0 {
             let block = buffer.pad_with_zeros();
-            self.compress_block(block);
+            self.compress_block(&block);
         }
         let bs = Self::BlockSize::USIZE as u128;
         let r = encode_r(8 * ((bs * self.r) + pos as u128));

@@ -216,10 +216,10 @@ impl VariableOutputCore for ShabalVarCore {
     #[inline]
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let pos = buffer.get_pos();
-        let block = buffer.pad_with_zeros();
+        let mut block = buffer.pad_with_zeros();
         block[pos] = 0x80;
 
-        let m = read_m(block);
+        let m = read_m(&block);
         self.add_m(&m);
         self.xor_w();
         self.perm(&m);

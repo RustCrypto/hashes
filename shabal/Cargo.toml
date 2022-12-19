@@ -1,22 +1,23 @@
 [package]
 name = "shabal"
-version = "0.4.1"
+version = "0.5.0"
 description = "Shabal hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
+rust-version = "1.57"
 documentation = "https://docs.rs/shabal"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "shabal", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10.3"
+digest = "0.11"
 
 [dev-dependencies]
-digest = { version = "0.10.3", features = ["dev"] }
-hex-literal = "0.2.2"
+digest = { version = "0.11", features = ["dev"] }
+hex-literal = "0.3.3"
 
 [features]
 default = ["std"]

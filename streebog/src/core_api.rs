@@ -140,7 +140,7 @@ impl VariableOutputCore for StreebogVarCore {
     #[inline]
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let pos = buffer.get_pos();
-        let block = buffer.pad_with_zeros();
+        let mut block = buffer.pad_with_zeros();
         block[pos] = 1;
         self.compress(block.as_ref(), pos as u64);
         self.g(&[0u8; 64], &to_bytes(&self.n));

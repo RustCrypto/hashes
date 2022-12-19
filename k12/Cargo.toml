@@ -1,22 +1,23 @@
 [package]
 name = "k12"
-version = "0.2.1"
+version = "0.3.0"
 description = "Experimental pure Rust implementation of the KangarooTwelve hash function"
 authors = ["Diggory Hardy <github1@dhardy.name>"]
 license = "Apache-2.0 OR MIT"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
+rust-version = "1.57"
 documentation = "https://docs.rs/k12"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "0.10.3", features = ["alloc"] }
+digest = { version = "0.11", features = ["alloc"] }
 
 [dev-dependencies]
-digest = { version = "0.10.3", features = ["alloc", "dev"] }
-hex-literal = "0.2.2"
+digest = { version = "0.11", features = ["alloc", "dev"] }
+hex-literal = "0.3.3"
 
 [features]
 default = ["std"]
