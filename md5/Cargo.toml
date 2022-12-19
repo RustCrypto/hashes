@@ -26,7 +26,7 @@ digest = { version = "0.11.0-pre", features = ["dev"] }
 hex-literal = "0.3"
 
 [features]
-default = ["std"]
+default = ["std", "oid"]
 std = ["digest/std"]
 asm = ["md5-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
 oid = ["digest/oid"] # Enable OID support
