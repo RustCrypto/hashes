@@ -34,7 +34,8 @@ checksum = "847495c209977a90e8aad588b959d0ca9f5dc228096d29a6bd3defd53f35eaec"
 [[package]]
 name = "block-buffer"
 version = "0.11.0-pre"
-source = "git+https://github.com/RustCrypto/utils?branch=hex_literal_0.11#b7630ebd7df40ed4f3baa5bcab976543469bf378"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23b6a33d658e9ef24ba0c4566d3d023d7978ca2ea3efb65e4eacd4586695892b"
 dependencies = [
  "crypto-common",
  "generic-array",
@@ -70,7 +71,8 @@ dependencies = [
 [[package]]
 name = "crypto-common"
 version = "0.2.0-pre"
-source = "git+https://github.com/RustCrypto/traits?branch=crypto_common_v0.2#48d751024011dd39abb3926dacb66b6ca7d7ef37"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6faaa83e7700e0832cbbf84854d4c356270526907d9b14fab927fc7a9b5befb8"
 dependencies = [
  "generic-array",
  "typenum",
@@ -78,8 +80,8 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.11.0"
-source = "git+https://github.com/RustCrypto/traits?branch=digest_v0.11#a64e98a7267f9f7a810c3bb53262150578bc8c95"
+version = "0.11.0-pre"
+source = "git+https://github.com/RustCrypto/traits?branch=digest_v0.11#9ec4d99b615ff1e69350e5261db8322a7a03e70d"
 dependencies = [
  "blobby",
  "block-buffer",
