@@ -144,7 +144,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.51.0 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - 1.57.0
           - stable
         target:
           - aarch64-unknown-linux-gnu
