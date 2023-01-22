@@ -189,15 +189,24 @@ macro_rules! asm_md5 {
 
 /// MD5 compress function. We don't have enough registers to load the whole block,
 /// so we need to use memory address to refer to the inputs. But there are enough
-/// registers to to house states, block address, and clobbers (7 in total), so we
+/// registers to to house states, block address, and clobbers (12 in total), so we
 /// can use automatical register allocation.
 #[cfg(target_arch = "x86_64")]
-pub fn compress_block(state: &mut [u32; 4], block: &[u8; 64]) {
-    let mut temp_state: [u32; 4] = *state;
-
+pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
     // SAFETY: inline-assembly
     unsafe {
         asm!(
+            // exit if no block
+            "cmp {cnt}, 0",
+            "jz 3f",
+
+            "2:",
+            // duplicate state vector for this iteration
+            "mov {a:e}, {sa:e}",
+            "mov {b:e}, {sb:e}",
+            "mov {c:e}, {sc:e}",
+            "mov {d:e}, {sd:e}",
+
             asm_md5!(
                 // states
                 {a:e}, {b:e}, {c:e}, {d:e},
@@ -210,41 +219,81 @@ pub fn compress_block(state: &mut [u32; 4], block: &[u8; 64]) {
                 {t1:e}, {t2:e}
             ),
 
-            // states
-            a = inout(reg) temp_state[0],
-            b = inout(reg) temp_state[1],
-            c = inout(reg) temp_state[2],
-            d = inout(reg) temp_state[3],
+            // update state
+            "add {sa:e}, {a:e}",
+            "add {sb:e}, {b:e}",
+            "add {sc:e}, {c:e}",
+            "add {sd:e}, {d:e}",
+
+            // check end of loop?
+            "dec {cnt}",
+            "jz 3f",
+
+            // advance block pointer
+            // 4 * 16 = 64 bytes
+            "add {x}, 64",
+
+            "jmp 2b",
+
+            // exit
+            "3:",
+
+            // states clobbers
+            a = out(reg) _,
+            b = out(reg) _,
+            c = out(reg) _,
+            d = out(reg) _,
+            // output states
+            sa = inout(reg) state[0],
+            sb = inout(reg) state[1],
+            sc = inout(reg) state[2],
+            sd = inout(reg) state[3],
             // inputs
-            x = in(reg) block.as_ptr(),
+            x = in(reg) blocks.as_ptr(),
+            cnt = in(reg) blocks.len(),
             // clobbers
             t1 = out(reg) _,
             t2 = out(reg) _,
         );
     }
-
-    // update states
-    state[0] = state[0].wrapping_add(temp_state[0]);
-    state[1] = state[1].wrapping_add(temp_state[1]);
-    state[2] = state[2].wrapping_add(temp_state[2]);
-    state[3] = state[3].wrapping_add(temp_state[3]);
 }
 
 /// MD5 compress function. We don't have enough registers to load the whole block,
 /// so we need to use memory address to refer to the inputs. Due to possible failure
 /// of register allocation on `x86`, we explicitly specify registers to use.
 #[cfg(target_arch = "x86")]
-pub fn compress_block(state: &mut [u32; 4], block: &[u8; 64]) {
-    let mut temp_state: [u32; 4] = *state;
-
+pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
     // SAFETY: inline-assembly
     unsafe {
         asm!(
-            // Save esi and ebp
-            "sub esp, 8",
+            // exit if no block
+            "cmp ebx, 0",
+            "jz 4f",
+
+            // save esi and ebp
+            // save state vector address
+            // move block count to stack
+            "sub esp, 32",
             "mov [esp + 0], esi",
             "mov [esp + 4], ebp",
+            // address of `state`
+            "mov [esp + 8], eax",
+            // block count
+            "mov [esp + 12], ebx",
 
+            // we can now use all registers
+            // we will move eax into ebp, save states on stack and set eax-edx as states
+            "mov ebp, eax",
+            "mov eax, [ebp + 0]",
+            "mov [esp + 16], eax",
+            "mov ebx, [ebp + 4]",
+            "mov [esp + 20], ebx",
+            "mov ecx, [ebp + 8]",
+            "mov [esp + 24], ecx",
+            "mov edx, [ebp + 12]",
+            "mov [esp + 28], edx",
+
+            "2:",
             asm_md5!(
                 // states
                 eax, ebx, ecx, edx,
@@ -257,24 +306,55 @@ pub fn compress_block(state: &mut [u32; 4], block: &[u8; 64]) {
                 esi, ebp
             ),
 
-            // Restore esi and ebp
-            "mov ebp, [esp + 4]",
+            // update state
+            "add eax, [esp + 16]",
+            "add ebx, [esp + 20]",
+            "add ecx, [esp + 24]",
+            "add edx, [esp + 28]",
+
+            // check end of loop?
+            "mov esi, [esp + 12]",
+            "dec esi",
+            "jz 3f",
+
+            // save current state to stack
+            "mov [esp + 16], eax",
+            "mov [esp + 20], ebx",
+            "mov [esp + 24], ecx",
+            "mov [esp + 28], edx",
+            "mov [esp + 12], esi",
+
+            // advance block pointer
+            // 4 * 16 = 64 bytes
+            "add edi, 64",
+
+            "jmp 2b",
+
+            "3:",
+            // write to state vector
+            "mov ebp, [esp + 8]",
+            "mov [ebp + 0], eax",
+            "mov [ebp + 4], ebx",
+            "mov [ebp + 8], ecx",
+            "mov [ebp + 12], edx",
+
+            // restore esi and ebp
             "mov esi, [esp + 0]",
-            "add esp, 8",
+            "mov ebp, [esp + 4]",
+            "add esp, 32",
+
+            // exit
+            "4:",
 
             // states
-            inout("eax") temp_state[0],
-            inout("ebx") temp_state[1],
-            inout("ecx") temp_state[2],
-            inout("edx") temp_state[3],
+            inout("eax") state.as_mut_ptr() => _,
             // inputs
-            in("edi") block.as_ptr(),
+            inout("edi") blocks.as_ptr() => _,
+            inout("ebx") blocks.len() => _,
+
+            // clobbers
+            out("ecx") _,
+            out("edx") _,
         );
     }
-
-    // update states
-    state[0] = state[0].wrapping_add(temp_state[0]);
-    state[1] = state[1].wrapping_add(temp_state[1]);
-    state[2] = state[2].wrapping_add(temp_state[2]);
-    state[3] = state[3].wrapping_add(temp_state[3]);
 }
