@@ -13,6 +13,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = { version = "0.10.3", features = ["mac"] }
+zeroize = { version = "1.4.0", optional = true}
 
 [dev-dependencies]
 digest = { version = "0.10.3", features = ["dev"] }
@@ -26,3 +27,4 @@ simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
 size_opt = [] # Optimize for code size. Removes some `inline(always)`
+zeroize = ["dep:zeroize"] # Enable zeroize crate support

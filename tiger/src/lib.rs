@@ -91,7 +91,7 @@ impl UpdateCore for TigerCore {
 impl FixedOutputCore for TigerCore {
     #[inline]
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-        let bs = Self::BlockSize::U64 as u64;
+        let bs = Self::BlockSize::U64;
         let pos = buffer.get_pos() as u64;
         let bit_len = 8 * (pos + bs * self.block_len);
 
@@ -165,7 +165,7 @@ impl UpdateCore for Tiger2Core {
 impl FixedOutputCore for Tiger2Core {
     #[inline]
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-        let bs = Self::BlockSize::U64 as u64;
+        let bs = Self::BlockSize::U64;
         let pos = buffer.get_pos() as u64;
         let bit_len = 8 * (pos + bs * self.block_len);
 
