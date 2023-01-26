@@ -8,6 +8,8 @@
 #![allow(dead_code, non_camel_case_types)]
 
 use crate::as_bytes::Safe;
+#[cfg(feature = "zeroize")]
+use zeroize::Zeroize;
 
 #[cfg(feature = "simd")]
 macro_rules! decl_simd {
@@ -75,3 +77,13 @@ unsafe impl<T: Safe> Safe for Simd4<T> {}
 unsafe impl<T: Safe> Safe for Simd8<T> {}
 unsafe impl<T: Safe> Safe for Simd16<T> {}
 unsafe impl<T: Safe> Safe for Simd32<T> {}
+
+#[cfg(feature = "zeroize")]
+impl<T: Zeroize> Zeroize for Simd4<T> {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+        self.1.zeroize();
+        self.2.zeroize();
+        self.3.zeroize();
+    }
+}

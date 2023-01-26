@@ -82,7 +82,7 @@ extern crate std;
 
 pub use digest::{self, Digest};
 
-use core::{convert::TryInto, fmt, marker::PhantomData, ops::Div};
+use core::{convert::TryInto, fmt, marker::PhantomData, ops::Div, borrow::BorrowMut};
 use digest::{
     block_buffer::{Lazy, LazyBuffer},
     consts::{U128, U32, U4, U64},
@@ -98,6 +98,9 @@ use digest::{
 };
 #[cfg(feature = "reset")]
 use digest::{FixedOutputReset, Reset};
+
+#[cfg(feature = "zeroize")]
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 mod as_bytes;
 mod consts;

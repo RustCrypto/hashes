@@ -5,6 +5,7 @@ macro_rules! blake2_impl {
         $vardoc:expr, $doc:expr,
     ) => {
         #[derive(Clone)]
+        #[cfg_attr(feature = "zeroize", derive(Zeroize))]
         #[doc=$vardoc]
         pub struct $name {
             h: [$vec; 2],
@@ -285,12 +286,16 @@ macro_rules! blake2_mac_impl {
                 salt: &[u8],
                 persona: &[u8],
             ) -> Result<Self, InvalidLength> {
+                // since key is passed by reference, it is the caller's responsibility to zeroize it.
+                // TODO (reviewer): is this true? is this the right way to do it?
                 let kl = key.len();
                 let bs = <$hash as BlockSizeUser>::BlockSize::USIZE;
                 let qbs = bs / 4;
                 if kl > bs || salt.len() > qbs || persona.len() > qbs {
                     return Err(InvalidLength);
                 }
+                // padded_key gets owned by buffer, so is zeroized on drop when zeroize is enabled.
+                // TODO (reviewer): is this true? is this the right way to do it?
                 let mut padded_key = Block::<$hash>::default();
                 padded_key[..kl].copy_from_slice(key);
                 Ok(Self {
@@ -321,16 +326,20 @@ macro_rules! blake2_mac_impl {
             LeEq<OutSize, $max_size>: NonZero,
         {
             #[inline]
+            /// caller is responsible for zeroizing the key.
             fn new(key: &Key<Self>) -> Self {
                 Self::new_from_slice(key).expect("Key has correct length")
             }
 
             #[inline]
+            /// caller is responsible for zeroizing the key.
             fn new_from_slice(key: &[u8]) -> Result<Self, InvalidLength> {
                 let kl = key.len();
                 if kl > <Self as KeySizeUser>::KeySize::USIZE {
                     return Err(InvalidLength);
                 }
+                // padded_key gets owned by buffer, so is zeroized on drop when zeroize is enabled.
+                // TODO (reviewer): is this true? is this the right way to do it?
                 let mut padded_key = Block::<$hash>::default();
                 padded_key[..kl].copy_from_slice(key);
                 Ok(Self {
@@ -378,6 +387,7 @@ macro_rules! blake2_mac_impl {
                 let mut full_res = Default::default();
                 core.finalize_variable_core(buffer, &mut full_res);
                 out.copy_from_slice(&full_res[..OutSize::USIZE]);
+                // self including core is zeroized on drop
             }
         }
 
@@ -390,6 +400,9 @@ macro_rules! blake2_mac_impl {
             fn reset(&mut self) {
                 self.core.reset();
                 let kl = self.key_block.len();
+                // zeroize the buffer before you replace it (feeling pretty confident about this one?)
+                self.buffer.zeroize();
+                // TODO (reviewer) does padded key need to be zeroized here? I think not but just flagging the possibility
                 let mut padded_key = Block::<$hash>::default();
                 padded_key[..kl].copy_from_slice(&self.key_block);
                 self.buffer = LazyBuffer::new(&padded_key);
@@ -426,6 +439,20 @@ macro_rules! blake2_mac_impl {
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(f, "{}{} {{ ... }}", stringify!($name), OutSize::USIZE)
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl<OutSize> Drop for $name<OutSize>
+        where
+            OutSize: ArrayLength<u8> + IsLessOrEqual<$max_size>,
+            LeEq<OutSize, $max_size>: NonZero,
+        {
+            fn drop(&mut self) {
+                self.core.zeroize();
+                self.buffer.zeroize();
+                #[cfg(feature = "reset")]
+                self.key_block.zeroize();
             }
         }
     };
