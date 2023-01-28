@@ -26,6 +26,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bytemuck"
+version = "1.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c041d3eab048880cb0b86b256447da3f18859a163c3b8d8893f4e6368abe6393"
+
+[[package]]
 name = "cc"
 version = "1.0.73"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -198,6 +204,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkvm-platform"
+version = "0.12.0"
+
+[[package]]
 name = "sha1"
 version = "0.10.5"
 dependencies = [
@@ -221,10 +231,12 @@ dependencies = [
 name = "sha2"
 version = "0.10.6"
 dependencies = [
+ "bytemuck",
  "cfg-if",
  "cpufeatures",
  "digest",
  "hex-literal",
+ "risc0-zkvm-platform",
  "sha2-asm",
 ]
 
