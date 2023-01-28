@@ -9,7 +9,6 @@ mod sse41;
 use super::*;
 use arrayref::array_ref;
 use core::cmp;
-use digest::generic_array::typenum::Zero;
 use zeroize::Zeroize;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
