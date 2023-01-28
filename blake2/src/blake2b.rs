@@ -44,6 +44,7 @@ use digest::{
     generic_array::GenericArray,
     BlockInput, FixedOutputDirty, InvalidOutputSize, Reset, Update, VariableOutputDirty,
 };
+use zeroize::ZeroizeOnDrop;
 
 pub(crate) type Word = u64;
 pub(crate) type Count = u128;
@@ -108,7 +109,7 @@ pub fn blake2b(input: &[u8]) -> Hash {
 }
 
 /// Blake2b instance with a fixed output.
-#[derive(Clone, Default)]
+#[derive(Clone, Default, ZeroizeOnDrop)]
 pub struct Blake2b {
     params: Params,
     state: State,
@@ -192,7 +193,7 @@ opaque_debug::implement!(Blake2b);
 digest::impl_write!(Blake2b);
 
 /// Blake2b instance with a variable output.
-#[derive(Clone, Default)]
+#[derive(Clone, Default, ZeroizeOnDrop)]
 pub struct VarBlake2b {
     params: Params,
     state: State,

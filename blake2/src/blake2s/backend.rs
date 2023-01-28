@@ -9,6 +9,8 @@ mod sse41;
 use super::*;
 use arrayref::array_ref;
 use core::cmp;
+use digest::generic_array::typenum::Zero;
+use zeroize::Zeroize;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 pub const MAX_DEGREE: usize = 8;
@@ -136,6 +138,12 @@ impl Implementation {
     }
 }
 
+impl Zeroize for Implementation {
+    fn zeroize(&mut self) {
+        // Nothing to do.
+    }
+}
+
 pub struct Job<'a, 'b> {
     pub input: &'a [u8],
     pub words: &'b mut [Word; 8],
@@ -177,6 +185,12 @@ impl Finalize {
 pub enum LastNode {
     Yes,
     No,
+}
+
+impl Zeroize for LastNode {
+    fn zeroize(&mut self) {
+        // Nothing to do.
+    }
 }
 
 impl LastNode {

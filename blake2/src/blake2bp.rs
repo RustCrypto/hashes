@@ -26,6 +26,7 @@ use crate::blake2b::{
     many, state, Count, Hash, Word, BLOCKBYTES, KEYBYTES, OUTBYTES,
 };
 use core::{cmp, fmt, mem::size_of};
+use zeroize::ZeroizeOnDrop;
 
 pub(crate) const DEGREE: usize = 4;
 
@@ -58,7 +59,7 @@ pub fn blake2bp(input: &[u8]) -> Hash {
 /// use blake2::blake2bp;
 /// let mut state = blake2bp::Params::new().hash_length(32).to_state();
 /// ```
-#[derive(Clone)]
+#[derive(Clone, ZeroizeOnDrop)]
 pub struct Params {
     hash_length: u8,
     key_length: u8,
@@ -206,7 +207,7 @@ impl fmt::Debug for Params {
 ///                 dfa3205f7f7f71e4f0673d25fa82a368488911f446bccd323af3ab03f53e56e5";
 /// assert_eq!(expected, &hash.to_hex());
 /// ```
-#[derive(Clone)]
+#[derive(Clone, ZeroizeOnDrop)]
 pub struct State {
     leaf_words: [[Word; 8]; DEGREE],
     root_words: [Word; 8],

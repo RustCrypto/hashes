@@ -2,6 +2,8 @@ use super::{backend, Count, Hash, Params, Word, BLOCKBYTES, OUTBYTES};
 use arrayref::mut_array_refs;
 use core::{cmp, fmt, mem::size_of};
 
+use zeroize::ZeroizeOnDrop;
+
 /// An incremental hasher for BLAKE2b.
 ///
 /// To construct a `State` with non-default parameters, see `Params::to_state`.
@@ -19,7 +21,7 @@ use core::{cmp, fmt, mem::size_of};
 /// state.update(b"bar");
 /// assert_eq!(blake2b(b"foobar"), state.finalize());
 /// ```
-#[derive(Clone)]
+#[derive(Clone, ZeroizeOnDrop)]
 pub struct State {
     pub(super) words: [Word; 8],
     pub(super) count: Count,

@@ -1,6 +1,7 @@
 use super::{backend, Count, Hash, Params, Word, BLOCKBYTES, OUTBYTES};
 use arrayref::mut_array_refs;
 use core::{cmp, fmt, mem::size_of};
+use zeroize::ZeroizeOnDrop;
 
 /// An incremental hasher for BLAKE2s.
 ///
@@ -19,7 +20,7 @@ use core::{cmp, fmt, mem::size_of};
 /// state.update(b"bar");
 /// assert_eq!(blake2s(b"foobar"), state.finalize());
 /// ```
-#[derive(Clone)]
+#[derive(Clone, ZeroizeOnDrop)]
 pub struct State {
     pub(super) words: [Word; 8],
     pub(super) count: Count,
