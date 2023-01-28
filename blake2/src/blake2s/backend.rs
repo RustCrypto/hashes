@@ -223,7 +223,7 @@ pub(crate) fn count_low(count: Count) -> Word {
 }
 
 pub(crate) fn count_high(count: Count) -> Word {
-    (count >> (8 * size_of::<Word>())) as Word
+    (count >> (8 * (Word::BITS as usize / 8))) as Word
 }
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]

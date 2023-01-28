@@ -50,20 +50,20 @@ pub(crate) type Count = u64;
 type Output = GenericArray<u8, U32>;
 
 /// The max hash length.
-pub const OUTBYTES: usize = 8 * size_of::<Word>();
+pub const OUTBYTES: usize = 8 * (Word::BITS as usize / 8);
 
 /// The max key length.
-pub const KEYBYTES: usize = 8 * size_of::<Word>();
+pub const KEYBYTES: usize = 8 * (Word::BITS as usize / 8);
 
 /// The max salt length.
-pub const SALTBYTES: usize = 2 * size_of::<Word>();
+pub const SALTBYTES: usize = 2 * (Word::BITS as usize / 8);
 
 /// The max personalization length.
-pub const PERSONALBYTES: usize = 2 * size_of::<Word>();
+pub const PERSONALBYTES: usize = 2 * (Word::BITS as usize / 8);
 
 /// The number input bytes passed to each call to the compression function. Small benchmarks need
 /// to use an even multiple of `BLOCKBYTES`, or else their apparent throughput will be low.
-pub const BLOCKBYTES: usize = 16 * size_of::<Word>();
+pub const BLOCKBYTES: usize = 16 * (Word::BITS as usize / 8);
 
 const IV: [Word; 8] = [
     0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19,
