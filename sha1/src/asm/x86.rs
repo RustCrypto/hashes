@@ -21,7 +21,6 @@
 //  *   out of or in connection with the Software or the use or other dealings in the
 //  *   Software.
 //  */
-
 use core::arch::asm;
 
 use asm_block::asm_block;

@@ -64,46 +64,46 @@ use digest::{
 };
 
 #[cfg(all(
-feature = "inline-asm",
-any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+    feature = "inline-asm",
+    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
 ))]
 mod asm;
 
 #[cfg(not(all(
-any(feature = "asm", feature = "inline-asm"),
-any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+    any(feature = "asm", feature = "inline-asm"),
+    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
 )))]
 mod compress;
 
 #[cfg(feature = "compress")]
 #[cfg(all(
-feature = "inline-asm",
-feature = "compress",
-any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+    feature = "inline-asm",
+    feature = "compress",
+    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
 ))]
 pub use asm::compress;
 
 #[cfg(feature = "compress")]
 #[cfg(all(
-feature = "inline-asm",
-not(feature = "compress"),
-any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+    feature = "inline-asm",
+    not(feature = "compress"),
+    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
 ))]
 use asm::compress;
 
 #[cfg(feature = "compress")]
 #[cfg(all(
-not(feature = "inline-asm"),
-feature = "compress",
-any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+    not(feature = "inline-asm"),
+    feature = "compress",
+    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
 ))]
 pub use compress::compress;
 
 #[cfg(feature = "compress")]
 #[cfg(all(
-not(feature = "inline-asm"),
-not(feature = "compress"),
-any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
+    not(feature = "inline-asm"),
+    not(feature = "compress"),
+    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
 ))]
 use compress::compress;
 

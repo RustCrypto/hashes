@@ -1,3 +1,5 @@
+//! SHA-1 hash in AArch64 assembly, adapted from Emmanuel Gil Peyrot's MIT-licensed implementation
+//
 // /*
 //  * SHA-1 hash in AArch64 assembly
 //  *
@@ -19,8 +21,7 @@
 //  *   out of or in connection with the Software or the use or other dealings in the
 //  *   Software.
 //  */
-//
-//
+
 // /* void sha1_compress(uint32_t state[5], const uint8_t block[64]) */
 // .global sha1_compress
 // sha1_compress:
