@@ -6,8 +6,7 @@ cfg_if::cfg_if! {
         mod soft;
         use soft::compress as compress_inner;
     } else if #[cfg(feature = "inline-asm")] {
-        mod asm;
-        use asm::compress as compress_inner;
+        use crate::asm::compress as compress_inner;
     } else if #[cfg(all(feature = "asm", target_arch = "aarch64"))] {
         mod soft;
         mod aarch64;

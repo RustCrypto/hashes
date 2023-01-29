@@ -31,6 +31,7 @@ use core::arch::asm;
 /// of register allocation on `x86`, we explicitly specify registers to use.
 #[cfg(all(feature = "inline-asm", target_arch = "aarch64"))]
 pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+    let mut out_state = [0u32; 5];
     // SAFETY: inline-assembly
     unsafe {
         asm!(
@@ -57,9 +58,10 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
             // original code:
             // 	ldr	q5, [x0]
             // 	ldr	s16, [x0, 16]
-            // 	mov	v6.16b, v5.16b
-            in(q5) state[0..4],
-            in(s16) state[4],
+            // this now happens at the bottom...
+            // TODO what is this doing?
+            // i believe it's copying state[0..4] into v6 (which is also q6)
+            // confirmed this is the mutable copy of the first 4 words of the state
             "mov v6.16b, v5.16b",
 
             // Load block in registers
@@ -68,12 +70,10 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
             // 	ldr	q1, [x1, 16]
             // 	ldr	q2, [x1, 32]
             // 	ldr	q3, [x1, 48]
-            in(q0) blocks[0][0..16],
-            in(q1) blocks[0][16..32],
-            in(q2) blocks[0][32..48],
-            in(q3) blocks[0][48..64],
+            // this is at the bottom now
 
             // from original code: TODO: only do that on little endian
+            // this flips the blocks from little to big endian
             "rev32 v0.16b, v0.16b",
             "rev32 v1.16b, v1.16b",
             "rev32 v2.16b, v2.16b",
@@ -230,16 +230,16 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
             // Update state
             "add	v6.4s, v6.4s, v5.4s",
             // source code: str	q6, [x0]
-            out(q6) state[0..4],
+            // this now happens at the bottom
             "add	v16.2s, v16.2s, v17.2s",
             // source code: str	s16, [x0, 16]
-            out(s16) state[4],
+            // this now happens at the bottom
 
             "ret", // TODO is this right
 
             ".align 4", // TODO ummm alignment...
             ".K0:", // TODO are labels just the same in inline asm in rust?
-            ".word	0x5A827999"
+            ".word	0x5A827999",
             ".word	0x5A827999",
             ".word	0x5A827999",
             ".word	0x5A827999",
@@ -259,6 +259,21 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
             ".word	0xCA62C1D6",
             ".word	0xCA62C1D6",
 
+            // state ins and outs
+            in("q4") state.as_mut_ptr(),
+            inout("s16") state[4],
+            lateout("q6") state as *mut u32,
+            // blocks in
+            in("q0") blocks[0][0..16].as_ptr(),
+            in("q1") blocks[0][16..32].as_ptr(),
+            in("q2") blocks[0][32..48].as_ptr(),
+            in("q3") blocks[0][48..64].as_ptr(),
+            // some clobbers
+            out("q5") _,
+            out("s17") _,
+            out("s18") _,
+            out("q19") _,
+        // TODO make sure there aren't any other clobbers
         );
     };
 }

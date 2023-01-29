@@ -69,10 +69,6 @@ use digest::{
 ))]
 mod asm;
 
-#[cfg(not(all(
-    any(feature = "asm", feature = "inline-asm"),
-    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
-)))]
 mod compress;
 
 #[cfg(feature = "compress")]
