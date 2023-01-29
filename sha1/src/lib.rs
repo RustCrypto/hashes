@@ -76,35 +76,9 @@ mod asm;
 mod compress;
 
 #[cfg(feature = "compress")]
-#[cfg(all(
-    feature = "inline-asm",
-    feature = "compress",
-    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
-))]
-pub use asm::compress;
-
-#[cfg(feature = "compress")]
-#[cfg(all(
-    feature = "inline-asm",
-    not(feature = "compress"),
-    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
-))]
-use asm::compress;
-
-#[cfg(feature = "compress")]
-#[cfg(all(
-    not(feature = "inline-asm"),
-    feature = "compress",
-    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
-))]
 pub use compress::compress;
 
-#[cfg(feature = "compress")]
-#[cfg(all(
-    not(feature = "inline-asm"),
-    not(feature = "compress"),
-    any(target_arch = "x86", target_arch = "x86_64", target_arch = "aarch64")
-))]
+#[cfg(not(feature = "compress"))]
 use compress::compress;
 
 const STATE_LEN: usize = 5;

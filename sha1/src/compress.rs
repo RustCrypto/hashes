@@ -5,6 +5,14 @@ cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
         mod soft;
         use soft::compress as compress_inner;
+    } else if #[cfg(feature = "inline-asm")] {
+        mod asm;
+        #[cfg(all(feature = "inline-asm", target_arch = "x86"))]
+        use asm::x86::compress as compress_inner;
+        #[cfg(all(feature = "inline-asm", target_arch = "x86_64"))]
+        use asm::x86_64::compress as compress_inner;
+        #[cfg(all(feature = "inline-asm", target_arch = "aarch64"))]
+        use asm::aarch64::compress as compress_inner;
     } else if #[cfg(all(feature = "asm", target_arch = "aarch64"))] {
         mod soft;
         mod aarch64;

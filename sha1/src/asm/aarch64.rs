@@ -21,7 +21,6 @@
 //  *   out of or in connection with the Software or the use or other dealings in the
 //  *   Software.
 //  */
-
 use core::arch::asm;
 
 // macro_rules! sha_1_through_4 {
@@ -35,28 +34,6 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     // SAFETY: inline-assembly
     unsafe {
         asm!(
-            // define the SHA1 constants TODO (laudiacay) does it make sense for these to be up here? does it cause alignment issues?
-            ".K0:",
-            ".word	0x5A827999",
-            ".word	0x5A827999",
-            ".word	0x5A827999",
-            ".word	0x5A827999",
-            ".K1:",
-            ".word	0x6ED9EBA1",
-            ".word	0x6ED9EBA1",
-            ".word	0x6ED9EBA1",
-            ".word	0x6ED9EBA1",
-            ".K2:",
-            ".word	0x8F1BBCDC",
-            ".word	0x8F1BBCDC",
-            ".word	0x8F1BBCDC",
-            ".word	0x8F1BBCDC",
-            ".K3:",
-            ".word	0xCA62C1D6",
-            ".word	0xCA62C1D6",
-            ".word	0xCA62C1D6",
-            ".word	0xCA62C1D6",
-
             // from original code, some docs :)
             // 	/*
             // 	 * Storage usage:
@@ -103,181 +80,184 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
             "rev32 v3.16b, v3.16b",
 
             // k for the next five rounds
-            "adrp x1, .K0"
-            "ldr	q4, [x1, #:lo12:.K0]"
+            "adrp x1, .K0",
+            "ldr	q4, [x1, #:lo12:.K0]",
 
-            // 	// 0
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v0.4s, v4.4s
-            // 	sha1c	q6, s16, v19.4s
-            // 	sha1su0	v0.4s, v1.4s, v2.4s
+            // 0
+            "sha1h	s18, s6",
+            "add	v19.4s, v0.4s, v4.4s",
+            "sha1c	q6, s16, v19.4s",
+            "sha1su0	v0.4s, v1.4s, v2.4s",
 
-            // 	// 1
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v1.4s, v4.4s
-            // 	sha1c	q6, s18, v19.4s
-            // 	sha1su1	v0.4s, v3.4s
-            // 	sha1su0	v1.4s, v2.4s, v3.4s
-            //
-            // 	// 2
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v2.4s, v4.4s
-            // 	sha1c	q6, s17, v19.4s
-            // 	sha1su1	v1.4s, v0.4s
-            // 	sha1su0	v2.4s, v3.4s, v0.4s
-            //
-            // 	// 3
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v3.4s, v4.4s
-            // 	sha1c	q6, s18, v19.4s
-            // 	sha1su1	v2.4s, v1.4s
-            // 	sha1su0	v3.4s, v0.4s, v1.4s
-            //
-            // 	// 4
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v0.4s, v4.4s
-            // 	sha1c	q6, s17, v19.4s
-            // 	sha1su1	v3.4s, v2.4s
-            // 	sha1su0	v0.4s, v1.4s, v2.4s
-            //
-            // 	// k for the next five rounds
-            // 	adrp	x1, .K1
-            // 	ldr	q4, [x1, #:lo12:.K1]
-            //
-            // 	// 5
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v1.4s, v4.4s
-            // 	sha1p	q6, s18, v19.4s
-            // 	sha1su1	v0.4s, v3.4s
-            // 	sha1su0	v1.4s, v2.4s, v3.4s
-            //
-            // 	// 6
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v2.4s, v4.4s
-            // 	sha1p	q6, s17, v19.4s
-            // 	sha1su1	v1.4s, v0.4s
-            // 	sha1su0	v2.4s, v3.4s, v0.4s
-            //
-            // 	// 7
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v3.4s, v4.4s
-            // 	sha1p	q6, s18, v19.4s
-            // 	sha1su1	v2.4s, v1.4s
-            // 	sha1su0	v3.4s, v0.4s, v1.4s
-            //
-            // 	// 8
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v0.4s, v4.4s
-            // 	sha1p	q6, s17, v19.4s
-            // 	sha1su1	v3.4s, v2.4s
-            // 	sha1su0	v0.4s, v1.4s, v2.4s
-            //
-            // 	// 9
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v1.4s, v4.4s
-            // 	sha1p	q6, s18, v19.4s
-            // 	sha1su1	v0.4s, v3.4s
-            // 	sha1su0	v1.4s, v2.4s, v3.4s
-            //
-            // 	// k for the next five rounds
-            // 	adrp	x1, .K2
-            // 	ldr	q4, [x1, #:lo12:.K2]
-            //
-            // 	// 10
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v2.4s, v4.4s
-            // 	sha1m	q6, s17, v19.4s
-            // 	sha1su1	v1.4s, v0.4s
-            // 	sha1su0	v2.4s, v3.4s, v0.4s
-            //
-            // 	// 11
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v3.4s, v4.4s
-            // 	sha1m	q6, s18, v19.4s
-            // 	sha1su1	v2.4s, v1.4s
-            // 	sha1su0	v3.4s, v0.4s, v1.4s
-            //
-            // 	// 12
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v0.4s, v4.4s
-            // 	sha1m	q6, s17, v19.4s
-            // 	sha1su1	v3.4s, v2.4s
-            // 	sha1su0	v0.4s, v1.4s, v2.4s
-            //
-            // 	// 13
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v1.4s, v4.4s
-            // 	sha1m	q6, s18, v19.4s
-            // 	sha1su1	v0.4s, v3.4s
-            // 	sha1su0	v1.4s, v2.4s, v3.4s
-            //
-            // 	// 14
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v2.4s, v4.4s
-            // 	sha1m	q6, s17, v19.4s
-            // 	sha1su1	v1.4s, v0.4s
-            // 	sha1su0	v2.4s, v3.4s, v0.4s
-            //
-            // 	// k for the next five rounds
-            // 	adrp	x1, .K3
-            // 	ldr	q4, [x1, #:lo12:.K3]
-            //
-            // 	// 15
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v3.4s, v4.4s
-            // 	sha1p	q6, s18, v19.4s
-            // 	sha1su1	v2.4s, v1.4s
-            // 	sha1su0	v3.4s, v0.4s, v1.4s
-            //
-            // 	// 16
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v0.4s, v4.4s
-            // 	sha1p	q6, s17, v19.4s
-            // 	sha1su1	v3.4s, v2.4s
-            //
-            // 	// 17
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v1.4s, v4.4s
-            // 	sha1p	q6, s18, v19.4s
-            //
-            // 	// 18
-            // 	sha1h	s18, s6
-            // 	add	v19.4s, v2.4s, v4.4s
-            // 	sha1p	q6, s17, v19.4s
-            //
-            // 	// 19
-            // 	sha1h	s17, s6
-            // 	add	v19.4s, v3.4s, v4.4s
-            // 	sha1p	q6, s18, v19.4s
-            //
-            // 	// Update state
-            // 	add	v6.4s, v6.4s, v5.4s
-            // 	str	q6, [x0]
-            // 	add	v16.2s, v16.2s, v17.2s
-            // 	str	s16, [x0, 16]
-            //
-            // 	ret
-            // .align 4
-            // .K0:
-            // 	.word	0x5A827999
-            // 	.word	0x5A827999
-            // 	.word	0x5A827999
-            // 	.word	0x5A827999
-            // .K1:
-            // 	.word	0x6ED9EBA1
-            // 	.word	0x6ED9EBA1
-            // 	.word	0x6ED9EBA1
-            // 	.word	0x6ED9EBA1
-            // .K2:
-            // 	.word	0x8F1BBCDC
-            // 	.word	0x8F1BBCDC
-            // 	.word	0x8F1BBCDC
-            // 	.word	0x8F1BBCDC
-            // .K3:
-            // 	.word	0xCA62C1D6
-            // 	.word	0xCA62C1D6
-            // 	.word	0xCA62C1D6
-            // 	.word	0xCA62C1D6
+            // 1
+            "sha1h	s17, s6",
+            "add	v19.4s, v1.4s, v4.4s",
+            "sha1c	q6, s18, v19.4s",
+            "sha1su1	v0.4s, v3.4s",
+            "sha1su0	v1.4s, v2.4s, v3.4s",
+
+            // 2
+            "sha1h	s18, s6",
+            "add	v19.4s, v2.4s, v4.4s",
+            "sha1c	q6, s17, v19.4s",
+            "sha1su1	v1.4s, v0.4s",
+            "sha1su0	v2.4s, v3.4s, v0.4s",
+
+            // 3
+            "sha1h	s17, s6",
+            "add	v19.4s, v3.4s, v4.4s",
+            "sha1c	q6, s18, v19.4s",
+            "sha1su1	v2.4s, v1.4s",
+            "sha1su0	v3.4s, v0.4s, v1.4s",
+
+            // 4
+            "sha1h	s18, s6",
+            "add	v19.4s, v0.4s, v4.4s",
+            "sha1c	q6, s17, v19.4s",
+            "sha1su1	v3.4s, v2.4s",
+            "sha1su0	v0.4s, v1.4s, v2.4s",
+
+            // k for the next five rounds
+            "adrp	x1, .K1",
+            "ldr	q4, [x1, #:lo12:.K1]",
+
+            // 5
+            "sha1h	s17, s6",
+            "add	v19.4s, v1.4s, v4.4s",
+            "sha1p	q6, s18, v19.4s",
+            "sha1su1	v0.4s, v3.4s",
+            "sha1su0	v1.4s, v2.4s, v3.4s",
+
+            // 6
+            "sha1h	s18, s6",
+            "add	v19.4s, v2.4s, v4.4s",
+            "sha1p	q6, s17, v19.4s",
+            "sha1su1	v1.4s, v0.4s",
+            "sha1su0	v2.4s, v3.4s, v0.4s",
+
+            // 7
+            "sha1h	s17, s6",
+            "add	v19.4s, v3.4s, v4.4s",
+            "sha1p	q6, s18, v19.4s",
+            "sha1su1	v2.4s, v1.4s",
+            "sha1su0	v3.4s, v0.4s, v1.4s",
+
+            // 8
+            "sha1h	s18, s6",
+            "add	v19.4s, v0.4s, v4.4s",
+            "sha1p	q6, s17, v19.4s",
+            "sha1su1	v3.4s, v2.4s",
+            "sha1su0	v0.4s, v1.4s, v2.4s",
+
+            // 9
+            "sha1h	s17, s6",
+            "add	v19.4s, v1.4s, v4.4s",
+            "sha1p	q6, s18, v19.4s",
+            "sha1su1	v0.4s, v3.4s",
+            "sha1su0	v1.4s, v2.4s, v3.4s",
+
+            // k for the next five rounds
+            "adrp	x1, .K2",
+            "ldr	q4, [x1, #:lo12:.K2]",
+
+            // 10
+            "sha1h	s18, s6",
+            "add	v19.4s, v2.4s, v4.4s",
+            "sha1m	q6, s17, v19.4s",
+            "sha1su1	v1.4s, v0.4s",
+            "sha1su0	v2.4s, v3.4s, v0.4s",
+
+            // 11
+            "sha1h	s17, s6",
+            "add	v19.4s, v3.4s, v4.4s",
+            "sha1m	q6, s18, v19.4s",
+            "sha1su1	v2.4s, v1.4s",
+            "sha1su0	v3.4s, v0.4s, v1.4s",
+
+            // 12
+            "sha1h	s18, s6",
+            "add	v19.4s, v0.4s, v4.4s",
+            "sha1m	q6, s17, v19.4s",
+            "sha1su1	v3.4s, v2.4s",
+            "sha1su0	v0.4s, v1.4s, v2.4s",
+
+            // 13
+            "sha1h	s17, s6",
+            "add	v19.4s, v1.4s, v4.4s",
+            "sha1m	q6, s18, v19.4s",
+            "sha1su1	v0.4s, v3.4s",
+            "sha1su0	v1.4s, v2.4s, v3.4s",
+
+            // 14
+            "sha1h	s18, s6",
+            "add	v19.4s, v2.4s, v4.4s",
+            "sha1m	q6, s17, v19.4s",
+            "sha1su1	v1.4s, v0.4s",
+            "sha1su0	v2.4s, v3.4s, v0.4s",
+
+            // k for the next five rounds
+            "adrp	x1, .K3",
+            "ldr	q4, [x1, #:lo12:.K3]",
+
+            // 15
+            "sha1h	s17, s6",
+            "add	v19.4s, v3.4s, v4.4s",
+            "sha1p	q6, s18, v19.4s",
+            "sha1su1	v2.4s, v1.4s",
+            "sha1su0	v3.4s, v0.4s, v1.4s",
+
+            // 16
+            "sha1h	s18, s6",
+            "add	v19.4s, v0.4s, v4.4s",
+            "sha1p	q6, s17, v19.4s",
+            "sha1su1	v3.4s, v2.4s",
+
+            // 17
+            "sha1h	s17, s6",
+            "add	v19.4s, v1.4s, v4.4s",
+            "sha1p	q6, s18, v19.4s",
+
+            // 18
+            "sha1h	s18, s6",
+            "add	v19.4s, v2.4s, v4.4s",
+            "sha1p	q6, s17, v19.4s",
+
+            // 19
+            "sha1h	s17, s6",
+            "add	v19.4s, v3.4s, v4.4s",
+            "sha1p	q6, s18, v19.4s",
+
+            // Update state
+            "add	v6.4s, v6.4s, v5.4s",
+            // source code: str	q6, [x0]
+            out(q6) state[0..4],
+            "add	v16.2s, v16.2s, v17.2s",
+            // source code: str	s16, [x0, 16]
+            out(s16) state[4],
+
+            "ret", // TODO is this right
+
+            ".align 4", // TODO ummm alignment...
+            ".K0:", // TODO are labels just the same in inline asm in rust?
+            ".word	0x5A827999"
+            ".word	0x5A827999",
+            ".word	0x5A827999",
+            ".word	0x5A827999",
+            ".K1:",
+            ".word	0x6ED9EBA1",
+            ".word	0x6ED9EBA1",
+            ".word	0x6ED9EBA1",
+            ".word	0x6ED9EBA1",
+            ".K2:",
+            ".word	0x8F1BBCDC",
+            ".word	0x8F1BBCDC",
+            ".word	0x8F1BBCDC",
+            ".word	0x8F1BBCDC",
+            ".K3:",
+            ".word	0xCA62C1D6",
+            ".word	0xCA62C1D6",
+            ".word	0xCA62C1D6",
+            ".word	0xCA62C1D6",
 
         );
     };
