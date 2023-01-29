@@ -189,10 +189,16 @@ jobs:
       - run: cargo test
 
   # TODO: merge with test on MSRV bump to 1.59 or higher
+  # TODO: do i need to think about no-std platforms here?
   test-inline-asm:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        target:
+          - aarch64-unknown-linux-gnu
+          - x86_64-unknown-linux-gnu
+          - x86-unknown-linux-gnu
+          # TODO - aarch64-apple-darwin
         rust:
           - 1.59.0 # MSRV
     steps:
