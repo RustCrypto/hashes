@@ -48,7 +48,7 @@
 //      *      16  xmm1      Caller's value of rbp (only low 64 bits are used)
 //      */
 //
-//     #define ROUND0a(a, b, c, d, e, i)  \
+//     #define round0a(a, b, c, d, e, i)  \
 //         movl    (i*4)(%rdi), %esi;  \
 //         bswapl  %esi;               \
 //         movl    %esi, (i*4)(%rsp);  \
@@ -122,22 +122,22 @@
 //     movq    %rsi, %rdi
 //
 //     /* 80 rounds of hashing */
-//     ROUND0a(eax, ebx, ecx, edx, ebp,  0)
-//     ROUND0a(ebp, eax, ebx, ecx, edx,  1)
-//     ROUND0a(edx, ebp, eax, ebx, ecx,  2)
-//     ROUND0a(ecx, edx, ebp, eax, ebx,  3)
-//     ROUND0a(ebx, ecx, edx, ebp, eax,  4)
-//     ROUND0a(eax, ebx, ecx, edx, ebp,  5)
-//     ROUND0a(ebp, eax, ebx, ecx, edx,  6)
-//     ROUND0a(edx, ebp, eax, ebx, ecx,  7)
-//     ROUND0a(ecx, edx, ebp, eax, ebx,  8)
-//     ROUND0a(ebx, ecx, edx, ebp, eax,  9)
-//     ROUND0a(eax, ebx, ecx, edx, ebp, 10)
-//     ROUND0a(ebp, eax, ebx, ecx, edx, 11)
-//     ROUND0a(edx, ebp, eax, ebx, ecx, 12)
-//     ROUND0a(ecx, edx, ebp, eax, ebx, 13)
-//     ROUND0a(ebx, ecx, edx, ebp, eax, 14)
-//     ROUND0a(eax, ebx, ecx, edx, ebp, 15)
+//     round0a(eax, ebx, ecx, edx, ebp,  0)
+//     round0a(ebp, eax, ebx, ecx, edx,  1)
+//     round0a(edx, ebp, eax, ebx, ecx,  2)
+//     round0a(ecx, edx, ebp, eax, ebx,  3)
+//     round0a(ebx, ecx, edx, ebp, eax,  4)
+//     round0a(eax, ebx, ecx, edx, ebp,  5)
+//     round0a(ebp, eax, ebx, ecx, edx,  6)
+//     round0a(edx, ebp, eax, ebx, ecx,  7)
+//     round0a(ecx, edx, ebp, eax, ebx,  8)
+//     round0a(ebx, ecx, edx, ebp, eax,  9)
+//     round0a(eax, ebx, ecx, edx, ebp, 10)
+//     round0a(ebp, eax, ebx, ecx, edx, 11)
+//     round0a(edx, ebp, eax, ebx, ecx, 12)
+//     round0a(ecx, edx, ebp, eax, ebx, 13)
+//     round0a(ebx, ecx, edx, ebp, eax, 14)
+//     round0a(eax, ebx, ecx, edx, ebp, 15)
 //     ROUND0b(ebp, eax, ebx, ecx, edx, 16)
 //     ROUND0b(edx, ebp, eax, ebx, ecx, 17)
 //     ROUND0b(ecx, edx, ebp, eax, ebx, 18)

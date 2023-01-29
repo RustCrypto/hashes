@@ -51,8 +51,9 @@ use asm_block::asm_block;
 //      *       4  [esp+72]  Caller's value of edi
 //      *       4  [esp+76]  Caller's value of ebp
 //      */
-//
-//     #define ROUND0a(a, b, c, d, e, i)  \
+
+
+//     #define round0a(a, b, c, d, e, i)  \
 //         movl    (i*4)(%edi), %esi;  \
 //         bswapl  %esi;               \
 //         movl    %esi, (i*4)(%esp);  \
@@ -62,7 +63,25 @@ use asm_block::asm_block;
 //         andl    %b, %esi;           \
 //         xorl    %d, %esi;           \
 //         ROUNDTAIL(a, b, e, i, 0x5A827999)
-//
+
+macro_rules! round0a {
+    ($a:tt, $b:tt, $c:tt, $d:tt, $e:tt, $i:tt) => {
+        concat! {
+            asm_block! {
+                movl    ($i*4)(%edi), %esi;
+                bswapl  %esi;
+                movl    %esi, ($i*4)(%esp);
+                addl    %esi, $e;
+                movl    $c, %esi;
+                xorl    $d, %esi;
+                andl    $b, %esi;
+                xorl    $d, %esi;
+                ROUNDTAIL!($a, $b, $e, $i, 0x5A827999);
+            }
+        }
+    };
+}
+
 //     #define SCHEDULE(i, e)  \
 //         movl  (((i- 3)&0xF)*4)(%esp), %esi;  \
 //         xorl  (((i- 8)&0xF)*4)(%esp), %esi;  \
@@ -71,7 +90,23 @@ use asm_block::asm_block;
 //         roll  $1, %esi;                      \
 //         addl  %esi, %e;                      \
 //         movl  %esi, ((i&0xF)*4)(%esp);
-//
+
+macro_rules! schedule {
+    ($i:tt, $e:tt) => {
+        concat!{
+            asm_block! {
+                movl  ((($i- 3)&0xF)*4)(%esp), %esi;
+                xorl  ((($i- 8)&0xF)*4)(%esp), %esi;
+                xorl  ((($i-14)&0xF)*4)(%esp), %esi;
+                xorl  ((($i-16)&0xF)*4)(%esp), %esi;
+                roll  $1, %esi;
+                addl  %esi, $e;
+                movl  %esi, (($i&0xF)*4)(%esp);
+            }
+        }
+    };
+}
+
 //     #define ROUND0b(a, b, c, d, e, i)  \
 //         SCHEDULE(i, e)   \
 //         movl  %c, %esi;  \
@@ -79,14 +114,43 @@ use asm_block::asm_block;
 //         andl  %b, %esi;  \
 //         xorl  %d, %esi;  \
 //         ROUNDTAIL(a, b, e, i, 0x5A827999)
-//
+
+macro_rules! round0b {
+    ($a:tt, $b:tt, $c:tt, $d:tt, $e:tt, $i:tt) => {
+        concat! {
+            asm_block! {
+                schedule!($i, $e);
+                movl  $c, %esi;
+                xorl  $d, %esi;
+                andl  $b, %esi;
+                xorl  $d, %esi;
+                roundtail!($a, $b, $e, $i, 0x5A827999);
+            }
+        }
+    };
+}
+
 //     #define ROUND1(a, b, c, d, e, i)  \
 //         SCHEDULE(i, e)   \
 //         movl  %b, %esi;  \
 //         xorl  %c, %esi;  \
 //         xorl  %d, %esi;  \
 //         ROUNDTAIL(a, b, e, i, 0x6ED9EBA1)
-//
+
+macro_rules! round1 {
+    ($a:tt, $b:tt, $c:tt, $d:tt, $e:tt, $i:tt) => {
+        concat! {
+            asm_block! {
+                schedule!($i, $e);
+                movl  $b, %esi;
+                xorl  $c, %esi;
+                xorl  $d, %esi;
+                roundtail!($a, $b, $e, $i, 0x6ED9EBA1);
+            }
+        }
+    };
+}
+
 //     #define ROUND2(a, b, c, d, e, i)  \
 //         SCHEDULE(i, e)     \
 //         movl  %c, %esi;    \
@@ -96,22 +160,69 @@ use asm_block::asm_block;
 //         andl  %d, %edi;    \
 //         orl   %edi, %esi;  \
 //         ROUNDTAIL(a, b, e, i, 0x8F1BBCDC)
-//
+
+macro_rules! round2 {
+    ($a:tt, $b:tt, $c:tt, $d:tt, $e:tt, $i:tt) => {
+        concat! {
+            asm_block! {
+                schedule!($i, $e);
+                movl  $c, %esi;
+                movl  $c, %edi;
+                orl   $d, %esi;
+                andl  $b, %esi;
+                andl  $d, %edi;
+                orl   %edi, %esi;
+                roundtail!($a, $b, $e, $i, 0x8F1BBCDC);
+            }
+        }
+    };
+}
+
 //     #define ROUND3(a, b, c, d, e, i)  \
 //         SCHEDULE(i, e)   \
 //         movl  %b, %esi;  \
 //         xorl  %c, %esi;  \
 //         xorl  %d, %esi;  \
 //         ROUNDTAIL(a, b, e, i, 0xCA62C1D6)
-//
+
+macro_rules! round3 {
+    ($a:tt, $b:tt, $c:tt, $d:tt, $e:tt, $i:tt) => {
+        concat! {
+            asm_block! {
+                schedule!($i, $e);
+                movl  $b, %esi;
+                xorl  $c, %esi;
+                xorl  $d, %esi;
+                roundtail!($a, $b, $e, $i, 0xCA62C1D6);
+            }
+        }
+    };
+}
+
 //     #define ROUNDTAIL(a, b, e, i, k)  \
 //         roll  $30, %b;         \
 //         leal  k(%e,%esi), %e;  \
 //         movl  %a, %esi;        \
 //         roll  $5, %esi;        \
 //         addl  %esi, %e;
-//
-//     /* Save registers */
+
+macro_rules! roundtail {
+    ($a:tt, $b:tt, $e:tt, $i:tt, $k:tt) => {
+        concat! {
+            asm_block! {
+                roll  $30, $b;
+                leal  $k($e,%esi), $e;
+                movl  $a, %esi;
+                roll  $5, %esi;
+                addl  %esi, $e;
+            }
+        }
+    };
+}
+
+macro_rules! asm_sha1 {
+    // states
+    //     /* Save registers */
 //     subl    $80, %esp
 //     movl    %ebx, 64(%esp)
 //     movl    %esi, 68(%esp)
@@ -128,22 +239,22 @@ use asm_block::asm_block;
 //     movl    16(%esi), %ebp  /* e */
 //
 //     /* 80 rounds of hashing */
-//     ROUND0a(eax, ebx, ecx, edx, ebp,  0)
-//     ROUND0a(ebp, eax, ebx, ecx, edx,  1)
-//     ROUND0a(edx, ebp, eax, ebx, ecx,  2)
-//     ROUND0a(ecx, edx, ebp, eax, ebx,  3)
-//     ROUND0a(ebx, ecx, edx, ebp, eax,  4)
-//     ROUND0a(eax, ebx, ecx, edx, ebp,  5)
-//     ROUND0a(ebp, eax, ebx, ecx, edx,  6)
-//     ROUND0a(edx, ebp, eax, ebx, ecx,  7)
-//     ROUND0a(ecx, edx, ebp, eax, ebx,  8)
-//     ROUND0a(ebx, ecx, edx, ebp, eax,  9)
-//     ROUND0a(eax, ebx, ecx, edx, ebp, 10)
-//     ROUND0a(ebp, eax, ebx, ecx, edx, 11)
-//     ROUND0a(edx, ebp, eax, ebx, ecx, 12)
-//     ROUND0a(ecx, edx, ebp, eax, ebx, 13)
-//     ROUND0a(ebx, ecx, edx, ebp, eax, 14)
-//     ROUND0a(eax, ebx, ecx, edx, ebp, 15)
+//     round0a(eax, ebx, ecx, edx, ebp,  0)
+//     round0a(ebp, eax, ebx, ecx, edx,  1)
+//     round0a(edx, ebp, eax, ebx, ecx,  2)
+//     round0a(ecx, edx, ebp, eax, ebx,  3)
+//     round0a(ebx, ecx, edx, ebp, eax,  4)
+//     round0a(eax, ebx, ecx, edx, ebp,  5)
+//     round0a(ebp, eax, ebx, ecx, edx,  6)
+//     round0a(edx, ebp, eax, ebx, ecx,  7)
+//     round0a(ecx, edx, ebp, eax, ebx,  8)
+//     round0a(ebx, ecx, edx, ebp, eax,  9)
+//     round0a(eax, ebx, ecx, edx, ebp, 10)
+//     round0a(ebp, eax, ebx, ecx, edx, 11)
+//     round0a(edx, ebp, eax, ebx, ecx, 12)
+//     round0a(ecx, edx, ebp, eax, ebx, 13)
+//     round0a(ebx, ecx, edx, ebp, eax, 14)
+//     round0a(eax, ebx, ecx, edx, ebp, 15)
 //     ROUND0b(ebp, eax, ebx, ecx, edx, 16)
 //     ROUND0b(edx, ebp, eax, ebx, ecx, 17)
 //     ROUND0b(ecx, edx, ebp, eax, ebx, 18)
@@ -224,3 +335,9 @@ use asm_block::asm_block;
 //     movl    76(%esp), %ebp
 //     addl    $80, %esp
 //     retl
+}
+
+#[cfg(all(feature = "inline_asm", target_arch = "x86"))]
+pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+   unimplemented!("compress() is not implemented for x86");
+}
