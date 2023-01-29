@@ -187,3 +187,20 @@ jobs:
           override: true
       - run: cargo test --no-default-features
       - run: cargo test
+
+  # TODO: merge with test on MSRV bump to 1.59 or higher
+  test-inline-asm:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - 1.59.0 # MSRV
+    steps:
+      - uses: actions/checkout@v3
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - run: cargo test --features inline-asm
