@@ -3,6 +3,7 @@ use super::{
 };
 use arrayref::array_refs;
 use core::fmt;
+#[cfg(feature = "zeroize")]
 use zeroize::ZeroizeOnDrop;
 
 /// A parameter builder that exposes all the non-default BLAKE2 features.
@@ -29,7 +30,8 @@ use zeroize::ZeroizeOnDrop;
 /// // Or use those params to build an incremental State.
 /// let mut state = params.to_state();
 /// ```
-#[derive(Clone, ZeroizeOnDrop)]
+#[derive(Clone)]
+#[cfg_attr(feature = "zeroize", derive(ZeroizeOnDrop))]
 pub struct Params {
     pub(super) hash_length: u8,
     pub(super) key_length: u8,

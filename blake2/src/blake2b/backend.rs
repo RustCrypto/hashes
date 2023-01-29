@@ -9,6 +9,7 @@ mod sse41;
 use super::*;
 use arrayref::array_ref;
 use core::cmp;
+#[cfg(feature = "zeroize")]
 use zeroize::Zeroize;
 
 #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
@@ -139,6 +140,7 @@ impl Implementation {
     }
 }
 
+#[cfg(feature = "zeroize")]
 impl Zeroize for Implementation {
     fn zeroize(&mut self) {
         // Nothing to do.
@@ -188,6 +190,7 @@ pub enum LastNode {
     No,
 }
 
+#[cfg(feature = "zeroize")]
 impl Zeroize for LastNode {
     fn zeroize(&mut self) {
         // Nothing to do.

@@ -18,7 +18,7 @@ crypto-mac = "0.8"
 digest = "0.9"
 opaque-debug = "0.3"
 subtle = { version = ">=2, <2.5", default-features = false }
-zeroize = { version = "1.5.7", features = ["zeroize_derive"] }
+zeroize = { version = "1.5.7", features = ["zeroize_derive"], default-features = false, optional = true }
 
 [dev-dependencies]
 crypto-mac = { version = "0.8", features = ["dev"] }
@@ -40,6 +40,7 @@ blake2s = []
 # performance. This feature disables some inlining, improving the performance
 # of the portable implementation in that specific case.
 uninline_portable = []
+zeroize = ["zeroize/zeroize_derive"]
 
 [package.metadata.docs.rs]
 all-features = true
