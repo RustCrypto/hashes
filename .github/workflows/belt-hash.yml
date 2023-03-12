@@ -59,3 +59,17 @@ jobs:
       - run: cargo test --no-default-features
       - run: cargo test
       - run: cargo test --all-features
+
+  # Build iterate all no_std feature combos
+  build-nostd-features:
+    name: Build features on no_std target (thumbv7em-none-eabi)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: thumbv7em-none-eabi
+      - uses: taiki-e/install-action@cargo-hack
+      # No default features build
+      - run: cargo hack build --target thumbv7em-none-eabi --release --each-feature --exclude-features default,std
