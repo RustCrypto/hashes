@@ -193,7 +193,7 @@ macro_rules! impl_shake {
             fn read_block(&mut self) -> Block<Self> {
                 let mut block = Block::<Self>::default();
                 self.state.as_bytes(&mut block);
-                self.state.apply_f();
+                self.state.permute();
                 block
             }
         }
@@ -219,6 +219,135 @@ macro_rules! impl_shake {
             $pad,
             $alg_name
         );
+
+        #[cfg(feature = "oid")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
+        impl AssociatedOid for $name {
+            const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap($oid);
+        }
+    };
+}
+
+macro_rules! impl_turbo_shake {
+    (
+        $name:ident, $full_name:ident, $reader:ident, $reader_full:ident,
+        $rate:ident, $alg_name:expr $(,)?
+    ) => {
+        #[doc = "Core "]
+        #[doc = $alg_name]
+        #[doc = " hasher state."]
+        #[derive(Clone)]
+        #[allow(non_camel_case_types)]
+        pub struct $name {
+            domain_separation: u8,
+            state: Sha3State,
+        }
+
+        impl $name {
+            /// Creates a new TurboSHAKE instance with the given domain separation.
+            /// Note that the domain separation needs to be a byte with a value in
+            /// the range [0x01, . . . , 0x7F]
+            pub fn new(domain_separation: u8) -> Self {
+                assert!((0x01..=0x7F).contains(&domain_separation));
+                Self {
+                    domain_separation,
+                    state: Sha3State::new(TURBO_SHAKE_ROUND_COUNT),
+                }
+            }
+        }
+
+        impl HashMarker for $name {}
+
+        impl BlockSizeUser for $name {
+            type BlockSize = $rate;
+        }
+
+        impl BufferKindUser for $name {
+            type BufferKind = Eager;
+        }
+
+        impl UpdateCore for $name {
+            #[inline]
+            fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+                for block in blocks {
+                    self.state.absorb_block(block)
+                }
+            }
+        }
+
+        impl ExtendableOutputCore for $name {
+            type ReaderCore = $reader;
+
+            #[inline]
+            fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
+                let pos = buffer.get_pos();
+                let block = buffer.pad_with_zeros();
+                block[pos] = self.domain_separation;
+                let n = block.len();
+                block[n - 1] |= 0x80;
+
+                self.state.absorb_block(block);
+                $reader {
+                    state: self.state.clone(),
+                }
+            }
+        }
+
+        impl Reset for $name {
+            #[inline]
+            fn reset(&mut self) {
+                *self = Self::new(self.domain_separation);
+            }
+        }
+
+        impl AlgorithmName for $name {
+            fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(stringify!($full_name))
+            }
+        }
+
+        impl fmt::Debug for $name {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(concat!(stringify!($name), " { ... }"))
+            }
+        }
+
+        #[doc = "Core "]
+        #[doc = $alg_name]
+        #[doc = " reader state."]
+        #[derive(Clone)]
+        #[allow(non_camel_case_types)]
+        pub struct $reader {
+            state: Sha3State,
+        }
+
+        impl BlockSizeUser for $reader {
+            type BlockSize = $rate;
+        }
+
+        impl XofReaderCore for $reader {
+            #[inline]
+            fn read_block(&mut self) -> Block<Self> {
+                let mut block = Block::<Self>::default();
+                self.state.as_bytes(&mut block);
+                self.state.permute();
+                block
+            }
+        }
+
+        #[doc = $alg_name]
+        #[doc = " hasher state."]
+        pub type $full_name = CoreWrapper<$name>;
+
+        #[doc = $alg_name]
+        #[doc = " reader state."]
+        pub type $reader_full = XofReaderCoreWrapper<$reader>;
+    };
+    (
+        $name:ident, $full_name:ident, $reader:ident, $reader_full:ident,
+        $rate:ident, $alg_name:expr, $oid:literal $(,)?
+    ) => {
+        impl_turbo_shake!($name, $full_name, $reader, $reader_full, $rate, $alg_name);
 
         #[cfg(feature = "oid")]
         #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
@@ -384,7 +513,7 @@ macro_rules! impl_cshake {
             fn read_block(&mut self) -> Block<Self> {
                 let mut block = Block::<Self>::default();
                 self.state.as_bytes(&mut block);
-                self.state.apply_f();
+                self.state.permute();
                 block
             }
         }
