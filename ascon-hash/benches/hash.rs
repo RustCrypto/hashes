@@ -1,5 +1,5 @@
 // Copyright 2022 Sebastian Ramacher
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use ascon_hash::{AsconAHash, AsconHash, Digest};
 use criterion::{

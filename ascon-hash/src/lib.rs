@@ -1,5 +1,5 @@
-// Copyright 2022 Sebastian Ramacher
-// SPDX-License-Identifier: MIT
+// Copyright 2022-2023 Sebastian Ramacher
+// SPDX-License-Identifier: Apache-2.0 OR MIT
 
 //! # Hashing with [Ascon](https://ascon.iaik.tugraz.at/index.html)
 //!
