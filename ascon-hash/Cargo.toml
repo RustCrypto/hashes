@@ -22,12 +22,7 @@ ascon = "0.3"
 [dev-dependencies]
 spectral = { version = "0.6", default-features = false }
 hex = "0.4"
-criterion = "0.4"
-rand = { version = "0.8", default-features = false, features = [
-    "std_rng",
-    "getrandom",
-] }
 
-[[bench]]
-name = "hash"
-harness = false
+[features]
+default = ["std"]
+std = ["digest/std"]

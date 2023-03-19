@@ -1,0 +1,24 @@
+[package]
+name = "benches"
+version = "0.0.0"
+authors = ["RustCrypto Developers"]
+license = "Apache-2.0 OR MIT"
+description = "Criterion benchmarks of the hash crates"
+edition = "2021"
+rust-version = "1.59"
+publish = false
+
+[workspace]
+
+[dependencies]
+ascon-hash = { path = "../ascon-hash" }
+criterion = "0.4"
+rand = { version = "0.8", default-features = false, features = [
+    "std_rng",
+    "getrandom",
+] }
+
+[[bench]]
+name = "ascon-hash"
+path = "src/ascon-hash.rs"
+harness = false
