@@ -26,3 +26,7 @@ hex = "0.4"
 [features]
 default = ["std"]
 std = ["digest/std"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

@@ -1,17 +1,15 @@
 // Copyright 2022-2023 Sebastian Ramacher
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-//! # Hashing with [Ascon](https://ascon.iaik.tugraz.at/index.html)
-//!
-//! This crate provides implementations of the cryptographic hashes, AsconHash
-//! and AsconAHash, which are both based on the Ascon permutation. Additionally,
-//! it also contains implementations of the extendable output functions AsconXOF
-//! and AsconAXOF.
-//!
-//! ## Security Notes
-//!
-//! This crate has received no security audit. Use at your own risk.
-//!
+#![no_std]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![doc = include_str!("../README.md")]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
+)]
+#![warn(missing_docs)]
+
 //! ## Usage (Hashing)
 //!
 //! ```
@@ -35,9 +33,6 @@
 //! reader.read(&mut dst);
 //! assert_eq!(&dst, b"\xc2\x19\x72\xfd\xe9");
 //! ```
-
-#![no_std]
-#![warn(missing_docs)]
 
 use core::marker::PhantomData;
 
