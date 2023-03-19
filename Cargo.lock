@@ -3,22 +3,6 @@
 version = 3
 
 [[package]]
-name = "ascon"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fe9a0cff241855e9166670d259192aacf1e9a81b865dc9905afbbab31a9d2c1"
-
-[[package]]
-name = "ascon-hash"
-version = "0.1.2-pre"
-dependencies = [
- "ascon",
- "digest",
- "hex",
- "spectral",
-]
-
-[[package]]
 name = "blake2"
 version = "0.10.6"
 dependencies = [
@@ -125,12 +109,6 @@ dependencies = [
  "digest",
  "hex-literal",
 ]
-
-[[package]]
-name = "hex"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "hex-literal"
@@ -286,12 +264,6 @@ dependencies = [
  "digest",
  "hex-literal",
 ]
-
-[[package]]
-name = "spectral"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 
 [[package]]
 name = "streebog"
