@@ -1,6 +1,6 @@
 [package]
 name = "ascon-hash"
-version = "0.2.0-pre"
+version = "0.2.0"
 description = "Implementation of the Ascon and AsconA hashes and XOFs"
 authors = [
     "Sebastian Ramacher <sebastian.ramacher@ait.ac.at>",
