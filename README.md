@@ -13,6 +13,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 
 | Algorithm | Crate | Crates.io | Documentation | MSRV | [Security] |
 |-----------|-------|:---------:|:-------------:|:----:|:----------:|
+| [Ascon] hash | [`ascon-hash`] | [![crates.io](https://img.shields.io/crates/v/ascon-hash.svg)](https://crates.io/crates/ascon-hash) | [![Documentation](https://docs.rs/ascon-hash/badge.svg)](https://docs.rs/ascon-hash) | ![MSRV 1.56][msrv-1.56] | :green_heart: |
 | [BelT] hash | [`belt-hash`] | [![crates.io](https://img.shields.io/crates/v/belt-hash.svg)](https://crates.io/crates/belt-hash) | [![Documentation](https://docs.rs/belt-hash/badge.svg)](https://docs.rs/belt-hash) | ![MSRV 1.57][msrv-1.57] | :green_heart: |
 | [BLAKE2] | [`blake2`] | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [FSB] | [`fsb`] | [![crates.io](https://img.shields.io/crates/v/fsb.svg)](https://crates.io/crates/fsb) | [![Documentation](https://docs.rs/fsb/badge.svg)](https://docs.rs/fsb) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
@@ -231,6 +232,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [deps-image]: https://deps.rs/repo/github/RustCrypto/hashes/status.svg
 [deps-link]: https://deps.rs/repo/github/RustCrypto/hashes
 [msrv-1.41]: https://img.shields.io/badge/rustc-1.41.0+-blue.svg
+[msrv-1.56]: https://img.shields.io/badge/rustc-1.56.0+-blue.svg
 [msrv-1.57]: https://img.shields.io/badge/rustc-1.57.0+-blue.svg
 
 [//]: # (crates)
@@ -273,6 +275,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 [//]: # (algorithms)
 
+[Ascon]: https://ascon.iaik.tugraz.at
 [BelT]: https://ru.wikipedia.org/wiki/BelT
 [BLAKE2]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
 [FSB]: https://en.wikipedia.org/wiki/Fast_syndrome-based_hash
