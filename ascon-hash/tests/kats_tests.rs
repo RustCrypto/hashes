@@ -7,7 +7,7 @@ use std::include_str;
 use spectral::prelude::{asserting, OrderedAssertions};
 
 use ascon_hash::{
-    AsconAHash, AsconAXOF, AsconHash, AsconXOF, Digest, ExtendableOutput, Reset, XofReader,
+    AsconAHash, AsconAXof, AsconHash, AsconXof, Digest, ExtendableOutput, Reset, XofReader,
 };
 
 #[derive(Debug)]
@@ -110,7 +110,7 @@ fn test_vectors_asconhasha() {
 fn test_vectors_asconxof() {
     let tvs = parse_tvs(include_str!("data/asconxof.txt"));
     for tv in tvs {
-        run_tv_xof::<AsconXOF>(tv);
+        run_tv_xof::<AsconXof>(tv);
     }
 }
 
@@ -118,6 +118,6 @@ fn test_vectors_asconxof() {
 fn test_vectors_asconaxof() {
     let tvs = parse_tvs(include_str!("data/asconxofa.txt"));
     for tv in tvs {
-        run_tv_xof::<AsconAXOF>(tv);
+        run_tv_xof::<AsconAXof>(tv);
     }
 }
