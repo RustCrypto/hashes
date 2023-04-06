@@ -16,7 +16,7 @@ digest = "0.10.3"
 
 [dev-dependencies]
 digest = { version = "0.10.3", features = ["dev"] }
-hex-literal = "0.2.2"
+hex-literal = "0.4.1"
 
 [features]
 default = ["std"]

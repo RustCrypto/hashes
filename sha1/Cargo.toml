@@ -21,7 +21,7 @@ sha1-asm = { version = "0.5", optional = true }
 
 [dev-dependencies]
 digest = { version = "0.10.4", features = ["dev"] }
-hex-literal = "0.2.2"
+hex-literal = "0.4.1"
 
 [features]
 default = ["std"]
