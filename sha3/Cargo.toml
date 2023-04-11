@@ -1,7 +1,11 @@
 [package]
 name = "sha3"
-version = "0.10.6"
-description = "SHA-3 (Keccak) hash function"
+version = "0.10.7"
+description = """
+Pure Rust implementation of SHA-3, a family of Keccak-based hash functions
+including the SHAKE family of eXtendable-Output Functions (XOFs), as well as
+the accelerated variant TurboSHAKE
+"""
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"

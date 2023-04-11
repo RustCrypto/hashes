@@ -11,6 +11,8 @@
 //! * `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512` (NIST submission
 //!    without padding changes)
 //!
+//! Additionally supports `TurboSHAKE`.
+//!
 //! # Examples
 //!
 //! Output size of SHA3-256 is fixed, so its functionality is usually
