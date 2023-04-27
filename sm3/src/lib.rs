@@ -1,4 +1,4 @@
-//! An implementation of the [SM3] cryptographic hash function defined
+//! An implementation of the SM3 cryptographic hash function defined
 //! in OSCCA GM/T 0004-2012.
 //!
 //! # Usage
