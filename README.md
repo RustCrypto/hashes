@@ -237,6 +237,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 [//]: # (crates)
 
+[`ascon-hash`]: ./ascon-hash
 [`belt-hash`]: ./belt-hash
 [`blake2`]: ./blake2
 [`fsb`]: ./fsb
