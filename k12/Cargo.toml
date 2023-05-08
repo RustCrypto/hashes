@@ -13,7 +13,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = { version = "0.10.3", default-features = false, features = ["core-api"] }
-sha3 = "0.10.8"
+sha3 = { path = "../sha3" }
 
 [dev-dependencies]
 digest = { version = "0.10.3", features = ["alloc", "dev"] }
