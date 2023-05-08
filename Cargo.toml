@@ -8,6 +8,7 @@ members = [
     "gost94",
     "groestl",
     "k12",
+    "m14",
     "md2",
     "md4",
     "md5",

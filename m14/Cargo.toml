@@ -1,0 +1,24 @@
+[package]
+name = "m14"
+version = "0.0.1"
+description = "Rust implementation of the MarsupilamiFourteen hash function"
+license = "Apache-2.0 OR MIT"
+readme = "README.md"
+edition = "2018"
+documentation = "https://docs.rs/m14"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+digest = { version = "0.10.3", default-features = false, features = ["core-api"] }
+k12 = { path = "../k12" }
+sha3 = { path = "../sha3" }
+
+[dev-dependencies]
+digest = { version = "0.10.3", features = ["alloc", "dev"] }
+hex-literal = "0.2.2"
+
+[features]
+default = ["std"]
+std = ["digest/std"]
