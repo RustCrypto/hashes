@@ -240,18 +240,34 @@ macro_rules! impl_turbo_shake {
         #[allow(non_camel_case_types)]
         pub struct $name {
             domain_separation: u8,
+            round_count: usize,
             state: Sha3State,
         }
 
         impl $name {
             /// Creates a new TurboSHAKE instance with the given domain separation.
             /// Note that the domain separation needs to be a byte with a value in
-            /// the range [0x01, . . . , 0x7F]
+            /// the range [0x01, . . . , 0x7F].
             pub fn new(domain_separation: u8) -> Self {
                 assert!((0x01..=0x7F).contains(&domain_separation));
                 Self {
                     domain_separation,
+                    round_count: TURBO_SHAKE_ROUND_COUNT,
                     state: Sha3State::new(TURBO_SHAKE_ROUND_COUNT),
+                }
+            }
+
+            /// Creates a new TurboSHAKE instance with the given domain separation
+            /// and round_count.
+            /// This is a low-level "hazmat" API.
+            /// Note that the domain separation needs to be a byte with a value in
+            /// the range [0x01, . . . , 0x7F].
+            pub fn new_with_round_count(domain_separation: u8, round_count: usize) -> Self {
+                assert!((0x01..=0x7F).contains(&domain_separation));
+                Self {
+                    domain_separation,
+                    round_count,
+                    state: Sha3State::new(round_count),
                 }
             }
         }
@@ -296,7 +312,7 @@ macro_rules! impl_turbo_shake {
         impl Reset for $name {
             #[inline]
             fn reset(&mut self) {
-                *self = Self::new(self.domain_separation);
+                *self = Self::new_with_round_count(self.domain_separation, self.round_count);
             }
         }
 
