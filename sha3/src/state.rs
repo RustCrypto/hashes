@@ -1,4 +1,6 @@
 use core::convert::TryInto;
+#[cfg(feature = "zeroize")]
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 const PLEN: usize = 25;
 const DEFAULT_ROUND_COUNT: usize = 24;
@@ -17,6 +19,16 @@ impl Default for Sha3State {
         }
     }
 }
+
+#[cfg(feature = "zeroize")]
+impl Drop for Sha3State {
+    fn drop(&mut self) {
+        self.state.zeroize();
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for Sha3State {}
 
 impl Sha3State {
     pub(crate) fn new(round_count: usize) -> Self {
