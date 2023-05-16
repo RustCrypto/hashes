@@ -1,4 +1,4 @@
-//! An implementation of the SM3 cryptographic hash function defined
+//! An implementation of the [SM3] cryptographic hash function defined
 //! in OSCCA GM/T 0004-2012.
 //!
 //! # Usage
@@ -23,10 +23,10 @@
 //! ")[..]);
 //! ```
 //!
-//! Also see [RustCrypto/hashes][2] readme.
+//! Also see [RustCrypto/hashes] readme.
 //!
-//! [1]: https://zh.wikipedia.org/zh-hans/SM3
-//! [2]: https://github.com/RustCrypto/hashes
+//! [SM3]: https://en.wikipedia.org/wiki/SM3_(hash_function)
+//! [RustCrypto/hashes]: https://github.com/RustCrypto/hashes
 
 #![no_std]
 #![doc(
