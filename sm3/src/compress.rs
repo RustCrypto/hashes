@@ -19,7 +19,8 @@ fn gg1(x: u32, y: u32, z: u32) -> u32 {
 
 #[inline(always)]
 fn gg2(x: u32, y: u32, z: u32) -> u32 {
-    (x & y) | (!x & z)
+    // This line is equivalent to `(x & y) | (!x & z)`, but executes faster
+    (y ^ z) & x ^ z
 }
 
 #[inline(always)]
