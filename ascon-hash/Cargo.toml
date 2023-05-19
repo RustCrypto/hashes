@@ -19,7 +19,7 @@ rust-version = "1.56"
 
 [dependencies]
 digest = { version = "0.10", default-features = false, features = ["core-api"] }
-ascon = "0.3"
+ascon = { version = "0.4", default-features = false }
 
 [dev-dependencies]
 spectral = { version = "0.6", default-features = false }
@@ -28,6 +28,7 @@ hex = "0.4"
 [features]
 default = ["std"]
 std = ["digest/std"]
+zeroize = ["ascon/zeroize"] # TODO: enable zeroize in the future for block-buffer v0.11
 
 [package.metadata.docs.rs]
 all-features = true
