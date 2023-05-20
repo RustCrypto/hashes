@@ -18,6 +18,7 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 digest = "0.10.4"
 keccak = "0.1.4"
+zeroize = { version = "1.6.0", default-features = false, optional=true } # WARNING: Bumps MSRV to 1.56
 
 [dev-dependencies]
 digest = { version = "0.10.4", features = ["dev"] }
