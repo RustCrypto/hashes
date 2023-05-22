@@ -16,12 +16,12 @@ keywords = ["crypto", "sha3", "keccak", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10.4"
+digest = "0.10.7"
 keccak = "0.1.4"
 zeroize = { version = "1.6.0", default-features = false, optional=true } # WARNING: Bumps MSRV to 1.56
 
 [dev-dependencies]
-digest = { version = "0.10.4", features = ["dev"] }
+digest = { version = "0.10.7", features = ["dev"] }
 hex-literal = "0.2.2"
 
 [features]
