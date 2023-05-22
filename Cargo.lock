@@ -64,9 +64,9 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.10.6"
+version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8168378f4e5023e7218c89c891c0fd8ecdb5e5e4f18cb78f38cf245dd021e76f"
+checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -248,6 +248,7 @@ dependencies = [
  "digest",
  "hex-literal",
  "keccak",
+ "zeroize",
 ]
 
 [[package]]
@@ -327,3 +328,9 @@ checksum = "4b0930846e800a97c78fd09a494b25d1f0780be9face03b7a05151e3104a8284"
 dependencies = [
  "cc",
 ]
+
+[[package]]
+name = "zeroize"
+version = "1.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a0956f1ba7c7909bfb66c2e9e4124ab6f6482560f6628b5aaeba39207c9aad9"
