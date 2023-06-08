@@ -14,18 +14,18 @@
 //! accessed via the `Digest` trait:
 //!
 //! ```
-//! use digest::{FixedOutput, generic_array::typenum::U32, Update};
+//! use digest::generic_array::typenum::U32;
 //! use hex_literal::hex;
 //! use skein::{Digest, Skein256};
 //!
 //! // create a Skein-256 object
-//! let mut hasher = Skein256::<U32>::default();
+//! let mut hasher = Skein256::<U32>::new();
 //!
 //! // write input message
 //! hasher.update(b"hello");
 //!
 //! // read hash digest
-//! let result = hasher.finalize_fixed();
+//! let result = hasher.finalize();
 //!
 //! assert_eq!(result[..], hex!("
 //!     8b467f67dd324c9c9fe9aff562ee0e3746d88abcb2879e4e1b4fbd06a5061f89
