@@ -253,6 +253,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`sha2`]: ./sha2
 [`sha3`]: ./sha3
 [`shabal`]: ./shabal
+[`skein`]: ./skein
 [`sm3`]: ./sm3
 [`streebog`]: ./streebog
 [`tiger`]: ./tiger
@@ -292,6 +293,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [SHA-2]: https://en.wikipedia.org/wiki/SHA-2
 [SHA-3]: https://en.wikipedia.org/wiki/SHA-3
 [SHABAL]: https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
+[Skein]: https://schneier.com/academic/skein
 [SM3]: https://en.wikipedia.org/wiki/SM3_(hash_function)
 [Streebog]: https://en.wikipedia.org/wiki/Streebog
 [Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(cryptography)
