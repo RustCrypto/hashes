@@ -24,6 +24,7 @@ members = [
 exclude = [
     "ascon-hash",
     "belt-hash",
+    "skein",
 ]
 
 [profile.dev]
