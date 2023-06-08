@@ -11,10 +11,9 @@ edition = "2021"
 rust-version = "1.57"
 
 [dependencies]
-block-buffer = "0.10"
-cipher = "0.4"
 digest = "0.10"
 threefish = "0.5"
 
 [dev-dependencies]
 digest = { version = "0.10", features = ["dev"] }
+hex-literal = "0.4"

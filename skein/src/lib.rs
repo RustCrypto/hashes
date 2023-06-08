@@ -1,13 +1,57 @@
-#![no_std]
+//! Implementation of Skein cryptographic hash algorithms.
+//! The Skein hash function was one of the submissions to SHA-3,
+//! the cryptographic hash algorithm competition organized by the NIST.
+//!
+//! There are 3 standard versions of the Skein hash function:
+//!
+//! * `Skein-256`
+//! * `Skein-512`
+//! * `Skein-1024`
+//!
+//! # Examples
+//!
+//! Output size of Skein-256 is fixed, so its functionality is usually
+//! accessed via the `Digest` trait:
+//!
+//! ```
+//! use digest::{FixedOutput, generic_array::typenum::U32, Update};
+//! use hex_literal::hex;
+//! use skein::{Digest, Skein256};
+//!
+//! // create a Skein-256 object
+//! let mut hasher = Skein256::<U32>::default();
+//!
+//! // write input message
+//! hasher.update(b"hello");
+//!
+//! // read hash digest
+//! let result = hasher.finalize_fixed();
+//!
+//! assert_eq!(result[..], hex!("
+//!     8b467f67dd324c9c9fe9aff562ee0e3746d88abcb2879e4e1b4fbd06a5061f89
+//! ")[..]);
+//! ```
+//! Also see [RustCrypto/hashes][2] readme.
+//!
+//! [1]: https://schneier.com/academic/skein
+//! [2]: https://github.com/RustCrypto/hashes
 
-use block_buffer::{BlockBuffer, Lazy};
-use cipher::BlockEncrypt;
-use digest::generic_array::{
-    typenum::{NonZero, PartialDiv, Unsigned, U128, U32, U64, U8},
-    ArrayLength,
+#![no_std]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
+)]
+#![warn(missing_docs, rust_2018_idioms)]
+
+pub use digest::{self, Digest};
+use digest::{
+    block_buffer::{BlockBuffer, Lazy},
+    generic_array::{
+        typenum::{NonZero, PartialDiv, Unsigned, U128, U32, U64, U8},
+        ArrayLength, GenericArray,
+    },
 };
-pub use digest::{generic_array::GenericArray, Digest};
-use threefish::{Threefish1024, Threefish256, Threefish512};
+use threefish::{cipher::BlockEncrypt, Threefish1024, Threefish256, Threefish512};
 
 /// N word buffer.
 #[derive(Copy, Clone)]
@@ -98,7 +142,7 @@ impl<X> State<X> {
 }
 
 impl<X> core::fmt::Debug for State<X> {
-    fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         f.debug_struct("State<X>")
             .field("t", &"(unknown)")
             .field("x", &"(unknown)")
@@ -119,6 +163,7 @@ const CFG_STR_LEN: usize = 4 * 8;
 
 macro_rules! define_hasher {
     ($name:ident, $threefish:ident, $state_bytes:ty, $state_bits:expr) => {
+        /// Skein hash function.
         #[derive(Clone)]
         pub struct $name<N: Unsigned + ArrayLength<u8> + NonZero + Default> {
             state: State<Block<$state_bytes>>,
@@ -130,7 +175,7 @@ macro_rules! define_hasher {
         where
             N: Unsigned + ArrayLength<u8> + NonZero + Default,
         {
-            fn fmt(&self, f: &mut core::fmt::Formatter) -> Result<(), core::fmt::Error> {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
                 f.debug_struct("Skein").field("state", &self.state).finish()
             }
         }
