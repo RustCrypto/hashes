@@ -1,39 +1,38 @@
-//! Implementation of Skein cryptographic hash algorithms.
-//! The Skein hash function was one of the submissions to SHA-3,
-//! the cryptographic hash algorithm competition organized by the NIST.
+//! Implementation of the [Skein] family of cryptographic hash algorithms.
 //!
 //! There are 3 standard versions of the Skein hash function:
 //!
-//! * `Skein-256`
-//! * `Skein-512`
-//! * `Skein-1024`
+//! * [`Skein256`]
+//! * [`Skein512`]
+//! * [`Skein1024`]
+//!
+//! Output size of the Skein hash functions is arbitrary, so it has to be
+//! fixed using additional type parameter
 //!
 //! # Examples
-//!
-//! Output size of Skein-256 is fixed, so its functionality is usually
-//! accessed via the `Digest` trait:
+//! Hash functionality is usually accessed via the [`Digest`] trait:
 //!
 //! ```
 //! use hex_literal::hex;
-//! use skein::{Digest, Skein256, consts::U32};
+//! use skein::{Digest, Skein512, consts::U32};
 //!
-//! // create a Skein-256 object
-//! let mut hasher = Skein256::<U32>::new();
+//! // Create a Skein-512-256 hasher object
+//! let mut hasher = Skein512::<U32>::new();
 //!
-//! // write input message
-//! hasher.update(b"hello");
+//! // Write input message
+//! hasher.update(b"The quick brown fox ");
+//! hasher.update(b"jumps over the lazy dog");
 //!
-//! // read hash digest
+//! // Read hash digest
 //! let result = hasher.finalize();
 //!
-//! assert_eq!(result[..], hex!(
-//!     "8b467f67dd324c9c9fe9aff562ee0e3746d88abcb2879e4e1b4fbd06a5061f89"
-//! )[..]);
+//! let expected = hex!("b3250457e05d3060b1a4bbc1428bc75a3f525ca389aeab96cfa34638d96e492a");
+//! assert_eq!(result[..], expected[..]);
 //! ```
-//! Also see [RustCrypto/hashes][2] readme.
+//! Also see [RustCrypto/hashes] readme.
 //!
-//! [1]: https://schneier.com/academic/skein
-//! [2]: https://github.com/RustCrypto/hashes
+//! [Skein]: https://schneier.com/academic/skein
+//! [RustCrypto/hashes]: https://github.com/RustCrypto/hashes
 
 #![no_std]
 #![doc(
@@ -74,7 +73,8 @@ macro_rules! define_hasher {
         $name:ident, $full_name:ident, $threefish:ident,
         $state_bytes:ty, $alg_name:expr
     ) => {
-        /// Skein hash function.
+        #[doc = $alg_name]
+        #[doc = " core hasher state"]
         #[derive(Clone)]
         pub struct $name<N: ArrayLength<u8>> {
             t: [u64; 2],
@@ -205,7 +205,7 @@ macro_rules! define_hasher {
         }
 
         #[doc = $alg_name]
-        #[doc = " hasher state."]
+        #[doc = " hasher state"]
         pub type $full_name<OutputSize = $state_bytes> = CoreWrapper<$name<OutputSize>>;
     };
 }
