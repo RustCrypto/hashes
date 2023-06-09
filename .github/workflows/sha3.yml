@@ -43,12 +43,8 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
-      - run: cargo build --no-default-features --target ${{ matrix.target }}
-
-  minimal-versions:
-    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
-    with:
-        working-directory: ${{ github.workflow }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std,asm
 
   test:
     needs: set-msrv
@@ -64,17 +60,21 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-      - run: cargo check --all-features
-      - run: cargo test --no-default-features
-      - run: cargo test
-      - run: cargo test --all-features
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack test --feature-powerset
+
+  minimal-versions:
+    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+    with:
+        working-directory: ${{ github.workflow }}
 
   # Cross-compiled tests
   cross:
+    needs: set-msrv
     strategy:
       matrix:
         rust:
-          - 1.51.0 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - aarch64-unknown-linux-gnu
