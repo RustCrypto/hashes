@@ -60,19 +60,28 @@ use digest::{
 use threefish::{cipher::BlockEncrypt, Threefish1024, Threefish256, Threefish512};
 
 #[derive(Clone)]
-struct State<X> {
+struct State<N>
+where
+    N: ArrayLength<u8>,
+{
     t: (u64, u64),
-    x: X,
+    x: GenericArray<u8, N>,
 }
 
-impl<X> State<X> {
-    fn new(t1: u64, x: X) -> Self {
+impl<N> State<N>
+where
+    N: ArrayLength<u8>,
+{
+    fn new(t1: u64, x: GenericArray<u8, N>) -> Self {
         let t = (0, t1);
         State { t, x }
     }
 }
 
-impl<X> core::fmt::Debug for State<X> {
+impl<N> core::fmt::Debug for State<N>
+where
+    N: ArrayLength<u8>,
+{
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         f.debug_struct("State<X>")
             .field("t", &"(unknown)")
@@ -100,7 +109,7 @@ macro_rules! define_hasher {
         where
             N: ArrayLength<u8>,
         {
-            state: State<Block<Self>>,
+            state: State<<Self as BlockSizeUser>::BlockSize>,
             _output: core::marker::PhantomData<N>,
         }
 
@@ -170,7 +179,7 @@ macro_rules! define_hasher {
             N: ArrayLength<u8>,
         {
             fn process_block(
-                state: &mut State<Block<Self>>,
+                state: &mut State<<Self as BlockSizeUser>::BlockSize>,
                 block: &GenericArray<u8, $state_bytes>,
                 byte_count_add: usize,
             ) {
