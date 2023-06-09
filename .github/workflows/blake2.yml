@@ -109,4 +109,4 @@ jobs:
           targets: thumbv7em-none-eabi
       - uses: taiki-e/install-action@cargo-hack
       # No default features build
-      - run: cargo hack build --target thumbv7em-none-eabi --release --each-feature --exclude-features default,std
+      - run: cargo hack build --target thumbv7em-none-eabi --release --each-feature --exclude-features default,std,simd_asm,simd_opt,simd
