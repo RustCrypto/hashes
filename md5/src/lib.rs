@@ -33,12 +33,31 @@
 #[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))]
 extern crate md5_asm as compress;
 
-#[cfg(not(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64"))))]
+#[cfg(all(
+    feature = "inline-asm",
+    any(target_arch = "x86", target_arch = "x86_64")
+))]
+mod asm;
+
+#[cfg(not(all(
+    any(feature = "asm", feature = "inline-asm"),
+    any(target_arch = "x86", target_arch = "x86_64")
+)))]
 mod compress;
 
 pub use digest::{self, Digest};
 
+#[cfg(not(all(
+    feature = "inline-asm",
+    any(target_arch = "x86", target_arch = "x86_64")
+)))]
 use compress::compress;
+
+#[cfg(all(
+    feature = "inline-asm",
+    any(target_arch = "x86", target_arch = "x86_64")
+))]
+use asm::compress;
 
 use core::{fmt, slice::from_ref};
 #[cfg(feature = "oid")]

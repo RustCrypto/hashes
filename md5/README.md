@@ -28,6 +28,8 @@ including HMAC-MD5.
 
 Rust **1.41** or higher.
 
+Enabling feature flag `inline-asm` requires Rust **1.59** or higher.
+
 Minimum supported Rust version can be changed in the future, but it will be
 done with a minor version bump.
 
