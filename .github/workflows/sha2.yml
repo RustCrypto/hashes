@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - ${{needs.set-msrv.outputs.msrv}}
+          - 1.57
           - stable
         target:
           - thumbv7em-none-eabi
@@ -44,12 +44,8 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
-      - run: cargo build --no-default-features --target ${{ matrix.target }}
-
-  minimal-versions:
-    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
-    with:
-        working-directory: ${{ github.workflow }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std,asm-aarch64,asm
 
   # Linux tests
   linux:
@@ -70,7 +66,6 @@ jobs:
             rust: ${{needs.set-msrv.outputs.msrv}}
           - target: x86_64-unknown-linux-gnu
             rust: stable
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -79,11 +74,9 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
       - run: ${{ matrix.deps }}
-      - run: cargo test --target ${{ matrix.target }} --no-default-features
-      - run: cargo test --target ${{ matrix.target }}
-      - run: cargo test --target ${{ matrix.target }} --features asm
-      - run: cargo test --target ${{ matrix.target }} --all-features
+      - run: cargo hack test --feature-powerset --exclude-features asm-aarch64
 
   # macOS tests
   macos:
@@ -93,7 +86,6 @@ jobs:
         rust:
           - ${{needs.set-msrv.outputs.msrv}}
           - stable
-
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -102,23 +94,22 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           targets: x86_64-apple-darwin
+      - uses: RustCrypto/actions/cargo-hack-install@master
       - run: cargo test --no-default-features
       - run: cargo test
       - run: cargo test --features asm
+      - run: cargo test --all-features
 
   # Windows tests
   windows:
     needs: set-msrv
     strategy:
       matrix:
-        include:
-          # 64-bit Windows (GNU)
-          # TODO(tarcieri): try re-enabling this when we bump MSRV
-          #- target: x86_64-pc-windows-gnu
-          #  toolchain: 1.41.0 # MSRV
-          - target: x86_64-pc-windows-gnu
-            rust: stable
-
+        rust:
+          - ${{needs.set-msrv.outputs.msrv}}
+          - stable
+        target:
+          - x86_64-pc-windows-gnu
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -132,10 +123,11 @@ jobs:
 
   # Cross-compiled tests
   cross:
+    needs: set-msrv
     strategy:
       matrix:
         rust:
-          - 1.51.0 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - aarch64-unknown-linux-gnu
@@ -146,7 +138,6 @@ jobs:
             - rust: stable
               target: aarch64-unknown-linux-gnu
               features: asm
-
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -160,6 +151,11 @@ jobs:
           package: ${{ github.workflow }}
           target: ${{ matrix.target }}
           features: ${{ matrix.features }}
+
+  minimal-versions:
+    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+    with:
+        working-directory: ${{ github.workflow }}
 
   # TODO: remove on MSRV bump to 1.57 or higher
   test-msrv:
