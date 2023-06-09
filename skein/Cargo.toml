@@ -1,14 +1,16 @@
 [package]
 name = "skein"
 version = "0.1.0"
+description = "Skein hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-description = "Skein hash functions"
+edition = "2021"
+rust-version = "1.57"
+readme = "README.md"
+documentation = "https://docs.rs/skein"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "skein", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-edition = "2021"
-rust-version = "1.57"
 
 [dependencies]
 digest = "0.10"
