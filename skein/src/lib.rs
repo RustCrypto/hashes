@@ -76,13 +76,13 @@ macro_rules! define_hasher {
         #[doc = $alg_name]
         #[doc = " core hasher state"]
         #[derive(Clone)]
-        pub struct $name<N: ArrayLength<u8>> {
+        pub struct $name<N: ArrayLength<u8> + 'static> {
             t: [u64; 2],
             x: [u64; <$state_bytes>::USIZE / 8],
             _pd: PhantomData<N>,
         }
 
-        impl<N: ArrayLength<u8>> $name<N> {
+        impl<N: ArrayLength<u8> + 'static> $name<N> {
             fn blank_state(t1: u64, x: [u64; <$state_bytes>::USIZE / 8]) -> Self {
                 Self {
                     t: [0, t1],
@@ -116,21 +116,21 @@ macro_rules! define_hasher {
             }
         }
 
-        impl<N> HashMarker for $name<N> where N: ArrayLength<u8> {}
+        impl<N> HashMarker for $name<N> where N: ArrayLength<u8> + 'static {}
 
-        impl<N: ArrayLength<u8>> BlockSizeUser for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> BlockSizeUser for $name<N> {
             type BlockSize = $state_bytes;
         }
 
-        impl<N: ArrayLength<u8>> BufferKindUser for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> BufferKindUser for $name<N> {
             type BufferKind = Lazy;
         }
 
-        impl<N: ArrayLength<u8>> OutputSizeUser for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> OutputSizeUser for $name<N> {
             type OutputSize = N;
         }
 
-        impl<N: ArrayLength<u8>> UpdateCore for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> UpdateCore for $name<N> {
             #[inline]
             fn update_blocks(&mut self, blocks: &[Block<Self>]) {
                 for block in blocks {
@@ -139,7 +139,7 @@ macro_rules! define_hasher {
             }
         }
 
-        impl<N: ArrayLength<u8>> FixedOutputCore for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> FixedOutputCore for $name<N> {
             #[inline]
             fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
                 self.t[1] |= T1_FLAG_FINAL;
@@ -163,7 +163,7 @@ macro_rules! define_hasher {
             }
         }
 
-        impl<N: ArrayLength<u8>> Default for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> Default for $name<N> {
             fn default() -> Self {
                 // build and process config block
                 let mut state = Self::blank_state(
@@ -185,20 +185,20 @@ macro_rules! define_hasher {
             }
         }
 
-        impl<N: ArrayLength<u8>> Reset for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> Reset for $name<N> {
             #[inline]
             fn reset(&mut self) {
                 *self = Default::default();
             }
         }
 
-        impl<N: ArrayLength<u8>> AlgorithmName for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> AlgorithmName for $name<N> {
             fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str(stringify!($full_name))
             }
         }
 
-        impl<N: ArrayLength<u8>> fmt::Debug for $name<N> {
+        impl<N: ArrayLength<u8> + 'static> fmt::Debug for $name<N> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
                 write!(f, "{}<{}> {{ .. }}", stringify!($name), N::USIZE)
             }
