@@ -15,7 +15,7 @@
 //!
 //! ```
 //! use hex_literal::hex;
-//! use skein::{Digest, Skein256, digest::generic_array::typenum::U32};
+//! use skein::{Digest, Skein256, consts::U32};
 //!
 //! // create a Skein-256 object
 //! let mut hasher = Skein256::<U32>::new();
@@ -26,9 +26,9 @@
 //! // read hash digest
 //! let result = hasher.finalize();
 //!
-//! assert_eq!(result[..], hex!("
-//!     8b467f67dd324c9c9fe9aff562ee0e3746d88abcb2879e4e1b4fbd06a5061f89
-//! ")[..]);
+//! assert_eq!(result[..], hex!(
+//!     "8b467f67dd324c9c9fe9aff562ee0e3746d88abcb2879e4e1b4fbd06a5061f89"
+//! )[..]);
 //! ```
 //! Also see [RustCrypto/hashes][2] readme.
 //!
@@ -41,53 +41,22 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![warn(missing_docs, rust_2018_idioms)]
+#![deny(unsafe_code)]
 
-use core::fmt;
-pub use digest::{self, Digest};
+pub use digest::{self, consts, Digest};
+
+use core::{fmt, marker::PhantomData};
 use digest::{
     block_buffer::Lazy,
+    consts::{U128, U32, U64},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::{
-        typenum::{U128, U32, U64},
-        ArrayLength, GenericArray,
-    },
+    generic_array::{typenum::Unsigned, ArrayLength, GenericArray},
     HashMarker, Output,
 };
-use threefish::{cipher::BlockEncrypt, Threefish1024, Threefish256, Threefish512};
-
-#[derive(Clone)]
-struct State<N>
-where
-    N: ArrayLength<u8>,
-{
-    t: (u64, u64),
-    x: GenericArray<u8, N>,
-}
-
-impl<N> State<N>
-where
-    N: ArrayLength<u8>,
-{
-    fn new(t1: u64, x: GenericArray<u8, N>) -> Self {
-        let t = (0, t1);
-        State { t, x }
-    }
-}
-
-impl<N> core::fmt::Debug for State<N>
-where
-    N: ArrayLength<u8>,
-{
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
-        f.debug_struct("State<X>")
-            .field("t", &"(unknown)")
-            .field("x", &"(unknown)")
-            .finish()
-    }
-}
+use threefish::{Threefish1024, Threefish256, Threefish512};
 
 const VERSION: u64 = 1;
 const ID_STRING_LE: u64 = 0x3341_4853;
@@ -101,167 +70,147 @@ const T1_BLK_TYPE_OUT: u64 = 63 << 56;
 const CFG_STR_LEN: usize = 4 * 8;
 
 macro_rules! define_hasher {
-    ($name:ident, $full_name:ident, $threefish:ident, $state_bytes:ty, $state_bits:expr, $alg_name:expr) => {
+    (
+        $name:ident, $full_name:ident, $threefish:ident,
+        $state_bytes:ty, $alg_name:expr
+    ) => {
         /// Skein hash function.
         #[derive(Clone)]
-        pub struct $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
-            state: State<<Self as BlockSizeUser>::BlockSize>,
-            _output: core::marker::PhantomData<N>,
+        pub struct $name<N: ArrayLength<u8>> {
+            t: [u64; 2],
+            x: [u64; <$state_bytes>::USIZE / 8],
+            _pd: PhantomData<N>,
+        }
+
+        impl<N: ArrayLength<u8>> $name<N> {
+            fn blank_state(t1: u64, x: [u64; <$state_bytes>::USIZE / 8]) -> Self {
+                Self {
+                    t: [0, t1],
+                    x,
+                    _pd: PhantomData,
+                }
+            }
+
+            fn process_block(
+                &mut self,
+                block: &GenericArray<u8, $state_bytes>,
+                byte_count_add: usize,
+            ) {
+                const STATE_WORDS: usize = <$state_bytes>::USIZE / 8;
+
+                self.t[0] += byte_count_add as u64;
+                let cipher = $threefish::new_with_tweak_u64(&self.x.into(), &self.t);
+
+                let mut x = [0u64; STATE_WORDS];
+                for (src, dst) in block.chunks_exact(8).zip(x.iter_mut()) {
+                    *dst = u64::from_le_bytes(src.try_into().unwrap());
+                }
+                let t = x;
+
+                cipher.encrypt_block_u64(&mut x);
+
+                for i in 0..STATE_WORDS {
+                    self.x[i] = t[i] ^ x[i];
+                }
+                self.t[1] &= !T1_FLAG_FIRST;
+            }
         }
 
         impl<N> HashMarker for $name<N> where N: ArrayLength<u8> {}
 
-        impl<N> BlockSizeUser for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
-            type BlockSize = <$threefish as BlockSizeUser>::BlockSize;
+        impl<N: ArrayLength<u8>> BlockSizeUser for $name<N> {
+            type BlockSize = $state_bytes;
         }
 
-        impl<N> BufferKindUser for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
+        impl<N: ArrayLength<u8>> BufferKindUser for $name<N> {
             type BufferKind = Lazy;
         }
 
-        impl<N> OutputSizeUser for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
+        impl<N: ArrayLength<u8>> OutputSizeUser for $name<N> {
             type OutputSize = N;
         }
 
-        impl<N> UpdateCore for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
+        impl<N: ArrayLength<u8>> UpdateCore for $name<N> {
             #[inline]
             fn update_blocks(&mut self, blocks: &[Block<Self>]) {
                 for block in blocks {
-                    Self::process_block(&mut self.state, block, $state_bits / 8)
+                    self.process_block(block, block.len())
                 }
             }
         }
 
-        impl<N> FixedOutputCore for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
+        impl<N: ArrayLength<u8>> FixedOutputCore for $name<N> {
             #[inline]
             fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-                self.state.t.1 |= T1_FLAG_FINAL;
+                self.t[1] |= T1_FLAG_FINAL;
                 let pos = buffer.get_pos();
                 let final_block = buffer.pad_with_zeros();
-                Self::process_block(&mut self.state, final_block, pos);
+                self.process_block(final_block, pos);
 
                 // run Threefish in "counter mode" to generate output
-                for (i, chunk) in out.chunks_mut($state_bits / 8).enumerate() {
-                    let mut ctr = State::new(
-                        T1_FLAG_FIRST | T1_BLK_TYPE_OUT | T1_FLAG_FINAL,
-                        self.state.x,
-                    );
-                    let mut b = GenericArray::<u8, $state_bytes>::default();
-                    b[..8].copy_from_slice(&(i as u64).to_le_bytes());
-                    Self::process_block(&mut ctr, &b, 8);
-                    let n = chunk.len();
-                    chunk.copy_from_slice(&ctr.x[..n]);
+                let flag = T1_FLAG_FIRST | T1_BLK_TYPE_OUT | T1_FLAG_FINAL;
+                let mut block = GenericArray::<u8, $state_bytes>::default();
+                for (i, chunk) in out.chunks_mut(<$state_bytes>::USIZE).enumerate() {
+                    let mut ctr = Self::blank_state(flag, self.x);
+
+                    block[..8].copy_from_slice(&(i as u64).to_le_bytes());
+                    Self::process_block(&mut ctr, &block, 8);
+
+                    for (src, dst) in ctr.x.iter().zip(chunk.chunks_exact_mut(8)) {
+                        dst.copy_from_slice(&src.to_le_bytes());
+                    }
                 }
             }
         }
 
-        impl<N> $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
-            fn process_block(
-                state: &mut State<<Self as BlockSizeUser>::BlockSize>,
-                block: &GenericArray<u8, $state_bytes>,
-                byte_count_add: usize,
-            ) {
-                state.t.0 += byte_count_add as u64;
-                let mut tweak = [0u8; 16];
-                tweak[..8].copy_from_slice(&state.t.0.to_le_bytes());
-                tweak[8..].copy_from_slice(&state.t.1.to_le_bytes());
-                let mut key = [0u8; { $state_bits / 8 }];
-                key[..].copy_from_slice(&state.x[..]);
-                let fish = $threefish::new_with_tweak(&key, &tweak);
-                let mut x = block.clone();
-                fish.encrypt_block(&mut x);
-                for i in 0..x.len() {
-                    state.x[i] = x[i] ^ block[i];
-                }
-                state.t.1 &= !T1_FLAG_FIRST;
-            }
-        }
-
-        impl<N> Default for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
+        impl<N: ArrayLength<u8>> Default for $name<N> {
             fn default() -> Self {
                 // build and process config block
-                let mut state = State::new(
+                let mut state = Self::blank_state(
                     T1_FLAG_FIRST | T1_BLK_TYPE_CFG | T1_FLAG_FINAL,
-                    Block::<$name<N>>::default(),
+                    Default::default(),
                 );
+
                 let mut cfg = GenericArray::<u8, $state_bytes>::default();
                 cfg[..8].copy_from_slice(&SCHEMA_VER.to_le_bytes());
                 cfg[8..16].copy_from_slice(&(N::to_u64() * 8).to_le_bytes());
                 cfg[16..24].copy_from_slice(&CFG_TREE_INFO_SEQUENTIAL.to_le_bytes());
-                Self::process_block(&mut state, &cfg, CFG_STR_LEN);
+
+                state.process_block(&cfg, CFG_STR_LEN);
 
                 // The chaining vars ctx->X are now initialized for the given hashBitLen.
                 // Set up to process the data message portion of the hash (default)
-                state.t = Default::default();
-                state.t.1 = T1_FLAG_FIRST | T1_BLK_TYPE_MSG;
-                Self {
-                    state,
-                    _output: Default::default(),
-                }
+                state.t = [0, T1_FLAG_FIRST | T1_BLK_TYPE_MSG];
+                state
             }
         }
 
-        impl<N> Reset for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
+        impl<N: ArrayLength<u8>> Reset for $name<N> {
             #[inline]
             fn reset(&mut self) {
                 *self = Default::default();
             }
         }
 
-        impl<N> AlgorithmName for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
+        impl<N: ArrayLength<u8>> AlgorithmName for $name<N> {
             fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str(stringify!($full_name))
             }
         }
 
-        impl<N> fmt::Debug for $name<N>
-        where
-            N: ArrayLength<u8>,
-        {
+        impl<N: ArrayLength<u8>> fmt::Debug for $name<N> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-                f.debug_struct("Skein").field("state", &self.state).finish()
+                write!(f, "{}<{}> {{ .. }}", stringify!($name), N::USIZE)
             }
         }
 
         #[doc = $alg_name]
         #[doc = " hasher state."]
-        pub type $full_name<OutputSize> = CoreWrapper<$name<OutputSize>>;
+        pub type $full_name<OutputSize = $state_bytes> = CoreWrapper<$name<OutputSize>>;
     };
 }
 
+define_hasher!(Skein256Core, Skein256, Threefish256, U32, "Skein-256");
+define_hasher!(Skein512Core, Skein512, Threefish512, U64, "Skein-512");
 #[rustfmt::skip]
-define_hasher!(Skein256Core, Skein256, Threefish256, U32, 256, "Skein-256");
-#[rustfmt::skip]
-define_hasher!(Skein512Core, Skein512, Threefish512, U64, 512, "Skein-512");
-#[rustfmt::skip]
-define_hasher!(Skein1024Core, Skein1024, Threefish1024, U128, 1024, "Skein-1024");
+define_hasher!(Skein1024Core, Skein1024, Threefish1024, U128, "Skein-1024");

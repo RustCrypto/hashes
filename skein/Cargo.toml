@@ -12,7 +12,7 @@ rust-version = "1.57"
 
 [dependencies]
 digest = "0.10"
-threefish = "0.5"
+threefish = { version = "0.5.2", default-features = false }
 
 [dev-dependencies]
 digest = { version = "0.10", features = ["dev"] }
