@@ -52,7 +52,7 @@ use digest::{
         OutputSizeUser, Reset, UpdateCore,
     },
     generic_array::{
-        typenum::{NonZero, Unsigned, U128, U32, U64},
+        typenum::{U128, U32, U64},
         ArrayLength, GenericArray,
     },
     HashMarker, Output,
@@ -98,38 +98,38 @@ macro_rules! define_hasher {
         #[derive(Clone)]
         pub struct $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             state: State<Block<Self>>,
-            _output: core::marker::PhantomData<GenericArray<u8, N>>,
+            _output: core::marker::PhantomData<N>,
         }
 
-        impl<N> HashMarker for $name<N> where N: Unsigned + ArrayLength<u8> + NonZero + Default {}
+        impl<N> HashMarker for $name<N> where N: ArrayLength<u8> {}
 
         impl<N> BlockSizeUser for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             type BlockSize = <$threefish as BlockSizeUser>::BlockSize;
         }
 
         impl<N> BufferKindUser for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             type BufferKind = Lazy;
         }
 
         impl<N> OutputSizeUser for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             type OutputSize = N;
         }
 
         impl<N> UpdateCore for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             #[inline]
             fn update_blocks(&mut self, blocks: &[Block<Self>]) {
@@ -141,7 +141,7 @@ macro_rules! define_hasher {
 
         impl<N> FixedOutputCore for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             #[inline]
             fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
@@ -167,7 +167,7 @@ macro_rules! define_hasher {
 
         impl<N> $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             fn process_block(
                 state: &mut State<Block<Self>>,
@@ -192,7 +192,7 @@ macro_rules! define_hasher {
 
         impl<N> Default for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             fn default() -> Self {
                 // build and process config block
@@ -219,7 +219,7 @@ macro_rules! define_hasher {
 
         impl<N> Reset for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             #[inline]
             fn reset(&mut self) {
@@ -229,7 +229,7 @@ macro_rules! define_hasher {
 
         impl<N> AlgorithmName for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str(stringify!($full_name))
@@ -238,7 +238,7 @@ macro_rules! define_hasher {
 
         impl<N> fmt::Debug for $name<N>
         where
-            N: Unsigned + ArrayLength<u8> + NonZero + Default,
+            N: ArrayLength<u8>,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
                 f.debug_struct("Skein").field("state", &self.state).finish()
