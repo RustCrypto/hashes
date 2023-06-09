@@ -14,9 +14,8 @@
 //! accessed via the `Digest` trait:
 //!
 //! ```
-//! use digest::generic_array::typenum::U32;
 //! use hex_literal::hex;
-//! use skein::{Digest, Skein256};
+//! use skein::{Digest, Skein256, digest::generic_array::typenum::U32};
 //!
 //! // create a Skein-256 object
 //! let mut hasher = Skein256::<U32>::new();
