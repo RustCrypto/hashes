@@ -28,6 +28,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [SHA-3] (Keccak) | [`sha3`] | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) | [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [SHABAL] | [`shabal`] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) | [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
+| [Skein] | [`skein`] | [![crates.io](https://img.shields.io/crates/v/skein.svg)](https://crates.io/crates/skein) | [![Documentation](https://docs.rs/skein/badge.svg)](https://docs.rs/skein) | ![MSRV 1.57][msrv-1.57] | :green_heart: |
 | [SM3] (OSCCA GM/T 0004-2012) | [`sm3`] | [![crates.io](https://img.shields.io/crates/v/sm3.svg)](https://crates.io/crates/sm3) | [![Documentation](https://docs.rs/sm3/badge.svg)](https://docs.rs/sm3) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [Streebog] (GOST R 34.11-2012) | [`streebog`] | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) | [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | ![MSRV 1.41][msrv-1.41] | :yellow_heart: |
 | [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
@@ -252,6 +253,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`sha2`]: ./sha2
 [`sha3`]: ./sha3
 [`shabal`]: ./shabal
+[`skein`]: ./skein
 [`sm3`]: ./sm3
 [`streebog`]: ./streebog
 [`tiger`]: ./tiger
@@ -291,6 +293,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [SHA-2]: https://en.wikipedia.org/wiki/SHA-2
 [SHA-3]: https://en.wikipedia.org/wiki/SHA-3
 [SHABAL]: https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
+[Skein]: https://schneier.com/academic/skein
 [SM3]: https://en.wikipedia.org/wiki/SM3_(hash_function)
 [Streebog]: https://en.wikipedia.org/wiki/Streebog
 [Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(cryptography)
