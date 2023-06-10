@@ -1,24 +1,29 @@
 [package]
 name = "k12"
-version = "0.2.1"
+version = "0.3.0"
 description = "Pure Rust implementation of the KangarooTwelve hash function"
-authors = ["Diggory Hardy <github1@dhardy.name>"]
+authors = ["RustCrypto Developers", "Diggory Hardy <github1@dhardy.name>"]
 license = "Apache-2.0 OR MIT"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
 documentation = "https://docs.rs/k12"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+rust-version = "1.56"
 
 [dependencies]
 digest = { version = "0.10.7", default-features = false, features = ["core-api"] }
-sha3 = "0.10.8"
+sha3 = { version = "0.10.8", default-features = false }
 
 [dev-dependencies]
 digest = { version = "0.10.7", features = ["alloc", "dev"] }
-hex-literal = "0.2.2"
+hex-literal = "0.3"
 
 [features]
 default = ["std"]
 std = ["digest/std"]
+
+# TODO: remove when crate will be part of the root workspace
+[profile.dev]
+opt-level = 2

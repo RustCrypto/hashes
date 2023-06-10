@@ -7,7 +7,6 @@ members = [
     "fsb",
     "gost94",
     "groestl",
-    "k12",
     "md2",
     "md4",
     "md5",
@@ -25,6 +24,7 @@ exclude = [
     "ascon-hash",
     "belt-hash",
     "jh",
+    "k12",
     "skein",
 ]
 
