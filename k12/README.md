@@ -6,8 +6,8 @@
 ![Rust Version][rustc-image]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [KangarooTwelve][1] extensible-output
-function (XOF).
+Pure Rust implementation of the [KangarooTwelve][1] eXtendable-Output Function 
+(XOF).
 
 [Documentation][docs-link]
 
