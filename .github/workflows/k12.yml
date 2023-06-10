@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.41.0
+        msrv: 1.56.0
 
   build:
     needs: set-msrv
@@ -32,7 +32,7 @@ jobs:
           - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
-          # - thumbv7em-none-eabi # TODO: no_std w/o liballoc
+          - thumbv7em-none-eabi
           - wasm32-unknown-unknown
     steps:
       - uses: actions/checkout@v3
