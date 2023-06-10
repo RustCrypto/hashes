@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.0 (2023-06-10)
+### Added
+- Support for heapless `no_std` targets ([#353])
+
+### Changed
+- Use TurboSHAKE implementation from `sha3` ([#353])
+- Properly implement `XofReader` ([#353])
+- 2021 edition upgrade; MSRV 1.56 ([#487])
+
+[#353]: https://github.com/RustCrypto/hashes/pull/353
+[#487]: https://github.com/RustCrypto/hashes/pull/487
+
 ## 0.2.1 (2022-02-17)
 ### Fixed
 - Minimal versions build ([#363])
