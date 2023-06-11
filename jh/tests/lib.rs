@@ -1,5 +1,3 @@
-#![no_std]
-
 use digest::{dev::fixed_test, new_test};
 
 new_test!(long_224, "LongMsgKAT_224", jh::Jh224, fixed_test);
