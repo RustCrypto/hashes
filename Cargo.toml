@@ -23,6 +23,7 @@ members = [
 exclude = [
     "ascon-hash",
     "belt-hash",
+    "jh",
     "k12",
     "skein",
 ]

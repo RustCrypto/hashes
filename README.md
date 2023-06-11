@@ -19,6 +19,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [FSB] | [`fsb`] | [![crates.io](https://img.shields.io/crates/v/fsb.svg)](https://crates.io/crates/fsb) | [![Documentation](https://docs.rs/fsb/badge.svg)](https://docs.rs/fsb) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [GOST R 34.11-94][GOST94] | [`gost94`] | [![crates.io](https://img.shields.io/crates/v/gost94.svg)](https://crates.io/crates/gost94) | [![Documentation](https://docs.rs/gost94/badge.svg)](https://docs.rs/gost94) | ![MSRV 1.41][msrv-1.41] | :yellow_heart: |
 | [Grøstl] (Groestl) | [`groestl`] | [![crates.io](https://img.shields.io/crates/v/groestl.svg)](https://crates.io/crates/groestl) | [![Documentation](https://docs.rs/groestl/badge.svg)](https://docs.rs/groestl) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
+| [JH] | [`jh`] | [![crates.io](https://img.shields.io/crates/v/jh.svg)](https://crates.io/crates/jh) | [![Documentation](https://docs.rs/jh/badge.svg)](https://docs.rs/jh) | ![MSRV 1.57][msrv-1.57] | :green_heart: |
 | [KangarooTwelve] | [`k12`] | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [MD2] | [`md2`] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) | [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
 | [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![MSRV 1.41][msrv-1.41] | :broken_heart: |
@@ -244,6 +245,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`fsb`]: ./fsb
 [`gost94`]: ./gost94
 [`groestl`]: ./groestl
+[`jh`]: ./jh
 [`k12`]: ./k12
 [`md2`]: ./md2
 [`md4`]: ./md4
@@ -284,6 +286,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [FSB]: https://en.wikipedia.org/wiki/Fast_syndrome-based_hash
 [GOST94]: https://en.wikipedia.org/wiki/GOST_(hash_function)
 [Grøstl]: https://en.wikipedia.org/wiki/Grøstl
+[JH]: https://www3.ntu.edu.sg/home/wuhj/research/jh
 [KangarooTwelve]: https://keccak.team/kangarootwelve.html
 [MD2]: https://en.wikipedia.org/wiki/MD2_(cryptography)
 [MD4]: https://en.wikipedia.org/wiki/MD4
