@@ -17,38 +17,6 @@ pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     }
 }
 
-macro_rules! vsha512hq_u64 {
-    ($hash_ed:expr, $hash_gf:expr, $kwh_kwh2:expr) => {{
-        let mut out = $hash_ed;
-        asm!("SHA512H {:q}, {:q}, {:v}.2D", inout(vreg) out, in(vreg) $hash_gf, in(vreg) $kwh_kwh2);
-        out
-    }};
-}
-
-macro_rules! vsha512h2q_u64 {
-    ($sum_ab:expr, $hash_c_:expr, $hash_ab:expr) => {{
-        let mut out = $sum_ab;
-        asm!("SHA512H2 {:q}, {:q}, {:v}.2D", inout(vreg) out, in(vreg) $hash_c_, in(vreg) $hash_ab);
-        out
-    }};
-}
-
-macro_rules! vsha512su0q_u64 {
-    ($w0_1:expr, $w2_:expr) => {{
-        let mut out = $w0_1;
-        asm!("SHA512SU0 {:v}.2D, {:v}.2D", inout(vreg) out, in(vreg) $w2_);
-        out
-    }};
-}
-
-macro_rules! vsha512su1q_u64 {
-    ($s01_s02:expr, $w14_15:expr, $w9_10:expr) => {{
-        let mut out = $s01_s02;
-        asm!("SHA512SU1 {:v}.2D, {:v}.2D, {:v}.2D", inout(vreg) out, in(vreg) $w14_15, in(vreg) $w9_10);
-        out
-    }};
-}
-
 #[target_feature(enable = "sha3")]
 unsafe fn sha512_compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     // SAFETY: Requires the sha3 feature.
@@ -80,122 +48,122 @@ unsafe fn sha512_compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
         // Rounds 0 and 1
         let mut initial_sum = vaddq_u64(s0, vld1q_u64(&K64[0]));
         let mut sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), gh);
-        let mut intermed = vsha512hq_u64!(sum, vextq_u64(ef, gh, 1), vextq_u64(cd, ef, 1));
-        gh = vsha512h2q_u64!(intermed, cd, ab);
+        let mut intermed = vsha512hq_u64(sum, vextq_u64(ef, gh, 1), vextq_u64(cd, ef, 1));
+        gh = vsha512h2q_u64(intermed, cd, ab);
         cd = vaddq_u64(cd, intermed);
 
         // Rounds 2 and 3
         initial_sum = vaddq_u64(s1, vld1q_u64(&K64[2]));
         sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), ef);
-        intermed = vsha512hq_u64!(sum, vextq_u64(cd, ef, 1), vextq_u64(ab, cd, 1));
-        ef = vsha512h2q_u64!(intermed, ab, gh);
+        intermed = vsha512hq_u64(sum, vextq_u64(cd, ef, 1), vextq_u64(ab, cd, 1));
+        ef = vsha512h2q_u64(intermed, ab, gh);
         ab = vaddq_u64(ab, intermed);
 
         // Rounds 4 and 5
         initial_sum = vaddq_u64(s2, vld1q_u64(&K64[4]));
         sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), cd);
-        intermed = vsha512hq_u64!(sum, vextq_u64(ab, cd, 1), vextq_u64(gh, ab, 1));
-        cd = vsha512h2q_u64!(intermed, gh, ef);
+        intermed = vsha512hq_u64(sum, vextq_u64(ab, cd, 1), vextq_u64(gh, ab, 1));
+        cd = vsha512h2q_u64(intermed, gh, ef);
         gh = vaddq_u64(gh, intermed);
 
         // Rounds 6 and 7
         initial_sum = vaddq_u64(s3, vld1q_u64(&K64[6]));
         sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), ab);
-        intermed = vsha512hq_u64!(sum, vextq_u64(gh, ab, 1), vextq_u64(ef, gh, 1));
-        ab = vsha512h2q_u64!(intermed, ef, cd);
+        intermed = vsha512hq_u64(sum, vextq_u64(gh, ab, 1), vextq_u64(ef, gh, 1));
+        ab = vsha512h2q_u64(intermed, ef, cd);
         ef = vaddq_u64(ef, intermed);
 
         // Rounds 8 and 9
         initial_sum = vaddq_u64(s4, vld1q_u64(&K64[8]));
         sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), gh);
-        intermed = vsha512hq_u64!(sum, vextq_u64(ef, gh, 1), vextq_u64(cd, ef, 1));
-        gh = vsha512h2q_u64!(intermed, cd, ab);
+        intermed = vsha512hq_u64(sum, vextq_u64(ef, gh, 1), vextq_u64(cd, ef, 1));
+        gh = vsha512h2q_u64(intermed, cd, ab);
         cd = vaddq_u64(cd, intermed);
 
         // Rounds 10 and 11
         initial_sum = vaddq_u64(s5, vld1q_u64(&K64[10]));
         sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), ef);
-        intermed = vsha512hq_u64!(sum, vextq_u64(cd, ef, 1), vextq_u64(ab, cd, 1));
-        ef = vsha512h2q_u64!(intermed, ab, gh);
+        intermed = vsha512hq_u64(sum, vextq_u64(cd, ef, 1), vextq_u64(ab, cd, 1));
+        ef = vsha512h2q_u64(intermed, ab, gh);
         ab = vaddq_u64(ab, intermed);
 
         // Rounds 12 and 13
         initial_sum = vaddq_u64(s6, vld1q_u64(&K64[12]));
         sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), cd);
-        intermed = vsha512hq_u64!(sum, vextq_u64(ab, cd, 1), vextq_u64(gh, ab, 1));
-        cd = vsha512h2q_u64!(intermed, gh, ef);
+        intermed = vsha512hq_u64(sum, vextq_u64(ab, cd, 1), vextq_u64(gh, ab, 1));
+        cd = vsha512h2q_u64(intermed, gh, ef);
         gh = vaddq_u64(gh, intermed);
 
         // Rounds 14 and 15
         initial_sum = vaddq_u64(s7, vld1q_u64(&K64[14]));
         sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), ab);
-        intermed = vsha512hq_u64!(sum, vextq_u64(gh, ab, 1), vextq_u64(ef, gh, 1));
-        ab = vsha512h2q_u64!(intermed, ef, cd);
+        intermed = vsha512hq_u64(sum, vextq_u64(gh, ab, 1), vextq_u64(ef, gh, 1));
+        ab = vsha512h2q_u64(intermed, ef, cd);
         ef = vaddq_u64(ef, intermed);
 
         for t in (16..80).step_by(16) {
             // Rounds t and t + 1
-            s0 = vsha512su1q_u64!(vsha512su0q_u64!(s0, s1), s7, vextq_u64(s4, s5, 1));
+            s0 = vsha512su1q_u64(vsha512su0q_u64(s0, s1), s7, vextq_u64(s4, s5, 1));
             initial_sum = vaddq_u64(s0, vld1q_u64(&K64[t]));
             sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), gh);
-            intermed = vsha512hq_u64!(sum, vextq_u64(ef, gh, 1), vextq_u64(cd, ef, 1));
-            gh = vsha512h2q_u64!(intermed, cd, ab);
+            intermed = vsha512hq_u64(sum, vextq_u64(ef, gh, 1), vextq_u64(cd, ef, 1));
+            gh = vsha512h2q_u64(intermed, cd, ab);
             cd = vaddq_u64(cd, intermed);
 
             // Rounds t + 2 and t + 3
-            s1 = vsha512su1q_u64!(vsha512su0q_u64!(s1, s2), s0, vextq_u64(s5, s6, 1));
+            s1 = vsha512su1q_u64(vsha512su0q_u64(s1, s2), s0, vextq_u64(s5, s6, 1));
             initial_sum = vaddq_u64(s1, vld1q_u64(&K64[t + 2]));
             sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), ef);
-            intermed = vsha512hq_u64!(sum, vextq_u64(cd, ef, 1), vextq_u64(ab, cd, 1));
-            ef = vsha512h2q_u64!(intermed, ab, gh);
+            intermed = vsha512hq_u64(sum, vextq_u64(cd, ef, 1), vextq_u64(ab, cd, 1));
+            ef = vsha512h2q_u64(intermed, ab, gh);
             ab = vaddq_u64(ab, intermed);
 
             // Rounds t + 4 and t + 5
-            s2 = vsha512su1q_u64!(vsha512su0q_u64!(s2, s3), s1, vextq_u64(s6, s7, 1));
+            s2 = vsha512su1q_u64(vsha512su0q_u64(s2, s3), s1, vextq_u64(s6, s7, 1));
             initial_sum = vaddq_u64(s2, vld1q_u64(&K64[t + 4]));
             sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), cd);
-            intermed = vsha512hq_u64!(sum, vextq_u64(ab, cd, 1), vextq_u64(gh, ab, 1));
-            cd = vsha512h2q_u64!(intermed, gh, ef);
+            intermed = vsha512hq_u64(sum, vextq_u64(ab, cd, 1), vextq_u64(gh, ab, 1));
+            cd = vsha512h2q_u64(intermed, gh, ef);
             gh = vaddq_u64(gh, intermed);
 
             // Rounds t + 6 and t + 7
-            s3 = vsha512su1q_u64!(vsha512su0q_u64!(s3, s4), s2, vextq_u64(s7, s0, 1));
+            s3 = vsha512su1q_u64(vsha512su0q_u64(s3, s4), s2, vextq_u64(s7, s0, 1));
             initial_sum = vaddq_u64(s3, vld1q_u64(&K64[t + 6]));
             sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), ab);
-            intermed = vsha512hq_u64!(sum, vextq_u64(gh, ab, 1), vextq_u64(ef, gh, 1));
-            ab = vsha512h2q_u64!(intermed, ef, cd);
+            intermed = vsha512hq_u64(sum, vextq_u64(gh, ab, 1), vextq_u64(ef, gh, 1));
+            ab = vsha512h2q_u64(intermed, ef, cd);
             ef = vaddq_u64(ef, intermed);
 
             // Rounds t + 8 and t + 9
-            s4 = vsha512su1q_u64!(vsha512su0q_u64!(s4, s5), s3, vextq_u64(s0, s1, 1));
+            s4 = vsha512su1q_u64(vsha512su0q_u64(s4, s5), s3, vextq_u64(s0, s1, 1));
             initial_sum = vaddq_u64(s4, vld1q_u64(&K64[t + 8]));
             sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), gh);
-            intermed = vsha512hq_u64!(sum, vextq_u64(ef, gh, 1), vextq_u64(cd, ef, 1));
-            gh = vsha512h2q_u64!(intermed, cd, ab);
+            intermed = vsha512hq_u64(sum, vextq_u64(ef, gh, 1), vextq_u64(cd, ef, 1));
+            gh = vsha512h2q_u64(intermed, cd, ab);
             cd = vaddq_u64(cd, intermed);
 
             // Rounds t + 10 and t + 11
-            s5 = vsha512su1q_u64!(vsha512su0q_u64!(s5, s6), s4, vextq_u64(s1, s2, 1));
+            s5 = vsha512su1q_u64(vsha512su0q_u64(s5, s6), s4, vextq_u64(s1, s2, 1));
             initial_sum = vaddq_u64(s5, vld1q_u64(&K64[t + 10]));
             sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), ef);
-            intermed = vsha512hq_u64!(sum, vextq_u64(cd, ef, 1), vextq_u64(ab, cd, 1));
-            ef = vsha512h2q_u64!(intermed, ab, gh);
+            intermed = vsha512hq_u64(sum, vextq_u64(cd, ef, 1), vextq_u64(ab, cd, 1));
+            ef = vsha512h2q_u64(intermed, ab, gh);
             ab = vaddq_u64(ab, intermed);
 
             // Rounds t + 12 and t + 13
-            s6 = vsha512su1q_u64!(vsha512su0q_u64!(s6, s7), s5, vextq_u64(s2, s3, 1));
+            s6 = vsha512su1q_u64(vsha512su0q_u64(s6, s7), s5, vextq_u64(s2, s3, 1));
             initial_sum = vaddq_u64(s6, vld1q_u64(&K64[t + 12]));
             sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), cd);
-            intermed = vsha512hq_u64!(sum, vextq_u64(ab, cd, 1), vextq_u64(gh, ab, 1));
-            cd = vsha512h2q_u64!(intermed, gh, ef);
+            intermed = vsha512hq_u64(sum, vextq_u64(ab, cd, 1), vextq_u64(gh, ab, 1));
+            cd = vsha512h2q_u64(intermed, gh, ef);
             gh = vaddq_u64(gh, intermed);
 
             // Rounds t + 14 and t + 15
-            s7 = vsha512su1q_u64!(vsha512su0q_u64!(s7, s0), s6, vextq_u64(s3, s4, 1));
+            s7 = vsha512su1q_u64(vsha512su0q_u64(s7, s0), s6, vextq_u64(s3, s4, 1));
             initial_sum = vaddq_u64(s7, vld1q_u64(&K64[t + 14]));
             sum = vaddq_u64(vextq_u64(initial_sum, initial_sum, 1), ab);
-            intermed = vsha512hq_u64!(sum, vextq_u64(gh, ab, 1), vextq_u64(ef, gh, 1));
-            ab = vsha512h2q_u64!(intermed, ef, cd);
+            intermed = vsha512hq_u64(sum, vextq_u64(gh, ab, 1), vextq_u64(ef, gh, 1));
+            ab = vsha512h2q_u64(intermed, ef, cd);
             ef = vaddq_u64(ef, intermed);
         }
 
@@ -211,4 +179,42 @@ unsafe fn sha512_compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     vst1q_u64(state[2..4].as_mut_ptr(), cd);
     vst1q_u64(state[4..6].as_mut_ptr(), ef);
     vst1q_u64(state[6..8].as_mut_ptr(), gh);
+}
+
+// TODO remove these polyfills once SHA3 intrinsics land
+
+#[inline(always)]
+unsafe fn vsha512hq_u64(
+    mut hash_ed: uint64x2_t,
+    hash_gf: uint64x2_t,
+    kwh_kwh2: uint64x2_t,
+) -> uint64x2_t {
+    asm!("SHA512H {:q}, {:q}, {:v}.2D", inout(vreg) hash_ed, in(vreg) hash_gf, in(vreg) kwh_kwh2);
+    hash_ed
+}
+
+#[inline(always)]
+unsafe fn vsha512h2q_u64(
+    mut sum_ab: uint64x2_t,
+    hash_c_: uint64x2_t,
+    hash_ab: uint64x2_t,
+) -> uint64x2_t {
+    asm!("SHA512H2 {:q}, {:q}, {:v}.2D", inout(vreg) sum_ab, in(vreg) hash_c_, in(vreg) hash_ab);
+    sum_ab
+}
+
+#[inline(always)]
+unsafe fn vsha512su0q_u64(mut w0_1: uint64x2_t, w2_: uint64x2_t) -> uint64x2_t {
+    asm!("SHA512SU0 {:v}.2D, {:v}.2D", inout(vreg) w0_1, in(vreg) w2_);
+    w0_1
+}
+
+#[inline(always)]
+unsafe fn vsha512su1q_u64(
+    mut s01_s02: uint64x2_t,
+    w14_15: uint64x2_t,
+    w9_10: uint64x2_t,
+) -> uint64x2_t {
+    asm!("SHA512SU1 {:v}.2D, {:v}.2D, {:v}.2D", inout(vreg) s01_s02, in(vreg) w14_15, in(vreg) w9_10);
+    s01_s02
 }
