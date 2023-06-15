@@ -53,7 +53,10 @@ macro_rules! vsha256su1q_u32 {
     }};
 }
 
+#[target_feature(enable = "sha2")]
 unsafe fn sha256_compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+    // SAFETY: Requires the sha2 feature.
+
     // Load state into vectors.
     let mut abcd = vld1q_u32(state[0..4].as_ptr());
     let mut efgh = vld1q_u32(state[4..8].as_ptr());
