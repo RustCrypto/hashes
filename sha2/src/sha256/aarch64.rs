@@ -112,7 +112,11 @@ unsafe fn vsha256hq_u32(
     hash_abcd: uint32x4_t,
     wk: uint32x4_t,
 ) -> uint32x4_t {
-    asm!("SHA256H {:q}, {:q}, {:v}.4S", inout(vreg) hash_efgh, in(vreg) hash_abcd, in(vreg) wk);
+    asm!(
+        "SHA256H {:q}, {:q}, {:v}.4S",
+        inout(vreg) hash_efgh, in(vreg) hash_abcd, in(vreg) wk,
+        options(pure, nomem, nostack, preserves_flags)
+    );
     hash_efgh
 }
 
@@ -122,13 +126,21 @@ unsafe fn vsha256h2q_u32(
     hash_abcd: uint32x4_t,
     wk: uint32x4_t,
 ) -> uint32x4_t {
-    asm!("SHA256H2 {:q}, {:q}, {:v}.4S", inout(vreg) hash_efgh, in(vreg) hash_abcd, in(vreg) wk);
+    asm!(
+        "SHA256H2 {:q}, {:q}, {:v}.4S",
+        inout(vreg) hash_efgh, in(vreg) hash_abcd, in(vreg) wk,
+        options(pure, nomem, nostack, preserves_flags)
+    );
     hash_efgh
 }
 
 #[inline(always)]
 unsafe fn vsha256su0q_u32(mut w0_3: uint32x4_t, w4_7: uint32x4_t) -> uint32x4_t {
-    asm!("SHA256SU0 {:v}.4S, {:v}.4S", inout(vreg) w0_3, in(vreg) w4_7);
+    asm!(
+        "SHA256SU0 {:v}.4S, {:v}.4S",
+        inout(vreg) w0_3, in(vreg) w4_7,
+        options(pure, nomem, nostack, preserves_flags)
+    );
     w0_3
 }
 
@@ -138,6 +150,10 @@ unsafe fn vsha256su1q_u32(
     w8_11: uint32x4_t,
     w12_15: uint32x4_t,
 ) -> uint32x4_t {
-    asm!("SHA256SU1 {:v}.4S, {:v}.4S, {:v}.4S", inout(vreg) tw0_3, in(vreg) w8_11, in(vreg) w12_15);
+    asm!(
+        "SHA256SU1 {:v}.4S, {:v}.4S, {:v}.4S",
+        inout(vreg) tw0_3, in(vreg) w8_11, in(vreg) w12_15,
+        options(pure, nomem, nostack, preserves_flags)
+    );
     tw0_3
 }
