@@ -4,8 +4,7 @@
 
 // TODO: stdarch intrinsics: RustCrypto/hashes#257
 
-use core::arch::aarch64::*;
-use core::arch::asm;
+use core::arch::{aarch64::*, asm};
 
 use crate::consts::K32;
 

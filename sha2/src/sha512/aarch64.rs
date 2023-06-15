@@ -1,7 +1,6 @@
 // Implementation adapted from mbedtls.
 
-use core::arch::aarch64::*;
-use core::arch::asm;
+use core::arch::{aarch64::*, asm};
 
 use crate::consts::K64;
 
