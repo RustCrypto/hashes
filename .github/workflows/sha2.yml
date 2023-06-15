@@ -23,7 +23,7 @@ jobs:
     with:
         # Crate supports MSRV 1.41 without `oid` feature. We test true MSRV
         # in the `test-msrv` job.
-        msrv: 1.57.0
+        msrv: 1.59.0
 
   # Builds for no_std platforms
   build:
@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.57
+          - 1.59
           - stable
         target:
           - thumbv7em-none-eabi
