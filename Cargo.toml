@@ -19,6 +19,7 @@ members = [
     "sm3",
     "streebog",
     "tiger",
+    "vsh",
     "whirlpool",
 ]
 exclude = [
