@@ -33,8 +33,6 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-extern crate alloc;
-
 pub use digest::{self, Digest};
 
 use core::fmt;
@@ -52,7 +50,9 @@ mod compress;
 mod tables;
 use compress::compress;
 
+#[cfg(feature = "tth")]
 mod tth;
+#[cfg(feature = "tth")]
 use tth::TigerTreeCore;
 
 type State = [u64; 3];
@@ -214,4 +214,5 @@ pub type Tiger = CoreWrapper<TigerCore>;
 /// Tiger2 hasher.
 pub type Tiger2 = CoreWrapper<Tiger2Core>;
 /// TTH hasher.
+#[cfg(feature = "tth")]
 pub type TigerTree = CoreWrapper<TigerTreeCore>;

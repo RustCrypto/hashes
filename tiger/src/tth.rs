@@ -1,5 +1,5 @@
 use crate::{Digest, Tiger, TigerCore};
-use alloc::vec::Vec;
+use arrayvec::ArrayVec;
 use core::fmt;
 use digest::{
     core_api::{
@@ -11,18 +11,37 @@ use digest::{
     HashMarker, Output,
 };
 
+#[derive(Clone)]
+struct TigerTreeNode {
+    level: u32,
+    hash: Output<TigerCore>,
+}
+
 /// Core Tiger hasher state.
 #[derive(Clone)]
 pub struct TigerTreeCore {
-    leaves: Vec<Output<TigerCore>>,
+    nodes: ArrayVec<TigerTreeNode, MAX_TREE_HEIGHT>,
     hasher: Tiger,
     blocks_processed: usize,
+}
+
+impl TigerTreeCore {
+    fn add_node(&mut self, level: u32, hash: Output<TigerCore>) {
+        match self.nodes.last() {
+            Some(last) if last.level == level => {
+                let new_hash = Tiger::digest([&[NODE_SIG][..], &last.hash, &hash].concat());
+                self.nodes.pop();
+                self.add_node(level + 1, new_hash);
+            }
+            _ => self.nodes.push(TigerTreeNode { level, hash }),
+        }
+    }
 }
 
 impl Default for TigerTreeCore {
     fn default() -> Self {
         Self {
-            leaves: Vec::default(),
+            nodes: ArrayVec::default(),
             hasher: Tiger::new_with_prefix([LEAF_SIG]),
             blocks_processed: 0,
         }
@@ -32,6 +51,9 @@ impl Default for TigerTreeCore {
 type DataBlockSize = U1024;
 const LEAF_SIG: u8 = 0u8;
 const NODE_SIG: u8 = 1u8;
+/// The maximum height of a TigerTree based on the maximum addressable data length
+// max height = log2(usize::MAX / DataBlockSize) = log2(2^usize::BITS) - log2(DataBlockSize) = usize::BITS - log2(2^10)
+const MAX_TREE_HEIGHT: usize = (usize::BITS - 10 + 1) as usize;
 /// The number of TigerCore blocks in a TigerTree data block
 const LEAF_BLOCKS: usize = DataBlockSize::USIZE / <TigerCore as BlockSizeUser>::BlockSize::USIZE;
 
@@ -54,7 +76,7 @@ impl TigerTreeCore {
     fn finalize_blocks(&mut self) {
         let hasher = core::mem::replace(&mut self.hasher, Tiger::new_with_prefix([LEAF_SIG]));
         let hash = hasher.finalize();
-        self.leaves.push(hash);
+        self.add_node(0, hash);
         self.blocks_processed = 0;
     }
 
@@ -89,31 +111,15 @@ impl FixedOutputCore for TigerTreeCore {
             self.finalize_blocks()
         }
 
-        let result = hash_nodes(self.leaves.as_slice());
-        out.copy_from_slice(&result);
-    }
-}
-
-#[inline]
-fn hash_nodes(hashes: &[Output<TigerCore>]) -> Output<TigerCore> {
-    match hashes.len() {
-        0 => hash_nodes(&[Tiger::digest([LEAF_SIG])]),
-        1 => hashes[0],
-        _ => {
-            let left_hashes = hashes.iter().step_by(2);
-
-            let right_hashes = hashes.iter().map(Some).skip(1).chain([None]).step_by(2);
-
-            let next_level_hashes: Vec<Output<TigerCore>> = left_hashes
-                .zip(right_hashes)
-                .map(|(left, right)| match right {
-                    Some(right) => Tiger::digest([&[NODE_SIG][..], left, right].concat()),
-                    None => *left,
-                })
-                .collect();
-
-            hash_nodes(next_level_hashes.as_slice())
+        let mut hash = self
+            .nodes
+            .pop()
+            .map(|n| n.hash)
+            .unwrap_or_else(|| Tiger::digest([LEAF_SIG]));
+        while let Some(left) = self.nodes.pop() {
+            hash = Tiger::digest([&[NODE_SIG][..], &left.hash, &hash].concat());
         }
+        out.copy_from_slice(hash.as_slice());
     }
 }
 
