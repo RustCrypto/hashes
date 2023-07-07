@@ -256,6 +256,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`streebog`]: ./streebog
 [`tiger`]: ./tiger
 [`whirlpool`]: ./whirlpool
+[`Simple Vsh`]: ./vsh
 
 [//]: # (footnotes)
 
@@ -295,3 +296,4 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [Streebog]: https://en.wikipedia.org/wiki/Streebog
 [Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(cryptography)
 [Tiger]: http://www.cs.technion.ac.il/~biham/Reports/Tiger/tiger/tiger.html
+[Simple Vsh]: https://en.wikipedia.org/wiki/Very_smooth_hash
