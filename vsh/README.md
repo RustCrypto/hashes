@@ -1,4 +1,4 @@
-# RustCrypto: Tiger
+# RustCrypto: Vsh
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
@@ -7,7 +7,7 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Tiger] hash function.
+Pure Rust implementation of the [Vsh] hash function.
 
 [Documentation][docs-link]
 
@@ -39,17 +39,17 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, without 
 
 [//]: # (badges)
 
-[crate-image]: https://img.shields.io/crates/v/tiger.svg
-[crate-link]: https://crates.io/crates/tiger
-[docs-image]: https://docs.rs/tiger/badge.svg
-[docs-link]: https://docs.rs/tiger/
+[crate-image]: https://img.shields.io/crates/v/vsh.svg
+[crate-link]: https://crates.io/crates/vsh
+[docs-image]: https://docs.rs/vsh/badge.svg
+[docs-link]: https://docs.rs/vsh/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/tiger/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Atiger
+[build-image]: https://github.com/RustCrypto/hashes/workflows/vsh/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Avsh
 
 [//]: # (general links)
 
-[Tiger]: http://www.cs.technion.ac.il/~biham/Reports/Tiger/tiger/tiger.html
+[Vsh]: https://en.wikipedia.org/wiki/Very_smooth_hash
