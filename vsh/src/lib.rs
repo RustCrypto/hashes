@@ -1,6 +1,6 @@
 //! An implementation of the [Vsh][1] cryptographic hash algorithms.
 //!
-//! Vsh is a variant of the original Vsh with a small padding tweak.
+//! This is basic VSH implementation.
 //!
 //! # Usage
 //!
@@ -8,21 +8,19 @@
 //! use hex_literal::hex;
 //! use vsh::{Vsh, Digest};
 //!
-//! // create a Vsh object
+//! // Create a Vsh object
 //! let mut hasher = Vsh::new();
 //!
 //! // process input message
 //! hasher.update(b"hello world");
 //!
-//! // acquire hash digest in the form of GenericArray,
-//! // which in this case is equivalent to [u8; 24]
+//! // Acquire hash digest which in this case is BigUint.
 //! let result = hasher.finalize();
-//! assert_eq!(result[..], hex!("4c8fbddae0b6f25832af45e7c62811bb64ec3e43691e9cc3"));
 //! ```
 //!
 //! Also see [RustCrypto/hashes][2] readme.
 //!
-//! [1]: https://en.wikipedia.org/wiki/Vsh_(hash_function)
+//! [1]: https://en.wikipedia.org/wiki/Very_smooth_hash
 //! [2]: https://github.com/RustCrypto/hashes
 
 use digest::{
