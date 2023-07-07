@@ -54,7 +54,7 @@ dependencies = [
 name = "blake2"
 version = "0.10.6"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -70,6 +70,16 @@ version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
 dependencies = [
+ "generic-array",
+]
+
+[[package]]
+name = "block-buffer"
+version = "0.11.0-pre"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23b6a33d658e9ef24ba0c4566d3d023d7978ca2ea3efb65e4eacd4586695892b"
+dependencies = [
+ "crypto-common 0.2.0-pre",
  "generic-array",
 ]
 
@@ -117,16 +127,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "crypto-common"
+version = "0.2.0-pre"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6faaa83e7700e0832cbbf84854d4c356270526907d9b14fab927fc7a9b5befb8"
+dependencies = [
+ "generic-array",
+ "typenum",
+]
+
+[[package]]
 name = "digest"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8168378f4e5023e7218c89c891c0fd8ecdb5e5e4f18cb78f38cf245dd021e76f"
 dependencies = [
  "blobby",
- "block-buffer",
+ "block-buffer 0.10.4",
  "const-oid",
- "crypto-common",
+ "crypto-common 0.1.6",
  "subtle",
+]
+
+[[package]]
+name = "digest"
+version = "0.11.0-pre"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f2e47350a84ef81587a050177f84af69defbf2bee70bdfb92b500dbbd247e97"
+dependencies = [
+ "block-buffer 0.11.0-pre",
+ "crypto-common 0.2.0-pre",
 ]
 
 [[package]]
@@ -142,7 +172,7 @@ dependencies = [
 name = "fsb"
 version = "0.1.3"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
  "whirlpool",
 ]
@@ -173,7 +203,7 @@ checksum = "ad0a93d233ebf96623465aad4046a8d3aa4da22d4f4beba5388838c8a434bbb4"
 name = "gost94"
 version = "0.10.4"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -181,7 +211,7 @@ dependencies = [
 name = "groestl"
 version = "0.10.1"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -208,7 +238,7 @@ dependencies = [
 name = "k12"
 version = "0.2.1"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -231,7 +261,7 @@ checksum = "3304a64d199bb964be99741b7a14d26972741915b3649639149b2479bb46f4b5"
 name = "md-5"
 version = "0.10.5"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
  "md5-asm",
 ]
@@ -240,7 +270,7 @@ dependencies = [
 name = "md2"
 version = "0.10.2"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -248,7 +278,7 @@ dependencies = [
 name = "md4"
 version = "0.10.2"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -387,7 +417,7 @@ checksum = "dc33ff2d4973d518d823d61aa239014831e521c75da58e3df4840d3f47749d09"
 name = "ripemd"
 version = "0.1.3"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -403,7 +433,7 @@ version = "0.10.5"
 dependencies = [
  "cfg-if",
  "cpufeatures",
- "digest",
+ "digest 0.10.6",
  "hex-literal",
  "sha1-asm",
 ]
@@ -423,7 +453,7 @@ version = "0.10.6"
 dependencies = [
  "cfg-if",
  "cpufeatures",
- "digest",
+ "digest 0.10.6",
  "hex-literal",
  "sha2-asm",
 ]
@@ -441,7 +471,7 @@ dependencies = [
 name = "sha3"
 version = "0.10.6"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
  "keccak",
 ]
@@ -450,7 +480,7 @@ dependencies = [
 name = "shabal"
 version = "0.4.1"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -458,7 +488,7 @@ dependencies = [
 name = "sm3"
 version = "0.4.1"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -466,7 +496,7 @@ dependencies = [
 name = "streebog"
 version = "0.10.2"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -486,7 +516,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 name = "tiger"
 version = "0.2.1"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
 ]
 
@@ -507,6 +537,7 @@ name = "vsh"
 version = "0.1.0"
 dependencies = [
  "bitvec",
+ "digest 0.11.0-pre",
  "mem",
  "num",
 ]
@@ -515,7 +546,7 @@ dependencies = [
 name = "whirlpool"
 version = "0.10.4"
 dependencies = [
- "digest",
+ "digest 0.10.6",
  "hex-literal",
  "whirlpool-asm",
 ]

@@ -32,6 +32,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [Streebog] (GOST R 34.11-2012) | [`streebog`] | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) | [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | ![MSRV 1.41][msrv-1.41] | :yellow_heart: |
 | [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 | [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
+| [Simple VSH] | [`Simple VSH`] | [![crates.io](https://img.shields.io/crates/v/vsh.svg)](https://crates.io/crates/vsh) | [![Documentation](https://docs.rs/vsh/badge.svg)](https://docs.rs/vsh) | ![MSRV 1.41][msrv-1.41] | :green_heart: |
 
 NOTE: the [`blake3`] crate implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
 
