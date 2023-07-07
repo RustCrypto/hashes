@@ -82,19 +82,16 @@ fn reverse_chunks_by_block_size(data: &[u8]) -> Vec<Vec<u8>> {
 }
 
 pub fn calculate_vhs_of_x(input: Vec<u8>) -> Vec<usize> {
-    // println!("input len:{:?} bl: {:?}", input_length, block_len);
     let chunks = reverse_chunks_by_block_size(&input);
     let mut set_bits: Vec<usize> = vec![];
     for chunk in chunks {
         let bits = chunk.view_bits::<Msb0>();
-        // println!("bits:{:?}", bits);
         set_bits = bits
             .iter()
             .enumerate()
             .filter(|(_, b)| **b)
             .map(|(i, _)| (8 * BLOCK_SIZE as usize) - i)
             .collect();
-        // println!("Bits one: {:?}", set_bits);
     }
     set_bits
 }
@@ -106,13 +103,11 @@ pub fn get_prime_list(index:Vec<usize>) -> Vec<u128> {
     for a_index in index {
         prime_list.push(primes[a_index-1]);
     }
-    // println!("Prime list:{:?}",prime_list);
     
     let mut prime_products = vec![1];
     for a_prime in prime_list {
         let second_prime: Vec<u128> = vec![a_prime as u128];
         prime_products = get_prime_products(&prime_products, &second_prime);
-        // println!("Prime prod:{:?}",prime_products);
     }
     prime_products
 }
@@ -126,9 +121,7 @@ pub fn do_mod_with_products(product: Vec<u128>) -> BigUint{
         .flat_map(|&x| x.to_le_bytes().to_vec())
         .collect();
     let num = BigUint::from_bytes_le(&bytes);
-    // println!("Num is:{:?} modulus is: {:?}", num, modulus);
     let remainder = num % modulus;
-    println!("{:?}", remainder);
     remainder
 }
 
