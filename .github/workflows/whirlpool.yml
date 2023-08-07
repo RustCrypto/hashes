@@ -68,14 +68,10 @@ jobs:
 
   test-asm:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        rust:
-          - 1.45 # MSRV of cc v1.0.82
     steps:
       - uses: actions/checkout@v3
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: stable # cc has a relaxed MSRV policy
       - run: cargo test --features asm
