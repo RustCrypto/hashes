@@ -2077,6 +2077,7 @@ mod test {
     use super::SHUFFLED_LIN_TABLE;
     use crate::consts::{A, P};
 
+    #[allow(clippy::needless_range_loop)]
     fn gen_table() -> [[u64; 256]; 8] {
         let mut table: [[u64; 256]; 8] = [[0; 256]; 8];
         for i in 0..8 {

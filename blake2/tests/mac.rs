@@ -16,7 +16,7 @@ fn blake2b_new_test() {
             .chain_update(DATA)
             .finalize()
             .into_bytes();
-        let res2 = <T as Mac>::new_from_slice(&key)
+        let res2 = <T as Mac>::new_from_slice(key)
             .unwrap()
             .chain_update(DATA)
             .finalize()
