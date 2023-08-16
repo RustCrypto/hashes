@@ -73,3 +73,37 @@ fn pat_c() {
         assert_eq!(result[..], expected[i as usize][..]);
     }
 }
+
+#[test]
+fn input_multiple_of_chunk_size_minus_one() {
+    // generated with reference python implementation
+    let expected = [
+        hex!("1b577636f723643e990cc7d6a659837436fd6a103626600eb8301cd1dbe553d6"),
+        hex!("e3ded52118ea64eaf04c7531c6ccb95e32924b7c2b87b2ce68ff2f2ee46e84ef"),
+        hex!("daacf62e434bdd126fbe9e61fae38d1429e9dddfaf8f999095585c3cbf366a4a"),
+        hex!("eac3722b4b7db10af973ed7ca60e113a19fab895b46476a9aac51ead099e6ba4"),
+    ];
+    for i in 0..expected.len() {
+        let len = 8192 * (i + 1) - 1;
+        let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
+        let result = digest_and_box(&m, 32);
+        assert_eq!(result[..], expected[i as usize][..]);
+    }
+}
+
+#[test]
+fn input_multiple_of_chunk_size() {
+    // generated with reference python implementation
+    let expected = [
+        hex!("48f256f6772f9edfb6a8b661ec92dc93b95ebd05a08a17b39ae3490870c926c3"),
+        hex!("82778f7f7234c83352e76837b721fbdbb5270b88010d84fa5ab0b61ec8ce0956"),
+        hex!("f4082a8fe7d1635aa042cd1da63bf235f91c231886c29896f9fe3818c60cd360"),
+        hex!("d14f8dc243c206004ca8a996997e5ae16a8bdda288f6c90d20d7c43c1a408618"),
+    ];
+    for i in 0..expected.len() {
+        let len = 8192 * (i + 1);
+        let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
+        let result = digest_and_box(&m, 32);
+        assert_eq!(result[..], expected[i as usize][..]);
+    }
+}
