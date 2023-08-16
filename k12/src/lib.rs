@@ -52,6 +52,32 @@ impl<'cs> KangarooTwelveCore<'cs> {
             chain_length: 0usize,
         }
     }
+
+    fn process_chunk(&mut self) {
+        debug_assert!(self.bufpos == CHUNK_SIZE);
+        if self.chain_length == 0 {
+            self.final_tshk.update(&self.buffer);
+        } else {
+            self.process_chaining_chunk();
+        }
+
+        self.chain_length += 1;
+        self.buffer = [0u8; CHUNK_SIZE];
+        self.bufpos = 0;
+    }
+
+    fn process_chaining_chunk(&mut self) {
+        debug_assert!(self.bufpos != 0);
+        if self.chain_length == 1 {
+            self.final_tshk
+                .update(&[0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+        }
+
+        let mut result = [0u8; CHAINING_VALUE_SIZE];
+        self.chain_tshk.update(&self.buffer[..self.bufpos]);
+        self.chain_tshk.finalize_xof_reset_into(&mut result);
+        self.final_tshk.update(&result);
+    }
 }
 
 impl HashMarker for KangarooTwelveCore<'_> {}
@@ -68,27 +94,12 @@ impl UpdateCore for KangarooTwelveCore<'_> {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         for block in blocks {
+            if self.bufpos == CHUNK_SIZE {
+                self.process_chunk();
+            }
+
             self.buffer[self.bufpos..self.bufpos + 128].clone_from_slice(block);
             self.bufpos += 128;
-
-            if self.bufpos != CHUNK_SIZE {
-                continue;
-            }
-
-            if self.chain_length == 0 {
-                self.final_tshk.update(&self.buffer);
-                self.final_tshk
-                    .update(&[0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-            } else {
-                let mut result = [0u8; CHAINING_VALUE_SIZE];
-                self.chain_tshk.update(&self.buffer);
-                self.chain_tshk.finalize_xof_reset_into(&mut result);
-                self.final_tshk.update(&result);
-            }
-
-            self.chain_length += 1;
-            self.buffer = [0u8; CHUNK_SIZE];
-            self.bufpos = 0;
         }
     }
 }
@@ -107,6 +118,10 @@ impl ExtendableOutputCore for KangarooTwelveCore<'_> {
             |block| self.update_blocks(block),
         );
 
+        if self.bufpos == CHUNK_SIZE && buffer.get_pos() != 0 {
+            self.process_chunk();
+        }
+
         // Read leftover data from buffer
         self.buffer[self.bufpos..(self.bufpos + buffer.get_pos())]
             .copy_from_slice(buffer.get_data());
@@ -114,17 +129,16 @@ impl ExtendableOutputCore for KangarooTwelveCore<'_> {
 
         // Calculate final node
         if self.chain_length == 0 {
-            // Input didnot exceed a single chaining value
+            // Input did not exceed a single chaining value
             let tshk = TurboShake128::from_core(<TurboShake128Core>::new(0x07))
                 .chain(&self.buffer[..self.bufpos])
                 .finalize_xof_reset();
             return KangarooTwelveReaderCore { tshk };
         }
+
         // Calculate last chaining value
-        let mut result = [0u8; CHAINING_VALUE_SIZE];
-        self.chain_tshk.update(&self.buffer[..self.bufpos]);
-        self.chain_tshk.finalize_xof_reset_into(&mut result);
-        self.final_tshk.update(&result);
+        self.process_chaining_chunk();
+
         // Pad final node calculation
         self.final_tshk
             .update(length_encode(self.chain_length, &mut lenbuf));
