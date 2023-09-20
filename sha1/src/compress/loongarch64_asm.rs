@@ -30,7 +30,6 @@ macro_rules! scheldule {
     ($i:literal, $e:literal) => {
         c!(
             "ld.w    $t5, $sp, (((" $i " - 3) & 0xF) * 4);"
-            "ld.w    $t5, $sp, (((" $i " - 3) & 0xF) * 4);"
             "ld.w    $t6, $sp, (((" $i " - 8) & 0xF) * 4);"
             "ld.w    $t7, $sp, (((" $i " - 14) & 0xF) * 4);"
             "ld.w    $t8, $sp, (((" $i " - 16) & 0xF) * 4);"
@@ -94,11 +93,11 @@ macro_rules! round3 {
 macro_rules! roundtail {
     ($a:literal, $b:literal, $e:literal, $i:literal, $k:literal) => {
         c!(
-            "ld.w    $t5, $a1, (" $i " * 4);"
-            "revb.2h $t5, $t5;"
-            "rotri.w $t5, $t5, 16;"
+            "rotri.w " $b "," $b ", 2;"
             "add.w " $e "," $e ", $t5;"
-            "st.w    $t5, $sp, (" $i " * 4);"
+            "add.w " $e "," $e "," $k ";"
+            "rotri.w $t5," $a ", 27;"
+            "add.w " $e "," $e ", $t5;"
         )
     };
 }
