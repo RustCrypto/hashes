@@ -109,9 +109,6 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     }
 
     unsafe {
-        let mut blocks_ptr = blocks.as_ptr();
-        let mut blocks_len = blocks.len();
-
         asm!(
             // Allocate scratch stack space
             "addi.d  $sp, $sp, -64;",
@@ -234,8 +231,8 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
             "addi.d  $sp, $sp, 64",
 
             in("$a0") state,
-            inout("$a1") blocks_ptr,
-            inout("$a2") blocks_len,
+            inout("$a1") blocks.as_ptr() => _,
+            inout("$a2") blocks.len() => _,
 
             in("$a4") K[0],
             in("$a5") K[1],
@@ -255,8 +252,5 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
 
             options(preserves_flags),
         );
-
-        // Silence unused warning
-        let _ = (blocks_ptr, blocks_len);
     }
 }
