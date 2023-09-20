@@ -215,17 +215,17 @@ pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
             "add.w   $t3, $t3, $t8",
             "add.w   $t4, $t4, $t5",
 
-            // Looping over blocks
-            "addi.d  $a1, $a1, 64",
-            "addi.d  $a2, $a2, -1",
-            "bnez    $a2, 42b",
-
             // Save updated state
             "st.w    $t0, $a0, 0",
             "st.w    $t1, $a0, 4",
             "st.w    $t2, $a0, 8",
             "st.w    $t3, $a0, 12",
             "st.w    $t4, $a0, 16",
+
+            // Looping over blocks
+            "addi.d  $a1, $a1, 64",
+            "addi.d  $a2, $a2, -1",
+            "bnez    $a2, 42b",
 
             // Restore stack register
             "addi.d  $sp, $sp, 64",
