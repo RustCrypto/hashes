@@ -1,6 +1,6 @@
 [package]
 name = "sha1"
-version = "0.10.5"
+version = "0.10.6"
 description = "SHA-1 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -28,6 +28,9 @@ default = ["std"]
 std = ["digest/std"]
 oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
 asm = ["sha1-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
+# Use assembly backend for LoongArch64 targets
+# WARNING: Bumps MSRV to 1.72. This feature SHOULD NOT be enabled by library crates
+loongarch64_asm = []
 compress = [] # Expose compress function
 force-soft = [] # Force software implementation
 

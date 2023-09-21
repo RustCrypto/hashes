@@ -132,6 +132,18 @@ jobs:
       - uses: msys2/setup-msys2@v2
       - run: cargo test --target ${{ matrix.target }}
 
+  # Build-only test of the LoongArch64 assembly backend
+  loongarch64_asm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.72
+          targets: loongarch64-unknown-linux-gnu
+      - run: cargo build --target loongarch64-unknown-linux-gnu --features loongarch64_asm
+
   # Cross-compiled tests
   cross:
     strategy:
