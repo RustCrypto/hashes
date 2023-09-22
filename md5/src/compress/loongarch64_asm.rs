@@ -1,11 +1,5 @@
 //! LoongArch64 assembly backend
 
-use core::arch::asm;
-
-#[path = "consts.rs"]
-mod consts;
-use consts::*;
-
 macro_rules! c {
     ($($l:expr)*) => {
         concat!($($l ,)*)
@@ -74,7 +68,7 @@ pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
     }
 
     unsafe {
-        asm!(
+        core::arch::asm!(
             "42:",
 
             "move    $t0, $a4",
@@ -99,6 +93,7 @@ pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
             round0!("$t3", "$t0", "$t1", "$t2", 13, 12, 13),
             round0!("$t2", "$t3", "$t0", "$t1", 14, 17, 14),
             round0!("$t1", "$t2", "$t3", "$t0", 15, 22, 15),
+
             round1!("$t0", "$t1", "$t2", "$t3",  1,  5, 16),
             round1!("$t3", "$t0", "$t1", "$t2",  6,  9, 17),
             round1!("$t2", "$t3", "$t0", "$t1", 11, 14, 18),
@@ -114,6 +109,7 @@ pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
             round1!("$t0", "$t1", "$t2", "$t3", 13,  5, 28),
             round1!("$t3", "$t0", "$t1", "$t2",  2,  9, 29),
             round1!("$t2", "$t3", "$t0", "$t1",  7, 14, 30),
+
             round1!("$t1", "$t2", "$t3", "$t0", 12, 20, 31),
             round2!("$t0", "$t1", "$t2", "$t3",  5,  4, 32),
             round2!("$t3", "$t0", "$t1", "$t2",  8, 11, 33),
@@ -131,6 +127,7 @@ pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
             round2!("$t3", "$t0", "$t1", "$t2", 12, 11, 45),
             round2!("$t2", "$t3", "$t0", "$t1", 15, 16, 46),
             round2!("$t1", "$t2", "$t3", "$t0",  2, 23, 47),
+
             round3!("$t0", "$t1", "$t2", "$t3",  0,  6, 48),
             round3!("$t3", "$t0", "$t1", "$t2",  7, 10, 49),
             round3!("$t2", "$t3", "$t0", "$t1", 14, 15, 50),
@@ -158,14 +155,13 @@ pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
             "addi.d  $a2, $a2, -1",
             "bnez    $a2, 42b",
 
+            inout("$a1") blocks.as_ptr() => _,
+            inout("$a2") blocks.len() => _,
+            in("$a3") crate::consts::RC.as_ptr(),
             inout("$a4") state[0],
             inout("$a5") state[1],
             inout("$a6") state[2],
             inout("$a7") state[3],
-            inout("$a1") blocks.as_ptr() => _,
-            inout("$a2") blocks.len() => _,
-
-            in("$a3") RC.as_ptr(),
 
             // Clobbers
             out("$t0") _,

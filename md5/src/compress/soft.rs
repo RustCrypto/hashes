@@ -1,9 +1,6 @@
 #![allow(clippy::many_single_char_names, clippy::unreadable_literal)]
+use crate::consts::RC;
 use core::convert::TryInto;
-
-#[path = "consts.rs"]
-mod consts;
-use consts::*;
 
 #[inline(always)]
 fn op_f(w: u32, x: u32, y: u32, z: u32, m: u32, c: u32, s: u32) -> u32 {

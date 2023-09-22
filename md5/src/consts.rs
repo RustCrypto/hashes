@@ -1,4 +1,8 @@
-pub const RC: [u32; 64] = [
+pub(crate) const STATE_INIT: [u32; 4] = [0x6745_2301, 0xEFCD_AB89, 0x98BA_DCFE, 0x1032_5476];
+
+// TODO: remove `allow` on deprecation of `md5-asm`
+#[allow(dead_code)]
+pub(crate) static RC: [u32; 64] = [
     // round 1
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
     0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
