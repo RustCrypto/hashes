@@ -276,9 +276,12 @@ macro_rules! blake2_mac_impl {
         {
             /// Create new instance using provided key, salt, and persona.
             ///
-            /// Key length should not be bigger than block size, salt and persona
-            /// length should not be bigger than quarter of block size. If any
-            /// of those conditions is false the method will return an error.
+            /// # Errors
+            ///
+            /// Key length should not be empty or bigger than the block size and
+            /// the salt and persona length should not be bigger than quarter of
+            /// block size. If any of those conditions is false the method will
+            /// return an error.
             #[inline]
             pub fn new_with_salt_and_personal(
                 key: &[u8],
@@ -288,7 +291,7 @@ macro_rules! blake2_mac_impl {
                 let kl = key.len();
                 let bs = <$hash as BlockSizeUser>::BlockSize::USIZE;
                 let qbs = bs / 4;
-                if kl > bs || salt.len() > qbs || persona.len() > qbs {
+                if kl == 0 || kl > bs || salt.len() > qbs || persona.len() > qbs {
                     return Err(InvalidLength);
                 }
                 let mut padded_key = Block::<$hash>::default();
