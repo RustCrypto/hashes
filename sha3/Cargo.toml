@@ -28,6 +28,7 @@ hex-literal = "0.2.2"
 default = ["std"]
 std = ["digest/std"]
 
+zeroize = ["dep:zeroize"]
 asm = ["keccak/asm"] # Enable ASM (currently ARMv8 only). WARNING: Bumps MSRV to 1.59
 oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
 reset = [] # Enable reset functionality
