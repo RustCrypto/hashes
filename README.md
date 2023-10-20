@@ -93,7 +93,7 @@ Now you can write the following code:
 ```rust
 use sha2::{Sha256, Digest};
 
-let mut hasher = Sha256::new();
+let mut hasher = Sha256::default();
 let data = b"Hello world!";
 hasher.update(data);
 // `update` can be called repeatedly and is generic over `AsRef<[u8]>`
@@ -120,7 +120,7 @@ Instead of calling `update`, you also can use a chained approach:
 ```rust
 use sha2::{Sha256, Digest};
 
-let hash = Sha256::new()
+let hash = Sha256::default()
     .chain_update(b"Hello world!")
     .chain_update("String data")
     .finalize();
@@ -143,7 +143,7 @@ use sha2::{Sha256, Digest};
 use std::{fs, io};
 
 let mut file = fs::File::open(&path)?;
-let mut hasher = Sha256::new();
+let mut hasher = Sha256::default();
 let n = io::copy(&mut file, &mut hasher)?;
 let hash = hasher.finalize();
 ```
@@ -162,7 +162,7 @@ use sha2::{Sha256, Sha512, Digest};
 // Toy example, do not use it in practice!
 // Instead use crates from: https://github.com/RustCrypto/password-hashing
 fn hash_password<D: Digest>(password: &str, salt: &str, output: &mut [u8]) {
-    let mut hasher = D::new();
+    let mut hasher = D::default();
     hasher.update(password.as_bytes());
     hasher.update(b"$");
     hasher.update(salt.as_bytes());
