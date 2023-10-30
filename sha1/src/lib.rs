@@ -17,7 +17,7 @@
 //! use hex_literal::hex;
 //! use sha1::{Sha1, Digest};
 //!
-//! let result = Sha1::new_with_prefix(b"hello world").finalize();
+//! let result = Sha1::digest(b"hello world");
 //! assert_eq!(result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
 //! ```
 //!
