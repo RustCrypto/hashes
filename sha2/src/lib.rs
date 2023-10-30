@@ -23,7 +23,7 @@
 //! ")[..]);
 //! ```
 //!
-//! ## Verbose
+//! ## Incremental API
 //!
 //! ```rust
 //! use hex_literal::hex;

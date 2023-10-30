@@ -21,7 +21,7 @@
 //! assert_eq!(result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
 //! ```
 //!
-//! ## Verbose
+//! ## Incremental API
 //!
 //! ```rust
 //! use hex_literal::hex;
