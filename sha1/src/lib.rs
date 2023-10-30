@@ -11,7 +11,7 @@
 //!
 //! # Usage
 //!
-//! ## Simple
+//! ## One-shot API
 //!
 //! ```rust
 //! use hex_literal::hex;
