@@ -21,7 +21,7 @@ hex-literal = "0.2.2"
 
 [features]
 default = ["std"]
-std = ["digest/std", "zeroize_crate?/std"]
+std = ["digest/std"]
 reset = [] # Enable reset functionality
 simd = []
 simd_opt = ["simd"]

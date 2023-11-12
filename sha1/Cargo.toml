@@ -26,7 +26,7 @@ hex-literal = "0.2.2"
 
 [features]
 default = ["std"]
-std = ["digest/std", "zeroize_crate?/std"]
+std = ["digest/std"]
 oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
 asm = ["sha1-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
 # Use assembly backend for LoongArch64 targets
