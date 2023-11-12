@@ -7,6 +7,9 @@
 
 #![allow(dead_code, non_camel_case_types)]
 
+#[cfg(feature = "zeroize")]
+use zeroize::Zeroize;
+
 use crate::as_bytes::Safe;
 
 #[cfg(feature = "simd")]
@@ -14,6 +17,7 @@ macro_rules! decl_simd {
     ($($decl:item)*) => {
         $(
             #[derive(Clone, Copy, Debug)]
+            #[cfg_attr(feature = "zeroize", derive(Zeroize))]
             #[repr(simd)]
             $decl
         )*
@@ -25,6 +29,7 @@ macro_rules! decl_simd {
     ($($decl:item)*) => {
         $(
             #[derive(Clone, Copy, Debug)]
+            #[cfg_attr(feature = "zeroize", derive(Zeroize))]
             #[repr(C)]
             $decl
         )*

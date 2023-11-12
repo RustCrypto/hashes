@@ -16,6 +16,8 @@ use digest::{
 /// i.e. 224 and 256 bits respectively.
 #[derive(Clone)]
 pub struct Sha256VarCore {
+    #[cfg(feature = "zeroize")]
+    output_size: usize,
     state: consts::State256,
     block_len: u64,
 }
@@ -53,7 +55,12 @@ impl VariableOutputCore for Sha256VarCore {
             _ => return Err(InvalidOutputSize),
         };
         let block_len = 0;
-        Ok(Self { state, block_len })
+        Ok(Self {
+            #[cfg(feature = "zeroize")]
+            output_size,
+            state,
+            block_len,
+        })
     }
 
     #[inline]
@@ -75,6 +82,20 @@ impl AlgorithmName for Sha256VarCore {
     }
 }
 
+#[cfg(feature = "zeroize")]
+impl zeroize::Zeroize for Sha256VarCore {
+    fn zeroize(&mut self) {
+        self.state.zeroize();
+        self.block_len.zeroize();
+
+        // Because the hasher is now in an invalid state, restore the starting state
+        // This makes Zeroize equivalent to reset *yet using a zero-write the compiler hopefully
+        // shouldn't be able to optimize out*
+        // The following lines may be optimized out if no further use occurs, which is fine
+        self.state = Self::new(self.output_size).unwrap().state;
+    }
+}
+
 impl fmt::Debug for Sha256VarCore {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -88,6 +109,8 @@ impl fmt::Debug for Sha256VarCore {
 /// i.e. 224, 256, 384, and 512 bits respectively.
 #[derive(Clone)]
 pub struct Sha512VarCore {
+    #[cfg(feature = "zeroize")]
+    output_size: usize,
     state: consts::State512,
     block_len: u128,
 }
@@ -127,7 +150,12 @@ impl VariableOutputCore for Sha512VarCore {
             _ => return Err(InvalidOutputSize),
         };
         let block_len = 0;
-        Ok(Self { state, block_len })
+        Ok(Self {
+            #[cfg(feature = "zeroize")]
+            output_size,
+            state,
+            block_len,
+        })
     }
 
     #[inline]
@@ -146,6 +174,15 @@ impl AlgorithmName for Sha512VarCore {
     #[inline]
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Sha512")
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl zeroize::Zeroize for Sha512VarCore {
+    fn zeroize(&mut self) {
+        self.state.zeroize();
+        self.block_len.zeroize();
+        self.state = Self::new(self.output_size).unwrap().state;
     }
 }
 

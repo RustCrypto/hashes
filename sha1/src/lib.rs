@@ -150,6 +150,20 @@ impl AlgorithmName for Sha1Core {
     }
 }
 
+#[cfg(feature = "zeroize")]
+impl zeroize::Zeroize for Sha1Core {
+    fn zeroize(&mut self) {
+        self.h.zeroize();
+        self.block_len.zeroize();
+
+        // Because the hasher is now in an invalid state, restore the starting state
+        // This makes Zeroize equivalent to reset *yet using a zero-write the compiler hopefully
+        // shouldn't be able to optimize out*
+        // The following lines may be optimized out if no further use occurs, which is fine
+        self.h = Self::default().h;
+    }
+}
+
 impl fmt::Debug for Sha1Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Sha1Core { ... }")

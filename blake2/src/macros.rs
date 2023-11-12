@@ -9,7 +9,7 @@ macro_rules! blake2_impl {
         pub struct $name {
             h: [$vec; 2],
             t: u64,
-            #[cfg(feature = "reset")]
+            #[cfg(any(feature = "reset", feature = "zeroize"))]
             h0: [$vec; 2],
         }
 
@@ -86,7 +86,7 @@ macro_rules! blake2_impl {
                     Self::iv1() ^ $vec::new(p[4], p[5], p[6], p[7]),
                 ];
                 $name {
-                    #[cfg(feature = "reset")]
+                    #[cfg(any(feature = "reset", feature = "zeroize"))]
                     h0: h.clone(),
                     h,
                     t: 0,
@@ -240,6 +240,20 @@ macro_rules! blake2_impl {
             #[inline]
             fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str($alg_name)
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl zeroize::Zeroize for $name {
+            fn zeroize(&mut self) {
+                self.h.zeroize();
+                self.t.zeroize();
+
+                // Because the hasher is now in an invalid state, restore the starting state
+                // This makes Zeroize equivalent to reset *yet using a zero-write the compiler
+                // hopefully shouldn't be able to optimize out*
+                // The following lines may be optimized out if no further use occurs, which is fine
+                self.h = self.h0;
             }
         }
 
