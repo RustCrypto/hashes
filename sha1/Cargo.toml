@@ -34,7 +34,7 @@ asm = ["sha1-asm"] # WARNING: this feature SHOULD NOT be enabled by library crat
 loongarch64_asm = []
 compress = [] # Expose compress function
 force-soft = [] # Force software implementation
-zeroize = ["zeroize_crate"] # Implement Zeroize for Digest implementors
+zeroize = ["zeroize_crate"] # Implement ZeroizeOnDrop for Digest implementors
 
 [package.metadata.docs.rs]
 all-features = true

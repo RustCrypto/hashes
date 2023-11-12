@@ -21,16 +21,9 @@ impl Default for Sha3State {
 }
 
 #[cfg(feature = "zeroize")]
-impl Zeroize for Sha3State {
-    fn zeroize(&mut self) {
-        self.state.zeroize();
-    }
-}
-
-#[cfg(feature = "zeroize")]
 impl Drop for Sha3State {
     fn drop(&mut self) {
-        self.zeroize();
+        self.state.zeroize();
     }
 }
 

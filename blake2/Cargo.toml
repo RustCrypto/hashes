@@ -27,4 +27,4 @@ simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
 size_opt = [] # Optimize for code size. Removes some `inline(always)`
-zeroize = ["zeroize_crate"] # Implement Zeroize for Digest implementors
+zeroize = ["zeroize_crate"] # Implement ZeroizeOnDrop for Digest implementors
