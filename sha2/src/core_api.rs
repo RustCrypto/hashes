@@ -78,13 +78,13 @@ impl AlgorithmName for Sha256VarCore {
 #[cfg(feature = "zeroize")]
 impl Drop for Sha256VarCore {
     fn drop(&mut self) {
-        use zeroize_crate::Zeroize;
+        use zeroize::Zeroize;
         self.state.zeroize();
         self.block_len.zeroize();
     }
 }
 #[cfg(feature = "zeroize")]
-impl zeroize_crate::ZeroizeOnDrop for Sha256VarCore {}
+impl zeroize::ZeroizeOnDrop for Sha256VarCore {}
 
 impl fmt::Debug for Sha256VarCore {
     #[inline]
@@ -163,13 +163,13 @@ impl AlgorithmName for Sha512VarCore {
 #[cfg(feature = "zeroize")]
 impl Drop for Sha512VarCore {
     fn drop(&mut self) {
-        use zeroize_crate::Zeroize;
+        use zeroize::Zeroize;
         self.state.zeroize();
         self.block_len.zeroize();
     }
 }
 #[cfg(feature = "zeroize")]
-impl zeroize_crate::ZeroizeOnDrop for Sha512VarCore {}
+impl zeroize::ZeroizeOnDrop for Sha512VarCore {}
 
 impl fmt::Debug for Sha512VarCore {
     #[inline]

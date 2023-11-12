@@ -13,7 +13,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = { version = "0.10.7", features = ["mac"] }
-zeroize_crate = { package = "zeroize", version = "1", default-features = false, optional = true }
+zeroize = { version = "1", default-features = false, optional = true }
 
 [dev-dependencies]
 digest = { version = "0.10.7", features = ["dev"] }
@@ -27,4 +27,3 @@ simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
 size_opt = [] # Optimize for code size. Removes some `inline(always)`
-zeroize = ["zeroize_crate"] # Implement ZeroizeOnDrop for Digest implementors

@@ -153,13 +153,13 @@ impl AlgorithmName for Sha1Core {
 #[cfg(feature = "zeroize")]
 impl Drop for Sha1Core {
     fn drop(&mut self) {
-        use zeroize_crate::Zeroize;
+        use zeroize::Zeroize;
         self.h.zeroize();
         self.block_len.zeroize();
     }
 }
 #[cfg(feature = "zeroize")]
-impl zeroize_crate::ZeroizeOnDrop for Sha1Core {}
+impl zeroize::ZeroizeOnDrop for Sha1Core {}
 
 impl fmt::Debug for Sha1Core {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -246,13 +246,13 @@ macro_rules! blake2_impl {
         #[cfg(feature = "zeroize")]
         impl Drop for $name {
             fn drop(&mut self) {
-                use zeroize_crate::Zeroize;
+                use zeroize::Zeroize;
                 self.h.zeroize();
                 self.t.zeroize();
             }
         }
         #[cfg(feature = "zeroize")]
-        impl zeroize_crate::ZeroizeOnDrop for $name {}
+        impl zeroize::ZeroizeOnDrop for $name {}
 
         impl fmt::Debug for $name {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -51,7 +51,7 @@ decl_simd! {
 }
 
 #[cfg(feature = "zeroize")]
-impl<T: zeroize_crate::Zeroize> zeroize_crate::Zeroize for Simd4<T> {
+impl<T: zeroize::Zeroize> zeroize::Zeroize for Simd4<T> {
     fn zeroize(&mut self) {
         self.0.zeroize();
         self.1.zeroize();

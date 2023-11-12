@@ -14,7 +14,7 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 digest = "0.10.7"
 cfg-if = "1.0"
-zeroize_crate = { package = "zeroize", version = "1", default-features = false, optional = true }
+zeroize = { version = "1", default-features = false, optional = true }
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64"))'.dependencies]
 cpufeatures = "0.2"
@@ -34,7 +34,6 @@ asm = ["sha1-asm"] # WARNING: this feature SHOULD NOT be enabled by library crat
 loongarch64_asm = []
 compress = [] # Expose compress function
 force-soft = [] # Force software implementation
-zeroize = ["zeroize_crate"] # Implement ZeroizeOnDrop for Digest implementors
 
 [package.metadata.docs.rs]
 all-features = true
