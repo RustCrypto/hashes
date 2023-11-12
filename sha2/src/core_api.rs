@@ -83,7 +83,7 @@ impl AlgorithmName for Sha256VarCore {
 }
 
 #[cfg(feature = "zeroize")]
-impl zeroize::Zeroize for Sha256VarCore {
+impl zeroize_crate::Zeroize for Sha256VarCore {
     fn zeroize(&mut self) {
         self.state.zeroize();
         self.block_len.zeroize();
@@ -178,7 +178,7 @@ impl AlgorithmName for Sha512VarCore {
 }
 
 #[cfg(feature = "zeroize")]
-impl zeroize::Zeroize for Sha512VarCore {
+impl zeroize_crate::Zeroize for Sha512VarCore {
     fn zeroize(&mut self) {
         self.state.zeroize();
         self.block_len.zeroize();
