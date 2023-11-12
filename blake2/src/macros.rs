@@ -244,7 +244,7 @@ macro_rules! blake2_impl {
         }
 
         #[cfg(feature = "zeroize")]
-        impl zeroize::Zeroize for $name {
+        impl zeroize_crate::Zeroize for $name {
             fn zeroize(&mut self) {
                 self.h.zeroize();
                 self.t.zeroize();

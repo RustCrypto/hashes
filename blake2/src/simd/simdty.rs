@@ -7,9 +7,6 @@
 
 #![allow(dead_code, non_camel_case_types)]
 
-#[cfg(feature = "zeroize")]
-use zeroize::Zeroize;
-
 use crate::as_bytes::Safe;
 
 #[cfg(feature = "simd")]
@@ -17,7 +14,6 @@ macro_rules! decl_simd {
     ($($decl:item)*) => {
         $(
             #[derive(Clone, Copy, Debug)]
-            #[cfg_attr(feature = "zeroize", derive(Zeroize))]
             #[repr(simd)]
             $decl
         )*
@@ -29,7 +25,6 @@ macro_rules! decl_simd {
     ($($decl:item)*) => {
         $(
             #[derive(Clone, Copy, Debug)]
-            #[cfg_attr(feature = "zeroize", derive(Zeroize))]
             #[repr(C)]
             $decl
         )*
@@ -53,6 +48,16 @@ decl_simd! {
                          pub T, pub T, pub T, pub T,
                          pub T, pub T, pub T, pub T,
                          pub T, pub T, pub T, pub T);
+}
+
+#[cfg(feature = "zeroize")]
+impl<T: zeroize_crate::Zeroize> zeroize_crate::Zeroize for Simd4<T> {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+        self.1.zeroize();
+        self.2.zeroize();
+        self.3.zeroize();
+    }
 }
 
 pub type u64x2 = Simd2<u64>;

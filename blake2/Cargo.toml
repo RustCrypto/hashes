@@ -13,7 +13,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = { version = "0.10.7", features = ["mac"] }
-zeroize = { version = "1", default-features = false, features = ["derive"], optional = true }
+zeroize_crate = { package = "zeroize", version = "1", default-features = false, optional = true }
 
 [dev-dependencies]
 digest = { version = "0.10.7", features = ["dev"] }
@@ -21,10 +21,10 @@ hex-literal = "0.2.2"
 
 [features]
 default = ["std"]
-std = ["digest/std", "zeroize?/std"]
+std = ["digest/std", "zeroize_crate?/std"]
 reset = [] # Enable reset functionality
 simd = []
 simd_opt = ["simd"]
 simd_asm = ["simd_opt"]
 size_opt = [] # Optimize for code size. Removes some `inline(always)`
-zeroize = ["dep:zeroize"] # Implement Zeroize for Digest implementors
+zeroize = ["zeroize_crate"] # Implement Zeroize for Digest implementors
