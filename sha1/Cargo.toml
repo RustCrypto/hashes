@@ -14,7 +14,7 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 digest = "0.10.7"
 cfg-if = "1.0"
-zeroize = { version = "1", default-features = false, optional = true }
+zeroize_crate = { package = "zeroize", version = "1", default-features = false, optional = true }
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64"))'.dependencies]
 cpufeatures = "0.2"
@@ -26,7 +26,7 @@ hex-literal = "0.2.2"
 
 [features]
 default = ["std"]
-std = ["digest/std", "zeroize?/std"]
+std = ["digest/std", "zeroize_crate?/std"]
 oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
 asm = ["sha1-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
 # Use assembly backend for LoongArch64 targets
@@ -34,7 +34,7 @@ asm = ["sha1-asm"] # WARNING: this feature SHOULD NOT be enabled by library crat
 loongarch64_asm = []
 compress = [] # Expose compress function
 force-soft = [] # Force software implementation
-zeroize = ["dep:zeroize"] # Implement Zeroize for Digest implementors
+zeroize = ["zeroize_crate"] # Implement Zeroize for Digest implementors
 
 [package.metadata.docs.rs]
 all-features = true

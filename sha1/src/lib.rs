@@ -151,7 +151,7 @@ impl AlgorithmName for Sha1Core {
 }
 
 #[cfg(feature = "zeroize")]
-impl zeroize::Zeroize for Sha1Core {
+impl zeroize_crate::Zeroize for Sha1Core {
     fn zeroize(&mut self) {
         self.h.zeroize();
         self.block_len.zeroize();
