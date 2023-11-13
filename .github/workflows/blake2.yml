@@ -66,6 +66,8 @@ jobs:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
         working-directory: ${{ github.workflow }}
+        nightly_cmd: cargo build --benches && cargo hack test --release --feature-powerset
+        stable_cmd:
 
   simd:
     runs-on: ubuntu-latest
