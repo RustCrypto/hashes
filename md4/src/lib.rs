@@ -135,7 +135,7 @@ pub type Md4 = CoreWrapper<Md4Core>;
 
 fn compress(state: &mut [u32; 4], input: &Block<Md4Core>) {
     fn f(x: u32, y: u32, z: u32) -> u32 {
-        (x & y) | (!x & z)
+        z ^ (x & (y ^ z))
     }
 
     fn g(x: u32, y: u32, z: u32) -> u32 {
@@ -146,22 +146,11 @@ fn compress(state: &mut [u32; 4], input: &Block<Md4Core>) {
         x ^ y ^ z
     }
 
-    fn op1(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
+    fn op<F>(f: F, a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32
+    where
+        F: Fn(u32, u32, u32) -> u32,
+    {
         a.wrapping_add(f(b, c, d)).wrapping_add(k).rotate_left(s)
-    }
-
-    fn op2(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-        a.wrapping_add(g(b, c, d))
-            .wrapping_add(k)
-            .wrapping_add(0x5A82_7999)
-            .rotate_left(s)
-    }
-
-    fn op3(a: u32, b: u32, c: u32, d: u32, k: u32, s: u32) -> u32 {
-        a.wrapping_add(h(b, c, d))
-            .wrapping_add(k)
-            .wrapping_add(0x6ED9_EBA1)
-            .rotate_left(s)
     }
 
     let mut a = state[0];
@@ -174,29 +163,28 @@ fn compress(state: &mut [u32; 4], input: &Block<Md4Core>) {
     for (o, chunk) in data.iter_mut().zip(input.chunks_exact(4)) {
         *o = u32::from_le_bytes(chunk.try_into().unwrap());
     }
-
     // round 1
     for &i in &[0, 4, 8, 12] {
-        a = op1(a, b, c, d, data[i], 3);
-        d = op1(d, a, b, c, data[i + 1], 7);
-        c = op1(c, d, a, b, data[i + 2], 11);
-        b = op1(b, c, d, a, data[i + 3], 19);
+        a = op(f, a, b, c, d, data[i], 3);
+        d = op(f, d, a, b, c, data[i + 1], 7);
+        c = op(f, c, d, a, b, data[i + 2], 11);
+        b = op(f, b, c, d, a, data[i + 3], 19);
     }
 
     // round 2
     for i in 0..4 {
-        a = op2(a, b, c, d, data[i], 3);
-        d = op2(d, a, b, c, data[i + 4], 5);
-        c = op2(c, d, a, b, data[i + 8], 9);
-        b = op2(b, c, d, a, data[i + 12], 13);
+        a = op(g, a, b, c, d, data[i].wrapping_add(0x5a827999), 3);
+        d = op(g, d, a, b, c, data[i + 4].wrapping_add(0x5a827999), 5);
+        c = op(g, c, d, a, b, data[i + 8].wrapping_add(0x5a827999), 9);
+        b = op(g, b, c, d, a, data[i + 12].wrapping_add(0x5a827999), 13);
     }
 
     // round 3
     for &i in &[0, 2, 1, 3] {
-        a = op3(a, b, c, d, data[i], 3);
-        d = op3(d, a, b, c, data[i + 8], 9);
-        c = op3(c, d, a, b, data[i + 4], 11);
-        b = op3(b, c, d, a, data[i + 12], 15);
+        a = op(h, a, b, c, d, data[i].wrapping_add(0x6ed9eba1), 3);
+        d = op(h, d, a, b, c, data[i + 8].wrapping_add(0x6ed9eba1), 9);
+        c = op(h, c, d, a, b, data[i + 4].wrapping_add(0x6ed9eba1), 11);
+        b = op(h, b, c, d, a, data[i + 12].wrapping_add(0x6ed9eba1), 15);
     }
 
     state[0] = state[0].wrapping_add(a);
