@@ -167,7 +167,7 @@ pub type BeltHash = CoreWrapper<BeltHashCore>;
 
 /// Compression function described in the section 6.3.2
 #[inline(always)]
-fn belt_compress(x1: [u32; 4], x2: [u32; 4], x34: [u32; 8]) -> ([u32; 4], [u32; 8]) {
+pub fn belt_compress(x1: [u32; 4], x2: [u32; 4], x34: [u32; 8]) -> ([u32; 4], [u32; 8]) {
     let x3 = [x34[0], x34[1], x34[2], x34[3]];
     let x4 = [x34[4], x34[5], x34[6], x34[7]];
 
