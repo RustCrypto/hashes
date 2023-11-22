@@ -1,6 +1,6 @@
 [package]
 name = "belt-hash"
-version = "0.1.0"
+version = "0.1.1"
 description = "BelT hash function (STB 34.101.31-2020)"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
