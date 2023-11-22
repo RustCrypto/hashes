@@ -42,6 +42,9 @@ jobs:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
       - uses: RustCrypto/actions/cargo-hack-install@master
+      # TODO: remove after bump to MSRV 1.60+
+      - run: cargo update
+      - run: cargo update -p zeroize --precise 1.6.0
       - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
 
   minimal-versions:
@@ -64,4 +67,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
       - uses: RustCrypto/actions/cargo-hack-install@master
+      # TODO: remove after bump to MSRV 1.60+
+      - run: cargo update
+      - run: cargo update -p zeroize --precise 1.6.0
       - run: cargo hack test --feature-powerset
