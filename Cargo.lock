@@ -3,6 +3,12 @@
 version = 3
 
 [[package]]
+name = "arrayvec"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
+
+[[package]]
 name = "blake2"
 version = "0.10.6"
 dependencies = [
@@ -280,6 +286,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 name = "tiger"
 version = "0.2.1"
 dependencies = [
+ "arrayvec",
  "digest",
  "hex-literal",
 ]
