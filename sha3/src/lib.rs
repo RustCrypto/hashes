@@ -79,7 +79,7 @@ use digest::{
         ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
         XofReaderCoreWrapper,
     },
-    generic_array::typenum::Unsigned,
+    array::typenum::Unsigned,
     HashMarker, Output,
 };
 

@@ -1,12 +1,14 @@
 [workspace]
-# This causes issues like https://github.com/RustCrypto/hashes/issues/396
-# Do not uncomment it until MSRV is bumped to 1.51 or higher.
-# resolver = "2"
+resolver = "2"
 members = [
+    "ascon-hash",
+    "belt-hash",
     "blake2",
     "fsb",
     "gost94",
     "groestl",
+    "jh",
+    "k12",
     "md2",
     "md4",
     "md5",
@@ -15,18 +17,16 @@ members = [
     "sha2",
     "sha3",
     "shabal",
+    "skein",
     "sm3",
     "streebog",
     "tiger",
     "whirlpool",
 ]
-exclude = [
-    "ascon-hash",
-    "belt-hash",
-    "jh",
-    "k12",
-    "skein",
-]
 
 [profile.dev]
 opt-level = 2
+
+[patch.crates-io]
+digest = { git = "https://github.com/RustCrypto/traits.git" }
+hybrid-array = { git = "https://github.com/RustCrypto/utils.git" }

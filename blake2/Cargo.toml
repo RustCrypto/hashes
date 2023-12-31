@@ -1,22 +1,23 @@
 [package]
 name = "blake2"
-version = "0.10.6"
+version = "0.11.0-pre"
 description = "BLAKE2 hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
 documentation = "https://docs.rs/blake2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+rust-version = "1.65"
 
 [dependencies]
-digest = { version = "0.10.7", features = ["mac"] }
+digest = { version = "=0.11.0-pre", features = ["mac"] }
 
 [dev-dependencies]
-digest = { version = "0.10.7", features = ["dev"] }
-hex-literal = "0.2.2"
+digest = { version = "=0.11.0-pre", features = ["dev"] }
+hex-literal = "0.4"
 
 [features]
 default = ["std"]

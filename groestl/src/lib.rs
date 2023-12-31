@@ -12,7 +12,7 @@
 //! // process input message
 //! hasher.update(b"my message");
 //!
-//! // acquire hash digest in the form of GenericArray,
+//! // acquire hash digest in the form of Array,
 //! // which in this case is equivalent to [u8; 32]
 //! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("

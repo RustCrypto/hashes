@@ -55,7 +55,7 @@ use digest::{
         TruncSide, UpdateCore, VariableOutputCore,
     },
     crypto_common::{BlockSizeUser, OutputSizeUser},
-    generic_array::typenum::{Unsigned, U28, U32, U48, U64},
+    array::typenum::{Unsigned, U28, U32, U48, U64},
     HashMarker, InvalidOutputSize, Output,
 };
 

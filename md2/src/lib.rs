@@ -12,7 +12,7 @@
 //! // process input message
 //! hasher.update(b"hello world");
 //!
-//! // acquire hash digest in the form of GenericArray,
+//! // acquire hash digest in the form of Array,
 //! // which in this case is equivalent to [u8; 16]
 //! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("d9cce882ee690a5c1ce70beff3a78c77"));
@@ -109,10 +109,10 @@ impl FixedOutputCore for Md2Core {
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let pos = buffer.get_pos();
         let rem = buffer.remaining() as u8;
-        let block = buffer.pad_with_zeros();
+        let mut block = buffer.pad_with_zeros();
         block[pos..].iter_mut().for_each(|b| *b = rem);
 
-        self.compress(block);
+        self.compress(&block);
         let checksum = self.checksum;
         self.compress(&checksum);
         out.copy_from_slice(&self.x[0..16]);

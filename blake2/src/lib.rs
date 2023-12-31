@@ -92,7 +92,7 @@ use digest::{
         VariableOutputCore,
     },
     crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
-    generic_array::{ArrayLength, GenericArray},
+    array::{ArraySize, Array},
     typenum::{IsLessOrEqual, LeEq, NonZero, Unsigned},
     FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update,
 };
