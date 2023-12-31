@@ -1,7 +1,7 @@
 #![feature(test)]
 extern crate test;
 
-use digest::{bench_update, array::typenum::U128};
+use digest::{array::typenum::U128, bench_update};
 use skein::Skein1024;
 use test::Bencher;
 

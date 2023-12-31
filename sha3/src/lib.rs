@@ -72,6 +72,7 @@ use core::fmt;
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
+    array::typenum::Unsigned,
     block_buffer::Eager,
     consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72},
     core_api::{
@@ -79,7 +80,6 @@ use digest::{
         ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
         XofReaderCoreWrapper,
     },
-    array::typenum::Unsigned,
     HashMarker, Output,
 };
 

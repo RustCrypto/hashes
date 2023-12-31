@@ -84,6 +84,7 @@ pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt, marker::PhantomData, ops::Div};
 use digest::{
+    array::{Array, ArraySize},
     block_buffer::{Lazy, LazyBuffer},
     consts::{U128, U32, U4, U64},
     core_api::{
@@ -92,7 +93,6 @@ use digest::{
         VariableOutputCore,
     },
     crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
-    array::{ArraySize, Array},
     typenum::{IsLessOrEqual, LeEq, NonZero, Unsigned},
     FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update,
 };
