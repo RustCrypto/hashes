@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.56.0
+        msrv: 1.65.0
 
   build:
     needs: set-msrv
@@ -42,9 +42,6 @@ jobs:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
       - uses: RustCrypto/actions/cargo-hack-install@master
-      # TODO: remove after bump to MSRV 1.60+
-      - run: cargo update
-      - run: cargo update -p zeroize --precise 1.6.0
       - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
 
   minimal-versions:
@@ -67,7 +64,4 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
       - uses: RustCrypto/actions/cargo-hack-install@master
-      # TODO: remove after bump to MSRV 1.60+
-      - run: cargo update
-      - run: cargo update -p zeroize --precise 1.6.0
       - run: cargo hack test --feature-powerset

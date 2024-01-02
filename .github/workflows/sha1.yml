@@ -21,9 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        # Crate supports MSRV 1.41 without `oid` feature. We test true MSRV
-        # in the `test-msrv` job.
-        msrv: 1.57.0
+        msrv: 1.65.0
 
   # Builds for no_std platforms
   build:
@@ -115,9 +113,8 @@ jobs:
       matrix:
         include:
           # 64-bit Windows (GNU)
-          # TODO(tarcieri): try re-enabling this when we bump MSRV
-          #- target: x86_64-pc-windows-gnu
-          #  toolchain: ${{needs.set-msrv.outputs.msrv}}
+          - target: x86_64-pc-windows-gnu
+            toolchain: ${{needs.set-msrv.outputs.msrv}}
           - target: x86_64-pc-windows-gnu
             rust: stable
 
@@ -149,7 +146,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.51.0 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - 1.65.0
           - stable
         target:
           - aarch64-unknown-linux-gnu
@@ -176,15 +173,3 @@ jobs:
           package: ${{ github.workflow }}
           target: ${{ matrix.target }}
           features: ${{ matrix.features }}
-
-  # TODO: remove on MSRV bump to 1.57 or higher
-  test-msrv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.41.0
-      - run: cargo test --no-default-features
-      - run: cargo test

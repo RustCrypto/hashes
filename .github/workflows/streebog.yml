@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.57.0
+        msrv: 1.65.0
 
   build:
     needs: set-msrv
@@ -65,17 +65,3 @@ jobs:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
         working-directory: ${{ github.workflow }}
-
-  # `oid` feature bumps MSRV to 1.57, so we temporarily split this job.
-  test-msrv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          profile: minimal
-          toolchain: 1.41.0
-          override: true
-      - run: cargo test --no-default-features
-      - run: cargo test
