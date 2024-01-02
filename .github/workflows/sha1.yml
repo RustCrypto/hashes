@@ -116,7 +116,7 @@ jobs:
           - target: x86_64-pc-windows-gnu
             toolchain: ${{needs.set-msrv.outputs.msrv}}
           - target: x86_64-pc-windows-gnu
-            rust: stable
+            toolchain: stable
 
     runs-on: windows-latest
     steps:
@@ -124,7 +124,7 @@ jobs:
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: ${{ matrix.toolchain }}
           targets: ${{ matrix.target }}
       - uses: msys2/setup-msys2@v2
       - run: cargo test --target ${{ matrix.target }}
