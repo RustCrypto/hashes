@@ -26,9 +26,9 @@ digest = { version = "=0.11.0-pre.3", features = ["dev"] }
 hex-literal = "0.4"
 
 [features]
-default = ["std"]
+default = ["oid", "std"]
 std = ["digest/std"]
 
-asm = ["keccak/asm"] # Enable ASM (currently ARMv8 only). WARNING: Bumps MSRV to 1.59
-oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
+asm = ["keccak/asm"] # Enable ASM (currently ARMv8 only).
+oid = ["digest/oid"] # Enable OID support.
 reset = [] # Enable reset functionality
