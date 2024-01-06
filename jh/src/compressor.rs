@@ -1,7 +1,7 @@
 #![allow(non_upper_case_globals)]
 
 use core::ptr;
-use digest::generic_array::{typenum::U64, GenericArray};
+use digest::array::{typenum::U64, Array};
 use simd::{dispatch, vec128_storage, AndNot, Machine, Swap64, VZip, Vec2};
 
 #[rustfmt::skip]
@@ -167,7 +167,7 @@ impl Compressor {
     }
 
     #[inline]
-    pub(crate) fn update(&mut self, data: &GenericArray<u8, U64>) {
+    pub(crate) fn update(&mut self, data: &Array<u8, U64>) {
         f8(unsafe { &mut self.cv }, data.as_ptr());
     }
 

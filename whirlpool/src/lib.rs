@@ -170,7 +170,7 @@ const BLOCK_SIZE: usize = <WhirlpoolCore as BlockSizeUser>::BlockSize::USIZE;
 
 #[inline(always)]
 fn convert(blocks: &[Block<WhirlpoolCore>]) -> &[[u8; BLOCK_SIZE]] {
-    // SAFETY: GenericArray<u8, U64> and [u8; 64] have
+    // SAFETY: Array<u8, U64> and [u8; 64] have
     // exactly the same memory layout
     let p = blocks.as_ptr() as *const [u8; BLOCK_SIZE];
     unsafe { core::slice::from_raw_parts(p, blocks.len()) }

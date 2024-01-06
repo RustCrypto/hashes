@@ -12,7 +12,7 @@
 //! // process input message
 //! hasher.update(b"hello world");
 //!
-//! // acquire hash digest in the form of GenericArray,
+//! // acquire hash digest in the form of Array,
 //! // which in this case is equivalent to [u8; 16]
 //! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("5eb63bbbe01eeed093cb22bb8f5acdc3"));
@@ -137,7 +137,7 @@ const BLOCK_SIZE: usize = <Md5Core as BlockSizeUser>::BlockSize::USIZE;
 
 #[inline(always)]
 fn convert(blocks: &[Block<Md5Core>]) -> &[[u8; BLOCK_SIZE]] {
-    // SAFETY: GenericArray<u8, U64> and [u8; 64] have
+    // SAFETY: Array<u8, U64> and [u8; 64] have
     // exactly the same memory layout
     let p = blocks.as_ptr() as *const [u8; BLOCK_SIZE];
     unsafe { core::slice::from_raw_parts(p, blocks.len()) }

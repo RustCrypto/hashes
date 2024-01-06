@@ -13,7 +13,7 @@
 //! // process input message
 //! hasher.update(b"hello world");
 //!
-//! // acquire hash digest in the form of GenericArray,
+//! // acquire hash digest in the form of Array,
 //! // which in this case is equivalent to [u8; 32]
 //! let result = hasher.finalize();
 //! let expected = hex!(
@@ -111,7 +111,7 @@ impl FixedOutputCore for BeltHashCore {
         let pos = buffer.get_pos();
         if pos != 0 {
             let block = buffer.pad_with_zeros();
-            self.compress_block(block);
+            self.compress_block(&block);
         }
         let bs = Self::BlockSize::USIZE as u128;
         let r = encode_r(8 * ((bs * self.r) + pos as u128));

@@ -18,10 +18,7 @@ fn ripemd128_1mil_a() {
     for _ in 0..1000 {
         h.update(&buf[..]);
     }
-    assert_eq!(
-        h.finalize(),
-        hex!("4a7f5723f954eba1216c9d8f6320431f").into()
-    );
+    assert_eq!(h.finalize(), hex!("4a7f5723f954eba1216c9d8f6320431f"));
 }
 
 #[test]
@@ -43,7 +40,7 @@ fn ripemd160_1mil_a() {
     }
     assert_eq!(
         h.finalize(),
-        hex!("52783243c1697bdbe16d37f97f68f08325dc1528").into()
+        hex!("52783243c1697bdbe16d37f97f68f08325dc1528")
     );
 }
 
@@ -66,7 +63,7 @@ fn ripemd256_1mil_a() {
     }
     assert_eq!(
         h.finalize(),
-        hex!("ac953744e10e31514c150d4d8d7b677342e33399788296e43ae4850ce4f97978").into()
+        hex!("ac953744e10e31514c150d4d8d7b677342e33399788296e43ae4850ce4f97978")
     );
 }
 
@@ -93,7 +90,7 @@ fn ripemd320_1mil_a() {
         hex!("
             bdee37f4371e20646b8b0d862dda16292ae36f40
             965e8c8509e63d1dbddecc503e2b63eb9245bb66
-        ").into()
+        ")
     );
 }
 

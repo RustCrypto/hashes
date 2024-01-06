@@ -18,7 +18,7 @@
 //! // process input message
 //! hasher.update(b"Hello world!");
 //!
-//! // acquire hash digest in the form of GenericArray,
+//! // acquire hash digest in the form of Array,
 //! // which in this case is equivalent to [u8; 20]
 //! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("7f772647d88750add82d8e1a7a3e5c0902a346a3"));

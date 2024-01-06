@@ -1,6 +1,6 @@
 [package]
 name = "ascon-hash"
-version = "0.2.0"
+version = "0.3.0-pre"
 description = "Implementation of the Ascon and AsconA hashes and XOFs"
 authors = [
     "Sebastian Ramacher <sebastian.ramacher@ait.ac.at>",
@@ -13,12 +13,10 @@ documentation = "https://docs.rs/ascon-hash"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "hash", "ascon"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.56"
-
-[workspace]
+rust-version = "1.71"
 
 [dependencies]
-digest = { version = "0.10", default-features = false, features = ["core-api"] }
+digest = { version = "=0.11.0-pre.3", default-features = false, features = ["core-api"] }
 ascon = { version = "0.4", default-features = false }
 
 [dev-dependencies]

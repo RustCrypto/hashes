@@ -5,7 +5,7 @@ authors = ["RustCrypto Developers"]
 license = "Apache-2.0 OR MIT"
 description = "Criterion benchmarks of the hash crates"
 edition = "2021"
-rust-version = "1.59"
+rust-version = "1.71"
 publish = false
 
 [workspace]

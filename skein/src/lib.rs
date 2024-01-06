@@ -46,13 +46,13 @@ pub use digest::{self, consts, Digest};
 
 use core::{fmt, marker::PhantomData};
 use digest::{
+    array::{typenum::Unsigned, Array, ArraySize},
     block_buffer::Lazy,
     consts::{U128, U32, U64},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    generic_array::{typenum::Unsigned, ArrayLength, GenericArray},
     HashMarker, Output,
 };
 use threefish::{Threefish1024, Threefish256, Threefish512};
@@ -76,13 +76,13 @@ macro_rules! define_hasher {
         #[doc = $alg_name]
         #[doc = " core hasher state"]
         #[derive(Clone)]
-        pub struct $name<N: ArrayLength<u8> + 'static> {
+        pub struct $name<N: ArraySize + 'static> {
             t: [u64; 2],
             x: [u64; <$state_bytes>::USIZE / 8],
             _pd: PhantomData<N>,
         }
 
-        impl<N: ArrayLength<u8> + 'static> $name<N> {
+        impl<N: ArraySize + 'static> $name<N> {
             fn blank_state(t1: u64, x: [u64; <$state_bytes>::USIZE / 8]) -> Self {
                 Self {
                     t: [0, t1],
@@ -91,11 +91,7 @@ macro_rules! define_hasher {
                 }
             }
 
-            fn process_block(
-                &mut self,
-                block: &GenericArray<u8, $state_bytes>,
-                byte_count_add: usize,
-            ) {
+            fn process_block(&mut self, block: &Array<u8, $state_bytes>, byte_count_add: usize) {
                 const STATE_WORDS: usize = <$state_bytes>::USIZE / 8;
 
                 self.t[0] += byte_count_add as u64;
@@ -116,21 +112,21 @@ macro_rules! define_hasher {
             }
         }
 
-        impl<N> HashMarker for $name<N> where N: ArrayLength<u8> + 'static {}
+        impl<N> HashMarker for $name<N> where N: ArraySize + 'static {}
 
-        impl<N: ArrayLength<u8> + 'static> BlockSizeUser for $name<N> {
+        impl<N: ArraySize + 'static> BlockSizeUser for $name<N> {
             type BlockSize = $state_bytes;
         }
 
-        impl<N: ArrayLength<u8> + 'static> BufferKindUser for $name<N> {
+        impl<N: ArraySize + 'static> BufferKindUser for $name<N> {
             type BufferKind = Lazy;
         }
 
-        impl<N: ArrayLength<u8> + 'static> OutputSizeUser for $name<N> {
+        impl<N: ArraySize + 'static> OutputSizeUser for $name<N> {
             type OutputSize = N;
         }
 
-        impl<N: ArrayLength<u8> + 'static> UpdateCore for $name<N> {
+        impl<N: ArraySize + 'static> UpdateCore for $name<N> {
             #[inline]
             fn update_blocks(&mut self, blocks: &[Block<Self>]) {
                 for block in blocks {
@@ -139,17 +135,17 @@ macro_rules! define_hasher {
             }
         }
 
-        impl<N: ArrayLength<u8> + 'static> FixedOutputCore for $name<N> {
+        impl<N: ArraySize + 'static> FixedOutputCore for $name<N> {
             #[inline]
             fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
                 self.t[1] |= T1_FLAG_FINAL;
                 let pos = buffer.get_pos();
                 let final_block = buffer.pad_with_zeros();
-                self.process_block(final_block, pos);
+                self.process_block(&final_block, pos);
 
                 // run Threefish in "counter mode" to generate output
                 let flag = T1_FLAG_FIRST | T1_BLK_TYPE_OUT | T1_FLAG_FINAL;
-                let mut block = GenericArray::<u8, $state_bytes>::default();
+                let mut block = Array::<u8, $state_bytes>::default();
                 for (i, chunk) in out.chunks_mut(<$state_bytes>::USIZE).enumerate() {
                     let mut ctr = Self::blank_state(flag, self.x);
 
@@ -163,7 +159,7 @@ macro_rules! define_hasher {
             }
         }
 
-        impl<N: ArrayLength<u8> + 'static> Default for $name<N> {
+        impl<N: ArraySize + 'static> Default for $name<N> {
             fn default() -> Self {
                 // build and process config block
                 let mut state = Self::blank_state(
@@ -171,7 +167,7 @@ macro_rules! define_hasher {
                     Default::default(),
                 );
 
-                let mut cfg = GenericArray::<u8, $state_bytes>::default();
+                let mut cfg = Array::<u8, $state_bytes>::default();
                 cfg[..8].copy_from_slice(&SCHEMA_VER.to_le_bytes());
                 cfg[8..16].copy_from_slice(&(N::to_u64() * 8).to_le_bytes());
                 cfg[16..24].copy_from_slice(&CFG_TREE_INFO_SEQUENTIAL.to_le_bytes());
@@ -185,20 +181,20 @@ macro_rules! define_hasher {
             }
         }
 
-        impl<N: ArrayLength<u8> + 'static> Reset for $name<N> {
+        impl<N: ArraySize + 'static> Reset for $name<N> {
             #[inline]
             fn reset(&mut self) {
                 *self = Default::default();
             }
         }
 
-        impl<N: ArrayLength<u8> + 'static> AlgorithmName for $name<N> {
+        impl<N: ArraySize + 'static> AlgorithmName for $name<N> {
             fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str(stringify!($full_name))
             }
         }
 
-        impl<N: ArrayLength<u8> + 'static> fmt::Debug for $name<N> {
+        impl<N: ArraySize + 'static> fmt::Debug for $name<N> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
                 write!(f, "{}<{}> {{ .. }}", stringify!($name), N::USIZE)
             }

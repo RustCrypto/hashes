@@ -1,18 +1,18 @@
 use crate::consts;
 use core::{convert::TryInto, fmt, mem, num::Wrapping};
 use digest::{
+    array::Array,
     block_buffer::Eager,
     consts::U64,
     core_api::{
         AlgorithmName, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
-    generic_array::GenericArray,
     HashMarker, InvalidOutputSize, Output,
 };
 
 type BlockSize = U64;
-type Block = GenericArray<u8, BlockSize>;
+type Block = Array<u8, BlockSize>;
 type M = [Wrapping<u32>; 16];
 
 /// Inner state of Shabal hash functions.
@@ -216,10 +216,10 @@ impl VariableOutputCore for ShabalVarCore {
     #[inline]
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let pos = buffer.get_pos();
-        let block = buffer.pad_with_zeros();
+        let mut block = buffer.pad_with_zeros();
         block[pos] = 0x80;
 
-        let m = read_m(block);
+        let m = read_m(&block);
         self.add_m(&m);
         self.xor_w();
         self.perm(&m);

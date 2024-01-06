@@ -11,7 +11,7 @@
 //! // process input message
 //! hasher.update("The quick brown fox jumps over the lazy dog");
 //!
-//! // acquire hash digest in the form of GenericArray,
+//! // acquire hash digest in the form of Array,
 //! // which in this case is equivalent to [u8; 32]
 //! let result = hasher.finalize();
 //! assert_eq!(result[..], hex!("
