@@ -27,11 +27,11 @@ digest = { version = "=0.11.0-pre.3", features = ["dev"] }
 hex-literal = "0.4"
 
 [features]
-default = ["std"]
+default = ["oid", "std"]
 std = ["digest/std"]
 asm = ["md5-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
 # Use assembly backend for LoongArch64 targets
 # WARNING: Bumps MSRV to 1.72. This feature SHOULD NOT be enabled by library crates
 loongarch64_asm = []
-oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
+oid = ["digest/oid"] # Enable OID support.
 force-soft = [] # Force software implementation
