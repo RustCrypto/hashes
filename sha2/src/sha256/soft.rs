@@ -3,12 +3,12 @@ use crate::consts::BLOCK_LEN;
 use core::convert::TryInto;
 
 #[inline(always)]
-fn shl(v: [u32; 4], o: u32) -> [u32; 4] {
+fn shr(v: [u32; 4], o: u32) -> [u32; 4] {
     [v[0] >> o, v[1] >> o, v[2] >> o, v[3] >> o]
 }
 
 #[inline(always)]
-fn shr(v: [u32; 4], o: u32) -> [u32; 4] {
+fn shl(v: [u32; 4], o: u32) -> [u32; 4] {
     [v[0] << o, v[1] << o, v[2] << o, v[3] << o]
 }
 
@@ -44,9 +44,9 @@ fn sha256msg1(v0: [u32; 4], v1: [u32; 4]) -> [u32; 4] {
     // sigma 0 on vectors
     #[inline]
     fn sigma0x4(x: [u32; 4]) -> [u32; 4] {
-        let t1 = or(shl(x, 7), shr(x, 25));
-        let t2 = or(shl(x, 18), shr(x, 14));
-        let t3 = shl(x, 3);
+        let t1 = or(shr(x, 7), shl(x, 25));
+        let t2 = or(shr(x, 18), shl(x, 14));
+        let t3 = shr(x, 3);
         xor(xor(t1, t2), t3)
     }
 
