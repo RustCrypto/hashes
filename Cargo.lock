@@ -76,9 +76,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "const-oid"
-version = "0.9.5"
+version = "0.10.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28c122c3980598d243d63d9a704629a2d748d101f278052ff068be5a4423ab6f"
+checksum = "f7e3352a27098ba6b09546e5f13b15165e6a88b5c2723afecb3ea9576b27e3ea"
 
 [[package]]
 name = "cpufeatures"
@@ -102,8 +102,9 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.11.0-pre"
-source = "git+https://github.com/RustCrypto/traits.git#e36243ee7624243a668ec7f233adccb216afcc41"
+version = "0.11.0-pre.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb3be3c52e023de5662dc05a32f747d09a1d6024fdd1f64b0850e373269efb43"
 dependencies = [
  "blobby",
  "block-buffer",

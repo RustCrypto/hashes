@@ -6,18 +6,18 @@ authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 edition = "2021"
-rust-version = "1.65"
+rust-version = "1.71"
 documentation = "https://docs.rs/belt-hash"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "belt", "stb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "=0.11.0-pre"
+digest = "=0.11.0-pre.3"
 belt-block = { version = "0.1.1", default-features = false }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre", features = ["dev"] }
+digest = { version = "=0.11.0-pre.3", features = ["dev"] }
 hex-literal = "0.4"
 
 [features]

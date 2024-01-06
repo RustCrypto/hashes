@@ -10,13 +10,13 @@ documentation = "https://docs.rs/blake2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.65"
+rust-version = "1.71"
 
 [dependencies]
-digest = { version = "=0.11.0-pre", features = ["mac"] }
+digest = { version = "=0.11.0-pre.3", features = ["mac"] }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre", features = ["dev"] }
+digest = { version = "=0.11.0-pre.3", features = ["dev"] }
 hex-literal = "0.4"
 
 [features]

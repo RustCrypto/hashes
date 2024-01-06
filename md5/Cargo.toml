@@ -10,20 +10,20 @@ documentation = "https://docs.rs/md-5"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md5", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.65"
+rust-version = "1.71"
 
 [lib]
 name = "md5"
 
 [dependencies]
-digest = "=0.11.0-pre"
+digest = "=0.11.0-pre.3"
 cfg-if = "1"
 
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
 md5-asm = { version = "0.5", optional = true }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre", features = ["dev"] }
+digest = { version = "=0.11.0-pre.3", features = ["dev"] }
 hex-literal = "0.4"
 
 [features]

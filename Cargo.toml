@@ -26,7 +26,3 @@ members = [
 
 [profile.dev]
 opt-level = 2
-
-[patch.crates-io]
-digest = { git = "https://github.com/RustCrypto/traits.git" }
-#hybrid-array = { path = "../utils/hybrid-array" }
