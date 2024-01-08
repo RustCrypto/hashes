@@ -205,7 +205,7 @@ checksum = "89d92a4743f9a61002fae18374ed11e7973f530cb3a3255fb354818118b2203c"
 
 [[package]]
 name = "md-5"
-version = "0.11.0-pre"
+version = "0.11.0-pre.0"
 dependencies = [
  "cfg-if",
  "digest",
