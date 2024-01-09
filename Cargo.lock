@@ -29,7 +29,7 @@ checksum = "d9aa1eef3994e2ccd304a78fe3fea4a73e5792007f85f09b79bb82143ca5f82b"
 
 [[package]]
 name = "belt-hash"
-version = "0.2.0-pre"
+version = "0.2.0-pre.0"
 dependencies = [
  "belt-block",
  "digest",
@@ -330,7 +330,7 @@ dependencies = [
 
 [[package]]
 name = "sm3"
-version = "0.5.0-pre"
+version = "0.5.0-pre.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -344,7 +344,7 @@ checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 
 [[package]]
 name = "streebog"
-version = "0.11.0-pre"
+version = "0.11.0-pre.0"
 dependencies = [
  "digest",
  "hex-literal",
