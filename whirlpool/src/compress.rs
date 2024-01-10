@@ -50,7 +50,7 @@ fn compress_block(state: &mut [u64; 8], b: &[u8; 64]) {
     }
 }
 
-pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; BLOCK_SIZE]]) {
+pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 64]]) {
     for block in blocks {
         compress_block(state, block);
     }
