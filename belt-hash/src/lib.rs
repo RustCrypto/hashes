@@ -158,7 +158,6 @@ pub fn belt_compress(x1: [u32; 4], x2: [u32; 4], x34: [u32; 8]) -> ([u32; 4], [u
 
 #[inline(always)]
 fn xor(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
-    // TODO: use array zip on stabilization and MSRV bump
     [a[0] ^ b[0], a[1] ^ b[1], a[2] ^ b[2], a[3] ^ b[3]]
 }
 

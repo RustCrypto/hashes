@@ -198,19 +198,12 @@ impl VariableOutputCore for ShabalVarCore {
             64 => consts::INIT_512,
             _ => return Err(InvalidOutputSize),
         };
-        let w = Wrapping(1);
-        // TODO: use `array::map` on MSRV bump
-        let mut a = [Wrapping(0u32); 12];
-        let mut b = [Wrapping(0u32); 16];
-        let mut c = [Wrapping(0u32); 16];
-        for i in 0..12 {
-            a[i] = Wrapping(init.0[i]);
-        }
-        for i in 0..16 {
-            b[i] = Wrapping(init.1[i]);
-            c[i] = Wrapping(init.2[i]);
-        }
-        Ok(Self { a, b, c, w })
+        Ok(Self {
+            a: init.0.map(Wrapping),
+            b: init.1.map(Wrapping),
+            c: init.2.map(Wrapping),
+            w: Wrapping(1),
+        })
     }
 
     #[inline]
