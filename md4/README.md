@@ -7,9 +7,27 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [MD4 hash function][1].
+Pure Rust implementation of the [MD4] cryptographic hash algorithm.
 
-[Documentation][docs-link]
+## Examples
+
+```rust
+use md4::{Md4, Digest};
+use hex_literal::hex;
+
+// create a Md4 hasher instance
+let mut hasher = Md4::new();
+
+// process input message
+hasher.update(b"hello world");
+
+// acquire hash digest in the form of Array,
+// which in this case is equivalent to [u8; 16]
+let result = hasher.finalize();
+assert_eq!(result[..], hex!("aa010fbc1d14c795d86ef98c95479d17"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +43,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -53,4 +71,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/MD4
+[MD4]: https://en.wikipedia.org/wiki/MD4
+[examples section]: https://github.com/RustCrypto/hashes#Examples

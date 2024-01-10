@@ -7,9 +7,37 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [RIPEMD] hash functions.
+Pure Rust implementation of the [RIPEMD] cryptographic hash.
 
-[Documentation][docs-link]
+This crate implements only the modified 1996 versions, not the original
+one from 1992.
+
+Note that RIPEMD-256 provides only the same security as RIPEMD-128,
+and RIPEMD-320 provides only the same security as RIPEMD-160.
+
+## Examples
+
+```rust
+use ripemd::{Ripemd160, Ripemd320, Digest};
+use hex_literal::hex;
+
+let mut hasher = Ripemd160::new();
+hasher.update(b"Hello world!");
+let hash160 = hasher.finalize();
+
+assert_eq!(hash160, hex!("7f772647d88750add82d8e1a7a3e5c0902a346a3"));
+
+let mut hasher = Ripemd320::new();
+hasher.update(b"Hello world!");
+let hash320 = hasher.finalize();
+
+assert_eq!(hash320, hex!(
+    "f1c1c231d301abcf2d7daae0269ff3e7bc68e623"
+    "ad723aa068d316b056d26b7d1bb6f0cc0f28336d"
+));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +53,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -54,3 +82,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [RIPEMD]: https://en.wikipedia.org/wiki/RIPEMD
+[examples section]: https://github.com/RustCrypto/hashes#Examples

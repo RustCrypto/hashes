@@ -1,29 +1,5 @@
-//! An implementation of the [MD2][1] cryptographic hash algorithm.
-//!
-//! # Usage
-//!
-//! ```rust
-//! use md2::{Md2, Digest};
-//! use hex_literal::hex;
-//!
-//! // create a Md2 hasher instance
-//! let mut hasher = Md2::new();
-//!
-//! // process input message
-//! hasher.update(b"hello world");
-//!
-//! // acquire hash digest in the form of Array,
-//! // which in this case is equivalent to [u8; 16]
-//! let result = hasher.finalize();
-//! assert_eq!(result[..], hex!("d9cce882ee690a5c1ce70beff3a78c77"));
-//! ```
-//!
-//! Also see [RustCrypto/hashes][2] readme.
-//!
-//! [1]: https://en.wikipedia.org/wiki/MD4
-//! [2]: https://github.com/RustCrypto/hashes
-
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"

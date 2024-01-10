@@ -7,9 +7,23 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [SM3 (OSCCA GM/T 0004-2012)][1] hash function.
+Pure Rust implementation of the [SM3] cryptographic hash function defined
+in OSCCA GM/T 0004-2012.
 
-[Documentation][docs-link]
+## Examples
+
+```rust
+use sm3::{Digest, Sm3};
+use hex_literal::hex;
+
+let mut hasher = Sm3::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("44f0061e69fa6fdfc290c494654a05dc0c053da7e5c52b84ef93a9d67d3fff88"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +39,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -53,4 +67,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/sm3
+[SM3]: https://en.wikipedia.org/wiki/SM3_(hash_function)
+[examples section]: https://github.com/RustCrypto/hashes#Examples

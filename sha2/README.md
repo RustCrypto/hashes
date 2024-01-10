@@ -7,12 +7,52 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [SHA-2 hash function family][1]
-including SHA-224, SHA-256, SHA-384, and SHA-512.
+Pure Rust implementation of the [SHA-2] cryptographic hash algorithms.
 
-[Documentation][docs-link]
+There are 6 standard algorithms specified in the SHA-2 standard: 
+[`Sha224`], [`Sha256`], [`Sha512_224`], [`Sha512_256`], [`Sha384`], and [`Sha512`].
 
-<img src="https://raw.githubusercontent.com/RustCrypto/meta/master/img/hashes/sha2.png" width="480px">
+Algorithmically, there are only 2 core algorithms: SHA-256 and SHA-512.
+All other algorithms are just applications of these with different initial
+hash values, and truncated to different digest bit lengths. The first two
+algorithms in the list are based on SHA-256, while the last four are based
+on SHA-512.
+
+## Examples
+
+### One-shot API
+
+```rust
+use sha2::{Sha256, Digest};
+use hex_literal::hex;
+
+let hash = Sha256::digest(b"hello world");
+assert_eq!(hash, hex!("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"));
+```
+
+### Incremental API
+
+```rust
+use sha2::{Sha256, Sha512, Digest};
+use hex_literal::hex;
+
+let mut hasher = Sha256::new();
+hasher.update(b"hello world");
+let hash256 = hasher.finalize();
+
+assert_eq!(hash256, hex!("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"));
+
+let mut hasher = Sha512::new();
+hasher.update(b"hello world");
+let hash512 = hasher.finalize();
+
+assert_eq!(hash512, hex!(
+    "309ecc489c12d6eb4cc40f50c902f2b4d0ed77ee511a7c7a9bcd3ca86d4cd86f"
+    "989dd35bc5ff499670da34255b45b0cfd830e81f605dcf7dc5542e93ae9cd76f"
+));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -28,10 +68,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -56,4 +96,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/SHA-2
+[SHA-2]: https://en.wikipedia.org/wiki/SHA-2
+[examples section]: https://github.com/RustCrypto/hashes#Examples

@@ -7,9 +7,24 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Tiger] hash function.
+Pure Rust implementation of the [Tiger] cryptographic hash algorithms.
 
-[Documentation][docs-link]
+Tiger2 is a variant of the original Tiger with a small padding tweak.
+
+## Examples
+
+```rust
+use tiger::{Tiger, Digest};
+use hex_literal::hex;
+
+let mut hasher = Tiger::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("4c8fbddae0b6f25832af45e7c62811bb64ec3e43691e9cc3"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +40,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -53,3 +68,4 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, without 
 [//]: # (general links)
 
 [Tiger]: http://www.cs.technion.ac.il/~biham/Reports/Tiger/tiger/tiger.html
+[examples section]: https://github.com/RustCrypto/hashes#Examples

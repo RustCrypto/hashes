@@ -1,33 +1,6 @@
-//! Pure Rust implementation of the [BelT] hash function specified in
-//! [STB 34.101.31-2020].
-//!
-//! # Usage
-//!
-//! ```rust
-//! use belt_hash::{BeltHash, Digest};
-//! use hex_literal::hex;
-//!
-//! // create a BelT hasher instance
-//! let mut hasher = BeltHash::new();
-//!
-//! // process input message
-//! hasher.update(b"hello world");
-//!
-//! // acquire hash digest in the form of Array,
-//! // which in this case is equivalent to [u8; 32]
-//! let result = hasher.finalize();
-//! let expected = hex!(
-//!     "afb175816416fbadad4629ecbd78e1887789881f2d2e5b80c22a746b7ac7ba88"
-//! );
-//! assert_eq!(result[..], expected[..]);
-//! ```
-//!
-//! Also see [examples] in the RustCrypto/hashes readme.
-//!
-//! [BelT]: https://ru.wikipedia.org/wiki/BelT
-//! [STB 34.101.31-2020]: http://apmi.bsu.by/assets/files/std/belt-spec371.pdf
-//! [examples]: https://github.com/RustCrypto/hashes#usage
 #![no_std]
+#![doc = include_str!("../README.md")]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"

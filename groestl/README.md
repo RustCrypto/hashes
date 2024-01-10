@@ -7,9 +7,22 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Grøstl hash function][1].
+Pure Rust implementation of the [Grøstl] cryptographic hash function.
 
-[Documentation][docs-link]
+## Examples
+
+```rust
+use groestl::{Digest, Groestl256};
+use hex_literal::hex;
+
+let mut hasher = Groestl256::default();
+hasher.update(b"my message");
+let result = hasher.finalize();
+
+assert_eq!(result, hex!("dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +38,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -53,4 +66,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/Gr%C3%B8stl
+[Grøstl]: https://en.wikipedia.org/wiki/Grøstl
+[examples section]: https://github.com/RustCrypto/hashes#Examples

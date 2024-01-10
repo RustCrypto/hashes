@@ -15,8 +15,8 @@ fn sha256_rand() {
     let mut h = Sha256::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!("45f51fead87328fe837a86f4f1ac0eb15116ab1473adc0423ef86c62eb2320c7")[..]
+        h.finalize(),
+        hex!("45f51fead87328fe837a86f4f1ac0eb15116ab1473adc0423ef86c62eb2320c7"),
     );
 }
 
@@ -26,10 +26,10 @@ fn sha512_rand() {
     let mut h = Sha512::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!("
-            9084d75a7c0721541d737b6171eb465dc9ba08a119a182a8508484aa27a176cd
-            e7c2103b108393eb024493ced4aac56be6f57222cac41b801f11494886264997
-        ")[..]
+        h.finalize(),
+        hex!(
+            "9084d75a7c0721541d737b6171eb465dc9ba08a119a182a8508484aa27a176cd"
+            "e7c2103b108393eb024493ced4aac56be6f57222cac41b801f11494886264997"
+        ),
     );
 }

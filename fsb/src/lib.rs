@@ -1,43 +1,5 @@
-//! An implementation of the [FSB][1] cryptographic hash algorithms.
-//! The FSB hash function was one of the submissions to SHA-3,
-//! the cryptographic hash algorithm competition organized by the NIST.
-//!
-//! There are 5 standard versions of the FSB hash function:
-//!
-//! * `FSB-160`
-//! * `FSB-224`
-//! * `FSB-256`
-//! * `FSB-384`
-//! * `FSB-512`
-//!
-//! # Examples
-//!
-//! Output size of FSB-256 is fixed, so its functionality is usually
-//! accessed via the `Digest` trait:
-//!
-//! ```
-//! use hex_literal::hex;
-//! use fsb::{Digest, Fsb256};
-//!
-//! // create a FSB-256 object
-//! let mut hasher = Fsb256::new();
-//!
-//! // write input message
-//! hasher.update(b"hello");
-//!
-//! // read hash digest
-//! let result = hasher.finalize();
-//!
-//! assert_eq!(result[..], hex!("
-//!     0f036dc3761aed2cba9de586a85976eedde6fa8f115c0190763decc02f28edbc
-//! ")[..]);
-//! ```
-//! Also see [RustCrypto/hashes][2] readme.
-//!
-//! [1]: https://www.paris.inria.fr/secret/CBCrypto/index.php?pg=fsb
-//! [2]: https://github.com/RustCrypto/hashes
-
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"

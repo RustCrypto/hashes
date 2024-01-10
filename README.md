@@ -67,7 +67,7 @@ The SHA-1 implementation was previously published as `sha-1`, but migrated to `s
 
 MSRV bumps are considered breaking changes and will be performed only with minor version bump.
 
-## Usage
+## Examples
 
 Let us demonstrate how to use crates in this repository using SHA-2 as an example.
 
@@ -215,10 +215,10 @@ let hash2_1 = use_hasher(&mut *hasher2, b"foo");
 
 ## License
 
-All crates licensed under either of
+All crates in this repository are licensed under either of
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 

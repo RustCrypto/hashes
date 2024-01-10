@@ -7,9 +7,36 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Whirlpool hash function][1].
+Pure Rust implementation of the [Whirlpool] cryptographic hash algorithm.
 
-[Documentation][docs-link]
+This is the algorithm recommended by NESSIE (New European Schemes for
+Signatures, Integrity and Encryption; an European research project).
+
+The constants used by Whirlpool were changed twice (2001 and 2003) - this
+crate only implements the most recent standard. The two older Whirlpool
+implementations (sometimes called Whirlpool-0 (pre 2001) and Whirlpool-T
+(pre 2003)) were not used much anyway (both have never been recommended
+by NESSIE).
+
+For details see this [page][1].
+
+## Examples
+
+```rust
+use whirlpool::{Whirlpool, Digest};
+use hex_literal::hex;
+
+let mut hasher = Whirlpool::new();
+hasher.update(b"Hello Whirlpool");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!(
+    "8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c"
+    "a373816495e63db0fff2ff25f75aa7162f332c9f518c3036456502a8414d300a"
+));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +52,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -53,4 +80,6 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/Whirlpool_(hash_function)
+[Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(hash_function)
+[1]: https://web.archive.org/web/20171129084214/http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html
+[examples section]: https://github.com/RustCrypto/hashes#Examples

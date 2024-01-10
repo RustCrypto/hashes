@@ -10,7 +10,7 @@ fn sm3_rand() {
     let mut h = Sm3::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!("ad154967b08d636a148dd4c688a6df7add1ed1946af18eb358a9b320de2aca86")[..]
+        h.finalize(),
+        hex!("ad154967b08d636a148dd4c688a6df7add1ed1946af18eb358a9b320de2aca86"),
     );
 }

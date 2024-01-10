@@ -1,58 +1,5 @@
-//! Pure Rust implementation of the [SHA-1][1] cryptographic hash algorithm
-//! with optional hardware-specific optimizations.
-//!
-//! # 🚨 Warning: Cryptographically Broken! 🚨
-//!
-//! The SHA-1 hash function should be considered cryptographically broken and
-//! unsuitable for further use in any security critical capacity, as it is
-//! [practically vulnerable to chosen-prefix collisions][2].
-//!
-//! We provide this crate for legacy interoperability purposes only.
-//!
-//! # Usage
-//!
-//! ## One-shot API
-//!
-//! ```rust
-//! use hex_literal::hex;
-//! use sha1::{Sha1, Digest};
-//!
-//! let result = Sha1::digest(b"hello world");
-//! assert_eq!(result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
-//! ```
-//!
-//! ## Incremental API
-//!
-//! ```rust
-//! use hex_literal::hex;
-//! use sha1::{Sha1, Digest};
-//!
-//! // create a Sha1 object
-//! let mut hasher = Sha1::new();
-//!
-//! // process input message
-//! hasher.update(b"hello world");
-//!
-//! // acquire hash digest in the form of Array,
-//! // which in this case is equivalent to [u8; 20]
-//! let result = hasher.finalize();
-//! assert_eq!(result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
-//! ```
-//!
-//! Also see [RustCrypto/hashes][3] readme.
-//!
-//! # Note for users of `sha1 v0.6`
-//!
-//! This crate has been transferred to the RustCrypto organization and uses
-//! implementation previously published as the `sha-1` crate. The previous
-//! zero dependencies version is now published as the [`sha1_smol`] crate.
-//!
-//! [1]: https://en.wikipedia.org/wiki/SHA-1
-//! [2]: https://sha-mbles.github.io/
-//! [3]: https://github.com/RustCrypto/hashes
-//! [`sha1_smol`]: https://github.com/mitsuhiko/sha1-smol/
-
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",

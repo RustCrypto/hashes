@@ -1,31 +1,5 @@
-//! An implementation of the [Tiger][1] cryptographic hash algorithms.
-//!
-//! Tiger2 is a variant of the original Tiger with a small padding tweak.
-//!
-//! # Usage
-//!
-//! ```rust
-//! use hex_literal::hex;
-//! use tiger::{Tiger, Digest};
-//!
-//! // create a Tiger object
-//! let mut hasher = Tiger::new();
-//!
-//! // process input message
-//! hasher.update(b"hello world");
-//!
-//! // acquire hash digest in the form of Array,
-//! // which in this case is equivalent to [u8; 24]
-//! let result = hasher.finalize();
-//! assert_eq!(result[..], hex!("4c8fbddae0b6f25832af45e7c62811bb64ec3e43691e9cc3"));
-//! ```
-//!
-//! Also see [RustCrypto/hashes][2] readme.
-//!
-//! [1]: https://en.wikipedia.org/wiki/Tiger_(hash_function)
-//! [2]: https://github.com/RustCrypto/hashes
-
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
