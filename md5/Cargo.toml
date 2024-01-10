@@ -26,6 +26,5 @@ hex-literal = "0.4"
 [features]
 default = ["oid", "std"]
 std = ["digest/std"]
-oid = ["digest/oid"] # Enable OID support.
-loongarch64_asm = [] # Use assembly backend for LoongArch64 targets
+oid = ["digest/oid"] # Enable OID support
 force-soft = [] # Force software implementation

@@ -29,8 +29,7 @@ hex-literal = "0.4"
 [features]
 default = ["oid", "std"]
 std = ["digest/std"]
-oid = ["digest/oid"] # Enable OID support.
-loongarch64_asm = [] # WARNING: this feature SHOULD NOT be enabled by library crates
+oid = ["digest/oid"] # Enable OID support
 force-soft = [] # Force software implementation
 
 [package.metadata.docs.rs]
