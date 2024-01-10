@@ -6,7 +6,6 @@
 pub const BLOCK_SIZE: usize = 64;
 
 /// Linear transformation matrix
-#[cfg(test)]
 pub const A: [u64; BLOCK_SIZE] = [
     0x641c314b2b8ee083,
     0xc83862965601dd1b,
@@ -75,7 +74,6 @@ pub const A: [u64; BLOCK_SIZE] = [
 ];
 
 /// Substitution table
-#[cfg(test)]
 pub const P: [u8; 256] = [
     252, 238, 221, 17, 207, 110, 49, 22, 251, 196, 250, 218, 35, 197, 4, 77, 233, 119, 240, 219,
     147, 46, 153, 186, 23, 54, 241, 187, 20, 205, 95, 193, 249, 24, 101, 90, 226, 92, 239, 33, 129,
@@ -179,3 +177,27 @@ pub const C: [[u8; BLOCK_SIZE]; 12] = [
         0x67, 0xe7, 0x8e, 0x37,
     ],
 ];
+
+/// Precomputed, pre-shuffled table for linear transformation using matrix
+/// `const::A` and shuffled using `const::P`
+pub const SHUFFLED_LIN_TABLE: [[u64; 256]; 8] = {
+    let mut table = [[0u64; 256]; 8];
+    let mut i = 0;
+    while i < 8 {
+        let mut j = 0;
+        while j < 256 {
+            let mut accum = 0u64;
+            let mut k = 0;
+            while k < 8 {
+                if P[j] & (1u8 << k) != 0 {
+                    accum ^= A[8 * i + k];
+                }
+                k += 1;
+            }
+            table[i][j] = accum;
+            j += 1;
+        }
+        i += 1;
+    }
+    table
+};

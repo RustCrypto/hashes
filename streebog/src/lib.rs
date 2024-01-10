@@ -20,7 +20,6 @@ use digest::{
 
 mod consts;
 mod core_api;
-mod table;
 
 pub use core_api::StreebogVarCore;
 pub use digest::{self, Digest};
