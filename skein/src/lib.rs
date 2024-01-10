@@ -1,40 +1,5 @@
-//! Implementation of the [Skein] family of cryptographic hash algorithms.
-//!
-//! There are 3 standard versions of the Skein hash function:
-//!
-//! * [`Skein256`]
-//! * [`Skein512`]
-//! * [`Skein1024`]
-//!
-//! Output size of the Skein hash functions is arbitrary, so it has to be
-//! fixed using additional type parameter
-//!
-//! # Examples
-//! Hash functionality is usually accessed via the [`Digest`] trait:
-//!
-//! ```
-//! use hex_literal::hex;
-//! use skein::{Digest, Skein512, consts::U32};
-//!
-//! // Create a Skein-512-256 hasher object
-//! let mut hasher = Skein512::<U32>::new();
-//!
-//! // Write input message
-//! hasher.update(b"The quick brown fox ");
-//! hasher.update(b"jumps over the lazy dog");
-//!
-//! // Read hash digest
-//! let result = hasher.finalize();
-//!
-//! let expected = hex!("b3250457e05d3060b1a4bbc1428bc75a3f525ca389aeab96cfa34638d96e492a");
-//! assert_eq!(result[..], expected[..]);
-//! ```
-//! Also see [RustCrypto/hashes] readme.
-//!
-//! [Skein]: https://schneier.com/academic/skein
-//! [RustCrypto/hashes]: https://github.com/RustCrypto/hashes
-
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
@@ -208,5 +173,4 @@ macro_rules! define_hasher {
 
 define_hasher!(Skein256Core, Skein256, Threefish256, U32, "Skein-256");
 define_hasher!(Skein512Core, Skein512, Threefish512, U64, "Skein-512");
-#[rustfmt::skip]
 define_hasher!(Skein1024Core, Skein1024, Threefish1024, U128, "Skein-1024");

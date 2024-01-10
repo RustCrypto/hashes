@@ -7,9 +7,27 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [GOST R 34.11-94 hash function][1].
+Pure Rust implementation of the [GOST R 34.11-94] cryptographic hash algorithm.
 
-[Documentation][docs-link]
+## Examples
+
+```rust
+use gost94::{Gost94CryptoPro, Digest};
+use hex_literal::hex;
+
+let mut hasher = Gost94CryptoPro::new();
+hasher.update("The quick brown fox jumps over the lazy dog");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
+
+## Associated OIDs.
+There can be a confusion regarding OIDs associated with declared types.
+According to the [RFC 4357], the OIDs 1.2.643.2.2.30.1 and 1.2.643.2.2.30.0 are used to identify the hash function parameter sets (CryptoPro vs Test ones).
+According to [RFC 4490] the OID 1.2.643.2.2.9 identifies the GOST 34.311-95 (former GOST R 34.11-94) function, but then it continues that this function MUST be used only with the CryptoPro parameter set.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +43,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -53,4 +71,7 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/GOST_(hash_function)
+[GOST R 34.11-94]: https://en.wikipedia.org/wiki/GOST_(hash_function)
+[RFC 4357]: https://www.rfc-editor.org/rfc/rfc4357
+[RFC 4490]: https://www.rfc-editor.org/rfc/rfc4490
+[examples section]: https://github.com/RustCrypto/hashes#Examples

@@ -11,13 +11,39 @@ Pure Rust implementation of the lightweight cryptographic hash functions
 [AsconHash and AsconAHash][1] and the extendable output functions (XOF) AsconXOF
 and AsconAXOF.
 
-[Documentation][docs-link]
-
 ## Security Notes
 
 No security audits of this crate have ever been performed.
 
 USE AT YOUR OWN RISK!
+
+## Examples
+Fixed output size hashing:
+```rust
+use ascon_hash::{AsconHash, Digest};
+use hex_literal::hex;
+
+let mut hasher = AsconHash::new();
+hasher.update(b"some bytes");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("b742ca75e57038757059cccc6874714f9dbd7fc5924a7df4e316594fd1426ca8"));
+```
+
+XOF hashing:
+```rust
+use ascon_hash::{AsconXof, ExtendableOutput, Update, XofReader};
+use hex_literal::hex;
+
+let mut xof = AsconXof::default();
+xof.update(b"some bytes");
+let mut reader = xof.finalize_xof();
+let mut dst = [0u8; 5];
+reader.read(&mut dst);
+assert_eq!(dst, hex!("c21972fde9"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -28,10 +54,10 @@ version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -57,3 +83,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [1]: https://ascon.iaik.tugraz.at
+[examples section]: https://github.com/RustCrypto/hashes#Examples

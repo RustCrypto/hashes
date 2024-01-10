@@ -1,44 +1,5 @@
-//! An implementation of the [RIPEMD] cryptographic hash.
-//!
-//! This crate implements only the modified 1996 versions, not the original
-//! one from 1992.
-//!
-//! Note that RIPEMD-256 provides only the same security as RIPEMD-128,
-//! and RIPEMD-320 provides only the same security as RIPEMD-160.
-//!
-//! # Usage
-//!
-//! ```rust
-//! use hex_literal::hex;
-//! use ripemd::{Ripemd160, Ripemd320, Digest};
-//!
-//! // create a RIPEMD-160 hasher instance
-//! let mut hasher = Ripemd160::new();
-//!
-//! // process input message
-//! hasher.update(b"Hello world!");
-//!
-//! // acquire hash digest in the form of Array,
-//! // which in this case is equivalent to [u8; 20]
-//! let result = hasher.finalize();
-//! assert_eq!(result[..], hex!("7f772647d88750add82d8e1a7a3e5c0902a346a3"));
-//!
-//! // same for RIPEMD-320
-//! let mut hasher = Ripemd320::new();
-//! hasher.update(b"Hello world!");
-//! let result = hasher.finalize();
-//! assert_eq!(&result[..], &hex!("
-//!     f1c1c231d301abcf2d7daae0269ff3e7bc68e623
-//!     ad723aa068d316b056d26b7d1bb6f0cc0f28336d
-//! ")[..]);
-//! ```
-//!
-//! Also see [RustCrypto/hashes] readme.
-//!
-//! [RIPEMD]: https://en.wikipedia.org/wiki/RIPEMD
-//! [RustCrypto/hashes]: https://github.com/RustCrypto/hashes
-
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"

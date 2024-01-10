@@ -7,22 +7,35 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [MD5 hash function][1].
-
-[Documentation][docs-link]
+Pure Rust implementation of the [MD5] cryptographic hash algorithm.
 
 ## ⚠️ Security Warning
 
 This crate is provided for the purposes of legacy interoperability with
 protocols and systems which mandate the use of MD5.
 
-However, MD5 is [cryptographically broken and unsuitable for further use][2].
+However, MD5 is [cryptographically broken and unsuitable for further use][1].
 
 Collision attacks against MD5 are both practical and trivial, and
-[theoretical attacks against MD5's preimage resistance have been found][3].
+[theoretical attacks against MD5's preimage resistance have been found][2].
 
-[RFC6151][4] advises no new IETF protocols can be designed MD5-based constructions,
+[RFC 6151] advises no new IETF protocols can be designed MD5-based constructions,
 including HMAC-MD5.
+
+## Examples
+
+```rust
+use md5::{Md5, Digest};
+use hex_literal::hex;
+
+let mut hasher = Md5::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("5eb63bbbe01eeed093cb22bb8f5acdc3"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -38,10 +51,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -66,7 +79,8 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/MD5
-[2]: https://www.kb.cert.org/vuls/id/836068
-[3]: https://dl.acm.org/citation.cfm?id=1724151
-[4]: https://tools.ietf.org/html/rfc6151
+[MD5]: https://en.wikipedia.org/wiki/MD5
+[examples section]: https://github.com/RustCrypto/hashes#Examples
+[1]: https://www.kb.cert.org/vuls/id/836068
+[2]: https://dl.acm.org/citation.cfm?id=1724151
+[RFC 6151]: https://tools.ietf.org/html/rfc6151

@@ -7,9 +7,33 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the [FSB hash function][1] family.
+Pure Rust implementation of the [FSB] cryptographic hash algorithms.
 
-[Documentation][docs-link]
+There are 5 standard versions of the FSB hash function:
+
+* `FSB-160`
+* `FSB-224`
+* `FSB-256`
+* `FSB-384`
+* `FSB-512`
+
+## Examples
+
+Output size of FSB-256 is fixed, so its functionality is usually
+accessed via the `Digest` trait:
+
+```rust
+use fsb::{Digest, Fsb256};
+use hex_literal::hex;
+
+let mut hasher = Fsb256::new();
+hasher.update(b"hello");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("0f036dc3761aed2cba9de586a85976eedde6fa8f115c0190763decc02f28edbc"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,7 +49,7 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
 * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * [MIT license](http://opensource.org/licenses/MIT)
@@ -53,4 +77,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://www.paris.inria.fr/secret/CBCrypto/index.php?pg=fsb
+[FSB]: https://www.paris.inria.fr/secret/CBCrypto/index.php?pg=fsb
+[examples section]: https://github.com/RustCrypto/hashes#Examples

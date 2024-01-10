@@ -1,39 +1,5 @@
-//! An implementation of the [GOST R 34.11-94][1] cryptographic hash algorithm.
-//!
-//! # Usage
-//! ```rust
-//! use gost94::{Gost94CryptoPro, Digest};
-//! use hex_literal::hex;
-//!
-//! // create Gost94 hasher instance with CryptoPro params
-//! let mut hasher = Gost94CryptoPro::new();
-//!
-//! // process input message
-//! hasher.update("The quick brown fox jumps over the lazy dog");
-//!
-//! // acquire hash digest in the form of Array,
-//! // which in this case is equivalent to [u8; 32]
-//! let result = hasher.finalize();
-//! assert_eq!(result[..], hex!("
-//!     9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76
-//! "));
-//! ```
-//!
-//! Also see [RustCrypto/hashes][2] readme.
-//!
-//! # Associated OIDs.
-//! There can be a confusion regarding OIDs associated with declared types. According to the
-//! [RFC 4357][3], the OIDs 1.2.643.2.2.30.1 and 1.2.643.2.2.30.0 are used to identify the hash
-//! function parameter sets (CryptoPro vs Test ones). According to [RFC 4490][4] the OID
-//! 1.2.643.2.2.9 identifies the GOST 34.311-95 (former GOST R 34.11-94) function, but then it
-//! continues that this function MUST be used only with the CryptoPro parameter set.
-//!
-//! [1]: https://en.wikipedia.org/wiki/GOST_(hash_function)
-//! [2]: https://github.com/RustCrypto/hashes
-//! [3]: https://www.rfc-editor.org/rfc/rfc4357
-//! [4]: https://www.rfc-editor.org/rfc/rfc4490
-
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"

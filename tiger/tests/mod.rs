@@ -11,8 +11,8 @@ fn tiger_rand() {
     let mut h = Tiger::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!("d12f382ecf3250c14aca7726df15b999dfe99f905cf163d2")[..]
+        h.finalize(),
+        hex!("d12f382ecf3250c14aca7726df15b999dfe99f905cf163d2"),
     );
 }
 
@@ -21,7 +21,7 @@ fn tiger2_rand() {
     let mut h = Tiger2::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!("1bb7a80144c97f831fdefb635477776dd6c164048ce5895d")[..]
+        h.finalize(),
+        hex!("1bb7a80144c97f831fdefb635477776dd6c164048ce5895d"),
     );
 }

@@ -7,9 +7,28 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Skein] family of cryptographic hash algorithms.
+Implementation of the [Skein] family of cryptographic hash algorithms.
 
-[Documentation][docs-link]
+There are 3 standard versions of the Skein hash function: `Skein256`, `Skein512`, `Skein1024`.
+
+Output size of the Skein hash functions is arbitrary, so it has to be
+fixed using additional type parameter.
+
+## Examples
+
+```rust
+use hex_literal::hex;
+use skein::{Digest, Skein512, consts::U32};
+
+let mut hasher = Skein512::<U32>::new();
+hasher.update(b"The quick brown fox ");
+hasher.update(b"jumps over the lazy dog");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("b3250457e05d3060b1a4bbc1428bc75a3f525ca389aeab96cfa34638d96e492a"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +44,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -54,3 +73,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [Skein]: https://schneier.com/academic/skein
+[examples section]: https://github.com/RustCrypto/hashes#Examples

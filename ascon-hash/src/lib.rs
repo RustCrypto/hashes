@@ -1,6 +1,3 @@
-// Copyright 2022-2023 Sebastian Ramacher
-// SPDX-License-Identifier: Apache-2.0 OR MIT
-
 #![no_std]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![doc = include_str!("../README.md")]
@@ -9,30 +6,6 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
 )]
 #![warn(missing_docs)]
-
-//! ## Usage (Hashing)
-//!
-//! ```
-//! use ascon_hash::{AsconHash, Digest}; // Or `AsconAHash`
-//!
-//! let mut hasher = AsconHash::new();
-//! hasher.update(b"some bytes");
-//! let digest = hasher.finalize();
-//! assert_eq!(&digest[..], b"\xb7\x42\xca\x75\xe5\x70\x38\x75\x70\x59\xcc\xcc\x68\x74\x71\x4f\x9d\xbd\x7f\xc5\x92\x4a\x7d\xf4\xe3\x16\x59\x4f\xd1\x42\x6c\xa8");
-//! ```
-//!
-//! ## Usage (XOF)
-//!
-//! ```
-//! use ascon_hash::{AsconXof, ExtendableOutput, Update, XofReader};
-//!
-//! let mut xof = AsconXof::default();
-//! xof.update(b"some bytes");
-//! let mut reader = xof.finalize_xof();
-//! let mut dst = [0u8; 5];
-//! reader.read(&mut dst);
-//! assert_eq!(&dst, b"\xc2\x19\x72\xfd\xe9");
-//! ```
 
 use core::marker::PhantomData;
 

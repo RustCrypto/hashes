@@ -1,37 +1,5 @@
-//! Implementation of the [JH] cryptographic hash function.
-//!
-//! There are 4 standard versions of the JH hash function:
-//!
-//! * [JH-224][Jh224]
-//! * [JH-256][Jh256]
-//! * [JH-384][Jh384]
-//! * [JH-512][Jh512]
-//!
-//! # Examples
-//!
-//! Hash functionality is usually accessed via the [`Digest`] trait:
-//!
-//! ```
-//! use hex_literal::hex;
-//! use jh::{Digest, Jh256};
-//!
-//! // create a JH-256 object
-//! let mut hasher = Jh256::new();
-//!
-//! // write input message
-//! hasher.update(b"hello");
-//!
-//! // read hash digest
-//! let result = hasher.finalize();
-//!
-//! let expected = hex!("94fd3f4c564957c6754265676bf8b244c707d3ffb294e18af1f2e4f9b8306089");
-//! assert_eq!(result[..], expected[..]);
-//! ```
-//! Also see [RustCrypto/hashes] readme.
-//!
-//! [JH]: https://en.wikipedia.org/wiki/JH_(hash_function)
-//! [RustCrypto/hashes]: https://github.com/RustCrypto/hashes
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"

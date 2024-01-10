@@ -7,17 +7,42 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [SHA-1 hash function][1].
+Pure Rust implementation of the [SHA-1] cryptographic hash algorithm.
 
-[Documentation][docs-link]
-
-## 🚨 Warning: Cryptographically Broken 🚨
+## 🚨 Warning: Cryptographically Broken! 🚨
 
 The SHA-1 hash function should be considered cryptographically broken and
 unsuitable for further use in any security critical capacity, as it is
-[practically vulnerable to chosen-prefix collisions][2].
+[practically vulnerable to chosen-prefix collisions][1].
 
 We provide this crate for legacy interoperability purposes only.
+
+## Examples
+
+### One-shot API
+
+```rust
+use hex_literal::hex;
+use sha1::{Sha1, Digest};
+
+let result = Sha1::digest(b"hello world");
+assert_eq!(result, hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
+```
+
+### Incremental API
+
+```rust
+use hex_literal::hex;
+use sha1::{Sha1, Digest};
+
+let mut hasher = Sha1::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -33,10 +58,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -61,5 +86,6 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/SHA-1
-[2]: https://sha-mbles.github.io/
+[SHA-1]: https://en.wikipedia.org/wiki/SHA-1
+[1]: https://sha-mbles.github.io/
+[examples section]: https://github.com/RustCrypto/hashes#Examples

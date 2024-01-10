@@ -7,38 +7,24 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Shabal][1] cryptographic hash algorithm.
+Pure Rust implementation of the [Shabal] cryptographic hash algorithm.
 
-[Documentation][docs-link]
+There are 5 standard algorithms specified in the Shabal standard: [`Shabal192`], [`Shabal224`], [`Shabal256`], [`Shabal384`], [`Shabal512`].
 
-## About 
-There are 5 standard algorithms specified in the Shabal standard:
-
-* `Shabal192`, which is the `Shabal` algorithm with the result truncated to 192 bits
-* `Shabal224`, which is the `Shabal` algorithm with the result truncated to 224 bits
-* `Shabal256`, which is the `Shabal` algorithm with the result truncated to 256 bits.
-* `Shabal384`, which is the `Shabal` algorithm with the result truncated to 384 bits.
-* `Shabal512`, which is the `Shabal` algorithm with the result not truncated.
-
-There is a single Shabal algorithm. All variants have different initialisation and apart
-from Shabal512 all truncate the result.
-
-## Usage
+## Examples
 
 ```rust
 use shabal::{Shabal256, Digest};
+use hex_literal::hex;
 
-// create a Shabal256 hasher instance
 let mut hasher = Shabal256::new();
+hasher.update(b"helloworld");
+let hash = hasher.finalize();
 
-// process input message
-hasher.input(b"helloworld");
-
-// acquire hash digest in the form of GenericArray,
-// which in this case is equivalent to [u8; 32]
-let result = hasher.result();
-assert_eq!(result[..], hex!("d945dee21ffca23ac232763aa9cac6c15805f144db9d6c97395437e01c8595a8"));
+assert_eq!(hash, hex!("d945dee21ffca23ac232763aa9cac6c15805f144db9d6c97395437e01c8595a8"));
 ```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -54,10 +40,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -82,4 +68,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
+[Shabal]: https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
+[examples section]: https://github.com/RustCrypto/hashes#Examples

@@ -11,10 +11,7 @@ fn belt_rand() {
     let mut h = BeltHash::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!(
-            "a45053f80827d530008198c8185aa507"
-            "403b4a21f591579f07c34358e5991754"
-        )[..]
+        h.finalize(),
+        hex!("a45053f80827d530008198c8185aa507403b4a21f591579f07c34358e5991754")
     );
 }

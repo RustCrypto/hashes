@@ -7,9 +7,22 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [MD2 hash function][1].
+Pure Rust implementation of the [MD2] cryptographic hash algorithm.
 
-[Documentation][docs-link]
+## Examples
+
+```rust
+use md2::{Md2, Digest};
+use hex_literal::hex;
+
+let mut hasher = Md2::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("d9cce882ee690a5c1ce70beff3a78c77"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +38,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -53,4 +66,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/MD2_(hash_function)
+[MD2]: https://en.wikipedia.org/wiki/MD2_(hash_function)
+[examples section]: https://github.com/RustCrypto/hashes#Examples

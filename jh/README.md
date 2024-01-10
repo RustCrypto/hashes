@@ -9,7 +9,27 @@
 
 Pure Rust implementation of the [JH] cryptographic hash function.
 
-[Documentation][docs-link]
+There are 4 standard versions of the JH hash function:
+
+* JH-224
+* JH-256
+* JH-384
+* JH-512
+
+## Examples
+
+```rust
+use jh::{Digest, Jh256};
+use hex_literal::hex;
+
+let mut hasher = Jh256::new();
+hasher.update(b"hello");
+let result = hasher.finalize();
+
+assert_eq!(result, hex!("94fd3f4c564957c6754265676bf8b244c707d3ffb294e18af1f2e4f9b8306089"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
@@ -25,10 +45,10 @@ done with a minor version bump.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -54,3 +74,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [JH]: https://en.wikipedia.org/wiki/JH_(hash_function)
+[examples section]: https://github.com/RustCrypto/hashes#Examples

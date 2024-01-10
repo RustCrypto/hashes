@@ -9,7 +9,7 @@ fn sha1_rand() {
     let mut h = Sha1::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!("7e565a25a8b123e9881addbcedcd927b23377a78")[..]
+        h.finalize(),
+        hex!("7e565a25a8b123e9881addbcedcd927b23377a78"),
     );
 }

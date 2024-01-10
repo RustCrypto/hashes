@@ -12,7 +12,6 @@ fn digest_and_box(data: &[u8], n: usize) -> Box<[u8]> {
 }
 
 #[test]
-#[rustfmt::skip]
 fn empty() {
     // Source: reference paper
     assert_eq!(
@@ -22,10 +21,10 @@ fn empty() {
 
     assert_eq!(
         digest_and_box(b"", 64)[..],
-        hex!("
-            1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5
-            4269c056b8c82e48276038b6d292966cc07a3d4645272e31ff38508139eb0a71
-        ")[..]
+        hex!(
+            "1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5"
+            "4269c056b8c82e48276038b6d292966cc07a3d4645272e31ff38508139eb0a71"
+        )[..],
     );
 
     assert_eq!(
@@ -83,11 +82,11 @@ fn input_multiple_of_chunk_size_minus_one() {
         hex!("daacf62e434bdd126fbe9e61fae38d1429e9dddfaf8f999095585c3cbf366a4a"),
         hex!("eac3722b4b7db10af973ed7ca60e113a19fab895b46476a9aac51ead099e6ba4"),
     ];
-    for i in 0..expected.len() {
+    for (i, exp_res) in expected.iter().enumerate() {
         let len = 8192 * (i + 1) - 1;
         let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
         let result = digest_and_box(&m, 32);
-        assert_eq!(result[..], expected[i as usize][..]);
+        assert_eq!(result[..], exp_res[..]);
     }
 }
 
@@ -100,10 +99,10 @@ fn input_multiple_of_chunk_size() {
         hex!("f4082a8fe7d1635aa042cd1da63bf235f91c231886c29896f9fe3818c60cd360"),
         hex!("d14f8dc243c206004ca8a996997e5ae16a8bdda288f6c90d20d7c43c1a408618"),
     ];
-    for i in 0..expected.len() {
+    for (i, exp_res) in expected.iter().enumerate() {
         let len = 8192 * (i + 1);
         let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
         let result = digest_and_box(&m, 32);
-        assert_eq!(result[..], expected[i as usize][..]);
+        assert_eq!(result[..], exp_res[..]);
     }
 }

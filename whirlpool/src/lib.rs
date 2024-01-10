@@ -1,41 +1,5 @@
-//! An implementation of the [Whirlpool][1] cryptographic hash algorithm.
-//!
-//! This is the algorithm recommended by NESSIE (New European Schemes for
-//! Signatures, Integrity and Encryption; an European research project).
-//!
-//! The constants used by Whirlpool were changed twice (2001 and 2003) - this
-//! crate only implements the most recent standard. The two older Whirlpool
-//! implementations (sometimes called Whirlpool-0 (pre 2001) and Whirlpool-T
-//! (pre 2003)) were not used much anyway (both have never been recommended
-//! by NESSIE).
-//!
-//! For details see [http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html](https://web.archive.org/web/20171129084214/http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html).
-//!
-//! # Usage
-//!
-//! ```rust
-//! use whirlpool::{Whirlpool, Digest};
-//! use hex_literal::hex;
-//!
-//! // create a hasher object, to use it do not forget to import `Digest` trait
-//! let mut hasher = Whirlpool::new();
-//! // write input message
-//! hasher.update(b"Hello Whirlpool");
-//! // read hash digest (it will consume hasher)
-//! let result = hasher.finalize();
-//!
-//! assert_eq!(result[..], hex!("
-//!     8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c
-//!     a373816495e63db0fff2ff25f75aa7162f332c9f518c3036456502a8414d300a
-//! ")[..]);
-//! ```
-//!
-//! Also see [RustCrypto/hashes][2] readme.
-//!
-//! [1]: https://en.wikipedia.org/wiki/Whirlpool_(hash_function)
-//! [2]: https://github.com/RustCrypto/hashes
-
 #![no_std]
+#![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
