@@ -4,6 +4,7 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub use digest::{self, Digest};
@@ -18,12 +19,13 @@ use compress::compress;
 
 use core::fmt;
 use digest::{
+    array::ArrayOps,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U64},
+    typenum::U64,
     HashMarker, Output,
 };
 
@@ -51,9 +53,10 @@ impl OutputSizeUser for WhirlpoolCore {
 impl UpdateCore for WhirlpoolCore {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-        let block_bits = 8 * BLOCK_SIZE as u64;
+        let block_bits = 8 * Self::block_size() as u64;
         self.update_len(block_bits * (blocks.len() as u64));
-        compress(&mut self.state, convert(blocks));
+        let blocks = ArrayOps::cast_slice_to_core(blocks);
+        compress(&mut self.state, blocks);
     }
 }
 
@@ -70,7 +73,7 @@ impl FixedOutputCore for WhirlpoolCore {
 
         let mut state = self.state;
         buffer.digest_pad(0x80, &buf, |block| {
-            compress(&mut state, convert(core::slice::from_ref(block)));
+            compress(&mut state, core::slice::from_ref(&block.0));
         });
 
         for (chunk, v) in out.chunks_exact_mut(8).zip(state.iter()) {
@@ -128,14 +131,4 @@ fn adc(a: &mut u64, b: u64, carry: &mut u64) {
     let ret = (*a as u128) + (b as u128) + (*carry as u128);
     *a = ret as u64;
     *carry = (ret >> 64) as u64;
-}
-
-const BLOCK_SIZE: usize = <WhirlpoolCore as BlockSizeUser>::BlockSize::USIZE;
-
-#[inline(always)]
-fn convert(blocks: &[Block<WhirlpoolCore>]) -> &[[u8; BLOCK_SIZE]] {
-    // SAFETY: Array<u8, U64> and [u8; 64] have
-    // exactly the same memory layout
-    let p = blocks.as_ptr() as *const [u8; BLOCK_SIZE];
-    unsafe { core::slice::from_raw_parts(p, blocks.len()) }
 }

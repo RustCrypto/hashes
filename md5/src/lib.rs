@@ -15,6 +15,7 @@ use core::{fmt, slice::from_ref};
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
+    array::ArrayOps,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
@@ -49,7 +50,8 @@ impl UpdateCore for Md5Core {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len = self.block_len.wrapping_add(blocks.len() as u64);
-        compress::compress(&mut self.state, convert(blocks))
+        let blocks = ArrayOps::cast_slice_to_core(blocks);
+        compress::compress(&mut self.state, blocks)
     }
 }
 
@@ -62,9 +64,7 @@ impl FixedOutputCore for Md5Core {
             .wrapping_add(buffer.get_pos() as u64)
             .wrapping_mul(8);
         let mut s = self.state;
-        buffer.len64_padding_le(bit_len, |b| {
-            compress::compress(&mut s, convert(from_ref(b)))
-        });
+        buffer.len64_padding_le(bit_len, |b| compress::compress(&mut s, from_ref(&b.0)));
         for (chunk, v) in out.chunks_exact_mut(4).zip(s.iter()) {
             chunk.copy_from_slice(&v.to_le_bytes());
         }
@@ -108,13 +108,3 @@ impl AssociatedOid for Md5Core {
 
 /// MD5 hasher state.
 pub type Md5 = CoreWrapper<Md5Core>;
-
-const BLOCK_SIZE: usize = <Md5Core as BlockSizeUser>::BlockSize::USIZE;
-
-#[inline(always)]
-fn convert(blocks: &[Block<Md5Core>]) -> &[[u8; BLOCK_SIZE]] {
-    // SAFETY: Array<u8, U64> and [u8; 64] have
-    // exactly the same memory layout
-    let p = blocks.as_ptr() as *const [u8; BLOCK_SIZE];
-    unsafe { core::slice::from_raw_parts(p, blocks.len()) }
-}

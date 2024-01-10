@@ -1,6 +1,7 @@
 use crate::{consts, sha256::compress256, sha512::compress512};
 use core::{fmt, slice::from_ref};
 use digest::{
+    array::ArrayOps,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
@@ -34,6 +35,7 @@ impl UpdateCore for Sha256VarCore {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
+        let blocks = ArrayOps::cast_slice_to_core(blocks);
         compress256(&mut self.state, blocks);
     }
 }
@@ -60,7 +62,7 @@ impl VariableOutputCore for Sha256VarCore {
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let bs = Self::BlockSize::U64;
         let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
-        buffer.len64_padding_be(bit_len, |b| compress256(&mut self.state, from_ref(b)));
+        buffer.len64_padding_be(bit_len, |b| compress256(&mut self.state, from_ref(&b.0)));
 
         for (chunk, v) in out.chunks_exact_mut(4).zip(self.state.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
@@ -106,6 +108,7 @@ impl UpdateCore for Sha512VarCore {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u128;
+        let blocks = ArrayOps::cast_slice_to_core(blocks);
         compress512(&mut self.state, blocks);
     }
 }
@@ -134,7 +137,7 @@ impl VariableOutputCore for Sha512VarCore {
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let bs = Self::BlockSize::U64 as u128;
         let bit_len = 8 * (buffer.get_pos() as u128 + bs * self.block_len);
-        buffer.len128_padding_be(bit_len, |b| compress512(&mut self.state, from_ref(b)));
+        buffer.len128_padding_be(bit_len, |b| compress512(&mut self.state, from_ref(&b.0)));
 
         for (chunk, v) in out.chunks_exact_mut(8).zip(self.state.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
