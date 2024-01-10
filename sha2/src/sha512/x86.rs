@@ -39,7 +39,7 @@ unsafe fn sha512_compress_x86_64_avx2(state: &mut [u64; 8], blocks: &[[u8; 128]]
     let mut x = [_mm256_setzero_si256(); 8];
 
     for i in (start_block..blocks.len()).step_by(2) {
-        load_data_avx2(&mut x, &mut ms, &mut t2, blocks.as_ptr().add(i) as *const _);
+        load_data_avx2(&mut x, &mut ms, &mut t2, blocks.as_ptr().add(i).cast());
 
         // First block
         let mut current_state = *state;
@@ -61,7 +61,7 @@ unsafe fn sha512_compress_x86_64_avx(state: &mut [u64; 8], block: &[u8; 128]) {
 
     // Reduced to single iteration
     let mut current_state = *state;
-    load_data_avx(&mut x, &mut ms, block.as_ptr() as *const _);
+    load_data_avx(&mut x, &mut ms, block.as_ptr().cast());
     rounds_0_63_avx(&mut current_state, &mut x, &mut ms);
     rounds_64_79(&mut current_state, &ms);
     accumulate_state(state, &current_state);
@@ -74,12 +74,12 @@ unsafe fn load_data_avx(x: &mut [__m128i; 8], ms: &mut MsgSchedule, data: *const
 
     macro_rules! unrolled_iterations {
         ($($i:literal),*) => {$(
-            x[$i] = _mm_loadu_si128(data.add($i) as *const _);
+            x[$i] = _mm_loadu_si128(data.add($i).cast());
             x[$i] = _mm_shuffle_epi8(x[$i], MASK);
 
             let y = _mm_add_epi64(
                 x[$i],
-                _mm_loadu_si128(&K64[2 * $i] as *const u64 as *const _),
+                _mm_loadu_si128(K64.as_ptr().add(2 * $i).cast()),
             );
 
             ms[$i] = y;
@@ -106,12 +106,12 @@ unsafe fn load_data_avx2(
 
     macro_rules! unrolled_iterations {
         ($($i:literal),*) => {$(
-            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add(8 + $i) as *const _), 1);
-            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i) as *const _), 0);
+            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add(8 + $i).cast()), 1);
+            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i).cast()), 0);
 
             x[$i] = _mm256_shuffle_epi8(x[$i], MASK);
 
-            let t = _mm_loadu_si128(K64.as_ptr().add($i * 2) as *const u64 as *const _);
+            let t = _mm_loadu_si128(K64.as_ptr().add($i * 2).cast());
             let y = _mm256_add_epi64(x[$i], _mm256_set_m128i(t, t));
 
             ms[$i] = _mm256_extracti128_si256(y, 0);
@@ -128,7 +128,7 @@ unsafe fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &
 
     for _ in 0..4 {
         for j in 0..8 {
-            let k64 = _mm_loadu_si128(&K64[k64_idx] as *const u64 as *const _);
+            let k64 = _mm_loadu_si128(K64.as_ptr().add(k64_idx).cast());
             let y = sha512_update_x_avx(x, k64);
 
             {
@@ -338,12 +338,12 @@ fn_sha512_update_x!(sha512_update_x_avx2, __m256i, {
 
 #[inline(always)]
 fn cast_ms(ms: &MsgSchedule) -> &[u64; SHA512_BLOCK_WORDS_NUM] {
-    unsafe { &*(ms as *const MsgSchedule as *const _) }
+    unsafe { &*(ms.as_ptr().cast()) }
 }
 
 #[inline(always)]
 fn cast_rs(rs: &RoundStates) -> &[u64; SHA512_ROUNDS_NUM] {
-    unsafe { &*(rs as *const RoundStates as *const _) }
+    unsafe { &*(rs.as_ptr().cast()) }
 }
 
 type State = [u64; SHA512_HASH_WORDS_NUM];

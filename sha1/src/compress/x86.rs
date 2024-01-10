@@ -35,18 +35,12 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     #[allow(non_snake_case)]
     let MASK: __m128i = _mm_set_epi64x(0x0001_0203_0405_0607, 0x0809_0A0B_0C0D_0E0F);
 
-    let mut state_abcd = _mm_set_epi32(
-        state[0] as i32,
-        state[1] as i32,
-        state[2] as i32,
-        state[3] as i32,
-    );
+    let mut state_abcd = _mm_loadu_si128(state.as_ptr().cast());
+    state_abcd = _mm_shuffle_epi32(state_abcd, 0b00011011);
     let mut state_e = _mm_set_epi32(state[4] as i32, 0, 0, 0);
 
     for block in blocks {
-        // SAFETY: we use only unaligned loads with this pointer
-        #[allow(clippy::cast_ptr_alignment)]
-        let block_ptr = block.as_ptr() as *const __m128i;
+        let block_ptr: *const __m128i = block.as_ptr().cast();
 
         let mut w0 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(0)), MASK);
         let mut w1 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.offset(1)), MASK);
@@ -90,10 +84,8 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
         state_e = _mm_sha1nexte_epu32(h1, state_e);
     }
 
-    state[0] = _mm_extract_epi32(state_abcd, 3) as u32;
-    state[1] = _mm_extract_epi32(state_abcd, 2) as u32;
-    state[2] = _mm_extract_epi32(state_abcd, 1) as u32;
-    state[3] = _mm_extract_epi32(state_abcd, 0) as u32;
+    state_abcd = _mm_shuffle_epi32(state_abcd, 0b00011011);
+    _mm_storeu_si128(state.as_mut_ptr().cast(), state_abcd);
     state[4] = _mm_extract_epi32(state_e, 3) as u32;
 }
 

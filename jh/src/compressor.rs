@@ -97,7 +97,7 @@ union X2Bytes<M: Machine> {
 #[doc(hidden)]
 pub fn f8_impl<M: Machine>(mach: M, state: &mut [vec128_storage; 8], data: *const u8) {
     #[allow(clippy::cast_ptr_alignment)]
-    let data = data as *const M::u128x1;
+    let data: *const M::u128x1 = data.cast();
     let mut y = X8::<M>(
         mach.unpack(state[0]),
         mach.unpack(state[1]),
