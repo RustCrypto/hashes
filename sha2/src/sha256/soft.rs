@@ -1,6 +1,5 @@
 #![allow(clippy::many_single_char_names)]
 use crate::consts::BLOCK_LEN;
-use core::convert::TryInto;
 
 #[inline(always)]
 fn shr(v: [u32; 4], o: u32) -> [u32; 4] {

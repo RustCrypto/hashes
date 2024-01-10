@@ -1,5 +1,3 @@
-use digest::{array::Array, typenum::U64};
-
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
         mod soft;
@@ -31,10 +29,6 @@ cfg_if::cfg_if! {
 /// This is a low-level "hazmat" API which provides direct access to the core
 /// functionality of SHA-256.
 #[cfg_attr(docsrs, doc(cfg(feature = "compress")))]
-pub fn compress256(state: &mut [u32; 8], blocks: &[Array<u8, U64>]) {
-    // SAFETY: Array<u8, U64> and [u8; 64] have
-    // exactly the same memory layout
-    let p = blocks.as_ptr() as *const [u8; 64];
-    let blocks = unsafe { core::slice::from_raw_parts(p, blocks.len()) };
+pub fn compress256(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     compress(state, blocks)
 }

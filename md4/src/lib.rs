@@ -9,7 +9,7 @@
 
 pub use digest::{self, Digest};
 
-use core::{convert::TryInto, fmt, num::Wrapping as W};
+use core::{fmt, num::Wrapping as W};
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{

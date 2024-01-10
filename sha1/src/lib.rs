@@ -13,6 +13,7 @@ use core::{fmt, slice::from_ref};
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
+    array::ArrayOps,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
@@ -30,6 +31,7 @@ pub use compress::compress;
 use compress::compress;
 
 const STATE_LEN: usize = 5;
+const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
 
 /// Core SHA-1 hasher state.
 #[derive(Clone)]
@@ -56,6 +58,7 @@ impl UpdateCore for Sha1Core {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
+        let blocks = ArrayOps::cast_slice_to_core(blocks);
         compress(&mut self.h, blocks);
     }
 }
@@ -67,7 +70,7 @@ impl FixedOutputCore for Sha1Core {
         let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
 
         let mut h = self.h;
-        buffer.len64_padding_be(bit_len, |b| compress(&mut h, from_ref(b)));
+        buffer.len64_padding_be(bit_len, |b| compress(&mut h, from_ref(&b.0)));
         for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }

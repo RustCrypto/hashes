@@ -1,5 +1,4 @@
-use crate::{Block, BlockSizeUser, Sha1Core};
-use digest::typenum::Unsigned;
+use crate::BLOCK_SIZE;
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
@@ -27,14 +26,8 @@ cfg_if::cfg_if! {
     }
 }
 
-const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
-
 /// SHA-1 compression function
 #[cfg_attr(docsrs, doc(cfg(feature = "compress")))]
-pub fn compress(state: &mut [u32; 5], blocks: &[Block<Sha1Core>]) {
-    // SAFETY: Array<u8, U64> and [u8; 64] have
-    // exactly the same memory layout
-    let blocks: &[[u8; BLOCK_SIZE]] =
-        unsafe { &*(blocks as *const _ as *const [[u8; BLOCK_SIZE]]) };
+pub fn compress(state: &mut [u32; 5], blocks: &[[u8; BLOCK_SIZE]]) {
     compress_inner(state, blocks);
 }

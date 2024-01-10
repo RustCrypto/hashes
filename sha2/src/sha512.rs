@@ -1,5 +1,3 @@
-use digest::{array::Array, typenum::U128};
-
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
         mod soft;
@@ -33,10 +31,6 @@ cfg_if::cfg_if! {
 /// This is a low-level "hazmat" API which provides direct access to the core
 /// functionality of SHA-512.
 #[cfg_attr(docsrs, doc(cfg(feature = "compress")))]
-pub fn compress512(state: &mut [u64; 8], blocks: &[Array<u8, U128>]) {
-    // SAFETY: Array<u8, U64> and [u8; 64] have
-    // exactly the same memory layout
-    let p = blocks.as_ptr() as *const [u8; 128];
-    let blocks = unsafe { core::slice::from_raw_parts(p, blocks.len()) };
+pub fn compress512(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     compress(state, blocks)
 }

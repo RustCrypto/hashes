@@ -46,7 +46,7 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         0x0405_0607_0001_0203u64 as i64,
     );
 
-    let state_ptr = state.as_ptr() as *const __m128i;
+    let state_ptr: *const __m128i = state.as_ptr().cast();
     let dcba = _mm_loadu_si128(state_ptr.add(0));
     let efgh = _mm_loadu_si128(state_ptr.add(1));
 
@@ -59,11 +59,11 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         let abef_save = abef;
         let cdgh_save = cdgh;
 
-        let data_ptr = block.as_ptr() as *const __m128i;
-        let mut w0 = _mm_shuffle_epi8(_mm_loadu_si128(data_ptr.add(0)), MASK);
-        let mut w1 = _mm_shuffle_epi8(_mm_loadu_si128(data_ptr.add(1)), MASK);
-        let mut w2 = _mm_shuffle_epi8(_mm_loadu_si128(data_ptr.add(2)), MASK);
-        let mut w3 = _mm_shuffle_epi8(_mm_loadu_si128(data_ptr.add(3)), MASK);
+        let block_ptr: *const __m128i = block.as_ptr().cast();
+        let mut w0 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.add(0)), MASK);
+        let mut w1 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.add(1)), MASK);
+        let mut w2 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.add(2)), MASK);
+        let mut w3 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.add(3)), MASK);
         let mut w4;
 
         rounds4!(abef, cdgh, w0, 0);
@@ -92,7 +92,7 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     let dcba = _mm_blend_epi16(feba, dchg, 0xF0);
     let hgef = _mm_alignr_epi8(dchg, feba, 8);
 
-    let state_ptr_mut = state.as_mut_ptr() as *mut __m128i;
+    let state_ptr_mut: *mut __m128i = state.as_mut_ptr().cast();
     _mm_storeu_si128(state_ptr_mut.add(0), dcba);
     _mm_storeu_si128(state_ptr_mut.add(1), hgef);
 }

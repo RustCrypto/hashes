@@ -1,11 +1,8 @@
-use crate::BLOCK_SIZE;
-use core::convert::TryInto;
-
 #[path = "consts.rs"]
 mod consts;
 use consts::*;
 
-fn compress_block(state: &mut [u64; 8], b: &[u8; BLOCK_SIZE]) {
+fn compress_block(state: &mut [u64; 8], b: &[u8; 64]) {
     let mut k = [0u64; 8];
     let mut block = [0u64; 8];
     let mut s = [0u64; 8];
@@ -53,7 +50,7 @@ fn compress_block(state: &mut [u64; 8], b: &[u8; BLOCK_SIZE]) {
     }
 }
 
-pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; BLOCK_SIZE]]) {
+pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 64]]) {
     for block in blocks {
         compress_block(state, block);
     }

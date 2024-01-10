@@ -1,4 +1,4 @@
-use core::{convert::TryInto, mem::swap};
+use core::mem::swap;
 
 pub const HALF_DIGEST_BUF_LEN: usize = 5;
 pub const DIGEST_BUF_LEN: usize = 10;

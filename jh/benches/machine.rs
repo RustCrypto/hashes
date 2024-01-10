@@ -22,7 +22,7 @@ macro_rules! mach_bench {
                 input: *const [u8; 64],
             ) {
                 for _ in 0..160 {
-                    jh::f8_impl(m, state, input as *const _);
+                    jh::f8_impl(m, state, input.cast());
                 }
             }
             b.iter(|| unsafe { runner(m, &mut state, &input) });

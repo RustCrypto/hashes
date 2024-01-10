@@ -1,6 +1,5 @@
 use super::tables::{T1, T2, T3, T4};
 use super::State;
-use core::convert::TryInto;
 
 #[inline(always)]
 fn round(a: &mut u64, b: &mut u64, c: &mut u64, x: &u64, mul: u8) {
