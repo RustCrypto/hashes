@@ -154,7 +154,7 @@ unsafe fn rounds_0_63_avx2(
 
     for i in 1..5 {
         for j in 0..8 {
-            let t = _mm_loadu_si128(K64.as_ptr().add(k64x4_idx) as *const u64 as *const _);
+            let t = _mm_loadu_si128(K64.as_ptr().add(k64x4_idx).cast());
             let y = sha512_update_x_avx2(x, _mm256_set_m128i(t, t));
 
             {
