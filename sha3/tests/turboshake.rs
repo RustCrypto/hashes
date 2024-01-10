@@ -1,4 +1,4 @@
-use core::{convert::TryInto, fmt::Debug};
+use core::fmt::Debug;
 use digest::ExtendableOutput;
 
 pub(crate) fn turbo_shake_test<D, F>(

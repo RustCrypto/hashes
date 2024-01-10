@@ -1,6 +1,5 @@
 #![allow(clippy::many_single_char_names, clippy::too_many_arguments)]
 use crate::{consts::T32, Block, Sm3Core};
-use core::convert::TryInto;
 
 #[inline(always)]
 fn ff1(x: u32, y: u32, z: u32) -> u32 {

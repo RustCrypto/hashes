@@ -1,5 +1,5 @@
 use crate::consts;
-use core::{convert::TryInto, fmt, mem, num::Wrapping};
+use core::{fmt, mem, num::Wrapping};
 use digest::{
     array::Array,
     block_buffer::Eager,

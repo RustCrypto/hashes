@@ -1,4 +1,3 @@
-use core::convert::TryInto;
 #[cfg(feature = "zeroize")]
 use zeroize::{Zeroize, ZeroizeOnDrop};
 

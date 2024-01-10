@@ -1,6 +1,5 @@
 #![allow(clippy::many_single_char_names)]
 use super::BLOCK_SIZE;
-use core::convert::TryInto;
 
 const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
 

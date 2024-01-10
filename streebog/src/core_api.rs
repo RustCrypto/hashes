@@ -1,4 +1,4 @@
-use core::{convert::TryInto, fmt};
+use core::fmt;
 use digest::{
     block_buffer::Eager,
     consts::U64,

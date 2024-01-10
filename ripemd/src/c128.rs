@@ -1,5 +1,3 @@
-use core::convert::TryInto;
-
 pub const DIGEST_BUF_LEN: usize = 4;
 pub const WORK_BUF_LEN: usize = 16;
 

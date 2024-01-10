@@ -13,7 +13,7 @@ extern crate std;
 
 pub use digest::{self, Digest};
 
-use core::{convert::TryInto, fmt, marker::PhantomData, ops::Div};
+use core::{fmt, marker::PhantomData, ops::Div};
 use digest::{
     array::{Array, ArraySize},
     block_buffer::{Lazy, LazyBuffer},

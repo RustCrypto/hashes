@@ -1,5 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use core::{convert::TryInto, fmt};
+use core::fmt;
 use digest::{
     block_buffer::Eager,
     core_api::{

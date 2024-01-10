@@ -1,6 +1,5 @@
 #![allow(clippy::many_single_char_names)]
 use crate::consts::{BLOCK_LEN, K64X2};
-use core::convert::TryInto;
 
 fn add(a: [u64; 2], b: [u64; 2]) -> [u64; 2] {
     [a[0].wrapping_add(b[0]), a[1].wrapping_add(b[1])]
