@@ -12,7 +12,6 @@ fn digest_and_box(data: &[u8], n: usize) -> Box<[u8]> {
 }
 
 #[test]
-#[rustfmt::skip]
 fn empty() {
     // Source: reference paper
     assert_eq!(
@@ -25,7 +24,7 @@ fn empty() {
         hex!(
             "1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5"
             "4269c056b8c82e48276038b6d292966cc07a3d4645272e31ff38508139eb0a71"
-        )[..]
+        )[..],
     );
 
     assert_eq!(

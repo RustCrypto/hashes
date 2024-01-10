@@ -42,7 +42,6 @@ fn shabal256_rand() {
 }
 
 #[test]
-#[rustfmt::skip]
 fn shabal384_rand() {
     let mut h = Shabal384::new();
     feed_rand_16mib(&mut h);
@@ -56,7 +55,6 @@ fn shabal384_rand() {
 }
 
 #[test]
-#[rustfmt::skip]
 fn shabal512_rand() {
     let mut h = Shabal512::new();
     feed_rand_16mib(&mut h);

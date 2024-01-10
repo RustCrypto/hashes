@@ -40,7 +40,6 @@ fn fsb256_rand() {
 }
 
 #[test]
-#[rustfmt::skip]
 fn fsb384_rand() {
     let mut h = Fsb384::new();
     feed_rand_16mib(&mut h);
@@ -54,7 +53,6 @@ fn fsb384_rand() {
 }
 
 #[test]
-#[rustfmt::skip]
 fn fsb512_rand() {
     let mut h = Fsb512::new();
     feed_rand_16mib(&mut h);

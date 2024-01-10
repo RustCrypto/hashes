@@ -21,7 +21,6 @@ fn sha256_rand() {
 }
 
 #[test]
-#[rustfmt::skip]
 fn sha512_rand() {
     let mut h = Sha512::new();
     feed_rand_16mib(&mut h);

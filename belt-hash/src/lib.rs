@@ -25,6 +25,9 @@ use digest::{
 };
 
 const U32_MASK: u128 = (1 << 32) - 1;
+const H0: [u32; 8] = [
+    0xC8BA94B1, 0x3BF5080A, 0x8E006D36, 0xE45D4A58, 0x9DFA0485, 0xACC7B61B, 0xC2722E25, 0x0DCEFD02,
+];
 
 /// Core BelT hasher state.
 #[derive(Clone)]
@@ -101,11 +104,7 @@ impl Default for BeltHashCore {
         Self {
             r: 0,
             s: [0; 4],
-            #[rustfmt::skip]
-            h: [
-                0xC8BA94B1, 0x3BF5080A, 0x8E006D36, 0xE45D4A58,
-                0x9DFA0485, 0xACC7B61B, 0xC2722E25, 0x0DCEFD02,
-            ],
+            h: H0,
         }
     }
 }

@@ -173,5 +173,4 @@ macro_rules! define_hasher {
 
 define_hasher!(Skein256Core, Skein256, Threefish256, U32, "Skein-256");
 define_hasher!(Skein512Core, Skein512, Threefish512, U64, "Skein-512");
-#[rustfmt::skip]
 define_hasher!(Skein1024Core, Skein1024, Threefish1024, U128, "Skein-1024");
