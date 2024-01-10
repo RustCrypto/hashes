@@ -9,8 +9,7 @@ use digest::{
     HashMarker, InvalidOutputSize, Output,
 };
 
-use crate::consts::{BLOCK_SIZE, C};
-use crate::table::SHUFFLED_LIN_TABLE;
+use crate::consts::{BLOCK_SIZE, C, SHUFFLED_LIN_TABLE};
 
 type Block = [u8; 64];
 
