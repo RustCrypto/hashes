@@ -13,13 +13,13 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.71"
 
 [dependencies]
-digest = "=0.11.0-pre.3"
+digest = "=0.11.0-pre.4"
 
 [target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
 whirlpool-asm = { version = "0.6", optional = true}
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.3", features = ["dev"] }
+digest = { version = "=0.11.0-pre.4", features = ["dev"] }
 hex-literal = "0.4"
 
 [features]
