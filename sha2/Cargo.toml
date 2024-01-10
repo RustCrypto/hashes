@@ -13,7 +13,7 @@ documentation = "https://docs.rs/sha2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.71"
+rust-version = "1.72"
 
 [dependencies]
 digest = "=0.11.0-pre.4"
@@ -21,7 +21,6 @@ cfg-if = "1"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
 cpufeatures = "0.2"
-sha2-asm = { version = "0.6.1", optional = true }
 
 [dev-dependencies]
 digest = { version = "=0.11.0-pre.4", features = ["dev"] }
@@ -31,11 +30,8 @@ hex-literal = "0.4"
 default = ["oid", "std"]
 std = ["digest/std"]
 oid = ["digest/oid"] # Enable OID support.
-asm = ["sha2-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
 loongarch64_asm = [] # WARNING: this feature SHOULD NOT be enabled by library crates
-compress = [] # Expose compress functions
 force-soft = [] # Force software implementation
-asm-aarch64 = ["asm"] # DEPRECATED: use `asm` instead
 
 [package.metadata.docs.rs]
 all-features = true

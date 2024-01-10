@@ -25,10 +25,7 @@ use digest::{
 
 mod compress;
 
-#[cfg(feature = "compress")]
 pub use compress::compress;
-#[cfg(not(feature = "compress"))]
-use compress::compress;
 
 const STATE_LEN: usize = 5;
 const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;

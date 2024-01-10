@@ -1,6 +1,4 @@
-#[path = "consts.rs"]
-mod consts;
-use consts::*;
+use crate::consts::*;
 
 fn compress_block(state: &mut [u64; 8], b: &[u8; 64]) {
     let mut k = [0u64; 8];
