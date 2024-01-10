@@ -9,14 +9,10 @@
 
 Implementation of the [Skein] family of cryptographic hash algorithms.
 
-There are 3 standard versions of the Skein hash function:
-
-* [`Skein256`]
-* [`Skein512`]
-* [`Skein1024`]
+There are 3 standard versions of the Skein hash function: `Skein256`, `Skein512`, `Skein1024`.
 
 Output size of the Skein hash functions is arbitrary, so it has to be
-fixed using additional type parameter
+fixed using additional type parameter.
 
 ## Examples
 

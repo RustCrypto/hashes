@@ -10,7 +10,7 @@
 Pure Rust implementation of the [SHA-2] cryptographic hash algorithms.
 
 There are 6 standard algorithms specified in the SHA-2 standard: 
-[`Sha224`], [`Sha256`], [`Sha512_224`], [`Sha512_256`], [`Sha384`], and [`Sha512`].
+`Sha224`, `Sha256`, `Sha512_224`, `Sha512_256`, `Sha384`, and `Sha512`.
 
 Algorithmically, there are only 2 core algorithms: SHA-256 and SHA-512.
 All other algorithms are just applications of these with different initial
