@@ -122,8 +122,12 @@ impl Drop for JhCore {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
-            // TODO: implement Zeroize for Compressor
-            // self.state.zeroize();
+            const N: usize = core::mem::size_of::<Compressor>();
+            // TODO: remove this unsafe after migration from `ppv-lite86`
+            unsafe {
+                let p: *mut [u8; N] = (&mut self.state as *mut Compressor).cast();
+                core::ptr::write_volatile(p, [0u8; N]);
+            }
             self.block_len.zeroize();
         }
     }
