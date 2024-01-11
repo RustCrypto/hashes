@@ -22,8 +22,13 @@ hex-literal = "0.4"
 [features]
 default = ["std"]
 std = ["digest/std"]
+zeroize = ["digest/zeroize"]
 reset = [] # Enable reset functionality
 #simd = []
 #simd_opt = ["simd"]
 #simd_asm = ["simd_opt"]
 size_opt = [] # Optimize for code size. Removes some `inline(always)`
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

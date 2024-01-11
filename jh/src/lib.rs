@@ -4,6 +4,7 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
 
 mod compressor;
@@ -27,12 +28,24 @@ use digest::{
     HashMarker, InvalidOutputSize, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+
 /// Core JH hasher state
 #[derive(Clone)]
 pub struct JhCore {
     state: Compressor,
     block_len: u64,
 }
+
+/// Jh-224 hasher state
+pub type Jh224 = CoreWrapper<CtVariableCoreWrapper<JhCore, U28>>;
+/// Jh-256 hasher state
+pub type Jh256 = CoreWrapper<CtVariableCoreWrapper<JhCore, U32>>;
+/// Jh-384 hasher state
+pub type Jh384 = CoreWrapper<CtVariableCoreWrapper<JhCore, U48>>;
+/// Jh-512 hasher state
+pub type Jh512 = CoreWrapper<CtVariableCoreWrapper<JhCore, U64>>;
 
 impl HashMarker for JhCore {}
 
@@ -105,11 +118,20 @@ impl fmt::Debug for JhCore {
     }
 }
 
-/// Jh-224 hasher state
-pub type Jh224 = CoreWrapper<CtVariableCoreWrapper<JhCore, U28>>;
-/// Jh-256 hasher state
-pub type Jh256 = CoreWrapper<CtVariableCoreWrapper<JhCore, U32>>;
-/// Jh-384 hasher state
-pub type Jh384 = CoreWrapper<CtVariableCoreWrapper<JhCore, U48>>;
-/// Jh-512 hasher state
-pub type Jh512 = CoreWrapper<CtVariableCoreWrapper<JhCore, U64>>;
+impl Drop for JhCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            const N: usize = core::mem::size_of::<Compressor>();
+            // TODO: remove this unsafe after migration from `ppv-lite86`
+            unsafe {
+                let p: *mut [u8; N] = (&mut self.state as *mut Compressor).cast();
+                core::ptr::write_volatile(p, [0u8; N]);
+            }
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for JhCore {}

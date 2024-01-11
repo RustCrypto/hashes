@@ -10,7 +10,7 @@ documentation = "https://docs.rs/tiger"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "hash", "tiger", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.71"
+rust-version = "1.74"
 
 [dependencies]
 digest = "=0.11.0-pre.6"
@@ -22,3 +22,8 @@ hex-literal = "0.4"
 [features]
 default = ["std"]
 std = ["digest/std"]
+zeroize = ["digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

@@ -12,6 +12,10 @@ macro_rules! impl_sha3 {
             state: Sha3State,
         }
 
+        #[doc = $alg_name]
+        #[doc = " hasher state."]
+        pub type $full_name = CoreWrapper<$name>;
+
         impl HashMarker for $name {}
 
         impl BlockSizeUser for $name {
@@ -78,9 +82,17 @@ macro_rules! impl_sha3 {
             }
         }
 
-        #[doc = $alg_name]
-        #[doc = " hasher state."]
-        pub type $full_name = CoreWrapper<$name>;
+        impl Drop for $name {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.state.state.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $name {}
     };
     (
         $name:ident, $full_name:ident, $output_size:ident,
@@ -109,6 +121,10 @@ macro_rules! impl_shake {
         pub struct $name {
             state: Sha3State,
         }
+
+        #[doc = $alg_name]
+        #[doc = " hasher state."]
+        pub type $full_name = CoreWrapper<$name>;
 
         impl HashMarker for $name {}
 
@@ -175,6 +191,18 @@ macro_rules! impl_shake {
             }
         }
 
+        impl Drop for $name {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.state.state.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $name {}
+
         #[doc = "Core "]
         #[doc = $alg_name]
         #[doc = " reader state."]
@@ -183,6 +211,10 @@ macro_rules! impl_shake {
         pub struct $reader {
             state: Sha3State,
         }
+
+        #[doc = $alg_name]
+        #[doc = " reader state."]
+        pub type $reader_full = XofReaderCoreWrapper<$reader>;
 
         impl BlockSizeUser for $reader {
             type BlockSize = $rate;
@@ -198,13 +230,17 @@ macro_rules! impl_shake {
             }
         }
 
-        #[doc = $alg_name]
-        #[doc = " hasher state."]
-        pub type $full_name = CoreWrapper<$name>;
+        impl Drop for $reader {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.state.state.zeroize();
+                }
+            }
+        }
 
-        #[doc = $alg_name]
-        #[doc = " reader state."]
-        pub type $reader_full = XofReaderCoreWrapper<$reader>;
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $reader {}
     };
     (
         $name:ident, $full_name:ident, $reader:ident, $reader_full:ident,
@@ -239,9 +275,13 @@ macro_rules! impl_turbo_shake {
         #[derive(Clone)]
         #[allow(non_camel_case_types)]
         pub struct $name {
+            state: Sha3State<TURBO_SHAKE_ROUND_COUNT>,
             domain_separation: u8,
-            state: Sha3State,
         }
+
+        #[doc = $alg_name]
+        #[doc = " hasher state."]
+        pub type $full_name = CoreWrapper<$name>;
 
         impl $name {
             /// Creates a new TurboSHAKE instance with the given domain separation.
@@ -251,7 +291,7 @@ macro_rules! impl_turbo_shake {
                 assert!((0x01..=0x7F).contains(&domain_separation));
                 Self {
                     domain_separation,
-                    state: Sha3State::new(TURBO_SHAKE_ROUND_COUNT),
+                    state: Default::default(),
                 }
             }
         }
@@ -312,14 +352,31 @@ macro_rules! impl_turbo_shake {
             }
         }
 
+        impl Drop for $name {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.state.state.zeroize();
+                    self.domain_separation.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $name {}
+
         #[doc = "Core "]
         #[doc = $alg_name]
         #[doc = " reader state."]
         #[derive(Clone)]
         #[allow(non_camel_case_types)]
         pub struct $reader {
-            state: Sha3State,
+            state: Sha3State<TURBO_SHAKE_ROUND_COUNT>,
         }
+
+        #[doc = $alg_name]
+        #[doc = " reader state."]
+        pub type $reader_full = XofReaderCoreWrapper<$reader>;
 
         impl BlockSizeUser for $reader {
             type BlockSize = $rate;
@@ -335,13 +392,17 @@ macro_rules! impl_turbo_shake {
             }
         }
 
-        #[doc = $alg_name]
-        #[doc = " hasher state."]
-        pub type $full_name = CoreWrapper<$name>;
+        impl Drop for $reader {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.state.state.zeroize();
+                }
+            }
+        }
 
-        #[doc = $alg_name]
-        #[doc = " reader state."]
-        pub type $reader_full = XofReaderCoreWrapper<$reader>;
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $reader {}
     };
     (
         $name:ident, $full_name:ident, $reader:ident, $reader_full:ident,
@@ -368,11 +429,15 @@ macro_rules! impl_cshake {
         #[derive(Clone)]
         #[allow(non_camel_case_types)]
         pub struct $name {
-            padding: u8,
             state: Sha3State,
             #[cfg(feature = "reset")]
             initial_state: Sha3State,
+            padding: u8,
         }
+
+        #[doc = $alg_name]
+        #[doc = " hasher state."]
+        pub type $full_name = CoreWrapper<$name>;
 
         impl $name {
             /// Creates a new CSHAKE instance with the given customization.
@@ -495,6 +560,21 @@ macro_rules! impl_cshake {
             }
         }
 
+        impl Drop for $name {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.state.state.zeroize();
+                    self.padding.zeroize();
+                    #[cfg(feature = "reset")]
+                    self.initial_state.state.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $name {}
+
         #[doc = "Core "]
         #[doc = $alg_name]
         #[doc = " reader state."]
@@ -503,6 +583,10 @@ macro_rules! impl_cshake {
         pub struct $reader {
             state: Sha3State,
         }
+
+        #[doc = $alg_name]
+        #[doc = " reader state."]
+        pub type $reader_full = XofReaderCoreWrapper<$reader>;
 
         impl BlockSizeUser for $reader {
             type BlockSize = $rate;
@@ -518,12 +602,16 @@ macro_rules! impl_cshake {
             }
         }
 
-        #[doc = $alg_name]
-        #[doc = " hasher state."]
-        pub type $full_name = CoreWrapper<$name>;
+        impl Drop for $reader {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.state.state.zeroize();
+                }
+            }
+        }
 
-        #[doc = $alg_name]
-        #[doc = " reader state."]
-        pub type $reader_full = XofReaderCoreWrapper<$reader>;
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $reader {}
     };
 }

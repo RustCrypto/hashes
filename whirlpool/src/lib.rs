@@ -4,6 +4,7 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![deny(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
@@ -21,6 +22,9 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+
 mod compress;
 mod consts;
 
@@ -32,6 +36,9 @@ pub struct WhirlpoolCore {
     bit_len: [u64; 4],
     state: [u64; 8],
 }
+
+/// Whirlpool hasher state.
+pub type Whirlpool = CoreWrapper<WhirlpoolCore>;
 
 impl HashMarker for WhirlpoolCore {}
 
@@ -81,6 +88,13 @@ impl FixedOutputCore for WhirlpoolCore {
 
 impl WhirlpoolCore {
     fn update_len(&mut self, len: u64) {
+        #[inline(always)]
+        fn adc(a: &mut u64, b: u64, carry: &mut u64) {
+            let ret = (*a as u128) + (b as u128) + (*carry as u128);
+            *a = ret as u64;
+            *carry = (ret >> 64) as u64;
+        }
+
         let mut carry = 0;
         adc(&mut self.bit_len[3], len, &mut carry);
         adc(&mut self.bit_len[2], 0, &mut carry);
@@ -120,12 +134,15 @@ impl fmt::Debug for WhirlpoolCore {
     }
 }
 
-/// Whirlpool hasher state.
-pub type Whirlpool = CoreWrapper<WhirlpoolCore>;
-
-#[inline(always)]
-fn adc(a: &mut u64, b: u64, carry: &mut u64) {
-    let ret = (*a as u128) + (b as u128) + (*carry as u128);
-    *a = ret as u64;
-    *carry = (ret >> 64) as u64;
+impl Drop for WhirlpoolCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.bit_len.zeroize();
+        }
+    }
 }
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for WhirlpoolCore {}

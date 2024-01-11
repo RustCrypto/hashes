@@ -1,17 +1,15 @@
 #![no_std]
 #![doc = include_str!("../README.md")]
-#![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub use digest::{self, Digest};
 
 use core::{fmt, slice::from_ref};
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     array::ArrayOps,
     block_buffer::Eager,
@@ -22,6 +20,11 @@ use digest::{
     typenum::{Unsigned, U20, U64},
     HashMarker, Output,
 };
+
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 mod compress;
 
@@ -36,6 +39,9 @@ pub struct Sha1Core {
     h: [u32; STATE_LEN],
     block_len: u64,
 }
+
+/// SHA-1 hasher state.
+pub type Sha1 = CoreWrapper<Sha1Core>;
 
 impl HashMarker for Sha1Core {}
 
@@ -109,5 +115,15 @@ impl AssociatedOid for Sha1Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.14.3.2.26");
 }
 
-/// SHA-1 hasher state.
-pub type Sha1 = CoreWrapper<Sha1Core>;
+impl Drop for Sha1Core {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.h.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for Sha1Core {}

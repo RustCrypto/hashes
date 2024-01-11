@@ -12,6 +12,9 @@ macro_rules! fsb_impl {
             state: [u8; $r / 8],
         }
 
+        #[doc=$full_doc]
+        pub type $full_state = CoreWrapper<$state>;
+
         impl HashMarker for $state {}
 
         impl BlockSizeUser for $state {
@@ -79,8 +82,18 @@ macro_rules! fsb_impl {
             }
         }
 
-        #[doc=$full_doc]
-        pub type $full_state = CoreWrapper<$state>;
+        impl Drop for $state {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.state.zeroize();
+                    self.blocks_len.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $state {}
 
         impl $state {
             const SIZE_OUTPUT_COMPRESS: usize = $r / 8;

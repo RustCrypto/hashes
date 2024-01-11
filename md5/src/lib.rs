@@ -4,6 +4,7 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub use digest::{self, Digest};
@@ -12,8 +13,6 @@ mod compress;
 pub(crate) mod consts;
 
 use core::{fmt, slice::from_ref};
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     array::ArrayOps,
     block_buffer::Eager,
@@ -25,12 +24,20 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+
 /// Core MD5 hasher state.
 #[derive(Clone)]
 pub struct Md5Core {
     block_len: u64,
     state: [u32; 4],
 }
+
+/// MD5 hasher state.
+pub type Md5 = CoreWrapper<Md5Core>;
 
 impl HashMarker for Md5Core {}
 
@@ -106,5 +113,15 @@ impl AssociatedOid for Md5Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.5");
 }
 
-/// MD5 hasher state.
-pub type Md5 = CoreWrapper<Md5Core>;
+impl Drop for Md5Core {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for Md5Core {}

@@ -4,7 +4,7 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
-#![forbid(unsafe_code)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub use digest::{self, Digest};
@@ -20,6 +20,9 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+
 mod compress;
 mod tables;
 use compress::compress;
@@ -33,26 +36,31 @@ const S0: State = [
 
 /// Core Tiger hasher state.
 #[derive(Clone)]
-pub struct TigerCore {
+pub struct TigerCore<const VER2: bool = true> {
     block_len: u64,
     state: State,
 }
 
-impl HashMarker for TigerCore {}
+/// Tiger hasher state.
+pub type Tiger = CoreWrapper<TigerCore<false>>;
+/// Tiger2 hasher state.
+pub type Tiger2 = CoreWrapper<TigerCore<true>>;
 
-impl BlockSizeUser for TigerCore {
+impl<const VER2: bool> HashMarker for TigerCore<VER2> {}
+
+impl<const VER2: bool> BlockSizeUser for TigerCore<VER2> {
     type BlockSize = U64;
 }
 
-impl BufferKindUser for TigerCore {
+impl<const VER2: bool> BufferKindUser for TigerCore<VER2> {
     type BufferKind = Eager;
 }
 
-impl OutputSizeUser for TigerCore {
+impl<const VER2: bool> OutputSizeUser for TigerCore<VER2> {
     type OutputSize = U24;
 }
 
-impl UpdateCore for TigerCore {
+impl<const VER2: bool> UpdateCore for TigerCore<VER2> {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
@@ -62,23 +70,29 @@ impl UpdateCore for TigerCore {
     }
 }
 
-impl FixedOutputCore for TigerCore {
+impl<const VER2: bool> FixedOutputCore for TigerCore<VER2> {
     #[inline]
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let bs = Self::BlockSize::U64;
         let pos = buffer.get_pos() as u64;
         let bit_len = 8 * (pos + bs * self.block_len);
 
-        buffer.digest_pad(1, &bit_len.to_le_bytes(), |b| {
-            compress(&mut self.state, b.as_ref())
-        });
+        if VER2 {
+            buffer.len64_padding_le(bit_len, |b| compress(&mut self.state, b.as_ref()));
+        } else {
+            buffer.digest_pad(1, &bit_len.to_le_bytes(), |b| {
+                compress(&mut self.state, b.as_ref())
+            });
+        }
+
         for (chunk, v) in out.chunks_exact_mut(8).zip(self.state.iter()) {
             chunk.copy_from_slice(&v.to_le_bytes());
         }
     }
 }
 
-impl Default for TigerCore {
+impl<const VER2: bool> Default for TigerCore<VER2> {
+    #[inline]
     fn default() -> Self {
         Self {
             block_len: 0,
@@ -87,102 +101,44 @@ impl Default for TigerCore {
     }
 }
 
-impl Reset for TigerCore {
-    fn reset(&mut self) {
-        *self = Default::default();
-    }
-}
-
-impl AlgorithmName for TigerCore {
-    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Tiger")
-    }
-}
-
-impl fmt::Debug for TigerCore {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("TigerCore { ... }")
-    }
-}
-
-/// Core Tiger2 hasher state.
-#[derive(Clone)]
-pub struct Tiger2Core {
-    block_len: u64,
-    state: State,
-}
-
-impl HashMarker for Tiger2Core {}
-
-impl BlockSizeUser for Tiger2Core {
-    type BlockSize = U64;
-}
-
-impl BufferKindUser for Tiger2Core {
-    type BufferKind = Eager;
-}
-
-impl OutputSizeUser for Tiger2Core {
-    type OutputSize = U24;
-}
-
-impl UpdateCore for Tiger2Core {
-    #[inline]
-    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-        self.block_len += blocks.len() as u64;
-        for block in blocks {
-            compress(&mut self.state, block.as_ref());
-        }
-    }
-}
-
-impl FixedOutputCore for Tiger2Core {
-    #[inline]
-    fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-        let bs = Self::BlockSize::U64;
-        let pos = buffer.get_pos() as u64;
-        let bit_len = 8 * (pos + bs * self.block_len);
-
-        buffer.len64_padding_le(bit_len, |b| compress(&mut self.state, b.as_ref()));
-        for (chunk, v) in out.chunks_exact_mut(8).zip(self.state.iter()) {
-            chunk.copy_from_slice(&v.to_le_bytes());
-        }
-    }
-}
-
-impl Default for Tiger2Core {
-    fn default() -> Self {
-        Self {
-            block_len: 0,
-            state: [
-                0x0123_4567_89AB_CDEF,
-                0xFEDC_BA98_7654_3210,
-                0xF096_A5B4_C3B2_E187,
-            ],
-        }
-    }
-}
-
-impl Reset for Tiger2Core {
+impl<const VER2: bool> Reset for TigerCore<VER2> {
     #[inline]
     fn reset(&mut self) {
         *self = Default::default();
     }
 }
 
-impl AlgorithmName for Tiger2Core {
+impl<const VER2: bool> AlgorithmName for TigerCore<VER2> {
+    #[inline]
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Tiger2")
+        if VER2 {
+            f.write_str("Tiger2")
+        } else {
+            f.write_str("Tiger")
+        }
     }
 }
 
-impl fmt::Debug for Tiger2Core {
+impl<const VER2: bool> fmt::Debug for TigerCore<VER2> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Tiger2Core { ... }")
+        if VER2 {
+            f.write_str("Tiger2Core { ... }")
+        } else {
+            f.write_str("TigerCore { ... }")
+        }
     }
 }
 
-/// Tiger hasher state.
-pub type Tiger = CoreWrapper<TigerCore>;
-/// Tiger2 hasher state.
-pub type Tiger2 = CoreWrapper<Tiger2Core>;
+impl<const VER2: bool> Drop for TigerCore<VER2> {
+    #[inline]
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl<const VER2: bool> ZeroizeOnDrop for TigerCore<VER2> {}

@@ -4,6 +4,7 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
 #![deny(unsafe_code)]
 
@@ -21,6 +22,9 @@ use digest::{
     HashMarker, Output,
 };
 use threefish::{Threefish1024, Threefish256, Threefish512};
+
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 const VERSION: u64 = 1;
 const ID_STRING_LE: u64 = 0x3341_4853;
@@ -46,6 +50,10 @@ macro_rules! define_hasher {
             x: [u64; <$state_bytes>::USIZE / 8],
             _pd: PhantomData<N>,
         }
+
+        #[doc = $alg_name]
+        #[doc = " hasher state"]
+        pub type $full_name<OutputSize = $state_bytes> = CoreWrapper<$name<OutputSize>>;
 
         impl<N: ArraySize + 'static> $name<N> {
             fn blank_state(t1: u64, x: [u64; <$state_bytes>::USIZE / 8]) -> Self {
@@ -165,9 +173,18 @@ macro_rules! define_hasher {
             }
         }
 
-        #[doc = $alg_name]
-        #[doc = " hasher state"]
-        pub type $full_name<OutputSize = $state_bytes> = CoreWrapper<$name<OutputSize>>;
+        impl<N: ArraySize + 'static> Drop for $name<N> {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.t.zeroize();
+                    self.x.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl<N: ArraySize + 'static> ZeroizeOnDrop for $name<N> {}
     };
 }
 

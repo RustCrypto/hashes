@@ -4,14 +4,13 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub use digest::{self, Digest};
 
 use core::fmt;
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     array::typenum::Unsigned,
     block_buffer::Eager,
@@ -23,6 +22,11 @@ use digest::{
     },
     HashMarker, Output,
 };
+
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 #[macro_use]
 mod macros;

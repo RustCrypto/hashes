@@ -4,6 +4,7 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
@@ -17,8 +18,10 @@ use digest::core_api::{
     UpdateCore, XofReaderCore, XofReaderCoreWrapper,
 };
 use digest::{ExtendableOutputReset, HashMarker, Reset, Update, XofReader};
-
 use sha3::{TurboShake128, TurboShake128Core, TurboShake128ReaderCore};
+
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 const CHUNK_SIZE: usize = 8192;
 const CHAINING_VALUE_SIZE: usize = 32;
@@ -35,6 +38,9 @@ pub struct KangarooTwelveCore<'cs> {
     chain_tshk: TurboShake128,
     chain_length: usize,
 }
+
+/// [`KangarooTwelve`] hasher state.
+pub type KangarooTwelve<'cs> = CoreWrapper<KangarooTwelveCore<'cs>>;
 
 impl<'cs> KangarooTwelveCore<'cs> {
     /// Creates a new KangarooTwelve instance with the given customization.
@@ -179,12 +185,30 @@ impl fmt::Debug for KangarooTwelveCore<'_> {
     }
 }
 
+impl Drop for KangarooTwelveCore<'_> {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.buffer.zeroize();
+            self.bufpos.zeroize();
+            self.chain_length.zeroize();
+            // final_tshk and chain_tshk zeroized by their Drop impl
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for KangarooTwelveCore<'_> {}
+
 /// Core [`KangarooTwelve`] reader state.
 #[derive(Clone)]
 #[allow(non_camel_case_types)]
 pub struct KangarooTwelveReaderCore {
     tshk: XofReaderCoreWrapper<TurboShake128ReaderCore>,
 }
+
+/// [`KangarooTwelve`] reader state.
+pub type KangarooTwelveReader = XofReaderCoreWrapper<KangarooTwelveReaderCore>;
 
 impl BlockSizeUser for KangarooTwelveReaderCore {
     type BlockSize = U168; // TurboSHAKE128 block size
@@ -199,11 +223,9 @@ impl XofReaderCore for KangarooTwelveReaderCore {
     }
 }
 
-/// [`KangarooTwelve`] hasher state.
-pub type KangarooTwelve<'cs> = CoreWrapper<KangarooTwelveCore<'cs>>;
-
-/// [`KangarooTwelve`] reader state.
-pub type KangarooTwelveReader = XofReaderCoreWrapper<KangarooTwelveReaderCore>;
+// `TurboShake128ReaderCore` and the wrapper are zeroized by their Drop impls
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for KangarooTwelveReaderCore {}
 
 fn length_encode(mut length: usize, buffer: &mut [u8; LENGTH_ENCODE_SIZE]) -> &mut [u8] {
     let mut bufpos = 0usize;

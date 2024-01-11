@@ -9,6 +9,9 @@ use digest::{
     HashMarker, InvalidOutputSize, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+
 use crate::consts::{BLOCK_SIZE, C, SHUFFLED_LIN_TABLE};
 
 type Block = [u8; 64];
@@ -161,6 +164,20 @@ impl fmt::Debug for StreebogVarCore {
         f.write_str("StreebogVarCore { ... }")
     }
 }
+
+impl Drop for StreebogVarCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.h.zeroize();
+            self.n.zeroize();
+            self.sigma.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for StreebogVarCore {}
 
 #[inline(always)]
 fn adc(a: &mut u64, b: u64, carry: &mut u64) {

@@ -19,3 +19,10 @@ simd = { package = "ppv-lite86", version = "0.2.6" }
 
 [dev-dependencies]
 digest = { version = "=0.11.0-pre.6", features = ["dev"] }
+
+[features]
+zeroize = ["digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

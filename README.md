@@ -32,7 +32,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [Skein] | [`skein`] | [![crates.io](https://img.shields.io/crates/v/skein.svg)](https://crates.io/crates/skein) | [![Documentation](https://docs.rs/skein/badge.svg)](https://docs.rs/skein) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [SM3] (OSCCA GM/T 0004-2012) | [`sm3`] | [![crates.io](https://img.shields.io/crates/v/sm3.svg)](https://crates.io/crates/sm3) | [![Documentation](https://docs.rs/sm3/badge.svg)](https://docs.rs/sm3) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [Streebog] (GOST R 34.11-2012) | [`streebog`] | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) | [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | ![MSRV 1.71][msrv-1.71] | :yellow_heart: |
-| [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
+| [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | ![MSRV 1.74][msrv-1.74] | :green_heart: |
 | [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 
 NOTE: the [`blake3`] crate implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
@@ -235,6 +235,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [deps-link]: https://deps.rs/repo/github/RustCrypto/hashes
 [msrv-1.71]: https://img.shields.io/badge/rustc-1.71.0+-blue.svg
 [msrv-1.72]: https://img.shields.io/badge/rustc-1.72.0+-blue.svg
+[msrv-1.74]: https://img.shields.io/badge/rustc-1.74.0+-blue.svg
 
 [//]: # (crates)
 

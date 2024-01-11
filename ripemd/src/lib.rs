@@ -4,14 +4,13 @@
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
 pub use digest::{self, Digest};
 
 use core::fmt;
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     block_buffer::Eager,
     core_api::{
@@ -21,6 +20,11 @@ use digest::{
     typenum::{Unsigned, U16, U20, U32, U40, U64},
     HashMarker, Output,
 };
+
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 mod c128;
 mod c160;
@@ -40,6 +44,10 @@ macro_rules! impl_ripemd {
             h: [u32; $mod::DIGEST_BUF_LEN],
             block_len: u64,
         }
+
+        #[doc = $doc_name]
+        #[doc = " hasher."]
+        pub type $wrapped_name = CoreWrapper<$name>;
 
         impl HashMarker for $name {}
 
@@ -111,9 +119,18 @@ macro_rules! impl_ripemd {
             }
         }
 
-        #[doc = $doc_name]
-        #[doc = " hasher."]
-        pub type $wrapped_name = CoreWrapper<$name>;
+        impl Drop for $name {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.h.zeroize();
+                    self.block_len.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $name {}
     };
 }
 
