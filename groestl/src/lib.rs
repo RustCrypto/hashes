@@ -21,6 +21,9 @@ use digest::{
     HashMarker, InvalidOutputSize, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 mod compress1024;
 mod compress512;
 mod table;
@@ -31,6 +34,18 @@ pub struct GroestlShortVarCore {
     state: [u64; compress512::COLS],
     blocks_len: u64,
 }
+
+/// Short Groestl variant which allows to choose output size at runtime.
+pub type GroestlShortVar = RtVariableCoreWrapper<GroestlShortVarCore>;
+/// Core hasher state of the short Groestl variant generic over output size.
+pub type GroestlShortCore<OutSize> = CtVariableCoreWrapper<GroestlShortVarCore, OutSize>;
+/// Hasher state of the short Groestl variant generic over output size.
+pub type GroestlShort<OutSize> = CoreWrapper<GroestlShortCore<OutSize>>;
+
+/// Groestl-224 hasher state.
+pub type Groestl224 = CoreWrapper<GroestlShortCore<U28>>;
+/// Groestl-256 hasher state.
+pub type Groestl256 = CoreWrapper<GroestlShortCore<U32>>;
 
 impl HashMarker for GroestlShortVarCore {}
 
@@ -101,17 +116,18 @@ impl fmt::Debug for GroestlShortVarCore {
     }
 }
 
-/// Short Groestl variant which allows to choose output size at runtime.
-pub type GroestlShortVar = RtVariableCoreWrapper<GroestlShortVarCore>;
-/// Core hasher state of the short Groestl variant generic over output size.
-pub type GroestlShortCore<OutSize> = CtVariableCoreWrapper<GroestlShortVarCore, OutSize>;
-/// Hasher state of the short Groestl variant generic over output size.
-pub type GroestlShort<OutSize> = CoreWrapper<GroestlShortCore<OutSize>>;
+impl Drop for GroestlShortVarCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.blocks_len.zeroize();
+        }
+    }
+}
 
-/// Groestl-224 hasher state.
-pub type Groestl224 = CoreWrapper<GroestlShortCore<U28>>;
-/// Groestl-256 hasher state.
-pub type Groestl256 = CoreWrapper<GroestlShortCore<U32>>;
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for GroestlShortVarCore {}
 
 /// Lowest-level core hasher state of the long Groestl variant.
 #[derive(Clone)]
@@ -119,6 +135,18 @@ pub struct GroestlLongVarCore {
     state: [u64; compress1024::COLS],
     blocks_len: u64,
 }
+
+/// Long Groestl variant which allows to choose output size at runtime.
+pub type GroestlLongVar = RtVariableCoreWrapper<GroestlLongVarCore>;
+/// Core hasher state of the long Groestl variant generic over output size.
+pub type GroestlLongCore<OutSize> = CtVariableCoreWrapper<GroestlLongVarCore, OutSize>;
+/// Hasher state of the long Groestl variant generic over output size.
+pub type GroestlLong<OutSize> = CoreWrapper<GroestlLongCore<OutSize>>;
+
+/// Groestl-384 hasher state.
+pub type Groestl384 = CoreWrapper<GroestlLongCore<U48>>;
+/// Groestl-512 hasher state.
+pub type Groestl512 = CoreWrapper<GroestlLongCore<U64>>;
 
 impl HashMarker for GroestlLongVarCore {}
 
@@ -189,14 +217,15 @@ impl fmt::Debug for GroestlLongVarCore {
     }
 }
 
-/// Long Groestl variant which allows to choose output size at runtime.
-pub type GroestlLongVar = RtVariableCoreWrapper<GroestlLongVarCore>;
-/// Core hasher state of the long Groestl variant generic over output size.
-pub type GroestlLongCore<OutSize> = CtVariableCoreWrapper<GroestlLongVarCore, OutSize>;
-/// Hasher state of the long Groestl variant generic over output size.
-pub type GroestlLong<OutSize> = CoreWrapper<GroestlLongCore<OutSize>>;
+impl Drop for GroestlLongVarCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.blocks_len.zeroize();
+        }
+    }
+}
 
-/// Groestl-384 hasher state.
-pub type Groestl384 = CoreWrapper<GroestlLongCore<U48>>;
-/// Groestl-512 hasher state.
-pub type Groestl512 = CoreWrapper<GroestlLongCore<U64>>;
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for GroestlLongVarCore {}

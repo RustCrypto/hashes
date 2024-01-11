@@ -11,6 +11,9 @@ use digest::{
     HashMarker, InvalidOutputSize, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 type BlockSize = U64;
 type Block = Array<u8, BlockSize>;
 type M = [Wrapping<u32>; 16];
@@ -241,3 +244,18 @@ impl fmt::Debug for ShabalVarCore {
         f.write_str("ShabalVarCore { ... }")
     }
 }
+
+impl Drop for ShabalVarCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.a.zeroize();
+            self.b.zeroize();
+            self.c.zeroize();
+            self.w.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for ShabalVarCore {}

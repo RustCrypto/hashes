@@ -10,6 +10,9 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 use crate::params::{Block, Gost94Params, SBox};
 
 const C: Block = [
@@ -273,3 +276,17 @@ impl<P: Gost94Params> fmt::Debug for Gost94Core<P> {
         f.write_str("Core { .. }")
     }
 }
+
+impl<P: Gost94Params> Drop for Gost94Core<P> {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.h.zeroize();
+            self.n.zeroize();
+            self.sigma.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl<P: Gost94Params> ZeroizeOnDrop for Gost94Core<P> {}

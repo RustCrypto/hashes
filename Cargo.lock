@@ -96,8 +96,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.11.0-pre.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f5c2be52eb4dc1e4456d89eaa0df751889c31dd95a69efc57e92e6e3593a1fc"
+source = "git+https://github.com/RustCrypto/traits#b4ec63b0e6b94fad7c311b6b77ae0b59d3c3b18e"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -253,7 +252,6 @@ dependencies = [
  "cpufeatures",
  "digest",
  "hex-literal",
- "zeroize",
 ]
 
 [[package]]
@@ -264,7 +262,6 @@ dependencies = [
  "cpufeatures",
  "digest",
  "hex-literal",
- "zeroize",
 ]
 
 [[package]]
@@ -274,7 +271,6 @@ dependencies = [
  "digest",
  "hex-literal",
  "keccak",
- "zeroize",
 ]
 
 [[package]]
@@ -327,6 +323,9 @@ name = "threefish"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a693d0c8cf16973fac5a93fbe47b8c6452e7097d4fcac49f3d7a18e39c76e62e"
+dependencies = [
+ "zeroize",
+]
 
 [[package]]
 name = "tiger"

@@ -12,8 +12,6 @@ mod compress;
 pub(crate) mod consts;
 
 use core::{fmt, slice::from_ref};
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     array::ArrayOps,
     block_buffer::Eager,
@@ -25,12 +23,20 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+
 /// Core MD5 hasher state.
 #[derive(Clone)]
 pub struct Md5Core {
     block_len: u64,
     state: [u32; 4],
 }
+
+/// MD5 hasher state.
+pub type Md5 = CoreWrapper<Md5Core>;
 
 impl HashMarker for Md5Core {}
 
@@ -106,5 +112,15 @@ impl AssociatedOid for Md5Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.5");
 }
 
-/// MD5 hasher state.
-pub type Md5 = CoreWrapper<Md5Core>;
+impl Drop for Md5Core {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for Md5Core {}

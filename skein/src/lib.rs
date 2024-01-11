@@ -22,6 +22,9 @@ use digest::{
 };
 use threefish::{Threefish1024, Threefish256, Threefish512};
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 const VERSION: u64 = 1;
 const ID_STRING_LE: u64 = 0x3341_4853;
 const SCHEMA_VER: u64 = (VERSION << 32) | ID_STRING_LE;
@@ -46,6 +49,10 @@ macro_rules! define_hasher {
             x: [u64; <$state_bytes>::USIZE / 8],
             _pd: PhantomData<N>,
         }
+
+        #[doc = $alg_name]
+        #[doc = " hasher state"]
+        pub type $full_name<OutputSize = $state_bytes> = CoreWrapper<$name<OutputSize>>;
 
         impl<N: ArraySize + 'static> $name<N> {
             fn blank_state(t1: u64, x: [u64; <$state_bytes>::USIZE / 8]) -> Self {
@@ -165,9 +172,18 @@ macro_rules! define_hasher {
             }
         }
 
-        #[doc = $alg_name]
-        #[doc = " hasher state"]
-        pub type $full_name<OutputSize = $state_bytes> = CoreWrapper<$name<OutputSize>>;
+        impl<N: ArraySize + 'static> Drop for $name<N> {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.t.zeroize();
+                    self.x.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl<N: ArraySize + 'static> ZeroizeOnDrop for $name<N> {}
     };
 }
 

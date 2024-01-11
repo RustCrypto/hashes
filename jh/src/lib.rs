@@ -34,6 +34,15 @@ pub struct JhCore {
     block_len: u64,
 }
 
+/// Jh-224 hasher state
+pub type Jh224 = CoreWrapper<CtVariableCoreWrapper<JhCore, U28>>;
+/// Jh-256 hasher state
+pub type Jh256 = CoreWrapper<CtVariableCoreWrapper<JhCore, U32>>;
+/// Jh-384 hasher state
+pub type Jh384 = CoreWrapper<CtVariableCoreWrapper<JhCore, U48>>;
+/// Jh-512 hasher state
+pub type Jh512 = CoreWrapper<CtVariableCoreWrapper<JhCore, U64>>;
+
 impl HashMarker for JhCore {}
 
 impl BlockSizeUser for JhCore {
@@ -104,12 +113,3 @@ impl fmt::Debug for JhCore {
         f.write_str("JhCore { ... }")
     }
 }
-
-/// Jh-224 hasher state
-pub type Jh224 = CoreWrapper<CtVariableCoreWrapper<JhCore, U28>>;
-/// Jh-256 hasher state
-pub type Jh256 = CoreWrapper<CtVariableCoreWrapper<JhCore, U32>>;
-/// Jh-384 hasher state
-pub type Jh384 = CoreWrapper<CtVariableCoreWrapper<JhCore, U48>>;
-/// Jh-512 hasher state
-pub type Jh512 = CoreWrapper<CtVariableCoreWrapper<JhCore, U64>>;

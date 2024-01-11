@@ -24,6 +24,9 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 const U32_MASK: u128 = (1 << 32) - 1;
 const H0: [u32; 8] = [
     0xC8BA94B1, 0x3BF5080A, 0x8E006D36, 0xE45D4A58, 0x9DFA0485, 0xACC7B61B, 0xC2722E25, 0x0DCEFD02,
@@ -36,6 +39,9 @@ pub struct BeltHashCore {
     s: [u32; 4],
     h: [u32; 8],
 }
+
+/// BelT hasher state.
+pub type BeltHash = CoreWrapper<BeltHashCore>;
 
 impl BeltHashCore {
     fn compress_block(&mut self, block: &Block<Self>) {
@@ -134,8 +140,19 @@ impl AssociatedOid for BeltHashCore {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.112.0.2.0.34.101.31.81");
 }
 
-/// BelT hasher state.
-pub type BeltHash = CoreWrapper<BeltHashCore>;
+impl Drop for BeltHashCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.r.zeroize();
+            self.s.zeroize();
+            self.h.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for BeltHashCore {}
 
 /// Compression function described in the section 6.3.2
 #[inline(always)]

@@ -10,8 +10,6 @@
 pub use digest::{self, Digest};
 
 use core::{fmt, slice::from_ref};
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     array::ArrayOps,
     block_buffer::Eager,
@@ -22,6 +20,11 @@ use digest::{
     typenum::{Unsigned, U20, U64},
     HashMarker, Output,
 };
+
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 
 mod compress;
 
@@ -116,11 +119,11 @@ impl Drop for Sha1Core {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
-            use zeroize::Zeroize;
             self.h.zeroize();
             self.block_len.zeroize();
         }
     }
 }
+
 #[cfg(feature = "zeroize")]
-impl zeroize::ZeroizeOnDrop for Sha1Core {}
+impl ZeroizeOnDrop for Sha1Core {}

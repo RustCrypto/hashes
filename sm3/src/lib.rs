@@ -20,6 +20,9 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 mod compress;
 mod consts;
 
@@ -31,6 +34,9 @@ pub struct Sm3Core {
     block_len: u64,
     h: [u32; 8],
 }
+
+/// Sm3 hasher state.
+pub type Sm3 = CoreWrapper<Sm3Core>;
 
 impl HashMarker for Sm3Core {}
 
@@ -97,5 +103,15 @@ impl fmt::Debug for Sm3Core {
     }
 }
 
-/// Sm3 hasher state.
-pub type Sm3 = CoreWrapper<Sm3Core>;
+impl Drop for Sm3Core {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.h.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for Sm3Core {}

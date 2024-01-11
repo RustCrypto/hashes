@@ -22,3 +22,8 @@ hex-literal = "0.4"
 [features]
 default = ["std"]
 std = ["digest/std"]
+zeroize = ["digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

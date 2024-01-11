@@ -27,4 +27,9 @@ hex-literal = "0.4"
 default = ["oid", "std"]
 std = ["digest/std"]
 oid = ["digest/oid"] # Enable OID support
+zeroize = ["digest/zeroize"]
 force-soft = [] # Force software implementation
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

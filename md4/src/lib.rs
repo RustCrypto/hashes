@@ -10,8 +10,6 @@
 pub use digest::{self, Digest};
 
 use core::{fmt, num::Wrapping as W};
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     block_buffer::Eager,
     core_api::{
@@ -21,6 +19,11 @@ use digest::{
     typenum::{Unsigned, U16, U64},
     HashMarker, Output,
 };
+
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 
 type Wu32 = W<u32>;
 const S0: [Wu32; 4] = [
@@ -32,11 +35,15 @@ const S0: [Wu32; 4] = [
 const K1: Wu32 = W(0x5A82_7999);
 const K2: Wu32 = W(0x6ED9_EBA1);
 
+/// MD4 core hasher state
 #[derive(Clone)]
 pub struct Md4Core {
     block_len: W<u64>,
     state: [Wu32; 4],
 }
+
+/// MD4 hasher state
+pub type Md4 = CoreWrapper<Md4Core>;
 
 impl HashMarker for Md4Core {}
 
@@ -113,8 +120,18 @@ impl AssociatedOid for Md4Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.4");
 }
 
-/// MD4 hasher state.
-pub type Md4 = CoreWrapper<Md4Core>;
+impl Drop for Md4Core {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for Md4Core {}
 
 fn compress(state: &mut [Wu32; 4], input: &Block<Md4Core>) {
     fn f(x: Wu32, y: Wu32, z: Wu32) -> Wu32 {

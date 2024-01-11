@@ -20,6 +20,9 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 mod compress;
 mod tables;
 use compress::compress;
@@ -37,6 +40,9 @@ pub struct TigerCore {
     block_len: u64,
     state: State,
 }
+
+/// Tiger hasher state.
+pub type Tiger = CoreWrapper<TigerCore>;
 
 impl HashMarker for TigerCore {}
 
@@ -105,12 +111,28 @@ impl fmt::Debug for TigerCore {
     }
 }
 
+impl Drop for TigerCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for TigerCore {}
+
 /// Core Tiger2 hasher state.
 #[derive(Clone)]
 pub struct Tiger2Core {
     block_len: u64,
     state: State,
 }
+
+/// Tiger2 hasher state.
+pub type Tiger2 = CoreWrapper<Tiger2Core>;
 
 impl HashMarker for Tiger2Core {}
 
@@ -182,7 +204,15 @@ impl fmt::Debug for Tiger2Core {
     }
 }
 
-/// Tiger hasher state.
-pub type Tiger = CoreWrapper<TigerCore>;
-/// Tiger2 hasher state.
-pub type Tiger2 = CoreWrapper<Tiger2Core>;
+impl Drop for Tiger2Core {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for Tiger2Core {}

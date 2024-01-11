@@ -10,8 +10,6 @@
 pub use digest::{self, Digest};
 
 use core::fmt;
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     block_buffer::Eager,
     consts::U16,
@@ -22,6 +20,11 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+
 mod consts;
 
 /// Core MD2 hasher state.
@@ -30,6 +33,9 @@ pub struct Md2Core {
     x: [u8; 48],
     checksum: Block<Self>,
 }
+
+/// MD2 hasher state.
+pub type Md2 = CoreWrapper<Md2Core>;
 
 impl Md2Core {
     fn compress(&mut self, block: &Block<Self>) {
@@ -130,5 +136,15 @@ impl AssociatedOid for Md2Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.2");
 }
 
-/// MD2 hasher state.
-pub type Md2 = CoreWrapper<Md2Core>;
+impl Drop for Md2Core {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.x.zeroize();
+            self.checksum.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for Md2Core {}

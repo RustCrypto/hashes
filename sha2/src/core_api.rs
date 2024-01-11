@@ -11,6 +11,9 @@ use digest::{
     HashMarker, InvalidOutputSize, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 /// Core block-level SHA-256 hasher with variable output size.
 ///
 /// Supports initialization only for 28 and 32 byte output sizes,
@@ -88,7 +91,6 @@ impl Drop for Sha256VarCore {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
-            use zeroize::Zeroize;
             self.state.zeroize();
             self.block_len.zeroize();
         }
@@ -96,7 +98,7 @@ impl Drop for Sha256VarCore {
 }
 
 #[cfg(feature = "zeroize")]
-impl zeroize::ZeroizeOnDrop for Sha256VarCore {}
+impl ZeroizeOnDrop for Sha256VarCore {}
 
 /// Core block-level SHA-512 hasher with variable output size.
 ///
@@ -177,11 +179,10 @@ impl Drop for Sha512VarCore {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
-            use zeroize::Zeroize;
             self.state.zeroize();
             self.block_len.zeroize();
         }
     }
 }
 #[cfg(feature = "zeroize")]
-impl zeroize::ZeroizeOnDrop for Sha512VarCore {}
+impl ZeroizeOnDrop for Sha512VarCore {}

@@ -10,8 +10,6 @@
 pub use digest::{self, Digest};
 
 use core::fmt;
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
     array::typenum::Unsigned,
     block_buffer::Eager,
@@ -23,6 +21,11 @@ use digest::{
     },
     HashMarker, Output,
 };
+
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+#[cfg(feature = "oid")]
+use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 
 #[macro_use]
 mod macros;

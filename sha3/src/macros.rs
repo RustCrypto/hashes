@@ -86,14 +86,13 @@ macro_rules! impl_sha3 {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
-                    use zeroize::Zeroize;
                     self.state.state.zeroize();
                 }
             }
         }
 
         #[cfg(feature = "zeroize")]
-        impl zeroize::ZeroizeOnDrop for $name {}
+        impl ZeroizeOnDrop for $name {}
     };
     (
         $name:ident, $full_name:ident, $output_size:ident,
@@ -196,14 +195,13 @@ macro_rules! impl_shake {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
-                    use zeroize::Zeroize;
                     self.state.state.zeroize();
                 }
             }
         }
 
         #[cfg(feature = "zeroize")]
-        impl zeroize::ZeroizeOnDrop for $name {}
+        impl ZeroizeOnDrop for $name {}
 
         #[doc = "Core "]
         #[doc = $alg_name]
@@ -236,14 +234,13 @@ macro_rules! impl_shake {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
-                    use zeroize::Zeroize;
                     self.state.state.zeroize();
                 }
             }
         }
 
         #[cfg(feature = "zeroize")]
-        impl zeroize::ZeroizeOnDrop for $reader {}
+        impl ZeroizeOnDrop for $reader {}
     };
     (
         $name:ident, $full_name:ident, $reader:ident, $reader_full:ident,
@@ -359,7 +356,6 @@ macro_rules! impl_turbo_shake {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
-                    use zeroize::Zeroize;
                     self.state.state.zeroize();
                     self.domain_separation.zeroize();
                 }
@@ -367,7 +363,7 @@ macro_rules! impl_turbo_shake {
         }
 
         #[cfg(feature = "zeroize")]
-        impl zeroize::ZeroizeOnDrop for $name {}
+        impl ZeroizeOnDrop for $name {}
 
         #[doc = "Core "]
         #[doc = $alg_name]
@@ -400,14 +396,13 @@ macro_rules! impl_turbo_shake {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
-                    use zeroize::Zeroize;
                     self.state.state.zeroize();
                 }
             }
         }
 
         #[cfg(feature = "zeroize")]
-        impl zeroize::ZeroizeOnDrop for $reader {}
+        impl ZeroizeOnDrop for $reader {}
     };
     (
         $name:ident, $full_name:ident, $reader:ident, $reader_full:ident,
@@ -569,7 +564,6 @@ macro_rules! impl_cshake {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
-                    use zeroize::Zeroize;
                     self.state.state.zeroize();
                     self.padding.zeroize();
                     #[cfg(feature = "reset")]
@@ -579,7 +573,7 @@ macro_rules! impl_cshake {
         }
 
         #[cfg(feature = "zeroize")]
-        impl zeroize::ZeroizeOnDrop for $name {}
+        impl ZeroizeOnDrop for $name {}
 
         #[doc = "Core "]
         #[doc = $alg_name]
@@ -612,13 +606,12 @@ macro_rules! impl_cshake {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
-                    use zeroize::Zeroize;
                     self.state.state.zeroize();
                 }
             }
         }
 
         #[cfg(feature = "zeroize")]
-        impl zeroize::ZeroizeOnDrop for $reader {}
+        impl ZeroizeOnDrop for $reader {}
     };
 }

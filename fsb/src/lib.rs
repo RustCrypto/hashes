@@ -27,6 +27,9 @@ use digest::{
     HashMarker, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+
 // FSB-160
 fsb_impl!(
     Fsb160,

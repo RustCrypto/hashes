@@ -18,8 +18,6 @@ rust-version = "1.72"
 [dependencies]
 digest = "=0.11.0-pre.6"
 cfg-if = "1"
-# TODO: use zeroize re-exported from digest
-zeroize = { version = "1.4", optional = true, default-features = false }
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
 cpufeatures = "0.2"
@@ -32,7 +30,7 @@ hex-literal = "0.4"
 default = ["oid", "std"]
 std = ["digest/std"]
 oid = ["digest/oid"] # Enable OID support
-zeroize = ["dep:zeroize", "digest/zeroize"]
+zeroize = ["digest/zeroize"]
 force-soft = [] # Force software implementation
 
 [package.metadata.docs.rs]
