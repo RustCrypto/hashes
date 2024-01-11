@@ -28,7 +28,7 @@ Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## Minimum Supported Rust Version
 
-Rust **1.71** or higher.
+Rust **1.74** or higher.
 
 Minimum supported Rust version can be changed in the future, but it will be
 done with a minor version bump.
@@ -59,7 +59,7 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, without 
 [docs-image]: https://docs.rs/tiger/badge.svg
 [docs-link]: https://docs.rs/tiger/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.71+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.74+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
 [build-image]: https://github.com/RustCrypto/hashes/workflows/tiger/badge.svg?branch=master
