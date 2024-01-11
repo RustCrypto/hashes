@@ -13,9 +13,9 @@ keywords = ["crypto", "jh", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "=0.11.0-pre.5"
+digest = "=0.11.0-pre.6"
 hex-literal = "0.4"
 simd = { package = "ppv-lite86", version = "0.2.6" }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.5", features = ["dev"] }
+digest = { version = "=0.11.0-pre.6", features = ["dev"] }

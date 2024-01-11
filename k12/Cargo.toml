@@ -13,11 +13,11 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.71"
 
 [dependencies]
-digest = { version = "=0.11.0-pre.5", default-features = false, features = ["core-api"] }
+digest = { version = "=0.11.0-pre.6", default-features = false, features = ["core-api"] }
 sha3 = { version = "=0.11.0-pre.1", default-features = false, path = "../sha3" }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.5", features = ["alloc", "dev"] }
+digest = { version = "=0.11.0-pre.6", features = ["alloc", "dev"] }
 hex-literal = "0.4"
 
 [features]
