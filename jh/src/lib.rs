@@ -28,6 +28,9 @@ use digest::{
     HashMarker, InvalidOutputSize, Output,
 };
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+
 /// Core JH hasher state
 #[derive(Clone)]
 pub struct JhCore {
@@ -114,3 +117,17 @@ impl fmt::Debug for JhCore {
         f.write_str("JhCore { ... }")
     }
 }
+
+impl Drop for JhCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            // TODO: implement Zeroize for Compressor
+            // self.state.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for JhCore {}
