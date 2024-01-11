@@ -37,7 +37,7 @@ const S0: State = [
 
 /// Core Tiger hasher state.
 #[derive(Clone)]
-pub struct TigerCore<const IS_VER2: bool> {
+pub struct TigerCore<const VER2: bool = true> {
     block_len: u64,
     state: State,
 }
@@ -47,21 +47,21 @@ pub type Tiger = CoreWrapper<TigerCore<false>>;
 /// Tiger2 hasher state.
 pub type Tiger2 = CoreWrapper<TigerCore<true>>;
 
-impl<const IS_VER2: bool> HashMarker for TigerCore<IS_VER2> {}
+impl<const VER2: bool> HashMarker for TigerCore<VER2> {}
 
-impl<const IS_VER2: bool> BlockSizeUser for TigerCore<IS_VER2> {
+impl<const VER2: bool> BlockSizeUser for TigerCore<VER2> {
     type BlockSize = U64;
 }
 
-impl<const IS_VER2: bool> BufferKindUser for TigerCore<IS_VER2> {
+impl<const VER2: bool> BufferKindUser for TigerCore<VER2> {
     type BufferKind = Eager;
 }
 
-impl<const IS_VER2: bool> OutputSizeUser for TigerCore<IS_VER2> {
+impl<const VER2: bool> OutputSizeUser for TigerCore<VER2> {
     type OutputSize = U24;
 }
 
-impl<const IS_VER2: bool> UpdateCore for TigerCore<IS_VER2> {
+impl<const VER2: bool> UpdateCore for TigerCore<VER2> {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
@@ -71,14 +71,14 @@ impl<const IS_VER2: bool> UpdateCore for TigerCore<IS_VER2> {
     }
 }
 
-impl<const IS_VER2: bool> FixedOutputCore for TigerCore<IS_VER2> {
+impl<const VER2: bool> FixedOutputCore for TigerCore<VER2> {
     #[inline]
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let bs = Self::BlockSize::U64;
         let pos = buffer.get_pos() as u64;
         let bit_len = 8 * (pos + bs * self.block_len);
 
-        if IS_VER2 {
+        if VER2 {
             buffer.len64_padding_le(bit_len, |b| compress(&mut self.state, b.as_ref()));
         } else {
             buffer.digest_pad(1, &bit_len.to_le_bytes(), |b| {
@@ -92,7 +92,7 @@ impl<const IS_VER2: bool> FixedOutputCore for TigerCore<IS_VER2> {
     }
 }
 
-impl<const IS_VER2: bool> Default for TigerCore<IS_VER2> {
+impl<const VER2: bool> Default for TigerCore<VER2> {
     #[inline]
     fn default() -> Self {
         Self {
@@ -102,17 +102,17 @@ impl<const IS_VER2: bool> Default for TigerCore<IS_VER2> {
     }
 }
 
-impl<const IS_VER2: bool> Reset for TigerCore<IS_VER2> {
+impl<const VER2: bool> Reset for TigerCore<VER2> {
     #[inline]
     fn reset(&mut self) {
         *self = Default::default();
     }
 }
 
-impl<const IS_VER2: bool> AlgorithmName for TigerCore<IS_VER2> {
+impl<const VER2: bool> AlgorithmName for TigerCore<VER2> {
     #[inline]
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if IS_VER2 {
+        if VER2 {
             f.write_str("Tiger2")
         } else {
             f.write_str("Tiger")
@@ -120,9 +120,9 @@ impl<const IS_VER2: bool> AlgorithmName for TigerCore<IS_VER2> {
     }
 }
 
-impl<const IS_VER2: bool> fmt::Debug for TigerCore<IS_VER2> {
+impl<const VER2: bool> fmt::Debug for TigerCore<VER2> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if IS_VER2 {
+        if VER2 {
             f.write_str("Tiger2Core { ... }")
         } else {
             f.write_str("TigerCore { ... }")
@@ -130,7 +130,7 @@ impl<const IS_VER2: bool> fmt::Debug for TigerCore<IS_VER2> {
     }
 }
 
-impl<const IS_VER2: bool> Drop for TigerCore<IS_VER2> {
+impl<const VER2: bool> Drop for TigerCore<VER2> {
     #[inline]
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
@@ -142,4 +142,4 @@ impl<const IS_VER2: bool> Drop for TigerCore<IS_VER2> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<const IS_VER2: bool> ZeroizeOnDrop for TigerCore<IS_VER2> {}
+impl<const VER2: bool> ZeroizeOnDrop for TigerCore<VER2> {}
