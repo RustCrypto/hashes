@@ -16,7 +16,7 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.71"
 
 [dependencies]
-digest = { version = "=0.11.0-pre.4", default-features = false, features = ["core-api"] }
+digest = { version = "=0.11.0-pre.5", default-features = false, features = ["core-api"] }
 ascon = { version = "0.4", default-features = false }
 
 [dev-dependencies]
@@ -27,7 +27,7 @@ hex-literal = "0.4"
 [features]
 default = ["std"]
 std = ["digest/std"]
-zeroize = ["ascon/zeroize"] # TODO: enable zeroize in the future for block-buffer v0.11
+zeroize = ["ascon/zeroize", "digest/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true

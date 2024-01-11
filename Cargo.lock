@@ -58,6 +58,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0edadbde8e0243b49d434f9a23ec0590af201f400a34d7d51049284e4a77c568"
 dependencies = [
  "crypto-common",
+ "zeroize",
 ]
 
 [[package]]
@@ -94,15 +95,16 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.11.0-pre.4"
+version = "0.11.0-pre.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b429fb535b92bad18c86f1d7ee7584a175c2810800c7ac5b75b9408b13981979"
+checksum = "c4612db8a7a119ddf07319531e7ae254f1008ce2c39ea252d37c68f3a7b4a059"
 dependencies = [
  "blobby",
  "block-buffer",
  "const-oid",
  "crypto-common",
  "subtle",
+ "zeroize",
 ]
 
 [[package]]
