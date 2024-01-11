@@ -31,6 +31,9 @@ use digest::{
 #[cfg(feature = "reset")]
 use digest::{FixedOutputReset, Reset};
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+
 mod as_bytes;
 mod consts;
 

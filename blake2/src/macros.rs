@@ -246,6 +246,18 @@ macro_rules! blake2_impl {
                 f.write_str(concat!(stringify!($name), " { ... }"))
             }
         }
+
+        impl Drop for $name {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    self.h.zeroize();
+                    self.t.zeroize();
+                }
+            }
+        }
+        #[cfg(feature = "zeroize")]
+        impl ZeroizeOnDrop for $name {}
     };
 }
 
@@ -425,6 +437,29 @@ macro_rules! blake2_mac_impl {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(f, "{}{} {{ ... }}", stringify!($name), OutSize::USIZE)
             }
+        }
+
+        impl<OutSize> Drop for $name<OutSize>
+        where
+            OutSize: ArraySize + IsLessOrEqual<$max_size>,
+            LeEq<OutSize, $max_size>: NonZero,
+        {
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    // `self.core` zeroized by its `Drop` impl
+                    self.buffer.zeroize();
+                    #[cfg(feature = "reset")]
+                    self.key_block.zeroize();
+                }
+            }
+        }
+        #[cfg(feature = "zeroize")]
+        impl<OutSize> ZeroizeOnDrop for $name<OutSize>
+        where
+            OutSize: ArraySize + IsLessOrEqual<$max_size>,
+            LeEq<OutSize, $max_size>: NonZero,
+        {
         }
     };
 }

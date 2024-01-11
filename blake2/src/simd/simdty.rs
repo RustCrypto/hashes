@@ -9,6 +9,9 @@
 
 use crate::as_bytes::Safe;
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::Zeroize;
+
 #[cfg(feature = "simd")]
 macro_rules! decl_simd {
     ($($decl:item)*) => {
@@ -48,6 +51,16 @@ decl_simd! {
                          pub T, pub T, pub T, pub T,
                          pub T, pub T, pub T, pub T,
                          pub T, pub T, pub T, pub T);
+}
+
+#[cfg(feature = "zeroize")]
+impl<T: Zeroize> Zeroize for Simd4<T> {
+    fn zeroize(&mut self) {
+        self.0.zeroize();
+        self.1.zeroize();
+        self.2.zeroize();
+        self.3.zeroize();
+    }
 }
 
 pub type u64x2 = Simd2<u64>;
