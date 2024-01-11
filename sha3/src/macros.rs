@@ -377,7 +377,7 @@ macro_rules! impl_turbo_shake {
         pub struct $reader {
             state: Sha3State<TURBO_SHAKE_ROUND_COUNT>,
         }
-        
+
         #[doc = $alg_name]
         #[doc = " reader state."]
         pub type $reader_full = XofReaderCoreWrapper<$reader>;
