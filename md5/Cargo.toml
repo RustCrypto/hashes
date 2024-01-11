@@ -10,7 +10,7 @@ documentation = "https://docs.rs/md-5"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md5", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.71"
+rust-version = "1.72"
 
 [lib]
 name = "md5"
@@ -19,9 +19,6 @@ name = "md5"
 digest = "=0.11.0-pre.4"
 cfg-if = "1"
 
-[target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
-md5-asm = { version = "0.5", optional = true }
-
 [dev-dependencies]
 digest = { version = "=0.11.0-pre.4", features = ["dev"] }
 hex-literal = "0.4"
@@ -29,9 +26,5 @@ hex-literal = "0.4"
 [features]
 default = ["oid", "std"]
 std = ["digest/std"]
-asm = ["md5-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
-# Use assembly backend for LoongArch64 targets
-# WARNING: Bumps MSRV to 1.72. This feature SHOULD NOT be enabled by library crates
-loongarch64_asm = []
-oid = ["digest/oid"] # Enable OID support.
+oid = ["digest/oid"] # Enable OID support
 force-soft = [] # Force software implementation

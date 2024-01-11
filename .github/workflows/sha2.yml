@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.71.0
+        msrv: 1.72.0
 
   # Builds for no_std platforms
   build:
@@ -30,11 +30,12 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.71.0
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
+          - loongarch64-unknown-linux-gnu
     steps:
       - uses: actions/checkout@v4
       - uses: RustCrypto/actions/cargo-cache@master
@@ -43,7 +44,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
       - uses: RustCrypto/actions/cargo-hack-install@master
-      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std,asm-aarch64,asm
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
 
   # Linux tests
   linux:
@@ -74,7 +75,7 @@ jobs:
           targets: ${{ matrix.target }}
       - uses: RustCrypto/actions/cargo-hack-install@master
       - run: ${{ matrix.deps }}
-      - run: cargo hack test --feature-powerset --exclude-features asm-aarch64
+      - run: cargo hack test --feature-powerset
 
   # macOS tests
   macos:
@@ -95,7 +96,6 @@ jobs:
       - uses: RustCrypto/actions/cargo-hack-install@master
       - run: cargo test --no-default-features
       - run: cargo test
-      - run: cargo test --features asm
       - run: cargo test --all-features
 
   # Windows tests
@@ -119,18 +119,6 @@ jobs:
       - uses: msys2/setup-msys2@v2
       - run: cargo test --target ${{ matrix.target }}
 
-  # Build-only test of the LoongArch64 assembly backend
-  loongarch64_asm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.72
-          targets: loongarch64-unknown-linux-gnu
-      - run: cargo build --target loongarch64-unknown-linux-gnu --features loongarch64_asm
-
   # Cross-compiled tests
   cross:
     needs: set-msrv
@@ -144,10 +132,6 @@ jobs:
           - powerpc-unknown-linux-gnu
         features:
           - default
-        include:
-            - rust: stable
-              target: aarch64-unknown-linux-gnu
-              features: asm
     runs-on: ubuntu-latest
     defaults:
       run:

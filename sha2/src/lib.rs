@@ -23,9 +23,7 @@ mod core_api;
 mod sha256;
 mod sha512;
 
-#[cfg(feature = "compress")]
 pub use sha256::compress256;
-#[cfg(feature = "compress")]
 pub use sha512::compress512;
 
 pub use core_api::{Sha256VarCore, Sha512VarCore};

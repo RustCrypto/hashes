@@ -9,14 +9,6 @@
 
 pub use digest::{self, Digest};
 
-#[cfg(not(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64"))))]
-mod compress;
-
-#[cfg(all(feature = "asm", any(target_arch = "x86", target_arch = "x86_64")))]
-use whirlpool_asm as compress;
-
-use compress::compress;
-
 use core::fmt;
 use digest::{
     array::ArrayOps,
@@ -28,6 +20,11 @@ use digest::{
     typenum::U64,
     HashMarker, Output,
 };
+
+mod compress;
+mod consts;
+
+use compress::compress;
 
 /// Core Whirlpool hasher state.
 #[derive(Clone)]

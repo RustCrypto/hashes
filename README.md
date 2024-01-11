@@ -23,10 +23,10 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [KangarooTwelve] | [`k12`] | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [MD2] | [`md2`] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) | [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | ![MSRV 1.71][msrv-1.71] | :broken_heart: |
 | [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![MSRV 1.71][msrv-1.71] | :broken_heart: |
-| [MD5] | [`md5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.71][msrv-1.71] | :broken_heart: |
+| [MD5] | [`md5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.72][msrv-1.72] | :broken_heart: |
 | [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
-| [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.71][msrv-1.71] | :broken_heart: |
-| [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
+| [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.72][msrv-1.72] | :broken_heart: |
+| [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.72][msrv-1.72] | :green_heart: |
 | [SHA-3] (Keccak) | [`sha3`] | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) | [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [SHABAL] | [`shabal`] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) | [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [Skein] | [`skein`] | [![crates.io](https://img.shields.io/crates/v/skein.svg)](https://crates.io/crates/skein) | [![Documentation](https://docs.rs/skein/badge.svg)](https://docs.rs/skein) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
@@ -234,6 +234,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [deps-image]: https://deps.rs/repo/github/RustCrypto/hashes/status.svg
 [deps-link]: https://deps.rs/repo/github/RustCrypto/hashes
 [msrv-1.71]: https://img.shields.io/badge/rustc-1.71.0+-blue.svg
+[msrv-1.72]: https://img.shields.io/badge/rustc-1.72.0+-blue.svg
 
 [//]: # (crates)
 
