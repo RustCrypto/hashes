@@ -253,6 +253,7 @@ dependencies = [
  "cpufeatures",
  "digest",
  "hex-literal",
+ "zeroize",
 ]
 
 [[package]]
@@ -263,6 +264,7 @@ dependencies = [
  "cpufeatures",
  "digest",
  "hex-literal",
+ "zeroize",
 ]
 
 [[package]]

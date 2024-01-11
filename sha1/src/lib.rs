@@ -37,6 +37,9 @@ pub struct Sha1Core {
     block_len: u64,
 }
 
+/// SHA-1 hasher state.
+pub type Sha1 = CoreWrapper<Sha1Core>;
+
 impl HashMarker for Sha1Core {}
 
 impl BlockSizeUser for Sha1Core {
@@ -109,5 +112,15 @@ impl AssociatedOid for Sha1Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.14.3.2.26");
 }
 
-/// SHA-1 hasher state.
-pub type Sha1 = CoreWrapper<Sha1Core>;
+impl Drop for Sha1Core {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            use zeroize::Zeroize;
+            self.h.zeroize();
+            self.block_len.zeroize();
+        }
+    }
+}
+#[cfg(feature = "zeroize")]
+impl zeroize::ZeroizeOnDrop for Sha1Core {}

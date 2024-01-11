@@ -19,7 +19,8 @@ rust-version = "1.71"
 [dependencies]
 digest = "=0.11.0-pre.6"
 keccak = "0.1.4"
-zeroize = { version = "1.6.0", default-features = false, optional=true } # WARNING: Bumps MSRV to 1.56
+# TODO: use zeroize re-exported from digest
+zeroize = { version = "1.6", optional = true, default-features = false }
 
 [dev-dependencies]
 digest = { version = "=0.11.0-pre.6", features = ["dev"] }
@@ -28,6 +29,7 @@ hex-literal = "0.4"
 [features]
 default = ["oid", "std"]
 std = ["digest/std"]
+zeroize = ["dep:zeroize", "digest/zeroize"]
 
 asm = ["keccak/asm"] # Enable ASM (currently ARMv8 only).
 oid = ["digest/oid"] # Enable OID support.
