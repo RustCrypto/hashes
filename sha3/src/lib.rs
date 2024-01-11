@@ -22,10 +22,10 @@ use digest::{
     HashMarker, Output,
 };
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 #[macro_use]
 mod macros;

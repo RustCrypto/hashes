@@ -25,7 +25,7 @@ use digest::{
 };
 
 #[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 const U32_MASK: u128 = (1 << 32) - 1;
 const H0: [u32; 8] = [

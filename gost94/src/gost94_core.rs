@@ -11,7 +11,7 @@ use digest::{
 };
 
 #[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::params::{Block, Gost94Params, SBox};
 

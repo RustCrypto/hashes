@@ -10,7 +10,7 @@ use digest::{
 };
 
 #[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::consts::{BLOCK_SIZE, C, SHUFFLED_LIN_TABLE};
 

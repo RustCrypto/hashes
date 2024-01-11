@@ -20,7 +20,7 @@ use digest::{ExtendableOutputReset, HashMarker, Reset, Update, XofReader};
 use sha3::{TurboShake128, TurboShake128Core, TurboShake128ReaderCore};
 
 #[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 const CHUNK_SIZE: usize = 8192;
 const CHAINING_VALUE_SIZE: usize = 32;

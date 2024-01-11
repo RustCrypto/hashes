@@ -20,10 +20,10 @@ use digest::{
     HashMarker, Output,
 };
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 type Wu32 = W<u32>;
 const S0: [Wu32; 4] = [

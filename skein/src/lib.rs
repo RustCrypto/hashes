@@ -23,7 +23,7 @@ use digest::{
 use threefish::{Threefish1024, Threefish256, Threefish512};
 
 #[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 const VERSION: u64 = 1;
 const ID_STRING_LE: u64 = 0x3341_4853;

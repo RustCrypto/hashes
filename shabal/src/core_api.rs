@@ -12,7 +12,7 @@ use digest::{
 };
 
 #[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 type BlockSize = U64;
 type Block = Array<u8, BlockSize>;

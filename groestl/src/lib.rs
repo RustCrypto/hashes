@@ -22,7 +22,7 @@ use digest::{
 };
 
 #[cfg(feature = "zeroize")]
-use digest::zeroize::{ZeroizeOnDrop, Zeroize};
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 mod compress1024;
 mod compress512;
