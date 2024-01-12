@@ -1,5 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use crate::consts::{BLOCK_LEN, K64X2};
+use crate::consts::{BLOCK_LEN, K64};
 
 fn add(a: [u64; 2], b: [u64; 2]) -> [u64; 2] {
     [a[0].wrapping_add(b[0]), a[1].wrapping_add(b[1])]
@@ -95,7 +95,14 @@ pub fn sha512_digest_round(
 
 /// Process a block with the SHA-512 algorithm.
 pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
-    let k = &K64X2;
+    #[inline(always)]
+    fn k(i: usize) -> [u64; 2] {
+        // `read_volatile` forces compiler to read round constants from the static
+        // instead of inlining them, which improves codegen and performance
+        use core::ptr::read_volatile as r;
+        let p = K64.as_ptr();
+        unsafe { [r(p.add(2 * i + 1)), r(p.add(2 * i))] }
+    }
 
     macro_rules! schedule {
         ($v0:expr, $v1:expr, $v4:expr, $v5:expr, $v7:expr) => {
@@ -122,67 +129,67 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
 
     // Rounds 0..20
     let (mut w1, mut w0) = ([block[3], block[2]], [block[1], block[0]]);
-    rounds4!(ae, bf, cg, dh, add(k[0], w0), add(k[1], w1));
+    rounds4!(ae, bf, cg, dh, add(k(0), w0), add(k(1), w1));
     let (mut w3, mut w2) = ([block[7], block[6]], [block[5], block[4]]);
-    rounds4!(ae, bf, cg, dh, add(k[2], w2), add(k[3], w3));
+    rounds4!(ae, bf, cg, dh, add(k(2), w2), add(k(3), w3));
     let (mut w5, mut w4) = ([block[11], block[10]], [block[9], block[8]]);
-    rounds4!(ae, bf, cg, dh, add(k[4], w4), add(k[5], w5));
+    rounds4!(ae, bf, cg, dh, add(k(4), w4), add(k(5), w5));
     let (mut w7, mut w6) = ([block[15], block[14]], [block[13], block[12]]);
-    rounds4!(ae, bf, cg, dh, add(k[6], w6), add(k[7], w7));
+    rounds4!(ae, bf, cg, dh, add(k(6), w6), add(k(7), w7));
     let mut w8 = schedule!(w0, w1, w4, w5, w7);
     let mut w9 = schedule!(w1, w2, w5, w6, w8);
-    rounds4!(ae, bf, cg, dh, add(k[8], w8), add(k[9], w9));
+    rounds4!(ae, bf, cg, dh, add(k(8), w8), add(k(9), w9));
 
     // Rounds 20..40
     w0 = schedule!(w2, w3, w6, w7, w9);
     w1 = schedule!(w3, w4, w7, w8, w0);
-    rounds4!(ae, bf, cg, dh, add(k[10], w0), add(k[11], w1));
+    rounds4!(ae, bf, cg, dh, add(k(10), w0), add(k(11), w1));
     w2 = schedule!(w4, w5, w8, w9, w1);
     w3 = schedule!(w5, w6, w9, w0, w2);
-    rounds4!(ae, bf, cg, dh, add(k[12], w2), add(k[13], w3));
+    rounds4!(ae, bf, cg, dh, add(k(12), w2), add(k(13), w3));
     w4 = schedule!(w6, w7, w0, w1, w3);
     w5 = schedule!(w7, w8, w1, w2, w4);
-    rounds4!(ae, bf, cg, dh, add(k[14], w4), add(k[15], w5));
+    rounds4!(ae, bf, cg, dh, add(k(14), w4), add(k(15), w5));
     w6 = schedule!(w8, w9, w2, w3, w5);
     w7 = schedule!(w9, w0, w3, w4, w6);
-    rounds4!(ae, bf, cg, dh, add(k[16], w6), add(k[17], w7));
+    rounds4!(ae, bf, cg, dh, add(k(16), w6), add(k(17), w7));
     w8 = schedule!(w0, w1, w4, w5, w7);
     w9 = schedule!(w1, w2, w5, w6, w8);
-    rounds4!(ae, bf, cg, dh, add(k[18], w8), add(k[19], w9));
+    rounds4!(ae, bf, cg, dh, add(k(18), w8), add(k(19), w9));
 
     // Rounds 40..60
     w0 = schedule!(w2, w3, w6, w7, w9);
     w1 = schedule!(w3, w4, w7, w8, w0);
-    rounds4!(ae, bf, cg, dh, add(k[20], w0), add(k[21], w1));
+    rounds4!(ae, bf, cg, dh, add(k(20), w0), add(k(21), w1));
     w2 = schedule!(w4, w5, w8, w9, w1);
     w3 = schedule!(w5, w6, w9, w0, w2);
-    rounds4!(ae, bf, cg, dh, add(k[22], w2), add(k[23], w3));
+    rounds4!(ae, bf, cg, dh, add(k(22), w2), add(k(23), w3));
     w4 = schedule!(w6, w7, w0, w1, w3);
     w5 = schedule!(w7, w8, w1, w2, w4);
-    rounds4!(ae, bf, cg, dh, add(k[24], w4), add(k[25], w5));
+    rounds4!(ae, bf, cg, dh, add(k(24), w4), add(k(25), w5));
     w6 = schedule!(w8, w9, w2, w3, w5);
     w7 = schedule!(w9, w0, w3, w4, w6);
-    rounds4!(ae, bf, cg, dh, add(k[26], w6), add(k[27], w7));
+    rounds4!(ae, bf, cg, dh, add(k(26), w6), add(k(27), w7));
     w8 = schedule!(w0, w1, w4, w5, w7);
     w9 = schedule!(w1, w2, w5, w6, w8);
-    rounds4!(ae, bf, cg, dh, add(k[28], w8), add(k[29], w9));
+    rounds4!(ae, bf, cg, dh, add(k(28), w8), add(k(29), w9));
 
     // Rounds 60..80
     w0 = schedule!(w2, w3, w6, w7, w9);
     w1 = schedule!(w3, w4, w7, w8, w0);
-    rounds4!(ae, bf, cg, dh, add(k[30], w0), add(k[31], w1));
+    rounds4!(ae, bf, cg, dh, add(k(30), w0), add(k(31), w1));
     w2 = schedule!(w4, w5, w8, w9, w1);
     w3 = schedule!(w5, w6, w9, w0, w2);
-    rounds4!(ae, bf, cg, dh, add(k[32], w2), add(k[33], w3));
+    rounds4!(ae, bf, cg, dh, add(k(32), w2), add(k(33), w3));
     w4 = schedule!(w6, w7, w0, w1, w3);
     w5 = schedule!(w7, w8, w1, w2, w4);
-    rounds4!(ae, bf, cg, dh, add(k[34], w4), add(k[35], w5));
+    rounds4!(ae, bf, cg, dh, add(k(34), w4), add(k(35), w5));
     w6 = schedule!(w8, w9, w2, w3, w5);
     w7 = schedule!(w9, w0, w3, w4, w6);
-    rounds4!(ae, bf, cg, dh, add(k[36], w6), add(k[37], w7));
+    rounds4!(ae, bf, cg, dh, add(k(36), w6), add(k(37), w7));
     w8 = schedule!(w0, w1, w4, w5, w7);
     w9 = schedule!(w1, w2, w5, w6, w8);
-    rounds4!(ae, bf, cg, dh, add(k[38], w8), add(k[39], w9));
+    rounds4!(ae, bf, cg, dh, add(k(38), w8), add(k(39), w9));
 
     let [a, e] = ae;
     let [b, f] = bf;
