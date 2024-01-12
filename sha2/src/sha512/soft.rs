@@ -1,5 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use crate::consts::{BLOCK_LEN, K64};
+use crate::consts::K64;
 
 /// Not an intrinsic, but works like an unaligned load.
 fn sha512load(v0: [u64; 2], v1: [u64; 2]) -> [u64; 2] {
@@ -209,15 +209,11 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
 }
 
 pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    let mut block_u32 = [0u64; BLOCK_LEN];
-    // since LLVM can't properly use aliasing yet it will make
-    // unnecessary state stores without this copy
-    let mut state_cpy = *state;
     for block in blocks {
+        let mut block_u32 = [0u64; 16];
         for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(8)) {
             *o = u64::from_be_bytes(chunk.try_into().unwrap());
         }
-        sha512_digest_block_u64(&mut state_cpy, &block_u32);
+        sha512_digest_block_u64(state, &block_u32);
     }
-    *state = state_cpy;
 }
