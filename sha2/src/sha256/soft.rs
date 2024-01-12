@@ -33,7 +33,6 @@ fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
 
 #[inline(always)]
 fn add_round_const(a: [u32; 4], i: usize) -> [u32; 4] {
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     fn k(i: usize, j: usize) -> u32 {
         // `read_volatile` forces compiler to read round constants from the static
         // instead of inlining them, which improves codegen and performance on some platforms.
