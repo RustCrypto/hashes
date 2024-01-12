@@ -74,7 +74,7 @@ pub static K32X4: [[u32; 4]; 16] = {
     let mut res = [[0u32; 4]; 16];
     let mut i = 0;
     while i < 16 {
-        res[i] = [K32[4 * i + 3], K32[4 * i + 2], K32[4 * i + 1], K32[4 * i + 0]];
+        res[i] = [K32[4 * i + 3], K32[4 * i + 2], K32[4 * i + 1], K32[4 * i]];
         i += 1;
     }
     res
