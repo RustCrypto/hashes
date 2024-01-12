@@ -1,12 +1,10 @@
-#![allow(dead_code, clippy::unreadable_literal)]
+#![allow(dead_code)]
 
-pub const STATE_LEN: usize = 8;
+pub type State256 = [u32; 8];
+pub type State512 = [u64; 8];
 
-pub type State256 = [u32; STATE_LEN];
-pub type State512 = [u64; STATE_LEN];
-
-/// Constants necessary for SHA-256 family of digests.
-pub const K32: [u32; 64] = [
+/// Round constants for SHA-256 family of digests
+pub static K32: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -17,8 +15,8 @@ pub const K32: [u32; 64] = [
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 ];
 
-/// Constants necessary for SHA-256 family of digests.
-pub const K32X4: [[u32; 4]; 16] = [
+/// Swapped round constants for SHA-256 family of digests
+pub static K32X4: [[u32; 4]; 16] = [
     [K32[3], K32[2], K32[1], K32[0]],
     [K32[7], K32[6], K32[5], K32[4]],
     [K32[11], K32[10], K32[9], K32[8]],
@@ -37,8 +35,8 @@ pub const K32X4: [[u32; 4]; 16] = [
     [K32[63], K32[62], K32[61], K32[60]],
 ];
 
-/// Constants necessary for SHA-512 family of digests.
-pub const K64: [u64; 80] = [
+/// Round constants for SHA-512 family of digests
+pub static K64: [u64; 80] = [
     0x428a2f98d728ae22,
     0x7137449123ef65cd,
     0xb5c0fbcfec4d3b2f,
@@ -121,8 +119,8 @@ pub const K64: [u64; 80] = [
     0x6c44198c4a475817,
 ];
 
-/// Constants necessary for SHA-512 family of digests.
-pub const K64X2: [[u64; 2]; 40] = [
+/// Swapped round constants for SHA-512 family of digests
+pub static K64X2: [[u64; 2]; 40] = [
     [K64[1], K64[0]],
     [K64[3], K64[2]],
     [K64[5], K64[4]],
