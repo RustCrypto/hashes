@@ -32,7 +32,7 @@ fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
 }
 
 #[inline(always)]
-fn add_round_const(a: [u32; 4], i: usize) -> [u32; 4] {
+fn add_round_const(mut a: [u32; 4], i: usize) -> [u32; 4] {
     fn k(i: usize, j: usize) -> u32 {
         // `read_volatile` forces compiler to read round constants from the static
         // instead of inlining them, which improves codegen and performance on some platforms.
@@ -49,12 +49,11 @@ fn add_round_const(a: [u32; 4], i: usize) -> [u32; 4] {
         unsafe { r(K32.as_ptr().add(4 * i + j)) }
     }
 
-    [
-        a[0].wrapping_add(k(i, 3)),
-        a[1].wrapping_add(k(i, 2)),
-        a[2].wrapping_add(k(i, 1)),
-        a[3].wrapping_add(k(i, 0)),
-    ]
+    a[3] = a[3].wrapping_add(k(i, 0));
+    a[2] = a[2].wrapping_add(k(i, 1));
+    a[1] = a[1].wrapping_add(k(i, 2));
+    a[0] = a[0].wrapping_add(k(i, 3));
+    a
 }
 
 fn sha256load(v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
