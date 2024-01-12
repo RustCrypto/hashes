@@ -1,5 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use crate::consts::BLOCK_LEN;
+use crate::consts::K32;
 
 #[inline(always)]
 fn shr(v: [u32; 4], o: u32) -> [u32; 4] {
@@ -29,6 +29,31 @@ fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
         a[2].wrapping_add(b[2]),
         a[3].wrapping_add(b[3]),
     ]
+}
+
+#[inline(always)]
+fn add_round_const(mut a: [u32; 4], i: usize) -> [u32; 4] {
+    fn k(i: usize, j: usize) -> u32 {
+        // `read_volatile` forces compiler to read round constants from the static
+        // instead of inlining them, which improves codegen and performance on some platforms.
+        // On x86 targets 32-bit constants can be encoded using immediate argument on the `add`
+        // instruction, so it's more efficient to inline them.
+        cfg_if::cfg_if! {
+            if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
+                use core::ptr::read as r;
+            } else {
+                use core::ptr::read_volatile as r;
+            }
+        }
+
+        unsafe { r(K32.as_ptr().add(4 * i + j)) }
+    }
+
+    a[3] = a[3].wrapping_add(k(i, 0));
+    a[2] = a[2].wrapping_add(k(i, 1));
+    a[1] = a[1].wrapping_add(k(i, 2));
+    a[0] = a[0].wrapping_add(k(i, 3));
+    a
 }
 
 fn sha256load(v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
@@ -142,7 +167,7 @@ fn schedule(v0: [u32; 4], v1: [u32; 4], v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] 
 
 macro_rules! rounds4 {
     ($abef:ident, $cdgh:ident, $rest:expr, $i:expr) => {{
-        let t1 = add($rest, crate::consts::K32X4[$i]);
+        let t1 = add_round_const($rest, $i);
         $cdgh = sha256_digest_round_x2($cdgh, $abef, t1);
         let t2 = sha256swap(t1);
         $abef = sha256_digest_round_x2($abef, $cdgh, t2);
@@ -203,15 +228,11 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
 }
 
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    let mut block_u32 = [0u32; BLOCK_LEN];
-    // since LLVM can't properly use aliasing yet it will make
-    // unnecessary state stores without this copy
-    let mut state_cpy = *state;
     for block in blocks {
+        let mut block_u32 = [0u32; 16];
         for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
             *o = u32::from_be_bytes(chunk.try_into().unwrap());
         }
-        sha256_digest_block_u32(&mut state_cpy, &block_u32);
+        sha256_digest_block_u32(state, &block_u32);
     }
-    *state = state_cpy;
 }

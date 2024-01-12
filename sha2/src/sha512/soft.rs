@@ -1,9 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use crate::consts::{BLOCK_LEN, K64X2};
-
-fn add(a: [u64; 2], b: [u64; 2]) -> [u64; 2] {
-    [a[0].wrapping_add(b[0]), a[1].wrapping_add(b[1])]
-}
+use crate::consts::K64;
 
 /// Not an intrinsic, but works like an unaligned load.
 fn sha512load(v0: [u64; 2], v1: [u64; 2]) -> [u64; 2] {
@@ -93,10 +89,23 @@ pub fn sha512_digest_round(
     [a1, e1]
 }
 
+#[inline(always)]
+fn add_rk(mut w: [u64; 2], i: usize) -> [u64; 2] {
+    fn rk(i: usize, j: usize) -> u64 {
+        // `read_volatile` forces compiler to read round constants from the static
+        // instead of inlining them, which improves codegen and performance
+        unsafe {
+            let p = K64.as_ptr().add(2 * i + j);
+            core::ptr::read_volatile(p)
+        }
+    }
+    w[1] = w[1].wrapping_add(rk(i, 0));
+    w[0] = w[0].wrapping_add(rk(i, 1));
+    w
+}
+
 /// Process a block with the SHA-512 algorithm.
 pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
-    let k = &K64X2;
-
     macro_rules! schedule {
         ($v0:expr, $v1:expr, $v4:expr, $v5:expr, $v7:expr) => {
             sha512_schedule_x2($v0, $v1, sha512load($v4, $v5), $v7)
@@ -122,67 +131,67 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
 
     // Rounds 0..20
     let (mut w1, mut w0) = ([block[3], block[2]], [block[1], block[0]]);
-    rounds4!(ae, bf, cg, dh, add(k[0], w0), add(k[1], w1));
+    rounds4!(ae, bf, cg, dh, add_rk(w0, 0), add_rk(w1, 1));
     let (mut w3, mut w2) = ([block[7], block[6]], [block[5], block[4]]);
-    rounds4!(ae, bf, cg, dh, add(k[2], w2), add(k[3], w3));
+    rounds4!(ae, bf, cg, dh, add_rk(w2, 2), add_rk(w3, 3));
     let (mut w5, mut w4) = ([block[11], block[10]], [block[9], block[8]]);
-    rounds4!(ae, bf, cg, dh, add(k[4], w4), add(k[5], w5));
+    rounds4!(ae, bf, cg, dh, add_rk(w4, 4), add_rk(w5, 5));
     let (mut w7, mut w6) = ([block[15], block[14]], [block[13], block[12]]);
-    rounds4!(ae, bf, cg, dh, add(k[6], w6), add(k[7], w7));
+    rounds4!(ae, bf, cg, dh, add_rk(w6, 6), add_rk(w7, 7));
     let mut w8 = schedule!(w0, w1, w4, w5, w7);
     let mut w9 = schedule!(w1, w2, w5, w6, w8);
-    rounds4!(ae, bf, cg, dh, add(k[8], w8), add(k[9], w9));
+    rounds4!(ae, bf, cg, dh, add_rk(w8, 8), add_rk(w9, 9));
 
     // Rounds 20..40
     w0 = schedule!(w2, w3, w6, w7, w9);
     w1 = schedule!(w3, w4, w7, w8, w0);
-    rounds4!(ae, bf, cg, dh, add(k[10], w0), add(k[11], w1));
+    rounds4!(ae, bf, cg, dh, add_rk(w0, 10), add_rk(w1, 11));
     w2 = schedule!(w4, w5, w8, w9, w1);
     w3 = schedule!(w5, w6, w9, w0, w2);
-    rounds4!(ae, bf, cg, dh, add(k[12], w2), add(k[13], w3));
+    rounds4!(ae, bf, cg, dh, add_rk(w2, 12), add_rk(w3, 13));
     w4 = schedule!(w6, w7, w0, w1, w3);
     w5 = schedule!(w7, w8, w1, w2, w4);
-    rounds4!(ae, bf, cg, dh, add(k[14], w4), add(k[15], w5));
+    rounds4!(ae, bf, cg, dh, add_rk(w4, 14), add_rk(w5, 15));
     w6 = schedule!(w8, w9, w2, w3, w5);
     w7 = schedule!(w9, w0, w3, w4, w6);
-    rounds4!(ae, bf, cg, dh, add(k[16], w6), add(k[17], w7));
+    rounds4!(ae, bf, cg, dh, add_rk(w6, 16), add_rk(w7, 17));
     w8 = schedule!(w0, w1, w4, w5, w7);
     w9 = schedule!(w1, w2, w5, w6, w8);
-    rounds4!(ae, bf, cg, dh, add(k[18], w8), add(k[19], w9));
+    rounds4!(ae, bf, cg, dh, add_rk(w8, 18), add_rk(w9, 19));
 
     // Rounds 40..60
     w0 = schedule!(w2, w3, w6, w7, w9);
     w1 = schedule!(w3, w4, w7, w8, w0);
-    rounds4!(ae, bf, cg, dh, add(k[20], w0), add(k[21], w1));
+    rounds4!(ae, bf, cg, dh, add_rk(w0, 20), add_rk(w1, 21));
     w2 = schedule!(w4, w5, w8, w9, w1);
     w3 = schedule!(w5, w6, w9, w0, w2);
-    rounds4!(ae, bf, cg, dh, add(k[22], w2), add(k[23], w3));
+    rounds4!(ae, bf, cg, dh, add_rk(w2, 22), add_rk(w3, 23));
     w4 = schedule!(w6, w7, w0, w1, w3);
     w5 = schedule!(w7, w8, w1, w2, w4);
-    rounds4!(ae, bf, cg, dh, add(k[24], w4), add(k[25], w5));
+    rounds4!(ae, bf, cg, dh, add_rk(w4, 24), add_rk(w5, 25));
     w6 = schedule!(w8, w9, w2, w3, w5);
     w7 = schedule!(w9, w0, w3, w4, w6);
-    rounds4!(ae, bf, cg, dh, add(k[26], w6), add(k[27], w7));
+    rounds4!(ae, bf, cg, dh, add_rk(w6, 26), add_rk(w7, 27));
     w8 = schedule!(w0, w1, w4, w5, w7);
     w9 = schedule!(w1, w2, w5, w6, w8);
-    rounds4!(ae, bf, cg, dh, add(k[28], w8), add(k[29], w9));
+    rounds4!(ae, bf, cg, dh, add_rk(w8, 28), add_rk(w9, 29));
 
     // Rounds 60..80
     w0 = schedule!(w2, w3, w6, w7, w9);
     w1 = schedule!(w3, w4, w7, w8, w0);
-    rounds4!(ae, bf, cg, dh, add(k[30], w0), add(k[31], w1));
+    rounds4!(ae, bf, cg, dh, add_rk(w0, 30), add_rk(w1, 31));
     w2 = schedule!(w4, w5, w8, w9, w1);
     w3 = schedule!(w5, w6, w9, w0, w2);
-    rounds4!(ae, bf, cg, dh, add(k[32], w2), add(k[33], w3));
+    rounds4!(ae, bf, cg, dh, add_rk(w2, 32), add_rk(w3, 33));
     w4 = schedule!(w6, w7, w0, w1, w3);
     w5 = schedule!(w7, w8, w1, w2, w4);
-    rounds4!(ae, bf, cg, dh, add(k[34], w4), add(k[35], w5));
+    rounds4!(ae, bf, cg, dh, add_rk(w4, 34), add_rk(w5, 35));
     w6 = schedule!(w8, w9, w2, w3, w5);
     w7 = schedule!(w9, w0, w3, w4, w6);
-    rounds4!(ae, bf, cg, dh, add(k[36], w6), add(k[37], w7));
+    rounds4!(ae, bf, cg, dh, add_rk(w6, 36), add_rk(w7, 37));
     w8 = schedule!(w0, w1, w4, w5, w7);
     w9 = schedule!(w1, w2, w5, w6, w8);
-    rounds4!(ae, bf, cg, dh, add(k[38], w8), add(k[39], w9));
+    rounds4!(ae, bf, cg, dh, add_rk(w8, 38), add_rk(w9, 39));
 
     let [a, e] = ae;
     let [b, f] = bf;
@@ -200,15 +209,11 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
 }
 
 pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    let mut block_u32 = [0u64; BLOCK_LEN];
-    // since LLVM can't properly use aliasing yet it will make
-    // unnecessary state stores without this copy
-    let mut state_cpy = *state;
     for block in blocks {
+        let mut block_u32 = [0u64; 16];
         for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(8)) {
             *o = u64::from_be_bytes(chunk.try_into().unwrap());
         }
-        sha512_digest_block_u64(&mut state_cpy, &block_u32);
+        sha512_digest_block_u64(state, &block_u32);
     }
-    *state = state_cpy;
 }
