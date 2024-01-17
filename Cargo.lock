@@ -30,7 +30,7 @@ checksum = "d9aa1eef3994e2ccd304a78fe3fea4a73e5792007f85f09b79bb82143ca5f82b"
 
 [[package]]
 name = "belt-hash"
-version = "0.2.0-pre.1"
+version = "0.2.0-pre.2"
 dependencies = [
  "belt-block",
  "digest",
@@ -199,7 +199,7 @@ checksum = "13e3bf6590cbc649f4d1a3eefc9d5d6eb746f5200ffb04e5e142700b8faa56e7"
 
 [[package]]
 name = "md-5"
-version = "0.11.0-pre.1"
+version = "0.11.0-pre.2"
 dependencies = [
  "cfg-if",
  "digest",
@@ -247,7 +247,7 @@ dependencies = [
 
 [[package]]
 name = "sha1"
-version = "0.11.0-pre.1"
+version = "0.11.0-pre.2"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -257,7 +257,7 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.11.0-pre.1"
+version = "0.11.0-pre.2"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -267,7 +267,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.11.0-pre.1"
+version = "0.11.0-pre.2"
 dependencies = [
  "digest",
  "hex-literal",
@@ -293,7 +293,7 @@ dependencies = [
 
 [[package]]
 name = "sm3"
-version = "0.5.0-pre.1"
+version = "0.5.0-pre.2"
 dependencies = [
  "digest",
  "hex-literal",
@@ -307,7 +307,7 @@ checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 
 [[package]]
 name = "streebog"
-version = "0.11.0-pre.1"
+version = "0.11.0-pre.2"
 dependencies = [
  "digest",
  "hex-literal",
