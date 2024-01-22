@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: RustCrypto/actions/cargo-cache@master
       - name: Cache cargo bin
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cargo/bin
           key: ${{ runner.os }}-cargo-audit-v0.12.0
