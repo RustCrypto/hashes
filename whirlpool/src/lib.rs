@@ -12,7 +12,7 @@ pub use digest::{self, Digest};
 
 use core::fmt;
 use digest::{
-    array::ArrayOps,
+    array::Array,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
@@ -59,7 +59,7 @@ impl UpdateCore for WhirlpoolCore {
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         let block_bits = 8 * Self::block_size() as u64;
         self.update_len(block_bits * (blocks.len() as u64));
-        let blocks = ArrayOps::cast_slice_to_core(blocks);
+        let blocks = Array::cast_slice_to_core(blocks);
         compress(&mut self.state, blocks);
     }
 }

@@ -11,7 +11,7 @@ pub use digest::{self, Digest};
 
 use core::{fmt, slice::from_ref};
 use digest::{
-    array::ArrayOps,
+    array::Array,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
@@ -61,7 +61,7 @@ impl UpdateCore for Sha1Core {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
-        let blocks = ArrayOps::cast_slice_to_core(blocks);
+        let blocks = Array::cast_slice_to_core(blocks);
         compress(&mut self.h, blocks);
     }
 }
