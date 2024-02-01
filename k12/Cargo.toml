@@ -14,7 +14,7 @@ rust-version = "1.71"
 
 [dependencies]
 digest = { version = "=0.11.0-pre.8", default-features = false, features = ["core-api"] }
-sha3 = { version = "=0.11.0-pre.2", default-features = false, path = "../sha3" }
+sha3 = { version = "=0.11.0-pre.3", default-features = false, path = "../sha3" }
 
 [dev-dependencies]
 digest = { version = "=0.11.0-pre.8", features = ["alloc", "dev"] }
