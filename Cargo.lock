@@ -53,9 +53,9 @@ checksum = "847495c209977a90e8aad588b959d0ca9f5dc228096d29a6bd3defd53f35eaec"
 
 [[package]]
 name = "block-buffer"
-version = "0.11.0-pre.4"
+version = "0.11.0-pre.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0edadbde8e0243b49d434f9a23ec0590af201f400a34d7d51049284e4a77c568"
+checksum = "3ded684142010808eb980d9974ef794da2bcf97d13396143b1515e9f0fb4a10e"
 dependencies = [
  "crypto-common",
  "zeroize",
@@ -84,9 +84,9 @@ dependencies = [
 
 [[package]]
 name = "crypto-common"
-version = "0.2.0-pre.4"
+version = "0.2.0-pre.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "806e4e3731d44f1340b069551225b44c2056c105cad9e67f0c46266db8a3a6b9"
+checksum = "b7aa2ec04f5120b830272a481e8d9d8ba4dda140d2cda59b0f1110d5eb93c38e"
 dependencies = [
  "getrandom",
  "hybrid-array",
@@ -95,9 +95,9 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.11.0-pre.7"
+version = "0.11.0-pre.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "957713a19ffdda287c63772e607f848512f67ba948f17d8e42cb8d50fd98a786"
+checksum = "065d93ead7c220b85d5b4be4795d8398eac4ff68b5ee63895de0a3c1fb6edf25"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -157,9 +157,9 @@ checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
 
 [[package]]
 name = "hybrid-array"
-version = "0.2.0-rc.3"
+version = "0.2.0-rc.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8856b3db5eb76328f03589feb25c7a3166bfa0ae3b38b1408d546b097fa7947"
+checksum = "18e63b66aee2df5599ba69b17a48113dfc68d2e143ea387ef836509e433bbd7e"
 dependencies = [
  "typenum",
 ]
