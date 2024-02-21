@@ -13,3 +13,16 @@ fn sha1_rand() {
         hex!("7e565a25a8b123e9881addbcedcd927b23377a78"),
     );
 }
+
+#[cfg(feature = "collision")]
+#[test]
+fn sha1_shambles() {
+    let mut h = Sha1::new();
+
+    // TODO: actually load shambles data ;)
+    h.update("shambles");
+    assert_eq!(
+        h.finalize(),
+        hex!("0409b8f154f8d5f273085c2c7bc369dc5a188c3b"),
+    );
+}

@@ -24,11 +24,12 @@ digest = { version = "=0.11.0-pre.8", features = ["dev"] }
 hex-literal = "0.4"
 
 [features]
-default = ["oid", "std"]
+default = ["oid", "std", "collision"]
 std = ["digest/std"]
 oid = ["digest/oid"] # Enable OID support
 zeroize = ["digest/zeroize"]
 force-soft = [] # Force software implementation
+collision = [] # Detect collisions
 
 [package.metadata.docs.rs]
 all-features = true

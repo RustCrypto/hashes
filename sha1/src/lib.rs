@@ -9,7 +9,7 @@
 
 pub use digest::{self, Digest};
 
-use core::{fmt, slice::from_ref};
+use core::fmt;
 use digest::{
     array::Array,
     block_buffer::Eager,
@@ -26,6 +26,9 @@ use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
+#[cfg(feature = "collision")]
+mod ubc_check;
+
 mod compress;
 
 pub use compress::compress;
@@ -38,6 +41,50 @@ const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
 pub struct Sha1Core {
     h: [u32; STATE_LEN],
     block_len: u64,
+    #[cfg(feature = "collision")]
+    detection: DetectionState,
+}
+
+/// The internal state used to do collision detection.
+#[cfg(feature = "collision")]
+#[derive(Clone)]
+pub struct DetectionState {
+    /// Should we detect collisions at all?
+    detect_collision: bool,
+    /// Should a fix be automatically be applied, or the original hash be returned?
+    safe_hash: bool,
+    /// Should unavoidable bitconditions be used to speed up the check?
+    ubc_check: bool,
+    /// Has a collision been detected?
+    found_collision: bool,
+    /// Has a reduced round collision been detected?
+    reduced_round_collision: bool,
+    ihv1: [u32; 5],
+    ihv2: [u32; 5],
+    m1: [u32; 80],
+    m2: [u32; 80],
+    /// Stores past states, for faster recompression.
+    state_58: [u32; 5],
+    state_65: [u32; 5],
+}
+
+#[cfg(feature = "collision")]
+impl Default for DetectionState {
+    fn default() -> Self {
+        Self {
+            detect_collision: true,
+            safe_hash: false,
+            ubc_check: true,
+            reduced_round_collision: false,
+            found_collision: false,
+            ihv1: Default::default(),
+            ihv2: Default::default(),
+            m1: [0; 80],
+            m2: [0; 80],
+            state_58: Default::default(),
+            state_65: Default::default(),
+        }
+    }
 }
 
 /// SHA-1 hasher state.
@@ -62,7 +109,12 @@ impl UpdateCore for Sha1Core {
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
         let blocks = Array::cast_slice_to_core(blocks);
-        compress(&mut self.h, blocks);
+        compress(
+            &mut self.h,
+            #[cfg(feature = "collision")]
+            &mut self.detection,
+            blocks,
+        );
     }
 }
 
@@ -70,10 +122,20 @@ impl FixedOutputCore for Sha1Core {
     #[inline]
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let bs = Self::BlockSize::U64;
-        let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
-
         let mut h = self.h;
-        buffer.len64_padding_be(bit_len, |b| compress(&mut h, from_ref(&b.0)));
+
+        #[cfg(feature = "collision")]
+        {
+            let last_block = buffer.get_data();
+            crate::compress::finalize(&mut h, bs * self.block_len, last_block, &mut self.detection);
+        }
+        #[cfg(not(feature = "collision"))]
+        {
+            use core::slice::from_ref;
+            let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
+            buffer.len64_padding_be(bit_len, |b| compress(&mut h, from_ref(&b.0)));
+        }
+
         for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
@@ -86,6 +148,8 @@ impl Default for Sha1Core {
         Self {
             h: [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
             block_len: 0,
+            #[cfg(feature = "collision")]
+            detection: Default::default(),
         }
     }
 }
