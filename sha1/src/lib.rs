@@ -45,20 +45,54 @@ pub struct Sha1Core {
     detection: DetectionState,
 }
 
+/// Configuration for collision detection.
+#[cfg(feature = "collision")]
+#[derive(Clone)]
+pub struct CollisionDetectionConfig {
+    /// Should we detect collisions at all? Default: true
+    pub detect_collision: bool,
+    /// Should a fix be automatically be applied, or the original hash be returned? Default: true
+    pub safe_hash: bool,
+    /// Should unavoidable bitconditions be used to speed up the check? Default: true
+    pub ubc_check: bool,
+    /// Should reduced round collisions be used? Default: false
+    pub reduced_round_collision: bool,
+}
+
+#[cfg(feature = "collision")]
+impl Default for CollisionDetectionConfig {
+    fn default() -> Self {
+        Self {
+            detect_collision: true,
+            safe_hash: true,
+            ubc_check: true,
+            reduced_round_collision: false,
+        }
+    }
+}
+
+#[cfg(feature = "collision")]
+impl CollisionDetectionConfig {
+    /// Create a Sha1 with a specific collision detection configuration.
+    pub fn build(self) -> Sha1 {
+        let core = Sha1Core {
+            detection: DetectionState {
+                config: self,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        CoreWrapper::from_core(core)
+    }
+}
+
 /// The internal state used to do collision detection.
 #[cfg(feature = "collision")]
 #[derive(Clone)]
 pub struct DetectionState {
-    /// Should we detect collisions at all?
-    detect_collision: bool,
-    /// Should a fix be automatically be applied, or the original hash be returned?
-    safe_hash: bool,
-    /// Should unavoidable bitconditions be used to speed up the check?
-    ubc_check: bool,
+    config: CollisionDetectionConfig,
     /// Has a collision been detected?
     found_collision: bool,
-    /// Has a reduced round collision been detected?
-    reduced_round_collision: bool,
     ihv1: [u32; 5],
     ihv2: [u32; 5],
     m1: [u32; 80],
@@ -72,10 +106,7 @@ pub struct DetectionState {
 impl Default for DetectionState {
     fn default() -> Self {
         Self {
-            detect_collision: true,
-            safe_hash: false,
-            ubc_check: true,
-            reduced_round_collision: false,
+            config: Default::default(),
             found_collision: false,
             ihv1: Default::default(),
             ihv2: Default::default(),

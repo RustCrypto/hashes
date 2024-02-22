@@ -684,7 +684,7 @@ pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; B
     let mut state_cpy = *state;
 
     for block in blocks.iter() {
-        if ctx.detect_collision {
+        if ctx.config.detect_collision {
             ctx.ihv1.copy_from_slice(&state_cpy);
         }
 
@@ -693,7 +693,7 @@ pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; B
         }
 
         let DetectionState {
-            detect_collision,
+            config,
             m1,
             state_58,
             state_65,
@@ -702,8 +702,8 @@ pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; B
 
         compression_states(&mut state_cpy, &block_u32, m1, state_58, state_65);
 
-        if *detect_collision {
-            let ubc_mask = if ctx.ubc_check {
+        if config.detect_collision {
+            let ubc_mask = if ctx.config.ubc_check {
                 crate::ubc_check::ubc_check(&ctx.m1)
             } else {
                 0xFFFFFFFF
@@ -744,7 +744,7 @@ pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; B
                                 | (ihvtmp[2] ^ state_cpy[2])
                                 | (ihvtmp[3] ^ state_cpy[3])
                                 | (ihvtmp[4] ^ state_cpy[4])))
-                            || (ctx.reduced_round_collision
+                            || (ctx.config.reduced_round_collision
                                 && 0 == ((ctx.ihv1[0] ^ ctx.ihv2[0])
                                     | (ctx.ihv1[1] ^ ctx.ihv2[1])
                                     | (ctx.ihv1[2] ^ ctx.ihv2[2])
@@ -753,7 +753,7 @@ pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; B
                         {
                             ctx.found_collision = true;
 
-                            if ctx.safe_hash {
+                            if ctx.config.safe_hash {
                                 compression_w(&mut state_cpy, &mut ctx.m1);
                                 compression_w(&mut state_cpy, &mut ctx.m1);
                             }
