@@ -7,6 +7,7 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
 
+use checked::DetectionState;
 pub use digest::{self, Digest};
 
 use core::fmt;
@@ -26,8 +27,11 @@ use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
+#[cfg(feature = "std")]
+extern crate std;
+
 #[cfg(feature = "collision")]
-mod ubc_check;
+pub mod checked;
 
 mod compress;
 
@@ -43,79 +47,6 @@ pub struct Sha1Core {
     block_len: u64,
     #[cfg(feature = "collision")]
     detection: DetectionState,
-}
-
-/// Configuration for collision detection.
-#[cfg(feature = "collision")]
-#[derive(Clone)]
-pub struct CollisionDetectionConfig {
-    /// Should we detect collisions at all? Default: true
-    pub detect_collision: bool,
-    /// Should a fix be automatically be applied, or the original hash be returned? Default: true
-    pub safe_hash: bool,
-    /// Should unavoidable bitconditions be used to speed up the check? Default: true
-    pub ubc_check: bool,
-    /// Should reduced round collisions be used? Default: false
-    pub reduced_round_collision: bool,
-}
-
-#[cfg(feature = "collision")]
-impl Default for CollisionDetectionConfig {
-    fn default() -> Self {
-        Self {
-            detect_collision: true,
-            safe_hash: true,
-            ubc_check: true,
-            reduced_round_collision: false,
-        }
-    }
-}
-
-#[cfg(feature = "collision")]
-impl CollisionDetectionConfig {
-    /// Create a Sha1 with a specific collision detection configuration.
-    pub fn build(self) -> Sha1 {
-        let core = Sha1Core {
-            detection: DetectionState {
-                config: self,
-                ..Default::default()
-            },
-            ..Default::default()
-        };
-        CoreWrapper::from_core(core)
-    }
-}
-
-/// The internal state used to do collision detection.
-#[cfg(feature = "collision")]
-#[derive(Clone)]
-pub struct DetectionState {
-    config: CollisionDetectionConfig,
-    /// Has a collision been detected?
-    found_collision: bool,
-    ihv1: [u32; 5],
-    ihv2: [u32; 5],
-    m1: [u32; 80],
-    m2: [u32; 80],
-    /// Stores past states, for faster recompression.
-    state_58: [u32; 5],
-    state_65: [u32; 5],
-}
-
-#[cfg(feature = "collision")]
-impl Default for DetectionState {
-    fn default() -> Self {
-        Self {
-            config: Default::default(),
-            found_collision: false,
-            ihv1: Default::default(),
-            ihv2: Default::default(),
-            m1: [0; 80],
-            m2: [0; 80],
-            state_58: Default::default(),
-            state_65: Default::default(),
-        }
-    }
 }
 
 /// SHA-1 hasher state.

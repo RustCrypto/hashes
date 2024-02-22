@@ -8,9 +8,9 @@ cfg_if::cfg_if! {
         mod soft;
         use soft::compress as compress_inner;
     } else if #[cfg(feature = "collision")] {
-        mod collision;
-        use collision::compress as compress_inner;
-        pub(crate) use collision::finalize;
+        mod checked;
+        use checked::compress as compress_inner;
+        pub(crate) use checked::finalize;
     } else if #[cfg(all(feature = "asm", target_arch = "aarch64"))] {
         mod soft;
         mod aarch64;

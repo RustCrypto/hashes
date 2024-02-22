@@ -26,10 +26,10 @@ hex-literal = "0.4"
 [features]
 default = ["oid", "std", "collision"]
 std = ["digest/std"]
-oid = ["digest/oid"] # Enable OID support
+oid = ["digest/oid"]                  # Enable OID support
 zeroize = ["digest/zeroize"]
-force-soft = [] # Force software implementation
-collision = [] # Detect collisions
+force-soft = []                       # Force software implementation
+collision = ["digest/mac"]            # Detect SHA1 collisions and mitigate them
 
 [package.metadata.docs.rs]
 all-features = true
