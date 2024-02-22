@@ -1,5 +1,7 @@
 //! Checked Sha1.
 
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 use digest::{
     block_buffer::BlockBuffer,
     core_api::{BlockSizeUser, BufferKindUser, FixedOutputCore, UpdateCore},
@@ -159,14 +161,31 @@ impl Drop for Sha1 {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
-            use zeroize::Zeroize;
             self.buffer.zeroize();
         }
     }
 }
 
 #[cfg(feature = "zeroize")]
-impl zeroize::ZeroizeOnDrop for Sha1 {}
+impl ZeroizeOnDrop for Sha1 {}
+
+impl Drop for DetectionState {
+    #[inline]
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.ihv1.zeroize();
+            self.ihv2.zeroize();
+            self.m1.zeroize();
+            self.m2.zeroize();
+            self.state_58.zeroize();
+            self.state_65.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for DetectionState {}
 
 #[cfg(feature = "oid")]
 impl digest::const_oid::AssociatedOid for Sha1 {
