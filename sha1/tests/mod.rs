@@ -2,9 +2,6 @@ use digest::dev::{feed_rand_16mib, fixed_reset_test};
 use hex_literal::hex;
 use sha1::{Digest, Sha1};
 
-#[cfg(feature = "collision")]
-use sha1::checked;
-
 digest::new_test!(sha1_main, "sha1", Sha1, fixed_reset_test);
 
 #[test]
@@ -17,7 +14,7 @@ fn sha1_rand() {
     );
 }
 
-#[cfg(feature = "collision")]
+#[cfg(all(feature = "collision", not(feature = "force-soft")))]
 #[test]
 fn shambles_1() {
     collision_test(
@@ -27,7 +24,7 @@ fn shambles_1() {
     )
 }
 
-#[cfg(feature = "collision")]
+#[cfg(all(feature = "collision", not(feature = "force-soft")))]
 #[test]
 fn shambles_2() {
     collision_test(
@@ -37,7 +34,7 @@ fn shambles_2() {
     )
 }
 
-#[cfg(feature = "collision")]
+#[cfg(all(feature = "collision", not(feature = "force-soft")))]
 #[test]
 fn shattered_1() {
     collision_test(
@@ -47,7 +44,7 @@ fn shattered_1() {
     )
 }
 
-#[cfg(feature = "collision")]
+#[cfg(all(feature = "collision", not(feature = "force-soft")))]
 #[test]
 fn shattered_2() {
     collision_test(
@@ -57,8 +54,9 @@ fn shattered_2() {
     )
 }
 
-#[cfg(feature = "collision")]
+#[cfg(all(feature = "collision", not(feature = "force-soft")))]
 fn collision_test(input: &[u8], hash: [u8; 20], mitigated_hash: [u8; 20]) {
+    use sha1::checked;
     // No detection.
     let mut ctx = checked::Config {
         detect_collision: false,

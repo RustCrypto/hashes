@@ -29,7 +29,7 @@ use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(feature = "collision")]
+#[cfg(all(feature = "collision", not(feature = "force-soft")))]
 pub mod checked;
 
 mod compress;
@@ -44,7 +44,7 @@ const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
 pub struct Sha1Core {
     h: [u32; STATE_LEN],
     block_len: u64,
-    #[cfg(feature = "collision")]
+    #[cfg(all(feature = "collision", not(feature = "force-soft")))]
     detection: checked::DetectionState,
 }
 
@@ -72,7 +72,7 @@ impl UpdateCore for Sha1Core {
         let blocks = Array::cast_slice_to_core(blocks);
         compress(
             &mut self.h,
-            #[cfg(feature = "collision")]
+            #[cfg(all(feature = "collision", not(feature = "force-soft")))]
             &mut self.detection,
             blocks,
         );
@@ -85,12 +85,12 @@ impl FixedOutputCore for Sha1Core {
         let bs = Self::BlockSize::U64;
         let mut h = self.h;
 
-        #[cfg(feature = "collision")]
+        #[cfg(all(feature = "collision", not(feature = "force-soft")))]
         {
             let last_block = buffer.get_data();
             crate::compress::finalize(&mut h, bs * self.block_len, last_block, &mut self.detection);
         }
-        #[cfg(not(feature = "collision"))]
+        #[cfg(any(not(feature = "collision"), feature = "force-soft"))]
         {
             use core::slice::from_ref;
             let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
@@ -109,7 +109,7 @@ impl Default for Sha1Core {
         Self {
             h: [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
             block_len: 0,
-            #[cfg(feature = "collision")]
+            #[cfg(all(feature = "collision", not(feature = "force-soft")))]
             detection: Default::default(),
         }
     }
