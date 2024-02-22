@@ -1,7 +1,7 @@
 use crate::BLOCK_SIZE;
 
 #[cfg(feature = "collision")]
-use crate::DetectionState;
+use crate::checked::DetectionState;
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {

@@ -7,7 +7,6 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
 
-use checked::DetectionState;
 pub use digest::{self, Digest};
 
 use core::fmt;
@@ -46,7 +45,7 @@ pub struct Sha1Core {
     h: [u32; STATE_LEN],
     block_len: u64,
     #[cfg(feature = "collision")]
-    detection: DetectionState,
+    detection: checked::DetectionState,
 }
 
 /// SHA-1 hasher state.
