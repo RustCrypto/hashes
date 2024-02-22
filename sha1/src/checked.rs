@@ -95,10 +95,7 @@ impl CollisionResult {
 
     /// Returns if there was a collision
     pub fn has_collision(&self) -> bool {
-        match self {
-            CollisionResult::Ok(_) => false,
-            _ => true,
-        }
+        !matches!(self, CollisionResult::Ok(_))
     }
 }
 
