@@ -305,6 +305,70 @@ fn full_round4_step4(
     full_round4_step(*c, d, *e, *a, b, w, t + 3);
 }
 
+#[inline]
+fn round1_step_bw4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    m: &[u32; 80],
+    t: usize,
+) {
+    round1_step_bw(*a, b, *c, *d, e, m[t]);
+    round1_step_bw(*b, c, *d, *e, a, m[t - 1]);
+    round1_step_bw(*c, d, *e, *a, b, m[t - 2]);
+    round1_step_bw(*d, e, *a, *b, c, m[t - 3]);
+}
+
+#[inline]
+fn round2_step_bw4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    m: &[u32; 80],
+    t: usize,
+) {
+    round2_step_bw(*a, b, *c, *d, e, m[t]);
+    round2_step_bw(*b, c, *d, *e, a, m[t - 1]);
+    round2_step_bw(*c, d, *e, *a, b, m[t - 2]);
+    round2_step_bw(*d, e, *a, *b, c, m[t - 3]);
+}
+
+#[inline]
+fn round3_step_bw4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    m: &[u32; 80],
+    t: usize,
+) {
+    round3_step_bw(*a, b, *c, *d, e, m[t]);
+    round3_step_bw(*b, c, *d, *e, a, m[t - 1]);
+    round3_step_bw(*c, d, *e, *a, b, m[t - 2]);
+    round3_step_bw(*d, e, *a, *b, c, m[t - 3]);
+}
+
+#[inline]
+fn round4_step_bw4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    m: &[u32; 80],
+    t: usize,
+) {
+    round4_step_bw(*a, b, *c, *d, e, m[t]);
+    round4_step_bw(*b, c, *d, *e, a, m[t - 1]);
+    round4_step_bw(*c, d, *e, *a, b, m[t - 2]);
+    round4_step_bw(*d, e, *a, *b, c, m[t - 3]);
+}
+
 fn add_assign(left: &mut [u32; 5], right: [u32; 5]) {
     left[0] = left[0].wrapping_add(right[0]);
     left[1] = left[1].wrapping_add(right[1]);
@@ -387,11 +451,7 @@ fn compression_states(
     full_round4_step(b, &mut c, d, e, &mut a, w, 64);
 
     // Store state65
-    state_65[0] = a;
-    state_65[1] = b;
-    state_65[2] = c;
-    state_65[3] = d;
-    state_65[4] = e;
+    *state_65 = [a, b, c, d, e];
 
     full_round4_step(a, &mut b, c, d, &mut e, w, 65);
     full_round4_step(e, &mut a, b, c, &mut d, w, 66);
@@ -414,76 +474,26 @@ fn recompress_fast_58(
 
     round3_step_bw(d, &mut e, a, b, &mut c, me2[57]);
     round3_step_bw(e, &mut a, b, c, &mut d, me2[56]);
-    round3_step_bw(a, &mut b, c, d, &mut e, me2[55]);
-    round3_step_bw(b, &mut c, d, e, &mut a, me2[54]);
-    round3_step_bw(c, &mut d, e, a, &mut b, me2[53]);
-    round3_step_bw(d, &mut e, a, b, &mut c, me2[52]);
-    round3_step_bw(e, &mut a, b, c, &mut d, me2[51]);
-    round3_step_bw(a, &mut b, c, d, &mut e, me2[50]);
-    round3_step_bw(b, &mut c, d, e, &mut a, me2[49]);
-    round3_step_bw(c, &mut d, e, a, &mut b, me2[48]);
-    round3_step_bw(d, &mut e, a, b, &mut c, me2[47]);
-    round3_step_bw(e, &mut a, b, c, &mut d, me2[46]);
-    round3_step_bw(a, &mut b, c, d, &mut e, me2[45]);
-    round3_step_bw(b, &mut c, d, e, &mut a, me2[44]);
-    round3_step_bw(c, &mut d, e, a, &mut b, me2[43]);
-    round3_step_bw(d, &mut e, a, b, &mut c, me2[42]);
-    round3_step_bw(e, &mut a, b, c, &mut d, me2[41]);
-    round3_step_bw(a, &mut b, c, d, &mut e, me2[40]);
 
-    round2_step_bw(b, &mut c, d, e, &mut a, me2[39]);
-    round2_step_bw(c, &mut d, e, a, &mut b, me2[38]);
-    round2_step_bw(d, &mut e, a, b, &mut c, me2[37]);
-    round2_step_bw(e, &mut a, b, c, &mut d, me2[36]);
-    round2_step_bw(a, &mut b, c, d, &mut e, me2[35]);
-    round2_step_bw(b, &mut c, d, e, &mut a, me2[34]);
-    round2_step_bw(c, &mut d, e, a, &mut b, me2[33]);
-    round2_step_bw(d, &mut e, a, b, &mut c, me2[32]);
-    round2_step_bw(e, &mut a, b, c, &mut d, me2[31]);
-    round2_step_bw(a, &mut b, c, d, &mut e, me2[30]);
-    round2_step_bw(b, &mut c, d, e, &mut a, me2[29]);
-    round2_step_bw(c, &mut d, e, a, &mut b, me2[28]);
-    round2_step_bw(d, &mut e, a, b, &mut c, me2[27]);
-    round2_step_bw(e, &mut a, b, c, &mut d, me2[26]);
-    round2_step_bw(a, &mut b, c, d, &mut e, me2[25]);
-    round2_step_bw(b, &mut c, d, e, &mut a, me2[24]);
-    round2_step_bw(c, &mut d, e, a, &mut b, me2[23]);
-    round2_step_bw(d, &mut e, a, b, &mut c, me2[22]);
-    round2_step_bw(e, &mut a, b, c, &mut d, me2[21]);
-    round2_step_bw(a, &mut b, c, d, &mut e, me2[20]);
+    round3_step_bw4(&mut a, &mut b, &mut c, &mut d, &mut e, me2, 55);
+    round3_step_bw4(&mut e, &mut a, &mut b, &mut c, &mut d, me2, 51);
+    round3_step_bw4(&mut d, &mut e, &mut a, &mut b, &mut c, me2, 47);
+    round3_step_bw4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 43);
 
-    round1_step_bw(b, &mut c, d, e, &mut a, me2[19]);
-    round1_step_bw(c, &mut d, e, a, &mut b, me2[18]);
-    round1_step_bw(d, &mut e, a, b, &mut c, me2[17]);
-    round1_step_bw(e, &mut a, b, c, &mut d, me2[16]);
-    round1_step_bw(a, &mut b, c, d, &mut e, me2[15]);
-    round1_step_bw(b, &mut c, d, e, &mut a, me2[14]);
-    round1_step_bw(c, &mut d, e, a, &mut b, me2[13]);
-    round1_step_bw(d, &mut e, a, b, &mut c, me2[12]);
-    round1_step_bw(e, &mut a, b, c, &mut d, me2[11]);
-    round1_step_bw(a, &mut b, c, d, &mut e, me2[10]);
-    round1_step_bw(b, &mut c, d, e, &mut a, me2[9]);
-    round1_step_bw(c, &mut d, e, a, &mut b, me2[8]);
-    round1_step_bw(d, &mut e, a, b, &mut c, me2[7]);
-    round1_step_bw(e, &mut a, b, c, &mut d, me2[6]);
-    round1_step_bw(a, &mut b, c, d, &mut e, me2[5]);
-    round1_step_bw(b, &mut c, d, e, &mut a, me2[4]);
-    round1_step_bw(c, &mut d, e, a, &mut b, me2[3]);
-    round1_step_bw(d, &mut e, a, b, &mut c, me2[2]);
-    round1_step_bw(e, &mut a, b, c, &mut d, me2[1]);
-    round1_step_bw(a, &mut b, c, d, &mut e, me2[0]);
+    round2_step_bw4(&mut b, &mut c, &mut d, &mut e, &mut a, me2, 39);
+    round2_step_bw4(&mut a, &mut b, &mut c, &mut d, &mut e, me2, 35);
+    round2_step_bw4(&mut e, &mut a, &mut b, &mut c, &mut d, me2, 31);
+    round2_step_bw4(&mut d, &mut e, &mut a, &mut b, &mut c, me2, 27);
+    round2_step_bw4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 23);
 
-    ihvin[0] = a;
-    ihvin[1] = b;
-    ihvin[2] = c;
-    ihvin[3] = d;
-    ihvin[4] = e;
+    round1_step_bw4(&mut b, &mut c, &mut d, &mut e, &mut a, me2, 19);
+    round1_step_bw4(&mut a, &mut b, &mut c, &mut d, &mut e, me2, 15);
+    round1_step_bw4(&mut e, &mut a, &mut b, &mut c, &mut d, me2, 11);
+    round1_step_bw4(&mut d, &mut e, &mut a, &mut b, &mut c, me2, 7);
+    round1_step_bw4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 3);
 
-    a = state[0];
-    b = state[1];
-    c = state[2];
-    d = state[3];
-    e = state[4];
+    *ihvin = [a, b, c, d, e];
+    [a, b, c, d, e] = *state;
 
     round3_step(c, &mut d, e, a, &mut b, me2[58]);
     round3_step(b, &mut c, d, e, &mut a, me2[59]);
@@ -510,85 +520,28 @@ fn recompress_fast_65(
     let [mut a, mut b, mut c, mut d, mut e] = state;
 
     round4_step_bw(b, &mut c, d, e, &mut a, me2[64]);
-    round4_step_bw(c, &mut d, e, a, &mut b, me2[63]);
-    round4_step_bw(d, &mut e, a, b, &mut c, me2[62]);
-    round4_step_bw(e, &mut a, b, c, &mut d, me2[61]);
-    round4_step_bw(a, &mut b, c, d, &mut e, me2[60]);
+    round4_step_bw4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 63);
 
-    round3_step_bw(b, &mut c, d, e, &mut a, me2[59]);
-    round3_step_bw(c, &mut d, e, a, &mut b, me2[58]);
-    round3_step_bw(d, &mut e, a, b, &mut c, me2[57]);
-    round3_step_bw(e, &mut a, b, c, &mut d, me2[56]);
-    round3_step_bw(a, &mut b, c, d, &mut e, me2[55]);
-    round3_step_bw(b, &mut c, d, e, &mut a, me2[54]);
-    round3_step_bw(c, &mut d, e, a, &mut b, me2[53]);
-    round3_step_bw(d, &mut e, a, b, &mut c, me2[52]);
-    round3_step_bw(e, &mut a, b, c, &mut d, me2[51]);
-    round3_step_bw(a, &mut b, c, d, &mut e, me2[50]);
-    round3_step_bw(b, &mut c, d, e, &mut a, me2[49]);
-    round3_step_bw(c, &mut d, e, a, &mut b, me2[48]);
-    round3_step_bw(d, &mut e, a, b, &mut c, me2[47]);
-    round3_step_bw(e, &mut a, b, c, &mut d, me2[46]);
-    round3_step_bw(a, &mut b, c, d, &mut e, me2[45]);
-    round3_step_bw(b, &mut c, d, e, &mut a, me2[44]);
-    round3_step_bw(c, &mut d, e, a, &mut b, me2[43]);
-    round3_step_bw(d, &mut e, a, b, &mut c, me2[42]);
-    round3_step_bw(e, &mut a, b, c, &mut d, me2[41]);
-    round3_step_bw(a, &mut b, c, d, &mut e, me2[40]);
+    round3_step_bw4(&mut b, &mut c, &mut d, &mut e, &mut a, me2, 59);
+    round3_step_bw4(&mut a, &mut b, &mut c, &mut d, &mut e, me2, 55);
+    round3_step_bw4(&mut e, &mut a, &mut b, &mut c, &mut d, me2, 51);
+    round3_step_bw4(&mut d, &mut e, &mut a, &mut b, &mut c, me2, 47);
+    round3_step_bw4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 43);
 
-    round2_step_bw(b, &mut c, d, e, &mut a, me2[39]);
-    round2_step_bw(c, &mut d, e, a, &mut b, me2[38]);
-    round2_step_bw(d, &mut e, a, b, &mut c, me2[37]);
-    round2_step_bw(e, &mut a, b, c, &mut d, me2[36]);
-    round2_step_bw(a, &mut b, c, d, &mut e, me2[35]);
-    round2_step_bw(b, &mut c, d, e, &mut a, me2[34]);
-    round2_step_bw(c, &mut d, e, a, &mut b, me2[33]);
-    round2_step_bw(d, &mut e, a, b, &mut c, me2[32]);
-    round2_step_bw(e, &mut a, b, c, &mut d, me2[31]);
-    round2_step_bw(a, &mut b, c, d, &mut e, me2[30]);
-    round2_step_bw(b, &mut c, d, e, &mut a, me2[29]);
-    round2_step_bw(c, &mut d, e, a, &mut b, me2[28]);
-    round2_step_bw(d, &mut e, a, b, &mut c, me2[27]);
-    round2_step_bw(e, &mut a, b, c, &mut d, me2[26]);
-    round2_step_bw(a, &mut b, c, d, &mut e, me2[25]);
-    round2_step_bw(b, &mut c, d, e, &mut a, me2[24]);
-    round2_step_bw(c, &mut d, e, a, &mut b, me2[23]);
-    round2_step_bw(d, &mut e, a, b, &mut c, me2[22]);
-    round2_step_bw(e, &mut a, b, c, &mut d, me2[21]);
-    round2_step_bw(a, &mut b, c, d, &mut e, me2[20]);
+    round2_step_bw4(&mut b, &mut c, &mut d, &mut e, &mut a, me2, 39);
+    round2_step_bw4(&mut a, &mut b, &mut c, &mut d, &mut e, me2, 35);
+    round2_step_bw4(&mut e, &mut a, &mut b, &mut c, &mut d, me2, 31);
+    round2_step_bw4(&mut d, &mut e, &mut a, &mut b, &mut c, me2, 27);
+    round2_step_bw4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 23);
 
-    round1_step_bw(b, &mut c, d, e, &mut a, me2[19]);
-    round1_step_bw(c, &mut d, e, a, &mut b, me2[18]);
-    round1_step_bw(d, &mut e, a, b, &mut c, me2[17]);
-    round1_step_bw(e, &mut a, b, c, &mut d, me2[16]);
-    round1_step_bw(a, &mut b, c, d, &mut e, me2[15]);
-    round1_step_bw(b, &mut c, d, e, &mut a, me2[14]);
-    round1_step_bw(c, &mut d, e, a, &mut b, me2[13]);
-    round1_step_bw(d, &mut e, a, b, &mut c, me2[12]);
-    round1_step_bw(e, &mut a, b, c, &mut d, me2[11]);
-    round1_step_bw(a, &mut b, c, d, &mut e, me2[10]);
-    round1_step_bw(b, &mut c, d, e, &mut a, me2[9]);
-    round1_step_bw(c, &mut d, e, a, &mut b, me2[8]);
-    round1_step_bw(d, &mut e, a, b, &mut c, me2[7]);
-    round1_step_bw(e, &mut a, b, c, &mut d, me2[6]);
-    round1_step_bw(a, &mut b, c, d, &mut e, me2[5]);
-    round1_step_bw(b, &mut c, d, e, &mut a, me2[4]);
-    round1_step_bw(c, &mut d, e, a, &mut b, me2[3]);
-    round1_step_bw(d, &mut e, a, b, &mut c, me2[2]);
-    round1_step_bw(e, &mut a, b, c, &mut d, me2[1]);
-    round1_step_bw(a, &mut b, c, d, &mut e, me2[0]);
+    round1_step_bw4(&mut b, &mut c, &mut d, &mut e, &mut a, me2, 19);
+    round1_step_bw4(&mut a, &mut b, &mut c, &mut d, &mut e, me2, 15);
+    round1_step_bw4(&mut e, &mut a, &mut b, &mut c, &mut d, me2, 11);
+    round1_step_bw4(&mut d, &mut e, &mut a, &mut b, &mut c, me2, 7);
+    round1_step_bw4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 3);
 
-    ihvin[0] = a;
-    ihvin[1] = b;
-    ihvin[2] = c;
-    ihvin[3] = d;
-    ihvin[4] = e;
-
-    a = state[0];
-    b = state[1];
-    c = state[2];
-    d = state[3];
-    e = state[4];
+    *ihvin = [a, b, c, d, e];
+    [a, b, c, d, e] = *state;
 
     round4_step(a, &mut b, c, d, &mut e, me2[65]);
     round4_step(e, &mut a, b, c, &mut d, me2[66]);
@@ -620,6 +573,11 @@ fn recompression_step(
             recompress_fast_65(ihvin, ihvout, me2, state);
         }
     }
+}
+
+#[inline(always)]
+fn xor(a: &[u32; 5], b: &[u32; 5]) -> u32 {
+    a[0] ^ b[0] | a[1] ^ b[1] | a[2] ^ b[2] | a[3] ^ b[3] | a[4] ^ b[4]
 }
 
 #[inline]
@@ -680,18 +638,8 @@ pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; B
                     );
 
                     // to verify SHA-1 collision detection code with collisions for reduced-step SHA-1
-                    if (0
-                        == ((ihvtmp[0] ^ state_cpy[0])
-                            | (ihvtmp[1] ^ state_cpy[1])
-                            | (ihvtmp[2] ^ state_cpy[2])
-                            | (ihvtmp[3] ^ state_cpy[3])
-                            | (ihvtmp[4] ^ state_cpy[4])))
-                        || (ctx.reduced_round_collision
-                            && 0 == ((ctx.ihv1[0] ^ ctx.ihv2[0])
-                                | (ctx.ihv1[1] ^ ctx.ihv2[1])
-                                | (ctx.ihv1[2] ^ ctx.ihv2[2])
-                                | (ctx.ihv1[3] ^ ctx.ihv2[3])
-                                | (ctx.ihv1[4] ^ ctx.ihv2[4])))
+                    if (0 == xor(&ihvtmp, &state_cpy))
+                        || (ctx.reduced_round_collision && 0 == xor(&ctx.ihv1, &ctx.ihv2))
                     {
                         ctx.found_collision = true;
 
@@ -714,15 +662,8 @@ const SHA1_PADDING: [u8; 64] = [
     0,
 ];
 
-/// returns: 0 = no collision detected,
-/// otherwise = collision found => warn user for active attack
 #[inline]
-pub fn finalize(
-    state: &mut [u32; 5],
-    total: u64,
-    last_block: &[u8],
-    ctx: &mut DetectionState,
-) -> bool {
+pub fn finalize(state: &mut [u32; 5], total: u64, last_block: &[u8], ctx: &mut DetectionState) {
     let mut total = total + last_block.len() as u64;
     let last = last_block.len();
     let needs_two_blocks = last >= 56;
@@ -754,6 +695,4 @@ pub fn finalize(
     buffer[63] = total as u8;
 
     compress(state, ctx, &[buffer]);
-
-    ctx.found_collision
 }
