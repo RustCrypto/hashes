@@ -224,6 +224,87 @@ fn round4_step4(a: &mut u32, b: &mut u32, c: &mut u32, d: &mut u32, e: &mut u32,
     round4_step(*c, d, *e, *a, b, w[3]);
 }
 
+#[inline]
+fn full_round1_step_load4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    m: &[u32; 16],
+    w: &mut [u32; 80],
+    t: usize,
+) {
+    full_round1_step_load(*a, b, *c, *d, e, m, w, t);
+    full_round1_step_load(*e, a, *b, *c, d, m, w, t + 1);
+    full_round1_step_load(*d, e, *a, *b, c, m, w, t + 2);
+    full_round1_step_load(*c, d, *e, *a, b, m, w, t + 3);
+}
+
+#[inline]
+fn full_round1_step_expand4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    w: &mut [u32; 80],
+    t: usize,
+) {
+    full_round1_step_expand(*a, b, *c, *d, e, w, t);
+    full_round1_step_expand(*e, a, *b, *c, d, w, t + 1);
+    full_round1_step_expand(*d, e, *a, *b, c, w, t + 2);
+    full_round1_step_expand(*c, d, *e, *a, b, w, t + 3);
+}
+
+#[inline]
+fn full_round2_step4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    w: &mut [u32; 80],
+    t: usize,
+) {
+    full_round2_step(*a, b, *c, *d, e, w, t);
+    full_round2_step(*e, a, *b, *c, d, w, t + 1);
+    full_round2_step(*d, e, *a, *b, c, w, t + 2);
+    full_round2_step(*c, d, *e, *a, b, w, t + 3);
+}
+
+#[inline]
+fn full_round3_step4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    w: &mut [u32; 80],
+    t: usize,
+) {
+    full_round3_step(*a, b, *c, *d, e, w, t);
+    full_round3_step(*e, a, *b, *c, d, w, t + 1);
+    full_round3_step(*d, e, *a, *b, c, w, t + 2);
+    full_round3_step(*c, d, *e, *a, b, w, t + 3);
+}
+
+#[inline]
+fn full_round4_step4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    w: &mut [u32; 80],
+    t: usize,
+) {
+    full_round4_step(*a, b, *c, *d, e, w, t);
+    full_round4_step(*e, a, *b, *c, d, w, t + 1);
+    full_round4_step(*d, e, *a, *b, c, w, t + 2);
+    full_round4_step(*c, d, *e, *a, b, w, t + 3);
+}
+
 fn add_assign(left: &mut [u32; 5], right: [u32; 5]) {
     left[0] = left[0].wrapping_add(right[0]);
     left[1] = left[1].wrapping_add(right[1]);
@@ -271,65 +352,24 @@ fn compression_states(
 ) {
     let [mut a, mut b, mut c, mut d, mut e] = ihv;
 
-    full_round1_step_load(a, &mut b, c, d, &mut e, m, w, 0);
-    full_round1_step_load(e, &mut a, b, c, &mut d, m, w, 1);
-    full_round1_step_load(d, &mut e, a, b, &mut c, m, w, 2);
-    full_round1_step_load(c, &mut d, e, a, &mut b, m, w, 3);
-    full_round1_step_load(b, &mut c, d, e, &mut a, m, w, 4);
-    full_round1_step_load(a, &mut b, c, d, &mut e, m, w, 5);
-    full_round1_step_load(e, &mut a, b, c, &mut d, m, w, 6);
-    full_round1_step_load(d, &mut e, a, b, &mut c, m, w, 7);
-    full_round1_step_load(c, &mut d, e, a, &mut b, m, w, 8);
-    full_round1_step_load(b, &mut c, d, e, &mut a, m, w, 9);
-    full_round1_step_load(a, &mut b, c, d, &mut e, m, w, 10);
-    full_round1_step_load(e, &mut a, b, c, &mut d, m, w, 11);
-    full_round1_step_load(d, &mut e, a, b, &mut c, m, w, 12);
-    full_round1_step_load(c, &mut d, e, a, &mut b, m, w, 13);
-    full_round1_step_load(b, &mut c, d, e, &mut a, m, w, 14);
-    full_round1_step_load(a, &mut b, c, d, &mut e, m, w, 15);
+    full_round1_step_load4(&mut a, &mut b, &mut c, &mut d, &mut e, m, w, 0);
+    full_round1_step_load4(&mut b, &mut c, &mut d, &mut e, &mut a, m, w, 4);
+    full_round1_step_load4(&mut c, &mut d, &mut e, &mut a, &mut b, m, w, 8);
+    full_round1_step_load4(&mut d, &mut e, &mut a, &mut b, &mut c, m, w, 12);
 
-    full_round1_step_expand(e, &mut a, b, c, &mut d, w, 16);
-    full_round1_step_expand(d, &mut e, a, b, &mut c, w, 17);
-    full_round1_step_expand(c, &mut d, e, a, &mut b, w, 18);
-    full_round1_step_expand(b, &mut c, d, e, &mut a, w, 19);
+    full_round1_step_expand4(&mut e, &mut a, &mut b, &mut c, &mut d, w, 16);
 
-    full_round2_step(a, &mut b, c, d, &mut e, w, 20);
-    full_round2_step(e, &mut a, b, c, &mut d, w, 21);
-    full_round2_step(d, &mut e, a, b, &mut c, w, 22);
-    full_round2_step(c, &mut d, e, a, &mut b, w, 23);
-    full_round2_step(b, &mut c, d, e, &mut a, w, 24);
-    full_round2_step(a, &mut b, c, d, &mut e, w, 25);
-    full_round2_step(e, &mut a, b, c, &mut d, w, 26);
-    full_round2_step(d, &mut e, a, b, &mut c, w, 27);
-    full_round2_step(c, &mut d, e, a, &mut b, w, 28);
-    full_round2_step(b, &mut c, d, e, &mut a, w, 29);
-    full_round2_step(a, &mut b, c, d, &mut e, w, 30);
-    full_round2_step(e, &mut a, b, c, &mut d, w, 31);
-    full_round2_step(d, &mut e, a, b, &mut c, w, 32);
-    full_round2_step(c, &mut d, e, a, &mut b, w, 33);
-    full_round2_step(b, &mut c, d, e, &mut a, w, 34);
-    full_round2_step(a, &mut b, c, d, &mut e, w, 35);
-    full_round2_step(e, &mut a, b, c, &mut d, w, 36);
-    full_round2_step(d, &mut e, a, b, &mut c, w, 37);
-    full_round2_step(c, &mut d, e, a, &mut b, w, 38);
-    full_round2_step(b, &mut c, d, e, &mut a, w, 39);
+    full_round2_step4(&mut a, &mut b, &mut c, &mut d, &mut e, w, 20);
+    full_round2_step4(&mut b, &mut c, &mut d, &mut e, &mut a, w, 24);
+    full_round2_step4(&mut c, &mut d, &mut e, &mut a, &mut b, w, 28);
+    full_round2_step4(&mut d, &mut e, &mut a, &mut b, &mut c, w, 32);
+    full_round2_step4(&mut e, &mut a, &mut b, &mut c, &mut d, w, 36);
 
-    full_round3_step(a, &mut b, c, d, &mut e, w, 40);
-    full_round3_step(e, &mut a, b, c, &mut d, w, 41);
-    full_round3_step(d, &mut e, a, b, &mut c, w, 42);
-    full_round3_step(c, &mut d, e, a, &mut b, w, 43);
-    full_round3_step(b, &mut c, d, e, &mut a, w, 44);
-    full_round3_step(a, &mut b, c, d, &mut e, w, 45);
-    full_round3_step(e, &mut a, b, c, &mut d, w, 46);
-    full_round3_step(d, &mut e, a, b, &mut c, w, 47);
-    full_round3_step(c, &mut d, e, a, &mut b, w, 48);
-    full_round3_step(b, &mut c, d, e, &mut a, w, 49);
-    full_round3_step(a, &mut b, c, d, &mut e, w, 50);
-    full_round3_step(e, &mut a, b, c, &mut d, w, 51);
-    full_round3_step(d, &mut e, a, b, &mut c, w, 52);
-    full_round3_step(c, &mut d, e, a, &mut b, w, 53);
-    full_round3_step(b, &mut c, d, e, &mut a, w, 54);
-    full_round3_step(a, &mut b, c, d, &mut e, w, 55);
+    full_round3_step4(&mut a, &mut b, &mut c, &mut d, &mut e, w, 40);
+    full_round3_step4(&mut b, &mut c, &mut d, &mut e, &mut a, w, 44);
+    full_round3_step4(&mut c, &mut d, &mut e, &mut a, &mut b, w, 48);
+    full_round3_step4(&mut d, &mut e, &mut a, &mut b, &mut c, w, 52);
+
     full_round3_step(e, &mut a, b, c, &mut d, w, 56);
     full_round3_step(d, &mut e, a, b, &mut c, w, 57);
 
@@ -343,10 +383,7 @@ fn compression_states(
     full_round3_step(c, &mut d, e, a, &mut b, w, 58);
     full_round3_step(b, &mut c, d, e, &mut a, w, 59);
 
-    full_round4_step(a, &mut b, c, d, &mut e, w, 60);
-    full_round4_step(e, &mut a, b, c, &mut d, w, 61);
-    full_round4_step(d, &mut e, a, b, &mut c, w, 62);
-    full_round4_step(c, &mut d, e, a, &mut b, w, 63);
+    full_round4_step4(&mut a, &mut b, &mut c, &mut d, &mut e, w, 60);
     full_round4_step(b, &mut c, d, e, &mut a, w, 64);
 
     // Store state65
@@ -359,24 +396,12 @@ fn compression_states(
     full_round4_step(a, &mut b, c, d, &mut e, w, 65);
     full_round4_step(e, &mut a, b, c, &mut d, w, 66);
     full_round4_step(d, &mut e, a, b, &mut c, w, 67);
-    full_round4_step(c, &mut d, e, a, &mut b, w, 68);
-    full_round4_step(b, &mut c, d, e, &mut a, w, 69);
-    full_round4_step(a, &mut b, c, d, &mut e, w, 70);
-    full_round4_step(e, &mut a, b, c, &mut d, w, 71);
-    full_round4_step(d, &mut e, a, b, &mut c, w, 72);
-    full_round4_step(c, &mut d, e, a, &mut b, w, 73);
-    full_round4_step(b, &mut c, d, e, &mut a, w, 74);
-    full_round4_step(a, &mut b, c, d, &mut e, w, 75);
-    full_round4_step(e, &mut a, b, c, &mut d, w, 76);
-    full_round4_step(d, &mut e, a, b, &mut c, w, 77);
-    full_round4_step(c, &mut d, e, a, &mut b, w, 78);
-    full_round4_step(b, &mut c, d, e, &mut a, w, 79);
 
-    ihv[0] = ihv[0].wrapping_add(a);
-    ihv[1] = ihv[1].wrapping_add(b);
-    ihv[2] = ihv[2].wrapping_add(c);
-    ihv[3] = ihv[3].wrapping_add(d);
-    ihv[4] = ihv[4].wrapping_add(e);
+    full_round4_step4(&mut c, &mut d, &mut e, &mut a, &mut b, w, 68);
+    full_round4_step4(&mut d, &mut e, &mut a, &mut b, &mut c, w, 72);
+    full_round4_step4(&mut e, &mut a, &mut b, &mut c, &mut d, w, 76);
+
+    add_assign(ihv, [a, b, c, d, e]);
 }
 
 fn recompress_fast_58(
