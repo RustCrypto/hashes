@@ -15,7 +15,7 @@ use crate::Sha1Core;
 pub(crate) mod ubc_check;
 
 /// SHA-1 collision detection hasher state.
-#[derive(Default)]
+#[derive(Clone)]
 pub struct Sha1 {
     core: Sha1Core,
     buffer: BlockBuffer<
@@ -33,10 +33,21 @@ impl BlockSizeUser for Sha1 {
     type BlockSize = <Sha1Core as BlockSizeUser>::BlockSize;
 }
 
+impl Default for Sha1 {
+    fn default() -> Self {
+        Builder::default().build()
+    }
+}
+
 impl Sha1 {
-    /// Create a new Sha1 instance.
+    /// Create a new Sha1 instance, with collision detection enabled.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Create a new Sha1 builder to configure detection.
+    pub fn builder() -> Builder {
+        Builder::default()
     }
 
     /// Create a new Sha1 instance from a `core`.
@@ -46,29 +57,19 @@ impl Sha1 {
         Self { core, buffer }
     }
 
-    /// Create a new Sha1 instance from a `CollisionDetectionConfig`.
-    pub fn from_config(config: Config) -> Self {
-        let core = Sha1Core {
-            detection: DetectionState {
-                config,
-                ..Default::default()
-            },
-            ..Default::default()
-        };
-        Self::from_core(core)
-    }
-
     /// Try finalization, reporting the collision state.
     pub fn try_finalize(mut self) -> CollisionResult {
         let mut out = Output::<Sha1Core>::default();
         let Self { core, buffer } = &mut self;
         core.finalize_fixed_core(buffer, &mut out);
 
-        if core.detection.found_collision {
-            if core.detection.config.safe_hash {
-                return CollisionResult::Mitigated(out);
+        if let Some(ref ctx) = core.detection {
+            if ctx.found_collision {
+                if ctx.safe_hash {
+                    return CollisionResult::Mitigated(out);
+                }
+                return CollisionResult::Collision(out);
             }
-            return CollisionResult::Collision(out);
         }
         CollisionResult::Ok(out)
     }
@@ -206,20 +207,16 @@ impl std::io::Write for Sha1 {
     }
 }
 
-/// Configuration for collision detection.
+/// Builder for collision detection configuration.
 #[derive(Clone)]
-pub struct Config {
-    /// Should we detect collisions at all? Default: true
-    pub detect_collision: bool,
-    /// Should a fix be automatically be applied, or the original hash be returned? Default: true
-    pub safe_hash: bool,
-    /// Should unavoidable bitconditions be used to speed up the check? Default: true
-    pub ubc_check: bool,
-    /// Should reduced round collisions be used? Default: false
-    pub reduced_round_collision: bool,
+pub struct Builder {
+    detect_collision: bool,
+    safe_hash: bool,
+    ubc_check: bool,
+    reduced_round_collision: bool,
 }
 
-impl Default for Config {
+impl Default for Builder {
     fn default() -> Self {
         Self {
             detect_collision: true,
@@ -230,17 +227,67 @@ impl Default for Config {
     }
 }
 
-impl Config {
+impl Builder {
+    /// Should we detect collisions at all? Default: true
+    pub fn detect_collision(mut self, detect: bool) -> Self {
+        self.detect_collision = detect;
+        self
+    }
+
+    /// Should a fix be automatically be applied, or the original hash be returned? Default: true
+    pub fn safe_hash(mut self, safe_hash: bool) -> Self {
+        self.safe_hash = safe_hash;
+        self
+    }
+
+    /// Should unavoidable bitconditions be used to speed up the check? Default: true
+    pub fn use_ubc(mut self, ubc: bool) -> Self {
+        self.ubc_check = ubc;
+        self
+    }
+
+    /// Should reduced round collisions be used? Default: false
+    pub fn reduced_round_collision(mut self, reduced: bool) -> Self {
+        self.reduced_round_collision = reduced;
+        self
+    }
+
+    fn into_detection_state(self) -> Option<DetectionState> {
+        if self.detect_collision {
+            Some(DetectionState {
+                safe_hash: self.safe_hash,
+                reduced_round_collision: self.reduced_round_collision,
+                ubc_check: self.ubc_check,
+                found_collision: false,
+                ihv1: Default::default(),
+                ihv2: Default::default(),
+                m1: [0; 80],
+                m2: [0; 80],
+                state_58: Default::default(),
+                state_65: Default::default(),
+            })
+        } else {
+            None
+        }
+    }
+
     /// Create a Sha1 with a specific collision detection configuration.
     pub fn build(self) -> Sha1 {
-        Sha1::from_config(self)
+        let detection = self.into_detection_state();
+        let core = Sha1Core {
+            detection,
+            ..Default::default()
+        };
+        Sha1::from_core(core)
     }
 }
 
 /// The internal state used to do collision detection.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DetectionState {
-    pub(crate) config: Config,
+    pub(crate) safe_hash: bool,
+    pub(crate) ubc_check: bool,
+    pub(crate) reduced_round_collision: bool,
     /// Has a collision been detected?
     pub(crate) found_collision: bool,
     pub(crate) ihv1: [u32; 5],
@@ -254,15 +301,22 @@ pub struct DetectionState {
 
 impl Default for DetectionState {
     fn default() -> Self {
-        Self {
-            config: Default::default(),
-            found_collision: false,
-            ihv1: Default::default(),
-            ihv2: Default::default(),
-            m1: [0; 80],
-            m2: [0; 80],
-            state_58: Default::default(),
-            state_65: Default::default(),
-        }
+        Builder::default()
+            .into_detection_state()
+            .expect("enabled by default")
+    }
+}
+
+impl DetectionState {
+    pub(crate) fn reset(&mut self) {
+        // Do not reset the config, it needs to be preserved
+
+        self.found_collision = false;
+        self.ihv1 = Default::default();
+        self.ihv2 = Default::default();
+        self.m1 = [0; 80];
+        self.m2 = [0; 80];
+        self.state_58 = Default::default();
+        self.state_65 = Default::default();
     }
 }

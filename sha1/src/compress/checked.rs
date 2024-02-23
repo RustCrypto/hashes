@@ -687,16 +687,13 @@ pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; B
     let mut state_cpy = *state;
 
     for block in blocks.iter() {
-        if ctx.config.detect_collision {
-            ctx.ihv1.copy_from_slice(&state_cpy);
-        }
+        ctx.ihv1.copy_from_slice(&state_cpy);
 
         for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
             *o = u32::from_be_bytes(chunk.try_into().unwrap());
         }
 
         let DetectionState {
-            config,
             m1,
             state_58,
             state_65,
@@ -705,63 +702,61 @@ pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; B
 
         compression_states(&mut state_cpy, &block_u32, m1, state_58, state_65);
 
-        if config.detect_collision {
-            let ubc_mask = if ctx.config.ubc_check {
-                crate::checked::ubc_check::ubc_check(&ctx.m1)
-            } else {
-                0xFFFFFFFF
-            };
+        let ubc_mask = if ctx.ubc_check {
+            crate::checked::ubc_check::ubc_check(&ctx.m1)
+        } else {
+            0xFFFFFFFF
+        };
 
-            if ubc_mask != 0 {
-                let mut ihvtmp = [0u32; 5];
-                for dv_type in &crate::checked::ubc_check::SHA1_DVS {
-                    if ubc_mask & (1 << dv_type.maskb) != 0 {
-                        for ((m2, m1), dm) in
-                            ctx.m2.iter_mut().zip(ctx.m1.iter()).zip(dv_type.dm.iter())
-                        {
-                            *m2 = m1 ^ dm;
+        if ubc_mask != 0 {
+            let mut ihvtmp = [0u32; 5];
+            for dv_type in &crate::checked::ubc_check::SHA1_DVS {
+                if ubc_mask & (1 << dv_type.maskb) != 0 {
+                    for ((m2, m1), dm) in
+                        ctx.m2.iter_mut().zip(ctx.m1.iter()).zip(dv_type.dm.iter())
+                    {
+                        *m2 = m1 ^ dm;
+                    }
+                    let DetectionState {
+                        ihv2,
+                        m2,
+                        state_58,
+                        state_65,
+                        ..
+                    } = ctx;
+
+                    recompression_step(
+                        dv_type.testt,
+                        ihv2,
+                        &mut ihvtmp,
+                        m2,
+                        match dv_type.testt {
+                            Testt::T58 => state_58,
+                            Testt::T65 => state_65,
+                        },
+                    );
+
+                    // to verify SHA-1 collision detection code with collisions for reduced-step SHA-1
+                    if (0
+                        == ((ihvtmp[0] ^ state_cpy[0])
+                            | (ihvtmp[1] ^ state_cpy[1])
+                            | (ihvtmp[2] ^ state_cpy[2])
+                            | (ihvtmp[3] ^ state_cpy[3])
+                            | (ihvtmp[4] ^ state_cpy[4])))
+                        || (ctx.reduced_round_collision
+                            && 0 == ((ctx.ihv1[0] ^ ctx.ihv2[0])
+                                | (ctx.ihv1[1] ^ ctx.ihv2[1])
+                                | (ctx.ihv1[2] ^ ctx.ihv2[2])
+                                | (ctx.ihv1[3] ^ ctx.ihv2[3])
+                                | (ctx.ihv1[4] ^ ctx.ihv2[4])))
+                    {
+                        ctx.found_collision = true;
+
+                        if ctx.safe_hash {
+                            compression_w(&mut state_cpy, &mut ctx.m1);
+                            compression_w(&mut state_cpy, &mut ctx.m1);
                         }
-                        let DetectionState {
-                            ihv2,
-                            m2,
-                            state_58,
-                            state_65,
-                            ..
-                        } = ctx;
-
-                        recompression_step(
-                            dv_type.testt,
-                            ihv2,
-                            &mut ihvtmp,
-                            m2,
-                            match dv_type.testt {
-                                Testt::T58 => state_58,
-                                Testt::T65 => state_65,
-                            },
-                        );
-
-                        // to verify SHA-1 collision detection code with collisions for reduced-step SHA-1
-                        if (0
-                            == ((ihvtmp[0] ^ state_cpy[0])
-                                | (ihvtmp[1] ^ state_cpy[1])
-                                | (ihvtmp[2] ^ state_cpy[2])
-                                | (ihvtmp[3] ^ state_cpy[3])
-                                | (ihvtmp[4] ^ state_cpy[4])))
-                            || (ctx.config.reduced_round_collision
-                                && 0 == ((ctx.ihv1[0] ^ ctx.ihv2[0])
-                                    | (ctx.ihv1[1] ^ ctx.ihv2[1])
-                                    | (ctx.ihv1[2] ^ ctx.ihv2[2])
-                                    | (ctx.ihv1[3] ^ ctx.ihv2[3])
-                                    | (ctx.ihv1[4] ^ ctx.ihv2[4])))
-                        {
-                            ctx.found_collision = true;
-
-                            if ctx.config.safe_hash {
-                                compression_w(&mut state_cpy, &mut ctx.m1);
-                                compression_w(&mut state_cpy, &mut ctx.m1);
-                            }
-                            break;
-                        }
+                        break;
                     }
                 }
             }

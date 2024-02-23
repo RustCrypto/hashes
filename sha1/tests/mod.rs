@@ -14,7 +14,26 @@ fn sha1_rand() {
     );
 }
 
-#[cfg(all(feature = "collision", not(feature = "force-soft")))]
+#[cfg(feature = "collision")]
+digest::new_test!(
+    sha1_collision_main,
+    "sha1",
+    sha1::checked::Sha1,
+    fixed_reset_test
+);
+
+#[cfg(feature = "collision")]
+#[test]
+fn sha1_collision_rand() {
+    let mut h = sha1::checked::Sha1::new();
+    feed_rand_16mib(&mut h);
+    assert_eq!(
+        h.finalize(),
+        hex!("7e565a25a8b123e9881addbcedcd927b23377a78"),
+    );
+}
+
+#[cfg(feature = "collision")]
 #[test]
 fn shambles_1() {
     collision_test(
@@ -24,7 +43,7 @@ fn shambles_1() {
     )
 }
 
-#[cfg(all(feature = "collision", not(feature = "force-soft")))]
+#[cfg(feature = "collision")]
 #[test]
 fn shambles_2() {
     collision_test(
@@ -34,7 +53,7 @@ fn shambles_2() {
     )
 }
 
-#[cfg(all(feature = "collision", not(feature = "force-soft")))]
+#[cfg(feature = "collision")]
 #[test]
 fn shattered_1() {
     collision_test(
@@ -44,7 +63,7 @@ fn shattered_1() {
     )
 }
 
-#[cfg(all(feature = "collision", not(feature = "force-soft")))]
+#[cfg(feature = "collision")]
 #[test]
 fn shattered_2() {
     collision_test(
@@ -54,26 +73,19 @@ fn shattered_2() {
     )
 }
 
-#[cfg(all(feature = "collision", not(feature = "force-soft")))]
+#[cfg(feature = "collision")]
 fn collision_test(input: &[u8], hash: [u8; 20], mitigated_hash: [u8; 20]) {
     use sha1::checked;
+
     // No detection.
-    let mut ctx = checked::Config {
-        detect_collision: false,
-        ..Default::default()
-    }
-    .build();
+    let mut ctx = checked::Sha1::builder().detect_collision(false).build();
     ctx.update(input);
     let d = ctx.try_finalize();
     assert!(!d.has_collision());
     assert_eq!(&d.hash()[..], hash,);
 
     // No mitigation.
-    let mut ctx = checked::Config {
-        safe_hash: false,
-        ..Default::default()
-    }
-    .build();
+    let mut ctx = checked::Sha1::builder().safe_hash(false).build();
     ctx.update(input);
 
     let d = ctx.try_finalize();
@@ -81,12 +93,10 @@ fn collision_test(input: &[u8], hash: [u8; 20], mitigated_hash: [u8; 20]) {
     assert_eq!(&d.hash()[..], hash);
 
     // No mitigation, no optimization.
-    let mut ctx = checked::Config {
-        safe_hash: false,
-        ubc_check: false,
-        ..Default::default()
-    }
-    .build();
+    let mut ctx = checked::Sha1::builder()
+        .safe_hash(false)
+        .use_ubc(false)
+        .build();
     ctx.update(input);
     let d = ctx.try_finalize();
     assert!(d.has_collision());
