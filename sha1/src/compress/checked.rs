@@ -7,32 +7,32 @@ use crate::{
 
 const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
 
-#[inline]
+#[inline(always)]
 fn mix(w: &mut [u32; 80], t: usize) -> u32 {
     (w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16]).rotate_left(1)
 }
 
-#[inline]
+#[inline(always)]
 fn f1(b: u32, c: u32, d: u32) -> u32 {
     d ^ b & (c ^ d)
 }
 
-#[inline]
+#[inline(always)]
 fn f2(b: u32, c: u32, d: u32) -> u32 {
     b ^ c ^ d
 }
 
-#[inline]
+#[inline(always)]
 fn f3(b: u32, c: u32, d: u32) -> u32 {
     (b & c).wrapping_add(d & (b ^ c))
 }
 
-#[inline]
+#[inline(always)]
 fn f4(b: u32, c: u32, d: u32) -> u32 {
     b ^ c ^ d
 }
 
-#[inline]
+#[inline(always)]
 fn round3_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *e = e.wrapping_add(
         a.rotate_left(5)
@@ -43,7 +43,7 @@ fn round3_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *b = b.rotate_left(30);
 }
 
-#[inline]
+#[inline(always)]
 fn round4_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *e = e.wrapping_add(
         a.rotate_left(5)
@@ -54,7 +54,7 @@ fn round4_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *b = b.rotate_left(30);
 }
 
-#[inline]
+#[inline(always)]
 fn round1_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *b = b.rotate_right(30);
     *e = e.wrapping_sub(
@@ -65,7 +65,7 @@ fn round1_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     );
 }
 
-#[inline]
+#[inline(always)]
 fn round2_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *b = b.rotate_right(30);
     *e = e.wrapping_sub(
@@ -76,7 +76,7 @@ fn round2_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     );
 }
 
-#[inline]
+#[inline(always)]
 fn round3_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *b = b.rotate_right(30);
     *e = e.wrapping_sub(
@@ -87,7 +87,7 @@ fn round3_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     );
 }
 
-#[inline]
+#[inline(always)]
 fn round4_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *b = b.rotate_right(30);
     *e = e.wrapping_sub(
@@ -98,7 +98,7 @@ fn round4_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     );
 }
 
-#[inline]
+#[inline(always)]
 fn full_round3_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, w: &mut [u32; 80], t: usize) {
     w[t] = mix(w, t);
     *e = e.wrapping_add(
@@ -109,7 +109,7 @@ fn full_round3_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, w: &mut [u
     *b = b.rotate_left(30);
 }
 
-#[inline]
+#[inline(always)]
 fn full_round4_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, w: &mut [u32; 80], t: usize) {
     w[t] = mix(w, t);
     *e = e.wrapping_add(
@@ -120,7 +120,7 @@ fn full_round4_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, w: &mut [u
     *b = b.rotate_left(30);
 }
 
-#[inline(always)]
+#[inline]
 fn round2_step4(
     a: &mut u32,
     b: &mut u32,
@@ -166,7 +166,7 @@ fn round2_step4(
     *d = d.rotate_left(30);
 }
 
-#[inline(always)]
+#[inline]
 fn round3_step4(
     a: &mut u32,
     b: &mut u32,
@@ -212,7 +212,7 @@ fn round3_step4(
     *d = d.rotate_left(30);
 }
 
-#[inline(always)]
+#[inline]
 fn round4_step4(
     a: &mut u32,
     b: &mut u32,

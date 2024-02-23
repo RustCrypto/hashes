@@ -702,6 +702,7 @@ pub const SHA1_DVS: [Info; 32] = [
     },
 ];
 
+#[inline]
 pub const fn ubc_check(w: &[u32; 80]) -> u32 {
     let mut mask: u32 = !0;
     mask &= ((w[44] ^ w[45]) >> 29 & 1).wrapping_sub(1)
