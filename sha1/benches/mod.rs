@@ -12,3 +12,12 @@ bench_update!(
     sha1_1000 1000;
     sha1_10000 10000;
 );
+
+#[cfg(feature = "collision")]
+bench_update!(
+    sha1::checked::Sha1::default();
+    sha1_collision_10 10;
+    sha1_collision_100 100;
+    sha1_collision_1000 1000;
+    sha1_collision_10000 10000;
+);
