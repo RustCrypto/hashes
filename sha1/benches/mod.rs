@@ -21,3 +21,21 @@ bench_update!(
     sha1_collision_1000 1000;
     sha1_collision_10000 10000;
 );
+
+#[cfg(feature = "collision")]
+bench_update!(
+    sha1::checked::Sha1::builder().detect_collision(false).build();
+    sha1_collision_no_check_10 10;
+    sha1_collision_no_check_100 100;
+    sha1_collision_no_check_1000 1000;
+    sha1_collision_no_check_10000 10000;
+);
+
+#[cfg(feature = "collision")]
+bench_update!(
+    sha1::checked::Sha1::builder().use_ubc(false).build();
+    sha1_collision_no_ubc_10 10;
+    sha1_collision_no_ubc_100 100;
+    sha1_collision_no_ubc_1000 1000;
+    sha1_collision_no_ubc_10000 10000;
+);
