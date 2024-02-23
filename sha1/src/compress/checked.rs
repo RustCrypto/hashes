@@ -33,28 +33,6 @@ fn f4(b: u32, c: u32, d: u32) -> u32 {
 }
 
 #[inline]
-fn round1_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
-    *e = e.wrapping_add(
-        a.rotate_left(5)
-            .wrapping_add(f1(*b, c, d))
-            .wrapping_add(K[0])
-            .wrapping_add(mt),
-    );
-    *b = b.rotate_left(30);
-}
-
-#[inline]
-fn round2_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
-    *e = e.wrapping_add(
-        a.rotate_left(5)
-            .wrapping_add(f2(*b, c, d))
-            .wrapping_add(K[1])
-            .wrapping_add(mt),
-    );
-    *b = b.rotate_left(30);
-}
-
-#[inline]
 fn round3_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
     *e = e.wrapping_add(
         a.rotate_left(5)
@@ -121,56 +99,6 @@ fn round4_step_bw(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, mt: u32) {
 }
 
 #[inline]
-fn full_round1_step_load(
-    a: u32,
-    b: &mut u32,
-    c: u32,
-    d: u32,
-    e: &mut u32,
-    m: &[u32; 16],
-    w: &mut [u32; 80],
-    t: usize,
-) {
-    w[t] = m[t];
-    *e = e.wrapping_add(
-        w[t].wrapping_add(a.rotate_left(5))
-            .wrapping_add(f1(*b, c, d))
-            .wrapping_add(K[0]),
-    );
-    *b = b.rotate_left(30);
-}
-
-#[inline]
-fn full_round1_step_expand(
-    a: u32,
-    b: &mut u32,
-    c: u32,
-    d: u32,
-    e: &mut u32,
-    w: &mut [u32; 80],
-    t: usize,
-) {
-    w[t] = mix(w, t);
-    *e = e.wrapping_add(
-        w[t].wrapping_add(a.rotate_left(5))
-            .wrapping_add(f1(*b, c, d))
-            .wrapping_add(K[0]),
-    );
-    *b = b.rotate_left(30);
-}
-
-#[inline]
-fn full_round2_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, w: &mut [u32; 80], t: usize) {
-    w[t] = mix(w, t);
-    *e = e.wrapping_add(
-        w[t].wrapping_add(a.rotate_left(5))
-            .wrapping_add(f2(*b, c, d))
-            .wrapping_add(K[1]),
-    );
-    *b = b.rotate_left(30);
-}
-
-#[inline]
 fn full_round3_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, w: &mut [u32; 80], t: usize) {
     w[t] = mix(w, t);
     *e = e.wrapping_add(
@@ -192,36 +120,142 @@ fn full_round4_step(a: u32, b: &mut u32, c: u32, d: u32, e: &mut u32, w: &mut [u
     *b = b.rotate_left(30);
 }
 
-#[inline]
-fn round1_step4(a: &mut u32, b: &mut u32, c: &mut u32, d: &mut u32, e: &mut u32, w: &[u32]) {
-    round1_step(*a, b, *c, *d, e, w[0]);
-    round1_step(*e, a, *b, *c, d, w[1]);
-    round1_step(*d, e, *a, *b, c, w[2]);
-    round1_step(*c, d, *e, *a, b, w[3]);
+#[inline(always)]
+fn round2_step4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    w: &[u32; 80],
+    t: usize,
+) {
+    // 1
+    *e = e.wrapping_add(
+        w[t].wrapping_add(a.rotate_left(5))
+            .wrapping_add(f2(*b, *c, *d))
+            .wrapping_add(K[1]),
+    );
+    *b = b.rotate_left(30);
+
+    // 2
+    *d = d.wrapping_add(
+        w[t + 1]
+            .wrapping_add(e.rotate_left(5))
+            .wrapping_add(f2(*a, *b, *c))
+            .wrapping_add(K[1]),
+    );
+    *a = a.rotate_left(30);
+
+    // 3
+    *c = c.wrapping_add(
+        w[t + 2]
+            .wrapping_add(d.rotate_left(5))
+            .wrapping_add(f2(*e, *a, *b))
+            .wrapping_add(K[1]),
+    );
+    *e = e.rotate_left(30);
+
+    // 4
+    *b = b.wrapping_add(
+        w[t + 3]
+            .wrapping_add(c.rotate_left(5))
+            .wrapping_add(f2(*d, *e, *a))
+            .wrapping_add(K[1]),
+    );
+    *d = d.rotate_left(30);
 }
 
-#[inline]
-fn round2_step4(a: &mut u32, b: &mut u32, c: &mut u32, d: &mut u32, e: &mut u32, w: &[u32]) {
-    round2_step(*a, b, *c, *d, e, w[0]);
-    round2_step(*e, a, *b, *c, d, w[1]);
-    round2_step(*d, e, *a, *b, c, w[2]);
-    round2_step(*c, d, *e, *a, b, w[3]);
+#[inline(always)]
+fn round3_step4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    w: &[u32; 80],
+    t: usize,
+) {
+    // 1
+    *e = e.wrapping_add(
+        w[t].wrapping_add(a.rotate_left(5))
+            .wrapping_add(f3(*b, *c, *d))
+            .wrapping_add(K[2]),
+    );
+    *b = b.rotate_left(30);
+
+    // 2
+    *d = d.wrapping_add(
+        w[t + 1]
+            .wrapping_add(e.rotate_left(5))
+            .wrapping_add(f3(*a, *b, *c))
+            .wrapping_add(K[2]),
+    );
+    *a = a.rotate_left(30);
+
+    // 3
+    *c = c.wrapping_add(
+        w[t + 2]
+            .wrapping_add(d.rotate_left(5))
+            .wrapping_add(f3(*e, *a, *b))
+            .wrapping_add(K[2]),
+    );
+    *e = e.rotate_left(30);
+
+    // 4
+    *b = b.wrapping_add(
+        w[t + 3]
+            .wrapping_add(c.rotate_left(5))
+            .wrapping_add(f3(*d, *e, *a))
+            .wrapping_add(K[2]),
+    );
+    *d = d.rotate_left(30);
 }
 
-#[inline]
-fn round3_step4(a: &mut u32, b: &mut u32, c: &mut u32, d: &mut u32, e: &mut u32, w: &[u32]) {
-    round3_step(*a, b, *c, *d, e, w[0]);
-    round3_step(*e, a, *b, *c, d, w[1]);
-    round3_step(*d, e, *a, *b, c, w[2]);
-    round3_step(*c, d, *e, *a, b, w[3]);
-}
+#[inline(always)]
+fn round4_step4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    w: &[u32; 80],
+    t: usize,
+) {
+    // 1
+    *e = e.wrapping_add(
+        w[t].wrapping_add(a.rotate_left(5))
+            .wrapping_add(f4(*b, *c, *d))
+            .wrapping_add(K[3]),
+    );
+    *b = b.rotate_left(30);
 
-#[inline]
-fn round4_step4(a: &mut u32, b: &mut u32, c: &mut u32, d: &mut u32, e: &mut u32, w: &[u32]) {
-    round4_step(*a, b, *c, *d, e, w[0]);
-    round4_step(*e, a, *b, *c, d, w[1]);
-    round4_step(*d, e, *a, *b, c, w[2]);
-    round4_step(*c, d, *e, *a, b, w[3]);
+    // 2
+    *d = d.wrapping_add(
+        w[t + 1]
+            .wrapping_add(e.rotate_left(5))
+            .wrapping_add(f4(*a, *b, *c))
+            .wrapping_add(K[3]),
+    );
+    *a = a.rotate_left(30);
+
+    // 3
+    *c = c.wrapping_add(
+        w[t + 2]
+            .wrapping_add(d.rotate_left(5))
+            .wrapping_add(f4(*e, *a, *b))
+            .wrapping_add(K[3]),
+    );
+    *e = e.rotate_left(30);
+
+    // 4
+    *b = b.wrapping_add(
+        w[t + 3]
+            .wrapping_add(c.rotate_left(5))
+            .wrapping_add(f4(*d, *e, *a))
+            .wrapping_add(K[3]),
+    );
+    *d = d.rotate_left(30);
 }
 
 #[inline]
@@ -235,10 +269,55 @@ fn full_round1_step_load4(
     w: &mut [u32; 80],
     t: usize,
 ) {
-    full_round1_step_load(*a, b, *c, *d, e, m, w, t);
-    full_round1_step_load(*e, a, *b, *c, d, m, w, t + 1);
-    full_round1_step_load(*d, e, *a, *b, c, m, w, t + 2);
-    full_round1_step_load(*c, d, *e, *a, b, m, w, t + 3);
+    // load
+    w[t..t + 4].copy_from_slice(&m[t..t + 4]);
+    round1_step4(a, b, c, d, e, w, t);
+}
+
+#[inline(always)]
+fn round1_step4(
+    a: &mut u32,
+    b: &mut u32,
+    c: &mut u32,
+    d: &mut u32,
+    e: &mut u32,
+    w: &[u32; 80],
+    t: usize,
+) {
+    // 1
+    *e = e.wrapping_add(
+        w[t].wrapping_add(a.rotate_left(5))
+            .wrapping_add(f1(*b, *c, *d))
+            .wrapping_add(K[0]),
+    );
+    *b = b.rotate_left(30);
+
+    // 2
+    *d = d.wrapping_add(
+        w[t + 1]
+            .wrapping_add(e.rotate_left(5))
+            .wrapping_add(f1(*a, *b, *c))
+            .wrapping_add(K[0]),
+    );
+    *a = a.rotate_left(30);
+
+    // 3
+    *c = c.wrapping_add(
+        w[t + 2]
+            .wrapping_add(d.rotate_left(5))
+            .wrapping_add(f1(*e, *a, *b))
+            .wrapping_add(K[0]),
+    );
+    *e = e.rotate_left(30);
+
+    // 4
+    *b = b.wrapping_add(
+        w[t + 3]
+            .wrapping_add(c.rotate_left(5))
+            .wrapping_add(f1(*d, *e, *a))
+            .wrapping_add(K[0]),
+    );
+    *d = d.rotate_left(30);
 }
 
 #[inline]
@@ -251,10 +330,11 @@ fn full_round1_step_expand4(
     w: &mut [u32; 80],
     t: usize,
 ) {
-    full_round1_step_expand(*a, b, *c, *d, e, w, t);
-    full_round1_step_expand(*e, a, *b, *c, d, w, t + 1);
-    full_round1_step_expand(*d, e, *a, *b, c, w, t + 2);
-    full_round1_step_expand(*c, d, *e, *a, b, w, t + 3);
+    w[t] = mix(w, t);
+    w[t + 1] = mix(w, t + 1);
+    w[t + 2] = mix(w, t + 2);
+    w[t + 3] = mix(w, t + 3);
+    round1_step4(a, b, c, d, e, w, t);
 }
 
 #[inline]
@@ -267,10 +347,11 @@ fn full_round2_step4(
     w: &mut [u32; 80],
     t: usize,
 ) {
-    full_round2_step(*a, b, *c, *d, e, w, t);
-    full_round2_step(*e, a, *b, *c, d, w, t + 1);
-    full_round2_step(*d, e, *a, *b, c, w, t + 2);
-    full_round2_step(*c, d, *e, *a, b, w, t + 3);
+    w[t] = mix(w, t);
+    w[t + 1] = mix(w, t + 1);
+    w[t + 2] = mix(w, t + 2);
+    w[t + 3] = mix(w, t + 3);
+    round2_step4(a, b, c, d, e, w, t);
 }
 
 #[inline]
@@ -283,10 +364,11 @@ fn full_round3_step4(
     w: &mut [u32; 80],
     t: usize,
 ) {
-    full_round3_step(*a, b, *c, *d, e, w, t);
-    full_round3_step(*e, a, *b, *c, d, w, t + 1);
-    full_round3_step(*d, e, *a, *b, c, w, t + 2);
-    full_round3_step(*c, d, *e, *a, b, w, t + 3);
+    w[t] = mix(w, t);
+    w[t + 1] = mix(w, t + 1);
+    w[t + 2] = mix(w, t + 2);
+    w[t + 3] = mix(w, t + 3);
+    round3_step4(a, b, c, d, e, w, t);
 }
 
 #[inline]
@@ -299,10 +381,11 @@ fn full_round4_step4(
     w: &mut [u32; 80],
     t: usize,
 ) {
-    full_round4_step(*a, b, *c, *d, e, w, t);
-    full_round4_step(*e, a, *b, *c, d, w, t + 1);
-    full_round4_step(*d, e, *a, *b, c, w, t + 2);
-    full_round4_step(*c, d, *e, *a, b, w, t + 3);
+    w[t] = mix(w, t);
+    w[t + 1] = mix(w, t + 1);
+    w[t + 2] = mix(w, t + 2);
+    w[t + 3] = mix(w, t + 3);
+    round4_step4(a, b, c, d, e, w, t);
 }
 
 #[inline]
@@ -380,29 +463,29 @@ fn add_assign(left: &mut [u32; 5], right: [u32; 5]) {
 fn compression_w(ihv: &mut [u32; 5], w: &[u32; 80]) {
     let [mut a, mut b, mut c, mut d, mut e] = ihv;
 
-    round1_step4(&mut a, &mut b, &mut c, &mut d, &mut e, &w[0..4]);
-    round1_step4(&mut b, &mut c, &mut d, &mut e, &mut a, &w[4..8]);
-    round1_step4(&mut c, &mut d, &mut e, &mut a, &mut b, &w[8..12]);
-    round1_step4(&mut d, &mut e, &mut a, &mut b, &mut c, &w[12..16]);
-    round1_step4(&mut e, &mut a, &mut b, &mut c, &mut d, &w[16..20]);
+    round1_step4(&mut a, &mut b, &mut c, &mut d, &mut e, w, 0);
+    round1_step4(&mut b, &mut c, &mut d, &mut e, &mut a, w, 4);
+    round1_step4(&mut c, &mut d, &mut e, &mut a, &mut b, w, 8);
+    round1_step4(&mut d, &mut e, &mut a, &mut b, &mut c, w, 12);
+    round1_step4(&mut e, &mut a, &mut b, &mut c, &mut d, w, 16);
 
-    round2_step4(&mut a, &mut b, &mut c, &mut d, &mut e, &w[20..24]);
-    round2_step4(&mut b, &mut c, &mut d, &mut e, &mut a, &w[24..28]);
-    round2_step4(&mut c, &mut d, &mut e, &mut a, &mut b, &w[28..32]);
-    round2_step4(&mut d, &mut e, &mut a, &mut b, &mut c, &w[32..36]);
-    round2_step4(&mut e, &mut a, &mut b, &mut c, &mut d, &w[36..40]);
+    round2_step4(&mut a, &mut b, &mut c, &mut d, &mut e, w, 20);
+    round2_step4(&mut b, &mut c, &mut d, &mut e, &mut a, w, 24);
+    round2_step4(&mut c, &mut d, &mut e, &mut a, &mut b, w, 28);
+    round2_step4(&mut d, &mut e, &mut a, &mut b, &mut c, w, 32);
+    round2_step4(&mut e, &mut a, &mut b, &mut c, &mut d, w, 36);
 
-    round3_step4(&mut a, &mut b, &mut c, &mut d, &mut e, &w[40..44]);
-    round3_step4(&mut b, &mut c, &mut d, &mut e, &mut a, &w[44..48]);
-    round3_step4(&mut c, &mut d, &mut e, &mut a, &mut b, &w[48..52]);
-    round3_step4(&mut d, &mut e, &mut a, &mut b, &mut c, &w[52..56]);
-    round3_step4(&mut e, &mut a, &mut b, &mut c, &mut d, &w[56..60]);
+    round3_step4(&mut a, &mut b, &mut c, &mut d, &mut e, w, 40);
+    round3_step4(&mut b, &mut c, &mut d, &mut e, &mut a, w, 44);
+    round3_step4(&mut c, &mut d, &mut e, &mut a, &mut b, w, 48);
+    round3_step4(&mut d, &mut e, &mut a, &mut b, &mut c, w, 52);
+    round3_step4(&mut e, &mut a, &mut b, &mut c, &mut d, w, 56);
 
-    round4_step4(&mut a, &mut b, &mut c, &mut d, &mut e, &w[60..64]);
-    round4_step4(&mut b, &mut c, &mut d, &mut e, &mut a, &w[64..68]);
-    round4_step4(&mut c, &mut d, &mut e, &mut a, &mut b, &w[68..72]);
-    round4_step4(&mut d, &mut e, &mut a, &mut b, &mut c, &w[72..76]);
-    round4_step4(&mut e, &mut a, &mut b, &mut c, &mut d, &w[76..80]);
+    round4_step4(&mut a, &mut b, &mut c, &mut d, &mut e, w, 60);
+    round4_step4(&mut b, &mut c, &mut d, &mut e, &mut a, w, 64);
+    round4_step4(&mut c, &mut d, &mut e, &mut a, &mut b, w, 68);
+    round4_step4(&mut d, &mut e, &mut a, &mut b, &mut c, w, 72);
+    round4_step4(&mut e, &mut a, &mut b, &mut c, &mut d, w, 76);
 
     add_assign(ihv, [a, b, c, d, e]);
 }
@@ -438,11 +521,7 @@ fn compression_states(
     full_round3_step(d, &mut e, a, b, &mut c, w, 57);
 
     // Store state58
-    state_58[0] = a;
-    state_58[1] = b;
-    state_58[2] = c;
-    state_58[3] = d;
-    state_58[4] = e;
+    *state_58 = [a, b, c, d, e];
 
     full_round3_step(c, &mut d, e, a, &mut b, w, 58);
     full_round3_step(b, &mut c, d, e, &mut a, w, 59);
@@ -498,11 +577,11 @@ fn recompress_fast_58(
     round3_step(c, &mut d, e, a, &mut b, me2[58]);
     round3_step(b, &mut c, d, e, &mut a, me2[59]);
 
-    round4_step4(&mut a, &mut b, &mut c, &mut d, &mut e, &me2[60..64]);
-    round4_step4(&mut b, &mut c, &mut d, &mut e, &mut a, &me2[64..68]);
-    round4_step4(&mut c, &mut d, &mut e, &mut a, &mut b, &me2[68..72]);
-    round4_step4(&mut d, &mut e, &mut a, &mut b, &mut c, &me2[72..76]);
-    round4_step4(&mut e, &mut a, &mut b, &mut c, &mut d, &me2[76..80]);
+    round4_step4(&mut a, &mut b, &mut c, &mut d, &mut e, me2, 60);
+    round4_step4(&mut b, &mut c, &mut d, &mut e, &mut a, me2, 64);
+    round4_step4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 68);
+    round4_step4(&mut d, &mut e, &mut a, &mut b, &mut c, me2, 72);
+    round4_step4(&mut e, &mut a, &mut b, &mut c, &mut d, me2, 76);
 
     ihvout[0] = ihvin[0].wrapping_add(a);
     ihvout[1] = ihvin[1].wrapping_add(b);
@@ -547,9 +626,9 @@ fn recompress_fast_65(
     round4_step(e, &mut a, b, c, &mut d, me2[66]);
     round4_step(d, &mut e, a, b, &mut c, me2[67]);
 
-    round4_step4(&mut c, &mut d, &mut e, &mut a, &mut b, &me2[68..72]);
-    round4_step4(&mut d, &mut e, &mut a, &mut b, &mut c, &me2[72..76]);
-    round4_step4(&mut e, &mut a, &mut b, &mut c, &mut d, &me2[76..80]);
+    round4_step4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 68);
+    round4_step4(&mut d, &mut e, &mut a, &mut b, &mut c, me2, 72);
+    round4_step4(&mut e, &mut a, &mut b, &mut c, &mut d, me2, 76);
 
     ihvout[0] = ihvin[0].wrapping_add(a);
     ihvout[1] = ihvin[1].wrapping_add(b);
