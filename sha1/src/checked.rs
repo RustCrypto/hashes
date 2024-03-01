@@ -1,27 +1,28 @@
 //! Checked Sha1.
 
+use core::slice::from_ref;
+
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 use digest::{
-    block_buffer::BlockBuffer,
-    core_api::{BlockSizeUser, BufferKindUser, FixedOutputCore, UpdateCore},
-    crypto_common::InnerUser,
-    FixedOutput, FixedOutputReset, HashMarker, InnerInit, MacMarker, Output, OutputSizeUser, Reset,
-    Update,
+    array::Array,
+    block_buffer::{BlockBuffer, Eager},
+    core_api::{BlockSizeUser, BufferKindUser},
+    typenum::{Unsigned, U20, U64},
+    FixedOutput, FixedOutputReset, HashMarker, MacMarker, Output, OutputSizeUser, Reset, Update,
 };
 
-use crate::Sha1Core;
+use crate::{INITIAL_H, STATE_LEN};
 
 pub(crate) mod ubc_check;
 
 /// SHA-1 collision detection hasher state.
 #[derive(Clone)]
 pub struct Sha1 {
-    core: Sha1Core,
-    buffer: BlockBuffer<
-        <Sha1Core as BlockSizeUser>::BlockSize,
-        <Sha1Core as BufferKindUser>::BufferKind,
-    >,
+    h: [u32; STATE_LEN],
+    block_len: u64,
+    detection: Option<DetectionState>,
+    buffer: BlockBuffer<<Self as BlockSizeUser>::BlockSize, <Self as BufferKindUser>::BufferKind>,
 }
 
 impl HashMarker for Sha1 {}
@@ -30,7 +31,11 @@ impl MacMarker for Sha1 {}
 
 // this blanket impl is needed for HMAC
 impl BlockSizeUser for Sha1 {
-    type BlockSize = <Sha1Core as BlockSizeUser>::BlockSize;
+    type BlockSize = U64;
+}
+
+impl BufferKindUser for Sha1 {
+    type BufferKind = Eager;
 }
 
 impl Default for Sha1 {
@@ -50,20 +55,12 @@ impl Sha1 {
         Builder::default()
     }
 
-    /// Create a new Sha1 instance from a `core`.
-    #[inline]
-    pub fn from_core(core: Sha1Core) -> Self {
-        let buffer = Default::default();
-        Self { core, buffer }
-    }
-
     /// Try finalization, reporting the collision state.
     pub fn try_finalize(mut self) -> CollisionResult {
-        let mut out = Output::<Sha1Core>::default();
-        let Self { core, buffer } = &mut self;
-        core.finalize_fixed_core(buffer, &mut out);
+        let mut out = Output::<Self>::default();
+        self.finalize_inner(&mut out);
 
-        if let Some(ref ctx) = core.detection {
+        if let Some(ref ctx) = self.detection {
             if ctx.found_collision {
                 if ctx.safe_hash {
                     return CollisionResult::Mitigated(out);
@@ -73,22 +70,40 @@ impl Sha1 {
         }
         CollisionResult::Ok(out)
     }
+
+    fn finalize_inner(&mut self, out: &mut Output<Self>) {
+        let bs = <Self as BlockSizeUser>::BlockSize::U64;
+        let buffer = &mut self.buffer;
+        let h = &mut self.h;
+
+        if let Some(ref mut ctx) = self.detection {
+            let last_block = buffer.get_data();
+            crate::compress::checked::finalize(h, bs * self.block_len, last_block, ctx);
+        } else {
+            let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
+            buffer.len64_padding_be(bit_len, |b| crate::compress::compress(h, from_ref(&b.0)));
+        }
+
+        for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
+    }
 }
 
 /// Result when trying to finalize a hash.
 #[derive(Debug)]
 pub enum CollisionResult {
     /// No collision.
-    Ok(Output<Sha1Core>),
+    Ok(Output<Sha1>),
     /// Collision occured, but was mititgated.
-    Mitigated(Output<Sha1Core>),
+    Mitigated(Output<Sha1>),
     /// Collision occured, the hash is the one that collided.
-    Collision(Output<Sha1Core>),
+    Collision(Output<Sha1>),
 }
 
 impl CollisionResult {
     /// Returns the output hash.
-    pub fn hash(&self) -> &Output<Sha1Core> {
+    pub fn hash(&self) -> &Output<Sha1> {
         match self {
             CollisionResult::Ok(ref s) => s,
             CollisionResult::Mitigated(ref s) => s,
@@ -102,16 +117,6 @@ impl CollisionResult {
     }
 }
 
-impl InnerUser for Sha1 {
-    type Inner = Sha1Core;
-}
-
-impl InnerInit for Sha1 {
-    fn inner_init(inner: Self::Inner) -> Self {
-        Self::from_core(inner)
-    }
-}
-
 impl core::fmt::Debug for Sha1 {
     #[inline]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
@@ -122,38 +127,53 @@ impl core::fmt::Debug for Sha1 {
 impl Reset for Sha1 {
     #[inline]
     fn reset(&mut self) {
-        self.core.reset();
+        self.h = INITIAL_H;
+        self.block_len = 0;
         self.buffer.reset();
+        if let Some(ref mut ctx) = self.detection {
+            ctx.reset();
+        }
     }
 }
 
 impl Update for Sha1 {
     #[inline]
     fn update(&mut self, input: &[u8]) {
-        let Self { core, buffer } = self;
-        buffer.digest_blocks(input, |blocks| core.update_blocks(blocks));
+        let Self {
+            h,
+            detection,
+            buffer,
+            ..
+        } = self;
+        buffer.digest_blocks(input, |blocks| {
+            self.block_len += blocks.len() as u64;
+            let blocks = Array::cast_slice_to_core(blocks);
+
+            if let Some(ref mut ctx) = detection {
+                crate::compress::checked::compress(h, ctx, blocks);
+            } else {
+                crate::compress::compress(h, blocks);
+            }
+        });
     }
 }
 
 impl OutputSizeUser for Sha1 {
-    type OutputSize = <Sha1Core as OutputSizeUser>::OutputSize;
+    type OutputSize = U20;
 }
 
 impl FixedOutput for Sha1 {
     #[inline]
     fn finalize_into(mut self, out: &mut Output<Self>) {
-        let Self { core, buffer } = &mut self;
-        core.finalize_fixed_core(buffer, out);
+        self.finalize_inner(out);
     }
 }
 
 impl FixedOutputReset for Sha1 {
     #[inline]
     fn finalize_into_reset(&mut self, out: &mut Output<Self>) {
-        let Self { core, buffer } = self;
-        core.finalize_fixed_core(buffer, out);
-        core.reset();
-        buffer.reset();
+        self.finalize_inner(out);
+        self.reset();
     }
 }
 
@@ -189,8 +209,9 @@ impl Drop for DetectionState {
 impl ZeroizeOnDrop for DetectionState {}
 
 #[cfg(feature = "oid")]
+#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl digest::const_oid::AssociatedOid for Sha1 {
-    const OID: digest::const_oid::ObjectIdentifier = Sha1Core::OID;
+    const OID: digest::const_oid::ObjectIdentifier = crate::Sha1Core::OID;
 }
 
 #[cfg(feature = "std")]
@@ -274,11 +295,12 @@ impl Builder {
     /// Create a Sha1 with a specific collision detection configuration.
     pub fn build(self) -> Sha1 {
         let detection = self.into_detection_state();
-        let core = Sha1Core {
+        Sha1 {
+            h: INITIAL_H,
+            block_len: 0,
             detection,
-            ..Default::default()
-        };
-        Sha1::from_core(core)
+            buffer: Default::default(),
+        }
     }
 }
 
@@ -308,7 +330,7 @@ impl Default for DetectionState {
 }
 
 impl DetectionState {
-    pub(crate) fn reset(&mut self) {
+    fn reset(&mut self) {
         // Do not reset the config, it needs to be preserved
 
         self.found_collision = false;
