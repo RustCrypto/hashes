@@ -70,7 +70,6 @@ impl UpdateCore for Sha1Core {
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         self.block_len += blocks.len() as u64;
         let blocks = Array::cast_slice_to_core(blocks);
-
         compress(&mut self.h, blocks);
     }
 }
@@ -79,11 +78,10 @@ impl FixedOutputCore for Sha1Core {
     #[inline]
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let bs = Self::BlockSize::U64;
-        let mut h = self.h;
-
         let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
-        buffer.len64_padding_be(bit_len, |b| compress(&mut h, from_ref(&b.0)));
 
+        let mut h = self.h;
+        buffer.len64_padding_be(bit_len, |b| compress(&mut h, from_ref(&b.0)));
         for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
@@ -103,8 +101,7 @@ impl Default for Sha1Core {
 impl Reset for Sha1Core {
     #[inline]
     fn reset(&mut self) {
-        self.h = INITIAL_H;
-        self.block_len = 0;
+        *self = Default::default();
     }
 }
 
