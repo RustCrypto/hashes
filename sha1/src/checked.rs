@@ -55,7 +55,8 @@ use digest::{
 
 use crate::{INITIAL_H, STATE_LEN};
 
-pub(crate) mod ubc_check;
+mod compress;
+mod ubc_check;
 
 /// SHA-1 collision detection hasher state.
 #[derive(Clone)]
@@ -119,7 +120,7 @@ impl Sha1 {
 
         if let Some(ref mut ctx) = self.detection {
             let last_block = buffer.get_data();
-            crate::compress::checked::finalize(h, bs * self.block_len, last_block, ctx);
+            compress::finalize(h, bs * self.block_len, last_block, ctx);
         } else {
             let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
             buffer.len64_padding_be(bit_len, |b| crate::compress::compress(h, from_ref(&b.0)));
@@ -191,7 +192,7 @@ impl Update for Sha1 {
             let blocks = Array::cast_slice_to_core(blocks);
 
             if let Some(ref mut ctx) = detection {
-                crate::compress::checked::compress(h, ctx, blocks);
+                compress::compress(h, ctx, blocks);
             } else {
                 crate::compress::compress(h, blocks);
             }
@@ -347,19 +348,19 @@ impl Builder {
 
 /// The internal state used to do collision detection.
 #[derive(Clone, Debug)]
-pub(crate) struct DetectionState {
-    pub(crate) safe_hash: bool,
-    pub(crate) ubc_check: bool,
-    pub(crate) reduced_round_collision: bool,
+struct DetectionState {
+    safe_hash: bool,
+    ubc_check: bool,
+    reduced_round_collision: bool,
     /// Has a collision been detected?
-    pub(crate) found_collision: bool,
-    pub(crate) ihv1: [u32; 5],
-    pub(crate) ihv2: [u32; 5],
-    pub(crate) m1: [u32; 80],
-    pub(crate) m2: [u32; 80],
+    found_collision: bool,
+    ihv1: [u32; 5],
+    ihv2: [u32; 5],
+    m1: [u32; 80],
+    m2: [u32; 80],
     /// Stores past states, for faster recompression.
-    pub(crate) state_58: [u32; 5],
-    pub(crate) state_65: [u32; 5],
+    state_58: [u32; 5],
+    state_65: [u32; 5],
 }
 
 impl Default for DetectionState {

@@ -1,8 +1,5 @@
 use crate::BLOCK_SIZE;
 
-#[cfg(feature = "collision")]
-pub(crate) mod checked;
-
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
         mod soft;
