@@ -1,3 +1,8 @@
+//! Direct translation of the C code found at
+//! [sha1.c](https://github.com/cr-marcstevens/sha1collisiondetection/blob/master/lib/sha1.c).
+//!
+//! For the original license and source details see the comments in `src/checked.rs`.
+
 #![allow(clippy::many_single_char_names, clippy::too_many_arguments)]
 
 use crate::{

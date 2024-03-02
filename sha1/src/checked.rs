@@ -1,4 +1,45 @@
-//! Checked Sha1.
+//! Collision checked Sha1.
+//!
+//! General techniques and implementation are based on the research and implementation done in [1], [2] by
+//! Marc Stevens.
+//!
+//!
+//! Original license from [3].
+//!
+//!      MIT License
+//!
+//!      Copyright (c) 2017:
+//!          Marc Stevens
+//!          Cryptology Group
+//!          Centrum Wiskunde & Informatica
+//!          P.O. Box 94079, 1090 GB Amsterdam, Netherlands
+//!          marc@marc-stevens.nl
+//!
+//!          Dan Shumow
+//!          Microsoft Research
+//!          danshu@microsoft.com
+//!
+//!      Permission is hereby granted, free of charge, to any person obtaining a copy
+//!      of this software and associated documentation files (the "Software"), to deal
+//!      in the Software without restriction, including without limitation the rights
+//!      to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//!      copies of the Software, and to permit persons to whom the Software is
+//!      furnished to do so, subject to the following conditions:
+//!
+//!      The above copyright notice and this permission notice shall be included in all
+//!      copies or substantial portions of the Software.
+//!
+//!      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//!      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//!      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//!      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//!      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//!      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//!      SOFTWARE.
+//!
+//! [1]: https://github.com/cr-marcstevens/sha1collisiondetection
+//! [2]: https://marc-stevens.nl/research/papers/C13-S.pdf
+//! [3]: https://github.com/cr-marcstevens/sha1collisiondetection/blob/master/LICENSE.txt
 
 use core::slice::from_ref;
 
@@ -306,7 +347,7 @@ impl Builder {
 
 /// The internal state used to do collision detection.
 #[derive(Clone, Debug)]
-pub struct DetectionState {
+pub(crate) struct DetectionState {
     pub(crate) safe_hash: bool,
     pub(crate) ubc_check: bool,
     pub(crate) reduced_round_collision: bool,
