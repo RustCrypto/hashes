@@ -665,7 +665,7 @@ fn xor(a: &[u32; 5], b: &[u32; 5]) -> u32 {
 }
 
 #[inline]
-pub fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; BLOCK_SIZE]]) {
+pub(super) fn compress(state: &mut [u32; 5], ctx: &mut DetectionState, blocks: &[[u8; BLOCK_SIZE]]) {
     let mut block_u32 = [0u32; BLOCK_SIZE / 4];
     // since LLVM can't properly use aliasing yet it will make
     // unnecessary state stores without this copy
@@ -747,7 +747,7 @@ const SHA1_PADDING: [u8; 64] = [
 ];
 
 #[inline]
-pub fn finalize(state: &mut [u32; 5], total: u64, last_block: &[u8], ctx: &mut DetectionState) {
+pub(super) fn finalize(state: &mut [u32; 5], total: u64, last_block: &[u8], ctx: &mut DetectionState) {
     let mut total = total + last_block.len() as u64;
     let last = last_block.len();
     let needs_two_blocks = last >= 56;
