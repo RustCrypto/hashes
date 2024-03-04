@@ -14,6 +14,7 @@ members = [
     "md5",
     "ripemd",
     "sha1",
+    "sha1-checked",
     "sha2",
     "sha3",
     "shabal",

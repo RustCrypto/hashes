@@ -9,8 +9,7 @@
 
 pub use digest::{self, Digest};
 
-use core::fmt;
-use core::slice::from_ref;
+use core::{fmt, slice::from_ref};
 use digest::{
     array::Array,
     block_buffer::Eager,
@@ -30,16 +29,13 @@ use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(feature = "collision")]
-pub mod checked;
-
 mod compress;
 
 pub use compress::compress;
 
-pub(crate) const STATE_LEN: usize = 5;
-pub(crate) const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
-pub(crate) const INITIAL_H: [u32; 5] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
+const STATE_LEN: usize = 5;
+const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
+const INITIAL_H: [u32; 5] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
 
 /// Core SHA-1 hasher state.
 #[derive(Clone)]

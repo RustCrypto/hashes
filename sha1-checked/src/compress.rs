@@ -6,8 +6,8 @@
 #![allow(clippy::many_single_char_names, clippy::too_many_arguments)]
 
 use crate::{
-    checked::{ubc_check::Testt, DetectionState},
     BLOCK_SIZE,
+    {ubc_check::Testt, DetectionState},
 };
 
 const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
@@ -692,14 +692,14 @@ pub(super) fn compress(
         compression_states(&mut state_cpy, &block_u32, m1, state_58, state_65);
 
         let ubc_mask = if ctx.ubc_check {
-            crate::checked::ubc_check::ubc_check(&ctx.m1)
+            crate::ubc_check::ubc_check(&ctx.m1)
         } else {
             0xFFFFFFFF
         };
 
         if ubc_mask != 0 {
             let mut ihvtmp = [0u32; 5];
-            for dv_type in &crate::checked::ubc_check::SHA1_DVS {
+            for dv_type in &crate::ubc_check::SHA1_DVS {
                 if ubc_mask & (1 << dv_type.maskb) != 0 {
                     for ((m2, m1), dm) in
                         ctx.m2.iter_mut().zip(ctx.m1.iter()).zip(dv_type.dm.iter())

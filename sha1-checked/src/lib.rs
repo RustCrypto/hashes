@@ -1,47 +1,30 @@
+#![no_std]
+#![doc = include_str!("../README.md")]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
+)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![warn(missing_docs, rust_2018_idioms)]
+
 //! Collision checked Sha1.
 //!
 //! General techniques and implementation are based on the research and implementation done in [1], [2] by
 //! Marc Stevens.
 //!
 //!
-//! Original license from [3].
-//!
-//! > MIT License
-//! >
-//! > Copyright (c) 2017:
-//! >   Marc Stevens
-//! >   Cryptology Group
-//! >   Centrum Wiskunde & Informatica
-//! >   P.O. Box 94079, 1090 GB Amsterdam, Netherlands
-//! >   marc@marc-stevens.nl
-//! >
-//! >   Dan Shumow
-//! >   Microsoft Research
-//! >   danshu@microsoft.com
-//! >
-//! > Permission is hereby granted, free of charge, to any person obtaining a copy
-//! > of this software and associated documentation files (the "Software"), to deal
-//! > in the Software without restriction, including without limitation the rights
-//! > to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//! > copies of the Software, and to permit persons to whom the Software is
-//! > furnished to do so, subject to the following conditions:
-//! >
-//! > The above copyright notice and this permission notice shall be included in all
-//! > copies or substantial portions of the Software.
-//! >
-//! > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//! > IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//! > FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//! > AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//! > LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//! > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-//! > SOFTWARE.
+//! Original license can be found in [3].
 //!
 //! [1]: https://github.com/cr-marcstevens/sha1collisiondetection
 //! [2]: https://marc-stevens.nl/research/papers/C13-S.pdf
 //! [3]: https://github.com/cr-marcstevens/sha1collisiondetection/blob/master/LICENSE.txt
 
+pub use digest::{self, Digest};
+
 use core::slice::from_ref;
+
+#[cfg(feature = "std")]
+extern crate std;
 
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
@@ -50,10 +33,12 @@ use digest::{
     block_buffer::{BlockBuffer, Eager},
     core_api::{BlockSizeUser, BufferKindUser},
     typenum::{Unsigned, U20, U64},
-    FixedOutput, FixedOutputReset, HashMarker, MacMarker, Output, OutputSizeUser, Reset, Update,
+    FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
 };
 
-use crate::{INITIAL_H, STATE_LEN};
+const BLOCK_SIZE: usize = <sha1::Sha1Core as BlockSizeUser>::BlockSize::USIZE;
+const STATE_LEN: usize = 5;
+const INITIAL_H: [u32; 5] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
 
 mod compress;
 mod ubc_check;
@@ -69,9 +54,6 @@ pub struct Sha1 {
 
 impl HashMarker for Sha1 {}
 
-impl MacMarker for Sha1 {}
-
-// this blanket impl is needed for HMAC
 impl BlockSizeUser for Sha1 {
     type BlockSize = U64;
 }
@@ -95,6 +77,24 @@ impl Sha1 {
     /// Create a new Sha1 builder to configure detection.
     pub fn builder() -> Builder {
         Builder::default()
+    }
+
+    /// Oneshot hashing, reporting the collision state.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use hex_literal::hex;
+    /// use sha1_checked::Sha1;
+    ///
+    /// let result = Sha1::try_digest(b"hello world");
+    /// assert_eq!(result.hash().as_ref(), hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
+    /// assert!(!result.has_collision());
+    /// ```
+    pub fn try_digest(data: impl AsRef<[u8]>) -> CollisionResult {
+        let mut hasher = Self::default();
+        Digest::update(&mut hasher, data);
+        hasher.try_finalize()
     }
 
     /// Try finalization, reporting the collision state.
@@ -123,7 +123,7 @@ impl Sha1 {
             compress::finalize(h, bs * self.block_len, last_block, ctx);
         } else {
             let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
-            buffer.len64_padding_be(bit_len, |b| crate::compress::compress(h, from_ref(&b.0)));
+            buffer.len64_padding_be(bit_len, |b| sha1::compress(h, from_ref(&b.0)));
         }
 
         for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
@@ -194,7 +194,7 @@ impl Update for Sha1 {
             if let Some(ref mut ctx) = detection {
                 compress::compress(h, ctx, blocks);
             } else {
-                crate::compress::compress(h, blocks);
+                sha1::compress(h, blocks);
             }
         });
     }
@@ -215,7 +215,7 @@ impl FixedOutputReset for Sha1 {
     #[inline]
     fn finalize_into_reset(&mut self, out: &mut Output<Self>) {
         self.finalize_inner(out);
-        self.reset();
+        Reset::reset(self);
     }
 }
 
@@ -253,7 +253,7 @@ impl ZeroizeOnDrop for DetectionState {}
 #[cfg(feature = "oid")]
 #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl digest::const_oid::AssociatedOid for Sha1 {
-    const OID: digest::const_oid::ObjectIdentifier = crate::Sha1Core::OID;
+    const OID: digest::const_oid::ObjectIdentifier = sha1::Sha1Core::OID;
 }
 
 #[cfg(feature = "std")]
