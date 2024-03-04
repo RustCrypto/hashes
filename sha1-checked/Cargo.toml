@@ -14,7 +14,7 @@ rust-version = "1.72"
 
 [dependencies]
 digest = "=0.11.0-pre.8"
-sha1 = { version = "=0.11.0-pre.3", features = [], path = "../sha1" }
+sha1 = { version = "=0.11.0-pre.3", default-features = false, path = "../sha1" }
 
 [dev-dependencies]
 digest = { version = "=0.11.0-pre.8", features = ["dev"] }

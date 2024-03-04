@@ -23,9 +23,6 @@ pub use digest::{self, Digest};
 
 use core::slice::from_ref;
 
-#[cfg(feature = "std")]
-extern crate std;
-
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 use digest::{
