@@ -17,6 +17,9 @@ unsuitable for further use in any security critical capacity, as it is
 
 We provide this crate for legacy interoperability purposes only.
 
+If possible use the [sha1-checked] crate, while slower it provides the ability to
+detect potential collisions, as well as generate alternative safe hashes.
+
 ## Examples
 
 ### One-shot API
@@ -89,3 +92,4 @@ dual licensed as above, without any additional terms or conditions.
 [SHA-1]: https://en.wikipedia.org/wiki/SHA-1
 [1]: https://sha-mbles.github.io/
 [examples section]: https://github.com/RustCrypto/hashes#Examples
+[sha1-checked]: https://crates.io/crates/sha1-checked
