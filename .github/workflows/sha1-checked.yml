@@ -1,4 +1,4 @@
-name: sha1
+name: sha1-checked
 
 on:
   pull_request:
