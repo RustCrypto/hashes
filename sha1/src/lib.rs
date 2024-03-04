@@ -32,7 +32,6 @@ pub use compress::compress;
 
 const STATE_LEN: usize = 5;
 const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
-const INITIAL_H: [u32; 5] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
 
 /// Core SHA-1 hasher state.
 #[derive(Clone)]
@@ -85,7 +84,7 @@ impl Default for Sha1Core {
     #[inline]
     fn default() -> Self {
         Self {
-            h: INITIAL_H,
+            h: [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
             block_len: 0,
         }
     }
