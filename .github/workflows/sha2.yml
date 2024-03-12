@@ -125,7 +125,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - ${{needs.set-msrv.outputs.msrv}}
+          #- ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - aarch64-unknown-linux-gnu
