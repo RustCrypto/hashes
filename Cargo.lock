@@ -257,7 +257,7 @@ dependencies = [
 
 [[package]]
 name = "sha1-checked"
-version = "0.11.0-pre.3"
+version = "0.11.0"
 dependencies = [
  "digest",
  "hex-literal",

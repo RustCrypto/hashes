@@ -671,12 +671,9 @@ pub(super) fn compress(
     blocks: &[[u8; BLOCK_SIZE]],
 ) {
     let mut block_u32 = [0u32; BLOCK_SIZE / 4];
-    // since LLVM can't properly use aliasing yet it will make
-    // unnecessary state stores without this copy
-    let mut state_cpy = *state;
 
     for block in blocks.iter() {
-        ctx.ihv1.copy_from_slice(&state_cpy);
+        ctx.ihv1.copy_from_slice(&*state);
 
         for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
             *o = u32::from_be_bytes(chunk.try_into().unwrap());
@@ -689,7 +686,7 @@ pub(super) fn compress(
             ..
         } = ctx;
 
-        compression_states(&mut state_cpy, &block_u32, m1, state_58, state_65);
+        compression_states(state, &block_u32, m1, state_58, state_65);
 
         let ubc_mask = if ctx.ubc_check {
             crate::ubc_check::ubc_check(&ctx.m1)
@@ -726,14 +723,14 @@ pub(super) fn compress(
                     );
 
                     // to verify SHA-1 collision detection code with collisions for reduced-step SHA-1
-                    if (0 == xor(&ihvtmp, &state_cpy))
+                    if (0 == xor(&ihvtmp, &*state))
                         || (ctx.reduced_round_collision && 0 == xor(&ctx.ihv1, &ctx.ihv2))
                     {
                         ctx.found_collision = true;
 
                         if ctx.safe_hash {
-                            compression_w(&mut state_cpy, &ctx.m1);
-                            compression_w(&mut state_cpy, &ctx.m1);
+                            compression_w(state, &ctx.m1);
+                            compression_w(state, &ctx.m1);
                         }
                         break;
                     }
@@ -741,7 +738,6 @@ pub(super) fn compress(
             }
         }
     }
-    *state = state_cpy;
 }
 
 const SHA1_PADDING: [u8; 64] = [

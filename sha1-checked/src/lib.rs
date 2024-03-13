@@ -31,7 +31,7 @@ use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 use digest::{
     array::Array,
     block_buffer::{BlockBuffer, Eager},
-    core_api::{BlockSizeUser, BufferKindUser},
+    core_api::BlockSizeUser,
     typenum::{Unsigned, U20, U64},
     FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
 };
@@ -49,18 +49,10 @@ pub struct Sha1 {
     h: [u32; STATE_LEN],
     block_len: u64,
     detection: Option<DetectionState>,
-    buffer: BlockBuffer<<Self as BlockSizeUser>::BlockSize, <Self as BufferKindUser>::BufferKind>,
+    buffer: BlockBuffer<U64, Eager>,
 }
 
 impl HashMarker for Sha1 {}
-
-impl BlockSizeUser for Sha1 {
-    type BlockSize = U64;
-}
-
-impl BufferKindUser for Sha1 {
-    type BufferKind = Eager;
-}
 
 impl Default for Sha1 {
     fn default() -> Self {
@@ -114,7 +106,7 @@ impl Sha1 {
     }
 
     fn finalize_inner(&mut self, out: &mut Output<Self>) {
-        let bs = <Self as BlockSizeUser>::BlockSize::U64;
+        let bs = 64;
         let buffer = &mut self.buffer;
         let h = &mut self.h;
 
