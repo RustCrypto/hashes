@@ -1,6 +1,6 @@
 [package]
 name = "sha1-checked"
-version = "0.11.0"
+version = "0.10.0"
 description = "SHA-1 hash function with collision detection"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -13,18 +13,18 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.72"
 
 [dependencies]
-digest = "=0.11.0-pre.8"
-sha1 = { version = "=0.11.0-pre.3", default-features = false, path = "../sha1" }
+digest = "0.10.7"
+sha1 = { version = "0.10.6", default-features = false, features = ["compress"] }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.8", features = ["dev"] }
+digest = { version = "0.10.7", features = ["dev"] }
 hex-literal = "0.4"
 
 [features]
 default = ["oid", "std"]
 std = ["digest/std", "sha1/std"]
 oid = ["digest/oid", "sha1/oid"] # Enable OID support
-zeroize = ["digest/zeroize", "sha1/zeroize"]
+zeroize = []
 
 
 [package.metadata.docs.rs]

@@ -29,7 +29,6 @@ extern crate std;
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 use digest::{
-    array::Array,
     block_buffer::{BlockBuffer, Eager},
     core_api::BlockSizeUser,
     typenum::{Unsigned, U20, U64},
@@ -115,7 +114,7 @@ impl Sha1 {
             compress::finalize(h, bs * self.block_len, last_block, ctx);
         } else {
             let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
-            buffer.len64_padding_be(bit_len, |b| sha1::compress(h, from_ref(&b.0)));
+            buffer.len64_padding_be(bit_len, |b| sha1::compress(h, from_ref(b)));
         }
 
         for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
@@ -181,9 +180,11 @@ impl Update for Sha1 {
         } = self;
         buffer.digest_blocks(input, |blocks| {
             self.block_len += blocks.len() as u64;
-            let blocks = Array::cast_slice_to_core(blocks);
-
             if let Some(ref mut ctx) = detection {
+                // SAFETY: GenericArray<u8, U64> and [u8; 64] have
+                // exactly the same memory layout
+                let blocks: &[[u8; BLOCK_SIZE]] =
+                    unsafe { &*(blocks as *const _ as *const [[u8; BLOCK_SIZE]]) };
                 compress::compress(h, ctx, blocks);
             } else {
                 sha1::compress(h, blocks);
