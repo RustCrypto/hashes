@@ -33,6 +33,7 @@ fn shambles_1() {
         hex!("4f3d9be4a472c4dae83c6314aa6c36a064c1fd14"),
         None,
         false,
+        false,
     );
 }
 
@@ -44,6 +45,7 @@ fn shambles_2() {
         hex!("8ac60ba76f1999a1ab70223f225aefdc78d4ddc0"),
         hex!("9ed5d77a4f48be1dbf3e9e15650733eb850897f2"),
         None,
+        false,
         false,
     );
 }
@@ -57,6 +59,7 @@ fn shattered_1() {
         hex!("16e96b70000dd1e7c85b8368ee197754400e58ec"),
         Some(hex!("d3a1d09969c3b57113fd17b23e01dd3de74a99bb")),
         false,
+        true,
     );
 }
 
@@ -69,6 +72,7 @@ fn shattered_2() {
         hex!("e1761773e6a35916d99f891b77663e6405313587"),
         Some(hex!("92246b0b718f4c704d37bb025717cbc66babf102")),
         false,
+        true,
     );
 }
 
@@ -81,6 +85,7 @@ fn reducedsha_coll() {
         hex!("dd39885a2a5d8f59030b451e00cb45da9f9d3828"),
         Some(hex!("dd39885a2a5d8f59030b451e00cb45da9f9d3828")),
         true,
+        false,
     );
 }
 
@@ -91,11 +96,18 @@ fn collision_test(
     mitigated_hash: [u8; 20],
     reduced_rounds_mitigated: Option<[u8; 20]>,
     reduced_rounds: bool,
+    allow_skip: bool,
 ) {
     let p = std::env::current_dir()
         .unwrap()
         .join("tests")
         .join(input_path);
+
+    if !p.exists() && allow_skip {
+        eprintln!("SKIPPING TEST, data not available");
+        return;
+    }
+
     let input = std::fs::read(p).unwrap();
     let has_collision = true;
 
