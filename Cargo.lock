@@ -320,6 +320,7 @@ dependencies = [
  "digest 0.10.7",
  "hex-literal",
  "sha1 0.10.6",
+ "zeroize",
 ]
 
 [[package]]

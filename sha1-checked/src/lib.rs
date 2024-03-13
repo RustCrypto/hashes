@@ -26,14 +26,14 @@ use core::slice::from_ref;
 #[cfg(feature = "std")]
 extern crate std;
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 use digest::{
     block_buffer::{BlockBuffer, Eager},
     core_api::BlockSizeUser,
     typenum::{Unsigned, U20, U64},
     FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
 };
+#[cfg(feature = "zeroize")]
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 const BLOCK_SIZE: usize = <sha1::Sha1Core as BlockSizeUser>::BlockSize::USIZE;
 const STATE_LEN: usize = 5;
@@ -209,16 +209,6 @@ impl FixedOutputReset for Sha1 {
     fn finalize_into_reset(&mut self, out: &mut Output<Self>) {
         self.finalize_inner(out);
         Reset::reset(self);
-    }
-}
-
-impl Drop for Sha1 {
-    #[inline]
-    fn drop(&mut self) {
-        #[cfg(feature = "zeroize")]
-        {
-            self.buffer.zeroize();
-        }
     }
 }
 
