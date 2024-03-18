@@ -101,8 +101,9 @@ macro_rules! fsb_impl {
             fn serialize(&self) -> SerializedState<Self> {
                 let mut serialized_state = SerializedState::<Self>::default();
 
-                serialized_state[..8].copy_from_slice(&self.blocks_len.to_le_bytes());
-                serialized_state[8..].copy_from_slice(&self.state[..]);
+                serialized_state[..self.state.len()].copy_from_slice(&self.state[..]);
+                serialized_state[self.state.len()..]
+                    .copy_from_slice(&self.blocks_len.to_le_bytes());
 
                 serialized_state
             }
@@ -110,7 +111,8 @@ macro_rules! fsb_impl {
             fn deserialize(
                 serialized_state: &SerializedState<Self>,
             ) -> Result<Self, DeserializeStateError> {
-                let (serialized_block_len, serialized_state) = serialized_state.split::<U8>();
+                let (serialized_state, serialized_block_len) =
+                    serialized_state.split::<$statesize>();
 
                 let mut state = [0; $r / 8];
                 state.copy_from_slice(serialized_state.as_ref());
