@@ -1,5 +1,5 @@
 use crate::{consts, sha256::compress256, sha512::compress512};
-use core::{fmt, slice::from_ref};
+use core::{convert::TryInto, fmt, slice::from_ref};
 use digest::{
     array::Array,
     block_buffer::Eager,
@@ -7,7 +7,8 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
-    typenum::{Unsigned, U128, U32, U64},
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::{Unsigned, U128, U32, U40, U64, U80},
     HashMarker, InvalidOutputSize, Output,
 };
 
@@ -100,6 +101,36 @@ impl Drop for Sha256VarCore {
 #[cfg(feature = "zeroize")]
 impl ZeroizeOnDrop for Sha256VarCore {}
 
+impl SerializableState for Sha256VarCore {
+    type SerializedStateSize = U40;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = SerializedState::<Self>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(4)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state[32..].copy_from_slice(&self.block_len.to_le_bytes());
+        serialized_state
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = serialized_state.split::<U32>();
+
+        let mut state = consts::State256::default();
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(4)) {
+            *val = u32::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u64::from_le_bytes(*serialized_block_len.as_ref());
+
+        Ok(Self { state, block_len })
+    }
+}
+
 /// Core block-level SHA-512 hasher with variable output size.
 ///
 /// Supports initialization only for 28, 32, 48, and 64 byte output sizes,
@@ -186,3 +217,34 @@ impl Drop for Sha512VarCore {
 }
 #[cfg(feature = "zeroize")]
 impl ZeroizeOnDrop for Sha512VarCore {}
+
+impl SerializableState for Sha512VarCore {
+    type SerializedStateSize = U80;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = SerializedState::<Self>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state[64..].copy_from_slice(&self.block_len.to_le_bytes());
+
+        serialized_state
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = serialized_state.split::<U64>();
+
+        let mut state = consts::State512::default();
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u128::from_le_bytes(*serialized_block_len.as_ref());
+
+        Ok(Self { state, block_len })
+    }
+}

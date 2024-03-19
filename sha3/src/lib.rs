@@ -20,6 +20,7 @@ use digest::{
         ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
         XofReaderCoreWrapper,
     },
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     HashMarker, Output,
 };
 

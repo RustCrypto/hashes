@@ -12,12 +12,14 @@ pub use digest::{self, Digest};
 
 use core::fmt;
 use digest::{
+    array::Array,
     block_buffer::Eager,
-    consts::U16,
+    consts::{U16, U48, U64},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     HashMarker, Output,
 };
 
@@ -31,12 +33,14 @@ mod consts;
 /// Core MD2 hasher state.
 #[derive(Clone)]
 pub struct Md2Core {
-    x: [u8; 48],
+    x: [u8; STATE_LEN],
     checksum: Block<Self>,
 }
 
 /// MD2 hasher state.
 pub type Md2 = CoreWrapper<Md2Core>;
+
+const STATE_LEN: usize = 48;
 
 impl Md2Core {
     fn compress(&mut self, block: &Block<Self>) {
@@ -48,7 +52,7 @@ impl Md2Core {
 
         let mut t = 0u8;
         for j in 0..18u8 {
-            for k in 0..48 {
+            for k in 0..STATE_LEN {
                 self.x[k] ^= consts::S[t as usize];
                 t = self.x[k];
             }
@@ -106,7 +110,7 @@ impl Default for Md2Core {
     #[inline]
     fn default() -> Self {
         Self {
-            x: [0; 48],
+            x: [0; STATE_LEN],
             checksum: Default::default(),
         }
     }
@@ -149,3 +153,22 @@ impl Drop for Md2Core {
 
 #[cfg(feature = "zeroize")]
 impl ZeroizeOnDrop for Md2Core {}
+
+impl SerializableState for Md2Core {
+    type SerializedStateSize = U64;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        Array::<_, U48>::from(self.x).concat(self.checksum)
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_x, serialized_checksum) = serialized_state.split::<U48>();
+
+        Ok(Self {
+            x: *serialized_x.as_ref(),
+            checksum: serialized_checksum,
+        })
+    }
+}

@@ -12,7 +12,7 @@
 #[macro_use]
 mod macros;
 
-use core::fmt;
+use core::{fmt, ops::Add};
 pub use digest::{self, Digest};
 
 // Double check this contains all values in the reference implementation
@@ -24,7 +24,8 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::Unsigned,
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::{Unsigned, U8},
     HashMarker, Output,
 };
 
@@ -38,6 +39,7 @@ fsb_impl!(
     160,
     U60,
     U20,
+    U80,
     5 << 18,
     80,
     640,
@@ -54,6 +56,7 @@ fsb_impl!(
     224,
     U84,
     U28,
+    U112,
     7 << 18,
     112,
     896,
@@ -70,6 +73,7 @@ fsb_impl!(
     256,
     U96,
     U32,
+    U128,
     1 << 21,
     128,
     1024,
@@ -86,6 +90,7 @@ fsb_impl!(
     384,
     U115,
     U48,
+    U184,
     23 << 16,
     184,
     1472,
@@ -102,6 +107,7 @@ fsb_impl!(
     512,
     U155,
     U64,
+    U248,
     31 << 16,
     248,
     1984,

@@ -1,11 +1,13 @@
 use core::fmt;
 use digest::{
+    array::Array,
     block_buffer::Eager,
-    consts::U64,
+    consts::{U192, U64},
     core_api::{
         AlgorithmName, Block as GenBlock, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser,
         TruncSide, UpdateCore, VariableOutputCore,
     },
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     HashMarker, InvalidOutputSize, Output,
 };
 
@@ -178,6 +180,49 @@ impl Drop for StreebogVarCore {
 
 #[cfg(feature = "zeroize")]
 impl ZeroizeOnDrop for StreebogVarCore {}
+
+impl SerializableState for StreebogVarCore {
+    type SerializedStateSize = U192;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let serialized_h = Array::<_, U64>::from(self.h);
+
+        let mut serialized_n = Array::<_, U64>::default();
+        for (val, chunk) in self.n.iter().zip(serialized_n.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        let mut serialized_sigma = Array::<_, U64>::default();
+        for (val, chunk) in self.sigma.iter().zip(serialized_sigma.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_h.concat(serialized_n).concat(serialized_sigma)
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_h, remaining_buffer) = serialized_state.split::<U64>();
+
+        let (serialized_n, serialized_sigma) = remaining_buffer.split::<U64>();
+        let mut n = [0; 8];
+        for (val, chunk) in n.iter_mut().zip(serialized_n.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let mut sigma = [0; 8];
+        for (val, chunk) in sigma.iter_mut().zip(serialized_sigma.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        Ok(Self {
+            h: serialized_h.into(),
+            n,
+            sigma,
+        })
+    }
+}
 
 #[inline(always)]
 fn adc(a: &mut u64, b: u64, carry: &mut u64) {

@@ -9,14 +9,15 @@
 
 pub use digest::{self, Digest};
 
-use core::fmt;
+use core::{convert::TryInto, fmt};
 use digest::{
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U24, U64},
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::{Unsigned, U24, U32, U64},
     HashMarker, Output,
 };
 
@@ -27,7 +28,8 @@ mod compress;
 mod tables;
 use compress::compress;
 
-type State = [u64; 3];
+type State = [u64; STATE_LEN];
+const STATE_LEN: usize = 3;
 const S0: State = [
     0x0123_4567_89AB_CDEF,
     0xFEDC_BA98_7654_3210,
@@ -105,6 +107,36 @@ impl<const VER2: bool> Reset for TigerCore<VER2> {
     #[inline]
     fn reset(&mut self) {
         *self = Default::default();
+    }
+}
+
+impl<const VER2: bool> SerializableState for TigerCore<VER2> {
+    type SerializedStateSize = U32;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = SerializedState::<Self>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state[24..].copy_from_slice(&self.block_len.to_le_bytes());
+        serialized_state
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = serialized_state.split::<U24>();
+
+        let mut state = [0; STATE_LEN];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let block_len = u64::from_le_bytes(*serialized_block_len.as_ref());
+
+        Ok(Self { state, block_len })
     }
 }
 
