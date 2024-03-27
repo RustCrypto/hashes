@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.72.0
+      msrv: 1.72.0
 
   # Builds for no_std platforms
   build:
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-      # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
+        # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
         working-directory: .
     steps:
       - uses: actions/checkout@v4
@@ -146,7 +146,39 @@ jobs:
           target: ${{ matrix.target }}
           features: ${{ matrix.features }}
 
+  # wasmtime tests
+  wasm:
+    needs: set-msrv
+    strategy:
+      matrix:
+        include:
+          # without simd
+          - rust: ${{needs.set-msrv.outputs.msrv}}
+            flags: "-C target-feature=-simd128"
+          - rust: stable
+            flags: "-C target-feature=-simd128"
+
+          # with simd
+          - rust: ${{needs.set-msrv.outputs.msrv}}
+            flags: "-C target-feature=+simd128"
+          - rust: stable
+            flags: "-C target-feature=+simd128"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          targets: wasm32-wasi
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - uses: jcbhmr/setup-wasmtime@v2
+      - run: cargo hack test --feature-powerset --target wasm32-wasi
+        env:
+          RUSTFLAGS: ${{ matrix.flags }}
+          CARGO_TARGET_WASM32_WASI_RUNNER: wasmtime
+
   minimal-versions:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
-        working-directory: ${{ github.workflow }}
+      working-directory: ${{ github.workflow }}
