@@ -16,7 +16,7 @@ name = "ascon-hash"
 version = "0.3.0-pre"
 dependencies = [
  "ascon",
- "digest",
+ "digest 0.11.0-pre.8",
  "hex",
  "hex-literal",
  "spectral",
@@ -33,7 +33,7 @@ name = "belt-hash"
 version = "0.2.0-pre.3"
 dependencies = [
  "belt-block",
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -41,7 +41,7 @@ dependencies = [
 name = "blake2"
 version = "0.11.0-pre.3"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -53,11 +53,20 @@ checksum = "847495c209977a90e8aad588b959d0ca9f5dc228096d29a6bd3defd53f35eaec"
 
 [[package]]
 name = "block-buffer"
+version = "0.10.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71"
+dependencies = [
+ "generic-array",
+]
+
+[[package]]
+name = "block-buffer"
 version = "0.11.0-pre.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ded684142010808eb980d9974ef794da2bcf97d13396143b1515e9f0fb4a10e"
 dependencies = [
- "crypto-common",
+ "crypto-common 0.2.0-pre.5",
  "zeroize",
 ]
 
@@ -66,6 +75,12 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "const-oid"
+version = "0.9.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c2459377285ad874054d797f3ccebf984978aa39129f6eafde5cdc8315b612f8"
 
 [[package]]
 name = "const-oid"
@@ -84,6 +99,16 @@ dependencies = [
 
 [[package]]
 name = "crypto-common"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1bfb12502f3fc46cca1bb51ac28df9d618d813cdc3d2f25b9fe775a34af26bb3"
+dependencies = [
+ "generic-array",
+ "typenum",
+]
+
+[[package]]
+name = "crypto-common"
 version = "0.2.0-pre.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7aa2ec04f5120b830272a481e8d9d8ba4dda140d2cda59b0f1110d5eb93c38e"
@@ -95,13 +120,25 @@ dependencies = [
 
 [[package]]
 name = "digest"
+version = "0.10.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
+dependencies = [
+ "blobby",
+ "block-buffer 0.10.4",
+ "const-oid 0.9.6",
+ "crypto-common 0.1.6",
+]
+
+[[package]]
+name = "digest"
 version = "0.11.0-pre.8"
 source = "git+https://github.com/RustCrypto/traits.git#7c7a0d2a2caa60e286835051e6ad5fd10a9a9554"
 dependencies = [
  "blobby",
- "block-buffer",
- "const-oid",
- "crypto-common",
+ "block-buffer 0.11.0-pre.5",
+ "const-oid 0.10.0-pre.2",
+ "crypto-common 0.2.0-pre.5",
  "subtle",
  "zeroize",
 ]
@@ -110,9 +147,19 @@ dependencies = [
 name = "fsb"
 version = "0.2.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
  "whirlpool",
+]
+
+[[package]]
+name = "generic-array"
+version = "0.14.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a"
+dependencies = [
+ "typenum",
+ "version_check",
 ]
 
 [[package]]
@@ -130,7 +177,7 @@ dependencies = [
 name = "gost94"
 version = "0.11.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -138,7 +185,7 @@ dependencies = [
 name = "groestl"
 version = "0.11.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -167,7 +214,7 @@ dependencies = [
 name = "jh"
 version = "0.2.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
  "ppv-lite86",
 ]
@@ -176,7 +223,7 @@ dependencies = [
 name = "k12"
 version = "0.4.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
  "sha3",
 ]
@@ -201,7 +248,7 @@ name = "md-5"
 version = "0.11.0-pre.3"
 dependencies = [
  "cfg-if",
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -209,7 +256,7 @@ dependencies = [
 name = "md2"
 version = "0.11.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -217,7 +264,7 @@ dependencies = [
 name = "md4"
 version = "0.11.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -240,8 +287,19 @@ dependencies = [
 name = "ripemd"
 version = "0.2.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
+]
+
+[[package]]
+name = "sha1"
+version = "0.10.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3bf829a2d51ab4a5ddf1352d8470c140cadc8301b2ae1789db023f01cedd6ba"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest 0.10.7",
 ]
 
 [[package]]
@@ -250,8 +308,18 @@ version = "0.11.0-pre.3"
 dependencies = [
  "cfg-if",
  "cpufeatures",
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
+]
+
+[[package]]
+name = "sha1-checked"
+version = "0.10.0"
+dependencies = [
+ "digest 0.10.7",
+ "hex-literal",
+ "sha1 0.10.6",
+ "zeroize",
 ]
 
 [[package]]
@@ -260,7 +328,7 @@ version = "0.11.0-pre.3"
 dependencies = [
  "cfg-if",
  "cpufeatures",
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -268,7 +336,7 @@ dependencies = [
 name = "sha3"
 version = "0.11.0-pre.3"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
  "keccak",
 ]
@@ -277,7 +345,7 @@ dependencies = [
 name = "shabal"
 version = "0.5.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -285,7 +353,7 @@ dependencies = [
 name = "skein"
 version = "0.2.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
  "threefish",
 ]
@@ -294,7 +362,7 @@ dependencies = [
 name = "sm3"
 version = "0.5.0-pre.3"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -308,7 +376,7 @@ checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 name = "streebog"
 version = "0.11.0-pre.3"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -331,7 +399,7 @@ dependencies = [
 name = "tiger"
 version = "0.3.0-pre"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 
@@ -340,6 +408,12 @@ name = "typenum"
 version = "1.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
+
+[[package]]
+name = "version_check"
+version = "0.9.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "wasi"
@@ -351,7 +425,7 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 name = "whirlpool"
 version = "0.11.0-pre.2"
 dependencies = [
- "digest",
+ "digest 0.11.0-pre.8",
  "hex-literal",
 ]
 

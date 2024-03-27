@@ -26,6 +26,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [MD5] | [`md5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.72][msrv-1.72] | :broken_heart: |
 | [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.72][msrv-1.72] | :broken_heart: |
+| [SHA-1 Checked] | [`sha1-checked`] | [![crates.io](https://img.shields.io/crates/v/sha1-checked.svg)](https://crates.io/crates/sha1-checked) | [![Documentation](https://docs.rs/sha1-checked/badge.svg)](https://docs.rs/sha1-checked) | ![MSRV 1.72][msrv-1.72] | :yellow_heart: |
 | [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.72][msrv-1.72] | :green_heart: |
 | [SHA-3] (Keccak) | [`sha3`] | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) | [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [SHABAL] | [`shabal`] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) | [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
@@ -252,6 +253,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`md5`]: ./md5
 [`ripemd`]: ./ripemd
 [`sha1`]: ./sha1
+[`sha1-checked`]: ./sha1-checked
 [`sha2`]: ./sha2
 [`sha3`]: ./sha3
 [`shabal`]: ./shabal
@@ -293,6 +295,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [MD5]: https://en.wikipedia.org/wiki/MD5
 [RIPEMD]: https://en.wikipedia.org/wiki/RIPEMD
 [SHA-1]: https://en.wikipedia.org/wiki/SHA-1
+[SHA-1 Checked]: https://github.com/cr-marcstevens/sha1collisiondetection
 [SHA-2]: https://en.wikipedia.org/wiki/SHA-2
 [SHA-3]: https://en.wikipedia.org/wiki/SHA-3
 [SHABAL]: https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
