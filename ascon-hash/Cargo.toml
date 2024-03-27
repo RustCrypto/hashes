@@ -28,6 +28,7 @@ hex-literal = "0.4"
 default = ["std"]
 std = ["digest/std"]
 zeroize = ["ascon/zeroize", "digest/zeroize"]
+no_unroll = ["ascon/no_unroll"]
 
 [package.metadata.docs.rs]
 all-features = true
