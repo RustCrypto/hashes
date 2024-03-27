@@ -18,7 +18,7 @@ use core::{fmt, marker::PhantomData, ops::Div};
 use digest::{
     array::{Array, ArraySize},
     block_buffer::{Lazy, LazyBuffer},
-    consts::{U128, U32, U4, U64},
+    consts::{U128, U16, U32, U4, U64},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
         CtVariableCoreWrapper, OutputSizeUser, RtVariableCoreWrapper, TruncSide, UpdateCore,
@@ -68,6 +68,10 @@ pub type Blake2bVar = RtVariableCoreWrapper<Blake2bVarCore>;
 pub type Blake2bCore<OutSize> = CtVariableCoreWrapper<Blake2bVarCore, OutSize>;
 /// BLAKE2b generic over output size.
 pub type Blake2b<OutSize> = CoreWrapper<Blake2bCore<OutSize>>;
+/// BLAKE2b-128 hasher state.
+pub type Blake2b128 = Blake2b<U16>;
+/// BLAKE2b-256 hasher state.
+pub type Blake2b256 = Blake2b<U32>;
 /// BLAKE2b-512 hasher state.
 pub type Blake2b512 = Blake2b<U64>;
 
@@ -98,6 +102,8 @@ pub type Blake2sVar = RtVariableCoreWrapper<Blake2sVarCore>;
 pub type Blake2sCore<OutSize> = CtVariableCoreWrapper<Blake2sVarCore, OutSize>;
 /// BLAKE2s generic over output size.
 pub type Blake2s<OutSize> = CoreWrapper<Blake2sCore<OutSize>>;
+/// BLAKE2s-128 hasher state.
+pub type Blake2s128 = Blake2s<U16>;
 /// BLAKE2s-256 hasher state.
 pub type Blake2s256 = Blake2s<U32>;
 
