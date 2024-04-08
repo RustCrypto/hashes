@@ -9,6 +9,8 @@
 
 Pure Rust implementation of the [SHA-1 hash function][1].
 
+**This crate is deprecated! Use the [`sha1`](https://crates.io/crates/sha1) crate instead.**
+
 [Documentation][docs-link]
 
 ## 🚨 Warning: Cryptographically Broken 🚨
