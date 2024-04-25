@@ -20,7 +20,7 @@ exclude = [
 [dependencies]
 digest = "0.10.7"
 sha1 = { version = "0.10.6", default-features = false, features = ["compress"] }
-zeroize = { version = "1.7", default-features = false, optional = true }
+zeroize = { version = "1.8", default-features = false, optional = true }
 
 [dev-dependencies]
 digest = { version = "0.10.7", features = ["dev"] }
