@@ -2,6 +2,8 @@
 
 use core::arch::asm;
 
+use crate::Block;
+
 const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
 
 macro_rules! c {
@@ -102,7 +104,7 @@ macro_rules! roundtail {
     };
 }
 
-pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+pub fn compress(state: &mut [u32; 5], blocks: &[Block]) {
     if blocks.is_empty() {
         return;
     }

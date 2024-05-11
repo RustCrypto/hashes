@@ -11,10 +11,9 @@ pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt, slice::from_ref};
 use digest::{
-    array::Array,
     block_buffer::Eager,
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
+        AlgorithmName, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
@@ -31,8 +30,9 @@ mod compress;
 
 pub use compress::compress;
 
+type Block = digest::block_buffer::Block<Sha1Core>;
+
 const STATE_LEN: usize = 5;
-const BLOCK_SIZE: usize = <Sha1Core as BlockSizeUser>::BlockSize::USIZE;
 
 /// Core SHA-1 hasher state.
 #[derive(Clone)]
@@ -60,9 +60,8 @@ impl OutputSizeUser for Sha1Core {
 
 impl UpdateCore for Sha1Core {
     #[inline]
-    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+    fn update_blocks(&mut self, blocks: &[Block]) {
         self.block_len += blocks.len() as u64;
-        let blocks = Array::cast_slice_to_core(blocks);
         compress(&mut self.h, blocks);
     }
 }
@@ -74,7 +73,7 @@ impl FixedOutputCore for Sha1Core {
         let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
 
         let mut h = self.h;
-        buffer.len64_padding_be(bit_len, |b| compress(&mut h, from_ref(&b.0)));
+        buffer.len64_padding_be(bit_len, |b| compress(&mut h, from_ref(b)));
         for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }

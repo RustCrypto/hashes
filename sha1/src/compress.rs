@@ -1,4 +1,4 @@
-use crate::BLOCK_SIZE;
+use crate::Block;
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
@@ -22,6 +22,6 @@ cfg_if::cfg_if! {
 }
 
 /// SHA-1 compression function
-pub fn compress(state: &mut [u32; 5], blocks: &[[u8; BLOCK_SIZE]]) {
+pub fn compress(state: &mut [u32; 5], blocks: &[Block]) {
     compress_inner(state, blocks);
 }
