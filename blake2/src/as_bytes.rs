@@ -13,18 +13,12 @@ pub unsafe trait Safe {}
 
 pub trait AsBytes {
     fn as_bytes(&self) -> &[u8];
-    fn as_mut_bytes(&mut self) -> &mut [u8];
 }
 
 impl<T: Safe> AsBytes for [T] {
     #[inline]
     fn as_bytes(&self) -> &[u8] {
         unsafe { slice::from_raw_parts(self.as_ptr() as *const u8, mem::size_of_val(self)) }
-    }
-
-    #[inline]
-    fn as_mut_bytes(&mut self) -> &mut [u8] {
-        unsafe { slice::from_raw_parts_mut(self.as_mut_ptr() as *mut u8, mem::size_of_val(self)) }
     }
 }
 
