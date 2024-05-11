@@ -1,5 +1,7 @@
 //! LoongArch64 assembly backend
 
+use super::Block;
+
 macro_rules! c {
     ($($l:expr)*) => {
         concat!($($l ,)*)
@@ -78,7 +80,7 @@ macro_rules! roundtail {
     };
 }
 
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub fn compress(state: &mut [u32; 8], blocks: &[Block]) {
     if blocks.is_empty() {
         return;
     }

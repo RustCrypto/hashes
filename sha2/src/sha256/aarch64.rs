@@ -6,11 +6,12 @@
 
 use core::arch::{aarch64::*, asm};
 
+use super::Block;
 use crate::consts::K32;
 
 cpufeatures::new!(sha2_hwcap, "sha2");
 
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub fn compress(state: &mut [u32; 8], blocks: &[Block]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
     if sha2_hwcap::get() {
@@ -21,7 +22,7 @@ pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
 }
 
 #[target_feature(enable = "sha2")]
-unsafe fn sha256_compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+unsafe fn sha256_compress(state: &mut [u32; 8], blocks: &[Block]) {
     // SAFETY: Requires the sha2 feature.
 
     // Load state into vectors.

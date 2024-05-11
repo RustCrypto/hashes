@@ -1,3 +1,7 @@
+use crate::Sha512VarCore;
+
+type Block = digest::core_api::Block<Sha512VarCore>;
+
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
         mod soft;
@@ -24,6 +28,6 @@ cfg_if::cfg_if! {
 /// This is a low-level "hazmat" API which provides direct access to the core
 /// functionality of SHA-512.
 #[cfg_attr(docsrs, doc(cfg(feature = "compress")))]
-pub fn compress512(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub fn compress512(state: &mut [u64; 8], blocks: &[Block]) {
     compress(state, blocks)
 }

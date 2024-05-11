@@ -9,11 +9,12 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
+use super::Block;
 use crate::consts::K64;
 
 cpufeatures::new!(avx2_cpuid, "avx2");
 
-pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub fn compress(state: &mut [u64; 8], blocks: &[Block]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
     if avx2_cpuid::get() {
@@ -26,7 +27,7 @@ pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
 }
 
 #[target_feature(enable = "avx2")]
-unsafe fn sha512_compress_x86_64_avx2(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+unsafe fn sha512_compress_x86_64_avx2(state: &mut [u64; 8], blocks: &[Block]) {
     let mut start_block = 0;
 
     if blocks.len() & 0b1 != 0 {
@@ -55,7 +56,7 @@ unsafe fn sha512_compress_x86_64_avx2(state: &mut [u64; 8], blocks: &[[u8; 128]]
 }
 
 #[inline(always)]
-unsafe fn sha512_compress_x86_64_avx(state: &mut [u64; 8], block: &[u8; 128]) {
+unsafe fn sha512_compress_x86_64_avx(state: &mut [u64; 8], block: &Block) {
     let mut ms = [_mm_setzero_si128(); 8];
     let mut x = [_mm_setzero_si128(); 8];
 

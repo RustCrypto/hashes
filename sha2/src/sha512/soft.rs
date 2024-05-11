@@ -1,6 +1,8 @@
 #![allow(clippy::many_single_char_names)]
 use crate::consts::K64;
 
+use super::Block;
+
 /// Not an intrinsic, but works like an unaligned load.
 fn sha512load(v0: [u64; 2], v1: [u64; 2]) -> [u64; 2] {
     [v1[1], v0[0]]
@@ -208,7 +210,7 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub fn compress(state: &mut [u64; 8], blocks: &[Block]) {
     for block in blocks {
         let mut block_u32 = [0u64; 16];
         for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(8)) {

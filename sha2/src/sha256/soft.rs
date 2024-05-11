@@ -1,6 +1,8 @@
 #![allow(clippy::many_single_char_names)]
 use crate::consts::K32;
 
+use super::Block;
+
 #[inline(always)]
 fn shr(v: [u32; 4], o: u32) -> [u32; 4] {
     [v[0] >> o, v[1] >> o, v[2] >> o, v[3] >> o]
@@ -227,7 +229,7 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub fn compress(state: &mut [u32; 8], blocks: &[Block]) {
     for block in blocks {
         let mut block_u32 = [0u32; 16];
         for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
