@@ -197,6 +197,10 @@ impl OutputSizeUser for Sha1 {
     type OutputSize = U20;
 }
 
+impl BlockSizeUser for Sha1 {
+    type BlockSize = U64;
+}
+
 impl FixedOutput for Sha1 {
     #[inline]
     fn finalize_into(mut self, out: &mut Output<Self>) {
