@@ -18,7 +18,7 @@ unsuitable for further use in any security critical capacity, as it is
 But, this crate provides the detection [algorithm] pioneered by git, to detect hash collisions when they
 occur and prevent them. The [paper] has more details on how this works.
 
-This implementation will be slower to use than the pure SHA-1 implementation, as more work as to be done.
+This implementation will be slower to use than the pure SHA-1 implementation, as more work has to be done.
 
 ## Examples
 
