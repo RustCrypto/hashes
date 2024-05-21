@@ -64,24 +64,24 @@ fn g(h: &mut [u64; 8], n: &[u64; 8], m: &[u64; 8]) {
 }
 
 impl StreebogVarCore {
-    fn update_sigma(&mut self, m: &Block) {
-        let t = from_bytes(m);
+    fn update_sigma(&mut self, m: &[u64; 8]) {
         let mut carry = 0;
-        adc(&mut self.sigma[0], t[0], &mut carry);
-        adc(&mut self.sigma[1], t[1], &mut carry);
-        adc(&mut self.sigma[2], t[2], &mut carry);
-        adc(&mut self.sigma[3], t[3], &mut carry);
-        adc(&mut self.sigma[4], t[4], &mut carry);
-        adc(&mut self.sigma[5], t[5], &mut carry);
-        adc(&mut self.sigma[6], t[6], &mut carry);
-        adc(&mut self.sigma[7], t[7], &mut carry);
+        adc(&mut self.sigma[0], m[0], &mut carry);
+        adc(&mut self.sigma[1], m[1], &mut carry);
+        adc(&mut self.sigma[2], m[2], &mut carry);
+        adc(&mut self.sigma[3], m[3], &mut carry);
+        adc(&mut self.sigma[4], m[4], &mut carry);
+        adc(&mut self.sigma[5], m[5], &mut carry);
+        adc(&mut self.sigma[6], m[6], &mut carry);
+        adc(&mut self.sigma[7], m[7], &mut carry);
     }
 
     fn update_n(&mut self, len: u64) {
         let mut carry = 0;
         // note: `len` can not be bigger than block size,
-        // so `8*len` will never overflow
-        adc(&mut self.n[0], 8 * len, &mut carry);
+        // so `8 * len` will never overflow
+        let bits_len = 8 * len;
+        adc(&mut self.n[0], bits_len, &mut carry);
         adc(&mut self.n[1], 0, &mut carry);
         adc(&mut self.n[2], 0, &mut carry);
         adc(&mut self.n[3], 0, &mut carry);
@@ -92,9 +92,10 @@ impl StreebogVarCore {
     }
 
     fn compress(&mut self, block: &[u8; 64], msg_len: u64) {
-        g(&mut self.h, &self.n, &from_bytes(block));
+        let block = from_bytes(block);
+        g(&mut self.h, &self.n, &block);
         self.update_n(msg_len);
-        self.update_sigma(block);
+        self.update_sigma(&block);
     }
 }
 
