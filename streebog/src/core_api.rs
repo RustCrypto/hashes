@@ -14,7 +14,7 @@ use digest::{
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
-use crate::consts::{BLOCK_SIZE, C, SHUFFLED_LIN_TABLE};
+use crate::consts::{BLOCK_SIZE, C64, SHUFFLED_LIN_TABLE};
 
 type Block = [u8; 64];
 
@@ -24,70 +24,64 @@ type Block = [u8; 64];
 /// i.e. 256 and 512 bits respectively.
 #[derive(Clone)]
 pub struct StreebogVarCore {
-    h: Block,
+    h: [u64; 8],
     n: [u64; 8],
     sigma: [u64; 8],
 }
 
 #[inline(always)]
-fn lps(h: &mut Block, n: &Block) {
-    for i in 0..64 {
+fn lps(h: &mut [u64; 8], n: &[u64; 8]) {
+    for i in 0..8 {
         h[i] ^= n[i];
     }
 
     let mut buf = [0u64; 8];
-
-    for i in 0..4 {
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..8 {
         for j in 0..8 {
-            let b = h[2 * i + 8 * j] as usize;
-            buf[2 * i] ^= SHUFFLED_LIN_TABLE[j][b];
-            let b = h[2 * i + 1 + 8 * j] as usize;
-            buf[2 * i + 1] ^= SHUFFLED_LIN_TABLE[j][b];
+            let idx = (h[j] >> (8 * i) & 0xff) as usize;
+            buf[i] ^= SHUFFLED_LIN_TABLE[j][idx];
         }
     }
 
-    *h = to_bytes(&buf);
+    *h = buf;
+}
+
+fn g(h: &mut [u64; 8], n: &[u64; 8], m: &[u64; 8]) {
+    let mut key = *h;
+    let mut block = *m;
+
+    lps(&mut key, n);
+
+    for c in &C64 {
+        lps(&mut block, &key);
+        lps(&mut key, c);
+    }
+
+    for i in 0..8 {
+        h[i] ^= block[i] ^ key[i] ^ m[i];
+    }
 }
 
 impl StreebogVarCore {
-    fn g(&mut self, n: &Block, m: &Block) {
-        let mut key = [0u8; 64];
-        let mut block = [0u8; 64];
-
-        key.copy_from_slice(&self.h);
-        block.copy_from_slice(m);
-
-        lps(&mut key, n);
-
-        #[allow(clippy::needless_range_loop)]
-        for i in 0..12 {
-            lps(&mut block, &key);
-            lps(&mut key, &C[i]);
-        }
-
-        for i in 0..64 {
-            self.h[i] ^= block[i] ^ key[i] ^ m[i];
-        }
-    }
-
-    fn update_sigma(&mut self, m: &Block) {
-        let t = from_bytes(m);
+    fn update_sigma(&mut self, m: &[u64; 8]) {
         let mut carry = 0;
-        adc(&mut self.sigma[0], t[0], &mut carry);
-        adc(&mut self.sigma[1], t[1], &mut carry);
-        adc(&mut self.sigma[2], t[2], &mut carry);
-        adc(&mut self.sigma[3], t[3], &mut carry);
-        adc(&mut self.sigma[4], t[4], &mut carry);
-        adc(&mut self.sigma[5], t[5], &mut carry);
-        adc(&mut self.sigma[6], t[6], &mut carry);
-        adc(&mut self.sigma[7], t[7], &mut carry);
+        adc(&mut self.sigma[0], m[0], &mut carry);
+        adc(&mut self.sigma[1], m[1], &mut carry);
+        adc(&mut self.sigma[2], m[2], &mut carry);
+        adc(&mut self.sigma[3], m[3], &mut carry);
+        adc(&mut self.sigma[4], m[4], &mut carry);
+        adc(&mut self.sigma[5], m[5], &mut carry);
+        adc(&mut self.sigma[6], m[6], &mut carry);
+        adc(&mut self.sigma[7], m[7], &mut carry);
     }
 
     fn update_n(&mut self, len: u64) {
         let mut carry = 0;
         // note: `len` can not be bigger than block size,
-        // so `8*len` will never overflow
-        adc(&mut self.n[0], 8 * len, &mut carry);
+        // so `8 * len` will never overflow
+        let bits_len = 8 * len;
+        adc(&mut self.n[0], bits_len, &mut carry);
         adc(&mut self.n[1], 0, &mut carry);
         adc(&mut self.n[2], 0, &mut carry);
         adc(&mut self.n[3], 0, &mut carry);
@@ -98,9 +92,10 @@ impl StreebogVarCore {
     }
 
     fn compress(&mut self, block: &[u8; 64], msg_len: u64) {
-        self.g(&to_bytes(&self.n), block);
+        let block = from_bytes(block);
+        g(&mut self.h, &self.n, &block);
         self.update_n(msg_len);
-        self.update_sigma(block);
+        self.update_sigma(&block);
     }
 }
 
@@ -133,8 +128,8 @@ impl VariableOutputCore for StreebogVarCore {
     #[inline]
     fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
         let h = match output_size {
-            32 => [1; 64],
-            64 => [0; 64],
+            32 => [0x0101_0101_0101_0101; 8],
+            64 => [0; 8],
             _ => return Err(InvalidOutputSize),
         };
         let (n, sigma) = Default::default();
@@ -147,9 +142,9 @@ impl VariableOutputCore for StreebogVarCore {
         let mut block = buffer.pad_with_zeros();
         block[pos] = 1;
         self.compress(block.as_ref(), pos as u64);
-        self.g(&[0u8; 64], &to_bytes(&self.n));
-        self.g(&[0u8; 64], &to_bytes(&self.sigma));
-        out.copy_from_slice(&self.h);
+        g(&mut self.h, &[0u64; 8], &self.n);
+        g(&mut self.h, &[0u64; 8], &self.sigma);
+        out.copy_from_slice(&to_bytes(&self.h));
     }
 }
 
@@ -185,41 +180,20 @@ impl SerializableState for StreebogVarCore {
     type SerializedStateSize = U192;
 
     fn serialize(&self) -> SerializedState<Self> {
-        let serialized_h = Array::<_, U64>::from(self.h);
-
-        let mut serialized_n = Array::<_, U64>::default();
-        for (val, chunk) in self.n.iter().zip(serialized_n.chunks_exact_mut(8)) {
-            chunk.copy_from_slice(&val.to_le_bytes());
-        }
-
-        let mut serialized_sigma = Array::<_, U64>::default();
-        for (val, chunk) in self.sigma.iter().zip(serialized_sigma.chunks_exact_mut(8)) {
-            chunk.copy_from_slice(&val.to_le_bytes());
-        }
-
-        serialized_h.concat(serialized_n).concat(serialized_sigma)
+        let ser_h: Array<u8, U64> = to_bytes(&self.h).into();
+        let ser_n: Array<u8, U64> = to_bytes(&self.n).into();
+        let ser_sigma: Array<u8, U64> = to_bytes(&self.sigma).into();
+        ser_h.concat(ser_n).concat(ser_sigma)
     }
 
-    fn deserialize(
-        serialized_state: &SerializedState<Self>,
-    ) -> Result<Self, DeserializeStateError> {
-        let (serialized_h, remaining_buffer) = serialized_state.split::<U64>();
-
-        let (serialized_n, serialized_sigma) = remaining_buffer.split::<U64>();
-        let mut n = [0; 8];
-        for (val, chunk) in n.iter_mut().zip(serialized_n.chunks_exact(8)) {
-            *val = u64::from_le_bytes(chunk.try_into().unwrap());
-        }
-
-        let mut sigma = [0; 8];
-        for (val, chunk) in sigma.iter_mut().zip(serialized_sigma.chunks_exact(8)) {
-            *val = u64::from_le_bytes(chunk.try_into().unwrap());
-        }
+    fn deserialize(ser_state: &SerializedState<Self>) -> Result<Self, DeserializeStateError> {
+        let (ser_h, rem) = ser_state.split::<U64>();
+        let (ser_n, ser_sigma) = rem.split::<U64>();
 
         Ok(Self {
-            h: serialized_h.into(),
-            n,
-            sigma,
+            h: from_bytes(&ser_h.into()),
+            n: from_bytes(&ser_n.into()),
+            sigma: from_bytes(&ser_sigma.into()),
         })
     }
 }
