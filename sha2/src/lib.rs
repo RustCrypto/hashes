@@ -22,6 +22,8 @@ mod consts;
 mod core_api;
 mod sha256;
 mod sha512;
+#[cfg(feature = "spki")]
+mod spki;
 
 pub use sha256::compress256;
 pub use sha512::compress512;
