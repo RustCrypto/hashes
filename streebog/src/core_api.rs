@@ -64,33 +64,26 @@ fn g(h: &mut [u64; 8], n: &[u64; 8], m: &[u64; 8]) {
 }
 
 impl StreebogVarCore {
+    #[inline(always)]
     fn update_sigma(&mut self, m: &[u64; 8]) {
-        let mut carry = 0;
-        adc(&mut self.sigma[0], m[0], &mut carry);
-        adc(&mut self.sigma[1], m[1], &mut carry);
-        adc(&mut self.sigma[2], m[2], &mut carry);
-        adc(&mut self.sigma[3], m[3], &mut carry);
-        adc(&mut self.sigma[4], m[4], &mut carry);
-        adc(&mut self.sigma[5], m[5], &mut carry);
-        adc(&mut self.sigma[6], m[6], &mut carry);
-        adc(&mut self.sigma[7], m[7], &mut carry);
+        let mut carry = false;
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..8 {
+            adc(&mut self.sigma[i], m[i], &mut carry);
+        }
     }
 
+    #[inline(always)]
     fn update_n(&mut self, len: u64) {
-        let mut carry = 0;
-        // note: `len` can not be bigger than block size,
-        // so `8 * len` will never overflow
-        let bits_len = 8 * len;
-        adc(&mut self.n[0], bits_len, &mut carry);
-        adc(&mut self.n[1], 0, &mut carry);
-        adc(&mut self.n[2], 0, &mut carry);
-        adc(&mut self.n[3], 0, &mut carry);
-        adc(&mut self.n[4], 0, &mut carry);
-        adc(&mut self.n[5], 0, &mut carry);
-        adc(&mut self.n[6], 0, &mut carry);
-        adc(&mut self.n[7], 0, &mut carry);
+        let mut carry = false;
+        // Note: `len` can not be bigger than block size, so `8 * len` never overflows
+        adc(&mut self.n[0], 8 * len, &mut carry);
+        for i in 1..7 {
+            adc(&mut self.n[i], 0, &mut carry);
+        }
     }
 
+    #[inline(always)]
     fn compress(&mut self, block: &[u8; 64], msg_len: u64) {
         let block = from_bytes(block);
         g(&mut self.h, &self.n, &block);
@@ -198,11 +191,14 @@ impl SerializableState for StreebogVarCore {
     }
 }
 
+// This function mirrors implementation of the `carrying_add` method:
+// https://github.com/rust-lang/rust/blob/9cdfe28/library/core/src/num/uint_macros.rs#L2060-L2066
 #[inline(always)]
-fn adc(a: &mut u64, b: u64, carry: &mut u64) {
-    let ret = (*a as u128) + (b as u128) + (*carry as u128);
-    *a = ret as u64;
-    *carry = (ret >> 64) as u64;
+fn adc(v1: &mut u64, v2: u64, carry: &mut bool) {
+    let (a, b) = v1.overflowing_add(v2);
+    let (c, d) = a.overflowing_add(*carry as u64);
+    *v1 = c;
+    *carry = b || d;
 }
 
 #[inline(always)]
