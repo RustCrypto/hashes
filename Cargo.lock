@@ -94,14 +94,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "der"
+version = "0.8.0-pre.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b489fd2221710c1dd46637d66b984161fb66134f81437a8489800306bcc2ecea"
+dependencies = [
+ "const-oid",
+]
+
+[[package]]
 name = "digest"
 version = "0.11.0-pre.8"
-source = "git+https://github.com/RustCrypto/traits.git#7c7a0d2a2caa60e286835051e6ad5fd10a9a9554"
+source = "git+https://github.com/baloo/traits.git?branch=baloo/digest/expose-spki#f32b565722f2c46d2487037c8e088380beec5830"
 dependencies = [
  "blobby",
  "block-buffer",
  "const-oid",
  "crypto-common",
+ "spki",
  "subtle",
  "zeroize",
 ]
@@ -313,6 +323,15 @@ name = "spectral"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
+
+[[package]]
+name = "spki"
+version = "0.8.0-pre.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb2b56670f5ef52934c97efad30bf42585de0c33ec3e2a886e38b80d2db67243"
+dependencies = [
+ "der",
+]
 
 [[package]]
 name = "streebog"
