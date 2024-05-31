@@ -8,7 +8,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms)]
 
-pub use digest::{self, Digest};
+pub use digest::{self, CustomizedInit, Digest};
 
 use core::fmt;
 use digest::{
