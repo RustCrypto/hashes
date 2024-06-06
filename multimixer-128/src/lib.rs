@@ -15,16 +15,20 @@ use digest::{
     HashMarker, OutputSizeUser, Reset,
 };
 
+const BLOCKSIZE: usize = 32;
+
 pub struct MultimixerCore {
     x: [u32; 4usize],
     y: [u32; 4usize],
     h: [u32; 4usize],
+    k: [u32; 4usize],
     a: [u32; 4usize],
     b: [u32; 4usize],
     p: [u32; 4usize],
     q: [u32; 4usize],
-    key: [u8; 32usize],
+    key_blocks: Vec<Block<Self>>,
     block_sum: [u64; 8usize],
+    block_index: usize,
 }
 
 pub type Multimixer = CoreWrapper<MultimixerCore>;
@@ -45,8 +49,24 @@ impl MultimixerCore {
                 message_block[18 + i * 4],
                 message_block[19 + i * 4],
             ]);
+            self.h[i] = u32::from_be_bytes([
+                self.key_blocks[self.block_index][i * 4],
+                self.key_blocks[self.block_index][i * 4 + 1],
+                self.key_blocks[self.block_index][i * 4 + 2],
+                self.key_blocks[self.block_index][i * 4 + 3],
+            ]);
+            self.k[i] = u32::from_be_bytes([
+                self.key_blocks[self.block_index][i * 4 + 16],
+                self.key_blocks[self.block_index][i * 4 + 17],
+                self.key_blocks[self.block_index][i * 4 + 18],
+                self.key_blocks[self.block_index][i * 4 + 19],
+            ]);
+
+            self.a[i] = (self.x[i] + self.h[i]) % (2u32.pow(BLOCKSIZE as u32));
+            self.b[i] = (self.y[i] + self.k[i]) % (2u32.pow(BLOCKSIZE as u32));
         }
-        //TODO: Implement key and abpq
+        // TODO: impl p, q, block_sum
+        self.block_index += 1;
     }
 }
 
@@ -60,21 +80,30 @@ impl KeyInit for MultimixerCore {
     }
 
     fn new_from_slice(key: &[u8]) -> Result<Self, InvalidLength> {
-        if key.len() != <Self as KeySizeUser>::KeySize::USIZE {
+        let key_block_size = <Self as KeySizeUser>::KeySize::USIZE;
+        if key.len() % key_block_size != 0 {
             return Err(InvalidLength);
         }
         let mut s = Self {
             x: [0; 4],
             y: [0; 4],
             h: [0; 4],
+            k: [0; 4],
             a: [0; 4],
             b: [0; 4],
             p: [0; 4],
             q: [0; 4],
             block_sum: [0; 8],
-            key: [0; 32],
+            key_blocks: Vec::new(),
+            block_index: 0,
         };
-        s.key.clone_from_slice(&key);
+
+        for block in key.chunks(key_block_size) {
+            let array: [u8; BLOCKSIZE] = block
+                .try_into()
+                .expect("Key chunk is not of length 32 bytes");
+            s.key_blocks.push(array.into());
+        }
         Ok(s)
     }
 }
