@@ -5,13 +5,19 @@ use hex_literal::hex;
 
 use multimixer_128::Multimixer;
 
-// digest::new_test!(toy_main, "toy", Toy, fixed_reset_test); Need to find out how to make .blb testdata.
+#[test]
+fn multimixer_10_test() {
+    let key = &hex!("4420823cfde6f1c26b30f90ec7dd01e4887534a20f0b0d04c36ed80e71e0fd77");
+    let mut h = Multimixer::new(key.into());
+    let data = [0; 100];
+    digest::Update::update(&mut h, &data[..]);
+}
 
 #[test]
 fn multimixer_simple_test() {
     let key = &hex!("4420823cfde6f1c26b30f90ec7dd01e4887534a20f0b0d04c36ed80e71e0fd77");
     let message = &hex!("b07670eb940bd5335f973daad8619b91ffc911f57cced458bbbf2ce03753c9bd");
-    let mut h = Multimixer::new(key.into());
+    let mut h = Multimixer::new_from_slice(key).unwrap();
     h.update(message);
     assert_eq!(
         h.finalize_fixed().as_slice(),
