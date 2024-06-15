@@ -69,7 +69,7 @@ impl MultimixerCore {
 
         for i in 0..4 {
             x[i] = u32::from_ne_bytes([
-                message_block[0 + i * 4],
+                message_block[i * 4],
                 message_block[1 + i * 4],
                 message_block[2 + i * 4],
                 message_block[3 + i * 4],
@@ -105,9 +105,12 @@ impl MultimixerCore {
             p[3] as u64 * q[3] as u64,
         ];
 
-        for i in 0..self.block_sums.len() {
-            self.block_sums[i] = self.block_sums[i].wrapping_add(block_res[i]);
-        }
+        self.block_sums
+            .iter_mut()
+            .zip(block_res.iter())
+            .for_each(|(sum, &res)| {
+                *sum = sum.wrapping_add(res);
+            });
 
         self.block_index += 1;
     }
