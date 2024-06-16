@@ -240,7 +240,6 @@ impl Drop for DetectionState {
 impl ZeroizeOnDrop for DetectionState {}
 
 #[cfg(feature = "oid")]
-#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl digest::const_oid::AssociatedOid for Sha1 {
     const OID: digest::const_oid::ObjectIdentifier = sha1::Sha1Core::OID;
 }
