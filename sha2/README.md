@@ -28,6 +28,10 @@ use hex_literal::hex;
 
 let hash = Sha256::digest(b"hello world");
 assert_eq!(hash, hex!("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"));
+
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
 ```
 
 ### Incremental API
@@ -37,7 +41,8 @@ use sha2::{Sha256, Sha512, Digest};
 use hex_literal::hex;
 
 let mut hasher = Sha256::new();
-hasher.update(b"hello world");
+hasher.update(b"hello ");
+hasher.update(b"world");
 let hash256 = hasher.finalize();
 
 assert_eq!(hash256, hex!("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"));

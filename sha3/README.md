@@ -36,6 +36,10 @@ hasher.update(b"abc");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532"));
+
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532");
 ```
 
 SHAKE functions have an extendable output, so finalization method returns

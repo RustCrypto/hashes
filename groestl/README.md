@@ -17,9 +17,13 @@ use hex_literal::hex;
 
 let mut hasher = Groestl256::default();
 hasher.update(b"my message");
-let result = hasher.finalize();
+let hash = hasher.finalize();
 
-assert_eq!(result, hex!("dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86"));
+assert_eq!(hash, hex!("dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86"));
+
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86");
 ```
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
