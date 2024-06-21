@@ -32,6 +32,10 @@ use sha1_checked::Sha1;
 let result = Sha1::try_digest(b"hello world");
 assert_eq!(result.hash().as_ref(), hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
 assert!(!result.has_collision());
+
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(result.hash().as_ref());
+assert_eq!(hex_hash, "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
 ```
 
 ### Incremental API
