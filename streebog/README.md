@@ -21,6 +21,11 @@ let hash256 = hasher.finalize();
 
 assert_eq!(hash256, hex!("3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4"));
 
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash256 = base16ct::lower::encode_string(&hash256);
+assert_eq!(hex_hash256, "3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4");
+
+// Same example for Streebog-512
 let mut hasher = Streebog512::new();
 hasher.update("The quick brown fox jumps over the lazy dog.");
 let hash512 = hasher.finalize();

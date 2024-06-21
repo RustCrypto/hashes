@@ -24,8 +24,8 @@ let mut hasher = Blake2b512::new();
 hasher.update(b"hello world");
 
 // read hash digest and consume hasher
-let res = hasher.finalize();
-assert_eq!(res, hex!(
+let hash = hasher.finalize();
+assert_eq!(hash, hex!(
     "021ced8799296ceca557832ab941a50b4a11f83478cf141f51f933f653ab9fbc"
     "c05a037cddbed06e309bf334942c4e58cdf1a46e237911ccd7fcf9787cbc7fd0"
 ));
@@ -33,8 +33,12 @@ assert_eq!(res, hex!(
 // same example for Blake2s256:
 let mut hasher = Blake2s256::new();
 hasher.update(b"hello world");
-let res = hasher.finalize();
-assert_eq!(res, hex!("9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b"));
+let hash = hasher.finalize();
+assert_eq!(hash, hex!("9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b"));
+
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b");
 ```
 
 Also, see the [examples section] in the RustCrypto/hashes readme.

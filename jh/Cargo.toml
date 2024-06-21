@@ -19,6 +19,7 @@ simd = { package = "ppv-lite86", version = "0.2.6" }
 
 [dev-dependencies]
 digest = { version = "=0.11.0-pre.8", features = ["dev"] }
+base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]
 zeroize = ["digest/zeroize"]

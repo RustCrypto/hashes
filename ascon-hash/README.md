@@ -28,6 +28,10 @@ hasher.update(b"some bytes");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("b742ca75e57038757059cccc6874714f9dbd7fc5924a7df4e316594fd1426ca8"));
+
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "b742ca75e57038757059cccc6874714f9dbd7fc5924a7df4e316594fd1426ca8");
 ```
 
 XOF hashing:

@@ -21,6 +21,10 @@ hasher.update(b"hello world");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("44f0061e69fa6fdfc290c494654a05dc0c053da7e5c52b84ef93a9d67d3fff88"));
+
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "44f0061e69fa6fdfc290c494654a05dc0c053da7e5c52b84ef93a9d67d3fff88");
 ```
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
