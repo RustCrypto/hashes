@@ -1,13 +1,13 @@
 //! SHA-1 `aarch64` backend.
 
+use crate::K;
+
 // Per rustc target feature docs for `aarch64-unknown-linux-gnu` and
 // `aarch64-apple-darwin` platforms, the `sha2` target feature enables
 // SHA-1 as well:
 //
 // > Enable SHA1 and SHA256 support.
 cpufeatures::new!(sha1_hwcap, "sha2");
-
-const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
 
 // note that `sha2` implicitly enables `neon`
 #[target_feature(enable = "sha2")]

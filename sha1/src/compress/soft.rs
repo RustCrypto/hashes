@@ -1,7 +1,6 @@
 #![allow(clippy::many_single_char_names)]
 use super::BLOCK_SIZE;
-
-const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
+use crate::K;
 
 #[inline(always)]
 fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
