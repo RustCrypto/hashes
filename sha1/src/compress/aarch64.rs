@@ -16,7 +16,7 @@ unsafe fn compress_sha1_neon(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
 
     let mut abcd = vld1q_u32(state.as_ptr());
     let mut e0 = state[4];
-    let mut e1;
+    let (mut e1, mut tmp0, mut tmp1);
     let (mut msg0, mut msg1, mut msg2, mut msg3);
 
     for block in blocks {
@@ -30,8 +30,8 @@ unsafe fn compress_sha1_neon(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
         msg2 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(bp.add(32))));
         msg3 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(bp.add(48))));
 
-        let mut tmp0 = vaddq_u32(msg0, vdupq_n_u32(K[0]));
-        let mut tmp1 = vaddq_u32(msg1, vdupq_n_u32(K[0]));
+        tmp0 = vaddq_u32(msg0, vdupq_n_u32(K[0]));
+        tmp1 = vaddq_u32(msg1, vdupq_n_u32(K[0]));
 
         // Rounds 0-3
         e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
