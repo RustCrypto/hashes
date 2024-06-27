@@ -1,4 +1,3 @@
-
 #[test]
 fn full_test() {
     let message = b"Hello, World!".to_vec();
