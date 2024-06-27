@@ -9,6 +9,7 @@ members = [
     "groestl",
     "jh",
     "k12",
+    "kupyna512",
     "md2",
     "md4",
     "md5",
