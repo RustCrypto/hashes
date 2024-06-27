@@ -13,7 +13,6 @@ type Matrix = [[u8; COLS]; ROWS];
 
 use tables::{MDS_MATRIX, SBOXES};
 
-
 pub(crate) fn block_to_matrix(block: &[u8]) -> Matrix {
     let mut matrix = [[0u8; COLS]; ROWS];
     for i in 0..ROWS {

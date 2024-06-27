@@ -1,5 +1,4 @@
-use crate::{pad_message, divide_into_blocks};
-
+use crate::{divide_into_blocks, pad_message};
 
 const STATE_SIZE_512: usize = 1024;
 
@@ -9,7 +8,7 @@ fn block_test_0() {
 
     let expected_block_count = 1;
 
-    let padded_message = pad_message(&message,0, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 0, STATE_SIZE_512);
 
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE_512);
 
@@ -28,7 +27,7 @@ fn block_test_8() {
 
     let expected_block_count = 1;
 
-    let padded_message = pad_message(&message,8, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 8, STATE_SIZE_512);
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE_512);
 
     assert_eq!(blocks.len(), expected_block_count);
@@ -52,7 +51,7 @@ fn block_test_512() {
 
     let expected_block_count = 1;
 
-    let padded_message = pad_message(&message,512, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 512, STATE_SIZE_512);
 
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE_512);
 
@@ -77,7 +76,7 @@ fn block_test_510() {
 
     let expected_block_count = 1;
 
-    let padded_message = pad_message(&message,510, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 510, STATE_SIZE_512);
 
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE_512);
 
@@ -88,7 +87,6 @@ fn block_test_510() {
     for block in blocks {
         assert_eq!(block.len(), block_len);
     }
-
 }
 
 #[test]
@@ -107,7 +105,7 @@ fn block_test_1024() {
 
     let expected_block_count = 2;
 
-    let padded_message = pad_message(&message,1024, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 1024, STATE_SIZE_512);
 
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE_512);
 
@@ -145,7 +143,7 @@ fn block_test_2048() {
 
     let expected_block_count = 3;
 
-    let padded_message = pad_message(&message,2048, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 2048, STATE_SIZE_512);
 
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE_512);
 
@@ -178,7 +176,7 @@ fn block_test_1536() {
 
     let expected_block_count = 2;
 
-    let padded_message = pad_message(&message,1536, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 1536, STATE_SIZE_512);
 
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE_512);
 
@@ -204,7 +202,7 @@ fn block_test_655() {
 
     let expected_block_count = 1;
 
-    let padded_message = pad_message(&message,655, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 655, STATE_SIZE_512);
 
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE_512);
 
