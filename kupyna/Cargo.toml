@@ -1,0 +1,30 @@
+[package]
+name = "kupyna"
+version = "0.1.0"
+description = "Hashing algorithm for Kupyna, 8 to 512 length"
+authors = [
+    "Joshua Koudys <josh@qaribou.com>",
+    "RustCrypto Developers",
+]
+license = "MIT"
+readme = "README.md"
+edition = "2021"
+documentation = "https://docs.rs/kupyna"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "hash", "kupyno"]
+categories = ["cryptography", "no-std"]
+rust-version = "1.71"
+
+[dependencies]
+digest = { version = "=0.11.0-pre.8", default-features = false, features = ["core-api"] }
+kupyna = { version = "0.1.0", default-features = false }
+
+[dev-dependencies]
+
+[features]
+default = ["std"]
+std = ["digest/std"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
