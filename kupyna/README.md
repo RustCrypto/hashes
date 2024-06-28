@@ -20,15 +20,10 @@ Kupyna is a hash function standardized in Ukraine as DSTU 7564:2014. It is desig
 
 ## Implementation Details
 
-### Functions
-
-- **`pad_message`**: Pads the input message according to the Kupyna padding scheme.
-- **`divide_into_blocks`**: Divides the padded message into fixed-size blocks.
-- **`t_xor_l`**: Placeholder for the T⊕l transformation (to be implemented).
-- **`t_plus_l`**: Placeholder for the T+l transformation (to be implemented).
-- **`r_l_n`**: Truncates the block to the desired number of bits.
-- **`kupyna_hash`**: Main function to compute the Kupyna hash of a given message.
-- **`xor_bytes`**: Utility function to perform bitwise XOR on two byte slices.
+### TODO
+Implement the excellent digest::Digest trait.
+Work on streams of arbitrary size, so long as they have a known size by the end of them. Right
+now it's just running on byte slices because it's easy.
 
 ### Usage
 
@@ -37,9 +32,8 @@ To compute the hash of a message using this implementation, you can call the `ku
 ```rust
 fn main() {
     let message = b"hello world";
-    let hash_code_length = 256;
 
-    let hash = kupyna_hash(message, hash_code_length);
+    let hash = kupyna::hash(message);
 
     println!("Hash: {:?}", hash);
 }
