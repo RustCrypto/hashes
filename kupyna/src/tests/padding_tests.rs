@@ -18,7 +18,7 @@ fn pad_test_0() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let padded_message = pad_message(&message,0, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 0, STATE_SIZE_512);
 
     assert_eq!(padded_message, expected_output);
 }
@@ -39,7 +39,7 @@ fn pad_test_8() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let padded_message = pad_message(&message,8, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 8, STATE_SIZE_512);
 
     assert_eq!(padded_message, expected_output);
 }
@@ -66,7 +66,7 @@ fn pad_test_510() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let padded_message = pad_message(&message,510, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 510, STATE_SIZE_512);
 
     assert_eq!(padded_message, expected_output);
 }
@@ -93,7 +93,7 @@ fn pad_test_512() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let padded_message = pad_message(&message,512, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 512, STATE_SIZE_512);
 
     assert_eq!(padded_message, expected_output);
 }
@@ -133,7 +133,7 @@ fn pad_test_1024() {
         0x00,
     ];
 
-    let padded_message = pad_message(&message,1024, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 1024, STATE_SIZE_512);
 
     assert_eq!(padded_message, expected_output);
 }
@@ -190,7 +190,7 @@ fn pad_test_2048() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let padded_message = pad_message(&message,2048, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 2048, STATE_SIZE_512);
 
     assert_eq!(padded_message, expected_output);
 }
@@ -234,7 +234,7 @@ fn pad_test_1536() {
         0x00,
     ];
 
-    let padded_message = pad_message(&message,1536, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 1536, STATE_SIZE_512);
 
     assert_eq!(padded_message, expected_output);
 }
@@ -262,7 +262,7 @@ fn pad_test_655() {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     ];
 
-    let padded_message = pad_message(&message,655, STATE_SIZE_512);
+    let padded_message = pad_message(&message, 655, STATE_SIZE_512);
 
     assert_eq!(padded_message, expected_output);
 }
