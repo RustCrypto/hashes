@@ -5,8 +5,6 @@ mod sub_units;
 const STATE_SIZE: usize = 1024;
 const HASH_SIZE: usize = 512;
 
-const MAX_MESSAGE_LENGTH: usize = 18446744073709551615;
-
 fn pad_message(message: &[u8], msg_len_bits: usize, state_size: usize) -> Vec<u8> {
     let round_msg_len = message.len() * 8;
     let d =
@@ -58,9 +56,6 @@ pub fn hash(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static
     let mut message = message;
     let message_length: usize;
     if let Some(len) = length {
-        if len > MAX_MESSAGE_LENGTH {
-            return Err("Message is too long");
-        }
         if len > message.len() * 8 {
             return Err("Message length is less than the provided length");
         }
@@ -78,9 +73,6 @@ pub fn hash(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static
         message_length = len;
 
     } else {
-        if message.len() * 8 > MAX_MESSAGE_LENGTH {
-            return Err("Message is too long");
-        }
         message_length = message.len() * 8;
     }
 
