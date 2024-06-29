@@ -1,6 +1,6 @@
+mod sub_units;
 #[cfg(test)]
 mod tests;
-mod sub_units;
 
 const STATE_SIZE: usize = 1024;
 const HASH_SIZE: usize = 512;
@@ -60,10 +60,10 @@ pub fn hash(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static
             return Err("Message length is less than the provided length");
         }
 
-        let mut trimmed_message = message[..(len/8)].to_vec();
+        let mut trimmed_message = message[..(len / 8)].to_vec();
 
         if len % 8 != 0 {
-            let extra_byte = message[len/8];
+            let extra_byte = message[len / 8];
             let extra_bits = len % 8;
             let mask = 0xFF << (8 - extra_bits);
             trimmed_message.push(extra_byte & mask);
@@ -71,7 +71,6 @@ pub fn hash(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static
 
         message = trimmed_message;
         message_length = len;
-
     } else {
         message_length = message.len() * 8;
     }
@@ -80,9 +79,8 @@ pub fn hash(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static
 
     let blocks = divide_into_blocks(&padded_message, STATE_SIZE);
 
-    let mut init_vector: Vec<u8> = vec![0; STATE_SIZE/8];
+    let mut init_vector: Vec<u8> = vec![0; STATE_SIZE / 8];
     init_vector[0] = 0x80; // set the first bit of this init vector to high
-
 
     let fin_vector = sub_units::plant(blocks, &init_vector);
 
@@ -90,4 +88,3 @@ pub fn hash(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static
 
     Ok(hash)
 }
-
