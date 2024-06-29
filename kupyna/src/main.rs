@@ -1,5 +1,3 @@
-use kupyna;
-
 fn main() {
     let message = b"Hello, World!".to_vec();
     let _message_length = 0;
