@@ -4,10 +4,13 @@
 
 The Kupyna hash function is a cryptographic hash developed in Ukraine, designed for high security and efficiency. This implementation supports generating hash codes of various lengths.
 
-## Author
+## Authors
 
 Joshua Koudys  
 Email: [josh@qaribou.com](mailto:josh@qaribou.com)
+
+Raj Singh Bisen  
+Email: [typhoeusxoxo@gmail.com](mailto:typhoeusxoxo@gmail.com)
 
 ## Summary
 
