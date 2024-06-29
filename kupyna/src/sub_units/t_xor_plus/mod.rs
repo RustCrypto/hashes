@@ -35,9 +35,9 @@ fn matrix_to_block(matrix: Matrix) -> Vec<u8> {
 }
 
 pub(crate) fn add_constant_xor(mut state: Matrix, round: usize) -> Matrix {
-    for j in 0..ROWS {
+    for (j, row) in state.iter_mut().enumerate().take(ROWS) {
         let constant = ((j * 0x10) ^ round) as u8;
-        state[j][0] ^= constant;
+        row[0] ^= constant;
     }
     state
 }
@@ -59,8 +59,8 @@ pub(crate) fn add_constant_plus(mut state: Matrix, round: usize) -> Matrix {
 
 pub(crate) fn s_box_layer(mut state: Matrix) -> Matrix {
     for i in 0..COLS {
-        for j in 0..ROWS {
-            state[j][i] = SBOXES[i % 4][state[j][i] as usize];
+        for row in state.iter_mut() {
+            row[i] = SBOXES[i % 4][row[i] as usize];
         }
     }
     state
@@ -70,7 +70,7 @@ pub(crate) fn rotate_rows(mut state: Matrix) -> Matrix {
     let mut temp = [0u8; ROWS];
     let mut shift: i32 = -1;
     for i in 0..COLS {
-        if (i == COLS - 1) && true {
+        if i == COLS - 1 {
             shift = 11;
         } else {
             shift += 1;
