@@ -13,6 +13,9 @@ cfg_if::cfg_if! {
     } else if #[cfg(target_arch = "loongarch64")] {
         mod loongarch64_asm;
         use loongarch64_asm::compress;
+    } else if #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))] {
+        mod wasm32;
+        use wasm32::compress;
     } else {
         mod soft;
         use soft::compress;
