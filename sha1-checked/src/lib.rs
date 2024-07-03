@@ -6,8 +6,6 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
-// TODO: remove after fixing https://github.com/RustCrypto/hashes/issues/594
-#![allow(dead_code)]
 
 //! Collision checked Sha1.
 //!
