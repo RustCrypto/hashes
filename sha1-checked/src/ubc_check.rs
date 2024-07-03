@@ -39,9 +39,13 @@ const DV_II_54_0_BIT: u32 = 1 << 29;
 const DV_II_55_0_BIT: u32 = 1 << 30;
 const DV_II_56_0_BIT: u32 = 1 << 31;
 
+/// Disturbance Vector (DV).
 pub struct Info {
+    /// The step to do the recompression from for collision detection.
     pub testt: Testt,
+    /// Defines the bit to check for each DV in the dvmask returned by [`ubc_check`].
     pub maskb: i32,
+    /// The expanded message block XOR-difference defined by the DV.
     pub dm: [u32; 80],
 }
 
@@ -52,12 +56,9 @@ pub enum Testt {
     T65 = 65,
 }
 
-/// Contains a list of SHA-1 Disturbance Vectors (DV) to check
-/// `dv_type`, `dv_k` and `dv_b` define the DV: I(K,B) or II(K,B) (see the paper)
-/// `dm[80]` is the expanded message block XOR-difference defined by the DV
-/// testt is the step to do the recompression from for collision detection
-/// `maski` and `maskb` define the bit to check for each DV in the dvmask returned by [`ubc_check`].
+/// The list of SHA-1 Disturbance Vectors (DV) to check.
 pub const SHA1_DVS: [Info; 32] = [
+    // DV: type=1, K=43, B=0,
     Info {
         testt: Testt::T58,
         maskb: 0,
@@ -74,6 +75,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x80000599,
         ],
     },
+    // DV: type=1, K=44, B=0,
     Info {
         testt: Testt::T58,
         maskb: 1,
@@ -90,6 +92,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x8000004c, 0x803, 0x80000161,
         ],
     },
+    // DV: type=1, K=45, B=0,
     Info {
         testt: Testt::T58,
         maskb: 2,
@@ -106,6 +109,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x8000004c, 0x803,
         ],
     },
+    // DV: type=1, K=46, B=0,
     Info {
         testt: Testt::T58,
         maskb: 3,
@@ -122,6 +126,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x408, 0x800000e6, 0x8000004c,
         ],
     },
+    // DV: type=1, K=46, B=2,
     Info {
         testt: Testt::T58,
         maskb: 4,
@@ -137,6 +142,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x1020, 0x39a, 0x132,
         ],
     },
+    // DV: type=1, K=47, B=0,
     Info {
         testt: Testt::T58,
         maskb: 5,
@@ -153,6 +159,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x408, 0x800000e6,
         ],
     },
+    // DV: type=1, K=47, B=2,
     Info {
         testt: Testt::T58,
         maskb: 6,
@@ -168,6 +175,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x60, 0x590, 0x1020, 0x39a,
         ],
     },
+    // DV: type=1, K=48, B=0
     Info {
         testt: Testt::T58,
         maskb: 7,
@@ -184,6 +192,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x18, 0x164, 0x408,
         ],
     },
+    // DV: type=1, K=48, B=2,
     Info {
         testt: Testt::T58,
         maskb: 8,
@@ -199,6 +208,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x80a, 0x60, 0x590, 0x1020,
         ],
     },
+    // DV: type=1, K=49, B=0,
     Info {
         testt: Testt::T58,
         maskb: 9,
@@ -215,6 +225,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x80000012, 0x80000202, 0x18, 0x164,
         ],
     },
+    // DV: type=1, K=49, B=2,
     Info {
         testt: Testt::T58,
         maskb: 10,
@@ -230,6 +241,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x124, 0x40c, 0x26, 0x4a, 0x80a, 0x60, 0x590,
         ],
     },
+    // DV: type=1, K=50, B=0,
     Info {
         testt: Testt::T65,
         maskb: 11,
@@ -246,6 +258,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x80000012, 0x80000202, 0x18,
         ],
     },
+    // DV: type=1, K=50, B=2,
     Info {
         testt: Testt::T65,
         maskb: 12,
@@ -261,6 +274,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x12, 0x202, 0x1a, 0x124, 0x40c, 0x26, 0x4a, 0x80a, 0x60,
         ],
     },
+    // DV: type=1, K=51, B=0,
     Info {
         testt: Testt::T65,
         maskb: 13,
@@ -277,6 +291,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x49, 0x103, 0x80000009, 0x80000012, 0x80000202,
         ],
     },
+    // DV: type=1, K=51, B=2,
     Info {
         testt: Testt::T65,
         maskb: 14,
@@ -292,6 +307,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x9, 0x12, 0x202, 0x1a, 0x124, 0x40c, 0x26, 0x4a, 0x80a,
         ],
     },
+    // DV: type=1, K=52, B=0,
     Info {
         testt: Testt::T65,
         maskb: 15,
@@ -308,6 +324,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x49, 0x103, 0x80000009, 0x80000012,
         ],
     },
+    // DV: type=2, K=45, B=0,
     Info {
         testt: Testt::T58,
         maskb: 16,
@@ -324,6 +341,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x8000041a, 0x2e4, 0x80000054, 0x967,
         ],
     },
+    // DV: type=2, K=46, B=0,
     Info {
         testt: Testt::T58,
         maskb: 17,
@@ -340,6 +358,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x8000041a, 0x2e4, 0x80000054,
         ],
     },
+    // DV: type=2, K=46, B=2,
     Info {
         testt: Testt::T58,
         maskb: 18,
@@ -355,6 +374,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x46c, 0x5b6, 0x106a, 0xb90, 0x152,
         ],
     },
+    // DV: type=2, K=47, B=0,
     Info {
         testt: Testt::T58,
         maskb: 19,
@@ -371,6 +391,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x8000016d, 0x8000041a, 0x2e4,
         ],
     },
+    // DV: type=2, K=48, B=0,
     Info {
         testt: Testt::T58,
         maskb: 20,
@@ -387,6 +408,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x11b, 0x8000016d, 0x8000041a,
         ],
     },
+    // DV: type=2, K=49, B=0,
     Info {
         testt: Testt::T58,
         maskb: 21,
@@ -403,6 +425,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x89, 0x14, 0x8000024b, 0x11b, 0x8000016d,
         ],
     },
+    // DV: type=2, K=49, B=2,
     Info {
         testt: Testt::T58,
         maskb: 22,
@@ -418,6 +441,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x20b, 0x11b, 0x12d, 0x41e, 0x224, 0x50, 0x92e, 0x46c, 0x5b6,
         ],
     },
+    // DV: type=2, K=50, B=0,
     Info {
         testt: Testt::T65,
         maskb: 23,
@@ -434,6 +458,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x89, 0x14, 0x8000024b, 0x11b,
         ],
     },
+    // DV: type=2, K=50, B=2,
     Info {
         testt: Testt::T65,
         maskb: 24,
@@ -449,6 +474,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x20b, 0x11b, 0x12d, 0x41e, 0x224, 0x50, 0x92e, 0x46c,
         ],
     },
+    // DV: type=2, K=51, B=0,
     Info {
         testt: Testt::T65,
         maskb: 25,
@@ -465,6 +491,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x89, 0x14, 0x8000024b,
         ],
     },
+    // DV: type=2, K=51, B=2,
     Info {
         testt: Testt::T65,
         maskb: 26,
@@ -480,6 +507,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0x20b, 0x11b, 0x12d, 0x41e, 0x224, 0x50, 0x92e,
         ],
     },
+    // DV: type=2, K=52, B=0,
     Info {
         testt: Testt::T65,
         maskb: 27,
@@ -496,6 +524,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0xc0000046, 0x4000004b, 0x80000107, 0x89, 0x14,
         ],
     },
+    // DV: type=2, K=53, B=0,
     Info {
         testt: Testt::T65,
         maskb: 28,
@@ -512,6 +541,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0xc0000046, 0x4000004b, 0x80000107, 0x89,
         ],
     },
+    // DV: type=2, K=54, B=0,
     Info {
         testt: Testt::T65,
         maskb: 29,
@@ -528,6 +558,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0xc0000082, 0xc0000046, 0x4000004b, 0x80000107,
         ],
     },
+    // DV: type=2, K=55, B=0,
     Info {
         testt: Testt::T65,
         maskb: 30,
@@ -544,6 +575,7 @@ pub const SHA1_DVS: [Info; 32] = [
             0xc0000082, 0xc0000046, 0x4000004b,
         ],
     },
+    // DV: type=2, K=56, B = 0,
     Info {
         testt: Testt::T65,
         maskb: 31,
