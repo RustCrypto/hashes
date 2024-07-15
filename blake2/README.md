@@ -75,7 +75,7 @@ assert_eq!(res, hex!("2cc55c84e416924e6400"));
 
 ### Message Authentication Code (MAC)
 
-BLAKE2 can be used as a MAC with variable output size set at run time:
+BLAKE2 can be used as a MAC with variable output size set at compile time:
 
 ```rust
 use blake2::Blake2bMac;
