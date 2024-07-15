@@ -319,9 +319,9 @@ macro_rules! blake2_mac_impl {
                 })
             }
             /// Creates a new instance using the provided key, skipping the salt
-            /// and personal. This method is equivalent to calling
+            /// and persona. This method is equivalent to calling
             /// [`new_with_salt_and_personal`](Self::new_with_salt_and_personal)
-            /// with empty slices for the salt and personal.
+            /// with empty slices for the salt and persona.
             #[inline]
             pub fn new_with_key(key: &[u8]) -> Result<Self, InvalidLength> {
                 Self::new_with_salt_and_personal(key, &[], &[])
