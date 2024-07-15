@@ -82,9 +82,7 @@ use blake2::Blake2bMac;
 use blake2::digest::{Update, FixedOutput, consts::U16};
 use hex_literal::hex;
 
-let mut hasher: Blake2bMac<U16> =
-    // Skip optional salt and optional persona.
-    Blake2bMac::new_with_salt_and_personal(b"my_key", &[], &[]).unwrap();
+let mut hasher: Blake2bMac<U16> = Blake2bMac::new_with_key(b"my_key").unwrap();
 hasher.update(b"my_input");
 let res = hasher.finalize_fixed();
 

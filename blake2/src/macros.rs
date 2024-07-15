@@ -284,7 +284,7 @@ macro_rules! blake2_mac_impl {
             OutSize: ArraySize + IsLessOrEqual<$max_size>,
             LeEq<OutSize, $max_size>: NonZero,
         {
-            /// Create new instance using provided key, salt, and persona.
+            /// Create new instance using the provided key, salt, and persona.
             ///
             /// # Errors
             ///
@@ -317,6 +317,14 @@ macro_rules! blake2_mac_impl {
                     },
                     _out: PhantomData,
                 })
+            }
+            /// Creates a new instance using the provided key, skipping the salt
+            /// and personal. This method is equivalent to calling
+            /// [`new_with_salt_and_personal`](Self::new_with_salt_and_personal)
+            /// with empty slices for the salt and personal.
+            #[inline]
+            pub fn new_with_key(key: &[u8]) -> Result<Self, InvalidLength> {
+                Self::new_with_salt_and_personal(key, &[], &[])
             }
         }
 
