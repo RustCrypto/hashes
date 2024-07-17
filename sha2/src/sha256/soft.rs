@@ -236,3 +236,19 @@ pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         sha256_digest_block_u32(state, &block_u32);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::sha256::soft::schedule;
+
+    #[test]
+    fn schedule_test() {
+        let v0: [u32; 4] = [0, 0, 0, 0];
+        let v1: [u32; 4] = [0, 0, 0, 0];
+        let v2: [u32; 4] = [0, 0, 0, 0];
+        let v3: [u32; 4] = [0, 0, 0, 0];
+        let expected: [u32; 4] = [0, 0, 0, 0];
+        let result = schedule(v0, v1, v2, v3);
+        assert_eq!(result, expected);
+    }
+}

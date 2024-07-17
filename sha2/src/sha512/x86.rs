@@ -355,3 +355,64 @@ const SHA512_ROUNDS_NUM: usize = 80;
 const SHA512_HASH_BYTE_LEN: usize = 64;
 const SHA512_HASH_WORDS_NUM: usize = SHA512_HASH_BYTE_LEN / size_of::<u64>();
 const SHA512_BLOCK_WORDS_NUM: usize = SHA512_BLOCK_BYTE_LEN / size_of::<u64>();
+
+#[cfg(test)]
+mod tests {
+    use crate::sha512::x86::sha512_compress_x86_64_avx2;
+
+    #[test]
+    fn test_sha512_compress_x86_64_avx2() {
+        unsafe {
+            let mut state = [
+                0x6a09e667f3bcc908,
+                0xbb67ae8584caa73b,
+                0x3c6ef372fe94f82b,
+                0xa54ff53a5f1d36f1,
+                0x510e527fade682d1,
+                0x9b05688c2b3e6c1f,
+                0x1f83d9abfb41bd6b,
+                0x5be0cd19137e2179,
+            ];
+            let blocks = [[0u8; 128], [0u8; 128]];
+            sha512_compress_x86_64_avx2(&mut state, &blocks);
+            assert_eq!(
+                state,
+                [
+                    0x1F6A2DE220B43EBC,
+                    0xF052C997D2B28419,
+                    0x8ACEEC8F1A7F8421,
+                    0xD16BD3C52FAC3460,
+                    0x08F8C96E9029BC30,
+                    0x284D3E4C0EDDC462,
+                    0x0261B89DD3808F39,
+                    0x43044E2B40D0899D
+                ]
+            );
+            let mut state = [
+                0x6a09e667f3bcc908,
+                0xbb67ae8584caa73b,
+                0x3c6ef372fe94f82b,
+                0xa54ff53a5f1d36f1,
+                0x510e527fade682d1,
+                0x9b05688c2b3e6c1f,
+                0x1f83d9abfb41bd6b,
+                0x5be0cd19137e2179,
+            ];
+            let blocks = [[0u8; 128]];
+            sha512_compress_x86_64_avx2(&mut state, &blocks);
+            assert_eq!(
+                state,
+                [
+                    0xCF7881D5774ACBE8,
+                    0x533362E0FBC78070,
+                    0x0267639D87460EDA,
+                    0x3086CB40E85931B0,
+                    0x717DC95288A023A3,
+                    0x96BAB2C14CE0B5E0,
+                    0x6FC4FE04EAE33E0B,
+                    0x91F4D80CBD668BEE
+                ]
+            );
+        }
+    }
+}

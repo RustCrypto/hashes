@@ -248,3 +248,47 @@ impl SerializableState for Sha512VarCore {
         Ok(Self { state, block_len })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::core_api::Array;
+    use crate::core_api::U128;
+    use crate::{Sha256VarCore, Sha512VarCore};
+    use digest::core_api::Block;
+    use digest::core_api::UpdateCore;
+    use digest::core_api::VariableOutputCore;
+
+    #[test]
+    fn test_update_blocks_after_blocks() {
+        let mut core = Sha256VarCore::new(32).unwrap();
+        let block = Block::<Sha256VarCore>::default();
+        core.update_blocks(&[block, block]);
+        core.update_blocks(&[block]);
+        assert_eq!(core.block_len, 3);
+    }
+
+    #[test]
+    fn test_sha256_var_core_new_valid_224() {
+        assert!(Sha256VarCore::new(28).is_ok());
+        assert!(Sha256VarCore::new(32).is_ok());
+        assert!(Sha256VarCore::new(0).is_err());
+    }
+
+    #[test]
+    fn update_blocks_increases_block_length() {
+        let mut core = Sha512VarCore::new(64).unwrap();
+        let initial_block_len = core.block_len;
+        let block = Array::<u8, U128>::default();
+        let blocks = [block; 1];
+        core.update_blocks(&blocks);
+        assert_eq!(core.block_len, initial_block_len + blocks.len() as u128);
+    }
+
+    #[test]
+    fn sha512_var_core_new_valid_output_sizes() {
+        assert!(Sha512VarCore::new(28).is_ok());
+        assert!(Sha512VarCore::new(32).is_ok());
+        assert!(Sha512VarCore::new(48).is_ok());
+        assert!(Sha512VarCore::new(64).is_ok());
+    }
+}
