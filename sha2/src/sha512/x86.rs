@@ -356,6 +356,7 @@ const SHA512_HASH_BYTE_LEN: usize = 64;
 const SHA512_HASH_WORDS_NUM: usize = SHA512_HASH_BYTE_LEN / size_of::<u64>();
 const SHA512_BLOCK_WORDS_NUM: usize = SHA512_BLOCK_BYTE_LEN / size_of::<u64>();
 
+#[cfg(target_feature = "avx2")]
 #[cfg(test)]
 mod tests {
     use crate::sha512::x86::sha512_compress_x86_64_avx2;
