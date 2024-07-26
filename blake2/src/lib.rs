@@ -5,6 +5,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![allow(unexpected_cfgs)] // `simd` feature is broken
 #![warn(missing_docs, rust_2018_idioms)]
 #![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]
 #![cfg_attr(feature = "simd", allow(incomplete_features))]
