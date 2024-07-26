@@ -13,14 +13,14 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.72"
 
 [dependencies]
-digest = "=0.11.0-pre.8"
+digest = "=0.11.0-pre.9"
 cfg-if = "1.0"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64"))'.dependencies]
 cpufeatures = "0.2"
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.8", features = ["dev"] }
+digest = { version = "=0.11.0-pre.9", features = ["dev"] }
 hex-literal = "0.4"
 base16ct = { version = "0.2", features = ["alloc"] }
 
