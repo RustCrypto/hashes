@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.72.0
+      msrv: 1.72.0
 
   # Builds for no_std platforms
   build:
@@ -47,9 +47,10 @@ jobs:
       - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
 
   minimal-versions:
+    if: false # TODO: temp disabled due to unpublished prerelease dependencies
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
-        working-directory: ${{ github.workflow }}
+      working-directory: ${{ github.workflow }}
 
   # Linux tests
   linux:
@@ -143,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-      # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
+        # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
         working-directory: .
     steps:
       - uses: actions/checkout@v4

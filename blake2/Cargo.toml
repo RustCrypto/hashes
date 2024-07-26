@@ -13,10 +13,10 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.71"
 
 [dependencies]
-digest = { version = "=0.11.0-pre.8", features = ["mac"] }
+digest = { version = "=0.11.0-pre.9", features = ["mac"] }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.8", features = ["dev"] }
+digest = { version = "=0.11.0-pre.9", features = ["dev"] }
 hex-literal = "0.4"
 base16ct = { version = "0.2", features = ["alloc"] }
 
