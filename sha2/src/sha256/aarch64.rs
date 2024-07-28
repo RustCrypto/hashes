@@ -2,8 +2,6 @@
 
 // Implementation adapted from mbedtls.
 
-// TODO: stdarch intrinsics: RustCrypto/hashes#257
-
 use core::arch::aarch64::*;
 
 use crate::consts::K32;
