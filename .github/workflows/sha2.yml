@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.72.0
+      msrv: 1.79.0
 
   # Builds for no_std platforms
   build:
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-      # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
+        # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
         working-directory: .
     steps:
       - uses: actions/checkout@v4
@@ -149,4 +149,4 @@ jobs:
   minimal-versions:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
-        working-directory: ${{ github.workflow }}
+      working-directory: ${{ github.workflow }}

@@ -1,6 +1,6 @@
 // Implementation adapted from mbedtls.
 
-use core::arch::{aarch64::*, asm};
+use core::arch::aarch64::*;
 
 use crate::consts::K64;
 
@@ -178,58 +178,4 @@ unsafe fn sha512_compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     vst1q_u64(state[2..4].as_mut_ptr(), cd);
     vst1q_u64(state[4..6].as_mut_ptr(), ef);
     vst1q_u64(state[6..8].as_mut_ptr(), gh);
-}
-
-// TODO remove these polyfills once SHA3 intrinsics land
-
-#[inline(always)]
-unsafe fn vsha512hq_u64(
-    mut hash_ed: uint64x2_t,
-    hash_gf: uint64x2_t,
-    kwh_kwh2: uint64x2_t,
-) -> uint64x2_t {
-    asm!(
-        "SHA512H {:q}, {:q}, {:v}.2D",
-        inout(vreg) hash_ed, in(vreg) hash_gf, in(vreg) kwh_kwh2,
-        options(pure, nomem, nostack, preserves_flags)
-    );
-    hash_ed
-}
-
-#[inline(always)]
-unsafe fn vsha512h2q_u64(
-    mut sum_ab: uint64x2_t,
-    hash_c_: uint64x2_t,
-    hash_ab: uint64x2_t,
-) -> uint64x2_t {
-    asm!(
-        "SHA512H2 {:q}, {:q}, {:v}.2D",
-        inout(vreg) sum_ab, in(vreg) hash_c_, in(vreg) hash_ab,
-        options(pure, nomem, nostack, preserves_flags)
-    );
-    sum_ab
-}
-
-#[inline(always)]
-unsafe fn vsha512su0q_u64(mut w0_1: uint64x2_t, w2_: uint64x2_t) -> uint64x2_t {
-    asm!(
-        "SHA512SU0 {:v}.2D, {:v}.2D",
-        inout(vreg) w0_1, in(vreg) w2_,
-        options(pure, nomem, nostack, preserves_flags)
-    );
-    w0_1
-}
-
-#[inline(always)]
-unsafe fn vsha512su1q_u64(
-    mut s01_s02: uint64x2_t,
-    w14_15: uint64x2_t,
-    w9_10: uint64x2_t,
-) -> uint64x2_t {
-    asm!(
-        "SHA512SU1 {:v}.2D, {:v}.2D, {:v}.2D",
-        inout(vreg) s01_s02, in(vreg) w14_15, in(vreg) w9_10,
-        options(pure, nomem, nostack, preserves_flags)
-    );
-    s01_s02
 }
