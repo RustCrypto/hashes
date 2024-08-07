@@ -275,7 +275,7 @@ macro_rules! blake2_mac_impl {
             core: $hash,
             buffer: LazyBuffer<<$hash as BlockSizeUser>::BlockSize>,
             #[cfg(feature = "reset")]
-            key_block: Key<Self>,
+            key_block: Option<Key<Self>>,
             _out: PhantomData<OutSize>,
         }
 
@@ -286,35 +286,42 @@ macro_rules! blake2_mac_impl {
         {
             /// Create new instance using provided key, salt, and persona.
             ///
+            /// Setting key to `None` indicates unkeyed usage.
+            ///
             /// # Errors
             ///
-            /// Key length should not be empty or bigger than the block size and
-            /// the salt and persona length should not be bigger than quarter of
-            /// block size. If any of those conditions is false the method will
-            /// return an error.
+            /// If key is `Some`, then its length should not be zero or bigger
+            /// than the block size. The salt and persona length should not be
+            /// bigger than quarter of block size. If any of those conditions is
+            /// false the method will return an error.
             #[inline]
             pub fn new_with_salt_and_personal(
-                key: &[u8],
+                key: Option<&[u8]>,
                 salt: &[u8],
                 persona: &[u8],
             ) -> Result<Self, InvalidLength> {
-                let kl = key.len();
+                let kl = key.map_or(0, |k| k.len());
                 let bs = <$hash as BlockSizeUser>::BlockSize::USIZE;
                 let qbs = bs / 4;
-                if kl == 0 || kl > bs || salt.len() > qbs || persona.len() > qbs {
+                if key.is_some() && kl == 0 || kl > bs || salt.len() > qbs || persona.len() > qbs {
                     return Err(InvalidLength);
                 }
-                let mut padded_key = Block::<$hash>::default();
-                padded_key[..kl].copy_from_slice(key);
+                let buffer = if let Some(k) = key {
+                    let mut padded_key = Block::<$hash>::default();
+                    padded_key[..kl].copy_from_slice(k);
+                    LazyBuffer::new(&padded_key)
+                } else {
+                    LazyBuffer::default()
+                };
                 Ok(Self {
-                    core: <$hash>::new_with_params(salt, persona, key.len(), OutSize::USIZE),
-                    buffer: LazyBuffer::new(&padded_key),
+                    core: <$hash>::new_with_params(salt, persona, kl, OutSize::USIZE),
+                    buffer,
                     #[cfg(feature = "reset")]
-                    key_block: {
+                    key_block: key.map(|k| {
                         let mut t = Key::<Self>::default();
-                        t[..kl].copy_from_slice(key);
+                        t[..kl].copy_from_slice(k);
                         t
-                    },
+                    }),
                     _out: PhantomData,
                 })
             }
@@ -353,7 +360,7 @@ macro_rules! blake2_mac_impl {
                     key_block: {
                         let mut t = Key::<Self>::default();
                         t[..kl].copy_from_slice(key);
-                        t
+                        Some(t)
                     },
                     _out: PhantomData,
                 })
@@ -402,10 +409,14 @@ macro_rules! blake2_mac_impl {
         {
             fn reset(&mut self) {
                 self.core.reset();
-                let kl = self.key_block.len();
-                let mut padded_key = Block::<$hash>::default();
-                padded_key[..kl].copy_from_slice(&self.key_block);
-                self.buffer = LazyBuffer::new(&padded_key);
+                self.buffer = if let Some(k) = self.key_block {
+                    let kl = k.len();
+                    let mut padded_key = Block::<$hash>::default();
+                    padded_key[..kl].copy_from_slice(&k);
+                    LazyBuffer::new(&padded_key)
+                } else {
+                    LazyBuffer::default()
+                }
             }
         }
 
@@ -453,7 +464,9 @@ macro_rules! blake2_mac_impl {
                     // `self.core` zeroized by its `Drop` impl
                     self.buffer.zeroize();
                     #[cfg(feature = "reset")]
-                    self.key_block.zeroize();
+                    if let Some(mut key_block) = self.key_block {
+                        key_block.zeroize();
+                    }
                 }
             }
         }
