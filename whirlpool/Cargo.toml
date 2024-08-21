@@ -1,6 +1,6 @@
 [package]
 name = "whirlpool"
-version = "0.11.0-pre.2"
+version = "0.11.0-pre.4"
 description = "Whirlpool hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -13,10 +13,10 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.71"
 
 [dependencies]
-digest = "=0.11.0-pre.8"
+digest = "=0.11.0-pre.9"
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.8", features = ["dev"] }
+digest = { version = "=0.11.0-pre.9", features = ["dev"] }
 hex-literal = "0.4"
 base16ct = { version = "0.2", features = ["alloc"] }
 

@@ -37,7 +37,7 @@ checksum = "d9aa1eef3994e2ccd304a78fe3fea4a73e5792007f85f09b79bb82143ca5f82b"
 
 [[package]]
 name = "belt-hash"
-version = "0.2.0-pre.3"
+version = "0.2.0-pre.4"
 dependencies = [
  "base16ct",
  "belt-block",
@@ -47,7 +47,7 @@ dependencies = [
 
 [[package]]
 name = "blake2"
-version = "0.11.0-pre.3"
+version = "0.11.0-pre.4"
 dependencies = [
  "base16ct",
  "digest",
@@ -62,9 +62,9 @@ checksum = "847495c209977a90e8aad588b959d0ca9f5dc228096d29a6bd3defd53f35eaec"
 
 [[package]]
 name = "block-buffer"
-version = "0.11.0-pre.5"
+version = "0.11.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ded684142010808eb980d9974ef794da2bcf97d13396143b1515e9f0fb4a10e"
+checksum = "17092d478f4fadfb35a7e082f62e49f0907fdf048801d9d706277e34f9df8a78"
 dependencies = [
  "crypto-common",
  "zeroize",
@@ -78,9 +78,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "const-oid"
-version = "0.10.0-pre.2"
+version = "0.10.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f7e3352a27098ba6b09546e5f13b15165e6a88b5c2723afecb3ea9576b27e3ea"
+checksum = "9adcf94f05e094fca3005698822ec791cb4433ced416afda1c5ca3b8dfc05a2f"
 
 [[package]]
 name = "cpufeatures"
@@ -93,9 +93,9 @@ dependencies = [
 
 [[package]]
 name = "crypto-common"
-version = "0.2.0-pre.5"
+version = "0.2.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7aa2ec04f5120b830272a481e8d9d8ba4dda140d2cda59b0f1110d5eb93c38e"
+checksum = "8c070b79a496dccd931229780ad5bbedd535ceff6c3565605a8e440e18e1aa2b"
 dependencies = [
  "getrandom",
  "hybrid-array",
@@ -104,8 +104,9 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.11.0-pre.8"
-source = "git+https://github.com/RustCrypto/traits.git#5e6ddf673d83b6e1ae7eea9e61c526f5cf41cd65"
+version = "0.11.0-pre.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf2e3d6615d99707295a9673e889bf363a04b2a466bd320c65a72536f7577379"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -211,7 +212,7 @@ checksum = "97b3888a4aecf77e811145cadf6eef5901f4782c53886191b2f693f24761847c"
 
 [[package]]
 name = "md-5"
-version = "0.11.0-pre.3"
+version = "0.11.0-pre.4"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -263,7 +264,7 @@ dependencies = [
 
 [[package]]
 name = "sha1"
-version = "0.11.0-pre.3"
+version = "0.11.0-pre.4"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -285,7 +286,7 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.11.0-pre.3"
+version = "0.11.0-pre.4"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -296,7 +297,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.11.0-pre.3"
+version = "0.11.0-pre.4"
 dependencies = [
  "base16ct",
  "digest",
@@ -325,7 +326,7 @@ dependencies = [
 
 [[package]]
 name = "sm3"
-version = "0.5.0-pre.3"
+version = "0.5.0-pre.4"
 dependencies = [
  "base16ct",
  "digest",
@@ -340,7 +341,7 @@ checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 
 [[package]]
 name = "streebog"
-version = "0.11.0-pre.3"
+version = "0.11.0-pre.4"
 dependencies = [
  "base16ct",
  "digest",
@@ -385,7 +386,7 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "whirlpool"
-version = "0.11.0-pre.2"
+version = "0.11.0-pre.4"
 dependencies = [
  "base16ct",
  "digest",

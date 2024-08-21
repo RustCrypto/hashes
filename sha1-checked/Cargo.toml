@@ -13,17 +13,17 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.72"
 
 exclude = [
-  "sha1-checked/tests/data/shattered-1.pdf",
-  "sha1-checked/tests/data/shattered-2.pdf",
+    "sha1-checked/tests/data/shattered-1.pdf",
+    "sha1-checked/tests/data/shattered-2.pdf",
 ]
 
 [dependencies]
-digest = "=0.11.0-pre.8"
-sha1 = { version = "=0.11.0-pre.3", default-features = false }
+digest = "=0.11.0-pre.9"
+sha1 = { version = "=0.11.0-pre.4", default-features = false }
 zeroize = { version = "1.8", default-features = false, optional = true }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.8", features = ["dev"] }
+digest = { version = "=0.11.0-pre.9", features = ["dev"] }
 hex-literal = "0.4"
 base16ct = { version = "0.2", features = ["alloc"] }
 
