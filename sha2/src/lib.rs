@@ -6,7 +6,10 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
-#![cfg_attr(sha2_backend = "riscv-zknh", feature(riscv_ext_intrinsics))]
+#![cfg_attr(
+    any(sha2_backend = "riscv-zknh", sha2_backend = "riscv-zknh-compact"),
+    feature(riscv_ext_intrinsics)
+)]
 
 pub use digest::{self, Digest};
 

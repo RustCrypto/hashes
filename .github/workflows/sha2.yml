@@ -162,6 +162,9 @@ jobs:
       - run: cross test --package sha2 --target riscv64gc-unknown-linux-gnu
         env:
           RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
+      - run: cross test --package sha2 --target riscv64gc-unknown-linux-gnu
+        env:
+          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh'
 
   riscv32-zknh:
     runs-on: ubuntu-latest
@@ -175,6 +178,9 @@ jobs:
       - run: cargo build --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
           RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
+      - run: cargo build --target riscv32gc-unknown-linux-gnu -Z build-std
+        env:
+          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh'
 
   minimal-versions:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master

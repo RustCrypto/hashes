@@ -19,14 +19,15 @@ fn maj(x: u32, y: u32, z: u32) -> u32 {
 }
 
 fn round<const R: usize>(state: &mut [u32; 8], block: &[u32; 16]) {
-    let a = (K32.len() - R) % 8;
-    let b = (K32.len() - R + 1) % 8;
-    let c = (K32.len() - R + 2) % 8;
-    let d = (K32.len() - R + 3) % 8;
-    let e = (K32.len() - R + 4) % 8;
-    let f = (K32.len() - R + 5) % 8;
-    let g = (K32.len() - R + 6) % 8;
-    let h = (K32.len() - R + 7) % 8;
+    let n = K32.len() - R;
+    let a = n % 8;
+    let b = (n + 1) % 8;
+    let c = (n + 2) % 8;
+    let d = (n + 3) % 8;
+    let e = (n + 4) % 8;
+    let f = (n + 5) % 8;
+    let g = (n + 6) % 8;
+    let h = (n + 7) % 8;
 
     state[h] = state[h]
         .wrapping_add(unsafe { sha256sum1(state[e]) })
