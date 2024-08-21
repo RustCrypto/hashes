@@ -49,6 +49,7 @@ fn maj(x: u64, y: u64, z: u64) -> u64 {
 #[inline(always)]
 fn round(state: &mut [u64; 8], block: &[u64; 16], r: usize) {
     let n = K64.len() - r;
+    #[allow(clippy::identity_op)]
     let a = (n + 0) % 8;
     let b = (n + 1) % 8;
     let c = (n + 2) % 8;

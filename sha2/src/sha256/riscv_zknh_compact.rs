@@ -21,6 +21,7 @@ fn maj(x: u32, y: u32, z: u32) -> u32 {
 #[inline(always)]
 fn round(state: &mut [u32; 8], block: &[u32; 16], r: usize) {
     let n = K32.len() - r;
+    #[allow(clippy::identity_op)]
     let a = (n + 0) % 8;
     let b = (n + 1) % 8;
     let c = (n + 2) % 8;
