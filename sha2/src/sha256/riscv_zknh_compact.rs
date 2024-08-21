@@ -69,11 +69,7 @@ fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
 }
 
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block_u8 in blocks {
-        let mut block = [0u32; 16];
-        for (dst, src) in block.iter_mut().zip(block_u8.chunks_exact(4)) {
-            *dst = u32::from_be_bytes(src.try_into().unwrap());
-        }
+    for block in blocks.iter().map(super::to_u32s) {
         compress_block(state, block);
     }
 }

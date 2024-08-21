@@ -10,12 +10,12 @@ fn sha512load(v0: [u64; 2], v1: [u64; 2]) -> [u64; 2] {
 pub fn sha512_schedule_x2(v0: [u64; 2], v1: [u64; 2], v4to5: [u64; 2], v7: [u64; 2]) -> [u64; 2] {
     // sigma 0
     fn sigma0(x: u64) -> u64 {
-        ((x << 63) | (x >> 1)) ^ ((x << 56) | (x >> 8)) ^ (x >> 7)
+        (x.rotate_right(1)) ^ (x.rotate_right(8)) ^ (x >> 7)
     }
 
     // sigma 1
     fn sigma1(x: u64) -> u64 {
-        ((x << 45) | (x >> 19)) ^ ((x << 3) | (x >> 61)) ^ (x >> 6)
+        (x.rotate_right(19)) ^ (x.rotate_left(3)) ^ (x >> 6)
     }
 
     let [w1, w0] = v0;
@@ -105,7 +105,7 @@ fn add_rk(mut w: [u64; 2], i: usize) -> [u64; 2] {
 }
 
 /// Process a block with the SHA-512 algorithm.
-pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
+pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: [u64; 16]) {
     macro_rules! schedule {
         ($v0:expr, $v1:expr, $v4:expr, $v5:expr, $v7:expr) => {
             sha512_schedule_x2($v0, $v1, sha512load($v4, $v5), $v7)
@@ -209,11 +209,7 @@ pub fn sha512_digest_block_u64(state: &mut [u64; 8], block: &[u64; 16]) {
 }
 
 pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    for block in blocks {
-        let mut block_u32 = [0u64; 16];
-        for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(8)) {
-            *o = u64::from_be_bytes(chunk.try_into().unwrap());
-        }
-        sha512_digest_block_u64(state, &block_u32);
+    for block in blocks.iter().map(super::to_u64s) {
+        sha512_digest_block_u64(state, block);
     }
 }

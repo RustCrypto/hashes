@@ -31,6 +31,16 @@ cfg_if::cfg_if! {
     }
 }
 
+#[inline(always)]
+#[allow(dead_code)]
+fn to_u64s(block: &[u8; 128]) -> [u64; 16] {
+    let mut res = [0u64; 16];
+    for (src, dst) in block.chunks_exact(8).zip(res.iter_mut()) {
+        *dst = u64::from_be_bytes(src.try_into().unwrap());
+    }
+    res
+}
+
 /// Raw SHA-512 compression function.
 ///
 /// This is a low-level "hazmat" API which provides direct access to the core
