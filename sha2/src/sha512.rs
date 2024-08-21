@@ -6,6 +6,12 @@ cfg_if::cfg_if! {
         mod soft;
         mod x86;
         use x86::compress;
+    } else if #[cfg(all(
+        any(target_arch = "riscv32", target_arch = "riscv64"),
+        sha2_backend = "riscv-zknh"
+    ))] {
+        mod riscv_zknh;
+        use riscv_zknh::compress;
     } else if #[cfg(target_arch = "aarch64")] {
         mod soft;
         mod aarch64;

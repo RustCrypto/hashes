@@ -34,6 +34,10 @@ oid = ["digest/oid"] # Enable OID support
 zeroize = ["digest/zeroize"]
 force-soft = [] # Force software implementation
 
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = ['cfg(sha2_backend, values("riscv-zknh"))']
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]

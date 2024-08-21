@@ -146,6 +146,36 @@ jobs:
           target: ${{ matrix.target }}
           features: ${{ matrix.features }}
 
+  riscv64-zknh:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+      - run: cargo install cross --git https://github.com/cross-rs/cross
+      - run: cross test --package sha2 --target riscv64gc-unknown-linux-gnu
+        env:
+          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
+
+  riscv32-zknh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+          components: rust-src
+      - run: cargo build --target riscv32gc-unknown-linux-gnu -Z build-std
+        env:
+          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
+
   minimal-versions:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
