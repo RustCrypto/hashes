@@ -173,7 +173,7 @@ jobs:
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
           RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
-      - run: cross test --package sha2 --all-features--target riscv64gc-unknown-linux-gnu
+      - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
           RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh'
 
