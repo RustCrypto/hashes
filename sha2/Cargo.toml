@@ -30,13 +30,14 @@ base16ct = { version = "0.2", features = ["alloc"] }
 [features]
 default = ["oid", "std"]
 std = ["digest/std"]
-oid = ["digest/oid"]         # Enable OID support
 zeroize = ["digest/zeroize"]
-force-soft = []              # Force software implementation
+oid = ["digest/oid"]
 
 [lints.rust.unexpected_cfgs]
 level = "warn"
-check-cfg = ['cfg(sha2_backend, values("riscv-zknh", "riscv-zknh-compact"))']
+check-cfg = [
+    'cfg(sha2_backend, values("soft", "riscv-zknh", "riscv-zknh-compact"))',
+]
 
 [package.metadata.docs.rs]
 all-features = true

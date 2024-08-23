@@ -6,10 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## UNRELEASED
+### Added
+- RISC-V scalar crypto extension support gated behind `sha2_backend = "riscv-zknh"` or
+  `sha2_backend = "riscv-zknh-compact"` configuration flags [#614]
+
 ### Removed
 - `asm`, `asm-aarch64`, `loongarch64_asm`, and `compress` crate features [#542]
+- `soft` crate feature. Replaced with `sha2_backend = "soft"` configuration flag [#615]
 
 [#542]: https://github.com/RustCrypto/hashes/pull/542
+[#614]: https://github.com/RustCrypto/hashes/pull/614
+[#615]: https://github.com/RustCrypto/hashes/pull/615
 
 ## 0.10.8 (2023-09-26)
 ### Added
