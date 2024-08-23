@@ -111,7 +111,6 @@ impl fmt::Debug for Md5Core {
 }
 
 #[cfg(feature = "oid")]
-#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl AssociatedOid for Md5Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.5");
 }

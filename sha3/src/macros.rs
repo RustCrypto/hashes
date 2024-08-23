@@ -133,7 +133,6 @@ macro_rules! impl_sha3 {
         impl_sha3!($name, $full_name, $output_size, $rate, $pad, $alg_name);
 
         #[cfg(feature = "oid")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
         impl AssociatedOid for $name {
             const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap($oid);
         }
@@ -289,7 +288,6 @@ macro_rules! impl_shake {
         );
 
         #[cfg(feature = "oid")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
         impl AssociatedOid for $name {
             const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap($oid);
         }
@@ -443,7 +441,6 @@ macro_rules! impl_turbo_shake {
         impl_turbo_shake!($name, $full_name, $reader, $reader_full, $rate, $alg_name);
 
         #[cfg(feature = "oid")]
-        #[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
         impl AssociatedOid for $name {
             const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap($oid);
         }

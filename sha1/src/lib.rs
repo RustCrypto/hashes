@@ -114,7 +114,6 @@ impl fmt::Debug for Sha1Core {
 }
 
 #[cfg(feature = "oid")]
-#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl AssociatedOid for Sha1Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.3.14.3.2.26");
 }

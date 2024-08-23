@@ -45,7 +45,6 @@ fn to_u32s(block: &[u8; 64]) -> [u32; 16] {
 ///
 /// This is a low-level "hazmat" API which provides direct access to the core
 /// functionality of SHA-256.
-#[cfg_attr(docsrs, doc(cfg(feature = "compress")))]
 pub fn compress256(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     compress(state, blocks)
 }
