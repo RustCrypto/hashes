@@ -96,8 +96,9 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           targets: x86_64-apple-darwin
-      - uses: RustCrypto/actions/cargo-hack-install@master
-      - run: cargo hack test --feature-powerset
+      - run: cargo test --no-default-features
+      - run: cargo test
+      - run: cargo test --all-features
       - run: cargo test --all-features
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
