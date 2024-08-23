@@ -6,6 +6,18 @@ cfg_if::cfg_if! {
         mod soft;
         mod x86;
         use x86::compress;
+    } else if #[cfg(all(
+        any(target_arch = "riscv32", target_arch = "riscv64"),
+        sha2_backend = "riscv-zknh"
+    ))] {
+        mod riscv_zknh;
+        use riscv_zknh::compress;
+    } else if #[cfg(all(
+        any(target_arch = "riscv32", target_arch = "riscv64"),
+        sha2_backend = "riscv-zknh-compact"
+    ))] {
+        mod riscv_zknh_compact;
+        use riscv_zknh_compact::compress;
     } else if #[cfg(target_arch = "aarch64")] {
         mod soft;
         mod aarch64;
@@ -17,6 +29,16 @@ cfg_if::cfg_if! {
         mod soft;
         use soft::compress;
     }
+}
+
+#[inline(always)]
+#[allow(dead_code)]
+fn to_u64s(block: &[u8; 128]) -> [u64; 16] {
+    let mut res = [0u64; 16];
+    for (src, dst) in block.chunks_exact(8).zip(res.iter_mut()) {
+        *dst = u64::from_be_bytes(src.try_into().unwrap());
+    }
+    res
 }
 
 /// Raw SHA-512 compression function.

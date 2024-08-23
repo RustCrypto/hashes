@@ -186,7 +186,7 @@ macro_rules! schedule_rounds4 {
 }
 
 /// Process a block with the SHA-256 algorithm.
-fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
+fn sha256_digest_block_u32(state: &mut [u32; 8], block: [u32; 16]) {
     let mut abef = [state[0], state[1], state[4], state[5]];
     let mut cdgh = [state[2], state[3], state[6], state[7]];
 
@@ -228,11 +228,7 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: &[u32; 16]) {
 }
 
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks {
-        let mut block_u32 = [0u32; 16];
-        for (o, chunk) in block_u32.iter_mut().zip(block.chunks_exact(4)) {
-            *o = u32::from_be_bytes(chunk.try_into().unwrap());
-        }
-        sha256_digest_block_u32(state, &block_u32);
+    for block in blocks.iter().map(super::to_u32s) {
+        sha256_digest_block_u32(state, block);
     }
 }

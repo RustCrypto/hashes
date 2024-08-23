@@ -6,6 +6,16 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs, rust_2018_idioms)]
+#![cfg_attr(
+    any(sha2_backend = "riscv-zknh", sha2_backend = "riscv-zknh-compact"),
+    feature(riscv_ext_intrinsics)
+)]
+
+#[cfg(all(
+    any(sha2_backend = "riscv-zknh", sha2_backend = "riscv-zknh-compact"),
+    not(any(any(target_arch = "riscv32", target_arch = "riscv64")))
+))]
+compile_error!("The Zknh backends can be enabled only for RISC-V targets");
 
 pub use digest::{self, Digest};
 
