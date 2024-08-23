@@ -119,7 +119,6 @@ impl fmt::Debug for Md4Core {
 }
 
 #[cfg(feature = "oid")]
-#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl AssociatedOid for Md4Core {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.840.113549.2.4");
 }

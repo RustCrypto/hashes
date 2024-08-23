@@ -135,7 +135,6 @@ impl fmt::Debug for BeltHashCore {
 }
 
 #[cfg(feature = "oid")]
-#[cfg_attr(docsrs, doc(cfg(feature = "oid")))]
 impl AssociatedOid for BeltHashCore {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.112.0.2.0.34.101.31.81");
 }
