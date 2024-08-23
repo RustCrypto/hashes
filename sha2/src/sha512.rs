@@ -1,11 +1,11 @@
 cfg_if::cfg_if! {
-    if #[cfg(feature = "force-soft")] {
+    if #[cfg(sha2_backend = "soft")] {
         mod soft;
         use soft::compress;
     } else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
         mod soft;
-        mod x86;
-        use x86::compress;
+        mod x86_avx2;
+        use x86_avx2::compress;
     } else if #[cfg(all(
         any(target_arch = "riscv32", target_arch = "riscv64"),
         sha2_backend = "riscv-zknh"

@@ -76,6 +76,9 @@ jobs:
       - uses: RustCrypto/actions/cargo-hack-install@master
       - run: ${{ matrix.deps }}
       - run: cargo hack test --feature-powerset
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
 
   # macOS tests
   macos:
@@ -94,9 +97,10 @@ jobs:
           toolchain: ${{ matrix.rust }}
           targets: x86_64-apple-darwin
       - uses: RustCrypto/actions/cargo-hack-install@master
-      - run: cargo test --no-default-features
-      - run: cargo test
+      - run: cargo hack test --feature-powerset
       - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
 
   # Windows tests
   windows:
@@ -118,6 +122,9 @@ jobs:
           targets: ${{ matrix.target }}
       - uses: msys2/setup-msys2@v2
       - run: cargo test --target ${{ matrix.target }}
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
 
   # Cross-compiled tests
   cross:
@@ -159,10 +166,13 @@ jobs:
         with:
           toolchain: nightly
       - run: cargo install cross --git https://github.com/cross-rs/cross
-      - run: cross test --package sha2 --target riscv64gc-unknown-linux-gnu
+      - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
+        env:
+          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh'
+      - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
           RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
-      - run: cross test --package sha2 --target riscv64gc-unknown-linux-gnu
+      - run: cross test --package sha2 --all-features--target riscv64gc-unknown-linux-gnu
         env:
           RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh'
 
@@ -175,10 +185,13 @@ jobs:
         with:
           toolchain: nightly
           components: rust-src
-      - run: cargo build --target riscv32gc-unknown-linux-gnu -Z build-std
+      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
+        env:
+          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh'
+      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
           RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
-      - run: cargo build --target riscv32gc-unknown-linux-gnu -Z build-std
+      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
           RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh'
 
