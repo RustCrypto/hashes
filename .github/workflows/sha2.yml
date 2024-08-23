@@ -14,7 +14,7 @@ defaults:
     working-directory: sha2
 
 env:
-  RUSTFLAGS: "-Dwarnings"
+  RUSTFLAGS: -Dwarnings
   CARGO_INCREMENTAL: 0
 
 jobs:
@@ -169,13 +169,13 @@ jobs:
       - run: cargo install cross --git https://github.com/cross-rs/cross
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
-          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh'
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
-          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
-          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh'
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh
 
   riscv32-zknh:
     runs-on: ubuntu-latest
@@ -188,13 +188,13 @@ jobs:
           components: rust-src
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
-          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh'
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
-          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh'
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
-          RUSTFLAGS: '-Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh'
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh
 
   minimal-versions:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
