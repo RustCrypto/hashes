@@ -51,18 +51,35 @@ fn maj(x: u64, y: u64, z: u64) -> u64 {
 
 /// This function returns `k[R]`, but prevents compiler from inlining the indexed value
 pub(super) fn opaque_load<const R: usize>(k: &[u64]) -> u64 {
+    use core::arch::asm;
     assert!(R < k.len());
-    let dst;
+    #[cfg(target_arch = "riscv64")]
     unsafe {
-        core::arch::asm!(
-            "ld {dst}, 8*{R}({k})",
-            R = const R,
+        let dst;
+        asm!(
+            "ld {dst}, {N}({k})",
+            N = const 8 * R,
             k = in(reg) k.as_ptr(),
             dst = out(reg) dst,
             options(pure, readonly, nostack, preserves_flags),
         );
+        dst
     }
-    dst
+    #[cfg(target_arch = "riscv32")]
+    unsafe {
+        let [hi, lo]: [u32; 2];
+        asm!(
+            "lwu {lo}, {N1}({k})",
+            "lwu {hi}, {N2}({k})",
+            N1 = const 8 * R,
+            N2 = const 8 * R + 4,
+            k = in(reg) k.as_ptr(),
+            lo = out(reg) lo,
+            hi = out(reg) hi,
+            options(pure, readonly, nostack, preserves_flags),
+        );
+        ((hi as u64) << 32) | (lo as u64)
+    }
 }
 
 fn round<const R: usize>(state: &mut [u64; 8], block: &[u64; 16], k: &[u64]) {

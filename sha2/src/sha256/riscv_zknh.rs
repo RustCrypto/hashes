@@ -25,6 +25,17 @@ fn maj(x: u32, y: u32, z: u32) -> u32 {
 pub(super) fn opaque_load<const R: usize>(k: &[u32]) -> u32 {
     assert!(R < k.len());
     let dst;
+    #[cfg(target_arch = "riscv64")]
+    unsafe {
+        core::arch::asm!(
+            "lwu {dst}, 4*{R}({k})",
+            R = const R,
+            k = in(reg) k.as_ptr(),
+            dst = out(reg) dst,
+            options(pure, readonly, nostack, preserves_flags),
+        );
+    }
+    #[cfg(target_arch = "riscv32")]
     unsafe {
         core::arch::asm!(
             "lw {dst}, 4*{R}({k})",
