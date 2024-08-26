@@ -49,6 +49,22 @@ fn maj(x: u64, y: u64, z: u64) -> u64 {
     (x & y) ^ (x & z) ^ (y & z)
 }
 
+/// This function returns `k[R]`, but prevents compiler from inlining the indexed value
+pub(super) fn opaque_load<const R: usize>(k: &[u64]) -> u64 {
+    assert!(R < k.len());
+    let dst;
+    unsafe {
+        core::arch::asm!(
+            "ld {dst}, 8*{R}({k})",
+            R = const R,
+            k = in(reg) k.as_ptr(),
+            dst = out(reg) dst,
+            options(pure, readonly, nostack, preserves_flags),
+        );
+    }
+    dst
+}
+
 fn round<const R: usize>(state: &mut [u64; 8], block: &[u64; 16], k: &[u64]) {
     let n = K64.len() - R;
     #[allow(clippy::identity_op)]
@@ -64,8 +80,7 @@ fn round<const R: usize>(state: &mut [u64; 8], block: &[u64; 16], k: &[u64]) {
     state[h] = state[h]
         .wrapping_add(unsafe { sha512sum1(state[e]) })
         .wrapping_add(ch(state[e], state[f], state[g]))
-        // Force reading of constants from the static to prevent bad codegen
-        .wrapping_add(unsafe { core::ptr::read_volatile(&k[R]) })
+        .wrapping_add(opaque_load::<R>(k))
         .wrapping_add(block[R]);
     state[d] = state[d].wrapping_add(state[h]);
     state[h] = state[h]
