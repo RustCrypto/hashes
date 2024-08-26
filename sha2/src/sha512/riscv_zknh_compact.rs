@@ -5,8 +5,11 @@ use core::arch::riscv32::*;
 #[cfg(target_arch = "riscv64")]
 use core::arch::riscv64::*;
 
-#[cfg(not(all(target_feature = "zknh", target_feature = "zbkb")))]
-compile_error!("riscv-zknh-compact backend requires enabled zknh and zbkb target features");
+#[cfg(not(all(
+    target_feature = "zknh",
+    any(target_feature = "zbb", target_feature = "zbkb")
+)))]
+compile_error!("riscv-zknh-compact backend requires zknh and zbkb (or zbb) target features");
 
 #[cfg(target_arch = "riscv32")]
 unsafe fn sha512sum0(x: u64) -> u64 {

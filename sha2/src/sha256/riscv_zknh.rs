@@ -5,8 +5,11 @@ use core::arch::riscv32::*;
 #[cfg(target_arch = "riscv64")]
 use core::arch::riscv64::*;
 
-#[cfg(not(all(target_feature = "zknh", target_feature = "zbkb")))]
-compile_error!("riscv-zknh-compact backend requires enabled zknh and zbkb target features");
+#[cfg(not(all(
+    target_feature = "zknh",
+    any(target_feature = "zbb", target_feature = "zbkb")
+)))]
+compile_error!("riscv-zknh backend requires zknh and zbkb (or zbb) target features");
 
 #[inline(always)]
 fn ch(x: u32, y: u32, z: u32) -> u32 {
