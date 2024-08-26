@@ -18,8 +18,7 @@ fn maj(x: u32, y: u32, z: u32) -> u32 {
     (x & y) ^ (x & z) ^ (y & z)
 }
 
-#[allow(clippy::identity_op)]
-fn round<const R: usize>(state: &mut [u32; 8], block: &[u32; 16]) {
+fn round<const R: usize>(state: &mut [u32; 8], block: &[u32; 16], k: &[u32]) {
     let n = K32.len() - R;
     #[allow(clippy::identity_op)]
     let a = (n + 0) % 8;
@@ -35,117 +34,78 @@ fn round<const R: usize>(state: &mut [u32; 8], block: &[u32; 16]) {
         .wrapping_add(unsafe { sha256sum1(state[e]) })
         .wrapping_add(ch(state[e], state[f], state[g]))
         // Force reading of constants from the static to prevent bad codegen
-        .wrapping_add(unsafe { core::ptr::read_volatile(&K32[R]) })
-        .wrapping_add(block[R % 16]);
+        .wrapping_add(unsafe { core::ptr::read_volatile(&k[R]) })
+        .wrapping_add(block[R]);
     state[d] = state[d].wrapping_add(state[h]);
     state[h] = state[h]
         .wrapping_add(unsafe { sha256sum0(state[a]) })
         .wrapping_add(maj(state[a], state[b], state[c]))
 }
 
-fn round_schedule<const R: usize>(state: &mut [u32; 8], block: &mut [u32; 16]) {
-    round::<R>(state, block);
+fn round_schedule<const R: usize>(state: &mut [u32; 8], block: &mut [u32; 16], k: &[u32]) {
+    round::<R>(state, block, k);
 
-    block[R % 16] = block[R % 16]
+    block[R] = block[R]
         .wrapping_add(unsafe { sha256sig1(block[(R + 14) % 16]) })
         .wrapping_add(block[(R + 9) % 16])
         .wrapping_add(unsafe { sha256sig0(block[(R + 1) % 16]) });
 }
 
+#[inline(always)]
 fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     let s = &mut state.clone();
     let b = &mut block;
 
-    round_schedule::<0>(s, b);
-    round_schedule::<1>(s, b);
-    round_schedule::<2>(s, b);
-    round_schedule::<3>(s, b);
-    round_schedule::<4>(s, b);
-    round_schedule::<5>(s, b);
-    round_schedule::<6>(s, b);
-    round_schedule::<7>(s, b);
-    round_schedule::<8>(s, b);
-    round_schedule::<9>(s, b);
-    round_schedule::<10>(s, b);
-    round_schedule::<11>(s, b);
-    round_schedule::<12>(s, b);
-    round_schedule::<13>(s, b);
-    round_schedule::<14>(s, b);
-    round_schedule::<15>(s, b);
-    round_schedule::<16>(s, b);
-    round_schedule::<17>(s, b);
-    round_schedule::<18>(s, b);
-    round_schedule::<19>(s, b);
-    round_schedule::<20>(s, b);
-    round_schedule::<21>(s, b);
-    round_schedule::<22>(s, b);
-    round_schedule::<23>(s, b);
-    round_schedule::<24>(s, b);
-    round_schedule::<25>(s, b);
-    round_schedule::<26>(s, b);
-    round_schedule::<27>(s, b);
-    round_schedule::<28>(s, b);
-    round_schedule::<29>(s, b);
-    round_schedule::<30>(s, b);
-    round_schedule::<31>(s, b);
-    round_schedule::<32>(s, b);
-    round_schedule::<33>(s, b);
-    round_schedule::<34>(s, b);
-    round_schedule::<35>(s, b);
-    round_schedule::<36>(s, b);
-    round_schedule::<37>(s, b);
-    round_schedule::<38>(s, b);
-    round_schedule::<39>(s, b);
-    round_schedule::<40>(s, b);
-    round_schedule::<41>(s, b);
-    round_schedule::<42>(s, b);
-    round_schedule::<43>(s, b);
-    round_schedule::<44>(s, b);
-    round_schedule::<45>(s, b);
-    round_schedule::<46>(s, b);
-    round_schedule::<47>(s, b);
-    round::<48>(s, b);
-    round::<49>(s, b);
-    round::<50>(s, b);
-    round::<51>(s, b);
-    round::<52>(s, b);
-    round::<53>(s, b);
-    round::<54>(s, b);
-    round::<55>(s, b);
-    round::<56>(s, b);
-    round::<57>(s, b);
-    round::<58>(s, b);
-    round::<59>(s, b);
-    round::<60>(s, b);
-    round::<61>(s, b);
-    round::<62>(s, b);
-    round::<63>(s, b);
+    for i in 0..3 {
+        let k = &K32[16 * i..];
+        round_schedule::<0>(s, b, k);
+        round_schedule::<1>(s, b, k);
+        round_schedule::<2>(s, b, k);
+        round_schedule::<3>(s, b, k);
+        round_schedule::<4>(s, b, k);
+        round_schedule::<5>(s, b, k);
+        round_schedule::<6>(s, b, k);
+        round_schedule::<7>(s, b, k);
+        round_schedule::<8>(s, b, k);
+        round_schedule::<9>(s, b, k);
+        round_schedule::<10>(s, b, k);
+        round_schedule::<11>(s, b, k);
+        round_schedule::<12>(s, b, k);
+        round_schedule::<13>(s, b, k);
+        round_schedule::<14>(s, b, k);
+        round_schedule::<15>(s, b, k);
+    }
+
+    let k = &K32[48..];
+    round::<0>(s, b, k);
+    round::<1>(s, b, k);
+    round::<2>(s, b, k);
+    round::<3>(s, b, k);
+    round::<4>(s, b, k);
+    round::<5>(s, b, k);
+    round::<6>(s, b, k);
+    round::<7>(s, b, k);
+    round::<8>(s, b, k);
+    round::<9>(s, b, k);
+    round::<10>(s, b, k);
+    round::<11>(s, b, k);
+    round::<12>(s, b, k);
+    round::<13>(s, b, k);
+    round::<14>(s, b, k);
+    round::<15>(s, b, k);
 
     for i in 0..8 {
         state[i] = state[i].wrapping_add(s[i]);
     }
 }
 
-#[inline(never)]
-fn compress_aligned(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks {
-        let block = super::riscv_zknh_utils::load_aligned_block(block);
-        compress_block(state, block);
-    }
-}
-
-#[cold]
-fn compress_unaligned(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks {
-        let block = super::riscv_zknh_utils::load_unaligned_block(block);
-        compress_block(state, block);
-    }
-}
-
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    if blocks.as_ptr().cast::<u32>().is_aligned() {
-        compress_aligned(state, blocks);
-    } else {
-        compress_unaligned(state, blocks);
+    for block in blocks {
+        let block = if block.as_ptr().cast::<u32>().is_aligned() {
+            super::riscv_zknh_utils::load_aligned_block(block)
+        } else {
+            super::riscv_zknh_utils::load_unaligned_block(block)
+        };
+        compress_block(state, block);
     }
 }
