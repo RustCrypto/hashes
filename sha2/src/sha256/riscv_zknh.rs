@@ -5,8 +5,8 @@ use core::arch::riscv32::*;
 #[cfg(target_arch = "riscv64")]
 use core::arch::riscv64::*;
 
-#[cfg(not(target_feature = "zknh"))]
-compile_error!("riscv-zknh backend requires enabled zknh target feature");
+#[cfg(not(all(target_feature = "zknh", target_feature = "zbkb")))]
+compile_error!("riscv-zknh-compact backend requires enabled zknh and zbkb target features");
 
 #[inline(always)]
 fn ch(x: u32, y: u32, z: u32) -> u32 {
@@ -126,8 +126,26 @@ fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     }
 }
 
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks.iter().map(super::to_u32s) {
+#[inline(never)]
+fn compress_aligned(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+    for block in blocks {
+        let block = super::riscv_zknh_utils::load_aligned_block(block);
         compress_block(state, block);
+    }
+}
+
+#[cold]
+fn compress_unaligned(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+    for block in blocks {
+        let block = super::riscv_zknh_utils::load_unaligned_block(block);
+        compress_block(state, block);
+    }
+}
+
+pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+    if blocks.as_ptr().cast::<u32>().is_aligned() {
+        compress_aligned(state, blocks);
+    } else {
+        compress_unaligned(state, blocks);
     }
 }

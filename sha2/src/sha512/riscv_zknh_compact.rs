@@ -5,8 +5,8 @@ use core::arch::riscv32::*;
 #[cfg(target_arch = "riscv64")]
 use core::arch::riscv64::*;
 
-#[cfg(not(target_feature = "zknh"))]
-compile_error!("riscv-zknh backend requires enabled zknh target feature");
+#[cfg(not(all(target_feature = "zknh", target_feature = "zbkb")))]
+compile_error!("riscv-zknh-compact backend requires enabled zknh and zbkb target features");
 
 #[cfg(target_arch = "riscv32")]
 unsafe fn sha512sum0(x: u64) -> u64 {
@@ -71,9 +71,7 @@ fn round(state: &mut [u64; 8], block: &[u64; 16], r: usize) {
 }
 
 #[inline(always)]
-fn round_schedule(state: &mut [u64; 8], block: &mut [u64; 16], r: usize) {
-    round(state, block, r);
-
+fn schedule(block: &mut [u64; 16], r: usize) {
     block[r % 16] = block[r % 16]
         .wrapping_add(unsafe { sha512sig1(block[(r + 14) % 16]) })
         .wrapping_add(block[(r + 9) % 16])
@@ -82,14 +80,13 @@ fn round_schedule(state: &mut [u64; 8], block: &mut [u64; 16], r: usize) {
 
 #[inline(always)]
 fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
-    let s = &mut state.clone();
-    let b = &mut block;
+    let mut s = *state;
 
-    for i in 0..64 {
-        round_schedule(s, b, i);
-    }
-    for i in 64..80 {
-        round(s, b, i);
+    for r in 0..80 {
+        round(&mut s, &block, r);
+        if r < 64 {
+            schedule(&mut block, r)
+        }
     }
 
     for i in 0..8 {
@@ -98,7 +95,12 @@ fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
 }
 
 pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    for block in blocks.iter().map(super::to_u64s) {
+    for block in blocks.iter() {
+        let block = if block.as_ptr().cast::<usize>().is_aligned() {
+            super::riscv_zknh_utils::load_aligned_block(block)
+        } else {
+            super::riscv_zknh_utils::load_unaligned_block(block)
+        };
         compress_block(state, block);
     }
 }
