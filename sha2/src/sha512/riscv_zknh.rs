@@ -69,8 +69,8 @@ pub(super) fn opaque_load<const R: usize>(k: &[u64]) -> u64 {
     unsafe {
         let [hi, lo]: [u32; 2];
         asm!(
-            "lwu {lo}, {N1}({k})",
-            "lwu {hi}, {N2}({k})",
+            "lw {lo}, {N1}({k})",
+            "lw {hi}, {N2}({k})",
             N1 = const 8 * R,
             N2 = const 8 * R + 4,
             k = in(reg) k.as_ptr(),
