@@ -9,7 +9,7 @@ use core::arch::riscv64::*;
     target_feature = "zknh",
     any(target_feature = "zbb", target_feature = "zbkb")
 )))]
-compile_error!("riscv-zknh backend requires zknh and zbkb (or zbb) target features");
+compile_error!("riscv-zknh-compact backend requires zknh and zbkb (or zbb) target features");
 
 #[inline(always)]
 fn ch(x: u32, y: u32, z: u32) -> u32 {
