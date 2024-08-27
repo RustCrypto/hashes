@@ -1,8 +1,16 @@
 use core::{arch::asm, ptr};
 
-#[cfg(target_arch = "riscv32")]
 #[inline(always)]
-pub(super) fn load_aligned_block(block: &[u8; 128]) -> [u64; 16] {
+pub(super) fn load_block(block: &[u8; 128]) -> [u64; 16] {
+    if block.as_ptr().cast::<usize>().is_aligned() {
+        load_aligned_block(block)
+    } else {
+        load_unaligned_block(block)
+    }
+}
+
+#[cfg(target_arch = "riscv32")]
+fn load_aligned_block(block: &[u8; 128]) -> [u64; 16] {
     let p: *const [u32; 32] = block.as_ptr().cast();
     debug_assert!(p.is_aligned());
     let block = unsafe { &*p };
@@ -16,8 +24,7 @@ pub(super) fn load_aligned_block(block: &[u8; 128]) -> [u64; 16] {
 }
 
 #[cfg(target_arch = "riscv64")]
-#[inline(always)]
-pub(super) fn load_aligned_block(block: &[u8; 128]) -> [u64; 16] {
+fn load_aligned_block(block: &[u8; 128]) -> [u64; 16] {
     let block_ptr: *const u64 = block.as_ptr().cast();
     debug_assert!(block_ptr.is_aligned());
     let mut res = [0u64; 16];
@@ -29,8 +36,7 @@ pub(super) fn load_aligned_block(block: &[u8; 128]) -> [u64; 16] {
 }
 
 #[cfg(target_arch = "riscv32")]
-#[inline(always)]
-pub(super) fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
+fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
     let offset = (block.as_ptr() as usize) % align_of::<u32>();
     debug_assert_ne!(offset, 0);
     let off1 = (8 * offset) % 32;
@@ -42,8 +48,8 @@ pub(super) fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
 
     unsafe {
         asm!(
-            "lw {left}, 0({bp})",
-            "srl {left}, {left}, {off1}",
+            "lw {left}, 0({bp})",         // left = unsafe { ptr::read(bp) };
+            "srl {left}, {left}, {off1}", // left >>= off1;
             bp = in(reg) bp,
             off1 = in(reg) off1,
             left = out(reg) left,
@@ -60,8 +66,8 @@ pub(super) fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
     let right: u32;
     unsafe {
         asm!(
-            "lw {right}, 128({bp})",
-            "sll {right}, {right}, {off2}",
+            "lw {right}, 32 * 4({bp})",     // right = ptr::read(bp.add(32));
+            "sll {right}, {right}, {off2}", // right <<= off2;
             bp = in(reg) bp,
             off2 = in(reg) off2,
             right = out(reg) right,
@@ -80,8 +86,7 @@ pub(super) fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
 }
 
 #[cfg(target_arch = "riscv64")]
-#[inline(always)]
-pub(super) fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
+fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
     let offset = (block.as_ptr() as usize) % align_of::<u64>();
     debug_assert_ne!(offset, 0);
     let off1 = (8 * offset) % 64;
@@ -93,8 +98,8 @@ pub(super) fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
 
     unsafe {
         asm!(
-            "ld {left}, 0({bp})",
-            "srl {left}, {left}, {off1}",
+            "ld {left}, 0({bp})",           // left = unsafe { ptr::read(bp) };
+            "srl {left}, {left}, {off1}",   // left >>= off1;
             bp = in(reg) bp,
             off1 = in(reg) off1,
             left = out(reg) left,
@@ -110,8 +115,8 @@ pub(super) fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
     let right: u64;
     unsafe {
         asm!(
-            "ld {right}, 128({bp})",
-            "sll {right}, {right}, {off2}",
+            "ld {right}, 16 * 8({bp})",     // right = ptr::read(bp.add(16));
+            "sll {right}, {right}, {off2}", // right <<= off2;
             bp = in(reg) bp,
             off2 = in(reg) off2,
             right = out(reg) right,

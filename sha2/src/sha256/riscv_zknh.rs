@@ -129,12 +129,7 @@ fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
 }
 
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks {
-        let block = if block.as_ptr().cast::<u32>().is_aligned() {
-            super::riscv_zknh_utils::load_aligned_block(block)
-        } else {
-            super::riscv_zknh_utils::load_unaligned_block(block)
-        };
+    for block in blocks.map(super::riscv_zknh_utils::load_block) {
         compress_block(state, block);
     }
 }
