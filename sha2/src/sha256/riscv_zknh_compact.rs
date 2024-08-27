@@ -5,8 +5,11 @@ use core::arch::riscv32::*;
 #[cfg(target_arch = "riscv64")]
 use core::arch::riscv64::*;
 
-#[cfg(not(target_feature = "zknh"))]
-compile_error!("riscv-zknh backend requires enabled zknh target feature");
+#[cfg(not(all(
+    target_feature = "zknh",
+    any(target_feature = "zbb", target_feature = "zbkb")
+)))]
+compile_error!("riscv-zknh-compact backend requires zknh and zbkb (or zbb) target features");
 
 #[inline(always)]
 fn ch(x: u32, y: u32, z: u32) -> u32 {
@@ -43,9 +46,7 @@ fn round(state: &mut [u32; 8], block: &[u32; 16], r: usize) {
 }
 
 #[inline(always)]
-fn round_schedule(state: &mut [u32; 8], block: &mut [u32; 16], r: usize) {
-    round(state, block, r);
-
+fn schedule(block: &mut [u32; 16], r: usize) {
     block[r % 16] = block[r % 16]
         .wrapping_add(unsafe { sha256sig1(block[(r + 14) % 16]) })
         .wrapping_add(block[(r + 9) % 16])
@@ -54,14 +55,13 @@ fn round_schedule(state: &mut [u32; 8], block: &mut [u32; 16], r: usize) {
 
 #[inline(always)]
 fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
-    let s = &mut state.clone();
-    let b = &mut block;
+    let mut s = *state;
 
-    for i in 0..48 {
-        round_schedule(s, b, i);
-    }
-    for i in 48..64 {
-        round(s, b, i);
+    for r in 0..64 {
+        round(&mut s, &block, r);
+        if r < 48 {
+            schedule(&mut block, r)
+        }
     }
 
     for i in 0..8 {
@@ -70,7 +70,7 @@ fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
 }
 
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks.iter().map(super::to_u32s) {
+    for block in blocks.iter().map(super::riscv_zknh_utils::load_block) {
         compress_block(state, block);
     }
 }

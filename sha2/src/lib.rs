@@ -10,6 +10,7 @@
     any(sha2_backend = "riscv-zknh", sha2_backend = "riscv-zknh-compact"),
     feature(riscv_ext_intrinsics)
 )]
+#![allow(clippy::needless_range_loop)]
 
 #[cfg(all(
     any(sha2_backend = "riscv-zknh", sha2_backend = "riscv-zknh-compact"),
