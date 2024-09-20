@@ -255,7 +255,7 @@ dependencies = [
 
 [[package]]
 name = "ripemd"
-version = "0.2.0-pre"
+version = "0.2.0-pre.4"
 dependencies = [
  "base16ct",
  "digest",
