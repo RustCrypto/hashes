@@ -1,4 +1,4 @@
-use crate::hash;
+use crate::hash_bw_compat;
 
 #[test]
 fn hash_test_0() {
@@ -13,7 +13,7 @@ fn hash_test_0() {
         0x89, 0x19, 0x85, 0x38,
     ];
 
-    let actual_hash = hash(message.to_vec(), Some(message_length)).unwrap();
+    let actual_hash = hash_bw_compat(message.to_vec(), Some(message_length)).unwrap();
 
     assert_eq!(actual_hash, expected_hash);
 }
@@ -31,7 +31,7 @@ fn hash_test_8() {
         0x2B, 0x6D, 0x02, 0x92,
     ];
 
-    let actual_hash = hash(message.to_vec(), Some(message_length)).unwrap();
+    let actual_hash = hash_bw_compat(message.to_vec(), Some(message_length)).unwrap();
 
     assert_eq!(actual_hash, expected_hash);
 }
@@ -55,7 +55,7 @@ fn hash_test_510() {
         0xE0, 0x5F, 0x0D, 0xEA,
     ];
 
-    let actual_hash = hash(message.to_vec(), Some(message_length)).unwrap();
+    let actual_hash = hash_bw_compat(message.to_vec(), Some(message_length)).unwrap();
 
     assert_eq!(actual_hash, expected_hash);
 }
@@ -79,7 +79,7 @@ fn hash_test_512() {
         0xC1, 0x3D, 0xE6, 0x2A,
     ];
 
-    let actual_hash = hash(message.to_vec(), Some(message_length)).unwrap();
+    let actual_hash = hash_bw_compat(message.to_vec(), Some(message_length)).unwrap();
 
     assert_eq!(actual_hash, expected_hash);
 }
@@ -104,7 +104,7 @@ fn hash_test_655() {
         0x0E, 0x02, 0xC7, 0xAA,
     ];
 
-    let actual_hash = hash(message.to_vec(), Some(message_length)).unwrap();
+    let actual_hash = hash_bw_compat(message.to_vec(), Some(message_length)).unwrap();
 
     assert_eq!(actual_hash, expected_hash);
 }
@@ -132,7 +132,7 @@ fn hash_test_1024() {
         0x83, 0xFD, 0x7F, 0xFE,
     ];
 
-    let actual_hash = hash(message.to_vec(), Some(message_length)).unwrap();
+    let actual_hash = hash_bw_compat(message.to_vec(), Some(message_length)).unwrap();
 
     assert_eq!(actual_hash, expected_hash);
 }
@@ -164,7 +164,7 @@ fn hash_test_1536() {
         0xCF, 0x74, 0x31, 0x21,
     ];
 
-    let actual_hash = hash(message.to_vec(), Some(message_length)).unwrap();
+    let actual_hash = hash_bw_compat(message.to_vec(), Some(message_length)).unwrap();
 
     assert_eq!(actual_hash, expected_hash);
 }
@@ -201,7 +201,7 @@ fn hash_test_2048() {
         0x97, 0x28, 0x4F, 0x7E,
     ];
 
-    let actual_hash = hash(message.to_vec(), Some(message_length)).unwrap();
+    let actual_hash = hash_bw_compat(message.to_vec(), Some(message_length)).unwrap();
 
     assert_eq!(actual_hash, expected_hash);
 }

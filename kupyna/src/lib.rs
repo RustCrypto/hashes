@@ -108,6 +108,6 @@ fn truncate(block: &[u8], n: usize) -> Vec<u8> {
 }
 
 // Keep the standalone function for backward compatibility
-pub fn hash(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static str> {
+pub fn hash_bw_compat(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static str> {
     KupynaH::default().hash(message, length)
 }
