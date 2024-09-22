@@ -2,8 +2,63 @@ mod sub_units;
 #[cfg(test)]
 mod tests;
 
-const STATE_SIZE: usize = 1024;
-const HASH_SIZE: usize = 512;
+pub struct KupynaH {
+    state_size: usize,
+    hash_size: usize,
+}
+
+impl KupynaH {
+    pub fn new(state_size: usize, hash_size: usize) -> Self {
+        KupynaH {
+            state_size,
+            hash_size,
+        }
+    }
+
+    pub fn default() -> Self {
+        KupynaH {
+            state_size: 1024,
+            hash_size: 512,
+        }
+    }
+
+    pub fn hash(&self, message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static str> {
+        let mut message = message;
+        let message_length: usize;
+        if let Some(len) = length {
+            if len > message.len() * 8 {
+                return Err("Message length is less than the provided length");
+            }
+
+            let mut trimmed_message = message[..(len / 8)].to_vec();
+
+            if len % 8 != 0 {
+                let extra_byte = message[len / 8];
+                let extra_bits = len % 8;
+                let mask = 0xFF << (8 - extra_bits);
+                trimmed_message.push(extra_byte & mask);
+            }
+
+            message = trimmed_message;
+            message_length = len;
+        } else {
+            message_length = message.len() * 8;
+        }
+
+        let padded_message = pad_message(&message, message_length, self.state_size);
+
+        let blocks = divide_into_blocks(&padded_message, self.state_size);
+
+        let mut init_vector: Vec<u8> = vec![0; self.state_size / 8];
+        init_vector[0] = 0x80; // set the first bit of this init vector to high
+
+        let fin_vector = sub_units::plant(blocks, &init_vector);
+
+        let hash = truncate(&fin_vector, self.hash_size);
+
+        Ok(hash)
+    }
+}
 
 fn pad_message(message: &[u8], msg_len_bits: usize, state_size: usize) -> Vec<u8> {
     let round_msg_len = message.len() * 8;
@@ -52,39 +107,7 @@ fn truncate(block: &[u8], n: usize) -> Vec<u8> {
     block[start_index..].to_vec()
 }
 
+// Keep the standalone function for backward compatibility
 pub fn hash(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static str> {
-    let mut message = message;
-    let message_length: usize;
-    if let Some(len) = length {
-        if len > message.len() * 8 {
-            return Err("Message length is less than the provided length");
-        }
-
-        let mut trimmed_message = message[..(len / 8)].to_vec();
-
-        if len % 8 != 0 {
-            let extra_byte = message[len / 8];
-            let extra_bits = len % 8;
-            let mask = 0xFF << (8 - extra_bits);
-            trimmed_message.push(extra_byte & mask);
-        }
-
-        message = trimmed_message;
-        message_length = len;
-    } else {
-        message_length = message.len() * 8;
-    }
-
-    let padded_message = pad_message(&message, message_length, STATE_SIZE);
-
-    let blocks = divide_into_blocks(&padded_message, STATE_SIZE);
-
-    let mut init_vector: Vec<u8> = vec![0; STATE_SIZE / 8];
-    init_vector[0] = 0x80; // set the first bit of this init vector to high
-
-    let fin_vector = sub_units::plant(blocks, &init_vector);
-
-    let hash = truncate(&fin_vector, HASH_SIZE);
-
-    Ok(hash)
+    KupynaH::default().hash(message, length)
 }
