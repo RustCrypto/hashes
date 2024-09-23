@@ -30,6 +30,10 @@ fn blake2b_new_test() {
 
 #[test]
 fn mac_refuses_empty_keys() {
-    assert!(blake2::Blake2bMac512::new_with_salt_and_personal(&[], b"salt", b"persona").is_err());
-    assert!(blake2::Blake2sMac256::new_with_salt_and_personal(&[], b"salt", b"persona").is_err());
+    assert!(
+        blake2::Blake2bMac512::new_with_salt_and_personal(Some(&[]), b"salt", b"persona").is_err()
+    );
+    assert!(
+        blake2::Blake2sMac256::new_with_salt_and_personal(Some(&[]), b"salt", b"persona").is_err()
+    );
 }
