@@ -9,7 +9,6 @@ pub struct KupynaH {
 
 impl KupynaH {
     pub fn new(hash_size: usize) -> Self {
-
         let mut state_size: usize = 0;
 
         if hash_size > 256 && hash_size <= 512 {
