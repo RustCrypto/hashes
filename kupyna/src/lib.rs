@@ -4,19 +4,35 @@ mod tests;
 
 pub struct KupynaH {
     state_size: usize,
+    state_matrix_cols: usize,
+    state_matrix_rows: usize,
+    rounds: usize,
     hash_size: usize,
 }
 
 impl KupynaH {
     pub fn new(hash_size: usize) -> Self {
         let mut state_size: usize = 0;
+        let mut rounds: usize = 0;
 
-        if hash_size > 256 && hash_size <= 512 {
+        if hash_size >= 8 && hash_size <= 256 {
+            state_size = 512;
+            rounds = 10;
+        } else if hash_size > 256 && hash_size <= 512 {
             state_size = 1024;
+            rounds = 14;
         }
+
+        let state_matrix_cols = 8;
+        let state_matrix_rows = 16;
+
+
 
         KupynaH {
             state_size,
+            state_matrix_cols,
+            state_matrix_rows,
+            rounds,
             hash_size,
         }
     }
@@ -24,6 +40,9 @@ impl KupynaH {
     pub fn default() -> Self {
         KupynaH {
             state_size: 1024,
+            state_matrix_cols: 8,
+            state_matrix_rows: 16,
+            rounds: 14,
             hash_size: 512,
         }
     }
