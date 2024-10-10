@@ -77,7 +77,7 @@ impl KupynaH {
         let mut init_vector: Vec<u8> = vec![0; self.state_size / 8];
         init_vector[0] = 0x80; // set the first bit of this init vector to high
 
-        let fin_vector = sub_units::plant(blocks, &init_vector);
+        let fin_vector = sub_units::plant(blocks, &init_vector, self);
 
         let hash = truncate(&fin_vector, self.hash_size);
 
