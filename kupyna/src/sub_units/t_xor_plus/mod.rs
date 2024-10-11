@@ -3,9 +3,6 @@ mod tests;
 
 mod tables;
 
-const ROWS: usize = 16;
-const COLS: usize = 8; // For 512-bit state, adjust if needed
-
 const BITS_IN_BYTE: u8 = 8;
 const REDUCTION_POLYNOMIAL: u16 = 0x011d;
 

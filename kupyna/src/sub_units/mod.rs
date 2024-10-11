@@ -3,8 +3,6 @@ mod t_xor_plus;
 use crate::KupynaH;
 use t_xor_plus::{t_plus_l, t_xor_l};
 
-const ROUNDS: usize = 14;
-
 fn xor_bytes(a: &[u8], b: &[u8]) -> Vec<u8> {
     a.iter().zip(b.iter()).map(|(x, y)| x ^ y).collect()
 }
