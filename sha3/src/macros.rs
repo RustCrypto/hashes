@@ -469,11 +469,6 @@ macro_rules! impl_cshake {
         pub type $full_name = CoreWrapper<$name>;
 
         impl $name {
-            /// Creates a new CSHAKE instance with the given customization.
-            pub fn new(customization: &[u8]) -> Self {
-                Self::new_with_function_name(&[], customization)
-            }
-
             /// Creates a new CSHAKE instance with the given function name and customization.
             /// Note that the function name is intended for use by NIST and should only be set to
             /// values defined by NIST. You probably don't need to use this function.
@@ -642,5 +637,12 @@ macro_rules! impl_cshake {
 
         #[cfg(feature = "zeroize")]
         impl ZeroizeOnDrop for $reader {}
+
+        impl CustomizedInit for $name {
+            #[inline]
+            fn new_customized(customization: &[u8]) -> Self {
+                Self::new_with_function_name(&[], customization)
+            }
+        }
     };
 }
