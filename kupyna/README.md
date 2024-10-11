@@ -34,11 +34,13 @@ To compute the hash of a message using this implementation, you can call the `ku
 
 ```rust
 fn main() {
-    let message = b"hello world";
+    let message = b"Hello, World!".to_vec();
 
-    let hash = kupyna::hash(message);
+    let kupyna = KupynaH::new(512);
 
-    println!("Hash: {:?}", hash);
+    let hash_code = kupyna.hash(message, None).unwrap();
+
+    println!("Hash: {:02X?}", hash_code);
 }
 ```
 
