@@ -1,4 +1,9 @@
+use crate::KupynaH;
 use crate::sub_units::t_xor_plus::*;
+
+fn setup_hash_params() -> KupynaH {
+    KupynaH::default()
+}
 
 #[test]
 fn test_add_constant_xor() {
@@ -24,9 +29,12 @@ fn test_add_constant_xor() {
         0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x90, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77,
         0x88, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F,
     ];
-    let input_matrix = block_to_matrix(&input, );
-    let result = add_constant_xor(input_matrix, 0, );
-    assert_eq!(result, block_to_matrix(&expected_output, ));
+
+    let hash_params = setup_hash_params();
+
+    let input_matrix = block_to_matrix(&input, &hash_params);
+    let result = add_constant_xor(input_matrix, 0, &hash_params);
+    assert_eq!(result, block_to_matrix(&expected_output, &hash_params));
 }
 
 #[test]
@@ -53,9 +61,12 @@ fn test_add_constant_plus() {
         0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F, 0x90, 0x63, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x88,
         0x6B, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x80,
     ];
-    let input_matrix = block_to_matrix(&input, );
-    let result = add_constant_plus(input_matrix, 0, );
-    assert_eq!(result, block_to_matrix(&expected_output, ));
+
+    let hash_params = setup_hash_params();
+
+    let input_matrix = block_to_matrix(&input, &hash_params);
+    let result = add_constant_plus(input_matrix, 0, &hash_params);
+    assert_eq!(result, block_to_matrix(&expected_output, &hash_params));
 }
 
 #[test]
@@ -82,9 +93,12 @@ fn test_s_box_layer() {
         0x0D, 0x2F, 0xAB, 0x38, 0x8C, 0xDA, 0x60, 0xEB, 0xDC, 0x05, 0x0C, 0x36, 0xB5, 0x6C, 0xEC,
         0xCD, 0x62, 0xB1, 0x7C, 0x14, 0xA5, 0x5E, 0x5B,
     ];
-    let input_matrix = block_to_matrix(&input, );
-    let result = s_box_layer(input_matrix, );
-    assert_eq!(result, block_to_matrix(&expected_output, ));
+
+    let hash_params = setup_hash_params();
+
+    let input_matrix = block_to_matrix(&input, &hash_params);
+    let result = s_box_layer(input_matrix, &hash_params);
+    assert_eq!(result, block_to_matrix(&expected_output, &hash_params));
 }
 
 #[test]
@@ -111,9 +125,12 @@ fn test_rotate_rows() {
         0x2B, 0x18, 0xEE, 0x8F, 0x33, 0xB2, 0x83, 0xEB, 0x0D, 0x8F, 0xB1, 0x96, 0x95, 0xC3, 0xBD,
         0xCD, 0xDC, 0x2F, 0xFD, 0xBC, 0x3C, 0xCB, 0x11,
     ];
-    let input_matrix = block_to_matrix(&input, );
-    let result = rotate_rows(input_matrix, );
-    assert_eq!(result, block_to_matrix(&expected_output, ));
+
+    let hash_params = setup_hash_params();
+
+    let input_matrix = block_to_matrix(&input, &hash_params);
+    let result = rotate_rows(input_matrix, &hash_params);
+    assert_eq!(result, block_to_matrix(&expected_output, &hash_params));
 }
 
 #[test]
@@ -140,7 +157,10 @@ fn test_mix_columns() {
         0x1D, 0x60, 0xB9, 0xB2, 0x8B, 0xAE, 0x4D, 0xFE, 0xA8, 0x3F, 0xFB, 0x07, 0xF1, 0x35, 0xB5,
         0x71, 0x78, 0xE6, 0xC8, 0x9B, 0x20, 0x6A, 0xD3,
     ];
-    let input_matrix = block_to_matrix(&input, );
-    let result = mix_columns(input_matrix, );
-    assert_eq!(result, block_to_matrix(&expected_output, ));
+
+    let hash_params = setup_hash_params();
+
+    let input_matrix = block_to_matrix(&input, &hash_params);
+    let result = mix_columns(input_matrix, &hash_params);
+    assert_eq!(result, block_to_matrix(&expected_output, &hash_params));
 }

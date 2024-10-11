@@ -1,4 +1,9 @@
+use crate::KupynaH;
 use crate::sub_units::t_xor_plus::{t_plus_l, t_xor_l};
+
+fn setup_hash_params() -> KupynaH {
+    KupynaH::default()
+}
 
 #[test]
 fn test_t_xor_l() {
@@ -26,8 +31,8 @@ fn test_t_xor_l() {
         0xA9, 0x55, 0xF1, 0xF7, 0xC8, 0x32, 0xAD, 0xF3,
     ];
 
-    let rounds = 14;
-    let result = t_xor_l(&input, rounds);
+    let hash_params = setup_hash_params();
+    let result = t_xor_l(&input, &hash_params);
     assert_eq!(result, expected_output);
 }
 
@@ -57,7 +62,7 @@ fn test_t_plus_l() {
         0xD9, 0x0D, 0x2D, 0x55, 0xDC, 0xF7, 0x2F, 0x5F,
     ];
 
-    let rounds = 14;
-    let result = t_plus_l(&input, rounds);
+    let hash_params = setup_hash_params();
+    let result = t_plus_l(&input, &hash_params);
     assert_eq!(result, expected_output);
 }
