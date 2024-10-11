@@ -1,7 +1,7 @@
 mod t_xor_plus;
 
-use t_xor_plus::{t_plus_l, t_xor_l};
 use crate::KupynaH;
+use t_xor_plus::{t_plus_l, t_xor_l};
 
 const ROUNDS: usize = 14;
 
@@ -19,7 +19,11 @@ fn silo(message_block: &[u8], prev_vector: &[u8], hash_params: &KupynaH) -> Vec<
     xor_bytes(&(xor_bytes(&t_xor_mp, &t_plus_m)), prev_vector)
 }
 
-pub(crate) fn plant(message_blocks: Vec<&[u8]>, init_vector: &[u8], hash_params: &KupynaH) -> Vec<u8> {
+pub(crate) fn plant(
+    message_blocks: Vec<&[u8]>,
+    init_vector: &[u8],
+    hash_params: &KupynaH,
+) -> Vec<u8> {
     let mut last_vector = init_vector.to_vec();
 
     for block in message_blocks {

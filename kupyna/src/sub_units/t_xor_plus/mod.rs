@@ -11,8 +11,8 @@ const REDUCTION_POLYNOMIAL: u16 = 0x011d;
 
 type Matrix = Vec<Vec<u8>>;
 
-use tables::{MDS_MATRIX, SBOXES};
 use crate::KupynaH;
+use tables::{MDS_MATRIX, SBOXES};
 
 pub(crate) fn block_to_matrix(block: &[u8], hash_params: &KupynaH) -> Matrix {
     let rows = hash_params.state_matrix_rows;
@@ -28,11 +28,10 @@ pub(crate) fn block_to_matrix(block: &[u8], hash_params: &KupynaH) -> Matrix {
 }
 
 fn matrix_to_block(matrix: Matrix) -> Vec<u8> {
-
     let rows = matrix.len();
     let cols = matrix[0].len();
 
-    let mut block = vec![0u8; rows*cols];
+    let mut block = vec![0u8; rows * cols];
     for i in 0..rows {
         for j in 0..cols {
             block[i * cols + j] = matrix[i][j];
@@ -73,7 +72,6 @@ pub(crate) fn s_box_layer(mut state: Matrix, hash_params: &KupynaH) -> Matrix {
 }
 
 pub(crate) fn rotate_rows(mut state: Matrix, hash_params: &KupynaH) -> Matrix {
-
     let rows = hash_params.state_matrix_rows;
     let cols = hash_params.state_matrix_cols;
 
@@ -114,7 +112,6 @@ fn multiply_gf(mut x: u8, mut y: u8) -> u8 {
 }
 
 pub(crate) fn mix_columns(state: Matrix, hash_params: &KupynaH) -> Matrix {
-
     let rows = hash_params.state_matrix_rows;
     let cols = hash_params.state_matrix_cols;
 

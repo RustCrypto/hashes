@@ -26,8 +26,6 @@ impl KupynaH {
         let state_matrix_cols = 8;
         let state_matrix_rows = 16;
 
-
-
         KupynaH {
             state_size,
             state_matrix_cols,

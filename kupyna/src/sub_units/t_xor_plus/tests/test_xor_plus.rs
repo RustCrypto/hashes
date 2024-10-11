@@ -1,5 +1,5 @@
-use crate::KupynaH;
 use crate::sub_units::t_xor_plus::{t_plus_l, t_xor_l};
+use crate::KupynaH;
 
 fn setup_hash_params() -> KupynaH {
     KupynaH::default()
