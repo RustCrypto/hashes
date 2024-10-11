@@ -17,7 +17,7 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.71"
 
 [dependencies]
-digest = { version = "=0.11.0-pre.8", default-features = false, features = ["core-api"] }
+digest = { version = "=0.11.0-pre.9", default-features = false, features = ["core-api"] }
 
 [dev-dependencies]
 
