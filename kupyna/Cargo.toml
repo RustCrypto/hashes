@@ -1,12 +1,8 @@
 [package]
 name = "kupyna"
 version = "0.1.0"
-description = "Hashing algorithm for Kupyna, 8 to 512 length"
-authors = [
-    "Joshua Koudys <josh@qaribou.com>",
-    "Raj Singh <typhoeusxoxo@gmail.com>",
-    "RustCrypto Developers",
-]
+description = "Kupyna (DSTU 7564:2014) hash function"
+authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 edition = "2021"
