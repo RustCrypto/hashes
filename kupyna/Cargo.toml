@@ -7,7 +7,7 @@ authors = [
     "Raj Singh <typhoeusxoxo@gmail.com>",
     "RustCrypto Developers",
 ]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 readme = "README.md"
 edition = "2021"
 documentation = "https://docs.rs/kupyna"
