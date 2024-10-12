@@ -163,7 +163,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: RustCrypto/actions/cross-install@master
+      - run: cargo install cross --git https://github.com/cross-rs/cross
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
