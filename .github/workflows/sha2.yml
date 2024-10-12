@@ -163,10 +163,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: RustCrypto/actions/cargo-cache@master
+      - uses: RustCrypto/actions/cross-install@master
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
-      - run: cargo install cross --git https://github.com/cross-rs/cross
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh,+zbkb
