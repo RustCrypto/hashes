@@ -1,7 +1,9 @@
 name: Security Audit
 on:
   pull_request:
-    paths: Cargo.lock
+    paths:
+      - .github/workflows/security-audit.yml
+      - Cargo.lock
   push:
     branches: master
     paths: Cargo.lock
@@ -19,7 +21,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-audit-v0.12.0
+          key: ${{ runner.os }}-cargo-audit-v0.20
       - uses: actions-rs/audit-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
