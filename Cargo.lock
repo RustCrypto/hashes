@@ -209,6 +209,7 @@ name = "kupyna"
 version = "0.1.0"
 dependencies = [
  "digest",
+ "hex-literal",
 ]
 
 [[package]]
