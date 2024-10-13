@@ -10,15 +10,21 @@ pub struct KupynaH {
     hash_size: usize,
 }
 
+impl Default for KupynaH {
+    fn default() -> Self {
+        KupynaH::new(512)
+    }
+}
+
 impl KupynaH {
     pub fn new(hash_size: usize) -> Self {
         let mut state_size: usize = 0;
         let mut rounds: usize = 0;
 
-        if hash_size >= 8 && hash_size <= 256 {
+        if (8..=256).contains(&hash_size) {
             state_size = 512;
             rounds = 10;
-        } else if hash_size > 256 && hash_size <= 512 {
+        } else if (257..=512).contains(&hash_size) {
             state_size = 1024;
             rounds = 14;
         }
@@ -32,16 +38,6 @@ impl KupynaH {
             state_matrix_rows,
             rounds,
             hash_size,
-        }
-    }
-
-    pub fn default() -> Self {
-        KupynaH {
-            state_size: 1024,
-            state_matrix_cols: 8,
-            state_matrix_rows: 16,
-            rounds: 14,
-            hash_size: 512,
         }
     }
 
