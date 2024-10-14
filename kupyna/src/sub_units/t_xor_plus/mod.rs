@@ -48,12 +48,12 @@ pub(crate) fn add_constant_xor(mut state: Matrix, round: usize, hash_params: &Ku
 
 pub(crate) fn add_constant_plus(mut state: Matrix, round: usize, hash_params: &KupynaH) -> Matrix {
     let rows = hash_params.state_matrix_rows;
-    for j in 0..rows {
-        let mut row_as_u64 = u64::from_le_bytes(state[j][0..8].try_into().unwrap());
+    for (j, row) in state.iter_mut().enumerate().take(rows) {
+        let mut row_as_u64 = u64::from_le_bytes(row[0..8].try_into().unwrap());
         row_as_u64 = row_as_u64.wrapping_add(
             0x00F0F0F0F0F0F0F3u64 ^ (((((rows - j - 1) * 0x10) ^ round) as u64) << 56),
         );
-        state[j][0..8].copy_from_slice(&row_as_u64.to_le_bytes());
+        row[0..8].copy_from_slice(&row_as_u64.to_le_bytes());
     }
     state
 }
