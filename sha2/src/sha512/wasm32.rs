@@ -49,9 +49,9 @@ unsafe fn rounds_0_63(current_state: &mut State, x: &mut [v128; 8], ms: &mut Msg
             let y = sha512_update_x(x, k64);
 
             {
-                let ms = cast_ms(ms);
-                sha_round(current_state, ms[2 * j]);
-                sha_round(current_state, ms[2 * j + 1]);
+                let ms = ms[j];
+                sha_round(current_state, u64x2_extract_lane::<0>(ms));
+                sha_round(current_state, u64x2_extract_lane::<1>(ms));
             }
 
             ms[j] = y;
@@ -62,9 +62,10 @@ unsafe fn rounds_0_63(current_state: &mut State, x: &mut [v128; 8], ms: &mut Msg
 
 #[inline(always)]
 fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
-    let ms = cast_ms(ms);
-    for i in 64..80 {
-        sha_round(current_state, ms[i & 0xf]);
+    for j in 0..8 {
+        let ms = ms[j];
+        sha_round(current_state, u64x2_extract_lane::<0>(ms));
+        sha_round(current_state, u64x2_extract_lane::<1>(ms));
     }
 }
 
@@ -160,11 +161,6 @@ unsafe fn sha512_update_x(x: &mut [v128; 8], k64: v128) -> v128 {
     x[6] = x[7];
     x[7] = temp;
     i64x2_add(x[7], k64)
-}
-
-#[inline(always)]
-fn cast_ms(ms: &MsgSchedule) -> &[u64; SHA512_BLOCK_WORDS_NUM] {
-    unsafe { &*(ms.as_ptr().cast()) }
 }
 
 type State = [u64; SHA512_HASH_WORDS_NUM];

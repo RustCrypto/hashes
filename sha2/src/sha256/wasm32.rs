@@ -50,11 +50,11 @@ unsafe fn rounds_0_47(current_state: &mut State, x: &mut [v128; 4], ms: &mut Msg
             let y = sha256_update_x(x, k32);
 
             {
-                let ms = cast_ms(ms);
-                sha_round(current_state, ms[4 * j]);
-                sha_round(current_state, ms[4 * j + 1]);
-                sha_round(current_state, ms[4 * j + 2]);
-                sha_round(current_state, ms[4 * j + 3]);
+                let ms = ms[j];
+                sha_round(current_state, u32x4_extract_lane::<0>(ms));
+                sha_round(current_state, u32x4_extract_lane::<1>(ms));
+                sha_round(current_state, u32x4_extract_lane::<2>(ms));
+                sha_round(current_state, u32x4_extract_lane::<3>(ms));
             }
 
             ms[j] = y;
@@ -65,9 +65,12 @@ unsafe fn rounds_0_47(current_state: &mut State, x: &mut [v128; 4], ms: &mut Msg
 
 #[inline(always)]
 fn rounds_48_63(current_state: &mut State, ms: &MsgSchedule) {
-    let ms = cast_ms(ms);
-    for i in 48..64 {
-        sha_round(current_state, ms[i & 0xf]);
+    for j in 0..4 {
+        let ms = ms[j];
+        sha_round(current_state, u32x4_extract_lane::<0>(ms));
+        sha_round(current_state, u32x4_extract_lane::<1>(ms));
+        sha_round(current_state, u32x4_extract_lane::<2>(ms));
+        sha_round(current_state, u32x4_extract_lane::<3>(ms));
     }
 }
 
@@ -176,11 +179,6 @@ unsafe fn sha256_update_x(x: &mut [v128; 4], k32: v128) -> v128 {
     x[3] = tmp;
 
     u32x4_add(x[3], k32)
-}
-
-#[inline(always)]
-fn cast_ms(ms: &MsgSchedule) -> &[u32; SHA256_BLOCK_WORDS_NUM] {
-    unsafe { &*(ms.as_ptr().cast()) }
 }
 
 type State = [u32; SHA256_HASH_WORDS_NUM];
