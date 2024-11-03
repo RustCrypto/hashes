@@ -27,7 +27,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.72][msrv-1.72] | :broken_heart: |
 | [SHA-1 Checked] | [`sha1-checked`] | [![crates.io](https://img.shields.io/crates/v/sha1-checked.svg)](https://crates.io/crates/sha1-checked) | [![Documentation](https://docs.rs/sha1-checked/badge.svg)](https://docs.rs/sha1-checked) | ![MSRV 1.72][msrv-1.72] | :yellow_heart: |
-| [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.72][msrv-1.72] | :green_heart: |
+| [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
 | [SHA-3] (Keccak) | [`sha3`] | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) | [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [SHABAL] | [`shabal`] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) | [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
 | [Skein] | [`skein`] | [![crates.io](https://img.shields.io/crates/v/skein.svg)](https://crates.io/crates/skein) | [![Documentation](https://docs.rs/skein/badge.svg)](https://docs.rs/skein) | ![MSRV 1.71][msrv-1.71] | :green_heart: |
@@ -237,6 +237,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [msrv-1.71]: https://img.shields.io/badge/rustc-1.71.0+-blue.svg
 [msrv-1.72]: https://img.shields.io/badge/rustc-1.72.0+-blue.svg
 [msrv-1.74]: https://img.shields.io/badge/rustc-1.74.0+-blue.svg
+[msrv-1.81]: https://img.shields.io/badge/rustc-1.81.0+-blue.svg
 
 [//]: # (crates)
 
