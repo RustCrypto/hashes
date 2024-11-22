@@ -10,7 +10,7 @@ documentation = "https://docs.rs/k12"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.71"
+rust-version = "1.81"
 
 [dependencies]
 digest = { version = "=0.11.0-pre.9", default-features = false, features = ["core-api"] }

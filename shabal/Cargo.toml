@@ -10,7 +10,7 @@ documentation = "https://docs.rs/shabal"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "shabal", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.71"
+rust-version = "1.81"
 
 [dependencies]
 digest = "=0.11.0-pre.9"
