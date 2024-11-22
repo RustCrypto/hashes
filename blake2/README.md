@@ -75,7 +75,7 @@ assert_eq!(res, hex!("2cc55c84e416924e6400"));
 
 ## Minimum Supported Rust Version
 
-Rust **1.71** or higher.
+Rust **1.81** or higher.
 
 Minimum supported Rust version can be changed in the future, but it will be
 done with a minor version bump.
@@ -109,7 +109,7 @@ dual licensed as above, without any additional terms or conditions.
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[rustc-image]: https://img.shields.io/badge/rustc-1.71+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.81+-blue.svg
 [build-image]: https://github.com/RustCrypto/hashes/workflows/blake2/badge.svg?branch=master
 [build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Ablake2
 

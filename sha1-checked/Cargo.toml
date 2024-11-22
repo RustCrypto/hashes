@@ -10,7 +10,7 @@ documentation = "https://docs.rs/sha1-checked"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha1", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.72"
+rust-version = "1.81"
 
 exclude = [
     "sha1-checked/tests/data/shattered-1.pdf",

@@ -13,7 +13,7 @@ documentation = "https://docs.rs/sha2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.79"
+rust-version = "1.81"
 
 [dependencies]
 digest = "=0.11.0-pre.9"
