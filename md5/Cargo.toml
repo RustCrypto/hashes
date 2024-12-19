@@ -10,7 +10,7 @@ documentation = "https://docs.rs/md-5"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md5", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.72"
+rust-version = "1.81"
 
 [lib]
 name = "md5"
