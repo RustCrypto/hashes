@@ -1,13 +1,38 @@
-// Adapted from the original C code: https://github.com/brbsh/samp-plugin-md6
+#![no_std]
+#![doc = include_str!("../README.md")]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
+)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![warn(missing_docs, rust_2018_idioms)]
 
-
-#![allow(non_snake_case)]
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-
+mod compress;
+pub(crate) mod consts;
 mod md6;
-mod md6_compress;
-mod md6_consts;
 
-pub use md6::*;
-pub use md6_compress::*;
+use digest::{
+    consts::{U16, U28, U32, U48, U64, U8},
+    core_api::{CoreWrapper, CtVariableCoreWrapper, RtVariableCoreWrapper},
+};
+
+pub use digest::{Digest, Update, VariableOutput};
+
+use crate::md6::Md6VarCore;
+
+/// Md6 which allows variable output size at runtime
+pub type Md6Var = RtVariableCoreWrapper<Md6VarCore>;
+/// Core hash function for Md6 generic over output size
+pub type Md6Core<OutSize> = CtVariableCoreWrapper<Md6VarCore, OutSize>;
+/// Md6 with 64-bit output
+pub type Md6_64 = CoreWrapper<Md6Core<U8>>;
+/// Md6 with 128-bit output
+pub type Md6_128 = CoreWrapper<Md6Core<U16>>;
+/// Md6 with 224-bit output
+pub type Md6_224 = CoreWrapper<Md6Core<U28>>;
+/// Md6 with 256-bit output
+pub type Md6_256 = CoreWrapper<Md6Core<U32>>;
+/// Md6 with 384-bit output
+pub type Md6_384 = CoreWrapper<Md6Core<U48>>;
+/// Md6 with 512-bit output
+pub type Md6_512 = CoreWrapper<Md6Core<U64>>;
