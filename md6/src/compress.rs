@@ -145,7 +145,7 @@ pub fn compress(c: &mut [Md6Word], n: &mut [Md6Word], r: usize, a: &mut [Md6Word
     c.copy_from_slice(&a[((r - 1) * C + N)..((r - 1) * C + N + C)]); // output into c
 }
 
-fn make_control_word(
+pub fn make_control_word(
     r: usize,
     l: usize,
     z: usize,
@@ -170,15 +170,9 @@ pub fn pack(
     n: &mut [Md6Word],
     q: &[Md6Word],
     k: [Md6Word; K],
-    ell: usize,
-    i: Md6Word,
-    r: usize,
-    l: usize,
-    z: usize,
-    p: usize,
-    keylen: usize,
-    d: usize,
     b: [Md6Word; 64],
+    u: Md6NodeID,
+    v: Md6ControlWord,
 ) {
     let mut ni = 0;
 
@@ -188,46 +182,13 @@ pub fn pack(
     n[ni..ni + K].copy_from_slice(&k[..K]); // k: key in words  15--22
     ni += K;
 
-    let u = make_node_id(ell, i); // u: unique node ID in 23
+    // u: unique node ID in 23
     n[ni] = u;
     ni += U;
 
-    let v = make_control_word(r, l, z, p, keylen, d); // v: control word in 24
+    // v: control word in 24
     n[ni] = v;
     ni += V;
 
     n[ni..ni + B].copy_from_slice(&b[..B]); // b: data words     25--88
-}
-
-pub fn standard_compress(
-    c: &mut [Md6Word],
-    q: &[Md6Word],
-    k: [Md6Word; K],
-    ell: usize,
-    i: Md6Word,
-    r: usize,
-    l: usize,
-    z: usize,
-    p: usize,
-    keylen: usize,
-    d: usize,
-    b: [Md6Word; 64],
-) {
-    let mut n = [0; MD6_N];
-    let mut a = [0; 5000];
-
-    // check that the input values are sensible
-    assert!(!c.is_empty());
-    assert!(!q.is_empty());
-    assert!(!b.is_empty());
-    assert!(r <= MD6_MAX_R);
-    assert!(l <= 255);
-    assert!(ell <= 255);
-    assert!(p <= B * W);
-    assert!(d <= C * W / 2);
-    assert!(!k.is_empty());
-
-    pack(&mut n, q, k, ell, i, r, l, z, p, keylen, d, b); // pack input data into N
-
-    compress(c, &mut n, r, &mut a); // compress
 }

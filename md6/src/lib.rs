@@ -24,6 +24,8 @@ use crate::md6::Md6VarCore;
 pub type Md6Var = RtVariableCoreWrapper<Md6VarCore>;
 /// Core hash function for Md6 generic over output size
 pub type Md6Core<OutSize> = CtVariableCoreWrapper<Md6VarCore, OutSize>;
+/// Md6 generic over output size.
+pub type Md6<OutSize> = CoreWrapper<Md6Core<OutSize>>;
 /// Md6 with 64-bit output
 pub type Md6_64 = CoreWrapper<Md6Core<U8>>;
 /// Md6 with 128-bit output

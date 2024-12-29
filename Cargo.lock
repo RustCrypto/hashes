@@ -250,6 +250,7 @@ version = "0.1.0"
 dependencies = [
  "base16ct",
  "digest",
+ "hex",
  "hex-literal",
 ]
 

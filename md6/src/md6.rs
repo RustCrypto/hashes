@@ -245,7 +245,7 @@ impl SerializableState for Md6VarCore {
 
         let mut k = [0u64; K];
         for word in &mut k {
-            *word = read_u64(&serialized_state, &mut offset);
+            *word = read_u64(serialized_state, &mut offset);
         }
 
         let mut b = [[0u64; B]; MD6_MAX_STACK_HEIGHT];
@@ -298,7 +298,7 @@ impl Md6VarCore {
         if key.is_some() {
             assert!(keylen <= K * (W / 8), "bad keylen");
         }
-        assert!(!(d < 1 || d > 512 || d > W * C / 2), "bad hashlen");
+        assert!((1..=512).contains(&d), "bad hashlen");
 
         let (k, keylen) = match key {
             Some(key) if keylen > 0 => {
@@ -354,6 +354,36 @@ impl Md6VarCore {
         }
     }
 
+    pub fn standard_compress(
+        &self,
+        c: &mut [Md6Word],
+        q: &[Md6Word],
+        ell: usize,
+        p: usize,
+        z: usize,
+    ) {
+        let mut n = [0; MD6_N];
+        let mut a = [0; 5000];
+
+        // check that the input values are sensible
+        assert!(!c.is_empty());
+        assert!(!q.is_empty());
+        assert!(!self.b.is_empty());
+        assert!(self.r <= MD6_MAX_R);
+        assert!(self.l <= 255);
+        assert!(ell <= 255);
+        assert!(p <= B * W);
+        assert!(self.d <= C * W / 2);
+        assert!(!self.k.is_empty());
+
+        let u = make_node_id(ell, self.i_for_level[ell]);
+        let v = make_control_word(self.r, self.l, z, p, self.keylen, self.d);
+
+        pack(&mut n, q, self.k, self.b[ell], u, v); // pack input data into N
+
+        compress(c, &mut n, self.r, &mut a); // compress
+    }
+
     #[inline]
     fn compress_block(&mut self, c: &mut [u64], ell: usize, z: usize) {
         // check that input values are sensible
@@ -365,20 +395,7 @@ impl Md6VarCore {
         let p = B * W - self.bits[ell]; // number of padding bits
         let q = get_round_constants(W); // Q constant
 
-        standard_compress(
-            c,
-            q,
-            self.k,
-            ell,
-            self.i_for_level[ell],
-            self.r,
-            self.l,
-            z,
-            p,
-            self.keylen,
-            self.d,
-            self.b[ell],
-        );
+        self.standard_compress(c, q, ell, p, z);
 
         self.bits[ell] = 0; // clear bits used count this level
         self.i_for_level[ell] += 1; // increment i for this level
@@ -466,7 +483,7 @@ impl Md6VarCore {
         // Number of bytes (full or partial) in src
         let srcbytes = (srclen + 7) / 8;
 
-        for i in 0..srcbytes {
+        for (i, item) in src.iter().enumerate().take(srcbytes) {
             if i != srcbytes - 1 {
                 // Not the last byte
                 accum = (accum << 8) ^ src[i] as u16;
@@ -474,7 +491,7 @@ impl Md6VarCore {
             } else {
                 // Last byte
                 let newbits = if srclen % 8 == 0 { 8 } else { srclen % 8 };
-                accum = (accum << newbits) ^ ((src[i] as u16) >> (8 - newbits));
+                accum = (accum << newbits) ^ ((*item as u16) >> (8 - newbits));
                 accumlen += newbits;
             }
 
