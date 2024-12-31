@@ -34,7 +34,7 @@ fn test_md6_64() {
         let mut hasher = md6::Md6_64::new();
         hasher.update(msg);
         let output = hasher.finalize();
-    
+
         assert!(output.to_vec() == expected_hash);
     }
 }
@@ -70,7 +70,7 @@ fn test_md6_128() {
         let mut hasher = md6::Md6_128::new();
         hasher.update(msg);
         let output = hasher.finalize();
-    
+
         assert!(output.to_vec() == expected_hash);
     }
 }
@@ -78,35 +78,101 @@ fn test_md6_128() {
 #[test]
 fn test_md6_224() {
     const INPUT: &[(&[u8], &[u8; 28])] = &[
-        (b"a", &hex!("05de8792a96e024c806eb815f9f30053cf9f1b50661047a4934121b7")),
-        (b"aa", &hex!("a03a918a4d15e30c70b64a46374d8f3d97ac46bcd70176cc47fc6864")),
-        (b"aaa", &hex!("bb30c438e8aad6ba79c826542087a82e8d0d233c50c945a2071abb25")),
-        (b"aaaa", &hex!("bd4ecd894231f31df590f9e819600e363352b683b0acf0c84f69ede4")),
-        (b"aaaaa", &hex!("3a01ad0af963adefdff3d4f19b18fc409dbc371f52183125ea35409a")),
-        (b"aaaaaa", &hex!("b25d4fef8fef6de11074578de58c79da670dbfe2384c31e75b467be8")),
-        (b"aaaaaaa", &hex!("972c4efe175501a60a5ae668969317006640c8a79af596b6388f80c9")),
-        (b"aaaaaaaa", &hex!("d51f874f6ecc64526baf3d9acf1fdaaf25e5d7b0dd7a046cc5362a2d")),
-        (b"aaaaaaaaa", &hex!("a9713653a744b7198ac66744488de95b67ed4f97a0eff17dc5b9f0ad")),
-        (b"aaaaaaaaaa", &hex!("5672369481389de3fc4e5a678b071d328f2ff400b22c2aa226e72035")),
-        (b"0", &hex!("61ac9c7608a733ae06b37ebd729dbd2395e08aa3e08c2e645f996e0c")),
-        (b"1", &hex!("cbed1f15034d1a64e8ac4e4b61b20a1af88ce6b5975a66a31854f4b5")),
-        (b"2", &hex!("94efb1ddb684213949647ed2b7fc7cfed3c39bb7e6e7a206ce96a12d")),
-        (b"3", &hex!("74b69557a1caad60a0ff05605482c7683437a8cd84644b0ab511d629")),
-        (b"4", &hex!("8986a064f4fc94675f32f278984a472d70898267063eae0efb46b5aa")),
-        (b"5", &hex!("f42f6a4e12109d78a4fb1d701ea9447be6263bbdc7270c6da10fb78e")),
-        (b"6", &hex!("55bfa088f6d6f63579a6e79ea9b5a17101d46821ce7624b03aeed66d")),
-        (b"7", &hex!("48e4bbdb81eafab004a3067591765f75e10b835b04797912ce4ac6c9")),
-        (b"8", &hex!("4c690ad845a62e6c6f765cb58b5707f19d01af419c122b0118c8223c")),
-        (b"9", &hex!("a2ac8d05145172d6450806d84065211d14c712f3995dfbfbd05924a4")),
-        (b"md6", &hex!("577f5287cf2d8e515d5f22fefb730ba4e8e0607fc7705c5b123036cc")),
-        (b"md6 FTW", &hex!("7952f429ebbe134d302939817eff92e099b16273a2c3b0741614d8ad")),
+        (
+            b"a",
+            &hex!("05de8792a96e024c806eb815f9f30053cf9f1b50661047a4934121b7"),
+        ),
+        (
+            b"aa",
+            &hex!("a03a918a4d15e30c70b64a46374d8f3d97ac46bcd70176cc47fc6864"),
+        ),
+        (
+            b"aaa",
+            &hex!("bb30c438e8aad6ba79c826542087a82e8d0d233c50c945a2071abb25"),
+        ),
+        (
+            b"aaaa",
+            &hex!("bd4ecd894231f31df590f9e819600e363352b683b0acf0c84f69ede4"),
+        ),
+        (
+            b"aaaaa",
+            &hex!("3a01ad0af963adefdff3d4f19b18fc409dbc371f52183125ea35409a"),
+        ),
+        (
+            b"aaaaaa",
+            &hex!("b25d4fef8fef6de11074578de58c79da670dbfe2384c31e75b467be8"),
+        ),
+        (
+            b"aaaaaaa",
+            &hex!("972c4efe175501a60a5ae668969317006640c8a79af596b6388f80c9"),
+        ),
+        (
+            b"aaaaaaaa",
+            &hex!("d51f874f6ecc64526baf3d9acf1fdaaf25e5d7b0dd7a046cc5362a2d"),
+        ),
+        (
+            b"aaaaaaaaa",
+            &hex!("a9713653a744b7198ac66744488de95b67ed4f97a0eff17dc5b9f0ad"),
+        ),
+        (
+            b"aaaaaaaaaa",
+            &hex!("5672369481389de3fc4e5a678b071d328f2ff400b22c2aa226e72035"),
+        ),
+        (
+            b"0",
+            &hex!("61ac9c7608a733ae06b37ebd729dbd2395e08aa3e08c2e645f996e0c"),
+        ),
+        (
+            b"1",
+            &hex!("cbed1f15034d1a64e8ac4e4b61b20a1af88ce6b5975a66a31854f4b5"),
+        ),
+        (
+            b"2",
+            &hex!("94efb1ddb684213949647ed2b7fc7cfed3c39bb7e6e7a206ce96a12d"),
+        ),
+        (
+            b"3",
+            &hex!("74b69557a1caad60a0ff05605482c7683437a8cd84644b0ab511d629"),
+        ),
+        (
+            b"4",
+            &hex!("8986a064f4fc94675f32f278984a472d70898267063eae0efb46b5aa"),
+        ),
+        (
+            b"5",
+            &hex!("f42f6a4e12109d78a4fb1d701ea9447be6263bbdc7270c6da10fb78e"),
+        ),
+        (
+            b"6",
+            &hex!("55bfa088f6d6f63579a6e79ea9b5a17101d46821ce7624b03aeed66d"),
+        ),
+        (
+            b"7",
+            &hex!("48e4bbdb81eafab004a3067591765f75e10b835b04797912ce4ac6c9"),
+        ),
+        (
+            b"8",
+            &hex!("4c690ad845a62e6c6f765cb58b5707f19d01af419c122b0118c8223c"),
+        ),
+        (
+            b"9",
+            &hex!("a2ac8d05145172d6450806d84065211d14c712f3995dfbfbd05924a4"),
+        ),
+        (
+            b"md6",
+            &hex!("577f5287cf2d8e515d5f22fefb730ba4e8e0607fc7705c5b123036cc"),
+        ),
+        (
+            b"md6 FTW",
+            &hex!("7952f429ebbe134d302939817eff92e099b16273a2c3b0741614d8ad"),
+        ),
     ];
 
     for (msg, &expected_hash) in INPUT.iter() {
         let mut hasher = md6::Md6_224::new();
         hasher.update(msg);
         let output = hasher.finalize();
-    
+
         assert!(output.to_vec() == expected_hash);
     }
 }
@@ -114,35 +180,101 @@ fn test_md6_224() {
 #[test]
 fn test_md6_256() {
     const INPUT: &[(&[u8], &[u8; 32])] = &[
-        (b"a", &hex!("2b0a697a081c21269514640aab4d74ffafeb3c0212df68ce92922087c69b0a77")),
-        (b"aa", &hex!("dc62c2f369d0d0a8de1d3239e312e12ac8c92d77d64262eb1fc209f8a2aaa48a")),
-        (b"aaa", &hex!("84610026b18ef3019a73be33f9b084194ce6ef4cd7348ae5a390b2d20d3b45fe")),
-        (b"aaaa", &hex!("28c490c3d4b0ad1809f59160b522ccd99c5a7565499b53af94bc311b3581a9f6")),
-        (b"aaaaa", &hex!("40f8bab5ef49065851f602e062b7fa819497ea9e1aa9419ba70b3730f108d42f")),
-        (b"aaaaaa", &hex!("ff01d77b95f1aa6dafa4813c75d5ba2900cbe399505097f9c4fb1d1e9b0a1ba0")),
-        (b"aaaaaaa", &hex!("0107532d1a2c5028124135df7783c5177bc520d622c5bac3001e2c2e90011741")),
-        (b"aaaaaaaa", &hex!("44e7e33cf46bc248a0476332f6d24c59252412d8db037470142eb66f1afdae11")),
-        (b"aaaaaaaaa", &hex!("261ac535cae8a76b2e70c2b6f24e3fe5acf32f3d5db5662c8f933c90f84cfed1")),
-        (b"aaaaaaaaaa", &hex!("3c74f2b9d89cf806cf0b529773ef09b8ed0b393afe166fa759f53d2cb6dfb40b")),
-        (b"0", &hex!("d979642b9060ce2dc24183bf3ac6d9ae4b54f144d3af24935e9b8bc907a72b4e")),
-        (b"1", &hex!("7fe3b063c891feb631ed0988895cfaf8a90fcb5a7d43c25f9dd1e1c21f896711")),
-        (b"2", &hex!("1595783f79211f1d954c181f3573025020f9495f5763934ee25954ee7c2a83cc")),
-        (b"3", &hex!("edae30bbeb946b55333732d7c5ad872da6ece3ba28cece17d14c2302b4f98a51")),
-        (b"4", &hex!("8a1cb9446a2791e600879d214e50ab9f255c763f02043df556f3aad6e41d2b41")),
-        (b"5", &hex!("632a4ef13a940fec5c41cadd550dcd41d491024da37cfc686cea53026a39c2e7")),
-        (b"6", &hex!("bfed808c85097bd8bd45fe1b0223eb3a15c013af38c4a09a2e81f5eb2c2f6d43")),
-        (b"7", &hex!("662e1312173e2bf826439e234367ceaab3b0d98af400907742ea2c01fec70d2a")),
-        (b"8", &hex!("3edd4058e60c3e85c56341aaf8d037e3f3e5ff9233d17a66880616f3151de9ad")),
-        (b"9", &hex!("6c9f735d57a9b12493b5c5c0ec9733b459f13e7e996edd090dda164ebfe43d54")),
-        (b"md6", &hex!("cbe8da56ff91be9bc299ed4c1da6159f9a41ab380f565db0a5ef08895aed4f7d")),
-        (b"md6 FTW", &hex!("7bfaa624f661a683be2a3b2007493006a30a7845ee1670e499927861a8e74cce")),
+        (
+            b"a",
+            &hex!("2b0a697a081c21269514640aab4d74ffafeb3c0212df68ce92922087c69b0a77"),
+        ),
+        (
+            b"aa",
+            &hex!("dc62c2f369d0d0a8de1d3239e312e12ac8c92d77d64262eb1fc209f8a2aaa48a"),
+        ),
+        (
+            b"aaa",
+            &hex!("84610026b18ef3019a73be33f9b084194ce6ef4cd7348ae5a390b2d20d3b45fe"),
+        ),
+        (
+            b"aaaa",
+            &hex!("28c490c3d4b0ad1809f59160b522ccd99c5a7565499b53af94bc311b3581a9f6"),
+        ),
+        (
+            b"aaaaa",
+            &hex!("40f8bab5ef49065851f602e062b7fa819497ea9e1aa9419ba70b3730f108d42f"),
+        ),
+        (
+            b"aaaaaa",
+            &hex!("ff01d77b95f1aa6dafa4813c75d5ba2900cbe399505097f9c4fb1d1e9b0a1ba0"),
+        ),
+        (
+            b"aaaaaaa",
+            &hex!("0107532d1a2c5028124135df7783c5177bc520d622c5bac3001e2c2e90011741"),
+        ),
+        (
+            b"aaaaaaaa",
+            &hex!("44e7e33cf46bc248a0476332f6d24c59252412d8db037470142eb66f1afdae11"),
+        ),
+        (
+            b"aaaaaaaaa",
+            &hex!("261ac535cae8a76b2e70c2b6f24e3fe5acf32f3d5db5662c8f933c90f84cfed1"),
+        ),
+        (
+            b"aaaaaaaaaa",
+            &hex!("3c74f2b9d89cf806cf0b529773ef09b8ed0b393afe166fa759f53d2cb6dfb40b"),
+        ),
+        (
+            b"0",
+            &hex!("d979642b9060ce2dc24183bf3ac6d9ae4b54f144d3af24935e9b8bc907a72b4e"),
+        ),
+        (
+            b"1",
+            &hex!("7fe3b063c891feb631ed0988895cfaf8a90fcb5a7d43c25f9dd1e1c21f896711"),
+        ),
+        (
+            b"2",
+            &hex!("1595783f79211f1d954c181f3573025020f9495f5763934ee25954ee7c2a83cc"),
+        ),
+        (
+            b"3",
+            &hex!("edae30bbeb946b55333732d7c5ad872da6ece3ba28cece17d14c2302b4f98a51"),
+        ),
+        (
+            b"4",
+            &hex!("8a1cb9446a2791e600879d214e50ab9f255c763f02043df556f3aad6e41d2b41"),
+        ),
+        (
+            b"5",
+            &hex!("632a4ef13a940fec5c41cadd550dcd41d491024da37cfc686cea53026a39c2e7"),
+        ),
+        (
+            b"6",
+            &hex!("bfed808c85097bd8bd45fe1b0223eb3a15c013af38c4a09a2e81f5eb2c2f6d43"),
+        ),
+        (
+            b"7",
+            &hex!("662e1312173e2bf826439e234367ceaab3b0d98af400907742ea2c01fec70d2a"),
+        ),
+        (
+            b"8",
+            &hex!("3edd4058e60c3e85c56341aaf8d037e3f3e5ff9233d17a66880616f3151de9ad"),
+        ),
+        (
+            b"9",
+            &hex!("6c9f735d57a9b12493b5c5c0ec9733b459f13e7e996edd090dda164ebfe43d54"),
+        ),
+        (
+            b"md6",
+            &hex!("cbe8da56ff91be9bc299ed4c1da6159f9a41ab380f565db0a5ef08895aed4f7d"),
+        ),
+        (
+            b"md6 FTW",
+            &hex!("7bfaa624f661a683be2a3b2007493006a30a7845ee1670e499927861a8e74cce"),
+        ),
     ];
 
     for (msg, &expected_hash) in INPUT.iter() {
         let mut hasher = md6::Md6_256::new();
         hasher.update(msg);
         let output = hasher.finalize();
-    
+
         assert!(output.to_vec() == expected_hash);
     }
 }
@@ -178,7 +310,7 @@ fn test_md6_384() {
         let mut hasher = md6::Md6_384::new();
         hasher.update(msg);
         let output = hasher.finalize();
-    
+
         assert!(output.to_vec() == expected_hash);
     }
 }
@@ -214,18 +346,18 @@ fn test_md6_512() {
         let mut hasher = md6::Md6_512::new();
         hasher.update(msg);
         let output = hasher.finalize();
-    
+
         assert!(output.to_vec() == expected_hash);
     }
 }
 
 #[test]
 fn test_md6_var() {
-  use md6::{Update, VariableOutput};
+    use md6::{Update, VariableOutput};
 
-  let mut hasher = md6::Md6Var::new(12).unwrap();
-  hasher.update(b"hello rust");
-  let mut buf = [0u8; 12];
-  hasher.finalize_variable(&mut buf).unwrap();
-  assert_eq!(buf, hex!("9c5b8d9744898ec981bcc573"));
+    let mut hasher = md6::Md6Var::new(12).unwrap();
+    hasher.update(b"hello rust");
+    let mut buf = [0u8; 12];
+    hasher.finalize_variable(&mut buf).unwrap();
+    assert_eq!(buf, hex!("9c5b8d9744898ec981bcc573"));
 }

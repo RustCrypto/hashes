@@ -1,8 +1,8 @@
 #![feature(test)]
 extern crate test;
 
-use md6::{Md6_128, Md6_224, Md6_256, Md6_384, Md6_512, Md6_64};
 use digest::bench_update;
+use md6::{Md6_128, Md6_224, Md6_256, Md6_384, Md6_512, Md6_64};
 use test::Bencher;
 
 bench_update!(
