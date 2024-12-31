@@ -7,7 +7,8 @@ Pure Rust implementation of the MD6 hash function.
 ### Fixed output size
 
 ```rust
-use md6::{Md6_256, Digest};
+use md6::Md6_256;
+use digest::Digest;
 use hex_literal::hex;
 
 // create a Blake2b512 object
@@ -32,7 +33,7 @@ This implementation supports run and compile time variable sizes.
 Output size set at run time:
 ```rust
 use md6::Md6Var;
-use blake2::digest::{Update, VariableOutput};
+use digest::{Update, VariableOutput};
 use hex_literal::hex;
 
 let mut hasher = Md6Var::new(12).unwrap();
@@ -44,13 +45,14 @@ assert_eq!(buf, hex!("9c5b8d9744898ec981bcc573"));
 
 Output size set at compile time:
 ```rust
-use md6::{Md6, Digest, digest::consts::U20};
+use md6::Md6;
+use digest::{Digest, consts::U20};
 use hex_literal::hex;
 
 type Md6_160 = Md6<U20>;
 
 let mut hasher = Md6_160::new();
-hasher.update(b"my_input");
+hasher.update(b"hello rust");
 let res = hasher.finalize();
 assert_eq!(res, hex!("576d736a93a555a1c868973cfdd2d21838a26623"));
 ```

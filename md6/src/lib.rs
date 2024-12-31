@@ -12,7 +12,7 @@ pub(crate) mod consts;
 mod md6;
 
 use digest::{
-    consts::{U16, U28, U32, U48, U64, U8},
+    consts::{U64, U48, U32, U28, U16, U8},
     core_api::{CoreWrapper, CtVariableCoreWrapper, RtVariableCoreWrapper},
 };
 
