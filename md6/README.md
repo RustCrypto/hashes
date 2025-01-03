@@ -11,7 +11,7 @@ use md6::Md6_256;
 use digest::Digest;
 use hex_literal::hex;
 
-// create a Blake2b512 object
+// create a Md6_256 object
 let mut hasher = Md6_256::new();
 
 // write input message

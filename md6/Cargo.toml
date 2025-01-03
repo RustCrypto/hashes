@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 edition = "2021"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "md5", "hash", "digest"]
+keywords = ["crypto", "md6", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 rust-version = "1.81"
 
