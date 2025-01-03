@@ -11,9 +11,6 @@ keywords = ["crypto", "md6", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 rust-version = "1.81"
 
-[lib]
-name = "md6"
-
 [dependencies]
 digest = "=0.11.0-pre.9"
 
@@ -27,7 +24,3 @@ default = ["oid", "std"]
 std = ["digest/std"]
 oid = ["digest/oid"]
 zeroize = ["digest/zeroize"]
-
-[package.metadata.docs.rs]
-all-features = true
-rustdoc-args = ["--cfg", "docsrs"]

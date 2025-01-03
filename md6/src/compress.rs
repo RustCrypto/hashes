@@ -1,21 +1,5 @@
 use crate::consts::*;
 
-const W: usize = MD6_W; // number of bits in a word (64)
-const C: usize = MD6_C; // size of compression output in words (16)
-const N: usize = MD6_N; // size of compression input block in words (89)
-const Q: usize = MD6_Q; // Q words in a compression block (>= 0) (15)
-const K: usize = MD6_K; // key words per compression block (>= 0) (8)
-const U: usize = MD6_U; // words for unique node ID (0 or 64/w)
-const V: usize = MD6_V; // words for control word (0 or 64/w)
-const B: usize = MD6_B; // data words per compression block (> 0) (64)
-
-const T0: usize = 17; // index for linear feedback
-const T1: usize = 18; // index for first input to first and
-const T2: usize = 21; // index for second input to first and
-const T3: usize = 31; // index for first input to second and
-const T4: usize = 67; // index for second input to second and
-const T5: usize = 89; // last tap
-
 macro_rules! call_loop_bodies {
     ($w: ident, $s: expr, $i: expr) => {
         if $w == 64 {

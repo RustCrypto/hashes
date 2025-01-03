@@ -1,11 +1,11 @@
-#![no_std]
-
 use digest::Digest;
 use hex_literal::hex;
 
+// Test vectors from https://github.com/Snack-X/md6/blob/master/test/result.csv
+
 #[test]
 fn test_md6_64() {
-    const INPUT: &[(&[u8], &[u8; 8])] = &[
+    const TEST_VECTOR: &[(&[u8], &[u8; 8])] = &[
         (b"a", &hex!("32d13030a6815e95")),
         (b"aa", &hex!("af7966908a5d9c13")),
         (b"aaa", &hex!("3d8a4ff7a21eb0c6")),
@@ -30,7 +30,7 @@ fn test_md6_64() {
         (b"md6 FTW", &hex!("47cda109418592ca")),
     ];
 
-    for (msg, &expected_hash) in INPUT.iter() {
+    for (msg, &expected_hash) in TEST_VECTOR.iter() {
         let mut hasher = md6::Md6_64::new();
         hasher.update(msg);
         let output = hasher.finalize();
@@ -41,7 +41,7 @@ fn test_md6_64() {
 
 #[test]
 fn test_md6_128() {
-    const INPUT: &[(&[u8], &[u8; 16])] = &[
+    const TEST_VECTOR: &[(&[u8], &[u8; 16])] = &[
         (b"a", &hex!("bb691c1bfa4b4345292eb35f364919ea")),
         (b"aa", &hex!("19487e566f9ae2584d62628af2795f8c")),
         (b"aaa", &hex!("319f1b026f76f9caf62320b4e2e79e29")),
@@ -66,7 +66,7 @@ fn test_md6_128() {
         (b"md6 FTW", &hex!("e866b430fa07b5bea28981db1f9b24a6")),
     ];
 
-    for (msg, &expected_hash) in INPUT.iter() {
+    for (msg, &expected_hash) in TEST_VECTOR.iter() {
         let mut hasher = md6::Md6_128::new();
         hasher.update(msg);
         let output = hasher.finalize();
@@ -77,7 +77,7 @@ fn test_md6_128() {
 
 #[test]
 fn test_md6_224() {
-    const INPUT: &[(&[u8], &[u8; 28])] = &[
+    const TEST_VECTOR: &[(&[u8], &[u8; 28])] = &[
         (
             b"a",
             &hex!("05de8792a96e024c806eb815f9f30053cf9f1b50661047a4934121b7"),
@@ -168,7 +168,7 @@ fn test_md6_224() {
         ),
     ];
 
-    for (msg, &expected_hash) in INPUT.iter() {
+    for (msg, &expected_hash) in TEST_VECTOR.iter() {
         let mut hasher = md6::Md6_224::new();
         hasher.update(msg);
         let output = hasher.finalize();
@@ -179,7 +179,7 @@ fn test_md6_224() {
 
 #[test]
 fn test_md6_256() {
-    const INPUT: &[(&[u8], &[u8; 32])] = &[
+    const TEST_VECTOR: &[(&[u8], &[u8; 32])] = &[
         (
             b"a",
             &hex!("2b0a697a081c21269514640aab4d74ffafeb3c0212df68ce92922087c69b0a77"),
@@ -270,7 +270,7 @@ fn test_md6_256() {
         ),
     ];
 
-    for (msg, &expected_hash) in INPUT.iter() {
+    for (msg, &expected_hash) in TEST_VECTOR.iter() {
         let mut hasher = md6::Md6_256::new();
         hasher.update(msg);
         let output = hasher.finalize();
@@ -281,7 +281,7 @@ fn test_md6_256() {
 
 #[test]
 fn test_md6_384() {
-    const INPUT: &[(&[u8], &[u8; 48])] = &[
+    const TEST_VECTOR: &[(&[u8], &[u8; 48])] = &[
         (b"a", &hex!("a40c8d059495a278fadd30b96e3b2227758090c759b934197265bf632cabf8547a7429e5316d496c2a1ddae8d27e87ee")),
         (b"aa", &hex!("330547441b6518e7693ea01bfc55158bcfc084853fa1960a9e8999f98b57cea7d8b0564bf192b6ab1eb7638939dc9bbf")),
         (b"aaa", &hex!("f43bb4e108ec31e0cf8ded506f79373e69cddcd8c7c46298f1bd475401132e4c255c08e378c9db988f0de97131cbe36c")),
@@ -306,7 +306,7 @@ fn test_md6_384() {
         (b"md6 FTW", &hex!("7a4e8ecd1035ccdf00567595c15aa5a382fef2b6a4ec4bc609e0c655887b1c05e10eee223dd6c0ba5fa4a46159c70757")),
     ];
 
-    for (msg, &expected_hash) in INPUT.iter() {
+    for (msg, &expected_hash) in TEST_VECTOR.iter() {
         let mut hasher = md6::Md6_384::new();
         hasher.update(msg);
         let output = hasher.finalize();
@@ -317,7 +317,7 @@ fn test_md6_384() {
 
 #[test]
 fn test_md6_512() {
-    const INPUT: &[(&[u8], &[u8; 64])] = &[
+    const TEST_VECTOR: &[(&[u8], &[u8; 64])] = &[
         (b"a", &hex!("c0e4e18acb69cd1a7e5a20981fe6cc6f7b5b70e814d3a13b05ac292aba74c0d8c9d34c211414e7ab755a9559c27211cd749fc3eb09ae670e138881743b8d5051")),
         (b"aa", &hex!("2afa253b05702770343e5c46e9d47231812a741d7bba479539a3c5484a412ea419f0d0ca96e124ba92e4ca506ca12684579323051d9d52fe5a669d079a226683")),
         (b"aaa", &hex!("56b0131875d458f6d30ed1c594991df1efa8d6cae0c8abb36a9b811df23ac476c58e36d9adbe845e840d3de9175a8ceda11235144c3222587af108b902ce0fc5")),
@@ -342,7 +342,7 @@ fn test_md6_512() {
         (b"md6 FTW", &hex!("75df3b6031e8241ef59d01628b093b05906f1a2d80c43908cb2883f7db6fbdd1cadffd7d643505c20b9529b6a5d19f8b6ff1623cabbc14a606caa7bcb239611a")),
     ];
 
-    for (msg, &expected_hash) in INPUT.iter() {
+    for (msg, &expected_hash) in TEST_VECTOR.iter() {
         let mut hasher = md6::Md6_512::new();
         hasher.update(msg);
         let output = hasher.finalize();

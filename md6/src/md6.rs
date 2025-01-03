@@ -13,11 +13,6 @@ use digest::{
     HashMarker, Output,
 };
 
-const W: usize = MD6_W; // number of bits in a word (64)
-const C: usize = MD6_C; // size of compression output in words (16)
-const K: usize = MD6_K; // key words per compression block (8)
-const B: usize = MD6_B; // data words per compression block (64)
-
 pub struct Md6VarCore {
     d: usize,
     hashbitlen: usize,
@@ -289,7 +284,6 @@ impl SerializableState for Md6VarCore {
 impl Md6VarCore {
     #[inline]
     fn init(d: usize) -> Self {
-        //
         Self::full_init(d, None, 0, MD6_DEFAULT_L, default_r(d, 0))
     }
 
