@@ -826,26 +826,26 @@ pub const fn ubc_check(w: &[u32; 80]) -> u32 {
             | !(DV_I_45_0_BIT | DV_I_48_0_BIT | DV_II_47_0_BIT)
     }
     if mask & (DV_I_48_0_BIT | DV_II_48_0_BIT) != 0 {
-        mask &=
-            (0u32).wrapping_sub((w[63] ^ (w[64] >> 5)) & (1 << 0)) | !(DV_I_48_0_BIT | DV_II_48_0_BIT)
+        mask &= (0u32).wrapping_sub((w[63] ^ (w[64] >> 5)) & (1 << 0))
+            | !(DV_I_48_0_BIT | DV_II_48_0_BIT)
     }
     if mask & (DV_I_45_0_BIT | DV_II_45_0_BIT) != 0 {
-        mask &=
-            (0u32).wrapping_sub((w[63] ^ (w[64] >> 5)) & (1 << 1)) | !(DV_I_45_0_BIT | DV_II_45_0_BIT)
+        mask &= (0u32).wrapping_sub((w[63] ^ (w[64] >> 5)) & (1 << 1))
+            | !(DV_I_45_0_BIT | DV_II_45_0_BIT)
     }
     if mask & (DV_I_47_0_BIT | DV_II_47_0_BIT) != 0 {
-        mask &=
-            (0u32).wrapping_sub((w[62] ^ (w[63] >> 5)) & (1 << 0)) | !(DV_I_47_0_BIT | DV_II_47_0_BIT)
+        mask &= (0u32).wrapping_sub((w[62] ^ (w[63] >> 5)) & (1 << 0))
+            | !(DV_I_47_0_BIT | DV_II_47_0_BIT)
     }
     if mask & (DV_I_46_0_BIT | DV_II_46_0_BIT) != 0 {
-        mask &=
-            (0u32).wrapping_sub((w[61] ^ (w[62] >> 5)) & (1 << 0)) | !(DV_I_46_0_BIT | DV_II_46_0_BIT)
+        mask &= (0u32).wrapping_sub((w[61] ^ (w[62] >> 5)) & (1 << 0))
+            | !(DV_I_46_0_BIT | DV_II_46_0_BIT)
     }
     mask &=
         (0u32).wrapping_sub((w[61] ^ (w[62] >> 5)) & (1 << 2)) | !(DV_I_46_2_BIT | DV_II_46_2_BIT);
     if mask & (DV_I_45_0_BIT | DV_II_45_0_BIT) != 0 {
-        mask &=
-            (0u32).wrapping_sub((w[60] ^ (w[61] >> 5)) & (1 << 0)) | !(DV_I_45_0_BIT | DV_II_45_0_BIT)
+        mask &= (0u32).wrapping_sub((w[60] ^ (w[61] >> 5)) & (1 << 0))
+            | !(DV_I_45_0_BIT | DV_II_45_0_BIT)
     }
     if mask & (DV_II_51_0_BIT | DV_II_54_0_BIT) != 0 {
         mask &= (((w[58] ^ w[59]) >> 29) & 1).wrapping_sub(1) | !(DV_II_51_0_BIT | DV_II_54_0_BIT)
@@ -858,7 +858,8 @@ pub const fn ubc_check(w: &[u32; 80]) -> u32 {
             | !(DV_II_52_0_BIT | DV_II_54_0_BIT)
     }
     if mask & (DV_II_51_0_BIT | DV_II_52_0_BIT) != 0 {
-        mask &= (0u32).wrapping_sub(((w[56] ^ w[59]) >> 29) & 1) | !(DV_II_51_0_BIT | DV_II_52_0_BIT)
+        mask &=
+            (0u32).wrapping_sub(((w[56] ^ w[59]) >> 29) & 1) | !(DV_II_51_0_BIT | DV_II_52_0_BIT)
     }
     if mask & (DV_II_49_0_BIT | DV_II_52_0_BIT) != 0 {
         mask &= (((w[56] ^ w[57]) >> 29) & 1).wrapping_sub(1) | !(DV_II_49_0_BIT | DV_II_52_0_BIT)
@@ -875,28 +876,28 @@ pub const fn ubc_check(w: &[u32; 80]) -> u32 {
         mask &= ((w[53] ^ (w[56] >> 25)) & (1 << 4)).wrapping_sub(1 << 4)
             | !(DV_II_49_0_BIT | DV_II_51_0_BIT)
     }
-    mask &=
-        ((w[51] ^ (w[50] >> 5)) & (1 << 1)).wrapping_sub(1 << 1) | !(DV_I_50_2_BIT | DV_II_46_2_BIT);
+    mask &= ((w[51] ^ (w[50] >> 5)) & (1 << 1)).wrapping_sub(1 << 1)
+        | !(DV_I_50_2_BIT | DV_II_46_2_BIT);
     mask &= ((w[48] ^ w[50]) & (1 << 6)).wrapping_sub(1 << 6) | !(DV_I_50_2_BIT | DV_II_46_2_BIT);
     if mask & (DV_I_51_0_BIT | DV_I_52_0_BIT) != 0 {
         mask &= (0u32).wrapping_sub(((w[48] ^ w[55]) >> 29) & 1) | !(DV_I_51_0_BIT | DV_I_52_0_BIT)
     }
     mask &= ((w[47] ^ w[49]) & (1 << 6)).wrapping_sub(1 << 6) | !(DV_I_49_2_BIT | DV_I_51_2_BIT);
-    mask &=
-        ((w[48] ^ (w[47] >> 5)) & (1 << 1)).wrapping_sub(1 << 1) | !(DV_I_47_2_BIT | DV_II_51_2_BIT);
+    mask &= ((w[48] ^ (w[47] >> 5)) & (1 << 1)).wrapping_sub(1 << 1)
+        | !(DV_I_47_2_BIT | DV_II_51_2_BIT);
     mask &= ((w[46] ^ w[48]) & (1 << 6)).wrapping_sub(1 << 6) | !(DV_I_48_2_BIT | DV_I_50_2_BIT);
-    mask &=
-        ((w[47] ^ (w[46] >> 5)) & (1 << 1)).wrapping_sub(1 << 1) | !(DV_I_46_2_BIT | DV_II_50_2_BIT);
+    mask &= ((w[47] ^ (w[46] >> 5)) & (1 << 1)).wrapping_sub(1 << 1)
+        | !(DV_I_46_2_BIT | DV_II_50_2_BIT);
     mask &=
         (0u32).wrapping_sub((w[44] ^ (w[45] >> 5)) & (1 << 1)) | !(DV_I_51_2_BIT | DV_II_49_2_BIT);
     mask &= ((w[43] ^ w[45]) & (1 << 6)).wrapping_sub(1 << 6) | !(DV_I_47_2_BIT | DV_I_49_2_BIT);
     mask &= (((w[42] ^ w[44]) >> 6) & 1).wrapping_sub(1) | !(DV_I_46_2_BIT | DV_I_48_2_BIT);
-    mask &=
-        ((w[43] ^ (w[42] >> 5)) & (1 << 1)).wrapping_sub(1 << 1) | !(DV_II_46_2_BIT | DV_II_51_2_BIT);
-    mask &=
-        ((w[42] ^ (w[41] >> 5)) & (1 << 1)).wrapping_sub(1 << 1) | !(DV_I_51_2_BIT | DV_II_50_2_BIT);
-    mask &=
-        ((w[41] ^ (w[40] >> 5)) & (1 << 1)).wrapping_sub(1 << 1) | !(DV_I_50_2_BIT | DV_II_49_2_BIT);
+    mask &= ((w[43] ^ (w[42] >> 5)) & (1 << 1)).wrapping_sub(1 << 1)
+        | !(DV_II_46_2_BIT | DV_II_51_2_BIT);
+    mask &= ((w[42] ^ (w[41] >> 5)) & (1 << 1)).wrapping_sub(1 << 1)
+        | !(DV_I_51_2_BIT | DV_II_50_2_BIT);
+    mask &= ((w[41] ^ (w[40] >> 5)) & (1 << 1)).wrapping_sub(1 << 1)
+        | !(DV_I_50_2_BIT | DV_II_49_2_BIT);
     if mask & (DV_I_52_0_BIT | DV_II_51_0_BIT) != 0 {
         mask &= ((w[39] ^ (w[43] >> 25)) & (1 << 4)).wrapping_sub(1 << 4)
             | !(DV_I_52_0_BIT | DV_II_51_0_BIT)
@@ -906,8 +907,8 @@ pub const fn ubc_check(w: &[u32; 80]) -> u32 {
             | !(DV_I_51_0_BIT | DV_II_50_0_BIT)
     }
     if mask & (DV_I_48_2_BIT | DV_I_51_2_BIT) != 0 {
-        mask &=
-            (0u32).wrapping_sub((w[37] ^ (w[38] >> 5)) & (1 << 1)) | !(DV_I_48_2_BIT | DV_I_51_2_BIT)
+        mask &= (0u32).wrapping_sub((w[37] ^ (w[38] >> 5)) & (1 << 1))
+            | !(DV_I_48_2_BIT | DV_I_51_2_BIT)
     }
     if mask & (DV_I_50_0_BIT | DV_II_49_0_BIT) != 0 {
         mask &= ((w[37] ^ (w[41] >> 25)) & (1 << 4)).wrapping_sub(1 << 4)
@@ -916,7 +917,8 @@ pub const fn ubc_check(w: &[u32; 80]) -> u32 {
     if mask & (DV_II_52_0_BIT | DV_II_54_0_BIT) != 0 {
         mask &= (0u32).wrapping_sub((w[36] ^ w[38]) & (1 << 4)) | !(DV_II_52_0_BIT | DV_II_54_0_BIT)
     }
-    mask &= (0u32).wrapping_sub((w[35] ^ (w[36] >> 5)) & (1 << 1)) | !(DV_I_46_2_BIT | DV_I_49_2_BIT);
+    mask &=
+        (0u32).wrapping_sub((w[35] ^ (w[36] >> 5)) & (1 << 1)) | !(DV_I_46_2_BIT | DV_I_49_2_BIT);
     if mask & (DV_I_51_0_BIT | DV_II_47_0_BIT) != 0 {
         mask &= ((w[35] ^ (w[39] >> 25)) & (1 << 3)).wrapping_sub(1 << 3)
             | !(DV_I_51_0_BIT | DV_II_47_0_BIT)
