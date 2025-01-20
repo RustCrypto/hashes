@@ -39,7 +39,7 @@ fn lps(h: &mut [u64; 8], n: &[u64; 8]) {
     #[allow(clippy::needless_range_loop)]
     for i in 0..8 {
         for j in 0..8 {
-            let idx = (h[j] >> (8 * i) & 0xff) as usize;
+            let idx = ((h[j] >> (8 * i)) & 0xff) as usize;
             buf[i] ^= SHUFFLED_LIN_TABLE[j][idx];
         }
     }

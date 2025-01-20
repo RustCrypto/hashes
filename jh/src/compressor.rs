@@ -149,12 +149,6 @@ pub fn f8_impl<M: Machine>(mach: M, state: &mut [vec128_storage; 8], data: *cons
     ];
 }
 
-dispatch!(mach, M, {
-    fn f8(state: &mut [vec128_storage; 8], data: *const u8) {
-        f8_impl(mach, state, data);
-    }
-});
-
 pub(crate) union Compressor {
     cv: [vec128_storage; 8],
     bytes: [u8; 128],
@@ -167,7 +161,14 @@ impl Compressor {
     }
 
     #[inline]
+    #[allow(unexpected_cfgs)] // TODO: remove after dependency on ppv-lite86 is eliminated
     pub(crate) fn update(&mut self, data: &Array<u8, U64>) {
+        simd::dispatch!(mach, M, {
+            fn f8(state: &mut [vec128_storage; 8], data: *const u8) {
+                f8_impl(mach, state, data);
+            }
+        });
+
         f8(unsafe { &mut self.cv }, data.as_ptr());
     }
 
