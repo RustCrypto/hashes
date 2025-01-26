@@ -131,7 +131,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.9.1 (2020-06-24)
 ### Added
-- x86 hardware acceleration of SHA-256 via SHA extension instrinsics. ([#167])
+- x86 hardware acceleration of SHA-256 via SHA extension intrinsics. ([#167])
 
 [#167]: https://github.com/RustCrypto/hashes/pull/167
 
