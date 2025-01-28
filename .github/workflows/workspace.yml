@@ -35,3 +35,9 @@ jobs:
 
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
+
+  typos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: crate-ci/typos@v1.29.4
