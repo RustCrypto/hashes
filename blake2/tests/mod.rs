@@ -1,5 +1,5 @@
 #[cfg(feature = "reset")]
-use digest::dev::{fixed_reset_test as fixed_test, variable_reset_test as variable_fn};
+use digest::dev::{fixed_reset_test as fixed_test, variable_reset_test as variable_test};
 #[cfg(not(feature = "reset"))]
 use digest::dev::{fixed_test, variable_test};
 use digest::new_test;
