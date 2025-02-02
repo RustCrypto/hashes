@@ -7,7 +7,7 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Streebog] cryptographic hash function defined in GOST R 34.11-2012.
+Pure Rust implementation of the [Streebog] cryptographic hash function defined in GHOST R 34.11-2012.
 
 ## Examples
 
