@@ -1,0 +1,1 @@
+An implementation based on the paper [Multimixer-128: Universal Keyed Hashing Based on Integer Multiplication](https://eprint.iacr.org/2023/1357) and [the reference code](https://github.com/Parisaa/Multimixer/tree/main/ReferenceCode). ALso check out this repo: [itzmeanjan/multimixer-128](https://github.com/itzmeanjan/multimixer-128).
