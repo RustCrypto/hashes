@@ -73,6 +73,22 @@ let res = hasher.finalize();
 assert_eq!(res, hex!("2cc55c84e416924e6400"));
 ```
 
+### Message Authentication Code (MAC)
+
+BLAKE2 can be used as a MAC with variable output size set at compile time:
+
+```rust
+use blake2::Blake2bMac;
+use blake2::digest::{Update, FixedOutput, consts::U16};
+use hex_literal::hex;
+
+let mut hasher: Blake2bMac<U16> = Blake2bMac::new_with_key(b"my_key").unwrap();
+hasher.update(b"my_input");
+let res = hasher.finalize_fixed();
+
+assert_eq!(res.as_ref(), hex!("3c3869ce1c58d0569827a731d8eab099"));
+```
+
 ## Minimum Supported Rust Version
 
 Rust **1.81** or higher.

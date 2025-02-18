@@ -37,3 +37,14 @@ fn mac_refuses_empty_keys() {
         blake2::Blake2sMac256::new_with_salt_and_personal(Some(&[]), b"salt", b"persona").is_err()
     );
 }
+
+#[test]
+fn blake2b_with_key_equivalence() {
+    use blake2::digest::FixedOutput;
+
+    let key = b"my_key";
+    // Those two calls are equivalent.
+    let ctx1 = blake2::Blake2bMac512::new_with_salt_and_personal(key, &[], &[]).unwrap();
+    let ctx2 = blake2::Blake2bMac512::new_with_key(key).unwrap();
+    assert_eq!(ctx1.finalize_fixed(), ctx2.finalize_fixed(),);
+}
