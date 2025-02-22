@@ -466,7 +466,7 @@ fn add_assign(left: &mut [u32; 5], right: [u32; 5]) {
 }
 
 fn compression_w(ihv: &mut [u32; 5], w: &[u32; 80]) {
-    let [mut a, mut b, mut c, mut d, mut e] = ihv;
+    let &mut [mut a, mut b, mut c, mut d, mut e] = ihv;
 
     round1_step4(&mut a, &mut b, &mut c, &mut d, &mut e, w, 0);
     round1_step4(&mut b, &mut c, &mut d, &mut e, &mut a, w, 4);
@@ -502,7 +502,7 @@ fn compression_states(
     state_58: &mut [u32; 5],
     state_65: &mut [u32; 5],
 ) {
-    let [mut a, mut b, mut c, mut d, mut e] = ihv;
+    let &mut [mut a, mut b, mut c, mut d, mut e] = ihv;
 
     full_round1_step_load4(&mut a, &mut b, &mut c, &mut d, &mut e, m, w, 0);
     full_round1_step_load4(&mut b, &mut c, &mut d, &mut e, &mut a, m, w, 4);
@@ -554,7 +554,7 @@ fn recompress_fast_58(
     me2: &[u32; 80],
     state: &[u32; 5],
 ) {
-    let [mut a, mut b, mut c, mut d, mut e] = state;
+    let &[mut a, mut b, mut c, mut d, mut e] = state;
 
     round3_step_bw(d, &mut e, a, b, &mut c, me2[57]);
     round3_step_bw(e, &mut a, b, c, &mut d, me2[56]);
@@ -601,7 +601,7 @@ fn recompress_fast_65(
     me2: &[u32; 80],
     state: &[u32; 5],
 ) {
-    let [mut a, mut b, mut c, mut d, mut e] = state;
+    let &[mut a, mut b, mut c, mut d, mut e] = state;
 
     round4_step_bw(b, &mut c, d, e, &mut a, me2[64]);
     round4_step_bw4(&mut c, &mut d, &mut e, &mut a, &mut b, me2, 63);
