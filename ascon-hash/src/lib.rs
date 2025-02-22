@@ -9,17 +9,17 @@
 
 use core::marker::PhantomData;
 
-use ascon::{pad, State};
+use ascon::{State, pad};
 pub use digest::{self, Digest, ExtendableOutput, Reset, Update, XofReader};
 use digest::{
+    HashMarker, Output, OutputSizeUser,
     block_buffer::Eager,
-    consts::{U32, U8},
+    consts::{U8, U32},
     core_api::{
         AlgorithmName, Block, Buffer, BufferKindUser, CoreWrapper, ExtendableOutputCore,
         FixedOutputCore, UpdateCore, XofReaderCore, XofReaderCoreWrapper,
     },
     crypto_common::BlockSizeUser,
-    HashMarker, Output, OutputSizeUser,
 };
 
 /// Parameters for Ascon hash instances.

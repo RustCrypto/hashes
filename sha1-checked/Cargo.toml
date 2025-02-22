@@ -5,12 +5,12 @@ description = "SHA-1 hash function with collision detection"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 documentation = "https://docs.rs/sha1-checked"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha1", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.81"
 
 exclude = [
     "sha1-checked/tests/data/shattered-1.pdf",
@@ -18,13 +18,13 @@ exclude = [
 ]
 
 [dependencies]
-digest = "=0.11.0-pre.9"
-sha1 = { version = "=0.11.0-pre.4", default-features = false }
+digest = "=0.11.0-pre.10"
+sha1 = { version = "=0.11.0-pre.4", path = "../sha1", default-features = false }
 zeroize = { version = "1.8", default-features = false, optional = true }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.9", features = ["dev"] }
-hex-literal = "0.4"
+digest = { version = "=0.11.0-pre.10", features = ["dev"] }
+hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]

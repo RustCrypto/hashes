@@ -1,8 +1,8 @@
 #![allow(non_upper_case_globals)]
 
 use core::ptr;
-use digest::array::{typenum::U64, Array};
-use simd::{dispatch, vec128_storage, AndNot, Machine, Swap64, VZip, Vec2};
+use digest::array::{Array, typenum::U64};
+use simd::{AndNot, Machine, Swap64, VZip, Vec2, dispatch, vec128_storage};
 
 #[rustfmt::skip]
 macro_rules! unroll7 {

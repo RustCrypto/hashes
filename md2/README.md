@@ -28,18 +28,6 @@ assert_eq!(hex_hash, "d9cce882ee690a5c1ce70beff3a78c77");
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
 
-## Minimum Supported Rust Version
-
-Rust **1.81** or higher.
-
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
-
-## SemVer Policy
-
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
-
 ## License
 
 The crate is licensed under either of:
@@ -62,7 +50,7 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/md2/badge.svg
 [docs-link]: https://docs.rs/md2/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.81+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
 [build-image]: https://github.com/RustCrypto/hashes/workflows/md2/badge.svg?branch=master

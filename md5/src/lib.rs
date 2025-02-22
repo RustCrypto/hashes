@@ -14,6 +14,7 @@ pub(crate) mod consts;
 
 use core::{convert::TryInto, fmt, slice::from_ref};
 use digest::{
+    HashMarker, Output,
     array::Array,
     block_buffer::Eager,
     core_api::{
@@ -21,8 +22,7 @@ use digest::{
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U16, U24, U64},
-    HashMarker, Output,
+    typenum::{U16, U24, U64, Unsigned},
 };
 
 #[cfg(feature = "oid")]

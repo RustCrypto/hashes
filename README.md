@@ -13,28 +13,28 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 
 | Algorithm | Crate | Crates.io | Documentation | MSRV | [Security] |
 |-----------|-------|:---------:|:-------------:|:----:|:----------:|
-| [Ascon] hash | [`ascon‑hash`] | [![crates.io](https://img.shields.io/crates/v/ascon-hash.svg)](https://crates.io/crates/ascon-hash) | [![Documentation](https://docs.rs/ascon-hash/badge.svg)](https://docs.rs/ascon-hash) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [BelT] hash | [`belt‑hash`] | [![crates.io](https://img.shields.io/crates/v/belt-hash.svg)](https://crates.io/crates/belt-hash) | [![Documentation](https://docs.rs/belt-hash/badge.svg)](https://docs.rs/belt-hash) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [BLAKE2] | [`blake2`] | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [FSB] | [`fsb`] | [![crates.io](https://img.shields.io/crates/v/fsb.svg)](https://crates.io/crates/fsb) | [![Documentation](https://docs.rs/fsb/badge.svg)](https://docs.rs/fsb) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [GOST R 34.11-94][GOST94] | [`gost94`] | [![crates.io](https://img.shields.io/crates/v/gost94.svg)](https://crates.io/crates/gost94) | [![Documentation](https://docs.rs/gost94/badge.svg)](https://docs.rs/gost94) | ![MSRV 1.81][msrv-1.81] | :yellow_heart: |
-| [Grøstl] (Groestl) | [`groestl`] | [![crates.io](https://img.shields.io/crates/v/groestl.svg)](https://crates.io/crates/groestl) | [![Documentation](https://docs.rs/groestl/badge.svg)](https://docs.rs/groestl) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [JH] | [`jh`] | [![crates.io](https://img.shields.io/crates/v/jh.svg)](https://crates.io/crates/jh) | [![Documentation](https://docs.rs/jh/badge.svg)](https://docs.rs/jh) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [KangarooTwelve] | [`k12`] | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [MD2] | [`md2`] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) | [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | ![MSRV 1.81][msrv-1.81] | :broken_heart: |
-| [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![MSRV 1.81][msrv-1.81] | :broken_heart: |
-| [MD5] | [`md5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.81][msrv-1.81] | :broken_heart: |
-| [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.81][msrv-1.81] | :broken_heart: |
-| [SHA-1 Checked] | [`sha1-checked`] | [![crates.io](https://img.shields.io/crates/v/sha1-checked.svg)](https://crates.io/crates/sha1-checked) | [![Documentation](https://docs.rs/sha1-checked/badge.svg)](https://docs.rs/sha1-checked) | ![MSRV 1.81][msrv-1.81] | :yellow_heart: |
-| [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [SHA-3] (Keccak) | [`sha3`] | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) | [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [SHABAL] | [`shabal`] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) | [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [Skein] | [`skein`] | [![crates.io](https://img.shields.io/crates/v/skein.svg)](https://crates.io/crates/skein) | [![Documentation](https://docs.rs/skein/badge.svg)](https://docs.rs/skein) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [SM3] (OSCCA GM/T 0004-2012) | [`sm3`] | [![crates.io](https://img.shields.io/crates/v/sm3.svg)](https://crates.io/crates/sm3) | [![Documentation](https://docs.rs/sm3/badge.svg)](https://docs.rs/sm3) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [Streebog] (GOST R 34.11-2012) | [`streebog`] | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) | [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | ![MSRV 1.81][msrv-1.81] | :yellow_heart: |
-| [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
-| [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![MSRV 1.81][msrv-1.81] | :green_heart: |
+| [Ascon] hash | [`ascon‑hash`] | [![crates.io](https://img.shields.io/crates/v/ascon-hash.svg)](https://crates.io/crates/ascon-hash) | [![Documentation](https://docs.rs/ascon-hash/badge.svg)](https://docs.rs/ascon-hash) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [BelT] hash | [`belt‑hash`] | [![crates.io](https://img.shields.io/crates/v/belt-hash.svg)](https://crates.io/crates/belt-hash) | [![Documentation](https://docs.rs/belt-hash/badge.svg)](https://docs.rs/belt-hash) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [BLAKE2] | [`blake2`] | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [FSB] | [`fsb`] | [![crates.io](https://img.shields.io/crates/v/fsb.svg)](https://crates.io/crates/fsb) | [![Documentation](https://docs.rs/fsb/badge.svg)](https://docs.rs/fsb) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [GOST R 34.11-94][GOST94] | [`gost94`] | [![crates.io](https://img.shields.io/crates/v/gost94.svg)](https://crates.io/crates/gost94) | [![Documentation](https://docs.rs/gost94/badge.svg)](https://docs.rs/gost94) | ![MSRV 1.85][msrv-1.85] | :yellow_heart: |
+| [Grøstl] (Groestl) | [`groestl`] | [![crates.io](https://img.shields.io/crates/v/groestl.svg)](https://crates.io/crates/groestl) | [![Documentation](https://docs.rs/groestl/badge.svg)](https://docs.rs/groestl) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [JH] | [`jh`] | [![crates.io](https://img.shields.io/crates/v/jh.svg)](https://crates.io/crates/jh) | [![Documentation](https://docs.rs/jh/badge.svg)](https://docs.rs/jh) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [KangarooTwelve] | [`k12`] | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [MD2] | [`md2`] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) | [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | ![MSRV 1.85][msrv-1.85] | :broken_heart: |
+| [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![MSRV 1.85][msrv-1.85] | :broken_heart: |
+| [MD5] | [`md5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.85][msrv-1.85] | :broken_heart: |
+| [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | ![MSRV 1.85][msrv-1.85] | :broken_heart: |
+| [SHA-1 Checked] | [`sha1-checked`] | [![crates.io](https://img.shields.io/crates/v/sha1-checked.svg)](https://crates.io/crates/sha1-checked) | [![Documentation](https://docs.rs/sha1-checked/badge.svg)](https://docs.rs/sha1-checked) | ![MSRV 1.85][msrv-1.85] | :yellow_heart: |
+| [SHA-2] | [`sha2`] | [![crates.io](https://img.shields.io/crates/v/sha2.svg)](https://crates.io/crates/sha2) | [![Documentation](https://docs.rs/sha2/badge.svg)](https://docs.rs/sha2) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [SHA-3] (Keccak) | [`sha3`] | [![crates.io](https://img.shields.io/crates/v/sha3.svg)](https://crates.io/crates/sha3) | [![Documentation](https://docs.rs/sha3/badge.svg)](https://docs.rs/sha3) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [SHABAL] | [`shabal`] | [![crates.io](https://img.shields.io/crates/v/shabal.svg)](https://crates.io/crates/shabal) | [![Documentation](https://docs.rs/shabal/badge.svg)](https://docs.rs/shabal) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [Skein] | [`skein`] | [![crates.io](https://img.shields.io/crates/v/skein.svg)](https://crates.io/crates/skein) | [![Documentation](https://docs.rs/skein/badge.svg)](https://docs.rs/skein) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [SM3] (OSCCA GM/T 0004-2012) | [`sm3`] | [![crates.io](https://img.shields.io/crates/v/sm3.svg)](https://crates.io/crates/sm3) | [![Documentation](https://docs.rs/sm3/badge.svg)](https://docs.rs/sm3) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [Streebog] (GOST R 34.11-2012) | [`streebog`] | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) | [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | ![MSRV 1.85][msrv-1.85] | :yellow_heart: |
+| [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
 
 NOTE: the [`blake3`] crate implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
 
@@ -63,10 +63,6 @@ Note that the library itself is named as `md5`, i.e. inside `use` statements you
 
 The SHA-1 implementation was previously published as `sha-1`, but migrated to `sha1` since v0.10.0.
 `sha-1` will continue to receive v0.10.x patch updates, but will be deprecated after `sha1` v0.11 release.
-
-### Minimum Supported Rust Version (MSRV) Policy
-
-MSRV bumps are considered breaking changes and will be performed only with minor version bump.
 
 ## Examples
 
@@ -234,7 +230,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [deps-image]: https://deps.rs/repo/github/RustCrypto/hashes/status.svg
 [deps-link]: https://deps.rs/repo/github/RustCrypto/hashes
-[msrv-1.81]: https://img.shields.io/badge/rustc-1.81.0+-blue.svg
+[msrv-1.85]: https://img.shields.io/badge/rustc-1.85.0+-blue.svg
 
 [//]: # (crates)
 

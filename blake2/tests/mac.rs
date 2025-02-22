@@ -8,7 +8,7 @@ new_test!(blake2s_mac, "blake2s/mac", blake2::Blake2sMac256);
 
 #[test]
 fn blake2b_new_test() {
-    use blake2::digest::{array::Array, KeyInit, Mac};
+    use blake2::digest::{KeyInit, Mac, array::Array};
 
     fn run<T: Mac + KeyInit>(key: &[u8]) {
         const DATA: &[u8] = &[42; 300];

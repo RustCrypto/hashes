@@ -27,11 +27,11 @@ use core::slice::from_ref;
 extern crate std;
 
 use digest::{
+    FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
     array::Array,
     block_buffer::{BlockBuffer, Eager},
     core_api::BlockSizeUser,
-    typenum::{Unsigned, U20, U64},
-    FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
+    typenum::{U20, U64, Unsigned},
 };
 #[cfg(feature = "zeroize")]
 use zeroize::{Zeroize, ZeroizeOnDrop};

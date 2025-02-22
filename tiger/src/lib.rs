@@ -11,14 +11,14 @@ pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt};
 use digest::{
+    HashMarker, Output,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U24, U32, U64},
-    HashMarker, Output,
+    typenum::{U24, U32, U64, Unsigned},
 };
 
 #[cfg(feature = "zeroize")]

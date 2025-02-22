@@ -12,14 +12,14 @@ pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt};
 use digest::{
+    HashMarker, Output,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Sum, Unsigned, U16, U20, U32, U40, U64, U8},
-    HashMarker, Output,
+    typenum::{Sum, U8, U16, U20, U32, U40, U64, Unsigned},
 };
 
 #[cfg(feature = "oid")]

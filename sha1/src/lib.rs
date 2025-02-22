@@ -11,6 +11,7 @@ pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt, slice::from_ref};
 use digest::{
+    HashMarker, Output,
     array::Array,
     block_buffer::Eager,
     core_api::{
@@ -18,8 +19,7 @@ use digest::{
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U20, U28, U64},
-    HashMarker, Output,
+    typenum::{U20, U28, U64, Unsigned},
 };
 
 #[cfg(feature = "oid")]
