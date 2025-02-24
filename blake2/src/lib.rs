@@ -6,7 +6,7 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![allow(unexpected_cfgs)] // `simd` feature is broken
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 #![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]
 #![cfg_attr(feature = "simd", allow(incomplete_features))]
 
