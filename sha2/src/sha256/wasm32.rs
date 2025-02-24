@@ -1,4 +1,4 @@
-#![allow(clippy::many_single_char_names)]
+#![allow(clippy::many_single_char_names, unsafe_op_in_unsafe_fn)]
 use core::arch::wasm32::*;
 use core::mem::size_of;
 

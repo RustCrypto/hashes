@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-      msrv: 1.81.0
+      msrv: 1.85.0
 
   # Builds for no_std platforms
   build:
@@ -47,7 +47,6 @@ jobs:
       - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
 
   minimal-versions:
-    if: false # TODO: temp disabled due to unpublished prerelease dependencies
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
       working-directory: ${{ github.workflow }}

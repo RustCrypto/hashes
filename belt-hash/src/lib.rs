@@ -15,13 +15,13 @@ use core::fmt;
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
+    HashMarker, Output,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    typenum::{Unsigned, U32},
-    HashMarker, Output,
+    typenum::{U32, Unsigned},
 };
 
 #[cfg(feature = "zeroize")]

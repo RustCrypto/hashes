@@ -12,16 +12,16 @@ pub use digest::{self, Digest};
 
 use core::fmt;
 use digest::{
+    HashMarker, Output,
     array::typenum::Unsigned,
     block_buffer::Eager,
-    consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72},
+    consts::{U28, U32, U48, U64, U72, U104, U136, U144, U168, U200},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
         ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
         XofReaderCoreWrapper,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    HashMarker, Output,
 };
 
 #[cfg(feature = "oid")]

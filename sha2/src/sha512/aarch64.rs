@@ -1,4 +1,5 @@
 // Implementation adapted from mbedtls.
+#![allow(unsafe_op_in_unsafe_fn)]
 
 use core::arch::aarch64::*;
 

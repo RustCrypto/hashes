@@ -12,6 +12,7 @@ use core::arch::riscv64::*;
 compile_error!("riscv-zknh backend requires zknh and zbkb (or zbb) target features");
 
 #[cfg(target_arch = "riscv32")]
+#[allow(unsafe_op_in_unsafe_fn)]
 unsafe fn sha512sum0(x: u64) -> u64 {
     let a = sha512sum0r((x >> 32) as u32, x as u32);
     let b = sha512sum0r(x as u32, (x >> 32) as u32);
@@ -19,6 +20,7 @@ unsafe fn sha512sum0(x: u64) -> u64 {
 }
 
 #[cfg(target_arch = "riscv32")]
+#[allow(unsafe_op_in_unsafe_fn)]
 unsafe fn sha512sum1(x: u64) -> u64 {
     let a = sha512sum1r((x >> 32) as u32, x as u32);
     let b = sha512sum1r(x as u32, (x >> 32) as u32);
@@ -26,6 +28,7 @@ unsafe fn sha512sum1(x: u64) -> u64 {
 }
 
 #[cfg(target_arch = "riscv32")]
+#[allow(unsafe_op_in_unsafe_fn)]
 unsafe fn sha512sig0(x: u64) -> u64 {
     let a = sha512sig0h((x >> 32) as u32, x as u32);
     let b = sha512sig0l(x as u32, (x >> 32) as u32);
@@ -33,6 +36,7 @@ unsafe fn sha512sig0(x: u64) -> u64 {
 }
 
 #[cfg(target_arch = "riscv32")]
+#[allow(unsafe_op_in_unsafe_fn)]
 unsafe fn sha512sig1(x: u64) -> u64 {
     let a = sha512sig1h((x >> 32) as u32, x as u32);
     let b = sha512sig1l(x as u32, (x >> 32) as u32);

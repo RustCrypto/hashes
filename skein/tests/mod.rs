@@ -1,7 +1,7 @@
 use skein::{
-    consts::{U128, U32, U64},
+    Skein256, Skein512, Skein1024,
+    consts::{U32, U64, U128},
     digest::{dev::fixed_test, new_test},
-    Skein1024, Skein256, Skein512,
 };
 
 new_test!(skein256_32, "skein256_32", Skein256<U32>, fixed_test);

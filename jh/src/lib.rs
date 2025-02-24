@@ -18,14 +18,14 @@ pub use digest::{self, Digest};
 use crate::compressor::Compressor;
 use core::fmt;
 use digest::{
-    array::typenum::{Unsigned, U28, U32, U48, U64},
+    HashMarker, InvalidOutputSize, Output,
+    array::typenum::{U28, U32, U48, U64, Unsigned},
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, Buffer, BufferKindUser, CoreWrapper, CtVariableCoreWrapper,
         TruncSide, UpdateCore, VariableOutputCore,
     },
     crypto_common::{BlockSizeUser, OutputSizeUser},
-    HashMarker, InvalidOutputSize, Output,
 };
 
 #[cfg(feature = "zeroize")]

@@ -19,14 +19,14 @@ pub use digest::{self, Digest};
 static PI: &[u8; 272384] = include_bytes!("pi.bin");
 
 use digest::{
+    HashMarker, Output,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U8},
-    HashMarker, Output,
+    typenum::{U8, Unsigned},
 };
 
 #[cfg(feature = "zeroize")]

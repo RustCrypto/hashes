@@ -12,6 +12,7 @@ pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt};
 use digest::{
+    HashMarker, InvalidOutputSize, Output,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
@@ -19,8 +20,7 @@ use digest::{
         VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U128, U136, U28, U32, U48, U64, U72},
-    HashMarker, InvalidOutputSize, Output,
+    typenum::{U28, U32, U48, U64, U72, U128, U136, Unsigned},
 };
 
 #[cfg(feature = "zeroize")]

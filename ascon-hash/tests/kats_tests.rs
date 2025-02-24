@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 use std::include_str;
 
-use spectral::prelude::{asserting, OrderedAssertions};
+use spectral::prelude::{OrderedAssertions, asserting};
 
 use ascon_hash::{
     AsconAHash, AsconAXof, AsconHash, AsconXof, Digest, ExtendableOutput, Reset, XofReader,

@@ -33,18 +33,6 @@ There can be a confusion regarding OIDs associated with declared types.
 According to the [RFC 4357], the OIDs 1.2.643.2.2.30.1 and 1.2.643.2.2.30.0 are used to identify the hash function parameter sets (CryptoPro vs Test ones).
 According to [RFC 4490] the OID 1.2.643.2.2.9 identifies the GOST 34.311-95 (former GOST R 34.11-94) function, but then it continues that this function MUST be used only with the CryptoPro parameter set.
 
-## Minimum Supported Rust Version
-
-Rust **1.81** or higher.
-
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
-
-## SemVer Policy
-
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
-
 ## License
 
 The crate is licensed under either of:
@@ -67,7 +55,7 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/gost94/badge.svg
 [docs-link]: https://docs.rs/gost94/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.81+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
 [build-image]: https://github.com/RustCrypto/hashes/workflows/gost94/badge.svg?branch=master
