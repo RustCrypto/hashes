@@ -14,7 +14,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "=0.11.0-pre.9"
-hex-literal = "0.4"
+hex-literal = "1.0"
 simd = { package = "ppv-lite86", version = "0.2.6" }
 
 [dev-dependencies]
