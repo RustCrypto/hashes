@@ -1,15 +1,15 @@
 use crate::consts;
 use core::{fmt, mem, num::Wrapping};
 use digest::{
+    HashMarker, InvalidOutputSize, Output,
     array::Array,
     block_buffer::Eager,
-    consts::{U184, U48, U64, U8},
+    consts::{U8, U48, U64, U184},
     core_api::{
         AlgorithmName, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    HashMarker, InvalidOutputSize, Output,
 };
 
 #[cfg(feature = "zeroize")]

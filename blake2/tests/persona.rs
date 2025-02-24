@@ -1,4 +1,4 @@
-use blake2::{digest::FixedOutput, Blake2bMac512, Blake2sMac256};
+use blake2::{Blake2bMac512, Blake2sMac256, digest::FixedOutput};
 use hex_literal::hex;
 
 #[test]
@@ -8,7 +8,7 @@ fn blake2s_persona() {
         "101112131415161718191a1b1c1d1e1f"
     );
     let persona = b"personal";
-    let ctx = Blake2sMac256::new_with_salt_and_personal(&key, &[], persona).unwrap();
+    let ctx = Blake2sMac256::new_with_salt_and_personal(Some(&key), &[], persona).unwrap();
     assert_eq!(
         ctx.finalize_fixed(),
         hex!(
@@ -25,7 +25,7 @@ fn blake2b_persona() {
         "101112131415161718191a1b1c1d1e1f"
     );
     let persona = b"personal";
-    let ctx = Blake2bMac512::new_with_salt_and_personal(&key, &[], persona).unwrap();
+    let ctx = Blake2bMac512::new_with_salt_and_personal(Some(&key), &[], persona).unwrap();
     assert_eq!(
         ctx.finalize_fixed(),
         hex!(

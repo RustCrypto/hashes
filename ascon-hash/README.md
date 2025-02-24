@@ -49,13 +49,6 @@ assert_eq!(dst, hex!("c21972fde9"));
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
 
-## Minimum Supported Rust Version
-
-This crate requires **Rust 1.81** at a minimum.
-
-We may change the MSRV in the future, but it will be accompanied by a minor
-version bump.
-
 ## License
 
 The crate is licensed under either of:
@@ -78,11 +71,11 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/ascon-hash/badge.svg
 [docs-link]: https://docs.rs/ascon-hash/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.81+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/ascon-hash/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Aascon-hash
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-hash.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-hash.yml?query=branch:master
 
 [//]: # (general links)
 

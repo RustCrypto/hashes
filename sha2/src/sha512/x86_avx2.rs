@@ -1,6 +1,6 @@
 //! SHA-512 `x86`/`x86_64` backend
 
-#![allow(clippy::many_single_char_names)]
+#![allow(clippy::many_single_char_names, unsafe_op_in_unsafe_fn)]
 
 use core::mem::size_of;
 

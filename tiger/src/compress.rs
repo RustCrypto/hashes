@@ -1,5 +1,5 @@
-use super::tables::TABLES;
 use super::State;
+use super::tables::TABLES;
 
 #[inline(always)]
 fn round(a: &mut u64, b: &mut u64, c: &mut u64, x: &u64, mul: u8) {

@@ -1,6 +1,7 @@
 #![allow(clippy::many_single_char_names)]
 use core::fmt;
 use digest::{
+    HashMarker, Output,
     array::Array,
     block_buffer::Eager,
     core_api::{
@@ -8,8 +9,7 @@ use digest::{
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U32, U96},
-    HashMarker, Output,
+    typenum::{U32, U96, Unsigned},
 };
 
 #[cfg(feature = "zeroize")]

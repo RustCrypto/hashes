@@ -5,7 +5,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 
 mod compressor;
 mod consts;
@@ -18,14 +18,14 @@ pub use digest::{self, Digest};
 use crate::compressor::Compressor;
 use core::fmt;
 use digest::{
-    array::typenum::{Unsigned, U28, U32, U48, U64},
+    HashMarker, InvalidOutputSize, Output,
+    array::typenum::{U28, U32, U48, U64, Unsigned},
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, Buffer, BufferKindUser, CoreWrapper, CtVariableCoreWrapper,
         TruncSide, UpdateCore, VariableOutputCore,
     },
     crypto_common::{BlockSizeUser, OutputSizeUser},
-    HashMarker, InvalidOutputSize, Output,
 };
 
 #[cfg(feature = "zeroize")]

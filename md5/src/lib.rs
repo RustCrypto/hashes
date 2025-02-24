@@ -5,7 +5,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 
 pub use digest::{self, Digest};
 
@@ -14,6 +14,7 @@ pub(crate) mod consts;
 
 use core::{convert::TryInto, fmt, slice::from_ref};
 use digest::{
+    HashMarker, Output,
     array::Array,
     block_buffer::Eager,
     core_api::{
@@ -21,8 +22,7 @@ use digest::{
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U16, U24, U64},
-    HashMarker, Output,
+    typenum::{U16, U24, U64, Unsigned},
 };
 
 #[cfg(feature = "oid")]

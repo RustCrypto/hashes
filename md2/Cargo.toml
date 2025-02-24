@@ -5,19 +5,19 @@ license = "MIT OR Apache-2.0"
 authors = ["RustCrypto Developers"]
 description = "MD2 hash function"
 readme = "README.md"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 documentation = "https://docs.rs/md2"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "md2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.81"
 
 [dependencies]
-digest = "=0.11.0-pre.9"
+digest = "=0.11.0-pre.10"
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.9", features = ["dev"] }
-hex-literal = "0.4"
+digest = { version = "=0.11.0-pre.10", features = ["dev"] }
+hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]

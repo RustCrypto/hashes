@@ -48,8 +48,13 @@ macro_rules! new_turbo_shake_test {
             let data = include_bytes!(concat!("data/", $test_name, ".blb"));
 
             for (i, row) in Blob5Iterator::new(data).unwrap().enumerate() {
-                let [domain_separation, input, input_pattern_length, output, truncate_output] =
-                    row.unwrap();
+                let [
+                    domain_separation,
+                    input,
+                    input_pattern_length,
+                    output,
+                    truncate_output,
+                ] = row.unwrap();
 
                 let input = if (input_pattern_length.len() == 0) {
                     input.to_vec()

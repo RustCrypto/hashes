@@ -4,8 +4,8 @@ version = "0.2.0-pre"
 description = "Skein hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
-edition = "2021"
-rust-version = "1.81"
+edition = "2024"
+rust-version = "1.85"
 readme = "README.md"
 documentation = "https://docs.rs/skein"
 repository = "https://github.com/RustCrypto/hashes"
@@ -13,12 +13,12 @@ keywords = ["crypto", "skein", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "=0.11.0-pre.9"
+digest = "=0.11.0-pre.10"
 threefish = { version = "0.5.2", default-features = false }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.9", features = ["dev"] }
-hex-literal = "0.4"
+digest = { version = "=0.11.0-pre.10", features = ["dev"] }
+hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]

@@ -11,6 +11,7 @@ cpufeatures::new!(sha1_hwcap, "sha2");
 
 // note that `sha2` implicitly enables `neon`
 #[target_feature(enable = "sha2")]
+#[allow(unsafe_op_in_unsafe_fn)]
 unsafe fn compress_sha1_neon(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     use core::arch::aarch64::*;
 
