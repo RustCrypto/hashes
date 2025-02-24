@@ -6,7 +6,7 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
-#![warn(rust_2018_idioms)]
+#![warn(missing_docs)]
 
 pub use digest::{self, Digest};
 
