@@ -9,16 +9,13 @@ Pure Rust implementation of the [Kupyna] cryptographic hash function defined und
 ## Examples
 
 ```rust
-use kupyna::KupynaH;
+use kupyna::{Digest, Kupyna256};
 
-let message = b"Hello, World!".to_vec();
-let _message_length = 0;
+let mut hasher = Kupyna256::default();
+hasher.update(b"my message");
+let hash = hasher.finalize();
 
-let kupyna = KupynaH::new(512);
-
-let hash_code = kupyna.hash(message, None).unwrap();
-
-println!("{:02X?}", hash_code);
+println!("Computed Hash: {:02X?}", hash);
 ```
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
