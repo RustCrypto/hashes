@@ -13,14 +13,18 @@ categories = ["cryptography", "no-std"]
 rust-version = "1.71"
 
 [dependencies]
-digest = { version = "=0.11.0-pre.9", default-features = false, features = ["core-api"] }
+digest = "=0.11.0-pre.9"
+hex-literal = "0.4"
 
 [dev-dependencies]
-hex-literal = "0.4.1"
+digest = { version = "=0.11.0-pre.9", features = ["dev"] }
+hex-literal = "0.4"
+base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]
 default = ["std"]
 std = ["digest/std"]
+zeroize = ["digest/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true

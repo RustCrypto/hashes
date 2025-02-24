@@ -1,132 +1,176 @@
-mod sub_units;
-#[cfg(test)]
-mod tests;
+pub use digest::{self, Digest};
 
-pub struct KupynaH {
-    state_size: usize,
-    state_matrix_cols: usize,
-    state_matrix_rows: usize,
-    rounds: usize,
-    hash_size: usize,
+use core::{convert::TryInto, fmt};
+#[cfg(feature = "zeroize")]
+use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+use digest::{
+    block_buffer::Eager,
+    core_api::{
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
+        CtVariableCoreWrapper, OutputSizeUser, RtVariableCoreWrapper, TruncSide, UpdateCore,
+        VariableOutputCore,
+    },
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::{Unsigned, U128, U136, U28, U32, U48, U6, U64, U72},
+    HashMarker, InvalidOutputSize, Output,
+};
+
+mod compress512;
+mod tables;
+
+/// Lowest-level core hasher state of the short Kupyna variant.
+#[derive(Clone)]
+pub struct KupynaShortVarCore {
+    state: [u64; compress512::COLS],
+    blocks_len: u64,
 }
 
-impl Default for KupynaH {
-    fn default() -> Self {
-        KupynaH::new(512)
+/// Short Kupyna variant which allows to choose output size at runtime.
+pub type KupynaShortVar = RtVariableCoreWrapper<KupynaShortVarCore>;
+/// Core hasher state of the short Kupyna variant generic over output size.
+pub type KupynaShortCore<OutSize> = CtVariableCoreWrapper<KupynaShortVarCore, OutSize>;
+/// Hasher state of the short Kupyna variant generic over output size.
+pub type KupynaShort<OutSize> = CoreWrapper<KupynaShortCore<OutSize>>;
+
+/// Kupyna-48 hasher state
+pub type Kupyna48 = CoreWrapper<KupynaShortCore<U6>>;
+/// Kupyna-224 hasher state.
+pub type Kupyna224 = CoreWrapper<KupynaShortCore<U28>>;
+/// Kupyna-256 hasher state.
+pub type Kupyna256 = CoreWrapper<KupynaShortCore<U32>>;
+
+impl HashMarker for KupynaShortVarCore {}
+
+impl BlockSizeUser for KupynaShortVarCore {
+    type BlockSize = U64;
+}
+
+impl BufferKindUser for KupynaShortVarCore {
+    type BufferKind = Eager;
+}
+
+impl UpdateCore for KupynaShortVarCore {
+    #[inline]
+    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+        self.blocks_len += blocks.len() as u64;
+        for block in blocks {
+            compress512::compress(&mut self.state, block.as_ref());
+        }
     }
 }
 
-impl KupynaH {
-    pub fn new(hash_size: usize) -> Self {
-        let mut state_size: usize = 0;
-        let mut rounds: usize = 0;
+impl OutputSizeUser for KupynaShortVarCore {
+    type OutputSize = U32;
+}
 
-        if (8..=256).contains(&hash_size) {
-            state_size = 512;
-            rounds = 10;
-        } else if (257..=512).contains(&hash_size) {
-            state_size = 1024;
-            rounds = 14;
+impl VariableOutputCore for KupynaShortVarCore {
+    const TRUNC_SIDE: TruncSide = TruncSide::Right;
+
+    #[inline]
+    fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
+        if output_size > Self::OutputSize::USIZE {
+            return Err(InvalidOutputSize);
+        }
+        let mut state = [0; compress512::COLS];
+        state[0] = 0x40;
+        state[0] <<= 56;
+        let blocks_len = 0;
+        Ok(Self { state, blocks_len })
+    }
+
+    fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
+        let total_message_len_bits =
+            (((self.blocks_len * 64) + (buffer.size() - buffer.remaining()) as u64) * 8) as u128;
+
+        // let blocks_len = if buffer.remaining() <= 12 {
+        //     self.blocks_len + 2
+        // } else {
+        //     self.blocks_len + 1
+        // };
+
+        buffer.digest_pad(
+            0x80,
+            &total_message_len_bits.to_le_bytes()[0..12],
+            |block| compress512::compress(&mut self.state, block.as_ref()),
+        );
+
+        let mut state_u8 = [0u8; 64];
+        for (i, &value) in self.state.iter().enumerate() {
+            let bytes = value.to_be_bytes();
+            state_u8[i * 8..(i + 1) * 8].copy_from_slice(&bytes);
         }
 
-        let state_matrix_cols = 8;
-        let state_matrix_rows = 16;
+        // Call t_xor_l with u8 array
+        let t_xor_ult_processed_block = compress512::t_xor_l(state_u8);
 
-        KupynaH {
-            state_size,
-            state_matrix_cols,
-            state_matrix_rows,
-            rounds,
-            hash_size,
+        let result_u8 = compress512::xor_bytes(state_u8, t_xor_ult_processed_block);
+
+        // Convert result back to u64s
+        let mut res = [0u64; 8];
+        for i in 0..8 {
+            let mut bytes = [0u8; 8];
+            bytes.copy_from_slice(&result_u8[i * 8..(i + 1) * 8]);
+            res[i] = u64::from_be_bytes(bytes);
+        }
+        let n = compress512::COLS / 2;
+        for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
         }
     }
+}
 
-    pub fn hash(&self, message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static str> {
-        let mut message = message;
-        let message_length: usize;
-        if let Some(len) = length {
-            if len > message.len() * 8 {
-                return Err("Message length is less than the provided length");
-            }
+impl AlgorithmName for KupynaShortVarCore {
+    #[inline]
+    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("KupynaShort")
+    }
+}
 
-            let mut trimmed_message = message[..(len / 8)].to_vec();
+impl fmt::Debug for KupynaShortVarCore {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("KupynaShortVarCore { ... }")
+    }
+}
 
-            if len % 8 != 0 {
-                let extra_byte = message[len / 8];
-                let extra_bits = len % 8;
-                let mask = 0xFF << (8 - extra_bits);
-                trimmed_message.push(extra_byte & mask);
-            }
+impl Drop for KupynaShortVarCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.blocks_len.zeroize();
+        }
+    }
+}
 
-            message = trimmed_message;
-            message_length = len;
-        } else {
-            message_length = message.len() * 8;
+impl SerializableState for KupynaShortVarCore {
+    type SerializedStateSize = U72;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = SerializedState::<Self>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
         }
 
-        let padded_message = pad_message(&message, message_length, self.state_size);
+        serialized_state[64..].copy_from_slice(&self.blocks_len.to_le_bytes());
+        serialized_state
+    }
 
-        let blocks = divide_into_blocks(&padded_message, self.state_size);
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = serialized_state.split::<U64>();
 
-        let mut init_vector: Vec<u8> = vec![0; self.state_size / 8];
-        init_vector[0] = 0x80; // set the first bit of this init vector to high
+        let mut state = [0; compress512::COLS];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
 
-        let fin_vector = sub_units::plant(blocks, &init_vector, self);
+        let blocks_len = u64::from_le_bytes(*serialized_block_len.as_ref());
 
-        let hash = truncate(&fin_vector, self.hash_size);
-
-        Ok(hash)
+        Ok(Self { state, blocks_len })
     }
 }
 
-fn pad_message(message: &[u8], msg_len_bits: usize, state_size: usize) -> Vec<u8> {
-    let round_msg_len = message.len() * 8;
-    let d =
-        ((-((round_msg_len + 97) as isize) % (state_size as isize)) + state_size as isize) as usize;
-
-    // Calculate the length of padding to be added
-    let pad_len = d / 8;
-
-    // We set the padded message size upfront to reduce allocations
-    let padded_len = (msg_len_bits + 7) / 8 + pad_len + 13;
-    let mut padded_message = vec![0x00; padded_len];
-
-    // Copy n bits from the input message
-    let full_bytes = msg_len_bits / 8;
-    let remaining_bits = msg_len_bits % 8;
-
-    padded_message[..full_bytes].copy_from_slice(&message[..full_bytes]);
-
-    if remaining_bits > 0 {
-        let last_byte = message[full_bytes];
-        padded_message[full_bytes] = last_byte & ((1 << remaining_bits) - 1);
-    }
-
-    // Set the n+1'th bit to high
-    padded_message[msg_len_bits / 8] |= 1 << (7 - (msg_len_bits % 8));
-
-    // Convert the length to a byte array and copy it into the padded message
-    let n_bytes = (msg_len_bits as u128).to_le_bytes(); // message length in little-endian
-    padded_message[padded_len - 12..].copy_from_slice(&n_bytes[0..12]);
-
-    padded_message
-}
-
-fn divide_into_blocks(padded_message: &[u8], state_size: usize) -> Vec<&[u8]> {
-    padded_message.chunks(state_size / 8).collect()
-}
-
-fn truncate(block: &[u8], n: usize) -> Vec<u8> {
-    let bytes_to_keep = n / 8;
-    let start_index = if block.len() > bytes_to_keep {
-        block.len() - bytes_to_keep
-    } else {
-        0
-    };
-    block[start_index..].to_vec()
-}
-
-// Keep the standalone function for backward compatibility
-pub fn hash_bw_compat(message: Vec<u8>, length: Option<usize>) -> Result<Vec<u8>, &'static str> {
-    KupynaH::default().hash(message, length)
-}
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for KupynaShortVarCore {}
