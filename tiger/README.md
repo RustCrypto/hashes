@@ -54,8 +54,8 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, without 
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/tiger/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Atiger
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/tiger.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/tiger.yml?query=branch:master
 
 [//]: # (general links)
 

@@ -53,8 +53,8 @@ dual licensed as above, without any additional terms or conditions.
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/groestl/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Agroestl
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/groestl.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/groestl.yml?query=branch:master
 
 [//]: # (general links)
 
