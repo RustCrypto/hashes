@@ -221,7 +221,7 @@ impl OutputSizeUser for KupynaLongVarCore {
 
 impl VariableOutputCore for KupynaLongVarCore {
     const TRUNC_SIDE: TruncSide = TruncSide::Right;
-    
+
     #[inline]
     fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
         if output_size > Self::OutputSize::USIZE {
@@ -238,14 +238,45 @@ impl VariableOutputCore for KupynaLongVarCore {
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let total_message_len_bits =
             (((self.blocks_len * 64) + (buffer.size() - buffer.remaining()) as u64) * 8) as u128;
-        
+
+        let blocks_len = if buffer.remaining() <= 12 {
+            self.blocks_len + 2
+        } else {
+            self.blocks_len + 1
+        };
+
         buffer.digest_pad(
             0x80,
             &total_message_len_bits.to_le_bytes()[0..12],
-            |block| compress1024::compress(&mut self.state, block.as_ref()),
+            |block| {
+                compress1024::compress(&mut self.state, block.as_ref())
+            },
         );
-        
-        
+
+
+        let mut state_u8 = [0u8; 128];
+        for (i, &value) in self.state.iter().enumerate() {
+            let bytes = value.to_be_bytes();
+            state_u8[i * 8..(i + 1) * 8].copy_from_slice(&bytes);
+        }
+
+        // Call t_xor_l with u8 array
+        let t_xor_ult_processed_block = compress1024::t_xor_l(state_u8);
+
+        let result_u8 = compress1024::xor_bytes(state_u8, t_xor_ult_processed_block);
+
+
+        // Convert result back to u64s
+        let mut res = [0u64; 16];
+        for i in 0..16 {
+            let mut bytes = [0u8; 8];
+            bytes.copy_from_slice(&result_u8[i * 8..(i + 1) * 8]);
+            res[i] = u64::from_be_bytes(bytes);
+        }
+        let n = compress1024::COLS / 2;
+        for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
+            chunk.copy_from_slice(&v.to_be_bytes());
+        }
     }
 }
 
