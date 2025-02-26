@@ -16,6 +16,7 @@ use digest::{
 };
 
 mod compress512;
+mod compress1024;
 mod tables;
 
 /// Lowest-level core hasher state of the short Kupyna variant.
@@ -174,3 +175,133 @@ impl SerializableState for KupynaShortVarCore {
 
 #[cfg(feature = "zeroize")]
 impl ZeroizeOnDrop for KupynaShortVarCore {}
+
+/// Lowest-level core hasher state of the long Kupyna variant.
+#[derive(Clone)]
+pub struct KupynaLongVarCore {
+    state: [u64; compress1024::COLS],
+    blocks_len: u64,
+}
+
+/// Long Kupyna variant which allows to choose output size at runtime.
+pub type KupynaLongVar = RtVariableCoreWrapper<KupynaLongVarCore>;
+/// Core hasher state of the long Kupyna variant generic over output size.
+pub type KupynaLongCore<OutSize> = CtVariableCoreWrapper<KupynaLongVarCore, OutSize>;
+/// Hasher state of the long Kupyna variant generic over output size.
+pub type KupynaLong<OutSize> = CoreWrapper<KupynaLongCore<OutSize>>;
+
+/// Kupyna-384 hasher state.
+pub type Kupyna384 = CoreWrapper<KupynaLongCore<U48>>;
+/// Kupyna-512 hasher state.
+pub type Kupyna512 = CoreWrapper<KupynaLongCore<U64>>;
+
+impl HashMarker for KupynaLongVarCore {}
+
+impl BlockSizeUser for KupynaLongVarCore {
+    type BlockSize = U128;
+}
+
+impl BufferKindUser for KupynaLongVarCore {
+    type BufferKind = Eager;
+}
+
+impl UpdateCore for KupynaLongVarCore {
+    #[inline]
+    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+        self.blocks_len += blocks.len() as u64;
+        for block in blocks {
+            compress1024::compress(&mut self.state, block.as_ref());
+        }
+    }
+}
+
+impl OutputSizeUser for KupynaLongVarCore {
+    type OutputSize = U64;
+}
+
+impl VariableOutputCore for KupynaLongVarCore {
+    const TRUNC_SIDE: TruncSide = TruncSide::Right;
+    
+    #[inline]
+    fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
+        if output_size > Self::OutputSize::USIZE {
+            return Err(InvalidOutputSize);
+        }
+        let mut state = [0; compress1024::COLS];
+        state[0] = 0x80;
+        state[0] <<= 56;
+        let blocks_len = 0;
+        Ok(Self { state, blocks_len })
+    }
+
+    #[inline]
+    fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
+        let total_message_len_bits =
+            (((self.blocks_len * 64) + (buffer.size() - buffer.remaining()) as u64) * 8) as u128;
+        
+        buffer.digest_pad(
+            0x80,
+            &total_message_len_bits.to_le_bytes()[0..12],
+            |block| compress1024::compress(&mut self.state, block.as_ref()),
+        );
+        
+        
+    }
+}
+
+
+impl AlgorithmName for KupynaLongVarCore {
+    #[inline]
+    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("KupynaLong")
+    }
+}
+
+impl fmt::Debug for KupynaLongVarCore {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("KupynaLongVarCore { ... }")
+    }
+}
+
+impl Drop for KupynaLongVarCore {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            self.state.zeroize();
+            self.blocks_len.zeroize();
+        }
+    }
+}
+
+impl SerializableState for KupynaLongVarCore {
+    type SerializedStateSize = U136;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = SerializedState::<Self>::default();
+
+        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
+            chunk.copy_from_slice(&val.to_le_bytes());
+        }
+
+        serialized_state[128..].copy_from_slice(&self.blocks_len.to_le_bytes());
+        serialized_state
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = serialized_state.split::<U128>();
+
+        let mut state = [0; compress1024::COLS];
+        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
+            *val = u64::from_le_bytes(chunk.try_into().unwrap());
+        }
+
+        let blocks_len = u64::from_le_bytes(*serialized_block_len.as_ref());
+
+        Ok(Self { state, blocks_len })
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl ZeroizeOnDrop for KupynaLongVarCore {}
