@@ -37,8 +37,7 @@ pub struct Md5Core {
     state: [u32; STATE_LEN],
 }
 
-/// MD5 hasher state.
-pub type Md5 = CoreWrapper<Md5Core>;
+digest::newtype!("MD5 hasher", Md5 = CoreWrapper<Md5Core>);
 
 const STATE_LEN: usize = 4;
 

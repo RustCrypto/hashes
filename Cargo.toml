@@ -27,3 +27,7 @@ members = [
 
 [profile.dev]
 opt-level = 2
+
+[patch.crates-io]
+#digest = { path = "../traits/digest" }
+digest = { git = "https://github.com/baloo/traits.git", branch = "baloo/digest/new-type" }

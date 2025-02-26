@@ -43,10 +43,8 @@ pub struct TigerCore<const VER2: bool = true> {
     state: State,
 }
 
-/// Tiger hasher state.
-pub type Tiger = CoreWrapper<TigerCore<false>>;
-/// Tiger2 hasher state.
-pub type Tiger2 = CoreWrapper<TigerCore<true>>;
+digest::newtype!("Tiger hasher state.", Tiger = CoreWrapper<TigerCore<false>>);
+digest::newtype!("Tiger2 hasher state.", Tiger2 = CoreWrapper<TigerCore<true>>);
 
 impl<const VER2: bool> HashMarker for TigerCore<VER2> {}
 

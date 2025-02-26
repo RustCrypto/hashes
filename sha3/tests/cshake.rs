@@ -1,7 +1,7 @@
 use core::fmt::Debug;
-use digest::{CustomizedInit,ExtendableOutput};
 #[cfg(feature = "reset")]
 use digest::ExtendableOutputReset;
+use digest::{CustomizedInit, ExtendableOutput};
 
 #[cfg(feature = "reset")]
 pub(crate) fn cshake_reset_test<D, F>(input: &[u8], output: &[u8], new: F) -> Option<&'static str>

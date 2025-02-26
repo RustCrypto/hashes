@@ -37,8 +37,7 @@ pub struct Sm3Core {
     h: [u32; consts::H_LEN],
 }
 
-/// Sm3 hasher state.
-pub type Sm3 = CoreWrapper<Sm3Core>;
+digest::newtype!("Sm3 hasher", Sm3 = CoreWrapper<Sm3Core>);
 
 impl HashMarker for Sm3Core {}
 

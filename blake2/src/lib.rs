@@ -69,12 +69,10 @@ pub type Blake2bVar = RtVariableCoreWrapper<Blake2bVarCore>;
 pub type Blake2bCore<OutSize> = CtVariableCoreWrapper<Blake2bVarCore, OutSize>;
 /// BLAKE2b generic over output size.
 pub type Blake2b<OutSize> = CoreWrapper<Blake2bCore<OutSize>>;
-/// BLAKE2b-128 hasher state.
-pub type Blake2b128 = Blake2b<U16>;
-/// BLAKE2b-256 hasher state.
-pub type Blake2b256 = Blake2b<U32>;
-/// BLAKE2b-512 hasher state.
-pub type Blake2b512 = Blake2b<U64>;
+
+digest::newtype!("BLAKE2b-128 hasher state.", Blake2b128 = Blake2b<U16>);
+digest::newtype!("BLAKE2b-256 hasher state.", Blake2b256 = Blake2b<U32>);
+digest::newtype!("BLAKE2b-512 hasher state.", Blake2b512 = Blake2b<U64>);
 
 blake2_mac_impl!(Blake2bMac, Blake2bVarCore, U64, "Blake2b MAC function");
 

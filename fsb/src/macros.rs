@@ -12,8 +12,7 @@ macro_rules! fsb_impl {
             state: [u8; $r / 8],
         }
 
-        #[doc=$full_doc]
-        pub type $full_state = CoreWrapper<$state>;
+        digest::newtype!($full_doc, $full_state = CoreWrapper<$state>);
 
         impl HashMarker for $state {}
 

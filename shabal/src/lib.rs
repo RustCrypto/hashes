@@ -20,13 +20,27 @@ use digest::{
     core_api::{CoreWrapper, CtVariableCoreWrapper},
 };
 
-/// Shabal192 hasher.
-pub type Shabal192 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U24>>;
-/// Shabal224 hasher.
-pub type Shabal224 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U28>>;
-/// Shabal256 hasher.
-pub type Shabal256 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U32>>;
-/// Shabal384 hasher.
-pub type Shabal384 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U48>>;
-/// Shabal512 hasher.
-pub type Shabal512 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U64>>;
+digest::newtype!(
+    "Shabal192 hasher",
+    Shabal192 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U24>>
+);
+
+digest::newtype!(
+    "Shabal224 hasher",
+    Shabal224 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U28>>
+);
+
+digest::newtype!(
+    "Shabal256 hasher",
+    Shabal256 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U32>>
+);
+
+digest::newtype!(
+    "Shabal384 hasher",
+    Shabal384 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U48>>
+);
+
+digest::newtype!(
+    "Shabal512 hasher",
+    Shabal512 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U64>>
+);

@@ -44,8 +44,7 @@ pub struct Sha1Core {
     block_len: u64,
 }
 
-/// SHA-1 hasher state.
-pub type Sha1 = CoreWrapper<Sha1Core>;
+digest::newtype!("SHA-1 hasher", Sha1 = CoreWrapper<Sha1Core>);
 
 impl HashMarker for Sha1Core {}
 
