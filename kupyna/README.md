@@ -1,11 +1,15 @@
 # RustCrypto: Kupyna
 
 
+[![crate][crate-image]][crate-link]
+[![Docs][docs-image]][docs-link]
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
+[![Build Status][build-image]][build-link]
 
 Pure Rust implementation of the [Kupyna] cryptographic hash function defined under DSTU 7564:2014.
+
 ## Examples
 
 ```rust
@@ -15,17 +19,10 @@ let mut hasher = Kupyna256::default();
 hasher.update(b"my message");
 let hash = hasher.finalize();
 
-println!("Computed Hash: {:02X?}", hash);
+assert_eq!(hash, hex!("538e2e238142df05e954702aa75d6942cebe30d44bd514df365d13bdcb6b1458"));
 ```
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
-
-## Minimum Supported Rust Version
-
-Rust **1.71** or higher.
-
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
 
 ## License
 
