@@ -20,6 +20,8 @@ There are 6 standard algorithms specified in the SHA-3 standard:
 * `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512` (NIST submission
    without padding changes)
 
+This crates supports `cSHAKE128` and `cSHAKE256`, the customizable XOFs as defined in the NIST [SHA-3 Derived Functions].
+
 This crates additionally supports the `TurboSHAKE` XOF variant.
 
 ## Examples
@@ -91,5 +93,6 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[SHA-3]: https://en.wikipedia.org/wiki/SHA-3
 [examples section]: https://github.com/RustCrypto/hashes#Examples
+[SHA-3]: https://en.wikipedia.org/wiki/SHA-3
+[SHA-3 Derived Functions]: https://csrc.nist.gov/pubs/sp/800/185/final
