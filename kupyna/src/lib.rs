@@ -1,9 +1,20 @@
+// #![no_std]
+#![doc = include_str!("../README.md")]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
+)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
 pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt};
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 use digest::{
+    HashMarker, InvalidOutputSize, Output,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
@@ -11,12 +22,11 @@ use digest::{
         VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U128, U136, U28, U32, U48, U6, U64, U72},
-    HashMarker, InvalidOutputSize, Output,
+    typenum::{U6, U28, U32, U48, U64, U72, U128, U136, Unsigned},
 };
 
-mod compress512;
 mod compress1024;
+mod compress512;
 mod tables;
 
 /// Lowest-level core hasher state of the short Kupyna variant.
@@ -236,11 +246,8 @@ impl VariableOutputCore for KupynaLongVarCore {
         buffer.digest_pad(
             0x80,
             &total_message_len_bits.to_le_bytes()[0..12],
-            |block| {
-                compress1024::compress(&mut self.state, block.as_ref())
-            },
+            |block| compress1024::compress(&mut self.state, block.as_ref()),
         );
-
 
         let mut state_u8 = [0u8; 128];
         for (i, &value) in self.state.iter().enumerate() {
@@ -252,7 +259,6 @@ impl VariableOutputCore for KupynaLongVarCore {
         let t_xor_ult_processed_block = compress1024::t_xor_l(state_u8);
 
         let result_u8 = compress1024::xor_bytes(state_u8, t_xor_ult_processed_block);
-
 
         // Convert result back to u64s
         let mut res = [0u64; 16];
@@ -267,7 +273,6 @@ impl VariableOutputCore for KupynaLongVarCore {
         }
     }
 }
-
 
 impl AlgorithmName for KupynaLongVarCore {
     #[inline]
