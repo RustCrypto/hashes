@@ -13,6 +13,7 @@ Pure Rust implementation of the [Kupyna] cryptographic hash function defined und
 ## Examples
 
 ```rust
+use hex_literal::hex;
 use kupyna::{Digest, Kupyna256};
 
 let mut hasher = Kupyna256::default();
