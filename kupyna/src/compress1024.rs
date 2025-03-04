@@ -3,7 +3,6 @@ use crate::tables::{MDS_MATRIX, SBOXES};
 pub(crate) const COLS: usize = 16;
 const ROUNDS: u64 = 14;
 
-
 const BITS_IN_BYTE: u8 = 8;
 const REDUCTION_POLYNOMIAL: u16 = 0x011d;
 
@@ -18,22 +17,17 @@ pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128])
 
     let m_xor_p = xor_bytes(*message_block, prev_vector_u8);
 
-
     let t_xor_mp = t_xor_l(m_xor_p);
-
 
     let t_plus_m = t_plus_l(*message_block);
 
-
     prev_vector_u8 = xor_bytes(xor_bytes(t_xor_mp, t_plus_m), prev_vector_u8);
-
 
     for i in 0..COLS {
         let mut bytes = [0u8; 8];
         bytes.copy_from_slice(&prev_vector_u8[i * 8..(i + 1) * 8]);
         prev_vector[i] = u64::from_be_bytes(bytes);
     }
-
 }
 
 pub fn t_plus_l(block: [u8; 128]) -> [u8; 128] {
