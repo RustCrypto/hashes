@@ -83,12 +83,6 @@ impl VariableOutputCore for KupynaShortVarCore {
         let total_message_len_bits =
             (((self.blocks_len * 64) + (buffer.size() - buffer.remaining()) as u64) * 8) as u128;
 
-        // let blocks_len = if buffer.remaining() <= 12 {
-        //     self.blocks_len + 2
-        // } else {
-        //     self.blocks_len + 1
-        // };
-
         buffer.digest_pad(
             0x80,
             &total_message_len_bits.to_le_bytes()[0..12],
@@ -237,13 +231,7 @@ impl VariableOutputCore for KupynaLongVarCore {
     #[inline]
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let total_message_len_bits =
-            (((self.blocks_len * 64) + (buffer.size() - buffer.remaining()) as u64) * 8) as u128;
-
-        let blocks_len = if buffer.remaining() <= 12 {
-            self.blocks_len + 2
-        } else {
-            self.blocks_len + 1
-        };
+            (((self.blocks_len * 128) + (buffer.size() - buffer.remaining()) as u64) * 8) as u128;
 
         buffer.digest_pad(
             0x80,
