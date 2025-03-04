@@ -14,8 +14,7 @@ fn kup256_n512() {
 
     assert_eq!(
         result[..],
-        hex!("08F4EE6F1BE6903B324C4E27990CB24EF69DD58DBE84813EE0A52F6631239875")[..],
-        "Kupyna-256 did not produce the expected hash output"
+        hex!("08F4EE6F1BE6903B324C4E27990CB24EF69DD58DBE84813EE0A52F6631239875")[..]
     );
 }
 
@@ -34,8 +33,7 @@ fn kup256_n1024() {
 
     assert_eq!(
         result[..],
-        hex!("0A9474E645A7D25E255E9E89FFF42EC7EB31349007059284F0B182E452BDA882")[..],
-        "Kupyna-256 did not produce the expected hash output"
+        hex!("0A9474E645A7D25E255E9E89FFF42EC7EB31349007059284F0B182E452BDA882")[..]
     );
 }
 
@@ -59,8 +57,7 @@ E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
 
     assert_eq!(
         result[..],
-        hex!("D305A32B963D149DC765F68594505D4077024F836C1BF03806E1624CE176C08F")[..],
-        "Kupyna-256 did not produce the expected hash output"
+        hex!("D305A32B963D149DC765F68594505D4077024F836C1BF03806E1624CE176C08F")[..]
     );
 }
 
@@ -75,8 +72,7 @@ fn kup256_n8() {
 
     assert_eq!(
         result[..],
-        hex!("EA7677CA4526555680441C117982EA14059EA6D0D7124D6ECDB3DEEC49E890F4")[..],
-        "Kupyna-256 did not produce the expected hash output"
+        hex!("EA7677CA4526555680441C117982EA14059EA6D0D7124D6ECDB3DEEC49E890F4")[..]
     );
 }
 
@@ -95,8 +91,7 @@ fn kup256_n760() {
 
     assert_eq!(
         result[..],
-        hex!("1075C8B0CB910F116BDA5FA1F19C29CF8ECC75CAFF7208BA2994B68FC56E8D16")[..],
-        "Kupyna-256 did not produce the expected hash output"
+        hex!("1075C8B0CB910F116BDA5FA1F19C29CF8ECC75CAFF7208BA2994B68FC56E8D16")[..]
     );
 }
 
@@ -111,7 +106,6 @@ fn kup256_n0() {
 
     assert_eq!(
         result[..],
-        hex!("CD5101D1CCDF0D1D1F4ADA56E888CD724CA1A0838A3521E7131D4FB78D0F5EB6")[..],
-        "Kupyna-256 did not produce the expected hash output"
+        hex!("CD5101D1CCDF0D1D1F4ADA56E888CD724CA1A0838A3521E7131D4FB78D0F5EB6")[..]
     );
 }
