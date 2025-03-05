@@ -1,6 +1,6 @@
 [package]
 name = "sha3"
-version = "0.11.0-pre.4"
+version = "0.11.0-pre.5"
 description = """
 Pure Rust implementation of SHA-3, a family of Keccak-based hash functions
 including the SHAKE family of eXtendable-Output Functions (XOFs), as well as

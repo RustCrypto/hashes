@@ -1,6 +1,6 @@
 [package]
 name = "sm3"
-version = "0.5.0-pre.4"
+version = "0.5.0-pre.5"
 description = "SM3 (OSCCA GM/T 0004-2012) hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"

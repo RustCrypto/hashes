@@ -1,6 +1,6 @@
 [package]
 name = "ripemd"
-version = "0.2.0-pre.4"
+version = "0.2.0-pre.5"
 description = "Pure Rust implementation of the RIPEMD hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
