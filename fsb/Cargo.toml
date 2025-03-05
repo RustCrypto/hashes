@@ -14,7 +14,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "=0.11.0-pre.10"
-whirlpool = { version = "=0.11.0-pre.4", path = "../whirlpool", default-features = false }
+whirlpool = { version = "=0.11.0-pre.5", path = "../whirlpool", default-features = false }
 
 [dev-dependencies]
 digest = { version = "=0.11.0-pre.10", features = ["dev"] }
