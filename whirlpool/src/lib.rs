@@ -40,8 +40,7 @@ pub struct WhirlpoolCore {
 const STATE_LEN: usize = 8;
 const BITLEN_LEN: usize = 4;
 
-/// Whirlpool hasher state.
-pub type Whirlpool = CoreWrapper<WhirlpoolCore>;
+digest::newtype!("Whirlpool hasher state.", Whirlpool = CoreWrapper<WhirlpoolCore>);
 
 impl HashMarker for WhirlpoolCore {}
 

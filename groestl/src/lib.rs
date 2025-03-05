@@ -44,10 +44,8 @@ pub type GroestlShortCore<OutSize> = CtVariableCoreWrapper<GroestlShortVarCore, 
 /// Hasher state of the short Groestl variant generic over output size.
 pub type GroestlShort<OutSize> = CoreWrapper<GroestlShortCore<OutSize>>;
 
-/// Groestl-224 hasher state.
-pub type Groestl224 = CoreWrapper<GroestlShortCore<U28>>;
-/// Groestl-256 hasher state.
-pub type Groestl256 = CoreWrapper<GroestlShortCore<U32>>;
+digest::newtype!("Groestl-224 hasher state.", Groestl224 = CoreWrapper<GroestlShortCore<U28>>);
+digest::newtype!("Groestl-256 hasher state.", Groestl256 = CoreWrapper<GroestlShortCore<U32>>);
 
 impl HashMarker for GroestlShortVarCore {}
 
@@ -175,10 +173,8 @@ pub type GroestlLongCore<OutSize> = CtVariableCoreWrapper<GroestlLongVarCore, Ou
 /// Hasher state of the long Groestl variant generic over output size.
 pub type GroestlLong<OutSize> = CoreWrapper<GroestlLongCore<OutSize>>;
 
-/// Groestl-384 hasher state.
-pub type Groestl384 = CoreWrapper<GroestlLongCore<U48>>;
-/// Groestl-512 hasher state.
-pub type Groestl512 = CoreWrapper<GroestlLongCore<U64>>;
+digest::newtype!("Groestl-384 hasher state.", Groestl384 = CoreWrapper<GroestlLongCore<U48>>);
+digest::newtype!("Groestl-512 hasher state.", Groestl512 = CoreWrapper<GroestlLongCore<U64>>);
 
 impl HashMarker for GroestlLongVarCore {}
 

@@ -46,9 +46,10 @@ macro_rules! impl_ripemd {
             block_len: u64,
         }
 
-        #[doc = $doc_name]
-        #[doc = " hasher."]
-        pub type $wrapped_name = CoreWrapper<$name>;
+        digest::newtype!(
+            concat!($doc_name, " hasher state."),
+            $wrapped_name = CoreWrapper<$name>
+        );
 
         impl HashMarker for $name {}
 

@@ -464,9 +464,10 @@ macro_rules! impl_cshake {
             padding: u8,
         }
 
-        #[doc = $alg_name]
-        #[doc = " hasher state."]
-        pub type $full_name = CoreWrapper<$name>;
+        digest::newtype!(
+            concat!($alg_name, " hasher state."),
+            $full_name = CoreWrapper<$name>
+        );
 
         impl $name {
             /// Creates a new CSHAKE instance with the given function name and customization.
