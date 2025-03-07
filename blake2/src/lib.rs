@@ -17,7 +17,7 @@ pub use digest::{self, Digest};
 
 use core::{fmt, marker::PhantomData, ops::Div};
 use digest::{
-    FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update,
+    VarOutputCustomized, FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update,
     array::{Array, ArraySize},
     block_buffer::{Lazy, LazyBuffer},
     consts::{U4, U16, U32, U64, U128},

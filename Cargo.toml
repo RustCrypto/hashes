@@ -27,3 +27,7 @@ members = [
 
 [profile.dev]
 opt-level = 2
+
+[patch.crates-io]
+# https://github.com/RustCrypto/traits/pull/1787
+digest = { git = "https://github.com/RustCrypto/traits" }

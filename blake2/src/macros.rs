@@ -256,6 +256,14 @@ macro_rules! blake2_impl {
                 }
             }
         }
+
+        impl VarOutputCustomized for $name {
+            #[inline]
+            fn new_customized(customization: &[u8], output_size: usize) -> Self {
+                Self::new_with_params(&[], customization, 0, output_size)
+            }
+        }
+
         #[cfg(feature = "zeroize")]
         impl ZeroizeOnDrop for $name {}
     };

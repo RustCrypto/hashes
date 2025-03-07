@@ -1,4 +1,6 @@
-use blake2::{Blake2bMac512, Blake2sMac256, digest::FixedOutput};
+use blake2::{Blake2b128, Blake2bMac512, Blake2sMac256, digest::FixedOutput};
+use blake2::digest::CustomizedInit;
+use digest::Update;
 use hex_literal::hex;
 
 #[test]
@@ -20,6 +22,19 @@ fn blake2s_persona() {
 
 #[test]
 fn blake2b_persona() {
+    let persona = b"personal";
+    let mut ctx = Blake2b128::new_customized(persona);
+    ctx.update(b"hello");
+    assert_eq!(
+        ctx.finalize_fixed(),
+        hex!(
+            "5a5eb0aecc053af1ce6de25354c1c761"
+        ),
+    );
+}
+
+#[test]
+fn blake2b_mac_persona() {
     let key = hex!(
         "000102030405060708090a0b0c0d0e0f"
         "101112131415161718191a1b1c1d1e1f"
