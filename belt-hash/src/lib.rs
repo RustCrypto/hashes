@@ -40,8 +40,7 @@ pub struct BeltHashCore {
     h: [u32; 8],
 }
 
-/// BelT hasher state.
-pub type BeltHash = CoreWrapper<BeltHashCore>;
+digest::newtype!("BelT hasher hasher", BeltHash = CoreWrapper<BeltHashCore>);
 
 impl BeltHashCore {
     fn compress_block(&mut self, block: &Block<Self>) {

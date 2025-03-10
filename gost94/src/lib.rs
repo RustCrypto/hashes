@@ -34,12 +34,14 @@ impl AssociatedOid for Gost94Core<params::GOST28147UAParam> {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.804.2.1.1.1.1.2.1");
 }
 
-/// GOST94 hash function with CryptoPro parameters.
-pub type Gost94CryptoPro = CoreWrapper<Gost94Core<params::CryptoProParam>>;
-/// GOST94 hash function with S-box defined in GOST R 34.12-2015.
-pub type Gost94s2015 = CoreWrapper<Gost94Core<params::S2015Param>>;
-/// GOST94 hash function with test parameters.
-pub type Gost94Test = CoreWrapper<Gost94Core<params::TestParam>>;
-/// GOST94 hash function with UAPKI GOST 34.311-95 parameters
-/// (1.2.804.2.1.1.1.1.2.1 OID).
-pub type Gost94UA = CoreWrapper<Gost94Core<params::GOST28147UAParam>>;
+digest::newtype!("GOST94 hash function with CryptoPro parameters.", Gost94CryptoPro = CoreWrapper<Gost94Core<params::CryptoProParam>>);
+
+digest::newtype!("GOST94 hash function with S-box defined in GOST R 34.12-2015.", Gost94s2015 = CoreWrapper<Gost94Core<params::S2015Param>>);
+
+digest::newtype!("GOST94 hash function with test parameters.", Gost94Test = CoreWrapper<Gost94Core<params::TestParam>>);
+
+digest::newtype!(
+    r#"GOST94 hash function with UAPKI GOST 34.311-95 parameters
+(1.2.804.2.1.1.1.1.2.1 OID)."#,
+    Gost94UA = CoreWrapper<Gost94Core<params::GOST28147UAParam>>
+);

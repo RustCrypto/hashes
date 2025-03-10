@@ -37,8 +37,7 @@ pub struct Md2Core {
     checksum: Block<Self>,
 }
 
-/// MD2 hasher state.
-pub type Md2 = CoreWrapper<Md2Core>;
+digest::newtype!("MD2 hasher state.", Md2 = CoreWrapper<Md2Core>);
 
 const STATE_LEN: usize = 48;
 

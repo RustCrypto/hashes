@@ -381,55 +381,68 @@ impl AlgorithmName for AsconAXofCore {
     }
 }
 
-/// Ascon hash
-///
-/// ```
-/// use ascon_hash::{AsconHash, Digest};
-///
-/// let mut hasher = AsconHash::new();
-/// hasher.update(b"some bytes");
-/// let digest = hasher.finalize();
-/// assert_eq!(&digest[..], b"\xb7\x42\xca\x75\xe5\x70\x38\x75\x70\x59\xcc\xcc\x68\x74\x71\x4f\x9d\xbd\x7f\xc5\x92\x4a\x7d\xf4\xe3\x16\x59\x4f\xd1\x42\x6c\xa8");
-/// ```
-pub type AsconHash = CoreWrapper<AsconCore>;
-/// AsconA hash
-///
-/// ```
-/// use ascon_hash::{AsconAHash, Digest};
-///
-/// let mut hasher = AsconAHash::new();
-/// hasher.update(b"some bytes");
-/// let digest = hasher.finalize();
-/// assert_eq!(&digest[..], b"\x1d\x1a\xc8\x74\x4a\x4a\x05\x81\x33\x7d\x5a\xf2\x78\xc2\x55\x88\xe1\xa3\xdd\x2d\x86\x73\x07\x64\x26\x53\xdc\xa4\x45\xf5\x5c\x2a");
-/// ```
-pub type AsconAHash = CoreWrapper<AsconACore>;
-/// AsconXof
-///
-/// ```
-/// use ascon_hash::{AsconXof, ExtendableOutput, Update, XofReader};
-///
-/// let mut xof = AsconXof::default();
-/// xof.update(b"some bytes");
-/// let mut reader = xof.finalize_xof();
-/// let mut dst = [0u8; 5];
-/// reader.read(&mut dst);
-/// assert_eq!(&dst, b"\xc2\x19\x72\xfd\xe9");
-/// ```
-pub type AsconXof = CoreWrapper<AsconXofCore>;
+digest::newtype!(
+    r#"Ascon hash
+
+```
+use ascon_hash::{AsconHash, Digest};
+
+let mut hasher = AsconHash::new();
+hasher.update(b"some bytes");
+let digest = hasher.finalize();
+assert_eq!(&digest[..], b"\xb7\x42\xca\x75\xe5\x70\x38\x75\x70\x59\xcc\xcc\x68\x74\x71\x4f\x9d\xbd\x7f\xc5\x92\x4a\x7d\xf4\xe3\x16\x59\x4f\xd1\x42\x6c\xa8");
+```"#,
+    AsconHash = CoreWrapper<AsconCore>
+);
+
+digest::newtype!(
+    r#"AsconA hash
+
+```
+use ascon_hash::{AsconAHash, Digest};
+
+let mut hasher = AsconAHash::new();
+hasher.update(b"some bytes");
+let digest = hasher.finalize();
+assert_eq!(&digest[..], b"\x1d\x1a\xc8\x74\x4a\x4a\x05\x81\x33\x7d\x5a\xf2\x78\xc2\x55\x88\xe1\xa3\xdd\x2d\x86\x73\x07\x64\x26\x53\xdc\xa4\x45\xf5\x5c\x2a");
+```"#,
+    AsconAHash = CoreWrapper<AsconACore>
+);
+
+digest::newtype!(
+    r#"AsconXof
+
+```
+use ascon_hash::{AsconXof, ExtendableOutput, Update, XofReader};
+
+let mut xof = AsconXof::default();
+xof.update(b"some bytes");
+let mut reader = xof.finalize_xof();
+let mut dst = [0u8; 5];
+reader.read(&mut dst);
+assert_eq!(&dst, b"\xc2\x19\x72\xfd\xe9");
+```"#,
+    AsconXof = CoreWrapper<AsconXofCore>
+);
+
 /// Reader for AsconXof output
 pub type AsconXofReader = XofReaderCoreWrapper<AsconXofReaderCore>;
-/// AsconAXof
-///
-/// ```
-/// use ascon_hash::{AsconAXof, ExtendableOutput, Update, XofReader};
-///
-/// let mut xof = AsconAXof::default();
-/// xof.update(b"some bytes");
-/// let mut reader = xof.finalize_xof();
-/// let mut dst = [0u8; 5];
-/// reader.read(&mut dst);
-/// assert_eq!(&dst, b"\xb8\xd6\xbd\xf0\xa7");
-/// ```
-pub type AsconAXof = CoreWrapper<AsconAXofCore>;
+
+digest::newtype!(
+    r#"AsconAXof
+
+```
+use ascon_hash::{AsconAXof, ExtendableOutput, Update, XofReader};
+
+let mut xof = AsconAXof::default();
+xof.update(b"some bytes");
+let mut reader = xof.finalize_xof();
+let mut dst = [0u8; 5];
+reader.read(&mut dst);
+assert_eq!(&dst, b"\xb8\xd6\xbd\xf0\xa7");
+```"#,
+    AsconAXof = CoreWrapper<AsconAXofCore>
+);
+
 /// Reader for AsconAXof output
 pub type AsconAXofReader = XofReaderCoreWrapper<AsconAXofReaderCore>;

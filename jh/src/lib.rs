@@ -38,14 +38,22 @@ pub struct JhCore {
     block_len: u64,
 }
 
-/// Jh-224 hasher state
-pub type Jh224 = CoreWrapper<CtVariableCoreWrapper<JhCore, U28>>;
-/// Jh-256 hasher state
-pub type Jh256 = CoreWrapper<CtVariableCoreWrapper<JhCore, U32>>;
-/// Jh-384 hasher state
-pub type Jh384 = CoreWrapper<CtVariableCoreWrapper<JhCore, U48>>;
-/// Jh-512 hasher state
-pub type Jh512 = CoreWrapper<CtVariableCoreWrapper<JhCore, U64>>;
+digest::newtype!(
+    "Jh-224 hasher state",
+    Jh224 = CoreWrapper<CtVariableCoreWrapper<JhCore, U28>>
+);
+digest::newtype!(
+    "Jh-256 hasher state",
+    Jh256 = CoreWrapper<CtVariableCoreWrapper<JhCore, U32>>
+);
+digest::newtype!(
+    "Jh-384 hasher state",
+    Jh384 = CoreWrapper<CtVariableCoreWrapper<JhCore, U48>>
+);
+digest::newtype!(
+    "Jh-512 hasher state",
+    Jh512 = CoreWrapper<CtVariableCoreWrapper<JhCore, U64>>
+);
 
 impl HashMarker for JhCore {}
 

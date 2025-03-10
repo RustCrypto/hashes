@@ -46,15 +46,32 @@ impl_oid_carrier!(OidSha224, "2.16.840.1.101.3.4.2.4");
 impl_oid_carrier!(OidSha512_224, "2.16.840.1.101.3.4.2.5");
 impl_oid_carrier!(OidSha512_256, "2.16.840.1.101.3.4.2.6");
 
-/// SHA-224 hasher.
-pub type Sha224 = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore, U28, OidSha224>>;
-/// SHA-256 hasher.
-pub type Sha256 = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore, U32, OidSha256>>;
-/// SHA-512/224 hasher.
-pub type Sha512_224 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U28, OidSha512_224>>;
-/// SHA-512/256 hasher.
-pub type Sha512_256 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U32, OidSha512_256>>;
-/// SHA-384 hasher.
-pub type Sha384 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U48, OidSha384>>;
-/// SHA-512 hasher.
-pub type Sha512 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U64, OidSha512>>;
+digest::newtype!(
+    "SHA-224 hasher",
+    Sha224 = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore, U28, OidSha224>>
+);
+
+digest::newtype!(
+    "SHA-256 hasher",
+    Sha256 = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore, U32, OidSha256>>
+);
+
+digest::newtype!(
+    "SHA-512/224 hasher",
+    Sha512_224 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U28, OidSha512_224>>
+);
+
+digest::newtype!(
+    "SHA-512/256 hasher",
+    Sha512_256 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U32, OidSha512_256>>
+);
+
+digest::newtype!(
+    "SHA-384 hasher",
+    Sha384 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U48, OidSha384>>
+);
+
+digest::newtype!(
+    "SHA-512 hasher",
+    Sha512 = CoreWrapper<CtVariableCoreWrapper<Sha512VarCore, U64, OidSha512>>
+);
