@@ -13,8 +13,5 @@ fn kup48_n512() {
 
     let result = hasher.finalize();
 
-    assert_eq!(
-        result[..],
-        hex!("2F6631239875")[..],
-    );
+    assert_eq!(result[..], hex!("2F6631239875")[..],);
 }
