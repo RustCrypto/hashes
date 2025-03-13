@@ -19,7 +19,7 @@ exclude = [
 
 [dependencies]
 digest = "=0.11.0-pre.10"
-sha1 = { version = "=0.11.0-pre.4", path = "../sha1", default-features = false }
+sha1 = { version = "=0.11.0-pre.5", path = "../sha1", default-features = false }
 zeroize = { version = "1.8", default-features = false, optional = true }
 
 [dev-dependencies]
