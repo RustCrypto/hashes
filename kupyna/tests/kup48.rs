@@ -16,6 +16,5 @@ fn kup48_n512() {
     assert_eq!(
         result[..],
         hex!("2F6631239875")[..],
-        "Kupyna-48 did not produce the expected hash output"
     );
 }
