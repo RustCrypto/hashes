@@ -1,5 +1,5 @@
-use blake2::{Blake2b128, Blake2bMac512, Blake2sMac256, digest::FixedOutput};
 use blake2::digest::CustomizedInit;
+use blake2::{Blake2b128, Blake2bMac512, Blake2sMac256, digest::FixedOutput};
 use digest::Update;
 use hex_literal::hex;
 
@@ -27,9 +27,7 @@ fn blake2b_persona() {
     ctx.update(b"hello");
     assert_eq!(
         ctx.finalize_fixed(),
-        hex!(
-            "5a5eb0aecc053af1ce6de25354c1c761"
-        ),
+        hex!("5a5eb0aecc053af1ce6de25354c1c761"),
     );
 }
 
