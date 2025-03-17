@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
 - Relax MSRV policy and allow MSRV bumps in patch releases
 - Update to `digest` v0.11
+- Adopt to changes from NIST draft
+  - Remove `AsconAHash` and `AsconAXof`
+  - Rename `AsonHash` to `AsconHAsh256`
+  - Rename `AsconXof` to `AsconXof128`
 
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 

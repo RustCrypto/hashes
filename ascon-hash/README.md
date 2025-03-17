@@ -7,9 +7,8 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the lightweight cryptographic hash functions
-[AsconHash and AsconAHash][1] and the extendable output functions (XOF) AsconXOF
-and AsconAXOF.
+Pure Rust implementation of the lightweight cryptographic hash function
+[AsconHash256][1] and the extendable output functions (XOF) AsconXOF256.
 
 ## Security Notes
 
@@ -20,31 +19,31 @@ USE AT YOUR OWN RISK!
 ## Examples
 Fixed output size hashing:
 ```rust
-use ascon_hash::{AsconHash, Digest};
+use ascon_hash::{AsconHash256, Digest};
 use hex_literal::hex;
 
-let mut hasher = AsconHash::new();
+let mut hasher = AsconHash256::new();
 hasher.update(b"some bytes");
 let hash = hasher.finalize();
 
-assert_eq!(hash, hex!("b742ca75e57038757059cccc6874714f9dbd7fc5924a7df4e316594fd1426ca8"));
+assert_eq!(hash, hex!("e909c2f6da9cb3028423265c8f23fc2d26bfc0f3db704683ef16b787a945ed68"));
 
 // Hex-encode hash using https://docs.rs/base16ct
 let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "b742ca75e57038757059cccc6874714f9dbd7fc5924a7df4e316594fd1426ca8");
+assert_eq!(hex_hash, "e909c2f6da9cb3028423265c8f23fc2d26bfc0f3db704683ef16b787a945ed68");
 ```
 
 XOF hashing:
 ```rust
-use ascon_hash::{AsconXof, ExtendableOutput, Update, XofReader};
+use ascon_hash::{AsconXof128, ExtendableOutput, Update, XofReader};
 use hex_literal::hex;
 
-let mut xof = AsconXof::default();
+let mut xof = AsconXof128::default();
 xof.update(b"some bytes");
 let mut reader = xof.finalize_xof();
 let mut dst = [0u8; 5];
 reader.read(&mut dst);
-assert_eq!(dst, hex!("c21972fde9"));
+assert_eq!(dst, hex!("8c7dd114a0"));
 ```
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
@@ -79,5 +78,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://ascon.iaik.tugraz.at
+[1]: https://doi.org/10.6028/NIST.SP.800-232.ipd
 [examples section]: https://github.com/RustCrypto/hashes#Examples
