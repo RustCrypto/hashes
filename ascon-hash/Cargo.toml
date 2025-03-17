@@ -1,7 +1,7 @@
 [package]
 name = "ascon-hash"
 version = "0.3.0-pre"
-description = "Implementation of the Ascon and AsconA hashes and XOFs"
+description = "Implementation of Ascon-Hash256 and Ascon-XOF256"
 authors = [
     "Sebastian Ramacher <sebastian.ramacher@ait.ac.at>",
     "RustCrypto Developers",
