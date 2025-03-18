@@ -198,6 +198,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "kupyna"
+version = "0.1.0"
+dependencies = [
+ "base16ct",
+ "digest",
+ "hex-literal",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.170"
 source = "registry+https://github.com/rust-lang/crates.io-index"
