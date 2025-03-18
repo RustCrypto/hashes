@@ -8,10 +8,7 @@ fn kup512_n512() {
         "202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
     );
 
-    let mut hasher = Kupyna512::default();
-    hasher.update(&input);
-
-    let result = hasher.finalize();
+    let result = Kupyna512::digest(&input);
 
     assert_eq!(
         result[..],
@@ -31,10 +28,7 @@ fn kup512_n1024() {
         "606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
     );
 
-    let mut hasher = Kupyna512::default();
-    hasher.update(&input);
-
-    let result = hasher.finalize();
+    let result = Kupyna512::digest(&input);
 
     assert_eq!(
         result[..],
@@ -58,10 +52,7 @@ fn kup512_n2048() {
         "E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"
     );
 
-    let mut hasher = Kupyna512::default();
-    hasher.update(&input);
-
-    let result = hasher.finalize();
+    let result = Kupyna512::digest(&input);
 
     assert_eq!(
         result[..],
@@ -76,10 +67,7 @@ fn kup512_n2048() {
 fn kup512_n8() {
     let input = hex!("FF");
 
-    let mut hasher = Kupyna512::default();
-    hasher.update(&input);
-
-    let result = hasher.finalize();
+    let result = Kupyna512::digest(&input);
 
     assert_eq!(
         result[..],
@@ -101,10 +89,7 @@ fn kup512_n1536() {
         "A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
     );
 
-    let mut hasher = Kupyna512::default();
-    hasher.update(&input);
-
-    let result = hasher.finalize();
+    let result = Kupyna512::digest(&input);
 
     assert_eq!(
         result[..],
@@ -119,10 +104,7 @@ fn kup512_n1536() {
 fn kup512_n0() {
     let input = hex!("");
 
-    let mut hasher = Kupyna512::default();
-    hasher.update(&input);
-
-    let result = hasher.finalize();
+    let result = Kupyna512::digest(&input);
 
     assert_eq!(
         result[..],

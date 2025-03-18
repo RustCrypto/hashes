@@ -9,10 +9,7 @@ fn kup512_n760() {
         "404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E"
     );
 
-    let mut hasher = Kupyna384::default();
-    hasher.update(&input);
-
-    let result = hasher.finalize();
+    let result = Kupyna384::digest(&input);
 
     assert_eq!(
         result[..],

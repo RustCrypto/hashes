@@ -8,10 +8,7 @@ fn kup48_n512() {
         "202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
     );
 
-    let mut hasher = Kupyna48::default();
-    hasher.update(&input);
+    let result = Kupyna48::digest(&input);
 
-    let result = hasher.finalize();
-
-    assert_eq!(result[..], hex!("2F6631239875")[..],);
+    assert_eq!(result[..], hex!("2F6631239875")[..]);
 }
