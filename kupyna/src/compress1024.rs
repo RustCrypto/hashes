@@ -10,9 +10,8 @@ type Matrix = [[u8; 8]; 16];
 
 pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128]) {
     let mut prev_vector_u8 = [0u8; 128];
-    for (i, &value) in prev_vector.iter().enumerate() {
-        let bytes = value.to_be_bytes();
-        prev_vector_u8[i * 8..(i + 1) * 8].copy_from_slice(&bytes);
+    for (src, dst) in prev_vector.iter().zip(prev_vector_u8.chunks_exact_mut(8)) {
+        dst.copy_from_slice(&src.to_be_bytes());
     }
 
     let m_xor_p = xor_bytes(*message_block, prev_vector_u8);
@@ -23,10 +22,8 @@ pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128])
 
     prev_vector_u8 = xor_bytes(xor_bytes(t_xor_mp, t_plus_m), prev_vector_u8);
 
-    for i in 0..COLS {
-        let mut bytes = [0u8; 8];
-        bytes.copy_from_slice(&prev_vector_u8[i * 8..(i + 1) * 8]);
-        prev_vector[i] = u64::from_be_bytes(bytes);
+    for (dst, src) in prev_vector.iter_mut().zip(prev_vector_u8.chunks_exact(8)) {
+        *dst = u64::from_be_bytes(src.try_into().unwrap());
     }
 }
 

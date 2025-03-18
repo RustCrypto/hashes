@@ -1,4 +1,4 @@
-// #![no_std]
+#![no_std]
 #![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
@@ -100,9 +100,8 @@ impl VariableOutputCore for KupynaShortVarCore {
         );
 
         let mut state_u8 = [0u8; 64];
-        for (i, &value) in self.state.iter().enumerate() {
-            let bytes = value.to_be_bytes();
-            state_u8[i * 8..(i + 1) * 8].copy_from_slice(&bytes);
+        for (src, dst) in self.state.iter().zip(state_u8.chunks_exact_mut(8)) {
+            dst.copy_from_slice(&src.to_be_bytes());
         }
 
         // Call t_xor_l with u8 array
@@ -112,10 +111,8 @@ impl VariableOutputCore for KupynaShortVarCore {
 
         // Convert result back to u64s
         let mut res = [0u64; 8];
-        for i in 0..8 {
-            let mut bytes = [0u8; 8];
-            bytes.copy_from_slice(&result_u8[i * 8..(i + 1) * 8]);
-            res[i] = u64::from_be_bytes(bytes);
+        for (dst, src) in res.iter_mut().zip(result_u8.chunks_exact(8)) {
+            *dst = u64::from_be_bytes(src.try_into().unwrap());
         }
         let n = compress512::COLS / 2;
         for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
@@ -250,9 +247,8 @@ impl VariableOutputCore for KupynaLongVarCore {
         );
 
         let mut state_u8 = [0u8; 128];
-        for (i, &value) in self.state.iter().enumerate() {
-            let bytes = value.to_be_bytes();
-            state_u8[i * 8..(i + 1) * 8].copy_from_slice(&bytes);
+        for (src, dst) in self.state.iter().zip(state_u8.chunks_exact_mut(8)) {
+            dst.copy_from_slice(&src.to_be_bytes());
         }
 
         // Call t_xor_l with u8 array
@@ -262,10 +258,8 @@ impl VariableOutputCore for KupynaLongVarCore {
 
         // Convert result back to u64s
         let mut res = [0u64; 16];
-        for i in 0..16 {
-            let mut bytes = [0u8; 8];
-            bytes.copy_from_slice(&result_u8[i * 8..(i + 1) * 8]);
-            res[i] = u64::from_be_bytes(bytes);
+        for (dst, src) in res.iter_mut().zip(result_u8.chunks_exact(8)) {
+            *dst = u64::from_be_bytes(src.try_into().unwrap());
         }
         let n = compress1024::COLS / 2;
         for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
