@@ -1,5 +1,4 @@
 /// MD6 constants related to standard mode of operation
-
 pub type Md6Word = u64;
 pub type Md6ControlWord = u64;
 pub type Md6NodeID = u64;
@@ -18,10 +17,9 @@ pub const MD6_C: usize = 16;
 /// Size of compression input block in words
 pub const MD6_N: usize = 89;
 
-// These five values give lengths of the components of compression
-// input block; they should sum to MD6_N.
-
-// Q words in a compression block (>= 0)
+/// These five values give lengths of the components of compression
+/// input block; they should sum to MD6_N.
+/// Q words in a compression block (>= 0)
 pub const MD6_Q: usize = 15;
 /// Key words per compression block (>= 0)
 pub const MD6_K: usize = 8;
