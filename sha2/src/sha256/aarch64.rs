@@ -1,4 +1,5 @@
 //! SHA-256 `aarch64` backend.
+#![allow(unsafe_op_in_unsafe_fn)]
 
 // Implementation adapted from mbedtls.
 

@@ -4,11 +4,9 @@
 use std::collections::HashMap;
 use std::include_str;
 
-use spectral::prelude::{asserting, OrderedAssertions};
+use spectral::prelude::{OrderedAssertions, asserting};
 
-use ascon_hash::{
-    AsconAHash, AsconAXof, AsconHash, AsconXof, Digest, ExtendableOutput, Reset, XofReader,
-};
+use ascon_hash::{AsconHash256, AsconXof128, Digest, ExtendableOutput, Reset, XofReader};
 
 #[derive(Debug)]
 struct TestVector {
@@ -91,18 +89,10 @@ fn parse_tvs(tvs: &str) -> Vec<TestVector> {
 }
 
 #[test]
-fn test_vectors_asconhash() {
+fn test_vectors_asconhash256() {
     let tvs = parse_tvs(include_str!("data/asconhash.txt"));
     for tv in tvs {
-        run_tv::<AsconHash>(tv);
-    }
-}
-
-#[test]
-fn test_vectors_asconhasha() {
-    let tvs = parse_tvs(include_str!("data/asconhasha.txt"));
-    for tv in tvs {
-        run_tv::<AsconAHash>(tv);
+        run_tv::<AsconHash256>(tv);
     }
 }
 
@@ -110,14 +100,6 @@ fn test_vectors_asconhasha() {
 fn test_vectors_asconxof() {
     let tvs = parse_tvs(include_str!("data/asconxof.txt"));
     for tv in tvs {
-        run_tv_xof::<AsconXof>(tv);
-    }
-}
-
-#[test]
-fn test_vectors_asconaxof() {
-    let tvs = parse_tvs(include_str!("data/asconxofa.txt"));
-    for tv in tvs {
-        run_tv_xof::<AsconAXof>(tv);
+        run_tv_xof::<AsconXof128>(tv);
     }
 }

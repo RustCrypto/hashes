@@ -6,12 +6,13 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![deny(unsafe_code)]
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 
 pub use digest::{self, Digest};
 
 use core::{convert::TryInto, fmt};
 use digest::{
+    HashMarker, Output,
     array::Array,
     block_buffer::Eager,
     core_api::{
@@ -20,7 +21,6 @@ use digest::{
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{U32, U64, U96},
-    HashMarker, Output,
 };
 
 #[cfg(feature = "zeroize")]

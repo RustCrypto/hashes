@@ -1,14 +1,14 @@
 use core::fmt;
 use digest::{
+    HashMarker, InvalidOutputSize, Output,
     array::Array,
     block_buffer::Eager,
-    consts::{U192, U64},
+    consts::{U64, U192},
     core_api::{
         AlgorithmName, Block as GenBlock, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser,
         TruncSide, UpdateCore, VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    HashMarker, InvalidOutputSize, Output,
 };
 
 #[cfg(feature = "zeroize")]
@@ -39,7 +39,7 @@ fn lps(h: &mut [u64; 8], n: &[u64; 8]) {
     #[allow(clippy::needless_range_loop)]
     for i in 0..8 {
         for j in 0..8 {
-            let idx = (h[j] >> (8 * i) & 0xff) as usize;
+            let idx = ((h[j] >> (8 * i)) & 0xff) as usize;
             buf[i] ^= SHUFFLED_LIN_TABLE[j][idx];
         }
     }

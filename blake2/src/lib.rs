@@ -6,7 +6,7 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![allow(unexpected_cfgs)] // `simd` feature is broken
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 #![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]
 #![cfg_attr(feature = "simd", allow(incomplete_features))]
 
@@ -17,9 +17,10 @@ pub use digest::{self, Digest};
 
 use core::{fmt, marker::PhantomData, ops::Div};
 use digest::{
+    FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update, VarOutputCustomized,
     array::{Array, ArraySize},
     block_buffer::{Lazy, LazyBuffer},
-    consts::{U128, U16, U32, U4, U64},
+    consts::{U4, U16, U32, U64, U128},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
         CtVariableCoreWrapper, OutputSizeUser, RtVariableCoreWrapper, TruncSide, UpdateCore,
@@ -27,7 +28,6 @@ use digest::{
     },
     crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
     typenum::{IsLessOrEqual, LeEq, NonZero, Unsigned},
-    FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update,
 };
 #[cfg(feature = "reset")]
 use digest::{FixedOutputReset, Reset};
@@ -45,7 +45,7 @@ mod macros;
 
 use as_bytes::AsBytes;
 use consts::{BLAKE2B_IV, BLAKE2S_IV};
-use simd::{u32x4, u64x4, Vector4};
+use simd::{Vector4, u32x4, u64x4};
 
 blake2_impl!(
     Blake2bVarCore,

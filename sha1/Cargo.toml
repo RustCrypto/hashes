@@ -1,27 +1,27 @@
 [package]
 name = "sha1"
-version = "0.11.0-pre.4"
+version = "0.11.0-pre.5"
 description = "SHA-1 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 documentation = "https://docs.rs/sha1"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "sha1", "hash", "digest"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.81"
 
 [dependencies]
-digest = "=0.11.0-pre.9"
+digest = "=0.11.0-pre.10"
 cfg-if = "1.0"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64"))'.dependencies]
 cpufeatures = "0.2"
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.9", features = ["dev"] }
-hex-literal = "0.4"
+digest = { version = "=0.11.0-pre.10", features = ["dev"] }
+hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]

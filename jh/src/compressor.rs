@@ -1,8 +1,8 @@
 #![allow(non_upper_case_globals)]
 
 use core::ptr;
-use digest::array::{typenum::U64, Array};
-use simd::{dispatch, vec128_storage, AndNot, Machine, Swap64, VZip, Vec2};
+use digest::array::{Array, typenum::U64};
+use simd::{AndNot, Machine, Swap64, VZip, Vec2, dispatch, vec128_storage};
 
 #[rustfmt::skip]
 macro_rules! unroll7 {
@@ -149,12 +149,6 @@ pub fn f8_impl<M: Machine>(mach: M, state: &mut [vec128_storage; 8], data: *cons
     ];
 }
 
-dispatch!(mach, M, {
-    fn f8(state: &mut [vec128_storage; 8], data: *const u8) {
-        f8_impl(mach, state, data);
-    }
-});
-
 pub(crate) union Compressor {
     cv: [vec128_storage; 8],
     bytes: [u8; 128],
@@ -167,7 +161,14 @@ impl Compressor {
     }
 
     #[inline]
+    #[allow(unexpected_cfgs)] // TODO: remove after dependency on ppv-lite86 is eliminated
     pub(crate) fn update(&mut self, data: &Array<u8, U64>) {
+        simd::dispatch!(mach, M, {
+            fn f8(state: &mut [vec128_storage; 8], data: *const u8) {
+                f8_impl(mach, state, data);
+            }
+        });
+
         f8(unsafe { &mut self.cv }, data.as_ptr());
     }
 

@@ -6,12 +6,13 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 
 pub use digest::{self, Digest};
 
 use core::fmt;
 use digest::{
+    HashMarker, Output,
     array::Array,
     block_buffer::Eager,
     consts::{U16, U48, U64},
@@ -20,7 +21,6 @@ use digest::{
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    HashMarker, Output,
 };
 
 #[cfg(feature = "oid")]

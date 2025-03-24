@@ -21,7 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-      msrv: 1.81.0
+      msrv: 1.85.0
 
   # Builds for no_std platforms
   build:
@@ -163,7 +163,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: RustCrypto/actions/cargo-cache@master
-      - run: cargo install cross --git https://github.com/cross-rs/cross
+      - name: Install Cross
+        env:
+          # Do not fail on compilation warnings
+          RUSTFLAGS: ""
+        run: cargo install cross --git https://github.com/cross-rs/cross
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly

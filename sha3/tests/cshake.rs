@@ -1,7 +1,7 @@
 use core::fmt::Debug;
-use digest::ExtendableOutput;
 #[cfg(feature = "reset")]
 use digest::ExtendableOutputReset;
+use digest::{CustomizedInit, ExtendableOutput};
 
 #[cfg(feature = "reset")]
 pub(crate) fn cshake_reset_test<D, F>(input: &[u8], output: &[u8], new: F) -> Option<&'static str>
@@ -88,7 +88,7 @@ where
 }
 
 macro_rules! new_cshake_test {
-    ($name:ident, $test_name:expr, $hasher:ty, $hasher_core:ty, $test_func:ident $(,)?) => {
+    ($name:ident, $test_name:expr, $hasher:ty, $test_func:ident $(,)?) => {
         #[test]
         fn $name() {
             use digest::dev::blobby::Blob3Iterator;
@@ -96,9 +96,9 @@ macro_rules! new_cshake_test {
 
             for (i, row) in Blob3Iterator::new(data).unwrap().enumerate() {
                 let [customization, input, output] = row.unwrap();
-                if let Some(desc) = $test_func(input, output, || {
-                    <$hasher>::from_core(<$hasher_core>::new(customization))
-                }) {
+                if let Some(desc) =
+                    $test_func(input, output, || <$hasher>::new_customized(customization))
+                {
                     panic!(
                         "\n\
                          Failed test №{}: {}\n\
@@ -117,7 +117,6 @@ new_cshake_test!(
     cshake128_reset,
     "cshake128",
     sha3::CShake128,
-    sha3::CShake128Core,
     cshake_reset_test
 );
 #[cfg(feature = "reset")]
@@ -125,21 +124,8 @@ new_cshake_test!(
     cshake256_reset,
     "cshake256",
     sha3::CShake256,
-    sha3::CShake256Core,
     cshake_reset_test
 );
 
-new_cshake_test!(
-    cshake128,
-    "cshake128",
-    sha3::CShake128,
-    sha3::CShake128Core,
-    cshake_test
-);
-new_cshake_test!(
-    cshake256,
-    "cshake256",
-    sha3::CShake256,
-    sha3::CShake256Core,
-    cshake_test
-);
+new_cshake_test!(cshake128, "cshake128", sha3::CShake128, cshake_test);
+new_cshake_test!(cshake256, "cshake256", sha3::CShake256, cshake_test);

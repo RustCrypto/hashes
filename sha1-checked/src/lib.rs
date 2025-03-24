@@ -5,7 +5,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 
 //! Collision checked Sha1.
 //!
@@ -27,11 +27,11 @@ use core::slice::from_ref;
 extern crate std;
 
 use digest::{
+    FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
     array::Array,
     block_buffer::{BlockBuffer, Eager},
     core_api::BlockSizeUser,
-    typenum::{Unsigned, U20, U64},
-    FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
+    typenum::{U20, U64, Unsigned},
 };
 #[cfg(feature = "zeroize")]
 use zeroize::{Zeroize, ZeroizeOnDrop};
@@ -139,9 +139,9 @@ impl CollisionResult {
     /// Returns the output hash.
     pub fn hash(&self) -> &Output<Sha1> {
         match self {
-            CollisionResult::Ok(ref s) => s,
-            CollisionResult::Mitigated(ref s) => s,
-            CollisionResult::Collision(ref s) => s,
+            CollisionResult::Ok(s) => s,
+            CollisionResult::Mitigated(s) => s,
+            CollisionResult::Collision(s) => s,
         }
     }
 
@@ -181,7 +181,7 @@ impl Update for Sha1 {
         } = self;
         buffer.digest_blocks(input, |blocks| {
             self.block_len += blocks.len() as u64;
-            if let Some(ref mut ctx) = detection {
+            if let Some(ctx) = detection {
                 // SAFETY: GenericArray<u8, U64> and [u8; 64] have
                 // exactly the same memory layout
                 let blocks: &[[u8; BLOCK_SIZE]] =

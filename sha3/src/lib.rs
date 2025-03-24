@@ -6,22 +6,22 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 
-pub use digest::{self, Digest};
+pub use digest::{self, CustomizedInit, Digest};
 
 use core::fmt;
 use digest::{
+    HashMarker, Output,
     array::typenum::Unsigned,
     block_buffer::Eager,
-    consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72},
+    consts::{U28, U32, U48, U64, U72, U104, U136, U144, U168, U200},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
         ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
         XofReaderCoreWrapper,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    HashMarker, Output,
 };
 
 #[cfg(feature = "oid")]

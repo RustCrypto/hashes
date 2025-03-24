@@ -4,8 +4,8 @@ version = "0.0.0"
 authors = ["RustCrypto Developers"]
 license = "Apache-2.0 OR MIT"
 description = "Criterion benchmarks of the hash crates"
-edition = "2021"
-rust-version = "1.71"
+edition = "2024"
+rust-version = "1.85"
 publish = false
 
 [workspace]
@@ -13,7 +13,7 @@ publish = false
 [dependencies]
 ascon-hash = { path = "../ascon-hash" }
 criterion = "0.4"
-rand = { version = "0.8", default-features = false, features = [
+rand = { version = "0.9", default-features = false, features = [
     "std_rng",
     "getrandom",
 ] }

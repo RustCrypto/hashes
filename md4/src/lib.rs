@@ -6,20 +6,20 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
-#![warn(rust_2018_idioms)]
+#![warn(missing_docs)]
 
 pub use digest::{self, Digest};
 
 use core::{fmt, num::Wrapping as W};
 use digest::{
+    HashMarker, Output,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U16, U24, U64},
-    HashMarker, Output,
+    typenum::{U16, U24, U64, Unsigned},
 };
 
 #[cfg(feature = "oid")]

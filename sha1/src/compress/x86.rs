@@ -31,6 +31,7 @@ macro_rules! schedule_rounds4 {
 }
 
 #[target_feature(enable = "sha,sse2,ssse3,sse4.1")]
+#[allow(unsafe_op_in_unsafe_fn)]
 unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     #[allow(non_snake_case)]
     let MASK: __m128i = _mm_set_epi64x(0x0001_0203_0405_0607, 0x0809_0A0B_0C0D_0E0F);

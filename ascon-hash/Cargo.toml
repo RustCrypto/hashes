@@ -1,28 +1,28 @@
 [package]
 name = "ascon-hash"
 version = "0.3.0-pre"
-description = "Implementation of the Ascon and AsconA hashes and XOFs"
+description = "Implementation of Ascon-Hash256 and Ascon-XOF256"
 authors = [
     "Sebastian Ramacher <sebastian.ramacher@ait.ac.at>",
     "RustCrypto Developers",
 ]
 license = "Apache-2.0 OR MIT"
 readme = "README.md"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 documentation = "https://docs.rs/ascon-hash"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["crypto", "hash", "ascon"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.81"
 
 [dependencies]
-digest = { version = "=0.11.0-pre.9", default-features = false, features = ["core-api"] }
+digest = { version = "=0.11.0-pre.10", default-features = false, features = ["core-api"] }
 ascon = { version = "0.4", default-features = false }
 
 [dev-dependencies]
 spectral = { version = "0.6", default-features = false }
 hex = "0.4"
-hex-literal = "0.4"
+hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]

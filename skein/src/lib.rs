@@ -5,23 +5,23 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-#![warn(missing_docs, rust_2018_idioms)]
+#![warn(missing_docs)]
 #![deny(unsafe_code)]
 
-pub use digest::{self, consts, Digest};
+pub use digest::{self, Digest, consts};
 
 use core::{fmt, marker::PhantomData};
 use digest::{
-    array::{typenum::Unsigned, Array, ArraySize},
+    HashMarker, Output,
+    array::{Array, ArraySize, typenum::Unsigned},
     block_buffer::Lazy,
-    consts::{U128, U32, U64},
+    consts::{U32, U64, U128},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    HashMarker, Output,
 };
-use threefish::{Threefish1024, Threefish256, Threefish512};
+use threefish::{Threefish256, Threefish512, Threefish1024};
 
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};

@@ -1,8 +1,8 @@
 use core::iter;
 use hex_literal::hex;
 use k12::{
-    digest::{ExtendableOutput, Update},
     KangarooTwelve, KangarooTwelveCore,
+    digest::{ExtendableOutput, Update},
 };
 
 fn digest_and_box(data: &[u8], n: usize) -> Box<[u8]> {
@@ -63,7 +63,7 @@ fn pat_c() {
         hex!("75d2f86a2e644566726b4fbcfc5657b9dbcf070c7b0dca06450ab291d7443bcf"),
     ];
     for i in 0..4 {
-        let m: Vec<u8> = iter::repeat(0xFF).take(2usize.pow(i) - 1).collect();
+        let m: Vec<u8> = iter::repeat_n(0xFF, 2usize.pow(i) - 1).collect();
         let len = 41usize.pow(i);
         let c: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
         let mut h = KangarooTwelve::from_core(KangarooTwelveCore::new(&c));

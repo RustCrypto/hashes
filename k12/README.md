@@ -8,18 +8,6 @@
 
 Pure Rust implementation of the [KangarooTwelve] eXtendable-Output Function (XOF).
 
-## Minimum Supported Rust Version
-
-Rust **1.81** or higher.
-
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
-
-## SemVer Policy
-
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
-
 ## License
 
 The crate is licensed under either of:
@@ -42,11 +30,11 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/k12/badge.svg
 [docs-link]: https://docs.rs/k12/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.81+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/k12/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Ak12
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/k12.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/k12.yml?query=branch:master
 
 [//]: # (general links)
 

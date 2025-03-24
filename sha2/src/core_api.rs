@@ -1,6 +1,7 @@
 use crate::{consts, sha256::compress256, sha512::compress512};
 use core::{convert::TryInto, fmt, slice::from_ref};
 use digest::{
+    HashMarker, InvalidOutputSize, Output,
     array::Array,
     block_buffer::Eager,
     core_api::{
@@ -8,8 +9,7 @@ use digest::{
         UpdateCore, VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U128, U32, U40, U64, U80},
-    HashMarker, InvalidOutputSize, Output,
+    typenum::{U32, U40, U64, U80, U128, Unsigned},
 };
 
 #[cfg(feature = "zeroize")]

@@ -20,6 +20,8 @@ There are 6 standard algorithms specified in the SHA-3 standard:
 * `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512` (NIST submission
    without padding changes)
 
+This crates supports `cSHAKE128` and `cSHAKE256`, the customizable XOFs as defined in the NIST [SHA-3 Derived Functions].
+
 This crates additionally supports the `TurboSHAKE` XOF variant.
 
 ## Examples
@@ -61,18 +63,6 @@ assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
 
-## Minimum Supported Rust Version
-
-Rust **1.81** or higher.
-
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
-
-## SemVer Policy
-
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
-
 ## License
 
 The crate is licensed under either of:
@@ -95,13 +85,14 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/sha3/badge.svg
 [docs-link]: https://docs.rs/sha3/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.81+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/sha3/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Asha3
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/sha3.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/sha3.yml?query=branch:master
 
 [//]: # (general links)
 
-[SHA-3]: https://en.wikipedia.org/wiki/SHA-3
 [examples section]: https://github.com/RustCrypto/hashes#Examples
+[SHA-3]: https://en.wikipedia.org/wiki/SHA-3
+[SHA-3 Derived Functions]: https://csrc.nist.gov/pubs/sp/800/185/final

@@ -1,7 +1,7 @@
 #![feature(test)]
 extern crate test;
 
-use simd::{vec128_storage, x86_64, Machine};
+use simd::{Machine, vec128_storage, x86_64};
 use test::Bencher;
 
 macro_rules! mach_bench {

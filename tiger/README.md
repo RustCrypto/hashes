@@ -30,18 +30,6 @@ assert_eq!(hex_hash, "4c8fbddae0b6f25832af45e7c62811bb64ec3e43691e9cc3");
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
 
-## Minimum Supported Rust Version
-
-Rust **1.81** or higher.
-
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
-
-## SemVer Policy
-
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
-
 ## License
 
 The crate is licensed under either of:
@@ -63,11 +51,11 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, without 
 [docs-image]: https://docs.rs/tiger/badge.svg
 [docs-link]: https://docs.rs/tiger/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.81+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/tiger/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Atiger
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/tiger.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/tiger.yml?query=branch:master
 
 [//]: # (general links)
 
