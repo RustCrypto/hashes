@@ -1,6 +1,5 @@
 # RustCrypto: Kupyna
 
-
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
 ![Apache2/MIT licensed][license-image]
