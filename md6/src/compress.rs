@@ -137,17 +137,17 @@ pub fn make_control_word(
     keylen: usize,
     d: usize,
 ) -> Md6ControlWord {
-    (0 as Md6ControlWord) << 60 // reserved width 4 bits
-        | (r as Md6ControlWord) << 48 // r width 12 bits
-        | (l as Md6ControlWord) << 40 // L width 8 bits
-        | (z as Md6ControlWord) << 36 // z width 4 bits
-        | (p as Md6ControlWord) << 20 // p width 16 bits
-        | (keylen as Md6ControlWord) << 12 // keylen width 8 bits
+    ((0 as Md6ControlWord) << 60) // reserved width 4 bits
+        | ((r as Md6ControlWord) << 48) // r width 12 bits
+        | ((l as Md6ControlWord) << 40) // L width 8 bits
+        | ((z as Md6ControlWord) << 36) // z width 4 bits
+        | ((p as Md6ControlWord) << 20) // p width 16 bits
+        | ((keylen as Md6ControlWord) << 12) // keylen width 8 bits
         | (d as Md6ControlWord) // d width 12 bits
 }
 
 pub fn make_node_id(ell: usize, i: Md6Word) -> Md6NodeID {
-    (ell as Md6NodeID) << 56 | i // ell width 8 bits, i width 56 bits
+    ((ell as Md6NodeID) << 56) | i // ell width 8 bits, i width 56 bits
 }
 
 pub fn pack(

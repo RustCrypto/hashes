@@ -3,14 +3,14 @@ use crate::consts::*;
 
 use core::fmt;
 use digest::{
+    HashMarker, Output,
     block_buffer::Eager,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, Reset,
         TruncSide, UpdateCore, VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Unsigned, U128, U64},
-    HashMarker, Output,
+    typenum::{U64, U128, Unsigned},
 };
 
 pub struct Md6VarCore {
@@ -469,13 +469,13 @@ impl Md6VarCore {
         let mut di = destlen / 8; // Index of where next byte will go within dest
 
         // Ensure dest has enough space
-        let new_len = (destlen + srclen + 7) / 8;
+        let new_len = (destlen + srclen).div_ceil(8);
         if self.b[1].len() < new_len {
             panic!("destination buffer is too small");
         }
 
         // Number of bytes (full or partial) in src
-        let srcbytes = (srclen + 7) / 8;
+        let srcbytes = srclen.div_ceil(8);
 
         for (i, item) in src.iter().enumerate().take(srcbytes) {
             if i != srcbytes - 1 {
@@ -547,17 +547,17 @@ impl Md6VarCore {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
         ];
 
-        for i in 0..((self.d + 7) / 8) {
+        for i in 0..(self.d.div_ceil(8)) {
             self.hexhashval[2 * i] = hex_digits[((self.hashval[i] >> 4) & 0xf) as usize];
             self.hexhashval[2 * i + 1] = hex_digits[((self.hashval[i]) & 0xf) as usize];
         }
 
-        self.hexhashval[(self.d + 3) / 4] = '\n';
+        self.hexhashval[self.d.div_ceil(4)] = '\n';
     }
 
     #[inline]
     fn trim_hashval(&mut self) {
-        let full_or_partial_bytes = (self.d + 7) / 8;
+        let full_or_partial_bytes = self.d.div_ceil(8);
         let bits = self.d % 8;
 
         // move relevant bytes to the front

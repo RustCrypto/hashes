@@ -37,7 +37,6 @@ jobs:
         target:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
-          - loongarch64-unknown-linux-gnu
     steps:
       - uses: actions/checkout@v4
       - uses: RustCrypto/actions/cargo-cache@master
