@@ -93,7 +93,7 @@ impl VariableOutputCore for KupynaShortVarCore {
         let msg_len_bits = 8 * msg_len_bytes;
 
         buffer.digest_pad(0x80, &msg_len_bits.to_le_bytes()[0..12], |block| {
-            compress512::compress(&mut self.state, block.as_ref()),
+            compress512::compress(&mut self.state, block.as_ref());
         });
 
         let mut state_u8 = [0u8; 64];
@@ -239,7 +239,7 @@ impl VariableOutputCore for KupynaLongVarCore {
         let msg_len_bits = 8 * msg_len_bytes;
 
         buffer.digest_pad(0x80, &msg_len_bits.to_le_bytes()[0..12], |block| {
-            compress1024::compress(&mut self.state, block.as_ref()),
+            compress1024::compress(&mut self.state, block.as_ref());
         });
 
         let mut state_u8 = [0u8; 128];
