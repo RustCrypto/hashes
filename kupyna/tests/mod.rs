@@ -1,8 +1,12 @@
-use kupyna::{digest::{new_test,hash_serialization_test, dev::{feed_rand_16mib, fixed_reset_test}}, KupynaShortCore,
-    digest::{core_api::CoreWrapper, typenum::U6},
-    Kupyna256, Kupyna384, Kupyna512, Digest,
-};
 use hex_literal::hex;
+use kupyna::{
+    Digest, Kupyna256, Kupyna384, Kupyna512, KupynaShortCore,
+    digest::{core_api::CoreWrapper, typenum::U6},
+    digest::{
+        dev::{feed_rand_16mib, fixed_reset_test},
+        hash_serialization_test, new_test,
+    },
+};
 
 type Kupyna48 = CoreWrapper<KupynaShortCore<U6>>;
 
