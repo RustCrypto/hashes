@@ -22,7 +22,7 @@ use digest::{
         VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{U6, U28, U32, U48, U64, U72, U128, U136, Unsigned},
+    typenum::{U28, U32, U48, U64, U72, U128, U136, Unsigned},
 };
 
 mod compress1024;
