@@ -9,9 +9,6 @@
 #![warn(missing_docs)]
 
 pub use digest::{self, Digest};
-
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 use digest::{
     core_api::{CoreWrapper, CtVariableCoreWrapper, RtVariableCoreWrapper},
     typenum::{U28, U32, U48, U64},
