@@ -45,10 +45,16 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (badges)
 
+[crate-image]: https://img.shields.io/crates/v/kupyna.svg
+[crate-link]: https://crates.io/crates/kupyna
+[docs-image]: https://docs.rs/kupyna/badge.svg
+[docs-link]: https://docs.rs/kupyna/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/kupyna.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/kupyna.yml?query=branch:master
 
 [//]: # (general links)
 
