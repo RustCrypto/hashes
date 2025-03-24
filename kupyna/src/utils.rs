@@ -21,6 +21,7 @@ fn multiply_gf(mut x: u8, mut y: u8) -> u8 {
     r
 }
 
+#[allow(clippy::needless_range_loop)]
 pub(crate) fn mix_columns<const N: usize>(state: [[u8; 8]; N]) -> [[u8; 8]; N] {
     let mut result = [[0u8; 8]; N];
 
