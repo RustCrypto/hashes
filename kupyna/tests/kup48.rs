@@ -1,5 +1,10 @@
 use hex_literal::hex;
-use kupyna::{Digest, Kupyna48};
+use kupyna::{
+    Digest, KupynaShortCore,
+    digest::{core_api::CoreWrapper, typenum::U6},
+};
+
+type Kupyna48 = CoreWrapper<KupynaShortCore<U6>>;
 
 #[test]
 fn kup48_n512() {
