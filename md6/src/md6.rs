@@ -359,7 +359,7 @@ impl Md6VarCore {
         p: usize,
         z: usize,
     ) {
-        let mut n = [0; MD6_N];
+        let mut n = [0; N];
         let mut a = [0; 5000];
 
         // check that the input values are sensible
