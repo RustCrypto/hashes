@@ -25,9 +25,9 @@ pub(crate) fn mix_columns<const N: usize, const M: usize>(state: [[u8; N]; M]) -
     let mut result = [[0u8; N]; M];
 
     for col in 0..M {
-        for row in (0..N).rev() {
+        for row in 0..N {
             let mut product = 0u8;
-            for b in (0..N).rev() {
+            for b in 0..N {
                 product ^= multiply_gf(state[col][b], MDS_MATRIX[row][b]);
             }
             result[col][row] = product;
