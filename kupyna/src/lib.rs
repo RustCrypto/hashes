@@ -43,8 +43,6 @@ pub type KupynaShortCore<OutSize> = CtVariableCoreWrapper<KupynaShortVarCore, Ou
 /// Hasher state of the short Kupyna variant generic over output size.
 pub type KupynaShort<OutSize> = CoreWrapper<KupynaShortCore<OutSize>>;
 
-/// Kupyna-48 hasher state
-pub type Kupyna48 = CoreWrapper<KupynaShortCore<U6>>;
 /// Kupyna-224 hasher state.
 pub type Kupyna224 = CoreWrapper<KupynaShortCore<U28>>;
 /// Kupyna-256 hasher state.
