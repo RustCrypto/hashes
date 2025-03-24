@@ -21,13 +21,13 @@ fn multiply_gf(mut x: u8, mut y: u8) -> u8 {
     r
 }
 
-pub(crate) fn mix_columns<const N: usize, const M: usize>(state: [[u8; N]; M]) -> [[u8; N]; M] {
-    let mut result = [[0u8; N]; M];
+pub(crate) fn mix_columns<const N: usize>(state: [[u8; 8]; N]) -> [[u8; 8]; N] {
+    let mut result = [[0u8; 8]; N];
 
-    for col in 0..M {
-        for row in 0..N {
+    for col in 0..N {
+        for row in 0..8 {
             let mut product = 0u8;
-            for b in 0..N {
+            for b in 0..8 {
                 product ^= multiply_gf(state[col][b], MDS_MATRIX[row][b]);
             }
             result[col][row] = product;
@@ -37,8 +37,8 @@ pub(crate) fn mix_columns<const N: usize, const M: usize>(state: [[u8; N]; M]) -
     result
 }
 
-pub(crate) fn apply_s_box<const N: usize, const M: usize>(mut state: [[u8; N]; M]) -> [[u8; N]; M] {
-    for i in 0..N {
+pub(crate) fn apply_s_box<const N: usize>(mut state: [[u8; 8]; N]) -> [[u8; 8]; N] {
+    for i in 0..8 {
         for row in state.iter_mut() {
             row[i] = SBOXES[i % 4][row[i] as usize];
         }
@@ -46,10 +46,10 @@ pub(crate) fn apply_s_box<const N: usize, const M: usize>(mut state: [[u8; N]; M
     state
 }
 
-pub(crate) fn add_constant_xor<const N: usize, const M: usize>(
-    mut state: [[u8; N]; M],
+pub(crate) fn add_constant_xor<const N: usize>(
+    mut state: [[u8; 8]; N],
     round: usize,
-) -> [[u8; N]; M] {
+) -> [[u8; 8]; N] {
     for (j, row) in state.iter_mut().enumerate() {
         let constant = ((j * 0x10) ^ round) as u8;
         row[0] ^= constant;
@@ -57,14 +57,14 @@ pub(crate) fn add_constant_xor<const N: usize, const M: usize>(
     state
 }
 
-pub(crate) fn add_constant_plus<const N: usize, const M: usize>(
-    mut state: [[u8; N]; M],
+pub(crate) fn add_constant_plus<const N: usize>(
+    mut state: [[u8; 8]; N],
     round: usize,
-) -> [[u8; N]; M] {
+) -> [[u8; 8]; N] {
     for (j, row) in state.iter_mut().enumerate() {
-        let mut row_as_u64 = u64::from_le_bytes(row[0..8].try_into().unwrap());
+        let mut row_as_u64 = u64::from_le_bytes(*row);
         row_as_u64 = row_as_u64
-            .wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((M - j - 1) * 0x10) ^ round) as u64) << 56));
+            .wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((N - j - 1) * 0x10) ^ round) as u64) << 56));
         row[0..8].copy_from_slice(&row_as_u64.to_le_bytes());
     }
     state
