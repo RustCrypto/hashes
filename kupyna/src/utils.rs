@@ -1,9 +1,9 @@
 use crate::consts::{MDS_MATRIX, SBOXES};
 
-const BITS_IN_BYTE: u8 = 8;
-const REDUCTION_POLYNOMIAL: u16 = 0x011d;
-
 fn multiply_gf(mut x: u8, mut y: u8) -> u8 {
+    const BITS_IN_BYTE: u8 = 8;
+    const REDUCTION_POLYNOMIAL: u16 = 0x011d;
+
     let mut r = 0u8;
 
     for _ in 0..BITS_IN_BYTE {
