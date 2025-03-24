@@ -11,8 +11,8 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 
 **Note:** For new applications, or where compatibility with other existing standards is not a primary concern, we strongly recommend to use either BLAKE2, SHA-2 or SHA-3.
 
-| Algorithm | Crate | Crates.io | Documentation | MSRV | [Security] |
-|-----------|-------|:---------:|:-------------:|:----:|:----------:|
+| Algorithm | Crate | Crates.io | Documentation |          MSRV           | [Security] |
+|-----------|-------|:---------:|:-------------:|:-----------------------:|:----------:|
 | [Ascon] hash | [`ascon‑hash`] | [![crates.io](https://img.shields.io/crates/v/ascon-hash.svg)](https://crates.io/crates/ascon-hash) | [![Documentation](https://docs.rs/ascon-hash/badge.svg)](https://docs.rs/ascon-hash) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
 | [BelT] hash | [`belt‑hash`] | [![crates.io](https://img.shields.io/crates/v/belt-hash.svg)](https://crates.io/crates/belt-hash) | [![Documentation](https://docs.rs/belt-hash/badge.svg)](https://docs.rs/belt-hash) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
 | [BLAKE2] | [`blake2`] | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
@@ -21,6 +21,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [Grøstl] (Groestl) | [`groestl`] | [![crates.io](https://img.shields.io/crates/v/groestl.svg)](https://crates.io/crates/groestl) | [![Documentation](https://docs.rs/groestl/badge.svg)](https://docs.rs/groestl) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
 | [JH] | [`jh`] | [![crates.io](https://img.shields.io/crates/v/jh.svg)](https://crates.io/crates/jh) | [![Documentation](https://docs.rs/jh/badge.svg)](https://docs.rs/jh) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
 | [KangarooTwelve] | [`k12`] | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | ![MSRV 1.85][msrv-1.85] | :green_heart: |
+| [Kupyna] | [`kupyna`] | [![crates.io](https://img.shields.io/crates/v/kupyna.svg)](https://crates.io/crates/kupyna) | [![Documentation](https://docs.rs/kupyna/badge.svg)](https://docs.rs/kupyna) | ![MSRV 1.85][msrv-1.86] | :green_heart: |
 | [MD2] | [`md2`] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) | [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | ![MSRV 1.85][msrv-1.85] | :broken_heart: |
 | [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | ![MSRV 1.85][msrv-1.85] | :broken_heart: |
 | [MD5] | [`md5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | ![MSRV 1.85][msrv-1.85] | :broken_heart: |
