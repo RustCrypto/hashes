@@ -11,7 +11,10 @@ pub const MD6_MAX_R: usize = 255;
 pub const MD6_DEFAULT_L: usize = 64;
 
 /// Number of bits in a word (64)
+#[cfg(target_pointer_width = "64")]
 pub const W: usize = 64;
+#[cfg(target_pointer_width = "32")]
+pub const W: usize = 32;
 /// Size of compression output in words (16)
 pub const C: usize = 16;
 /// Size of compression input block in words (89)
@@ -21,9 +24,9 @@ pub const Q: usize = 15;
 /// Key words per compression block (>= 0) (8)
 pub const K: usize = 8;
 /// Words for unique node ID (0 or 64/w)
-pub const U: usize = 1;
+pub const U: usize = 64 / W;
 /// Words for control word (0 or 64/w)
-pub const V: usize = 1;
+pub const V: usize = 64 / W;
 /// Data words per compression block (> 0) (64)
 pub const B: usize = 64;
 

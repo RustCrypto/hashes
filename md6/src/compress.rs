@@ -36,40 +36,6 @@ macro_rules! call_loop_bodies {
             loop_body!(6, 8, 13, $s, $i);
             loop_body!(7, 2, 14, $s, $i);
             loop_body!(5, 11, 15, $s, $i);
-        } else if $w == 16 {
-            loop_body!(5, 6, 0, $s, $i);
-            loop_body!(4, 7, 1, $s, $i);
-            loop_body!(3, 2, 2, $s, $i);
-            loop_body!(5, 4, 3, $s, $i);
-            loop_body!(7, 2, 4, $s, $i);
-            loop_body!(5, 6, 5, $s, $i);
-            loop_body!(5, 3, 6, $s, $i);
-            loop_body!(2, 7, 7, $s, $i);
-            loop_body!(4, 5, 8, $s, $i);
-            loop_body!(3, 7, 9, $s, $i);
-            loop_body!(4, 6, 10, $s, $i);
-            loop_body!(3, 5, 11, $s, $i);
-            loop_body!(4, 5, 12, $s, $i);
-            loop_body!(7, 6, 13, $s, $i);
-            loop_body!(7, 4, 14, $s, $i);
-            loop_body!(2, 3, 15, $s, $i);
-        } else if $w == 8 {
-            loop_body!(3, 2, 0, $s, $i);
-            loop_body!(3, 4, 1, $s, $i);
-            loop_body!(3, 2, 2, $s, $i);
-            loop_body!(4, 3, 3, $s, $i);
-            loop_body!(3, 2, 4, $s, $i);
-            loop_body!(3, 2, 5, $s, $i);
-            loop_body!(3, 2, 6, $s, $i);
-            loop_body!(3, 4, 7, $s, $i);
-            loop_body!(2, 3, 8, $s, $i);
-            loop_body!(2, 3, 9, $s, $i);
-            loop_body!(3, 2, 10, $s, $i);
-            loop_body!(2, 3, 11, $s, $i);
-            loop_body!(2, 3, 12, $s, $i);
-            loop_body!(3, 4, 13, $s, $i);
-            loop_body!(2, 3, 14, $s, $i);
-            loop_body!(3, 4, 15, $s, $i);
         }
     };
 }
