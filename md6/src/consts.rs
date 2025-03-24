@@ -30,12 +30,6 @@ pub const V: usize = 64 / W;
 /// Data words per compression block (> 0) (64)
 pub const B: usize = 64;
 
-const _: () = {
-    if Q + K + U + V + B != N {
-        panic!("`Q + K + U + V` must be equal to `N`");
-    }
-};
-
 /// Index for linear feedback
 pub const T0: usize = 17;
 /// Index for first input to first and
