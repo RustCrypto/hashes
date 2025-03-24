@@ -2,24 +2,8 @@
 extern crate test;
 
 use digest::bench_update;
-use md6::{Md6_64, Md6_128, Md6_224, Md6_256, Md6_384, Md6_512};
+use md6::{Md6_224, Md6_256, Md6_384, Md6_512};
 use test::Bencher;
-
-bench_update!(
-    Md6_64::default();
-    md6_64_10 10;
-    md6_64_100 100;
-    md6_64_1000 1000;
-    md6_64_10000 10000;
-);
-
-bench_update!(
-    Md6_128::default();
-    md6_128_10 10;
-    md6_128_100 100;
-    md6_128_1000 1000;
-    md6_128_10000 10000;
-);
 
 bench_update!(
     Md6_224::default();

@@ -4,78 +4,6 @@ use hex_literal::hex;
 // Test vectors from https://github.com/Snack-X/md6/blob/master/test/result.csv
 
 #[test]
-fn test_md6_64() {
-    const TEST_VECTOR: &[(&[u8], &[u8; 8])] = &[
-        (b"a", &hex!("32d13030a6815e95")),
-        (b"aa", &hex!("af7966908a5d9c13")),
-        (b"aaa", &hex!("3d8a4ff7a21eb0c6")),
-        (b"aaaa", &hex!("5aafda0f42635bbe")),
-        (b"aaaaa", &hex!("c370f6eceefb2c04")),
-        (b"aaaaaa", &hex!("453f31fe99e3365d")),
-        (b"aaaaaaa", &hex!("9d52c725c926756b")),
-        (b"aaaaaaaa", &hex!("836d56b5756bd4d3")),
-        (b"aaaaaaaaa", &hex!("2d27ed075595d38f")),
-        (b"aaaaaaaaaa", &hex!("e31280f1a2fc2528")),
-        (b"0", &hex!("17d073d4d38b5400")),
-        (b"1", &hex!("870f87ac0bd00aee")),
-        (b"2", &hex!("0d70630287b9031a")),
-        (b"3", &hex!("f60aa0d9fa94116d")),
-        (b"4", &hex!("1e6b0691ef4d4705")),
-        (b"5", &hex!("6305b39e912c144b")),
-        (b"6", &hex!("b47486289e236138")),
-        (b"7", &hex!("dd018e6e7363124a")),
-        (b"8", &hex!("eb456a3ae7348bf8")),
-        (b"9", &hex!("15bc9eac62570fe7")),
-        (b"md6", &hex!("b2f36109e52bd99f")),
-        (b"md6 FTW", &hex!("47cda109418592ca")),
-    ];
-
-    for (msg, expected_hash) in TEST_VECTOR.iter() {
-        let mut hasher = md6::Md6_64::new();
-        hasher.update(msg);
-        let output = hasher.finalize();
-
-        assert!(output[..] == **expected_hash);
-    }
-}
-
-#[test]
-fn test_md6_128() {
-    const TEST_VECTOR: &[(&[u8], &[u8; 16])] = &[
-        (b"a", &hex!("bb691c1bfa4b4345292eb35f364919ea")),
-        (b"aa", &hex!("19487e566f9ae2584d62628af2795f8c")),
-        (b"aaa", &hex!("319f1b026f76f9caf62320b4e2e79e29")),
-        (b"aaaa", &hex!("eb94dae524df4b84ba4a14115c3d0448")),
-        (b"aaaaa", &hex!("07d01330b8af7013284b9b339378aac1")),
-        (b"aaaaaa", &hex!("5638b2a1b7c5b66e963ea7744d1c9876")),
-        (b"aaaaaaa", &hex!("2ad627c7c0e089c28824a354841e9215")),
-        (b"aaaaaaaa", &hex!("1f7d2461fcfe705a7afadfabc9c95eb6")),
-        (b"aaaaaaaaa", &hex!("aa74a4962cdc8b3ae4bacf8995e9fa68")),
-        (b"aaaaaaaaaa", &hex!("623522019a5e40188a3b8956d44ea57d")),
-        (b"0", &hex!("7464cb2427a4b04bc0ca92653711e3a5")),
-        (b"1", &hex!("84a229d23cf5f380527c7dd9a887a384")),
-        (b"2", &hex!("44bf1a90a89c4bf3d6668e7886226127")),
-        (b"3", &hex!("cad8b9e548056c8ffd19cf469d1ac1ee")),
-        (b"4", &hex!("78746de94a7ff50fa11d22119a3d6545")),
-        (b"5", &hex!("ccc274bde4ebb8a38b6f19a8e0c022c0")),
-        (b"6", &hex!("b19533319a23aa00af9d143db6655041")),
-        (b"7", &hex!("3c049e4e57a5661b66c5235a07393bd1")),
-        (b"8", &hex!("ba73bb10cf0fee5758f3f8b37cd9fdd4")),
-        (b"9", &hex!("cc5f60133f81e505343174fa672d9f96")),
-        (b"md6", &hex!("98b4a2b7363159f810a60432df277b7c")),
-        (b"md6 FTW", &hex!("e866b430fa07b5bea28981db1f9b24a6")),
-    ];
-
-    for (msg, expected_hash) in TEST_VECTOR.iter() {
-        let mut hasher = md6::Md6_128::new();
-        hasher.update(msg);
-        let output = hasher.finalize();
-
-        assert!(output[..] == **expected_hash);
-    }
-}
-
-#[test]
 fn test_md6_224() {
     const TEST_VECTOR: &[(&[u8], &[u8; 28])] = &[
         (
@@ -173,7 +101,7 @@ fn test_md6_224() {
         hasher.update(msg);
         let output = hasher.finalize();
 
-        assert!(output[..] == **expected_hash);
+        assert!(output[..] == expected_hash[..]);
     }
 }
 
@@ -275,7 +203,7 @@ fn test_md6_256() {
         hasher.update(msg);
         let output = hasher.finalize();
 
-        assert!(output[..] == **expected_hash);
+        assert!(output[..] == expected_hash[..]);
     }
 }
 
@@ -421,7 +349,7 @@ fn test_md6_384() {
         hasher.update(msg);
         let output = hasher.finalize();
 
-        assert!(output[..] == **expected_hash);
+        assert!(output[..] == expected_hash[..]);
     }
 }
 
@@ -567,7 +495,7 @@ fn test_md6_512() {
         hasher.update(msg);
         let output = hasher.finalize();
 
-        assert!(output[..] == **expected_hash);
+        assert!(output[..] == expected_hash[..]);
     }
 }
 

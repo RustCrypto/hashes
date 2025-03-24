@@ -12,7 +12,7 @@ pub(crate) mod consts;
 mod md6;
 
 use digest::{
-    consts::{U8, U16, U28, U32, U48, U64},
+    consts::{U28, U32, U48, U64},
     core_api::{CoreWrapper, CtVariableCoreWrapper, RtVariableCoreWrapper},
 };
 
@@ -26,10 +26,6 @@ pub type Md6Var = RtVariableCoreWrapper<Md6VarCore>;
 pub type Md6Core<OutSize> = CtVariableCoreWrapper<Md6VarCore, OutSize>;
 /// Md6 generic over output size.
 pub type Md6<OutSize> = CoreWrapper<Md6Core<OutSize>>;
-/// Md6 with 64-bit output
-pub type Md6_64 = CoreWrapper<Md6Core<U8>>;
-/// Md6 with 128-bit output
-pub type Md6_128 = CoreWrapper<Md6Core<U16>>;
 /// Md6 with 224-bit output
 pub type Md6_224 = CoreWrapper<Md6Core<U28>>;
 /// Md6 with 256-bit output

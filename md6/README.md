@@ -19,7 +19,7 @@ hasher.update(b"hello world");
 
 // read hash digest and consume hasher
 let hash = hasher.finalize();
-assert_eq!(hash.to_vec(), hex!(
+assert_eq!(hash[..], hex!(
     "9ae602639631cc2c60adaa7a952aae8756141f31a7e6a9b76adc1de121db2230"
 ));
 ```

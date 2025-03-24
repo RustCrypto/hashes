@@ -242,7 +242,6 @@ dependencies = [
 name = "md6"
 version = "0.11.0-pre.5"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal 0.4.1",
 ]
