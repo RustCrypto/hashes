@@ -63,22 +63,23 @@ impl Blake2Xb {
     }
 }
 
-pub struct Blake2bXReader {
+/// Finalized XOF instance over Blake2b
+pub struct Blake2XbReader {
     h0: [u8; 64],
     buffer: ReadBuffer<<Self as BlockSizeUser>::BlockSize>,
     node_offset: u32,
     total_length: u32,
 }
 
-impl BlockSizeUser for Blake2bXReader {
+impl BlockSizeUser for Blake2XbReader {
     type BlockSize = U64;
 }
 
-impl BufferKindUser for Blake2bXReader {
+impl BufferKindUser for Blake2XbReader {
     type BufferKind = <Blake2bVarCore as BufferKindUser>::BufferKind;
 }
 
-impl XofReader for Blake2bXReader {
+impl XofReader for Blake2XbReader {
     fn read(&mut self, buffer: &mut [u8]) {
         let Self { buffer: buf, .. } = self;
         buf.read(buffer, |block| {
@@ -101,7 +102,7 @@ impl XofReader for Blake2bXReader {
 }
 
 #[cfg(feature = "std")]
-impl std::io::Read for Blake2bXReader {
+impl std::io::Read for Blake2XbReader {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
         XofReader::read(self, buf);
@@ -129,7 +130,7 @@ impl Update for Blake2Xb {
 }
 
 impl ExtendableOutput for Blake2Xb {
-    type Reader = Blake2bXReader;
+    type Reader = Blake2XbReader;
 
     fn finalize_xof(self) -> Self::Reader {
         let mut m = <_>::default();
@@ -143,7 +144,7 @@ impl ExtendableOutput for Blake2Xb {
         let mut h0 = [0; 64];
         h0.copy_from_slice(&m);
 
-        Blake2bXReader {
+        Blake2XbReader {
             h0,
             buffer: <_>::default(),
             node_offset: 0,
