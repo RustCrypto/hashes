@@ -45,6 +45,7 @@ mod simd;
 mod macros;
 
 use as_bytes::AsBytes;
+pub use blake2x::Blake2bXReader;
 use consts::{BLAKE2B_IV, BLAKE2S_IV};
 use simd::{Vector4, u32x4, u64x4};
 
@@ -83,7 +84,7 @@ blake2_mac_impl!(Blake2bMac, Blake2bVarCore, U64, "Blake2b MAC function");
 pub type Blake2Xb = CoreWrapper<blake2x::Blake2Xb>;
 
 /// Create a blake2xb generator with maximum output
-pub fn blake2xb(seed: &[u8]) -> blake2x::Blake2bXReader {
+pub fn blake2xb(seed: &[u8]) -> Blake2bXReader {
     use digest::ExtendableOutput;
     blake2x::Blake2Xb::new(Some(seed), None)
         .unwrap()
