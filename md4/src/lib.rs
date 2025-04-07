@@ -44,8 +44,11 @@ pub struct Md4Core {
     state: [Wu32; STATE_LEN],
 }
 
-/// MD4 hasher state
-pub type Md4 = CoreWrapper<Md4Core>;
+digest::newtype!(
+    /// MD4 hasher state
+    pub struct Md4(CoreWrapper<Md4Core>);
+    delegate_template: FixedOutputHash
+);
 
 const STATE_LEN: usize = 4;
 

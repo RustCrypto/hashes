@@ -9,9 +9,6 @@
 
 pub use digest::{self, Digest};
 
-mod compress;
-pub(crate) mod consts;
-
 use core::{convert::TryInto, fmt, slice::from_ref};
 use digest::{
     HashMarker, Output,
@@ -30,6 +27,11 @@ use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
+mod compress;
+pub(crate) mod consts;
+
+const STATE_LEN: usize = 4;
+
 /// Core MD5 hasher state.
 #[derive(Clone)]
 pub struct Md5Core {
@@ -37,10 +39,11 @@ pub struct Md5Core {
     state: [u32; STATE_LEN],
 }
 
-/// MD5 hasher state.
-pub type Md5 = CoreWrapper<Md5Core>;
-
-const STATE_LEN: usize = 4;
+digest::newtype!(
+    /// MD5 hasher state.
+    pub struct Md5(CoreWrapper<Md5Core>);
+    delegate_template: FixedOutputHash
+);
 
 impl HashMarker for Md5Core {}
 

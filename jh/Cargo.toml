@@ -22,6 +22,8 @@ digest = { version = "=0.11.0-pre.10", features = ["dev"] }
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]
+default = ["alloc"]
+alloc = ["digest/alloc"]
 zeroize = ["digest/zeroize"]
 
 [package.metadata.docs.rs]

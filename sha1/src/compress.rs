@@ -1,4 +1,6 @@
-use crate::BLOCK_SIZE;
+const BLOCK_SIZE: usize = 64;
+#[allow(dead_code)]
+const K: [u32; 4] = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6];
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {

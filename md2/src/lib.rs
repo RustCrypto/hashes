@@ -29,18 +29,20 @@ use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 mod consts;
+const STATE_LEN: usize = 48;
 
-/// Core MD2 hasher state.
+/// Core MD2 hasher state
 #[derive(Clone)]
 pub struct Md2Core {
     x: [u8; STATE_LEN],
     checksum: Block<Self>,
 }
 
-/// MD2 hasher state.
-pub type Md2 = CoreWrapper<Md2Core>;
-
-const STATE_LEN: usize = 48;
+digest::newtype!(
+    /// MD2 hasher state
+    pub struct Md2(CoreWrapper<Md2Core>);
+    delegate_template: FixedOutputHash
+);
 
 impl Md2Core {
     fn compress(&mut self, block: &Block<Self>) {

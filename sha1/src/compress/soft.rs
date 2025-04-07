@@ -1,6 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use super::BLOCK_SIZE;
-use crate::K;
+use super::{BLOCK_SIZE, K};
 
 #[inline(always)]
 fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
