@@ -1,5 +1,5 @@
 use belt_hash::{BeltHash, Digest};
-use digest::dev::{fixed_reset_test};
+use digest::dev::fixed_reset_test;
 use hex_literal::hex;
 
 // Test vectors from STB 34.101.31-2020 (Section A.11, Table A.23):
