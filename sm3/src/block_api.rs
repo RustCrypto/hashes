@@ -15,9 +15,6 @@ use digest::{
     typenum::{U32, U40, U64, Unsigned},
 };
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
-
 /// Core SM3 hasher state.
 #[derive(Clone)]
 pub struct Sm3Core {
@@ -94,6 +91,7 @@ impl Drop for Sm3Core {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
+            use digest::zeroize::Zeroize;
             self.h.zeroize();
             self.block_len.zeroize();
         }
@@ -101,7 +99,7 @@ impl Drop for Sm3Core {
 }
 
 #[cfg(feature = "zeroize")]
-impl ZeroizeOnDrop for Sm3Core {}
+impl digest::zeroize::ZeroizeOnDrop for Sm3Core {}
 
 impl SerializableState for Sm3Core {
     type SerializedStateSize = U40;
