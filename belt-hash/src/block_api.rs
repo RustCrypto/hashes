@@ -11,9 +11,6 @@ use digest::{
     typenum::{U32, U64, Unsigned},
 };
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
-
 const H0: [u32; 8] = [
     0xC8BA94B1, 0x3BF5080A, 0x8E006D36, 0xE45D4A58, 0x9DFA0485, 0xACC7B61B, 0xC2722E25, 0x0DCEFD02,
 ];
@@ -109,6 +106,7 @@ impl Drop for BeltHashCore {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
+            use digest::zeroize::Zeroize;
             self.r.zeroize();
             self.s.zeroize();
             self.h.zeroize();
@@ -117,7 +115,7 @@ impl Drop for BeltHashCore {
 }
 
 #[cfg(feature = "zeroize")]
-impl ZeroizeOnDrop for BeltHashCore {}
+impl digest::zeroize::ZeroizeOnDrop for BeltHashCore {}
 
 impl SerializableState for BeltHashCore {
     type SerializedStateSize = U64;
@@ -191,6 +189,7 @@ fn read_u32s<const N: usize>(src: &[u8]) -> [u32; N] {
 
 #[inline(always)]
 fn write_u32s(src: &[u32], dst: &mut [u8]) {
+    assert_eq!(4 * src.len(), dst.len());
     for (src, dst) in src.iter().zip(dst.chunks_exact_mut(4)) {
         dst.copy_from_slice(&src.to_le_bytes());
     }
