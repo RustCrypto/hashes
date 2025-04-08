@@ -10,15 +10,12 @@
 
 pub use digest::{self, Digest};
 
-use digest::core_api::CoreWrapper;
-
 mod block_api;
-
-pub use block_api::BeltHashCore;
+pub use block_api::{BeltHashCore, belt_compress};
 
 digest::newtype!(
     /// BelT hasher state.
-    pub struct BeltHash(CoreWrapper<BeltHashCore>);
+    pub struct BeltHash(digest::core_api::CoreWrapper<BeltHashCore>);
     delegate_template: FixedOutputHash
     oid: "1.2.112.0.2.0.34.101.31.81"
 );

@@ -14,7 +14,6 @@ use digest::{
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
-const U32_MASK: u128 = (1 << 32) - 1;
 const H0: [u32; 8] = [
     0xC8BA94B1, 0x3BF5080A, 0x8E006D36, 0xE45D4A58, 0x9DFA0485, 0xACC7B61B, 0xC2722E25, 0x0DCEFD02,
 ];
@@ -29,12 +28,11 @@ pub struct BeltHashCore {
 
 impl BeltHashCore {
     fn compress_block(&mut self, block: &Block<Self>) {
-        let (x1, x2) = block.split_at(16);
-        let x1 = read_u32s(x1);
-        let x2 = read_u32s(x2);
+        let x1 = read_u32s(&block[..16]);
+        let x2 = read_u32s(&block[16..]);
         let (t, h) = belt_compress(x1, x2, self.h);
         self.h = h;
-        self.s.iter_mut().zip(t).for_each(|(s, t)| *s ^= t);
+        self.s = xor(self.s, t);
     }
 }
 
@@ -73,9 +71,7 @@ impl FixedOutputCore for BeltHashCore {
         let bs = Self::BlockSize::USIZE as u128;
         let r = encode_r(8 * ((bs * self.r) + pos as u128));
         let (_, y) = belt_compress(r, self.s, self.h);
-        for (chunk, val) in out.chunks_exact_mut(4).zip(y) {
-            chunk.copy_from_slice(&val.to_le_bytes());
-        }
+        write_u32s(&y, out);
     }
 }
 
@@ -202,12 +198,7 @@ fn write_u32s(src: &[u32], dst: &mut [u8]) {
 
 #[inline(always)]
 fn encode_r(r: u128) -> [u32; 4] {
-    [
-        (r & U32_MASK) as u32,
-        ((r >> 32) & U32_MASK) as u32,
-        ((r >> 64) & U32_MASK) as u32,
-        ((r >> 96) & U32_MASK) as u32,
-    ]
+    core::array::from_fn(|i| (r >> (32 * i)) as u32)
 }
 
 #[cfg(test)]
