@@ -32,4 +32,3 @@ size_opt = [] # Optimize for code size. Removes some `inline(always)`
 
 [package.metadata.docs.rs]
 all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
