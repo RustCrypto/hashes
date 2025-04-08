@@ -39,9 +39,9 @@ impl OutputSizeUser for WhirlpoolCore {
 impl UpdateCore for WhirlpoolCore {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-        // Techincally, Whirlpool uses 256-bit counter for tracking
+        // Technically, Whirlpool uses 256-bit counter for tracking
         // message length in bits, but it would take more than 100k years
-        // of continous computation to overflow 64-bit block counter,
+        // of continuous computation to overflow 64-bit block counter,
         // so we use it instead.
         self.blocks_len += blocks.len() as u64;
         let blocks = Array::cast_slice_to_core(blocks);
