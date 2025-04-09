@@ -10,8 +10,8 @@
 
 pub use digest::{self, Digest};
 
-mod consts;
 mod block_api;
+mod consts;
 
 pub use block_api::Md2Core;
 

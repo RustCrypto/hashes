@@ -1,4 +1,3 @@
-
 use core::fmt;
 use digest::{
     HashMarker, Output,
@@ -6,7 +5,7 @@ use digest::{
     block_buffer::Eager,
     consts::{U16, U48, U64},
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser,  FixedOutputCore,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
