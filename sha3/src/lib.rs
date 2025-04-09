@@ -12,16 +12,15 @@ pub use digest::{self, CustomizedInit, Digest};
 
 use core::fmt;
 use digest::{
-    HashMarker, Output,
+    HashMarker,
     array::typenum::Unsigned,
     block_buffer::Eager,
     consts::{U28, U32, U48, U64, U72, U104, U136, U144, U168, U200},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
-        ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
+        ExtendableOutputCore, Reset, UpdateCore, XofReaderCore,
         XofReaderCoreWrapper,
     },
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 
 #[cfg(feature = "oid")]
@@ -31,9 +30,11 @@ use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 #[macro_use]
 mod macros;
+mod fixed;
 mod state;
 
 use crate::state::Sha3State;
+pub use fixed::Sha3FixedCore;
 
 // Paddings
 const KECCAK: u8 = 0x01;
@@ -44,55 +45,55 @@ const CSHAKE: u8 = 0x4;
 // Round counts
 const TURBO_SHAKE_ROUND_COUNT: usize = 12;
 
-impl_sha3!(Keccak224Core, Keccak224, U28, U144, KECCAK, "Keccak-224");
-impl_sha3!(Keccak256Core, Keccak256, U32, U136, KECCAK, "Keccak-256");
-impl_sha3!(Keccak384Core, Keccak384, U48, U104, KECCAK, "Keccak-384");
-impl_sha3!(Keccak512Core, Keccak512, U64, U72, KECCAK, "Keccak-512");
-
-impl_sha3!(
-    Keccak256FullCore,
-    Keccak256Full,
-    U200,
-    U136,
-    KECCAK,
-    "SHA-3 CryptoNight variant",
+digest::newtype!(
+    /// SHA-3-224 hasher.
+    pub struct Sha3_224(digest::core_api::CoreWrapper<Sha3FixedCore<U144, U28, SHA3>>);
+    delegate_template: FixedOutputHash
+    oid: "2.16.840.1.101.3.4.2.7"
+);
+digest::newtype!(
+    /// SHA-3-256 hasher.
+    pub struct Sha3_256(digest::core_api::CoreWrapper<Sha3FixedCore<U136, U32, SHA3>>);
+    delegate_template: FixedOutputHash
+    oid: "2.16.840.1.101.3.4.2.8"
+);
+digest::newtype!(
+    /// SHA-3-384 hasher.
+    pub struct Sha3_384(digest::core_api::CoreWrapper<Sha3FixedCore<U104, U48, SHA3>>);
+    delegate_template: FixedOutputHash
+    oid: "2.16.840.1.101.3.4.2.9"
+);
+digest::newtype!(
+    /// SHA-3-512 hasher.
+    pub struct Sha3_512(digest::core_api::CoreWrapper<Sha3FixedCore<U72, U64, SHA3>>);
+    delegate_template: FixedOutputHash
+    oid: "2.16.840.1.101.3.4.2.10"
 );
 
-impl_sha3!(
-    Sha3_224Core,
-    Sha3_224,
-    U28,
-    U144,
-    SHA3,
-    "SHA-3-224",
-    "2.16.840.1.101.3.4.2.7",
+digest::newtype!(
+    /// SHA-3 CryptoNight variant.
+    pub struct Keccak256Full(digest::core_api::CoreWrapper<Sha3FixedCore<U136, U200, KECCAK>>);
+    delegate_template: FixedOutputHash
 );
-impl_sha3!(
-    Sha3_256Core,
-    Sha3_256,
-    U32,
-    U136,
-    SHA3,
-    "SHA-3-256",
-    "2.16.840.1.101.3.4.2.8",
+digest::newtype!(
+    /// Keccak-224 hasher.
+    pub struct Keccak224(digest::core_api::CoreWrapper<Sha3FixedCore<U144, U28, KECCAK>>);
+    delegate_template: FixedOutputHash
 );
-impl_sha3!(
-    Sha3_384Core,
-    Sha3_384,
-    U48,
-    U104,
-    SHA3,
-    "SHA-3-384",
-    "2.16.840.1.101.3.4.2.9",
+digest::newtype!(
+    /// Keccak-256 hasher.
+    pub struct Keccak256(digest::core_api::CoreWrapper<Sha3FixedCore<U136, U32, KECCAK>>);
+    delegate_template: FixedOutputHash
 );
-impl_sha3!(
-    Sha3_512Core,
-    Sha3_512,
-    U64,
-    U72,
-    SHA3,
-    "SHA-3-512",
-    "2.16.840.1.101.3.4.2.10",
+digest::newtype!(
+    /// Keccak-384 hasher.
+    pub struct Keccak384(digest::core_api::CoreWrapper<Sha3FixedCore<U104, U48, KECCAK>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Keccak-512 hasher.
+    pub struct Keccak512(digest::core_api::CoreWrapper<Sha3FixedCore<U72, U64, KECCAK>>);
+    delegate_template: FixedOutputHash
 );
 
 impl_shake!(
