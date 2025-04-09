@@ -1,7 +1,7 @@
 macro_rules! impl_sha3 {
     (
         $name:ident, $full_name:ident, $output_size:ident,
-        $rate:ident, $pad:expr, $alg_name:expr $(,)?
+        $rate:ident, $pad:expr, $alg_name:expr $(, $oid:literal)? $(,)?
     ) => {
         #[doc = "Core "]
         #[doc = $alg_name]
@@ -12,9 +12,14 @@ macro_rules! impl_sha3 {
             state: Sha3State,
         }
 
-        #[doc = $alg_name]
-        #[doc = " hasher state."]
-        pub type $full_name = CoreWrapper<$name>;
+        digest::newtype!(
+            #[doc = $alg_name]
+            #[doc = " hasher state."]
+            pub struct $full_name(CoreWrapper<$name>);
+            delegate_template: FixedOutputHash
+            $(oid: $oid)?
+        );
+
 
         impl HashMarker for $name {}
 
@@ -124,17 +129,6 @@ macro_rules! impl_sha3 {
 
                 Ok(Self { state })
             }
-        }
-    };
-    (
-        $name:ident, $full_name:ident, $output_size:ident,
-        $rate:ident, $pad:expr, $alg_name:expr, $oid:literal $(,)?
-    ) => {
-        impl_sha3!($name, $full_name, $output_size, $rate, $pad, $alg_name);
-
-        #[cfg(feature = "oid")]
-        impl AssociatedOid for $name {
-            const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap($oid);
         }
     };
 }
