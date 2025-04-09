@@ -14,9 +14,9 @@ use digest::{
 };
 
 mod consts;
-mod core_api;
+mod block_api;
 
-pub use core_api::StreebogVarCore;
+pub use block_api::StreebogVarCore;
 pub use digest::{self, Digest};
 
 digest::newtype!(
