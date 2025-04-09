@@ -11,7 +11,7 @@ use digest::{
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 
-use crate::consts;
+use crate::consts::S;
 
 const STATE_LEN: usize = 48;
 
@@ -24,16 +24,16 @@ pub struct Md2Core {
 
 impl Md2Core {
     fn compress(&mut self, block: &[u8; 16]) {
+        self.x[16..32].copy_from_slice(block);
         // Update state
         for j in 0..16 {
-            self.x[16 + j] = block[j];
             self.x[32 + j] = self.x[16 + j] ^ self.x[j];
         }
 
         let mut t = 0u8;
         for j in 0..18u8 {
             for k in 0..STATE_LEN {
-                self.x[k] ^= consts::S[t as usize];
+                self.x[k] ^= S[t as usize];
                 t = self.x[k];
             }
             t = t.wrapping_add(j);
@@ -42,7 +42,7 @@ impl Md2Core {
         // Update checksum
         let mut l = self.checksum[15];
         for j in 0..16 {
-            self.checksum[j] ^= consts::S[(block[j] ^ l) as usize];
+            self.checksum[j] ^= S[(block[j] ^ l) as usize];
             l = self.checksum[j];
         }
     }
