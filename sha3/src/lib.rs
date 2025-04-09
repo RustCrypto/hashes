@@ -18,8 +18,7 @@ use digest::{
     consts::{U28, U32, U48, U64, U72, U104, U136, U144, U168, U200},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
-        ExtendableOutputCore, Reset, UpdateCore, XofReaderCore,
-        XofReaderCoreWrapper,
+        ExtendableOutputCore, Reset, UpdateCore, XofReaderCore, XofReaderCoreWrapper,
     },
 };
 

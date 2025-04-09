@@ -3,7 +3,6 @@ use digest::{
     HashMarker, Output,
     array::ArraySize,
     block_buffer::Eager,
-    consts::U200,
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
@@ -12,6 +11,7 @@ use digest::{
         BlockSizes,
         hazmat::{DeserializeStateError, SerializableState, SerializedState},
     },
+    typenum::{IsLessOrEqual, LeEq, NonZero, U200},
 };
 
 const PLEN: usize = 25;
@@ -20,41 +20,67 @@ const DEFAULT_ROUND_COUNT: usize = 24;
 /// Core Sha3 fixed output hasher state.
 #[derive(Clone)]
 #[allow(non_camel_case_types)]
-pub struct Sha3FixedCore<
-    Rate: BlockSizes,
-    OutputSize: ArraySize,
-    const PAD: u8,
-    const ROUNDS: usize = DEFAULT_ROUND_COUNT,
-> {
+pub struct Sha3FixedCore<Rate, OutputSize, const PAD: u8, const ROUNDS: usize = DEFAULT_ROUND_COUNT>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
+{
     state: [u64; PLEN],
     _pd: PhantomData<(Rate, OutputSize)>,
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> HashMarker
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> HashMarker
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> BlockSizeUser
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> BlockSizeUser
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     type BlockSize = Rate;
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> BufferKindUser
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> BufferKindUser
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     type BufferKind = Eager;
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> OutputSizeUser
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> OutputSizeUser
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     type OutputSize = OutputSize;
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> UpdateCore
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> UpdateCore
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
@@ -65,8 +91,13 @@ impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize
     }
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> FixedOutputCore
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> FixedOutputCore
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     #[inline]
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
@@ -85,8 +116,13 @@ impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize
     }
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> Default
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Default
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     #[inline]
     fn default() -> Self {
@@ -97,8 +133,13 @@ impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize
     }
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> Reset
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Reset
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     #[inline]
     fn reset(&mut self) {
@@ -106,24 +147,39 @@ impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize
     }
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> AlgorithmName
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> AlgorithmName
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Sha3") // TODO
     }
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> fmt::Debug
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> fmt::Debug
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS> { ... }")
     }
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> Drop
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Drop
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
@@ -135,13 +191,23 @@ impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize>
-    digest::zeroize::ZeroizeOnDrop for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop
+    for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
 }
 
-impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize> SerializableState
+impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> SerializableState
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+    LeEq<OutputSize, U200>: NonZero,
 {
     type SerializedStateSize = U200;
 
