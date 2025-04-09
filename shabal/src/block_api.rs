@@ -170,7 +170,7 @@ impl UpdateCore for ShabalVarCore {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block]) {
         for block in blocks {
-            let m = read_m(block.as_ref());
+            let m = read_m(block);
             self.add_m(&m);
             self.xor_w();
             self.perm(&m);
