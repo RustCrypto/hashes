@@ -141,7 +141,7 @@ impl Drop for WhirlpoolCore {
         {
             use digest::zeroize::Zeroize;
             self.state.zeroize();
-            self.bit_len.zeroize();
+            self.blocks_len.zeroize();
         }
     }
 }
