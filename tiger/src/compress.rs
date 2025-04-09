@@ -1,5 +1,4 @@
-use super::State;
-use super::tables::TABLES;
+use crate::tables::TABLES;
 
 #[inline(always)]
 fn round(a: &mut u64, b: &mut u64, c: &mut u64, x: &u64, mul: u8) {
@@ -49,7 +48,7 @@ fn key_schedule(x: &mut [u64; 8]) {
     x[7] = x[7].wrapping_sub(x[6] ^ 0x0123_4567_89AB_CDEF);
 }
 
-pub(crate) fn compress(state: &mut State, raw_block: &[u8; 64]) {
+pub(crate) fn compress(state: &mut [u64; 3], raw_block: &[u8; 64]) {
     let mut block: [u64; 8] = Default::default();
     for (o, chunk) in block.iter_mut().zip(raw_block.chunks_exact(8)) {
         *o = u64::from_le_bytes(chunk.try_into().unwrap());

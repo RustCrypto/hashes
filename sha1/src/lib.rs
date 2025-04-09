@@ -9,8 +9,6 @@
 
 pub use digest::{self, Digest};
 
-use digest::core_api::CoreWrapper;
-
 mod block_api;
 mod compress;
 
@@ -19,7 +17,7 @@ pub use compress::compress;
 
 digest::newtype!(
     /// SHA-1 hasher.
-    pub struct Sha1(CoreWrapper<Sha1Core>);
+    pub struct Sha1(digest::core_api::CoreWrapper<Sha1Core>);
     delegate_template: FixedOutputHash
     oid: "1.3.14.3.2.26"
 );
