@@ -1,7 +1,7 @@
 use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
-    array::{Array, ArraySize, typenum::Unsigned},
+    array::{ArraySize, typenum::Unsigned},
     block_buffer::Lazy,
     consts::{U32, U64, U128},
     core_api::{
