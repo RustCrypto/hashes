@@ -129,7 +129,7 @@ impl<Rate: BlockSizes, OutputSize: ArraySize, const PAD: u8, const ROUNDS: usize
         #[cfg(feature = "zeroize")]
         {
             use digest::zeroize::Zeroize;
-            self.state.state.zeroize();
+            self.state.zeroize();
         }
     }
 }
