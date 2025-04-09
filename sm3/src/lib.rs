@@ -17,7 +17,7 @@ mod consts;
 pub use block_api::Sm3Core;
 
 digest::newtype!(
-    /// Sm3 hasher.
+    /// ShangMi 3 (SM3) hasher.
     pub struct Sm3(digest::core_api::CoreWrapper<Sm3Core>);
     delegate_template: FixedOutputHash
 );
