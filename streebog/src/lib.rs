@@ -13,8 +13,8 @@ use digest::{
     core_api::{CoreWrapper, CtVariableCoreWrapper},
 };
 
-mod consts;
 mod block_api;
+mod consts;
 
 pub use block_api::StreebogVarCore;
 pub use digest::{self, Digest};
