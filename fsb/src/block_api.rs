@@ -96,6 +96,7 @@ macro_rules! fsb_impl {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
+                    use digest::zeroize::Zeroize;
                     self.state.zeroize();
                     self.blocks_len.zeroize();
                 }
@@ -103,7 +104,7 @@ macro_rules! fsb_impl {
         }
 
         #[cfg(feature = "zeroize")]
-        impl ZeroizeOnDrop for $state {}
+        impl digest::zeroize::ZeroizeOnDrop for $state {}
 
         impl SerializableState for $state {
             type SerializedStateSize = Sum<$state_size, U8>;
