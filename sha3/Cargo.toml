@@ -31,7 +31,6 @@ alloc = ["digest/alloc"]
 oid = ["digest/oid"] # Enable OID support.
 zeroize = ["digest/zeroize"]
 asm = ["keccak/asm"] # Enable ASM (currently ARMv8 only).
-reset = [] # Enable reset functionality
 
 [package.metadata.docs.rs]
 all-features = true
