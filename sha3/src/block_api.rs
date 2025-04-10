@@ -1,21 +1,19 @@
+use crate::{DEFAULT_ROUND_COUNT, PLEN, Sha3XofReaderCore};
 use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
     array::ArraySize,
     block_buffer::Eager,
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore,
-        OutputSizeUser, Reset, UpdateCore,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, ExtendableOutputCore,
+        FixedOutputCore, OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::{
         BlockSizes,
         hazmat::{DeserializeStateError, SerializableState, SerializedState},
     },
-    typenum::{IsLessOrEqual, LeEq, NonZero, U200},
+    typenum::{Gr, IsGreater, IsLessOrEqual, LeEq, NonZero, U0, U200},
 };
-
-const PLEN: usize = 25;
-const DEFAULT_ROUND_COUNT: usize = 24;
 
 /// Core Sha3 fixed output hasher state.
 #[derive(Clone)]
@@ -95,8 +93,9 @@ impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> FixedOutputCore
     for Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
+    OutputSize: ArraySize + IsLessOrEqual<U200> + IsGreater<U0>,
     LeEq<Rate, U200>: NonZero,
+    Gr<OutputSize, U0>: NonZero,
     LeEq<OutputSize, U200>: NonZero,
 {
     #[inline]
@@ -113,6 +112,29 @@ where
         for (o, s) in out.chunks_mut(8).zip(self.state.iter()) {
             o.copy_from_slice(&s.to_le_bytes()[..o.len()]);
         }
+    }
+}
+
+impl<Rate, const PAD: u8, const ROUNDS: usize> ExtendableOutputCore
+    for Sha3FixedCore<Rate, U0, PAD, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200>,
+    LeEq<Rate, U200>: NonZero,
+{
+    type ReaderCore = Sha3XofReaderCore<Rate, ROUNDS>;
+
+    #[inline]
+    fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
+        let pos = buffer.get_pos();
+        let mut block = buffer.pad_with_zeros();
+        block[pos] = PAD;
+        let n = block.len();
+        block[n - 1] |= 0x80;
+
+        xor_block(&mut self.state, &block);
+        keccak::p1600(&mut self.state, ROUNDS);
+
+        Sha3XofReaderCore::new(&self.state)
     }
 }
 
