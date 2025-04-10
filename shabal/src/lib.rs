@@ -10,9 +10,9 @@
 
 #[rustfmt::skip]
 mod consts;
-mod core_api;
+mod block_api;
 
-pub use core_api::ShabalVarCore;
+pub use block_api::ShabalVarCore;
 pub use digest::{self, Digest};
 
 use digest::{
@@ -20,13 +20,28 @@ use digest::{
     core_api::{CoreWrapper, CtVariableCoreWrapper},
 };
 
-/// Shabal192 hasher.
-pub type Shabal192 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U24>>;
-/// Shabal224 hasher.
-pub type Shabal224 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U28>>;
-/// Shabal256 hasher.
-pub type Shabal256 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U32>>;
-/// Shabal384 hasher.
-pub type Shabal384 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U48>>;
-/// Shabal512 hasher.
-pub type Shabal512 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U64>>;
+digest::newtype!(
+    /// Shabal-192 hasher.
+    pub struct Shabal192(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U24>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Shabal-224 hasher.
+    pub struct Shabal224(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U28>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Shabal-256 hasher.
+    pub struct Shabal256(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U32>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Shabal-384 hasher.
+    pub struct Shabal384(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U48>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Shabal-512 hasher.
+    pub struct Shabal512(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U64>>);
+    delegate_template: FixedOutputHash
+);

@@ -28,8 +28,8 @@ hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]
-default = ["oid", "std"]
-std = ["digest/std"]
+default = ["alloc", "oid"]
+alloc = ["digest/alloc"]
 zeroize = ["digest/zeroize"]
 oid = ["digest/oid"]
 

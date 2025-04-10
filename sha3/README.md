@@ -11,18 +11,14 @@ Pure Rust implementation of the [SHA-3] cryptographic hash algorithms.
 
 There are 6 standard algorithms specified in the SHA-3 standard:
 
-* `SHA3-224`
-* `SHA3-256`
-* `SHA3-384`
-* `SHA3-512`
-* `SHAKE128`, an extendable output function (XOF)
-* `SHAKE256`, an extendable output function (XOF)
-* `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512` (NIST submission
-   without padding changes)
+- `SHA3-224`, `SHA3-256`, `SHA3-384`, `SHA3-512`
+- `SHAKE128` and `SHAKE256` (an extendable output function (XOF))
 
-This crates supports `cSHAKE128` and `cSHAKE256`, the customizable XOFs as defined in the NIST [SHA-3 Derived Functions].
-
-This crates additionally supports the `TurboSHAKE` XOF variant.
+Additionally, this crate supports:
+- `cSHAKE128` and `cSHAKE256` the customizable XOFs as defined in the NIST [SHA-3 Derived Functions]
+- `TurboSHAKE` XOF variant
+- CryptoNight variant of SHA-3
+- `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512` (NIST submission without padding changes)
 
 ## Examples
 

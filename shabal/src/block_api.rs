@@ -12,14 +12,11 @@ use digest::{
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
-
 type BlockSize = U64;
 type Block = Array<u8, BlockSize>;
 type M = [Wrapping<u32>; 16];
 
-/// Inner state of Shabal hash functions.
+/// Core state of Shabal hash functions.
 #[derive(Clone)]
 pub struct ShabalVarCore {
     a: [Wrapping<u32>; 12],
@@ -250,6 +247,7 @@ impl Drop for ShabalVarCore {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
+            use digest::zeroize::Zeroize;
             self.a.zeroize();
             self.b.zeroize();
             self.c.zeroize();
@@ -259,7 +257,7 @@ impl Drop for ShabalVarCore {
 }
 
 #[cfg(feature = "zeroize")]
-impl ZeroizeOnDrop for ShabalVarCore {}
+impl digest::zeroize::ZeroizeOnDrop for ShabalVarCore {}
 
 impl SerializableState for ShabalVarCore {
     type SerializedStateSize = U184;
@@ -293,25 +291,30 @@ impl SerializableState for ShabalVarCore {
         serialized_state: &SerializedState<Self>,
     ) -> Result<Self, DeserializeStateError> {
         let (serialized_a, remaining_buffer) = serialized_state.split::<U48>();
-        let mut a = [Wrapping(0); 12];
+        let mut a = [0; 12];
         for (val, chunk) in a.iter_mut().zip(serialized_a.chunks_exact(4)) {
-            *val = Wrapping(u32::from_le_bytes(chunk.try_into().unwrap()));
+            *val = u32::from_le_bytes(chunk.try_into().unwrap());
         }
 
         let (serialized_b, remaining_buffer) = remaining_buffer.split::<U64>();
-        let mut b = [Wrapping(0); 16];
+        let mut b = [0; 16];
         for (val, chunk) in b.iter_mut().zip(serialized_b.chunks_exact(4)) {
-            *val = Wrapping(u32::from_le_bytes(chunk.try_into().unwrap()));
+            *val = u32::from_le_bytes(chunk.try_into().unwrap());
         }
 
         let (serialized_c, serialized_w) = remaining_buffer.split::<U64>();
-        let mut c = [Wrapping(0); 16];
+        let mut c = [0; 16];
         for (val, chunk) in c.iter_mut().zip(serialized_c.chunks_exact(4)) {
-            *val = Wrapping(u32::from_le_bytes(chunk.try_into().unwrap()));
+            *val = u32::from_le_bytes(chunk.try_into().unwrap());
         }
 
         let w = Wrapping(u64::from_le_bytes(*serialized_w.as_ref()));
 
-        Ok(Self { a, b, c, w })
+        Ok(Self {
+            a: a.map(Wrapping),
+            b: b.map(Wrapping),
+            c: c.map(Wrapping),
+            w,
+        })
     }
 }
