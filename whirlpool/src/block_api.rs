@@ -1,4 +1,4 @@
-use core::{convert::TryInto, fmt};
+use core::fmt;
 use digest::{
     HashMarker, Output,
     array::Array,

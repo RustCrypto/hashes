@@ -1,4 +1,4 @@
-use core::{convert::TryInto, fmt, slice::from_ref};
+use core::fmt;
 use digest::{
     HashMarker, Output,
     array::Array,
@@ -54,7 +54,7 @@ impl FixedOutputCore for Md5Core {
             .wrapping_add(buffer.get_pos() as u64)
             .wrapping_mul(8);
         let mut s = self.state;
-        buffer.len64_padding_le(bit_len, |b| compress(&mut s, from_ref(&b.0)));
+        buffer.len64_padding_le(bit_len, |b| compress(&mut s, &[b.0]));
         for (chunk, v) in out.chunks_exact_mut(4).zip(s.iter()) {
             chunk.copy_from_slice(&v.to_le_bytes());
         }

@@ -1,8 +1,4 @@
-use crate::{
-    compress::compress,
-    consts::{H_LEN, H0},
-};
-use core::{convert::TryInto, fmt};
+use core::fmt;
 use digest::{
     HashMarker, Output,
     array::Array,
@@ -13,6 +9,11 @@ use digest::{
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{U32, U40, U64, Unsigned},
+};
+
+use crate::{
+    compress::compress,
+    consts::{H_LEN, H0},
 };
 
 /// Core SM3 hasher state.
