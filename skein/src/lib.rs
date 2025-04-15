@@ -18,36 +18,38 @@ pub use block_api::{Skein256Core, Skein512Core, Skein1024Core};
 
 use digest::core_api::CoreWrapper;
 
-// note: we do not use `delegate_template: FixedOutputHash` because
-// `Skein*Core`  not implement `SerializableState`
-// TODO: expose output size type parameter
 digest::newtype!(
-    /// Skein256 hasher.
-    pub struct Skein256(CoreWrapper<Skein256Core<U32>>);
-    delegate:
-        Debug Clone Default
-        AlgorithmName
-        BlockSizeUser OutputSizeUser
-        HashMarker Reset Update
-        FixedOutput FixedOutputReset
+    /// Skein-256-256 hasher.
+    pub struct Skein256_256(CoreWrapper<Skein256Core<U32>>);
+    delegate_template: FixedOutputHash
 );
 digest::newtype!(
-    /// Skein512 hasher.
-    pub struct Skein512(CoreWrapper<Skein512Core<U64>>);
-    delegate:
-        Debug Clone Default
-        AlgorithmName
-        BlockSizeUser OutputSizeUser
-        HashMarker Reset Update
-        FixedOutput FixedOutputReset
+    /// Skein-256-512 hasher.
+    pub struct Skein256_512(CoreWrapper<Skein256Core<U64>>);
+    delegate_template: FixedOutputHash
 );
 digest::newtype!(
-    /// Skein1024 hasher.
-    pub struct Skein1024(CoreWrapper<Skein1024Core<U128>>);
-    delegate:
-        Debug Clone Default
-        AlgorithmName
-        BlockSizeUser OutputSizeUser
-        HashMarker Reset Update
-        FixedOutput FixedOutputReset
+    /// Skein-512-256 hasher.
+    pub struct Skein512_256(CoreWrapper<Skein512Core<U64>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Skein-512-512 hasher.
+    pub struct Skein512_512(CoreWrapper<Skein512Core<U64>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Skein-1024-256 hasher.
+    pub struct Skein1024_256(CoreWrapper<Skein1024Core<U32>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Skein-1024-512 hasher.
+    pub struct Skein1024_512(CoreWrapper<Skein1024Core<U64>>);
+    delegate_template: FixedOutputHash
+);
+digest::newtype!(
+    /// Skein-1024-1024 hasher.
+    pub struct Skein1024_1024(CoreWrapper<Skein1024Core<U128>>);
+    delegate_template: FixedOutputHash
 );

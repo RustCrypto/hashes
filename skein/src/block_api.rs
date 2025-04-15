@@ -3,11 +3,12 @@ use digest::{
     HashMarker, Output,
     array::{ArraySize, typenum::Unsigned},
     block_buffer::Lazy,
-    consts::{U32, U64, U128},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::{Sum, U16, U32, U64, U128},
 };
 use threefish::{Threefish256, Threefish512, Threefish1024};
 
@@ -167,6 +168,45 @@ macro_rules! define_hasher {
 
         #[cfg(feature = "zeroize")]
         impl<N: ArraySize> digest::zeroize::ZeroizeOnDrop for $name<N> {}
+
+        impl<N: ArraySize> SerializableState for $name<N> {
+            type SerializedStateSize = Sum<$state_bytes, U16>;
+
+            #[inline]
+            fn serialize(&self) -> SerializedState<Self> {
+                let mut dst = SerializedState::<Self>::default();
+                let (t_dst, x_dst) = dst.split_at_mut(16);
+
+                t_dst[..8].copy_from_slice(&self.t[0].to_le_bytes());
+                t_dst[8..].copy_from_slice(&self.t[1].to_le_bytes());
+
+                for (src, dst) in self.x.iter().zip(x_dst.chunks_exact_mut(8)) {
+                    dst.copy_from_slice(&src.to_le_bytes());
+                }
+
+                dst
+            }
+
+            #[inline]
+            fn deserialize(
+                serialized_state: &SerializedState<Self>,
+            ) -> Result<Self, DeserializeStateError> {
+                let (t_src, x_src) = serialized_state.split_at(16);
+                let t = core::array::from_fn(|i| {
+                    let chunk = &t_src[8 * i..][..8];
+                    u64::from_le_bytes(chunk.try_into().unwrap())
+                });
+                let x = core::array::from_fn(|i| {
+                    let chunk = &x_src[8 * i..][..8];
+                    u64::from_le_bytes(chunk.try_into().unwrap())
+                });
+                Ok(Self {
+                    t,
+                    x,
+                    _pd: PhantomData,
+                })
+            }
+        }
     };
 }
 
