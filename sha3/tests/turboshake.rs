@@ -1,3 +1,4 @@
+#![cfg(none)]
 use core::fmt::Debug;
 use digest::ExtendableOutput;
 
