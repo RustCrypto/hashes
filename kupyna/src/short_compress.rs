@@ -63,23 +63,16 @@ fn matrix_to_block(matrix: Matrix) -> [u8; 64] {
 
 fn rotate_rows(mut state: Matrix) -> Matrix {
     const ROWS: usize = 8;
-    let cols = 8;
+    const COLS: usize = 8;
 
-    let mut temp = [0u8; ROWS];
-    let mut shift: i32 = -1;
-    for i in 0..cols {
-        if i == cols - 1 {
-            shift = 7;
-        } else {
-            shift += 1;
-        }
-        for col in 0..ROWS {
-            temp[(col + shift as usize) % ROWS] = state[col][i];
-        }
-        for col in 0..ROWS {
-            state[col][i] = temp[col];
+    for i in 0..COLS {
+        let shift = if i == COLS - 1 { 7 } else { i + 1 }; // Calculate the shift amount
+        for row in 0..ROWS {
+            let new_row = (row + shift) % ROWS; // Calculate the new row index
+            state[new_row][i] = state[row][i];  // Perform the rotation
         }
     }
+
     state
 }
 
