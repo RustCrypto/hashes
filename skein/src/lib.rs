@@ -156,8 +156,8 @@ macro_rules! define_hasher {
                     block[..8].copy_from_slice(&(i as u64).to_le_bytes());
                     Self::process_block(&mut ctr, &block, 8);
 
-                    for (src, dst) in ctr.x.iter().zip(chunk.chunks_exact_mut(8)) {
-                        dst.copy_from_slice(&src.to_le_bytes());
+                    for (src, dst) in ctr.x.iter().zip(chunk.chunks_mut(8)) {
+                        dst.copy_from_slice(&src.to_le_bytes()[..dst.len()]);
                     }
                 }
             }
