@@ -38,7 +38,7 @@ const fn generate_gf_lookup_table() -> [[u8; 256]; 256] {
     table
 }
 
-pub(crate) const GF_LOOKUP_TABLE: [[u8; 256]; 256] = generate_gf_lookup_table();
+pub(crate) static GF_LOOKUP_TABLE: [[u8; 256]; 256] = generate_gf_lookup_table();
 
 fn multiply_gf(x: u8, y: u8) -> u8 {
     GF_LOOKUP_TABLE[x as usize][y as usize]
