@@ -1,14 +1,13 @@
 use crate::consts::{MDS_MATRIX, SBOXES};
 
 const fn gf_multiply(x: u8, y: u8) -> u8 {
-    const BITS_IN_BYTE: u8 = 8;
     const REDUCTION_POLYNOMIAL: u16 = 0x011d;
 
     let mut x = x;
     let mut y = y;
     let mut r = 0u8;
     let mut i = 0;
-    while i < BITS_IN_BYTE {
+    while i < u8::BITS {
         if y & 1 == 1 {
             r ^= x;
         }
@@ -38,10 +37,10 @@ const fn generate_gf_lookup_table() -> [[u8; 256]; 256] {
     table
 }
 
-pub(crate) static GF_LOOKUP_TABLE: [[u8; 256]; 256] = generate_gf_lookup_table();
+static GF_LOOKUP_TABLE: [[u8; 256]; 256] = generate_gf_lookup_table();
 
 fn multiply_gf(x: u8, y: u8) -> u8 {
-    GF_LOOKUP_TABLE[x as usize][y as usize]
+    GF_LOOKUP_TABLE[usize::from(x)][usize::from(y)]
 }
 
 #[allow(clippy::needless_range_loop)]
