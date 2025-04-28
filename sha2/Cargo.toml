@@ -36,7 +36,7 @@ oid = ["digest/oid"]
 [lints.rust.unexpected_cfgs]
 level = "warn"
 check-cfg = [
-    'cfg(sha2_backend, values("soft", "riscv-zknh", "riscv-zknh-compact"))',
+    'cfg(sha2_backend, values("soft", "soft-compact", "riscv-zknh", "riscv-zknh-compact"))',
 ]
 
 [package.metadata.docs.rs]
