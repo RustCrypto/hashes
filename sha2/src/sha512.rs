@@ -42,14 +42,10 @@ cfg_if::cfg_if! {
 #[inline(always)]
 #[allow(dead_code)]
 fn to_u64s(block: &[u8; 128]) -> [u64; 16] {
-    let mut res = [0u64; 16];
-    // note: we intentionally do not use `zip`-based code here since
-    // it results in a suboptimal codegen for `opt-level = "s"`
-    for i in 0..16 {
+    core::array::from_fn(|i| {
         let chunk = block[8 * i..][..8].try_into().unwrap();
-        res[i] = u64::from_be_bytes(chunk);
-    }
-    res
+        u64::from_be_bytes(chunk)
+    })
 }
 
 /// Raw SHA-512 compression function.
