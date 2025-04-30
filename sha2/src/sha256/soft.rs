@@ -22,6 +22,26 @@ macro_rules! repeat64 {
     };
 }
 
+/// Read round constant
+fn rk(i: usize) -> u32 {
+    // `read_volatile` forces compiler to read round constants from the static
+    // instead of inlining them, which improves codegen and performance on some platforms.
+    // On x86 targets 32-bit constants can be encoded using immediate argument on the `add`
+    // instruction, so it's more efficient to inline them.
+    cfg_if::cfg_if! {
+        if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
+            use core::ptr::read as r;
+        } else {
+            use core::ptr::read_volatile as r;
+        }
+    }
+
+    unsafe {
+        let p = K32.as_ptr().add(i);
+        r(p)
+    }
+}
+
 /// Process a block with the SHA-256 algorithm.
 fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
     let mut block = super::to_u32s(block);
@@ -46,7 +66,7 @@ fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
-            .wrapping_add(K32[i])
+            .wrapping_add(rk(i))
             .wrapping_add(w)
             .wrapping_add(h);
         let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);

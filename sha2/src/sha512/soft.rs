@@ -26,6 +26,16 @@ macro_rules! repeat80 {
     };
 }
 
+/// Read round constant
+fn rk(i: usize) -> u64 {
+    // `read_volatile` forces the compiler to read round constants from the static
+    // instead of inlining them, which improves codegen and performance
+    unsafe {
+        let p = K64.as_ptr().add(i);
+        core::ptr::read_volatile(p)
+    }
+}
+
 /// Process a block with the SHA-512 algorithm.
 fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
     let mut block = super::to_u64s(block);
@@ -50,7 +60,7 @@ fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
-            .wrapping_add(K64[i])
+            .wrapping_add(rk(i))
             .wrapping_add(w)
             .wrapping_add(h);
         let s0 = a.rotate_right(28) ^ a.rotate_right(34) ^ a.rotate_right(39);
