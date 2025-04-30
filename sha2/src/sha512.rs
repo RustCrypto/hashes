@@ -2,6 +2,9 @@ cfg_if::cfg_if! {
     if #[cfg(sha2_backend = "soft")] {
         mod soft;
         use soft::compress;
+    } else if #[cfg(sha2_backend = "soft-compact")] {
+        mod soft_compact;
+        use soft_compact::compress;
     } else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
         mod soft;
         mod x86_avx2;
@@ -39,11 +42,10 @@ cfg_if::cfg_if! {
 #[inline(always)]
 #[allow(dead_code)]
 fn to_u64s(block: &[u8; 128]) -> [u64; 16] {
-    let mut res = [0u64; 16];
-    for (src, dst) in block.chunks_exact(8).zip(res.iter_mut()) {
-        *dst = u64::from_be_bytes(src.try_into().unwrap());
-    }
-    res
+    core::array::from_fn(|i| {
+        let chunk = block[8 * i..][..8].try_into().unwrap();
+        u64::from_be_bytes(chunk)
+    })
 }
 
 /// Raw SHA-512 compression function.

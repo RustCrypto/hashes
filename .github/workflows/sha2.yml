@@ -79,6 +79,9 @@ jobs:
       - run: cargo test --all-features
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact"
 
   # macOS tests
   macos:
@@ -102,6 +105,9 @@ jobs:
       - run: cargo test --all-features
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact"
 
   # Windows tests
   windows:
@@ -126,6 +132,9 @@ jobs:
       - run: cargo test --all-features
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact"
 
   # Cross-compiled tests
   cross:
@@ -176,6 +185,9 @@ jobs:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh,+zbkb
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact" -C target-feature=+zknh,+zbkb
+      - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
+        env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh,+zbkb
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
@@ -193,6 +205,9 @@ jobs:
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh,+zbkb
+      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact" -C target-feature=+zknh,+zbkb
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh,+zbkb

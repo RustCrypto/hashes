@@ -2,6 +2,9 @@ cfg_if::cfg_if! {
     if #[cfg(sha2_backend = "soft")] {
         mod soft;
         use soft::compress;
+    } else if #[cfg(sha2_backend = "soft-compact")] {
+        mod soft_compact;
+        use soft_compact::compress;
     } else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
         mod soft;
         mod x86_shani;
@@ -39,11 +42,10 @@ cfg_if::cfg_if! {
 #[inline(always)]
 #[allow(dead_code)]
 fn to_u32s(block: &[u8; 64]) -> [u32; 16] {
-    let mut res = [0u32; 16];
-    for (src, dst) in block.chunks_exact(4).zip(res.iter_mut()) {
-        *dst = u32::from_be_bytes(src.try_into().unwrap());
-    }
-    res
+    core::array::from_fn(|i| {
+        let chunk = block[4 * i..][..4].try_into().unwrap();
+        u32::from_be_bytes(chunk)
+    })
 }
 
 /// Raw SHA-256 compression function.
