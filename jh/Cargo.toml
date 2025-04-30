@@ -19,3 +19,7 @@ simd = { package = "ppv-lite86", version = "0.2.6" }
 
 [dev-dependencies]
 digest = { version = "0.10", features = ["dev"] }
+
+[features]
+default = ["std"]
+std = ["digest/std"]
