@@ -84,7 +84,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - ${{needs.set-msrv.outputs.msrv}}
+          - 1.79
           - stable
     runs-on: macos-latest
     steps:
