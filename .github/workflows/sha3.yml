@@ -95,15 +95,3 @@ jobs:
           package: ${{ github.workflow }}
           target: ${{ matrix.target }}
           features: ${{ matrix.features }}
-
-  # TODO: remove on MSRV bump to 1.57 or higher
-  test-msrv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.41.0
-      - run: cargo test --no-default-features
-      - run: cargo test
