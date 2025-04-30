@@ -76,7 +76,7 @@ This crate supports the following backends:
   if the extension is not available (SHA-512 only)
 
 You can force backend selection using the `sha2_backend` configuration flag. It can be enabled
-using either enviroment variable (e.g. `RUSTFLAGS='--cfg sha2_backend="soft"' cargo build`), or
+using either environment variable (e.g. `RUSTFLAGS='--cfg sha2_backend="soft"' cargo build`), or
 by modifying your `.cargo/config.toml` file. Currently the flag supports the following values:
 `soft`, `soft-compact`, `riscv-zknh`, and `riscv-zknh-compact`.
 
