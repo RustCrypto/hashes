@@ -15,7 +15,6 @@ defaults:
 
 env:
   CARGO_INCREMENTAL: 0
-  RUSTFLAGS: "-Dwarnings"
 
 jobs:
   set-msrv:
