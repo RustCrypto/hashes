@@ -1,221 +1,67 @@
-#![allow(clippy::many_single_char_names)]
 use crate::consts::K32;
 
-#[inline(always)]
-fn shr(v: [u32; 4], o: u32) -> [u32; 4] {
-    [v[0] >> o, v[1] >> o, v[2] >> o, v[3] >> o]
-}
-
-#[inline(always)]
-fn shl(v: [u32; 4], o: u32) -> [u32; 4] {
-    [v[0] << o, v[1] << o, v[2] << o, v[3] << o]
-}
-
-#[inline(always)]
-fn or(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
-    [a[0] | b[0], a[1] | b[1], a[2] | b[2], a[3] | b[3]]
-}
-
-#[inline(always)]
-fn xor(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
-    [a[0] ^ b[0], a[1] ^ b[1], a[2] ^ b[2], a[3] ^ b[3]]
-}
-
-#[inline(always)]
-fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
-    [
-        a[0].wrapping_add(b[0]),
-        a[1].wrapping_add(b[1]),
-        a[2].wrapping_add(b[2]),
-        a[3].wrapping_add(b[3]),
-    ]
-}
-
-#[inline(always)]
-fn add_round_const(mut a: [u32; 4], i: usize) -> [u32; 4] {
-    fn k(i: usize, j: usize) -> u32 {
-        // `read_volatile` forces compiler to read round constants from the static
-        // instead of inlining them, which improves codegen and performance on some platforms.
-        // On x86 targets 32-bit constants can be encoded using immediate argument on the `add`
-        // instruction, so it's more efficient to inline them.
-        cfg_if::cfg_if! {
-            if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
-                use core::ptr::read as r;
-            } else {
-                use core::ptr::read_volatile as r;
-            }
-        }
-
-        unsafe { r(K32.as_ptr().add(4 * i + j)) }
-    }
-
-    a[3] = a[3].wrapping_add(k(i, 0));
-    a[2] = a[2].wrapping_add(k(i, 1));
-    a[1] = a[1].wrapping_add(k(i, 2));
-    a[0] = a[0].wrapping_add(k(i, 3));
-    a
-}
-
-fn sha256load(v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
-    [v3[3], v2[0], v2[1], v2[2]]
-}
-
-fn sha256swap(v0: [u32; 4]) -> [u32; 4] {
-    [v0[2], v0[3], v0[0], v0[1]]
-}
-
-fn sha256msg1(v0: [u32; 4], v1: [u32; 4]) -> [u32; 4] {
-    // sigma 0 on vectors
-    #[inline]
-    fn sigma0x4(x: [u32; 4]) -> [u32; 4] {
-        let t1 = or(shr(x, 7), shl(x, 25));
-        let t2 = or(shr(x, 18), shl(x, 14));
-        let t3 = shr(x, 3);
-        xor(xor(t1, t2), t3)
-    }
-
-    add(v0, sigma0x4(sha256load(v0, v1)))
-}
-
-fn sha256msg2(v4: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
-    macro_rules! sigma1 {
-        ($a:expr) => {
-            $a.rotate_right(17) ^ $a.rotate_right(19) ^ ($a >> 10)
-        };
-    }
-
-    let [x3, x2, x1, x0] = v4;
-    let [w15, w14, _, _] = v3;
-
-    let w16 = x0.wrapping_add(sigma1!(w14));
-    let w17 = x1.wrapping_add(sigma1!(w15));
-    let w18 = x2.wrapping_add(sigma1!(w16));
-    let w19 = x3.wrapping_add(sigma1!(w17));
-
-    [w19, w18, w17, w16]
-}
-
-fn sha256_digest_round_x2(cdgh: [u32; 4], abef: [u32; 4], wk: [u32; 4]) -> [u32; 4] {
-    macro_rules! big_sigma0 {
-        ($a:expr) => {
-            ($a.rotate_right(2) ^ $a.rotate_right(13) ^ $a.rotate_right(22))
-        };
-    }
-    macro_rules! big_sigma1 {
-        ($a:expr) => {
-            ($a.rotate_right(6) ^ $a.rotate_right(11) ^ $a.rotate_right(25))
-        };
-    }
-    macro_rules! bool3ary_202 {
-        ($a:expr, $b:expr, $c:expr) => {
-            $c ^ ($a & ($b ^ $c))
-        };
-    } // Choose, MD5F, SHA1C
-    macro_rules! bool3ary_232 {
-        ($a:expr, $b:expr, $c:expr) => {
-            ($a & $b) ^ ($a & $c) ^ ($b & $c)
-        };
-    } // Majority, SHA1M
-
-    let [_, _, wk1, wk0] = wk;
-    let [a0, b0, e0, f0] = abef;
-    let [c0, d0, g0, h0] = cdgh;
-
-    // a round
-    let x0 = big_sigma1!(e0)
-        .wrapping_add(bool3ary_202!(e0, f0, g0))
-        .wrapping_add(wk0)
-        .wrapping_add(h0);
-    let y0 = big_sigma0!(a0).wrapping_add(bool3ary_232!(a0, b0, c0));
-    let (a1, b1, c1, d1, e1, f1, g1, h1) = (
-        x0.wrapping_add(y0),
-        a0,
-        b0,
-        c0,
-        x0.wrapping_add(d0),
-        e0,
-        f0,
-        g0,
-    );
-
-    // a round
-    let x1 = big_sigma1!(e1)
-        .wrapping_add(bool3ary_202!(e1, f1, g1))
-        .wrapping_add(wk1)
-        .wrapping_add(h1);
-    let y1 = big_sigma0!(a1).wrapping_add(bool3ary_232!(a1, b1, c1));
-    let (a2, b2, _, _, e2, f2, _, _) = (
-        x1.wrapping_add(y1),
-        a1,
-        b1,
-        c1,
-        x1.wrapping_add(d1),
-        e1,
-        f1,
-        g1,
-    );
-
-    [a2, b2, e2, f2]
-}
-
-fn schedule(v0: [u32; 4], v1: [u32; 4], v2: [u32; 4], v3: [u32; 4]) -> [u32; 4] {
-    let t1 = sha256msg1(v0, v1);
-    let t2 = sha256load(v2, v3);
-    let t3 = add(t1, t2);
-    sha256msg2(t3, v3)
-}
-
-macro_rules! rounds4 {
-    ($abef:ident, $cdgh:ident, $rest:expr, $i:expr) => {{
-        let t1 = add_round_const($rest, $i);
-        $cdgh = sha256_digest_round_x2($cdgh, $abef, t1);
-        let t2 = sha256swap(t1);
-        $abef = sha256_digest_round_x2($abef, $cdgh, t2);
-    }};
-}
-
-macro_rules! schedule_rounds4 {
-    (
-        $abef:ident, $cdgh:ident,
-        $w0:expr, $w1:expr, $w2:expr, $w3:expr, $w4:expr,
-        $i: expr
-    ) => {{
-        $w4 = schedule($w0, $w1, $w2, $w3);
-        rounds4!($abef, $cdgh, $w4, $i);
-    }};
+#[rustfmt::skip]
+macro_rules! repeat64 {
+    ($i:ident, $b:block) => {
+        let $i = 0; $b; let $i = 1; $b; let $i = 2; $b; let $i = 3; $b;
+        let $i = 4; $b; let $i = 5; $b; let $i = 6; $b; let $i = 7; $b;
+        let $i = 8; $b; let $i = 9; $b; let $i = 10; $b; let $i = 11; $b;
+        let $i = 12; $b; let $i = 13; $b; let $i = 14; $b; let $i = 15; $b;
+        let $i = 16; $b; let $i = 17; $b; let $i = 18; $b; let $i = 19; $b;
+        let $i = 20; $b; let $i = 21; $b; let $i = 22; $b; let $i = 23; $b;
+        let $i = 24; $b; let $i = 25; $b; let $i = 26; $b; let $i = 27; $b;
+        let $i = 28; $b; let $i = 29; $b; let $i = 30; $b; let $i = 31; $b;
+        let $i = 32; $b; let $i = 33; $b; let $i = 34; $b; let $i = 35; $b;
+        let $i = 36; $b; let $i = 37; $b; let $i = 38; $b; let $i = 39; $b;
+        let $i = 40; $b; let $i = 41; $b; let $i = 42; $b; let $i = 43; $b;
+        let $i = 44; $b; let $i = 45; $b; let $i = 46; $b; let $i = 47; $b;
+        let $i = 48; $b; let $i = 49; $b; let $i = 50; $b; let $i = 51; $b;
+        let $i = 52; $b; let $i = 53; $b; let $i = 54; $b; let $i = 55; $b;
+        let $i = 56; $b; let $i = 57; $b; let $i = 58; $b; let $i = 59; $b;
+        let $i = 60; $b; let $i = 61; $b; let $i = 62; $b; let $i = 63; $b;
+    };
 }
 
 /// Process a block with the SHA-256 algorithm.
-fn sha256_digest_block_u32(state: &mut [u32; 8], block: [u32; 16]) {
-    let mut abef = [state[0], state[1], state[4], state[5]];
-    let mut cdgh = [state[2], state[3], state[6], state[7]];
+fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
+    let mut block = super::to_u32s(block);
+    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
-    // Rounds 0..64
-    let mut w0 = [block[3], block[2], block[1], block[0]];
-    let mut w1 = [block[7], block[6], block[5], block[4]];
-    let mut w2 = [block[11], block[10], block[9], block[8]];
-    let mut w3 = [block[15], block[14], block[13], block[12]];
-    let mut w4;
+    repeat64!(i, {
+        let w = if i < 16 {
+            block[i]
+        } else {
+            let w15 = block[(i - 15) % 16];
+            let s0 = (w15.rotate_right(7)) ^ (w15.rotate_right(18)) ^ (w15 >> 3);
+            let w2 = block[(i - 2) % 16];
+            let s1 = (w2.rotate_right(17)) ^ (w2.rotate_right(19)) ^ (w2 >> 10);
+            block[i % 16] = block[i % 16]
+                .wrapping_add(s0)
+                .wrapping_add(block[(i - 7) % 16])
+                .wrapping_add(s1);
+            block[i % 16]
+        };
 
-    rounds4!(abef, cdgh, w0, 0);
-    rounds4!(abef, cdgh, w1, 1);
-    rounds4!(abef, cdgh, w2, 2);
-    rounds4!(abef, cdgh, w3, 3);
-    schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 4);
-    schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 5);
-    schedule_rounds4!(abef, cdgh, w2, w3, w4, w0, w1, 6);
-    schedule_rounds4!(abef, cdgh, w3, w4, w0, w1, w2, 7);
-    schedule_rounds4!(abef, cdgh, w4, w0, w1, w2, w3, 8);
-    schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 9);
-    schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 10);
-    schedule_rounds4!(abef, cdgh, w2, w3, w4, w0, w1, 11);
-    schedule_rounds4!(abef, cdgh, w3, w4, w0, w1, w2, 12);
-    schedule_rounds4!(abef, cdgh, w4, w0, w1, w2, w3, 13);
-    schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 14);
-    schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 15);
+        let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
+        let ch = (e & f) ^ ((!e) & g);
+        let t1 = s1
+            .wrapping_add(ch)
+            .wrapping_add(K32[i])
+            .wrapping_add(w)
+            .wrapping_add(h);
+        let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
+        let maj = (a & b) ^ (a & c) ^ (b & c);
+        let t2 = s0.wrapping_add(maj);
 
-    let [a, b, e, f] = abef;
-    let [c, d, g, h] = cdgh;
+        h = g;
+        g = f;
+        f = e;
+        e = d.wrapping_add(t1);
+        d = c;
+        c = b;
+        b = a;
+        a = t1.wrapping_add(t2);
+    });
 
     state[0] = state[0].wrapping_add(a);
     state[1] = state[1].wrapping_add(b);
@@ -228,7 +74,7 @@ fn sha256_digest_block_u32(state: &mut [u32; 8], block: [u32; 16]) {
 }
 
 pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks.iter().map(super::to_u32s) {
-        sha256_digest_block_u32(state, block);
+    for block in blocks {
+        compress_block(state, block);
     }
 }
