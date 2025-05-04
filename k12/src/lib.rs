@@ -18,7 +18,7 @@ use digest::core_api::{
     UpdateCore, XofReaderCore, XofReaderCoreWrapper,
 };
 use digest::{ExtendableOutputReset, HashMarker, Reset, Update, XofReader};
-use sha3::{TurboShake128, TurboShake128Core, TurboShake128ReaderCore};
+use sha3::{TurboShake128, TurboShake128Reader};
 
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
@@ -34,8 +34,8 @@ pub struct KangarooTwelveCore<'cs> {
     customization: &'cs [u8],
     buffer: [u8; CHUNK_SIZE],
     bufpos: usize,
-    final_tshk: TurboShake128,
-    chain_tshk: TurboShake128,
+    final_tshk: TurboShake128<0x06>,
+    chain_tshk: TurboShake128<0x0B>,
     chain_length: usize,
 }
 
@@ -49,8 +49,8 @@ impl<'cs> KangarooTwelveCore<'cs> {
             customization,
             buffer: [0u8; CHUNK_SIZE],
             bufpos: 0usize,
-            final_tshk: TurboShake128::from_core(<TurboShake128Core>::new(0x06)),
-            chain_tshk: TurboShake128::from_core(<TurboShake128Core>::new(0x0B)),
+            final_tshk: Default::default(),
+            chain_tshk: Default::default(),
             chain_length: 0usize,
         }
     }
@@ -132,7 +132,7 @@ impl ExtendableOutputCore for KangarooTwelveCore<'_> {
         // Calculate final node
         if self.chain_length == 0 {
             // Input did not exceed a single chaining value
-            let tshk = TurboShake128::from_core(<TurboShake128Core>::new(0x07))
+            let tshk = TurboShake128::<0x07>::default()
                 .chain(&self.buffer[..self.bufpos])
                 .finalize_xof_reset();
             return KangarooTwelveReaderCore { tshk };
@@ -159,8 +159,8 @@ impl Default for KangarooTwelveCore<'_> {
             customization: &[],
             buffer: [0u8; CHUNK_SIZE],
             bufpos: 0usize,
-            final_tshk: TurboShake128::from_core(<TurboShake128Core>::new(0x06)),
-            chain_tshk: TurboShake128::from_core(<TurboShake128Core>::new(0x0B)),
+            final_tshk: Default::default(),
+            chain_tshk: Default::default(),
             chain_length: 0usize,
         }
     }
@@ -204,7 +204,7 @@ impl ZeroizeOnDrop for KangarooTwelveCore<'_> {}
 #[derive(Clone)]
 #[allow(non_camel_case_types)]
 pub struct KangarooTwelveReaderCore {
-    tshk: XofReaderCoreWrapper<TurboShake128ReaderCore>,
+    tshk: TurboShake128Reader,
 }
 
 /// [`KangarooTwelve`] reader state.

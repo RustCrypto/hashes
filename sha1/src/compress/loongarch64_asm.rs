@@ -1,6 +1,6 @@
 //! LoongArch64 assembly backend
 
-use crate::K;
+use super::K;
 use core::arch::asm;
 
 macro_rules! c {

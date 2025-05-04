@@ -9,110 +9,32 @@
 #![warn(missing_docs)]
 #![allow(non_snake_case)]
 
-#[macro_use]
-mod macros;
-
-use core::{fmt, ops::Add};
 pub use digest::{self, Digest};
 
-// Double check this contains all values in the reference implementation
-static PI: &[u8; 272384] = include_bytes!("pi.bin");
+static PI: &[u8; 272_384] = include_bytes!("pi.bin");
 
-use digest::{
-    HashMarker, Output,
-    block_buffer::Eager,
-    core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, FixedOutputCore,
-        OutputSizeUser, Reset, UpdateCore,
-    },
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{U8, Unsigned},
-};
+mod block_api;
+pub use block_api::{Fsb160Core, Fsb224Core, Fsb256Core, Fsb384Core, Fsb512Core};
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+use digest::core_api::CoreWrapper;
 
-// FSB-160
-fsb_impl!(
-    Fsb160,
-    Fsb160Core,
-    160,
-    U60,
-    U20,
-    U80,
-    5 << 18,
-    80,
-    640,
-    653,
-    1120,
-    "FSB-160 hasher state",
-    "Core FSB-160 hasher state",
+digest::newtype_fixed_hash!(
+    /// FSB-160 hasher.
+    pub struct Fsb160(CoreWrapper<Fsb160Core>);
 );
-
-// FSB-224
-fsb_impl!(
-    Fsb224,
-    Fsb224Core,
-    224,
-    U84,
-    U28,
-    U112,
-    7 << 18,
-    112,
-    896,
-    907,
-    1568,
-    "FSB-224 hasher state",
-    "Core FSB-224 hasher state",
+digest::newtype_fixed_hash!(
+    /// FSB-224 hasher.
+    pub struct Fsb224(CoreWrapper<Fsb224Core>);
 );
-
-// FSB-256
-fsb_impl!(
-    Fsb256,
-    Fsb256Core,
-    256,
-    U96,
-    U32,
-    U128,
-    1 << 21,
-    128,
-    1024,
-    1061,
-    1792,
-    "FSB-256 hasher state",
-    "Core FSB-256 hasher state",
+digest::newtype_fixed_hash!(
+    /// FSB-256 hasher.
+    pub struct Fsb256(CoreWrapper<Fsb256Core>);
 );
-
-// FSB-384
-fsb_impl!(
-    Fsb384,
-    Fsb384Core,
-    384,
-    U115,
-    U48,
-    U184,
-    23 << 16,
-    184,
-    1472,
-    1483,
-    2392,
-    "FSB-384 hasher state",
-    "Core FSB-384 hasher state",
+digest::newtype_fixed_hash!(
+    /// FSB-384 hasher.
+    pub struct Fsb384(CoreWrapper<Fsb384Core>);
 );
-
-// FSB-512
-fsb_impl!(
-    Fsb512,
-    Fsb512Core,
-    512,
-    U155,
-    U64,
-    U248,
-    31 << 16,
-    248,
-    1984,
-    1987,
-    3224,
-    "FSB-512 hasher state",
-    "Core FSB-512 hasher state",
+digest::newtype_fixed_hash!(
+    /// FSB-512 hasher.
+    pub struct Fsb512(CoreWrapper<Fsb512Core>);
 );

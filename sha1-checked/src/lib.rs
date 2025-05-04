@@ -23,9 +23,6 @@ pub use digest::{self, Digest};
 
 use core::slice::from_ref;
 
-#[cfg(feature = "std")]
-extern crate std;
-
 use digest::{
     FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
     array::Array,
@@ -241,21 +238,7 @@ impl ZeroizeOnDrop for DetectionState {}
 
 #[cfg(feature = "oid")]
 impl digest::const_oid::AssociatedOid for Sha1 {
-    const OID: digest::const_oid::ObjectIdentifier = sha1::Sha1Core::OID;
-}
-
-#[cfg(feature = "std")]
-impl std::io::Write for Sha1 {
-    #[inline]
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        Update::update(self, buf);
-        Ok(buf.len())
-    }
-
-    #[inline]
-    fn flush(&mut self) -> std::io::Result<()> {
-        Ok(())
-    }
+    const OID: digest::const_oid::ObjectIdentifier = sha1::Sha1::OID;
 }
 
 /// Builder for collision detection configuration.
