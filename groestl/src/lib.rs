@@ -22,26 +22,27 @@ use digest::{
     core_api::{CoreWrapper, CtVariableCoreWrapper, RtVariableCoreWrapper},
 };
 
-/// Short Groestl variant which allows to choose output size at runtime.
-pub type GroestlShortVar = RtVariableCoreWrapper<GroestlShortVarCore>;
-/// Core hasher state of the short Groestl variant generic over output size.
-pub type GroestlShortCore<OutSize> = CtVariableCoreWrapper<GroestlShortVarCore, OutSize>;
-/// Hasher state of the short Groestl variant generic over output size.
-pub type GroestlShort<OutSize> = CoreWrapper<GroestlShortCore<OutSize>>;
+digest::newtype_variable_hash!(
+    /// Hasher state of the short Groestl variant generic over output size.
+    pub struct GroestlShort<OutSize>(CoreWrapper<CtVariableCoreWrapper<GroestlShortVarCore, OutSize>>);
+    /// Short Groestl variant which allows to select output size at runtime.
+    pub struct GroestlShortVar(RtVariableCoreWrapper<GroestlShortVarCore>);
+    max_size: U32;
+);
+digest::newtype_variable_hash!(
+    /// Hasher state of the long Groestl variant generic over output size.
+    pub struct GroestlLong<OutSize>(CoreWrapper<CtVariableCoreWrapper<GroestlLongVarCore, OutSize>>);
+    /// Short Groestl variant which allows to select output size at runtime.
+    pub struct GroestlLongVar(RtVariableCoreWrapper<GroestlLongVarCore>);
+    max_size: U64;
+);
 
 /// Groestl-224 hasher state.
-pub type Groestl224 = CoreWrapper<GroestlShortCore<U28>>;
+pub type Groestl224 = GroestlShort<U28>;
 /// Groestl-256 hasher state.
-pub type Groestl256 = CoreWrapper<GroestlShortCore<U32>>;
-
-/// Long Groestl variant which allows to choose output size at runtime.
-pub type GroestlLongVar = RtVariableCoreWrapper<GroestlLongVarCore>;
-/// Core hasher state of the long Groestl variant generic over output size.
-pub type GroestlLongCore<OutSize> = CtVariableCoreWrapper<GroestlLongVarCore, OutSize>;
-/// Hasher state of the long Groestl variant generic over output size.
-pub type GroestlLong<OutSize> = CoreWrapper<GroestlLongCore<OutSize>>;
+pub type Groestl256 = GroestlShort<U32>;
 
 /// Groestl-384 hasher state.
-pub type Groestl384 = CoreWrapper<GroestlLongCore<U48>>;
+pub type Groestl384 = GroestlLong<U48>;
 /// Groestl-512 hasher state.
-pub type Groestl512 = CoreWrapper<GroestlLongCore<U64>>;
+pub type Groestl512 = GroestlLong<U64>;
