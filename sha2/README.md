@@ -59,6 +59,29 @@ assert_eq!(hash512, hex!(
 
 Also, see the [examples section] in the RustCrypto/hashes readme.
 
+## Backends
+
+This crate supports the following backends:
+- `soft`: portable implementation with fully unrolled rounds
+- `soft-compact`: portable implementation which produces smaller binaries
+- `aarch64-sha2`: uses the AArch64 `sha2` extension, fallbacks to the `soft` backend
+  if the extension is not available
+- `loongarch64-asm`: `asm!`-based implementation for LoongArch64 targets
+- `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension (experimental)
+- `riscv-zknh-compact`: same as `riscv_zknh` but does not unroll rounds (experimental)
+- `wasm32-simd`: uses the WASM `simd128` extension
+- `x86-shani`: uses the x86 SHA-NI extension, fallbacks to the `soft` backend
+  if the extension is not available (SHA-256 only)
+- `x86-avx2`: uses the x86 AVX2 extension, fallbacks to the `soft` backend
+  if the extension is not available (SHA-512 only)
+
+You can force backend selection using the `sha2_backend` configuration flag. It can be enabled
+using either environment variable (e.g. `RUSTFLAGS='--cfg sha2_backend="soft"' cargo build`), or
+by modifying your `.cargo/config.toml` file. Currently the flag supports the following values:
+`soft`, `soft-compact`, `riscv-zknh`, and `riscv-zknh-compact`.
+
+Note that the RISC-V backends are experimental and require Nightly compiler.
+
 ## License
 
 The crate is licensed under either of:

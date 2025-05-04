@@ -25,14 +25,14 @@ cfg_if::cfg_if! {
         use riscv_zknh_compact::compress;
     } else if #[cfg(target_arch = "aarch64")] {
         mod soft;
-        mod aarch64;
-        use aarch64::compress;
+        mod aarch64_sha2;
+        use aarch64_sha2::compress;
     } else if #[cfg(target_arch = "loongarch64")] {
         mod loongarch64_asm;
         use loongarch64_asm::compress;
     } else if #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))] {
-        mod wasm32;
-        use wasm32::compress;
+        mod wasm32_simd128;
+        use wasm32_simd128::compress;
     } else {
         mod soft;
         use soft::compress;
