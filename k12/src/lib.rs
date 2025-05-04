@@ -20,9 +20,6 @@ use digest::core_api::{
 use digest::{ExtendableOutputReset, HashMarker, Reset, Update, XofReader};
 use sha3::{TurboShake128, TurboShake128Reader};
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
-
 const CHUNK_SIZE: usize = 8192;
 const CHAINING_VALUE_SIZE: usize = 32;
 const LENGTH_ENCODE_SIZE: usize = 255;
@@ -189,6 +186,7 @@ impl Drop for KangarooTwelveCore<'_> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
+            use digest::zeroize::Zeroize;
             self.buffer.zeroize();
             self.bufpos.zeroize();
             self.chain_length.zeroize();
@@ -198,7 +196,7 @@ impl Drop for KangarooTwelveCore<'_> {
 }
 
 #[cfg(feature = "zeroize")]
-impl ZeroizeOnDrop for KangarooTwelveCore<'_> {}
+impl digest::zeroize::ZeroizeOnDrop for KangarooTwelveCore<'_> {}
 
 /// Core [`KangarooTwelve`] reader state.
 #[derive(Clone)]
@@ -225,7 +223,7 @@ impl XofReaderCore for KangarooTwelveReaderCore {
 
 // `TurboShake128ReaderCore` and the wrapper are zeroized by their Drop impls
 #[cfg(feature = "zeroize")]
-impl ZeroizeOnDrop for KangarooTwelveReaderCore {}
+impl digest::zeroize::ZeroizeOnDrop for KangarooTwelveReaderCore {}
 
 fn length_encode(mut length: usize, buffer: &mut [u8; LENGTH_ENCODE_SIZE]) -> &mut [u8] {
     let mut bufpos = 0usize;
