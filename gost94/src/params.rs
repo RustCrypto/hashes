@@ -1,3 +1,5 @@
+//! GOST94 parameters.
+
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 

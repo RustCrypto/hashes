@@ -13,11 +13,23 @@ pub use digest::{
     consts::{U32, U64, U128},
 };
 
+use digest::{array::ArraySize, core_api::CoreWrapper};
+
 mod block_api;
-mod newtype;
 pub use block_api::{Skein256Core, Skein512Core, Skein1024Core};
 
-pub use newtype::{Skein256, Skein512, Skein1024};
+digest::newtype_fixed_hash!(
+    /// Skein-256 hasher generic over output size
+    pub struct Skein256<N: ArraySize>(CoreWrapper<Skein256Core<N>>);
+);
+digest::newtype_fixed_hash!(
+    /// Skein-512 hasher generic over output size
+    pub struct Skein512<N: ArraySize>(CoreWrapper<Skein512Core<N>>);
+);
+digest::newtype_fixed_hash!(
+    /// Skein-1024 hasher generic over output size
+    pub struct Skein1024<N: ArraySize>(CoreWrapper<Skein1024Core<N>>);
+);
 
 /// Skein-256-256 hasher.
 pub type Skein256_256 = Skein256<U32>;

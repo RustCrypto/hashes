@@ -94,7 +94,7 @@ dependencies = [
 [[package]]
 name = "crypto-common"
 version = "0.2.0-rc.2"
-source = "git+https://github.com/RustCrypto/traits?branch=digest%2Fnewtype#c0725f1d6e250285fa5754b113753f891defafa6"
+source = "git+https://github.com/RustCrypto/traits?branch=digest%2Fnewtype#24d0f6a9b1db824121902d3eef4f998ef2d63fc8"
 dependencies = [
  "hybrid-array",
 ]
@@ -102,7 +102,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.11.0-pre.10"
-source = "git+https://github.com/RustCrypto/traits?branch=digest%2Fnewtype#c0725f1d6e250285fa5754b113753f891defafa6"
+source = "git+https://github.com/RustCrypto/traits?branch=digest%2Fnewtype#24d0f6a9b1db824121902d3eef4f998ef2d63fc8"
 dependencies = [
  "blobby",
  "block-buffer",
