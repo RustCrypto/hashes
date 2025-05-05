@@ -24,25 +24,26 @@ pub(crate) mod utils;
 pub use long::KupynaLongVarCore;
 pub use short::KupynaShortVarCore;
 
-/// Short Kupyna variant which allows to choose output size at runtime.
-pub type KupynaShortVar = RtVariableCoreWrapper<KupynaShortVarCore>;
-/// Core hasher state of the short Kupyna variant generic over output size.
-pub type KupynaShortCore<OutSize> = CtVariableCoreWrapper<KupynaShortVarCore, OutSize>;
-/// Hasher state of the short Kupyna variant generic over output size.
-pub type KupynaShort<OutSize> = CoreWrapper<KupynaShortCore<OutSize>>;
-
-/// Long Kupyna variant which allows to choose output size at runtime.
-pub type KupynaLongVar = RtVariableCoreWrapper<KupynaLongVarCore>;
-/// Core hasher state of the long Kupyna variant generic over output size.
-pub type KupynaLongCore<OutSize> = CtVariableCoreWrapper<KupynaLongVarCore, OutSize>;
-/// Hasher state of the long Kupyna variant generic over output size.
-pub type KupynaLong<OutSize> = CoreWrapper<KupynaLongCore<OutSize>>;
+digest::newtype_variable_hash!(
+    /// Hasher state of the short Groestl variant generic over output size.
+    pub struct KupynaShort<OutSize>(CoreWrapper<CtVariableCoreWrapper<KupynaShortVarCore, OutSize>>);
+    /// Short Groestl variant which allows to select output size at runtime.
+    pub struct KupynaShortVar(RtVariableCoreWrapper<KupynaShortVarCore>);
+    max_size: U32;
+);
+digest::newtype_variable_hash!(
+    /// Hasher state of the long Groestl variant generic over output size.
+    pub struct KupynaLong<OutSize>(CoreWrapper<CtVariableCoreWrapper<KupynaLongVarCore, OutSize>>);
+    /// Short Groestl variant which allows to select output size at runtime.
+    pub struct KupynaLongVar(RtVariableCoreWrapper<KupynaLongVarCore>);
+    max_size: U64;
+);
 
 /// Kupyna-224 hasher state.
-pub type Kupyna224 = CoreWrapper<KupynaShortCore<U28>>;
+pub type Kupyna224 = KupynaShort<U28>;
 /// Kupyna-256 hasher state.
-pub type Kupyna256 = CoreWrapper<KupynaShortCore<U32>>;
+pub type Kupyna256 = KupynaShort<U32>;
 /// Kupyna-384 hasher state.
-pub type Kupyna384 = CoreWrapper<KupynaLongCore<U48>>;
+pub type Kupyna384 = KupynaLong<U48>;
 /// Kupyna-512 hasher state.
-pub type Kupyna512 = CoreWrapper<KupynaLongCore<U64>>;
+pub type Kupyna512 = KupynaLong<U64>;
