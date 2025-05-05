@@ -23,26 +23,26 @@ use digest::{
 };
 
 digest::newtype_variable_hash!(
-    /// Hasher state of the short Groestl variant generic over output size.
+    /// Short Groestl variant generic over output size.
     pub struct GroestlShort<OutSize>(CoreWrapper<CtVariableCoreWrapper<GroestlShortVarCore, OutSize>>);
     /// Short Groestl variant which allows to select output size at runtime.
     pub struct GroestlShortVar(RtVariableCoreWrapper<GroestlShortVarCore>);
     max_size: U32;
 );
 digest::newtype_variable_hash!(
-    /// Hasher state of the long Groestl variant generic over output size.
+    /// Long Groestl variant generic over output size.
     pub struct GroestlLong<OutSize>(CoreWrapper<CtVariableCoreWrapper<GroestlLongVarCore, OutSize>>);
-    /// Short Groestl variant which allows to select output size at runtime.
+    /// Long Groestl variant which allows to select output size at runtime.
     pub struct GroestlLongVar(RtVariableCoreWrapper<GroestlLongVarCore>);
     max_size: U64;
 );
 
-/// Groestl-224 hasher state.
+/// Groestl-224 hasher.
 pub type Groestl224 = GroestlShort<U28>;
-/// Groestl-256 hasher state.
+/// Groestl-256 hasher.
 pub type Groestl256 = GroestlShort<U32>;
 
-/// Groestl-384 hasher state.
+/// Groestl-384 hasher.
 pub type Groestl384 = GroestlLong<U48>;
-/// Groestl-512 hasher state.
+/// Groestl-512 hasher.
 pub type Groestl512 = GroestlLong<U64>;
