@@ -17,26 +17,26 @@ pub use digest::{self, Digest};
 
 use digest::{
     consts::{U24, U28, U32, U48, U64},
-    core_api::{CoreWrapper, CtVariableCoreWrapper},
+    core_api::CtVariableCoreWrapper,
 };
 
 digest::newtype_fixed_hash!(
     /// Shabal-192 hasher.
-    pub struct Shabal192(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U24>>);
+    pub struct Shabal192(CtVariableCoreWrapper<ShabalVarCore, U24>);
 );
 digest::newtype_fixed_hash!(
     /// Shabal-224 hasher.
-    pub struct Shabal224(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U28>>);
+    pub struct Shabal224(CtVariableCoreWrapper<ShabalVarCore, U28>);
 );
 digest::newtype_fixed_hash!(
     /// Shabal-256 hasher.
-    pub struct Shabal256(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U32>>);
+    pub struct Shabal256(CtVariableCoreWrapper<ShabalVarCore, U32>);
 );
 digest::newtype_fixed_hash!(
     /// Shabal-384 hasher.
-    pub struct Shabal384(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U48>>);
+    pub struct Shabal384(CtVariableCoreWrapper<ShabalVarCore, U48>);
 );
 digest::newtype_fixed_hash!(
     /// Shabal-512 hasher.
-    pub struct Shabal512(CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U64>>);
+    pub struct Shabal512(CtVariableCoreWrapper<ShabalVarCore, U64>);
 );

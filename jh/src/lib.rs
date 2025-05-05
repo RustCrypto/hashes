@@ -17,24 +17,22 @@ pub use block_api::JhCore;
 
 use digest::{
     consts::{U28, U32, U48, U64},
-    core_api::{CoreWrapper, CtVariableCoreWrapper},
+    core_api::CtVariableCoreWrapper,
 };
 
-// note: we do not use `delegate_template: FixedOutputHash` because
-// `JhCore` does not implement `SerializableState`
 digest::newtype_fixed_hash!(
     /// JH-224 hasher.
-    pub struct Jh224(CoreWrapper<CtVariableCoreWrapper<JhCore, U28>>);
+    pub struct Jh224(CtVariableCoreWrapper<JhCore, U28>);
 );
 digest::newtype_fixed_hash!(
     /// JH-256 hasher.
-    pub struct Jh256(CoreWrapper<CtVariableCoreWrapper<JhCore, U32>>);
+    pub struct Jh256(CtVariableCoreWrapper<JhCore, U32>);
 );
 digest::newtype_fixed_hash!(
     /// JH-384 hasher.
-    pub struct Jh384(CoreWrapper<CtVariableCoreWrapper<JhCore, U48>>);
+    pub struct Jh384(CtVariableCoreWrapper<JhCore, U48>);
 );
 digest::newtype_fixed_hash!(
     /// JH-512 hasher.
-    pub struct Jh512(CoreWrapper<CtVariableCoreWrapper<JhCore, U64>>);
+    pub struct Jh512(CtVariableCoreWrapper<JhCore, U64>);
 );

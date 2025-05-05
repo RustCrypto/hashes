@@ -283,7 +283,7 @@ impl SerializableState for AsconXofCore {
 
 digest::newtype_fixed_hash!(
     /// Ascon-Hash256
-    pub struct AsconHash256(CoreWrapper<AsconCore>);
+    pub struct AsconHash256(AsconCore);
 );
 
 digest::newtype_xof_hash!(

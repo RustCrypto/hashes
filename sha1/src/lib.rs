@@ -17,6 +17,6 @@ pub use compress::compress;
 
 digest::newtype_fixed_hash!(
     /// SHA-1 hasher.
-    pub struct Sha1(digest::core_api::CoreWrapper<Sha1Core>);
+    pub struct Sha1(Sha1Core);
     oid: "1.3.14.3.2.26"
 );

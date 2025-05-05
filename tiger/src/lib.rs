@@ -17,10 +17,10 @@ pub use block_api::TigerCore;
 
 digest::newtype_fixed_hash!(
     /// Tiger hasher.
-    pub struct Tiger(digest::core_api::CoreWrapper<TigerCore<false>>);
+    pub struct Tiger(TigerCore<false>);
 );
 
 digest::newtype_fixed_hash!(
     /// Tiger2 hasher.
-    pub struct Tiger2(digest::core_api::CoreWrapper<TigerCore<true>>);
+    pub struct Tiger2(TigerCore<true>);
 );

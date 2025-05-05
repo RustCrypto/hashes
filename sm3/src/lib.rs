@@ -18,5 +18,5 @@ pub use block_api::Sm3Core;
 
 digest::newtype_fixed_hash!(
     /// ShangMi 3 (SM3) hasher.
-    pub struct Sm3(digest::core_api::CoreWrapper<Sm3Core>);
+    pub struct Sm3(Sm3Core);
 );

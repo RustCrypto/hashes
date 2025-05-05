@@ -38,22 +38,22 @@ const DEFAULT_ROUND_COUNT: usize = 24;
 
 digest::newtype_fixed_hash!(
     /// SHA-3-224 hasher.
-    pub struct Sha3_224(CoreWrapper<Sha3FixedCore<U144, U28, SHA3_PAD>>);
+    pub struct Sha3_224(Sha3FixedCore<U144, U28, SHA3_PAD>);
     oid: "2.16.840.1.101.3.4.2.7"
 );
 digest::newtype_fixed_hash!(
     /// SHA-3-256 hasher.
-    pub struct Sha3_256(CoreWrapper<Sha3FixedCore<U136, U32, SHA3_PAD>>);
+    pub struct Sha3_256(Sha3FixedCore<U136, U32, SHA3_PAD>);
     oid: "2.16.840.1.101.3.4.2.8"
 );
 digest::newtype_fixed_hash!(
     /// SHA-3-384 hasher.
-    pub struct Sha3_384(CoreWrapper<Sha3FixedCore<U104, U48, SHA3_PAD>>);
+    pub struct Sha3_384(Sha3FixedCore<U104, U48, SHA3_PAD>);
     oid: "2.16.840.1.101.3.4.2.9"
 );
 digest::newtype_fixed_hash!(
     /// SHA-3-512 hasher.
-    pub struct Sha3_512(CoreWrapper<Sha3FixedCore<U72, U64, SHA3_PAD>>);
+    pub struct Sha3_512(Sha3FixedCore<U72, U64, SHA3_PAD>);
     oid: "2.16.840.1.101.3.4.2.10"
 );
 digest::newtype_xof_hash!(
@@ -73,23 +73,23 @@ digest::newtype_xof_hash!(
 
 digest::newtype_fixed_hash!(
     /// SHA-3 CryptoNight variant.
-    pub struct Keccak256Full(CoreWrapper<Sha3FixedCore<U136, U200, KECCAK_PAD>>);
+    pub struct Keccak256Full(Sha3FixedCore<U136, U200, KECCAK_PAD>);
 );
 digest::newtype_fixed_hash!(
     /// Keccak-224 hasher.
-    pub struct Keccak224(CoreWrapper<Sha3FixedCore<U144, U28, KECCAK_PAD>>);
+    pub struct Keccak224(Sha3FixedCore<U144, U28, KECCAK_PAD>);
 );
 digest::newtype_fixed_hash!(
     /// Keccak-256 hasher.
-    pub struct Keccak256(CoreWrapper<Sha3FixedCore<U136, U32, KECCAK_PAD>>);
+    pub struct Keccak256(Sha3FixedCore<U136, U32, KECCAK_PAD>);
 );
 digest::newtype_fixed_hash!(
     /// Keccak-384 hasher.
-    pub struct Keccak384(CoreWrapper<Sha3FixedCore<U104, U48, KECCAK_PAD>>);
+    pub struct Keccak384(Sha3FixedCore<U104, U48, KECCAK_PAD>);
 );
 digest::newtype_fixed_hash!(
     /// Keccak-512 hasher.
-    pub struct Keccak512(CoreWrapper<Sha3FixedCore<U72, U64, KECCAK_PAD>>);
+    pub struct Keccak512(Sha3FixedCore<U72, U64, KECCAK_PAD>);
 );
 
 fn xor_block(state: &mut [u64; PLEN], block: &[u8]) {

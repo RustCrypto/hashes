@@ -18,8 +18,6 @@ mod c320;
 
 pub use block_api::{Ripemd128Core, Ripemd160Core, Ripemd256Core, Ripemd320Core};
 
-use digest::core_api::CoreWrapper;
-
 // Note about used OIDs: there are two OIDs defined for RIPEMD-128/160.
 // The Teletrust one (which is used by almost anybody, including BouncyCastle,
 // OpenSSL, GnuTLS, etc.) and the ISO one (1.0.10118.3.0.50/49), which seems
@@ -27,20 +25,20 @@ use digest::core_api::CoreWrapper;
 
 digest::newtype_fixed_hash!(
     /// RIPEMD-128 hasher
-    pub struct Ripemd128(CoreWrapper<Ripemd128Core>);
+    pub struct Ripemd128(Ripemd128Core);
     oid: "1.3.36.3.2.2"
 );
 digest::newtype_fixed_hash!(
     /// RIPEMD-160 hasher
-    pub struct Ripemd160(CoreWrapper<Ripemd160Core>);
+    pub struct Ripemd160(Ripemd160Core);
     oid: "1.3.36.3.2.1"
 );
 digest::newtype_fixed_hash!(
     /// RIPEMD-256 hasher
-    pub struct Ripemd256(CoreWrapper<Ripemd256Core>);
+    pub struct Ripemd256(Ripemd256Core);
     oid: "1.3.36.3.2.3"
 );
 digest::newtype_fixed_hash!(
     /// RIPEMD-320 hasher
-    pub struct Ripemd320(CoreWrapper<Ripemd320Core>);
+    pub struct Ripemd320(Ripemd320Core);
 );

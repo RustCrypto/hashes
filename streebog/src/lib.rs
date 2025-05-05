@@ -10,7 +10,7 @@
 
 use digest::{
     consts::{U32, U64},
-    core_api::{CoreWrapper, CtVariableCoreWrapper},
+    core_api::CtVariableCoreWrapper,
 };
 
 mod block_api;
@@ -21,12 +21,12 @@ pub use digest::{self, Digest};
 
 digest::newtype_fixed_hash!(
     /// Streebog256 hasher.
-    pub struct Streebog256(CoreWrapper<CtVariableCoreWrapper<StreebogVarCore, U32>>);
+    pub struct Streebog256(CtVariableCoreWrapper<StreebogVarCore, U32>);
     oid: "1.2.643.7.1.1.2.2"
 );
 
 digest::newtype_fixed_hash!(
     /// Streebog512 hasher.
-    pub struct Streebog512(CoreWrapper<CtVariableCoreWrapper<StreebogVarCore, U64>>);
+    pub struct Streebog512(CtVariableCoreWrapper<StreebogVarCore, U64>);
     oid: "1.2.643.7.1.1.2.3"
 );

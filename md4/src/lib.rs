@@ -16,6 +16,6 @@ pub use block_api::Md4Core;
 
 digest::newtype_fixed_hash!(
     /// MD4 hash.
-    pub struct Md4(digest::core_api::CoreWrapper<Md4Core>);
+    pub struct Md4(Md4Core);
     oid: "1.2.840.113549.2.4"
 );

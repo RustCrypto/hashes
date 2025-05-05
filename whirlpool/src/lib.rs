@@ -18,5 +18,5 @@ pub use block_api::WhirlpoolCore;
 
 digest::newtype_fixed_hash!(
     /// Whirlpool hasher.
-    pub struct Whirlpool(digest::core_api::CoreWrapper<WhirlpoolCore>);
+    pub struct Whirlpool(WhirlpoolCore);
 );
