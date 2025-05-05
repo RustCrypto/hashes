@@ -1,7 +1,7 @@
 use core::iter;
 use hex_literal::hex;
 use k12::{
-    KangarooTwelve, KangarooTwelveCore,
+    KangarooTwelve,
     digest::{ExtendableOutput, Update},
 };
 
@@ -66,7 +66,7 @@ fn pat_c() {
         let m: Vec<u8> = iter::repeat_n(0xFF, 2usize.pow(i) - 1).collect();
         let len = 41usize.pow(i);
         let c: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
-        let mut h = KangarooTwelve::from_core(KangarooTwelveCore::new(&c));
+        let mut h = KangarooTwelve::new(&c);
         h.update(&m);
         let result = h.finalize_boxed(32);
         assert_eq!(result[..], expected[i as usize][..]);
