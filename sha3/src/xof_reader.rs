@@ -9,7 +9,7 @@ use digest::{
 /// Core Sha3 XOF reader.
 #[derive(Clone)]
 #[allow(non_camel_case_types)]
-pub struct Sha3XofReaderCore<Rate, const ROUNDS: usize = DEFAULT_ROUND_COUNT>
+pub struct Sha3ReaderCore<Rate, const ROUNDS: usize = DEFAULT_ROUND_COUNT>
 where
     Rate: BlockSizes + IsLessOrEqual<U200>,
     LeEq<Rate, U200>: NonZero,
@@ -18,7 +18,7 @@ where
     _pd: PhantomData<Rate>,
 }
 
-impl<Rate, const ROUNDS: usize> Sha3XofReaderCore<Rate, ROUNDS>
+impl<Rate, const ROUNDS: usize> Sha3ReaderCore<Rate, ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200>,
     LeEq<Rate, U200>: NonZero,
@@ -31,7 +31,7 @@ where
     }
 }
 
-impl<Rate, const ROUNDS: usize> BlockSizeUser for Sha3XofReaderCore<Rate, ROUNDS>
+impl<Rate, const ROUNDS: usize> BlockSizeUser for Sha3ReaderCore<Rate, ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200>,
     LeEq<Rate, U200>: NonZero,
@@ -39,7 +39,7 @@ where
     type BlockSize = Rate;
 }
 
-impl<Rate, const ROUNDS: usize> XofReaderCore for Sha3XofReaderCore<Rate, ROUNDS>
+impl<Rate, const ROUNDS: usize> XofReaderCore for Sha3ReaderCore<Rate, ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200>,
     LeEq<Rate, U200>: NonZero,
@@ -55,7 +55,7 @@ where
     }
 }
 
-impl<Rate, const ROUNDS: usize> Drop for Sha3XofReaderCore<Rate, ROUNDS>
+impl<Rate, const ROUNDS: usize> Drop for Sha3ReaderCore<Rate, ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200>,
     LeEq<Rate, U200>: NonZero,
@@ -70,7 +70,7 @@ where
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop for Sha3XofReaderCore<Rate, ROUNDS>
+impl<Rate, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop for Sha3ReaderCore<Rate, ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200>,
     LeEq<Rate, U200>: NonZero,

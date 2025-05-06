@@ -1,4 +1,4 @@
-use crate::{Sha3FixedCore, Sha3XofReaderCore};
+use crate::{Sha3HasherCore, Sha3ReaderCore};
 use core::fmt;
 use digest::{
     ExtendableOutput, ExtendableOutputReset, HashMarker, Update,
@@ -16,7 +16,7 @@ macro_rules! impl_turbo_shake {
         #[doc = " hasher."]
         #[derive(Clone)]
         pub struct $name<const DS: u8>(
-            CoreWrapper<Sha3FixedCore<$rate, U0, DS, TURBO_SHAKE_ROUND_COUNT>>,
+            CoreWrapper<Sha3HasherCore<$rate, U0, DS, TURBO_SHAKE_ROUND_COUNT>>,
         );
 
         impl<const DS: u8> Default for $name<DS> {
@@ -43,7 +43,7 @@ macro_rules! impl_turbo_shake {
         #[doc = $alg_name]
         #[doc = " XOF reader."]
         pub type $reader_name =
-            XofReaderCoreWrapper<Sha3XofReaderCore<$rate, TURBO_SHAKE_ROUND_COUNT>>;
+            XofReaderCoreWrapper<Sha3ReaderCore<$rate, TURBO_SHAKE_ROUND_COUNT>>;
 
         impl<const DS: u8> ExtendableOutput for $name<DS> {
             type Reader = $reader_name;

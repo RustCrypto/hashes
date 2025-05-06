@@ -1,5 +1,5 @@
 use crate::{
-    CSHAKE_PAD, DEFAULT_ROUND_COUNT as ROUNDS, PLEN, SHAKE_PAD, Sha3XofReaderCore, xor_block,
+    CSHAKE_PAD, DEFAULT_ROUND_COUNT as ROUNDS, PLEN, SHAKE_PAD, Sha3ReaderCore, xor_block,
 };
 use core::fmt;
 use digest::{
@@ -94,7 +94,7 @@ macro_rules! impl_cshake {
         }
 
         impl ExtendableOutputCore for $name {
-            type ReaderCore = Sha3XofReaderCore<$rate>;
+            type ReaderCore = Sha3ReaderCore<$rate>;
 
             #[inline]
             fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
@@ -112,7 +112,7 @@ macro_rules! impl_cshake {
                 xor_block(&mut self.state, &block);
                 keccak::p1600(&mut self.state, ROUNDS);
 
-                Sha3XofReaderCore::new(&self.state)
+                Sha3ReaderCore::new(&self.state)
             }
         }
 
@@ -170,7 +170,7 @@ macro_rules! impl_cshake {
             pub struct $full_name($name);
             #[doc = $alg_name]
             #[doc = " XOF reader."]
-            pub struct $reader_name(Sha3XofReaderCore<$rate>);
+            pub struct $reader_name(Sha3ReaderCore<$rate>);
         );
 
         impl CustomizedInit for $full_name {
