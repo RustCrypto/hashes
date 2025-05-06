@@ -3,10 +3,9 @@ use core::{fmt, mem, num::Wrapping};
 use digest::{
     HashMarker, InvalidOutputSize, Output,
     array::Array,
-    block_buffer::Eager,
     consts::{U8, U48, U64, U184},
     core_api::{
-        AlgorithmName, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
+        AlgorithmName, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},

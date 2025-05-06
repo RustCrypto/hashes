@@ -4,11 +4,10 @@ use crate::{
 use core::fmt;
 use digest::{
     CustomizedInit, HashMarker, Reset,
-    block_buffer::Eager,
     consts::{U136, U168},
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
-        ExtendableOutputCore, UpdateCore, XofReaderCoreWrapper,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
+        UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::Unsigned,
@@ -168,10 +167,10 @@ macro_rules! impl_cshake {
         digest::newtype_xof_hash!(
             #[doc = $alg_name]
             #[doc = " hasher."]
-            pub struct $full_name(CoreWrapper<$name>);
+            pub struct $full_name($name);
             #[doc = $alg_name]
             #[doc = " XOF reader."]
-            pub struct $reader_name(XofReaderCoreWrapper<Sha3XofReaderCore<$rate>>);
+            pub struct $reader_name(Sha3XofReaderCore<$rate>);
         );
 
         impl CustomizedInit for $full_name {
@@ -187,9 +186,9 @@ macro_rules! impl_cshake {
             /// Note that the function name is intended for use by NIST and should only be set to
             /// values defined by NIST. You probably don't need to use this function.
             pub fn new_with_function_name(function_name: &[u8], customization: &[u8]) -> Self {
-                let c = $name::new_with_function_name(function_name, customization);
                 Self {
-                    inner: CoreWrapper::from_core(c),
+                    core: $name::new_with_function_name(function_name, customization),
+                    buffer: Default::default(),
                 }
             }
         }

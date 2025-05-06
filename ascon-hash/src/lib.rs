@@ -13,11 +13,10 @@ use ascon::State;
 pub use digest::{self, Digest, ExtendableOutput, Reset, Update, XofReader};
 use digest::{
     HashMarker, Output, OutputSizeUser,
-    block_buffer::Eager,
     consts::{U8, U32, U40},
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
-        ExtendableOutputCore, FixedOutputCore, UpdateCore, XofReaderCore, XofReaderCoreWrapper,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
+        FixedOutputCore, UpdateCore, XofReaderCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
@@ -288,7 +287,7 @@ digest::newtype_fixed_hash!(
 
 digest::newtype_xof_hash!(
     /// Ascon-XOF128 hasher.
-    pub struct AsconXof128(CoreWrapper<AsconXofCore>);
+    pub struct AsconXof128(AsconXofCore);
     /// Ascon-XOF128 reader.
-    pub struct AsconXof128Reader(XofReaderCoreWrapper<AsconXofReaderCore>);
+    pub struct AsconXof128Reader(AsconXofReaderCore);
 );

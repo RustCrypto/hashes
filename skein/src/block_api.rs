@@ -1,14 +1,13 @@
 use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
-    array::{ArraySize, typenum::Unsigned},
-    block_buffer::Lazy,
+    array::ArraySize,
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore, Lazy,
         OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{Sum, U16, U32, U64, U128},
+    typenum::{Sum, U16, U32, U64, U128, Unsigned},
 };
 use threefish::{Threefish256, Threefish512, Threefish1024};
 

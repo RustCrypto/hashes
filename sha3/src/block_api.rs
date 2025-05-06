@@ -3,9 +3,8 @@ use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
     array::ArraySize,
-    block_buffer::Eager,
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, ExtendableOutputCore,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         FixedOutputCore, OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::{

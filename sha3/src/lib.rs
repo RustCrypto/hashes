@@ -22,10 +22,7 @@ pub use cshake::{
 pub use turbo_shake::{TurboShake128, TurboShake128Reader, TurboShake256, TurboShake256Reader};
 pub use xof_reader::Sha3XofReaderCore;
 
-use digest::{
-    consts::{U0, U28, U32, U48, U64, U72, U104, U136, U144, U168, U200},
-    core_api::{CoreWrapper, XofReaderCoreWrapper},
-};
+use digest::consts::{U0, U28, U32, U48, U64, U72, U104, U136, U144, U168, U200};
 
 // Paddings
 const KECCAK_PAD: u8 = 0x01;
@@ -58,16 +55,16 @@ digest::newtype_fixed_hash!(
 );
 digest::newtype_xof_hash!(
     /// SHAKE128 hasher.
-    pub struct Shake128(CoreWrapper<Sha3FixedCore<U168, U0, SHAKE_PAD>>);
+    pub struct Shake128(Sha3FixedCore<U168, U0, SHAKE_PAD>);
     /// SHAKE128 XOF reader.
-    pub struct Shake128Reader(XofReaderCoreWrapper<Sha3XofReaderCore<U168>>);
+    pub struct Shake128Reader(Sha3XofReaderCore<U168>);
     oid: "2.16.840.1.101.3.4.2.11"
 );
 digest::newtype_xof_hash!(
     /// SHAKE256 hasher.
-    pub struct Shake256(CoreWrapper<Sha3FixedCore<U136, U0, SHAKE_PAD>>);
+    pub struct Shake256(Sha3FixedCore<U136, U0, SHAKE_PAD>);
     /// SHAKE256 XOF reader.
-    pub struct Shake256Reader(XofReaderCoreWrapper<Sha3XofReaderCore<U136>>);
+    pub struct Shake256Reader(Sha3XofReaderCore<U136>);
     oid: "2.16.840.1.101.3.4.2.12"
 );
 

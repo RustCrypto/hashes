@@ -2,10 +2,9 @@ use crate::compressor::Compressor;
 use core::fmt;
 use digest::{
     HashMarker, InvalidOutputSize, Output,
-    block_buffer::Eager,
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
-        UpdateCore, VariableOutputCore,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser,
+        TruncSide, UpdateCore, VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{U64, Unsigned},

@@ -1,11 +1,12 @@
 use core::fmt;
-use digest::block_buffer::Eager;
-use digest::consts::{U128, U168};
-use digest::core_api::{
-    AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, ExtendableOutputCore, UpdateCore,
-    XofReaderCore,
+use digest::{
+    ExtendableOutputReset, HashMarker, Reset, Update, XofReader,
+    consts::{U128, U168},
+    core_api::{
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
+        UpdateCore, XofReaderCore,
+    },
 };
-use digest::{ExtendableOutputReset, HashMarker, Reset, Update, XofReader};
 use sha3::{TurboShake128, TurboShake128Reader};
 
 const CHUNK_SIZE: usize = 8192;
