@@ -19,7 +19,7 @@ dependencies = [
  "base16ct",
  "digest",
  "hex",
- "hex-literal",
+ "hex-literal 1.0.0",
  "spectral",
 ]
 
@@ -42,7 +42,7 @@ dependencies = [
  "base16ct",
  "belt-block",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -51,7 +51,7 @@ version = "0.11.0-pre.5"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -118,7 +118,7 @@ version = "0.2.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
  "whirlpool",
 ]
 
@@ -128,7 +128,7 @@ version = "0.11.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -137,7 +137,7 @@ version = "0.11.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -145,6 +145,12 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "hex-literal"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
 
 [[package]]
 name = "hex-literal"
@@ -167,7 +173,7 @@ version = "0.2.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
  "ppv-lite86",
 ]
 
@@ -176,7 +182,7 @@ name = "k12"
 version = "0.4.0-pre"
 dependencies = [
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
  "sha3",
 ]
 
@@ -195,7 +201,7 @@ version = "0.1.0"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -211,7 +217,7 @@ dependencies = [
  "base16ct",
  "cfg-if",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -220,7 +226,7 @@ version = "0.11.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -229,7 +235,15 @@ version = "0.11.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
+]
+
+[[package]]
+name = "md6"
+version = "0.11.0-pre.5"
+dependencies = [
+ "digest",
+ "hex-literal 0.4.1",
 ]
 
 [[package]]
@@ -265,7 +279,7 @@ version = "0.2.0-pre.5"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -276,7 +290,7 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -285,7 +299,7 @@ version = "0.11.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
  "sha1",
  "zeroize",
 ]
@@ -298,7 +312,7 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -307,7 +321,7 @@ version = "0.11.0-pre.5"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
  "keccak",
 ]
 
@@ -317,7 +331,7 @@ version = "0.5.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -326,7 +340,7 @@ version = "0.2.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
  "threefish",
 ]
 
@@ -336,7 +350,7 @@ version = "0.5.0-pre.5"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -351,7 +365,7 @@ version = "0.11.0-pre.5"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -386,7 +400,7 @@ version = "0.3.0-pre"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
@@ -407,7 +421,7 @@ version = "0.11.0-pre.5"
 dependencies = [
  "base16ct",
  "digest",
- "hex-literal",
+ "hex-literal 1.0.0",
 ]
 
 [[package]]
