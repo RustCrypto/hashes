@@ -19,22 +19,26 @@ pub use block_api::{GroestlLongVarCore, GroestlShortVarCore};
 
 use digest::{
     consts::{U28, U32, U48, U64},
-    core_api::{CoreWrapper, CtVariableCoreWrapper, RtVariableCoreWrapper},
+    core_api::{CoreWrapper, CtVariableCoreWrapper},
 };
 
-digest::newtype_variable_hash!(
+digest::newtype_ct_variable_hash!(
     /// Short Groestl variant generic over output size.
     pub struct GroestlShort<OutSize>(CoreWrapper<CtVariableCoreWrapper<GroestlShortVarCore, OutSize>>);
-    /// Short Groestl variant which allows to select output size at runtime.
-    pub struct GroestlShortVar(RtVariableCoreWrapper<GroestlShortVarCore>);
     max_size: U32;
 );
-digest::newtype_variable_hash!(
+digest::newtype_rt_variable_hash!(
+    /// Long Groestl variant which allows to select output size at runtime.
+    pub struct GroestlShortVar(GroestlShortVarCore);
+);
+digest::newtype_ct_variable_hash!(
     /// Long Groestl variant generic over output size.
     pub struct GroestlLong<OutSize>(CoreWrapper<CtVariableCoreWrapper<GroestlLongVarCore, OutSize>>);
-    /// Long Groestl variant which allows to select output size at runtime.
-    pub struct GroestlLongVar(RtVariableCoreWrapper<GroestlLongVarCore>);
     max_size: U64;
+);
+digest::newtype_rt_variable_hash!(
+    /// Long Groestl variant which allows to select output size at runtime.
+    pub struct GroestlLongVar(GroestlLongVarCore);
 );
 
 /// Groestl-224 hasher.

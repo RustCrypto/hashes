@@ -10,33 +10,35 @@
 
 pub use digest::{self, Digest};
 use digest::{
-    core_api::{CoreWrapper, CtVariableCoreWrapper, RtVariableCoreWrapper},
+    core_api::{CoreWrapper, CtVariableCoreWrapper},
     typenum::{U28, U32, U48, U64},
 };
 
+mod block_api;
 mod consts;
 mod long;
-mod long_compress;
 mod short;
-mod short_compress;
 pub(crate) mod utils;
 
-pub use long::KupynaLongVarCore;
-pub use short::KupynaShortVarCore;
+pub use block_api::{KupynaLongVarCore, KupynaShortVarCore};
 
-digest::newtype_variable_hash!(
+digest::newtype_ct_variable_hash!(
     /// Short Kupyna variant generic over output size.
     pub struct KupynaShort<OutSize>(CoreWrapper<CtVariableCoreWrapper<KupynaShortVarCore, OutSize>>);
-    /// Short Kupyna variant which allows to select output size at runtime.
-    pub struct KupynaShortVar(RtVariableCoreWrapper<KupynaShortVarCore>);
     max_size: U32;
 );
-digest::newtype_variable_hash!(
+digest::newtype_rt_variable_hash!(
+    /// Short Kupyna variant which allows to select output size at runtime.
+    pub struct KupynaShortVar(KupynaShortVarCore);
+);
+digest::newtype_ct_variable_hash!(
     /// Long Kupyna variant generic over output size.
     pub struct KupynaLong<OutSize>(CoreWrapper<CtVariableCoreWrapper<KupynaLongVarCore, OutSize>>);
-    /// Long Kupyna variant which allows to select output size at runtime.
-    pub struct KupynaLongVar(RtVariableCoreWrapper<KupynaLongVarCore>);
     max_size: U64;
+);
+digest::newtype_rt_variable_hash!(
+    /// Long Kupyna variant which allows to select output size at runtime.
+    pub struct KupynaLongVar(KupynaLongVarCore);
 );
 
 /// Kupyna-224 hasher.
