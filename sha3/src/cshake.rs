@@ -1,5 +1,6 @@
 use crate::{
-    CSHAKE_PAD, DEFAULT_ROUND_COUNT as ROUNDS, PLEN, SHAKE_PAD, Sha3ReaderCore, xor_block,
+    CSHAKE_PAD, DEFAULT_ROUND_COUNT as ROUNDS, PLEN, SHAKE_PAD, Sha3ReaderCore,
+    block_api::xor_block,
 };
 use core::fmt;
 use digest::{

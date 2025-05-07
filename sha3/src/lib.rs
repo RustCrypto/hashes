@@ -88,20 +88,3 @@ digest::newtype_fixed_hash!(
     /// Keccak-512 hasher.
     pub struct Keccak512(Sha3HasherCore<U72, U64, KECCAK_PAD>);
 );
-
-fn xor_block(state: &mut [u64; PLEN], block: &[u8]) {
-    assert!(block.len() < 8 * PLEN);
-
-    let mut chunks = block.chunks_exact(8);
-    for (s, chunk) in state.iter_mut().zip(&mut chunks) {
-        *s ^= u64::from_le_bytes(chunk.try_into().unwrap());
-    }
-
-    let rem = chunks.remainder();
-    if !rem.is_empty() {
-        let mut buf = [0u8; 8];
-        buf[..rem.len()].copy_from_slice(rem);
-        let n = block.len() / 8;
-        state[n] ^= u64::from_le_bytes(buf);
-    }
-}
