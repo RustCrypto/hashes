@@ -25,8 +25,8 @@ hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]
-default = ["oid", "std"]
-std = ["digest/std"]
+default = ["alloc", "oid"]
+alloc = ["digest/alloc"]
 oid = ["digest/oid"] # Enable OID support
 zeroize = ["digest/zeroize"]
 force-soft = [] # Force software implementation

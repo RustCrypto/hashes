@@ -1,6 +1,5 @@
 #![allow(clippy::many_single_char_names)]
-use super::BLOCK_SIZE;
-use crate::K;
+use super::K;
 
 #[inline(always)]
 fn add(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
@@ -243,8 +242,8 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
     state[4] = state[4].wrapping_add(e);
 }
 
-pub fn compress(state: &mut [u32; 5], blocks: &[[u8; BLOCK_SIZE]]) {
-    let mut block_u32 = [0u32; BLOCK_SIZE / 4];
+pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+    let mut block_u32 = [0u32; 16];
     // since LLVM can't properly use aliasing yet it will make
     // unnecessary state stores without this copy
     let mut state_cpy = *state;

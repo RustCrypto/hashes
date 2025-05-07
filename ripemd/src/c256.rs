@@ -1,4 +1,3 @@
-use core::{convert::TryInto, mem::swap};
 use digest::typenum::U32;
 
 pub const DIGEST_BUF_LEN: usize = 8;
@@ -27,7 +26,7 @@ macro_rules! round(
 
 #[inline(always)]
 fn swap_idx(bb: &mut [u32; HALF_DIGEST_BUF_LEN], bbb: &mut [u32; HALF_DIGEST_BUF_LEN], idx: usize) {
-    swap(&mut bb[idx], &mut bbb[idx]);
+    core::mem::swap(&mut bb[idx], &mut bbb[idx]);
 }
 
 macro_rules! process_block(

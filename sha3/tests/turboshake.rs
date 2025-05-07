@@ -1,17 +1,15 @@
 use core::fmt::Debug;
 use digest::ExtendableOutput;
 
-pub(crate) fn turbo_shake_test<D, F>(
+pub(crate) fn turbo_shake_test<D>(
     input: &[u8],
     output: &[u8],
     truncate_output: usize,
-    new: F,
 ) -> Option<&'static str>
 where
-    D: ExtendableOutput + Debug + Clone,
-    F: Fn() -> D,
+    D: ExtendableOutput + Default + Debug + Clone,
 {
-    let mut hasher = new();
+    let mut hasher = D::default();
     let mut buf = [0u8; 16 * 1024];
     let buf = &mut buf[..truncate_output + output.len()];
     // Test that it works when accepting the message all at once
@@ -25,7 +23,7 @@ where
 
     // Test that it works when accepting the message in chunks
     for n in 1..core::cmp::min(17, input.len()) {
-        let mut hasher = new();
+        let mut hasher = D::default();
         for chunk in input.chunks(n) {
             hasher.update(chunk);
             hasher2.update(chunk);
@@ -41,20 +39,14 @@ where
 }
 
 macro_rules! new_turbo_shake_test {
-    ($name:ident, $test_name:expr, $hasher:ty, $hasher_core:ty, $test_func:ident $(,)?) => {
+    ($name:ident, $test_name:expr, $hasher:ty, $test_func:ident $(,)?) => {
         #[test]
         fn $name() {
-            use digest::dev::blobby::Blob5Iterator;
+            use digest::dev::blobby::Blob4Iterator;
             let data = include_bytes!(concat!("data/", $test_name, ".blb"));
 
-            for (i, row) in Blob5Iterator::new(data).unwrap().enumerate() {
-                let [
-                    domain_separation,
-                    input,
-                    input_pattern_length,
-                    output,
-                    truncate_output,
-                ] = row.unwrap();
+            for (i, row) in Blob4Iterator::new(data).unwrap().enumerate() {
+                let [input, input_pattern_length, output, truncate_output] = row.unwrap();
 
                 let input = if (input_pattern_length.len() == 0) {
                     input.to_vec()
@@ -76,13 +68,14 @@ macro_rules! new_turbo_shake_test {
                     );
                 };
 
-                if let Some(desc) = $test_func(
+                println!("before func: {:?}", truncate_output.len());
+
+                if let Some(desc) = $test_func::<$hasher>(
                     &input,
                     output,
                     u64::from_be_bytes(truncate_output.try_into().unwrap())
                         .try_into()
                         .unwrap(),
-                    || <$hasher>::from_core(<$hasher_core>::new(domain_separation[0])),
                 ) {
                     panic!(
                         "\n\
@@ -98,16 +91,27 @@ macro_rules! new_turbo_shake_test {
 }
 
 new_turbo_shake_test!(
-    turboshake128,
-    "turboshake128",
-    sha3::TurboShake128,
-    sha3::TurboShake128Core,
+    turboshake128_6,
+    "turboshake128_6",
+    sha3::TurboShake128<6>,
     turbo_shake_test,
 );
 new_turbo_shake_test!(
-    turboshake256,
-    "turboshake256",
-    sha3::TurboShake256,
-    sha3::TurboShake256Core,
+    turboshake128_7,
+    "turboshake128_7",
+    sha3::TurboShake128<7>,
+    turbo_shake_test,
+);
+new_turbo_shake_test!(
+    turboshake256_6,
+    "turboshake256_6",
+    sha3::TurboShake256<6>,
+    turbo_shake_test,
+);
+
+new_turbo_shake_test!(
+    turboshake256_7,
+    "turboshake256_7",
+    sha3::TurboShake256<7>,
     turbo_shake_test,
 );
