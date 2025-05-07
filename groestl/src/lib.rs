@@ -17,14 +17,11 @@ mod table;
 
 pub use block_api::{GroestlLongVarCore, GroestlShortVarCore};
 
-use digest::{
-    consts::{U28, U32, U48, U64},
-    core_api::{CoreWrapper, CtVariableCoreWrapper},
-};
+use digest::consts::{U28, U32, U48, U64};
 
 digest::newtype_ct_variable_hash!(
     /// Short Groestl variant generic over output size.
-    pub struct GroestlShort<OutSize>(CoreWrapper<CtVariableCoreWrapper<GroestlShortVarCore, OutSize>>);
+    pub struct GroestlShort<OutSize>(GroestlShortVarCore);
     max_size: U32;
 );
 digest::newtype_rt_variable_hash!(
@@ -33,7 +30,7 @@ digest::newtype_rt_variable_hash!(
 );
 digest::newtype_ct_variable_hash!(
     /// Long Groestl variant generic over output size.
-    pub struct GroestlLong<OutSize>(CoreWrapper<CtVariableCoreWrapper<GroestlLongVarCore, OutSize>>);
+    pub struct GroestlLong<OutSize>(GroestlLongVarCore);
     max_size: U64;
 );
 digest::newtype_rt_variable_hash!(

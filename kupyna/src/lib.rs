@@ -9,10 +9,6 @@
 #![warn(missing_docs)]
 
 pub use digest::{self, Digest};
-use digest::{
-    core_api::{CoreWrapper, CtVariableCoreWrapper},
-    typenum::{U28, U32, U48, U64},
-};
 
 mod block_api;
 mod consts;
@@ -22,9 +18,11 @@ pub(crate) mod utils;
 
 pub use block_api::{KupynaLongVarCore, KupynaShortVarCore};
 
+use digest::consts::{U28, U32, U48, U64};
+
 digest::newtype_ct_variable_hash!(
     /// Short Kupyna variant generic over output size.
-    pub struct KupynaShort<OutSize>(CoreWrapper<CtVariableCoreWrapper<KupynaShortVarCore, OutSize>>);
+    pub struct KupynaShort<OutSize>(KupynaShortVarCore);
     max_size: U32;
 );
 digest::newtype_rt_variable_hash!(
@@ -33,7 +31,7 @@ digest::newtype_rt_variable_hash!(
 );
 digest::newtype_ct_variable_hash!(
     /// Long Kupyna variant generic over output size.
-    pub struct KupynaLong<OutSize>(CoreWrapper<CtVariableCoreWrapper<KupynaLongVarCore, OutSize>>);
+    pub struct KupynaLong<OutSize>(KupynaLongVarCore);
     max_size: U64;
 );
 digest::newtype_rt_variable_hash!(
