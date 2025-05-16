@@ -22,9 +22,8 @@ use digest::{
     block_buffer::{Lazy, LazyBuffer},
     consts::{U4, U16, U32, U64, U128},
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
-        CtVariableCoreWrapper, OutputSizeUser, RtVariableCoreWrapper, TruncSide, UpdateCore,
-        VariableOutputCore,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, CtOutWrapper,
+        OutputSizeUser, RtVariableCoreWrapper, TruncSide, UpdateCore, VariableOutputCore,
     },
     crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
     typenum::{IsLessOrEqual, LeEq, NonZero, Unsigned},
@@ -66,7 +65,7 @@ blake2_impl!(
 /// BLAKE2b which allows to choose output size at runtime.
 pub type Blake2bVar = RtVariableCoreWrapper<Blake2bVarCore>;
 /// Core hasher state of BLAKE2b generic over output size.
-pub type Blake2bCore<OutSize> = CtVariableCoreWrapper<Blake2bVarCore, OutSize>;
+pub type Blake2bCore<OutSize> = CtOutWrapper<Blake2bVarCore, OutSize>;
 /// BLAKE2b generic over output size.
 pub type Blake2b<OutSize> = CoreWrapper<Blake2bCore<OutSize>>;
 /// BLAKE2b-128 hasher state.
@@ -100,7 +99,7 @@ blake2_impl!(
 /// BLAKE2s which allows to choose output size at runtime.
 pub type Blake2sVar = RtVariableCoreWrapper<Blake2sVarCore>;
 /// Core hasher state of BLAKE2s generic over output size.
-pub type Blake2sCore<OutSize> = CtVariableCoreWrapper<Blake2sVarCore, OutSize>;
+pub type Blake2sCore<OutSize> = CtOutWrapper<Blake2sVarCore, OutSize>;
 /// BLAKE2s generic over output size.
 pub type Blake2s<OutSize> = CoreWrapper<Blake2sCore<OutSize>>;
 /// BLAKE2s-128 hasher state.
