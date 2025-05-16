@@ -22,7 +22,7 @@ pub use digest::{self, Digest};
 
 use digest::{
     consts::{U28, U32, U48, U64},
-    core_api::CtVariableCoreWrapper,
+    core_api::CtOutWrapper,
 };
 
 #[rustfmt::skip]
@@ -38,31 +38,31 @@ pub use block_api::{Sha256VarCore, Sha512VarCore};
 
 digest::newtype_fixed_hash!(
     /// SHA-256 hasher.
-    pub struct Sha256(CtVariableCoreWrapper<Sha256VarCore, U32>);
+    pub struct Sha256(CtOutWrapper<Sha256VarCore, U32>);
     oid: "2.16.840.1.101.3.4.2.1"
 );
 digest::newtype_fixed_hash!(
     /// SHA-384 hasher.
-    pub struct Sha384(CtVariableCoreWrapper<Sha512VarCore, U48>);
+    pub struct Sha384(CtOutWrapper<Sha512VarCore, U48>);
     oid: "2.16.840.1.101.3.4.2.2"
 );
 digest::newtype_fixed_hash!(
     /// SHA-512 hasher.
-    pub struct Sha512(CtVariableCoreWrapper<Sha512VarCore, U64>);
+    pub struct Sha512(CtOutWrapper<Sha512VarCore, U64>);
     oid: "2.16.840.1.101.3.4.2.3"
 );
 digest::newtype_fixed_hash!(
     /// SHA-224 hasher.
-    pub struct Sha224(CtVariableCoreWrapper<Sha256VarCore, U28>);
+    pub struct Sha224(CtOutWrapper<Sha256VarCore, U28>);
     oid: "2.16.840.1.101.3.4.2.4"
 );
 digest::newtype_fixed_hash!(
     /// SHA-512/224 hasher.
-    pub struct Sha512_224(CtVariableCoreWrapper<Sha512VarCore, U28>);
+    pub struct Sha512_224(CtOutWrapper<Sha512VarCore, U28>);
     oid: "2.16.840.1.101.3.4.2.5"
 );
 digest::newtype_fixed_hash!(
     /// SHA-512/256 hasher.
-    pub struct Sha512_256(CtVariableCoreWrapper<Sha512VarCore, U32>);
+    pub struct Sha512_256(CtOutWrapper<Sha512VarCore, U32>);
     oid: "2.16.840.1.101.3.4.2.6"
 );
