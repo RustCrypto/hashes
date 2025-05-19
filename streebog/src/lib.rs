@@ -19,14 +19,14 @@ mod consts;
 pub use block_api::StreebogVarCore;
 pub use digest::{self, Digest};
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Streebog256 hasher.
     pub struct Streebog256(CtOutWrapper<StreebogVarCore, U32>);
     oid: "1.2.643.7.1.1.2.2";
     impl: FixedHashTraits;
 );
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Streebog512 hasher.
     pub struct Streebog512(CtOutWrapper<StreebogVarCore, U64>);
     oid: "1.2.643.7.1.1.2.3";

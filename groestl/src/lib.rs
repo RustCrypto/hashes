@@ -19,21 +19,21 @@ pub use block_api::{GroestlLongVarCore, GroestlShortVarCore};
 
 use digest::consts::{U28, U32, U48, U64};
 
-digest::newtype_ct_variable_hash!(
+digest::buffer_ct_variable!(
     /// Short Groestl variant generic over output size.
     pub struct GroestlShort<OutSize>(GroestlShortVarCore);
     max_size: U32;
 );
-digest::newtype_rt_variable_hash!(
+digest::buffer_rt_variable!(
     /// Long Groestl variant which allows to select output size at runtime.
     pub struct GroestlShortVar(GroestlShortVarCore);
 );
-digest::newtype_ct_variable_hash!(
+digest::buffer_ct_variable!(
     /// Long Groestl variant generic over output size.
     pub struct GroestlLong<OutSize>(GroestlLongVarCore);
     max_size: U64;
 );
-digest::newtype_rt_variable_hash!(
+digest::buffer_rt_variable!(
     /// Long Groestl variant which allows to select output size at runtime.
     pub struct GroestlLongVar(GroestlLongVarCore);
 );

@@ -18,17 +18,17 @@ use digest::array::ArraySize;
 mod block_api;
 pub use block_api::{Skein256Core, Skein512Core, Skein1024Core};
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Skein-256 hasher generic over output size
     pub struct Skein256<N: ArraySize>(Skein256Core<N>);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Skein-512 hasher generic over output size
     pub struct Skein512<N: ArraySize>(Skein512Core<N>);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Skein-1024 hasher generic over output size
     pub struct Skein1024<N: ArraySize>(Skein1024Core<N>);
     impl: FixedHashTraits;

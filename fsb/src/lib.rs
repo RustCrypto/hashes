@@ -16,27 +16,27 @@ static PI: &[u8; 272_384] = include_bytes!("pi.bin");
 mod block_api;
 pub use block_api::{Fsb160Core, Fsb224Core, Fsb256Core, Fsb384Core, Fsb512Core};
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// FSB-160 hasher.
     pub struct Fsb160(Fsb160Core);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// FSB-224 hasher.
     pub struct Fsb224(Fsb224Core);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// FSB-256 hasher.
     pub struct Fsb256(Fsb256Core);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// FSB-384 hasher.
     pub struct Fsb384(Fsb384Core);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// FSB-512 hasher.
     pub struct Fsb512(Fsb512Core);
     impl: FixedHashTraits;

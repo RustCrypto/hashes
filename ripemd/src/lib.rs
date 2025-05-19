@@ -23,25 +23,25 @@ pub use block_api::{Ripemd128Core, Ripemd160Core, Ripemd256Core, Ripemd320Core};
 // OpenSSL, GnuTLS, etc.) and the ISO one (1.0.10118.3.0.50/49), which seems
 // to be used by by Go and nobody else.
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// RIPEMD-128 hasher
     pub struct Ripemd128(Ripemd128Core);
     oid: "1.3.36.3.2.2";
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// RIPEMD-160 hasher
     pub struct Ripemd160(Ripemd160Core);
     oid: "1.3.36.3.2.1";
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// RIPEMD-256 hasher
     pub struct Ripemd256(Ripemd256Core);
     oid: "1.3.36.3.2.3";
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// RIPEMD-320 hasher
     pub struct Ripemd320(Ripemd320Core);
     impl: FixedHashTraits;

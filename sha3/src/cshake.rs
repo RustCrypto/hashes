@@ -183,7 +183,7 @@ macro_rules! impl_cshake {
             }
         }
 
-        digest::newtype_xof_hash!(
+        digest::buffer_xof!(
             #[doc = $alg_name]
             #[doc = " hasher."]
             pub struct $full_name($name);

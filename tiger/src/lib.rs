@@ -15,13 +15,13 @@ mod tables;
 
 pub use block_api::TigerCore;
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Tiger hasher.
     pub struct Tiger(TigerCore<false>);
     impl: FixedHashTraits;
 );
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Tiger2 hasher.
     pub struct Tiger2(TigerCore<true>);
     impl: FixedHashTraits;

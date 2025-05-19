@@ -16,7 +16,7 @@ mod consts;
 
 pub use block_api::Sm3Core;
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// ShangMi 3 (SM3) hasher.
     pub struct Sm3(Sm3Core);
     impl: FixedHashTraits;

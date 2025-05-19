@@ -14,7 +14,7 @@ mod block_api;
 mod compress;
 pub use block_api::Md4Core;
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// MD4 hash.
     pub struct Md4(Md4Core);
     oid: "1.2.840.113549.2.4";

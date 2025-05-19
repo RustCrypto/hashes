@@ -60,7 +60,7 @@ blake2_impl!(
     "Blake2b instance with a fixed output.",
 );
 
-digest::newtype_ct_variable_hash!(
+digest::buffer_ct_variable!(
     /// BLAKE2b generic over output size.
     pub struct Blake2b<OutSize>(Blake2bVarCore);
     exclude: SerializableState;
@@ -80,7 +80,7 @@ where
     }
 }
 
-digest::newtype_rt_variable_hash!(
+digest::buffer_rt_variable!(
     /// BLAKE2b which allows to choose output size at runtime.
     pub struct Blake2bVar(Blake2bVarCore);
     exclude: SerializableState;
@@ -114,7 +114,7 @@ blake2_impl!(
     "Blake2s instance with a fixed output.",
 );
 
-digest::newtype_ct_variable_hash!(
+digest::buffer_ct_variable!(
     /// BLAKE2s generic over output size.
     pub struct Blake2s<OutSize>(Blake2sVarCore);
     exclude: SerializableState;
@@ -134,7 +134,7 @@ where
     }
 }
 
-digest::newtype_rt_variable_hash!(
+digest::buffer_rt_variable!(
     /// BLAKE2s which allows to choose output size at runtime.
     pub struct Blake2sVar(Blake2sVarCore);
     exclude: SerializableState;

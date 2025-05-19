@@ -280,13 +280,13 @@ impl SerializableState for AsconXofCore {
     }
 }
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Ascon-Hash256
     pub struct AsconHash256(AsconCore);
     impl: FixedHashTraits;
 );
 
-digest::newtype_xof_hash!(
+digest::buffer_xof!(
     /// Ascon-XOF128 hasher.
     pub struct AsconXof128(AsconXofCore);
     impl: XofHasherTraits;

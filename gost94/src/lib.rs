@@ -16,7 +16,7 @@ pub mod params;
 pub use block_api::Gost94Core;
 use params::Gost94Params;
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// GOST94 hash function generic over parameters.
     pub struct Gost94<P: Gost94Params>(Gost94Core<P>);
     impl: FixedHashTraits;

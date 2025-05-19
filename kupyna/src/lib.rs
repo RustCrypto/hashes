@@ -20,21 +20,21 @@ pub use block_api::{KupynaLongVarCore, KupynaShortVarCore};
 
 use digest::consts::{U28, U32, U48, U64};
 
-digest::newtype_ct_variable_hash!(
+digest::buffer_ct_variable!(
     /// Short Kupyna variant generic over output size.
     pub struct KupynaShort<OutSize>(KupynaShortVarCore);
     max_size: U32;
 );
-digest::newtype_rt_variable_hash!(
+digest::buffer_rt_variable!(
     /// Short Kupyna variant which allows to select output size at runtime.
     pub struct KupynaShortVar(KupynaShortVarCore);
 );
-digest::newtype_ct_variable_hash!(
+digest::buffer_ct_variable!(
     /// Long Kupyna variant generic over output size.
     pub struct KupynaLong<OutSize>(KupynaLongVarCore);
     max_size: U64;
 );
-digest::newtype_rt_variable_hash!(
+digest::buffer_rt_variable!(
     /// Long Kupyna variant which allows to select output size at runtime.
     pub struct KupynaLongVar(KupynaLongVarCore);
 );

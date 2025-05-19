@@ -20,27 +20,27 @@ use digest::{
     core_api::CtOutWrapper,
 };
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Shabal-192 hasher.
     pub struct Shabal192(CtOutWrapper<ShabalVarCore, U24>);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Shabal-224 hasher.
     pub struct Shabal224(CtOutWrapper<ShabalVarCore, U28>);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Shabal-256 hasher.
     pub struct Shabal256(CtOutWrapper<ShabalVarCore, U32>);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Shabal-384 hasher.
     pub struct Shabal384(CtOutWrapper<ShabalVarCore, U48>);
     impl: FixedHashTraits;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// Shabal-512 hasher.
     pub struct Shabal512(CtOutWrapper<ShabalVarCore, U64>);
     impl: FixedHashTraits;

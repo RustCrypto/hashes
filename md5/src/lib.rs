@@ -14,7 +14,7 @@ mod compress;
 mod consts;
 pub use block_api::Md5Core;
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// MD5 hasher state.
     pub struct Md5(Md5Core);
     oid: "1.2.840.113549.2.5";

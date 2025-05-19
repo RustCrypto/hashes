@@ -20,22 +20,22 @@ use digest::{
     core_api::CtOutWrapper,
 };
 
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// JH-224 hasher.
     pub struct Jh224(CtOutWrapper<JhCore, U28>);
     impl: BaseFixedTraits Default Clone HashMarker Reset FixedOutputReset;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// JH-256 hasher.
     pub struct Jh256(CtOutWrapper<JhCore, U32>);
     impl: BaseFixedTraits Default Clone HashMarker Reset FixedOutputReset;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// JH-384 hasher.
     pub struct Jh384(CtOutWrapper<JhCore, U48>);
     impl: BaseFixedTraits Default Clone HashMarker Reset FixedOutputReset;
 );
-digest::newtype_fixed_hash!(
+digest::buffer_fixed!(
     /// JH-512 hasher.
     pub struct Jh512(CtOutWrapper<JhCore, U64>);
     impl: BaseFixedTraits Default Clone HashMarker Reset FixedOutputReset;
