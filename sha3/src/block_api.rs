@@ -11,22 +11,19 @@ use digest::{
         BlockSizes,
         hazmat::{DeserializeStateError, SerializableState, SerializedState},
     },
-    typenum::{Gr, IsGreater, IsLessOrEqual, LeEq, NonZero, U0, U200},
+    typenum::{IsLessOrEqual, True, U0, U200},
 };
 
 /// Core Sha3 fixed output hasher state.
 #[derive(Clone)]
-#[allow(non_camel_case_types)]
 pub struct Sha3HasherCore<
     Rate,
     OutputSize,
     const PAD: u8,
     const ROUNDS: usize = DEFAULT_ROUND_COUNT,
 > where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     state: [u64; PLEN],
     _pd: PhantomData<(Rate, OutputSize)>,
@@ -35,20 +32,16 @@ pub struct Sha3HasherCore<
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> HashMarker
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
 }
 
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> BlockSizeUser
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     type BlockSize = Rate;
 }
@@ -56,10 +49,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> BufferKindUser
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     type BufferKind = Eager;
 }
@@ -67,10 +58,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> OutputSizeUser
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     type OutputSize = OutputSize;
 }
@@ -78,10 +67,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> UpdateCore
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
@@ -95,11 +82,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> FixedOutputCore
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200> + IsGreater<U0>,
-    LeEq<Rate, U200>: NonZero,
-    Gr<OutputSize, U0>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     #[inline]
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
@@ -121,8 +105,7 @@ where
 impl<Rate, const PAD: u8, const ROUNDS: usize> ExtendableOutputCore
     for Sha3HasherCore<Rate, U0, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
     type ReaderCore = Sha3ReaderCore<Rate, ROUNDS>;
 
@@ -144,10 +127,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Default
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     #[inline]
     fn default() -> Self {
@@ -161,10 +142,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Reset
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     #[inline]
     fn reset(&mut self) {
@@ -175,10 +154,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> AlgorithmName
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Sha3") // TODO
@@ -188,10 +165,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> fmt::Debug
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Sha3FixedCore<Rate, OutputSize, PAD, ROUNDS> { ... }")
@@ -201,10 +176,8 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Drop
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
@@ -219,20 +192,16 @@ where
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
 }
 
 impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> SerializableState
     for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    OutputSize: ArraySize + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
-    LeEq<OutputSize, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+    OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     type SerializedStateSize = U200;
 
