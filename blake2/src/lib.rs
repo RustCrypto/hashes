@@ -24,7 +24,7 @@ use digest::{
         UpdateCore, VariableOutputCore,
     },
     crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
-    typenum::{IsLessOrEqual, LeEq, NonZero, True, Unsigned},
+    typenum::{IsLessOrEqual, True, Unsigned},
 };
 #[cfg(feature = "reset")]
 use digest::{FixedOutputReset, Reset};

@@ -3,7 +3,7 @@ use core::marker::PhantomData;
 use digest::{
     core_api::{Block, BlockSizeUser, XofReaderCore},
     crypto_common::BlockSizes,
-    typenum::{IsLessOrEqual, LeEq, NonZero, U200},
+    typenum::{IsLessOrEqual, True, U200},
 };
 
 /// Core Sha3 XOF reader.
@@ -11,8 +11,7 @@ use digest::{
 #[allow(non_camel_case_types)]
 pub struct Sha3ReaderCore<Rate, const ROUNDS: usize = DEFAULT_ROUND_COUNT>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
     state: [u64; PLEN],
     _pd: PhantomData<Rate>,
@@ -20,8 +19,7 @@ where
 
 impl<Rate, const ROUNDS: usize> Sha3ReaderCore<Rate, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
     pub(crate) fn new(state: &[u64; PLEN]) -> Self {
         Self {
@@ -33,16 +31,14 @@ where
 
 impl<Rate, const ROUNDS: usize> BlockSizeUser for Sha3ReaderCore<Rate, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
     type BlockSize = Rate;
 }
 
 impl<Rate, const ROUNDS: usize> XofReaderCore for Sha3ReaderCore<Rate, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
     #[inline]
     fn read_block(&mut self) -> Block<Self> {
@@ -57,8 +53,7 @@ where
 
 impl<Rate, const ROUNDS: usize> Drop for Sha3ReaderCore<Rate, ROUNDS>
 where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
@@ -70,9 +65,7 @@ where
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop for Sha3ReaderCore<Rate, ROUNDS>
-where
-    Rate: BlockSizes + IsLessOrEqual<U200>,
-    LeEq<Rate, U200>: NonZero,
+impl<Rate, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop for Sha3ReaderCore<Rate, ROUNDS> where
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>
 {
 }
