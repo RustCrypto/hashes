@@ -42,7 +42,7 @@ jobs:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
       - uses: RustCrypto/actions/cargo-hack-install@master
-      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std,asm
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,asm
 
   test:
     needs: set-msrv

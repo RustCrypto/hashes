@@ -277,8 +277,7 @@ macro_rules! blake2_mac_impl {
         #[doc=$doc]
         pub struct $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             core: $hash,
             buffer: LazyBuffer<<$hash as BlockSizeUser>::BlockSize>,
@@ -289,8 +288,7 @@ macro_rules! blake2_mac_impl {
 
         impl<OutSize> $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             /// Create new instance using provided key, salt, and persona.
             ///
@@ -337,16 +335,14 @@ macro_rules! blake2_mac_impl {
 
         impl<OutSize> KeySizeUser for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             type KeySize = $max_size;
         }
 
         impl<OutSize> KeyInit for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             #[inline]
             fn new(key: &Key<Self>) -> Self {
@@ -377,8 +373,7 @@ macro_rules! blake2_mac_impl {
 
         impl<OutSize> Update for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             #[inline]
             fn update(&mut self, input: &[u8]) {
@@ -389,16 +384,14 @@ macro_rules! blake2_mac_impl {
 
         impl<OutSize> OutputSizeUser for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size> + 'static,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             type OutputSize = OutSize;
         }
 
         impl<OutSize> FixedOutput for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size> + 'static,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             #[inline]
             fn finalize_into(mut self, out: &mut Output<Self>) {
@@ -412,8 +405,7 @@ macro_rules! blake2_mac_impl {
         #[cfg(feature = "reset")]
         impl<OutSize> Reset for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             fn reset(&mut self) {
                 self.core.reset();
@@ -431,8 +423,7 @@ macro_rules! blake2_mac_impl {
         #[cfg(feature = "reset")]
         impl<OutSize> FixedOutputReset for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             #[inline]
             fn finalize_into_reset(&mut self, out: &mut Output<Self>) {
@@ -444,17 +435,14 @@ macro_rules! blake2_mac_impl {
             }
         }
 
-        impl<OutSize> MacMarker for $name<OutSize>
-        where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+        impl<OutSize> MacMarker for $name<OutSize> where
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>
         {
         }
 
         impl<OutSize> fmt::Debug for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 write!(f, "{}{} {{ ... }}", stringify!($name), OutSize::USIZE)
@@ -463,8 +451,7 @@ macro_rules! blake2_mac_impl {
 
         impl<OutSize> Drop for $name<OutSize>
         where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
         {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
@@ -479,10 +466,8 @@ macro_rules! blake2_mac_impl {
             }
         }
         #[cfg(feature = "zeroize")]
-        impl<OutSize> ZeroizeOnDrop for $name<OutSize>
-        where
-            OutSize: ArraySize + IsLessOrEqual<$max_size>,
-            LeEq<OutSize, $max_size>: NonZero,
+        impl<OutSize> ZeroizeOnDrop for $name<OutSize> where
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>
         {
         }
     };

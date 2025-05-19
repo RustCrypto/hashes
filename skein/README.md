@@ -18,9 +18,9 @@ fixed using additional type parameter.
 
 ```rust
 use hex_literal::hex;
-use skein::{Digest, Skein512, consts::U32};
+use skein::{Digest, Skein512_256};
 
-let mut hasher = Skein512::<U32>::new();
+let mut hasher = Skein512_256::new();
 hasher.update(b"The quick brown fox ");
 hasher.update(b"jumps over the lazy dog");
 let hash = hasher.finalize();

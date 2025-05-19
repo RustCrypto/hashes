@@ -1,6 +1,6 @@
 //! SHA-1 `aarch64` backend.
 
-use crate::K;
+use super::K;
 
 // Per rustc target feature docs for `aarch64-unknown-linux-gnu` and
 // `aarch64-apple-darwin` platforms, the `sha2` target feature enables

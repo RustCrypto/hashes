@@ -1,14 +1,14 @@
 use hex_literal::hex;
 use kupyna::{
-    Digest, Kupyna256, Kupyna384, Kupyna512, KupynaShortCore,
-    digest::{core_api::CoreWrapper, typenum::U6},
+    Digest, Kupyna256, Kupyna384, Kupyna512, KupynaShort,
     digest::{
+        consts::U6,
         dev::{feed_rand_16mib, fixed_reset_test},
         hash_serialization_test, new_test,
     },
 };
 
-type Kupyna48 = CoreWrapper<KupynaShortCore<U6>>;
+type Kupyna48 = KupynaShort<U6>;
 
 // Test vectors from the original paper:
 // https://eprint.iacr.org/2015/885.pdf
