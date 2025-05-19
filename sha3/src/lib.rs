@@ -60,16 +60,20 @@ digest::newtype_fixed_hash!(
 digest::newtype_xof_hash!(
     /// SHAKE128 hasher.
     pub struct Shake128(Sha3HasherCore<U168, U0, SHAKE_PAD>);
+    oid: "2.16.840.1.101.3.4.2.11";
+    impl: XofHasherTraits;
     /// SHAKE128 XOF reader.
     pub struct Shake128Reader(Sha3ReaderCore<U168>);
-    oid: "2.16.840.1.101.3.4.2.11";
+    impl: XofReaderTraits;
 );
 digest::newtype_xof_hash!(
     /// SHAKE256 hasher.
     pub struct Shake256(Sha3HasherCore<U136, U0, SHAKE_PAD>);
+    oid: "2.16.840.1.101.3.4.2.12";
+    impl: XofHasherTraits;
     /// SHAKE256 XOF reader.
     pub struct Shake256Reader(Sha3ReaderCore<U136>);
-    oid: "2.16.840.1.101.3.4.2.12";
+    impl: XofReaderTraits;
 );
 
 digest::newtype_fixed_hash!(

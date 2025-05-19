@@ -5,7 +5,7 @@ use crate::{
 use core::fmt;
 use digest::{
     CustomizedInit, HashMarker, Reset,
-    consts::{U136, U168},
+    consts::{U136, U168, U400},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         UpdateCore,
@@ -151,17 +151,35 @@ macro_rules! impl_cshake {
         impl digest::zeroize::ZeroizeOnDrop for $name {}
 
         impl SerializableState for $name {
-            // TODO: implement properly with U400
-            type SerializedStateSize = digest::consts::U0;
+            type SerializedStateSize = U400;
 
             fn serialize(&self) -> SerializedState<Self> {
-                todo!()
+                let mut serialized_state = SerializedState::<Self>::default();
+                let mut chunks = serialized_state.chunks_exact_mut(8);
+
+                for (val, chunk) in self.state.iter().zip(&mut chunks) {
+                    chunk.copy_from_slice(&val.to_le_bytes());
+                }
+                for (val, chunk) in self.initial_state.iter().zip(&mut chunks) {
+                    chunk.copy_from_slice(&val.to_le_bytes());
+                }
+
+                serialized_state
             }
 
             fn deserialize(
-                _serialized_state: &SerializedState<Self>,
+                serialized_state: &SerializedState<Self>,
             ) -> Result<Self, DeserializeStateError> {
-                todo!()
+                let (state_src, initial_state_src) = serialized_state.split_at(200);
+                let state = core::array::from_fn(|i| {
+                    let chunk = state_src[8 * i..][..8].try_into().unwrap();
+                    u64::from_le_bytes(chunk)
+                });
+                let initial_state = core::array::from_fn(|i| {
+                    let chunk = initial_state_src[8 * i..][..8].try_into().unwrap();
+                    u64::from_le_bytes(chunk)
+                });
+                Ok(Self{ state, initial_state })
             }
         }
 
@@ -169,17 +187,13 @@ macro_rules! impl_cshake {
             #[doc = $alg_name]
             #[doc = " hasher."]
             pub struct $full_name($name);
+            // TODO: Use `XofHasherTraits CustomizedInit` after serialization for buffers is fixed
+            impl: Debug AlgorithmName Clone Default BlockSizeUser CoreProxy HashMarker Update Reset ExtendableOutputReset CustomizedInit;
             #[doc = $alg_name]
             #[doc = " XOF reader."]
             pub struct $reader_name(Sha3ReaderCore<$rate>);
+            impl: XofReaderTraits;
         );
-
-        impl CustomizedInit for $full_name {
-            #[inline]
-            fn new_customized(customization: &[u8]) -> Self {
-                Self::new_with_function_name(&[], customization)
-            }
-        }
 
         impl $full_name {
             /// Creates a new cSHAKE instance with the given function name and customization.

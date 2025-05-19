@@ -289,6 +289,8 @@ digest::newtype_fixed_hash!(
 digest::newtype_xof_hash!(
     /// Ascon-XOF128 hasher.
     pub struct AsconXof128(AsconXofCore);
+    impl: XofHasherTraits;
     /// Ascon-XOF128 reader.
     pub struct AsconXof128Reader(AsconXofReaderCore);
+    impl: XofReaderTraits;
 );
