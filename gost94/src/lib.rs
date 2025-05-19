@@ -19,6 +19,7 @@ use params::Gost94Params;
 digest::newtype_fixed_hash!(
     /// GOST94 hash function generic over parameters.
     pub struct Gost94<P: Gost94Params>(Gost94Core<P>);
+    impl: FixedHashTraits;
 );
 
 /// GOST94 hash function with CryptoPro parameters.

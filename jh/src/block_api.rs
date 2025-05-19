@@ -6,7 +6,6 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser,
         TruncSide, UpdateCore, VariableOutputCore,
     },
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{U64, Unsigned},
 };
 
@@ -108,17 +107,3 @@ impl Drop for JhCore {
 
 #[cfg(feature = "zeroize")]
 impl digest::zeroize::ZeroizeOnDrop for JhCore {}
-
-impl SerializableState for JhCore {
-    type SerializedStateSize = U64;
-
-    fn serialize(&self) -> SerializedState<Self> {
-        todo!()
-    }
-
-    fn deserialize(
-        _serialized_state: &SerializedState<Self>,
-    ) -> Result<Self, DeserializeStateError> {
-        todo!()
-    }
-}

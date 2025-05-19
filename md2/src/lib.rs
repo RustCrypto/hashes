@@ -18,5 +18,6 @@ pub use block_api::Md2Core;
 digest::newtype_fixed_hash!(
     /// MD2 hasher.
     pub struct Md2(Md2Core);
-    oid: "1.2.840.113549.2.2"
+    oid: "1.2.840.113549.2.2";
+    impl: FixedHashTraits;
 );

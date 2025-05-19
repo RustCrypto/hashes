@@ -10,23 +10,21 @@
 #![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]
 #![cfg_attr(feature = "simd", allow(incomplete_features))]
 
-#[cfg(feature = "std")]
-extern crate std;
-
 pub use digest::{self, Digest};
 
 use core::{fmt, marker::PhantomData, ops::Div};
 use digest::{
-    FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update, VarOutputCustomized,
+    CustomizedInit, FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update,
+    VarOutputCustomized,
     array::{Array, ArraySize},
     block_buffer::{Lazy, LazyBuffer},
     consts::{U4, U16, U32, U64, U128},
     core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper, CtOutWrapper,
-        OutputSizeUser, RtVariableCoreWrapper, TruncSide, UpdateCore, VariableOutputCore,
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
+        UpdateCore, VariableOutputCore,
     },
     crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
-    typenum::{IsLessOrEqual, LeEq, NonZero, Unsigned},
+    typenum::{IsLessOrEqual, LeEq, NonZero, True, Unsigned},
 };
 #[cfg(feature = "reset")]
 use digest::{FixedOutputReset, Reset};
@@ -62,12 +60,32 @@ blake2_impl!(
     "Blake2b instance with a fixed output.",
 );
 
-/// BLAKE2b which allows to choose output size at runtime.
-pub type Blake2bVar = RtVariableCoreWrapper<Blake2bVarCore>;
-/// Core hasher state of BLAKE2b generic over output size.
-pub type Blake2bCore<OutSize> = CtOutWrapper<Blake2bVarCore, OutSize>;
-/// BLAKE2b generic over output size.
-pub type Blake2b<OutSize> = CoreWrapper<Blake2bCore<OutSize>>;
+digest::newtype_ct_variable_hash!(
+    /// BLAKE2b generic over output size.
+    pub struct Blake2b<OutSize>(Blake2bVarCore);
+    exclude: SerializableState;
+    max_size: U64;
+);
+
+// TODO: impl in the macro
+impl<OutSize> CustomizedInit for Blake2b<OutSize>
+where
+    OutSize: ArraySize + IsLessOrEqual<U64, Output = True>,
+{
+    fn new_customized(customization: &[u8]) -> Self {
+        Self {
+            core: CustomizedInit::new_customized(customization),
+            buffer: Default::default(),
+        }
+    }
+}
+
+digest::newtype_rt_variable_hash!(
+    /// BLAKE2b which allows to choose output size at runtime.
+    pub struct Blake2bVar(Blake2bVarCore);
+    exclude: SerializableState;
+);
+
 /// BLAKE2b-128 hasher state.
 pub type Blake2b128 = Blake2b<U16>;
 /// BLAKE2b-256 hasher state.
@@ -96,12 +114,32 @@ blake2_impl!(
     "Blake2s instance with a fixed output.",
 );
 
-/// BLAKE2s which allows to choose output size at runtime.
-pub type Blake2sVar = RtVariableCoreWrapper<Blake2sVarCore>;
-/// Core hasher state of BLAKE2s generic over output size.
-pub type Blake2sCore<OutSize> = CtOutWrapper<Blake2sVarCore, OutSize>;
-/// BLAKE2s generic over output size.
-pub type Blake2s<OutSize> = CoreWrapper<Blake2sCore<OutSize>>;
+digest::newtype_ct_variable_hash!(
+    /// BLAKE2s generic over output size.
+    pub struct Blake2s<OutSize>(Blake2sVarCore);
+    exclude: SerializableState;
+    max_size: U32;
+);
+
+// TODO: impl in the macro
+impl<OutSize> CustomizedInit for Blake2s<OutSize>
+where
+    OutSize: ArraySize + IsLessOrEqual<U32, Output = True>,
+{
+    fn new_customized(customization: &[u8]) -> Self {
+        Self {
+            core: CustomizedInit::new_customized(customization),
+            buffer: Default::default(),
+        }
+    }
+}
+
+digest::newtype_rt_variable_hash!(
+    /// BLAKE2s which allows to choose output size at runtime.
+    pub struct Blake2sVar(Blake2sVarCore);
+    exclude: SerializableState;
+);
+
 /// BLAKE2s-128 hasher state.
 pub type Blake2s128 = Blake2s<U16>;
 /// BLAKE2s-256 hasher state.

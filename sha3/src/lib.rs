@@ -36,55 +36,64 @@ const DEFAULT_ROUND_COUNT: usize = 24;
 digest::newtype_fixed_hash!(
     /// SHA-3-224 hasher.
     pub struct Sha3_224(Sha3HasherCore<U144, U28, SHA3_PAD>);
-    oid: "2.16.840.1.101.3.4.2.7"
+    oid: "2.16.840.1.101.3.4.2.7";
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// SHA-3-256 hasher.
     pub struct Sha3_256(Sha3HasherCore<U136, U32, SHA3_PAD>);
-    oid: "2.16.840.1.101.3.4.2.8"
+    oid: "2.16.840.1.101.3.4.2.8";
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// SHA-3-384 hasher.
     pub struct Sha3_384(Sha3HasherCore<U104, U48, SHA3_PAD>);
-    oid: "2.16.840.1.101.3.4.2.9"
+    oid: "2.16.840.1.101.3.4.2.9";
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// SHA-3-512 hasher.
     pub struct Sha3_512(Sha3HasherCore<U72, U64, SHA3_PAD>);
-    oid: "2.16.840.1.101.3.4.2.10"
+    oid: "2.16.840.1.101.3.4.2.10";
+    impl: FixedHashTraits;
 );
 digest::newtype_xof_hash!(
     /// SHAKE128 hasher.
     pub struct Shake128(Sha3HasherCore<U168, U0, SHAKE_PAD>);
     /// SHAKE128 XOF reader.
     pub struct Shake128Reader(Sha3ReaderCore<U168>);
-    oid: "2.16.840.1.101.3.4.2.11"
+    oid: "2.16.840.1.101.3.4.2.11";
 );
 digest::newtype_xof_hash!(
     /// SHAKE256 hasher.
     pub struct Shake256(Sha3HasherCore<U136, U0, SHAKE_PAD>);
     /// SHAKE256 XOF reader.
     pub struct Shake256Reader(Sha3ReaderCore<U136>);
-    oid: "2.16.840.1.101.3.4.2.12"
+    oid: "2.16.840.1.101.3.4.2.12";
 );
 
 digest::newtype_fixed_hash!(
     /// SHA-3 CryptoNight variant.
     pub struct Keccak256Full(Sha3HasherCore<U136, U200, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// Keccak-224 hasher.
     pub struct Keccak224(Sha3HasherCore<U144, U28, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// Keccak-256 hasher.
     pub struct Keccak256(Sha3HasherCore<U136, U32, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// Keccak-384 hasher.
     pub struct Keccak384(Sha3HasherCore<U104, U48, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// Keccak-512 hasher.
     pub struct Keccak512(Sha3HasherCore<U72, U64, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );

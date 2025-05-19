@@ -22,11 +22,13 @@ pub use digest::{self, Digest};
 digest::newtype_fixed_hash!(
     /// Streebog256 hasher.
     pub struct Streebog256(CtOutWrapper<StreebogVarCore, U32>);
-    oid: "1.2.643.7.1.1.2.2"
+    oid: "1.2.643.7.1.1.2.2";
+    impl: FixedHashTraits;
 );
 
 digest::newtype_fixed_hash!(
     /// Streebog512 hasher.
     pub struct Streebog512(CtOutWrapper<StreebogVarCore, U64>);
-    oid: "1.2.643.7.1.1.2.3"
+    oid: "1.2.643.7.1.1.2.3";
+    impl: FixedHashTraits;
 );

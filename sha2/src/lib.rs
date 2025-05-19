@@ -39,30 +39,36 @@ pub use block_api::{Sha256VarCore, Sha512VarCore};
 digest::newtype_fixed_hash!(
     /// SHA-256 hasher.
     pub struct Sha256(CtOutWrapper<Sha256VarCore, U32>);
-    oid: "2.16.840.1.101.3.4.2.1"
+    oid: "2.16.840.1.101.3.4.2.1";
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// SHA-384 hasher.
     pub struct Sha384(CtOutWrapper<Sha512VarCore, U48>);
-    oid: "2.16.840.1.101.3.4.2.2"
+    oid: "2.16.840.1.101.3.4.2.2";
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// SHA-512 hasher.
     pub struct Sha512(CtOutWrapper<Sha512VarCore, U64>);
-    oid: "2.16.840.1.101.3.4.2.3"
+    oid: "2.16.840.1.101.3.4.2.3";
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// SHA-224 hasher.
     pub struct Sha224(CtOutWrapper<Sha256VarCore, U28>);
-    oid: "2.16.840.1.101.3.4.2.4"
+    oid: "2.16.840.1.101.3.4.2.4";
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// SHA-512/224 hasher.
     pub struct Sha512_224(CtOutWrapper<Sha512VarCore, U28>);
-    oid: "2.16.840.1.101.3.4.2.5"
+    oid: "2.16.840.1.101.3.4.2.5";
+    impl: FixedHashTraits;
 );
 digest::newtype_fixed_hash!(
     /// SHA-512/256 hasher.
     pub struct Sha512_256(CtOutWrapper<Sha512VarCore, U32>);
-    oid: "2.16.840.1.101.3.4.2.6"
+    oid: "2.16.840.1.101.3.4.2.6";
+    impl: FixedHashTraits;
 );

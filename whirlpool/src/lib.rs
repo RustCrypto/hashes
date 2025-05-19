@@ -19,4 +19,5 @@ pub use block_api::WhirlpoolCore;
 digest::newtype_fixed_hash!(
     /// Whirlpool hasher.
     pub struct Whirlpool(WhirlpoolCore);
+    impl: FixedHashTraits;
 );
