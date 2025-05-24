@@ -1,6 +1,6 @@
 use crate::{
     short_compress::{COLS, compress, t_xor_l},
-    utils::{read_u64_le, write_u64_le, xor_bytes},
+    utils::{read_u64_le, write_u64_le, xor_words},
 };
 use core::fmt;
 use digest::{
@@ -73,23 +73,18 @@ impl VariableOutputCore for KupynaShortVarCore {
             compress(&mut self.state, block.as_ref());
         });
 
-        let mut state_u8 = [0u8; 64];
-        for (src, dst) in self.state.iter().zip(state_u8.chunks_exact_mut(8)) {
-            dst.copy_from_slice(&src.to_be_bytes());
-        }
+        // Process final state with t_xor_l
+        let t_xor_ult_processed_block = t_xor_l(self.state);
 
-        // Call t_xor_l with u8 array
-        let t_xor_ult_processed_block = t_xor_l(state_u8);
+        let result_state = xor_words(self.state, t_xor_ult_processed_block);
+        
+        // println!("final_result(pre truncate):=");
+        // for v in result_state.iter() {
+        //     println!("{:02X?}", v);
+        // }
 
-        let result_u8 = xor_bytes(state_u8, t_xor_ult_processed_block);
-
-        // Convert result back to u64s
-        let mut res = [0u64; 8];
-        for (dst, src) in res.iter_mut().zip(result_u8.chunks_exact(8)) {
-            *dst = u64::from_be_bytes(src.try_into().unwrap());
-        }
         let n = COLS / 2;
-        for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
+        for (chunk, v) in out.chunks_exact_mut(8).zip(result_state[n..].iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
         }
     }

@@ -1,95 +1,75 @@
-use crate::utils::{add_constant_plus, add_constant_xor, apply_s_box, mix_columns, xor_bytes};
+use crate::utils::{add_constant_plus, add_constant_xor, apply_s_box, mix_columns, xor_words};
 
 pub(crate) const COLS: usize = 16;
 const ROUNDS: u64 = 14;
 
-type Matrix = [[u8; 8]; 16];
-
 pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128]) {
-    let mut prev_vector_u8 = [0u8; 128];
-    for (src, dst) in prev_vector.iter().zip(prev_vector_u8.chunks_exact_mut(8)) {
-        dst.copy_from_slice(&src.to_be_bytes());
+    // Convert message block from u8 to u64 (column-major order as per paper)
+    let mut message_u64 = [0u64; COLS];
+    for (chunk, v) in message_block.chunks_exact(8).zip(message_u64.iter_mut()) {
+        *v = u64::from_be_bytes(chunk.try_into().unwrap());
     }
 
-    let m_xor_p = xor_bytes(*message_block, prev_vector_u8);
+    let m_xor_p = xor_words(*prev_vector, message_u64);
 
     let t_xor_mp = t_xor_l(m_xor_p);
 
-    let t_plus_m = t_plus_l(*message_block);
+    let t_plus_m = t_plus_l(message_u64);
 
-    prev_vector_u8 = xor_bytes(xor_bytes(t_xor_mp, t_plus_m), prev_vector_u8);
-
-    for (dst, src) in prev_vector.iter_mut().zip(prev_vector_u8.chunks_exact(8)) {
-        *dst = u64::from_be_bytes(src.try_into().unwrap());
-    }
+    *prev_vector = xor_words(xor_words(t_xor_mp, t_plus_m), *prev_vector);
 }
 
-pub(crate) fn t_plus_l(block: [u8; 128]) -> [u8; 128] {
-    let mut state = block_to_matrix(block);
+pub(crate) fn t_plus_l(state: [u64; COLS]) -> [u64; COLS] {
+    let mut state = state;
     for nu in 0..ROUNDS {
         state = add_constant_plus(state, nu as usize);
         state = apply_s_box(state);
         state = rotate_rows(state);
         state = mix_columns(state);
     }
-    matrix_to_block(state)
-}
-
-fn block_to_matrix(block: [u8; 128]) -> Matrix {
-    const ROWS: usize = 16;
-    const COLS: usize = 8;
-
-    let mut matrix = [[0u8; COLS]; ROWS];
-    for i in 0..ROWS {
-        for j in 0..COLS {
-            matrix[i][j] = block[i * COLS + j];
-        }
-    }
-    matrix
-}
-
-fn matrix_to_block(matrix: Matrix) -> [u8; 128] {
-    const ROWS: usize = 16;
-    const COLS: usize = 8;
-
-    let mut block = [0u8; ROWS * COLS];
-    for i in 0..ROWS {
-        for j in 0..COLS {
-            block[i * COLS + j] = matrix[i][j];
-        }
-    }
-    block
-}
-
-fn rotate_rows(mut state: Matrix) -> Matrix {
-    const ROWS: usize = 16;
-    let cols = 8;
-
-    let mut temp = [0u8; ROWS];
-    let mut shift: i32 = -1;
-    for i in 0..cols {
-        if i == cols - 1 {
-            shift = 11;
-        } else {
-            shift += 1;
-        }
-        for col in 0..ROWS {
-            temp[(col + shift as usize) % ROWS] = state[col][i];
-        }
-        for col in 0..ROWS {
-            state[col][i] = temp[col];
-        }
-    }
     state
 }
 
-pub(crate) fn t_xor_l(block: [u8; 128]) -> [u8; 128] {
-    let mut state = block_to_matrix(block);
+fn rotate_rows(state: [u64; COLS]) -> [u64; COLS] {
+    // Convert to matrix format (column-major as per paper)
+    let mut matrix = [[0u8; COLS]; 8];
+    for col in 0..COLS {
+        let bytes = state[col].to_be_bytes();
+        for row in 0..8 {
+            matrix[row][col] = bytes[row];
+        }
+    }
+
+    // Apply row rotation as per paper: row i rotated by i positions, row 7 by 11 positions for l=1024
+    let mut result_matrix = [[0u8; COLS]; 8];
+
+    for row in 0..8 {
+        let shift = if row == 7 { 11 } else { row };
+        for col in 0..COLS {
+            result_matrix[row][(col + shift) % COLS] = matrix[row][col];
+        }
+    }
+
+    // Convert back to u64 array
+    let mut result = [0u64; COLS];
+    for col in 0..COLS {
+        let mut bytes = [0u8; 8];
+        for row in 0..8 {
+            bytes[row] = result_matrix[row][col];
+        }
+        result[col] = u64::from_be_bytes(bytes);
+    }
+
+    result
+}
+
+pub(crate) fn t_xor_l(state: [u64; COLS]) -> [u64; COLS] {
+    let mut state = state;
     for nu in 0..ROUNDS {
         state = add_constant_xor(state, nu as usize);
         state = apply_s_box(state);
         state = rotate_rows(state);
         state = mix_columns(state);
     }
-    matrix_to_block(state)
+    state
 }
