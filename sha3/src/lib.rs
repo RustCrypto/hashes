@@ -6,7 +6,7 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
-#![warn(missing_docs)]
+#![warn(missing_docs, missing_debug_implementations)]
 
 pub use digest::{self, CustomizedInit, Digest};
 

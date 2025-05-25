@@ -1,9 +1,12 @@
 use crate::{Sha3HasherCore, Sha3ReaderCore};
 use core::fmt;
 use digest::{
-    ExtendableOutput, ExtendableOutputReset, HashMarker, Update,
+    ExtendableOutput, ExtendableOutputReset, HashMarker, Update, XofReader,
+    block_buffer::{EagerBuffer, ReadBuffer},
     consts::{U0, U136, U168},
-    core_api::{AlgorithmName, BlockSizeUser, CoreWrapper, Reset, XofReaderCoreWrapper},
+    core_api::{
+        AlgorithmName, BlockSizeUser, ExtendableOutputCore, Reset, UpdateCore, XofReaderCore,
+    },
 };
 
 const TURBO_SHAKE_ROUND_COUNT: usize = 12;
@@ -15,15 +18,19 @@ macro_rules! impl_turbo_shake {
         #[doc = $alg_name]
         #[doc = " hasher."]
         #[derive(Clone)]
-        pub struct $name<const DS: u8>(
-            CoreWrapper<Sha3HasherCore<$rate, U0, DS, TURBO_SHAKE_ROUND_COUNT>>,
-        );
+        pub struct $name<const DS: u8> {
+            core: Sha3HasherCore<$rate, U0, DS, TURBO_SHAKE_ROUND_COUNT>,
+            buffer: EagerBuffer<$rate>,
+        }
 
         impl<const DS: u8> Default for $name<DS> {
             #[inline]
             fn default() -> Self {
                 assert!((0x01..=0x7F).contains(&DS), "invalid domain separator");
-                Self(Default::default())
+                Self {
+                    core: Default::default(),
+                    buffer: Default::default(),
+                }
             }
         }
 
@@ -36,28 +43,31 @@ macro_rules! impl_turbo_shake {
         impl<const DS: u8> Update for $name<DS> {
             #[inline]
             fn update(&mut self, data: &[u8]) {
-                self.0.update(data)
+                let Self { core, buffer } = self;
+                buffer.digest_blocks(data, |blocks| core.update_blocks(blocks));
             }
         }
-
-        #[doc = $alg_name]
-        #[doc = " XOF reader."]
-        pub type $reader_name =
-            XofReaderCoreWrapper<Sha3ReaderCore<$rate, TURBO_SHAKE_ROUND_COUNT>>;
 
         impl<const DS: u8> ExtendableOutput for $name<DS> {
             type Reader = $reader_name;
 
             #[inline]
-            fn finalize_xof(self) -> Self::Reader {
-                self.0.finalize_xof()
+            fn finalize_xof(mut self) -> Self::Reader {
+                let Self { core, buffer } = &mut self;
+                let core = core.finalize_xof_core(buffer);
+                let buffer = Default::default();
+                Self::Reader { core, buffer }
             }
         }
 
         impl<const DS: u8> ExtendableOutputReset for $name<DS> {
             #[inline]
             fn finalize_xof_reset(&mut self) -> Self::Reader {
-                self.0.finalize_xof_reset()
+                let Self { core, buffer } = self;
+                let core = core.finalize_xof_core(buffer);
+                self.reset();
+                let buffer = Default::default();
+                Self::Reader { core, buffer }
             }
         }
 
@@ -82,6 +92,30 @@ macro_rules! impl_turbo_shake {
 
         #[cfg(feature = "zeroize")]
         impl<const DS: u8> digest::zeroize::ZeroizeOnDrop for $name<DS> {}
+
+        #[doc = $alg_name]
+        #[doc = " XOF reader."]
+        #[derive(Clone)]
+        pub struct $reader_name {
+            core: Sha3ReaderCore<$rate, TURBO_SHAKE_ROUND_COUNT>,
+            buffer: ReadBuffer<$rate>,
+        }
+
+        impl XofReader for $reader_name {
+            #[inline]
+            fn read(&mut self, buf: &mut [u8]) {
+                let Self { core, buffer } = self;
+                buffer.read(buf, |block| {
+                    *block = core.read_block();
+                });
+            }
+        }
+
+        impl fmt::Debug for $reader_name {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(concat!(stringify!($reader_name), " { ... }"))
+            }
+        }
     };
 }
 

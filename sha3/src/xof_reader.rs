@@ -1,5 +1,5 @@
 use crate::{DEFAULT_ROUND_COUNT, PLEN};
-use core::marker::PhantomData;
+use core::{fmt, marker::PhantomData};
 use digest::{
     core_api::{Block, BlockSizeUser, XofReaderCore},
     crypto_common::BlockSizes,
@@ -61,6 +61,15 @@ where
             use digest::zeroize::Zeroize;
             self.state.zeroize();
         }
+    }
+}
+
+impl<Rate, const ROUNDS: usize> fmt::Debug for Sha3ReaderCore<Rate, ROUNDS>
+where
+    Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Sha3ReaderCore { ... }")
     }
 }
 
