@@ -80,62 +80,6 @@ pub(crate) fn mix_columns<const N: usize>(state: [u64; N]) -> [u64; N] {
     result
 }
 
-// pub(crate) fn apply_s_box<const N: usize>(state: [u64; N]) -> [u64; N] {
-//     let mut result = [0u64; N];
-// 
-//     for (col, &word) in state.iter().enumerate() {
-//         let mut transformed_word = 0u64;
-// 
-//         // Process each byte position (row) in the u64 word
-//         for row in 0..8 {
-//             // Extract the byte at position 'row' from the word
-//             let byte = ((word >> (56 - row * 8)) & 0xFF) as u8;
-// 
-//             // Apply the appropriate S-box (π_{row mod 4})
-//             let transformed_byte = SBOXES[row % 4][byte as usize];
-// 
-//             // Place the transformed byte back in the same position
-//             transformed_word |= (transformed_byte as u64) << (56 - row * 8);
-//         }
-// 
-//         result[col] = transformed_word;
-//     }
-// 
-//     result
-// }
-// 
-// pub(crate) fn apply_s_box<const N: usize>(state: [u64; N]) -> [u64; N] {
-//     let mut result = [0u64; N];
-// 
-//     // Convert state to matrix format (column-major)
-//     let mut matrix = [[0u8; N]; 8];
-//     for col in 0..N {
-//         let bytes = state[col].to_be_bytes();
-//         for row in 0..8 {
-//             matrix[row][col] = bytes[row];
-//         }
-//     }
-// 
-//     // Apply S-boxes based on row index (π_{i mod 4})
-//     let mut result_matrix = [[0u8; N]; 8];
-//     for row in 0..8 {
-//         for col in 0..N {
-//             result_matrix[row][col] = SBOXES[row % 4][matrix[row][col] as usize];
-//         }
-//     }
-// 
-//     // Convert back to u64 array
-//     for col in 0..N {
-//         let mut bytes = [0u8; 8];
-//         for row in 0..8 {
-//             bytes[row] = result_matrix[row][col];
-//         }
-//         result[col] = u64::from_be_bytes(bytes);
-//     }
-// 
-//     result
-// }
-
 pub(crate) fn apply_s_box<const N: usize>(state: [u64; N]) -> [u64; N] {
     let mut result = [0u64; N];
 
