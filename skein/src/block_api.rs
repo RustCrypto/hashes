@@ -2,7 +2,7 @@ use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
     array::ArraySize,
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore, Lazy,
         OutputSizeUser, Reset, UpdateCore,
     },

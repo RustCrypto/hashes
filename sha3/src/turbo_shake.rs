@@ -2,11 +2,11 @@ use crate::{Sha3HasherCore, Sha3ReaderCore};
 use core::fmt;
 use digest::{
     ExtendableOutput, ExtendableOutputReset, HashMarker, Update, XofReader,
-    block_buffer::{EagerBuffer, ReadBuffer},
-    consts::{U0, U136, U168},
-    core_api::{
+    block_api::{
         AlgorithmName, BlockSizeUser, ExtendableOutputCore, Reset, UpdateCore, XofReaderCore,
     },
+    block_buffer::{EagerBuffer, ReadBuffer},
+    consts::{U0, U136, U168},
 };
 
 const TURBO_SHAKE_ROUND_COUNT: usize = 12;

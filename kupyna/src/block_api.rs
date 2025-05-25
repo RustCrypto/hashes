@@ -5,7 +5,7 @@ use crate::{
 use core::fmt;
 use digest::{
     HashMarker, InvalidOutputSize, Output,
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser,
         TruncSide, UpdateCore, VariableOutputCore,
     },

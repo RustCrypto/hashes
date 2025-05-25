@@ -17,12 +17,12 @@ use digest::{
     CustomizedInit, FixedOutput, HashMarker, InvalidOutputSize, MacMarker, Output, Update,
     VarOutputCustomized,
     array::{Array, ArraySize},
-    block_buffer::{Lazy, LazyBuffer},
-    consts::{U4, U16, U32, U64, U128},
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
+    block_buffer::{Lazy, LazyBuffer},
+    consts::{U4, U16, U32, U64, U128},
     crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
     typenum::{IsLessOrEqual, True, Unsigned},
 };

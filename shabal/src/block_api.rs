@@ -3,11 +3,11 @@ use core::{fmt, mem, num::Wrapping};
 use digest::{
     HashMarker, InvalidOutputSize, Output,
     array::Array,
-    consts::{U8, U48, U64, U184},
-    core_api::{
+    block_api::{
         AlgorithmName, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
+    consts::{U8, U48, U64, U184},
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 

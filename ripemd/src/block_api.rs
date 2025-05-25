@@ -1,7 +1,7 @@
 use core::fmt;
 use digest::{
     HashMarker, Output,
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },

@@ -2,11 +2,11 @@ use core::fmt;
 use digest::{
     HashMarker, Output,
     array::Array,
-    consts::{U64, U72},
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
+    consts::{U64, U72},
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 

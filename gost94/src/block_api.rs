@@ -3,7 +3,7 @@ use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
     array::Array,
-    core_api::{
+    block_api::{
         AlgorithmName, Block as TBlock, BlockSizeUser, Buffer, BufferKindUser, Eager,
         FixedOutputCore, OutputSizeUser, Reset, UpdateCore,
     },

@@ -21,8 +21,8 @@ compile_error!("The Zknh backends can be enabled only for RISC-V targets");
 pub use digest::{self, Digest};
 
 use digest::{
+    block_api::CtOutWrapper,
     consts::{U28, U32, U48, U64},
-    core_api::CtOutWrapper,
 };
 
 #[rustfmt::skip]

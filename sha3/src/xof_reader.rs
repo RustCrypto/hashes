@@ -1,7 +1,7 @@
 use crate::{DEFAULT_ROUND_COUNT, PLEN};
 use core::{fmt, marker::PhantomData};
 use digest::{
-    core_api::{Block, BlockSizeUser, XofReaderCore},
+    block_api::{Block, BlockSizeUser, XofReaderCore},
     crypto_common::BlockSizes,
     typenum::{IsLessOrEqual, True, U200},
 };

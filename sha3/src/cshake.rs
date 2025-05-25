@@ -5,11 +5,11 @@ use crate::{
 use core::fmt;
 use digest::{
     CustomizedInit, HashMarker, Reset,
-    consts::{U136, U168, U400},
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         UpdateCore,
     },
+    consts::{U136, U168, U400},
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::Unsigned,
 };

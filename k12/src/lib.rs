@@ -17,9 +17,9 @@ pub use block_api::{KangarooTwelveCore, KangarooTwelveReaderCore};
 use core::fmt;
 use digest::{
     ExtendableOutput, HashMarker, Reset, Update, XofReader,
+    block_api::{AlgorithmName, BlockSizeUser, ExtendableOutputCore, UpdateCore, XofReaderCore},
     block_buffer::{BlockBuffer, Eager, ReadBuffer},
     consts::{U128, U168},
-    core_api::{AlgorithmName, BlockSizeUser, ExtendableOutputCore, UpdateCore, XofReaderCore},
 };
 
 /// `KangarooTwelve` hasher.

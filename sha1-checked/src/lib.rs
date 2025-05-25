@@ -26,8 +26,8 @@ use core::slice::from_ref;
 use digest::{
     FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
     array::Array,
+    block_api::BlockSizeUser,
     block_buffer::{BlockBuffer, Eager},
-    core_api::BlockSizeUser,
     typenum::{U20, U64, Unsigned},
 };
 #[cfg(feature = "zeroize")]

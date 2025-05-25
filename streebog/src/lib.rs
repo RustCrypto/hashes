@@ -9,8 +9,8 @@
 #![warn(missing_docs)]
 
 use digest::{
+    block_api::CtOutWrapper,
     consts::{U32, U64},
-    core_api::CtOutWrapper,
 };
 
 mod block_api;

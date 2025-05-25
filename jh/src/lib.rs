@@ -16,8 +16,8 @@ mod consts;
 pub use block_api::JhCore;
 
 use digest::{
+    block_api::CtOutWrapper,
     consts::{U28, U32, U48, U64},
-    core_api::CtOutWrapper,
 };
 
 digest::buffer_fixed!(

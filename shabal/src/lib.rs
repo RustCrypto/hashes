@@ -16,8 +16,8 @@ pub use block_api::ShabalVarCore;
 pub use digest::{self, Digest};
 
 use digest::{
+    block_api::CtOutWrapper,
     consts::{U24, U28, U32, U48, U64},
-    core_api::CtOutWrapper,
 };
 
 digest::buffer_fixed!(

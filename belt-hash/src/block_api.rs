@@ -2,7 +2,7 @@ use belt_block::belt_block_raw;
 use core::fmt;
 use digest::{
     HashMarker, Output,
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },

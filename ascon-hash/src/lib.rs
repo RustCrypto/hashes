@@ -13,11 +13,11 @@ use ascon::State;
 pub use digest::{self, Digest, ExtendableOutput, Reset, Update, XofReader};
 use digest::{
     HashMarker, Output, OutputSizeUser,
-    consts::{U8, U32, U40},
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         FixedOutputCore, UpdateCore, XofReaderCore,
     },
+    consts::{U8, U32, U40},
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 

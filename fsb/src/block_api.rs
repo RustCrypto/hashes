@@ -2,7 +2,7 @@ use crate::PI;
 use core::fmt;
 use digest::{
     Digest, HashMarker, Output,
-    core_api::{
+    block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
