@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
 - Relax MSRV policy and allow MSRV bumps in patch releases
 - Update to `digest` v0.11
+- Replace type aliases with newtypes [#678]
 
 ### Removed
 - `asm` crate feature [#542]
 
 [#542]: https://github.com/RustCrypto/hashes/pull/542
 [#652]: https://github.com/RustCrypto/hashes/pull/652
+[#678]: https://github.com/RustCrypto/hashes/pull/678
 
 ## 0.10.4 (2022-09-02)
 ### Fixed
@@ -90,4 +92,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.2.0 (2016-10-14)
 
-## 0.1.0 (2016-10-06
+## 0.1.0 (2016-10-06)
