@@ -21,8 +21,8 @@ hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]
-default = ["std"]
-std = ["digest/std"]
+default = ["alloc"]
+alloc = ["digest/alloc"]
 zeroize = ["digest/zeroize"]
 reset = [] # Enable reset functionality
 #simd = []

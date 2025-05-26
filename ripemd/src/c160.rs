@@ -1,4 +1,3 @@
-use core::convert::TryInto;
 use digest::typenum::U20;
 
 pub const DIGEST_BUF_LEN: usize = 5;

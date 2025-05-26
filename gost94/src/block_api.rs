@@ -1,12 +1,11 @@
 #![allow(clippy::many_single_char_names)]
-use core::fmt;
+use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
     array::Array,
-    block_buffer::Eager,
-    core_api::{
-        AlgorithmName, Block as TBlock, BlockSizeUser, Buffer, BufferKindUser, FixedOutputCore,
-        OutputSizeUser, Reset, UpdateCore,
+    block_api::{
+        AlgorithmName, Block as TBlock, BlockSizeUser, Buffer, BufferKindUser, Eager,
+        FixedOutputCore, OutputSizeUser, Reset, UpdateCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{U32, U96, Unsigned},
@@ -130,7 +129,6 @@ fn adc(a: &mut u64, b: u64, carry: &mut u64) {
 }
 
 /// Core GOST94 algorithm generic over parameters.
-#[derive(Clone)]
 pub struct Gost94Core<P: Gost94Params> {
     h: Block,
     n: [u64; 4],
@@ -247,6 +245,18 @@ impl<P: Gost94Params> FixedOutputCore for Gost94Core<P> {
     }
 }
 
+impl<P: Gost94Params> Clone for Gost94Core<P> {
+    #[inline]
+    fn clone(&self) -> Self {
+        Self {
+            h: self.h,
+            n: self.n,
+            sigma: self.sigma,
+            _m: PhantomData,
+        }
+    }
+}
+
 impl<P: Gost94Params> Default for Gost94Core<P> {
     #[inline]
     fn default() -> Self {
@@ -254,7 +264,7 @@ impl<P: Gost94Params> Default for Gost94Core<P> {
             h: P::H0,
             n: Default::default(),
             sigma: Default::default(),
-            _m: Default::default(),
+            _m: PhantomData,
         }
     }
 }

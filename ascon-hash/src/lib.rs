@@ -13,13 +13,12 @@ use ascon::State;
 pub use digest::{self, Digest, ExtendableOutput, Reset, Update, XofReader};
 use digest::{
     HashMarker, Output, OutputSizeUser,
-    block_buffer::Eager,
-    consts::{U8, U32},
-    core_api::{
-        AlgorithmName, Block, Buffer, BufferKindUser, CoreWrapper, ExtendableOutputCore,
-        FixedOutputCore, UpdateCore, XofReaderCore, XofReaderCoreWrapper,
+    block_api::{
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
+        FixedOutputCore, UpdateCore, XofReaderCore,
     },
-    crypto_common::BlockSizeUser,
+    consts::{U8, U32, U40},
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 
 /// Produce mask for padding.
@@ -176,6 +175,26 @@ impl AlgorithmName for AsconCore {
     }
 }
 
+impl SerializableState for AsconCore {
+    type SerializedStateSize = U40;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        self.state.state.as_bytes().into()
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let state = ascon::State::from(&serialized_state.0);
+        Ok(Self {
+            state: HashCore {
+                state,
+                phantom: PhantomData,
+            },
+        })
+    }
+}
+
 /// Ascon XOF
 #[derive(Clone, Debug, Default)]
 pub struct AsconXofCore {
@@ -241,29 +260,37 @@ impl AlgorithmName for AsconXofCore {
     }
 }
 
-/// Ascon-Hash256
-///
-/// ```
-/// use ascon_hash::{AsconHash256, Digest};
-///
-/// let mut hasher = AsconHash256::new();
-/// hasher.update(b"some bytes");
-/// let digest = hasher.finalize();
-/// assert_eq!(&digest[..], b"\xe9\x09\xc2\xf6\xda\x9c\xb3\x02\x84\x23\x26\x5c\x8f\x23\xfc\x2d\x26\xbf\xc0\xf3\xdb\x70\x46\x83\xef\x16\xb7\x87\xa9\x45\xed\x68");
-/// ```
-pub type AsconHash256 = CoreWrapper<AsconCore>;
-/// Ascon-XOF128
-///
-/// ```
-/// use ascon_hash::{AsconXof128, ExtendableOutput, Update, XofReader};
-///
-/// let mut xof = AsconXof128::default();
-/// xof.update(b"some bytes");
-/// let mut reader = xof.finalize_xof();
-/// let mut dst = [0u8; 5];
-/// reader.read(&mut dst);
-/// assert_eq!(&dst, b"\x8c\x7d\xd1\x14\xa0");
-/// ```
-pub type AsconXof128 = CoreWrapper<AsconXofCore>;
-/// Reader for AsconXOF output
-pub type AsconXof128Reader = XofReaderCoreWrapper<AsconXofReaderCore>;
+impl SerializableState for AsconXofCore {
+    type SerializedStateSize = U40;
+
+    fn serialize(&self) -> SerializedState<Self> {
+        self.state.state.as_bytes().into()
+    }
+
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let state = ascon::State::from(&serialized_state.0);
+        Ok(Self {
+            state: HashCore {
+                state,
+                phantom: PhantomData,
+            },
+        })
+    }
+}
+
+digest::buffer_fixed!(
+    /// Ascon-Hash256
+    pub struct AsconHash256(AsconCore);
+    impl: FixedHashTraits;
+);
+
+digest::buffer_xof!(
+    /// Ascon-XOF128 hasher.
+    pub struct AsconXof128(AsconXofCore);
+    impl: XofHasherTraits;
+    /// Ascon-XOF128 reader.
+    pub struct AsconXof128Reader(AsconXofReaderCore);
+    impl: XofReaderTraits;
+);

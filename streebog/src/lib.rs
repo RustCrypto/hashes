@@ -8,27 +8,28 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-#[cfg(feature = "std")]
-extern crate std;
-
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
-use digest::{
-    consts::{U32, U64},
-    core_api::{CoreWrapper, CtVariableCoreWrapper},
-    impl_oid_carrier,
-};
-
-mod consts;
-mod core_api;
-
-pub use core_api::StreebogVarCore;
 pub use digest::{self, Digest};
 
-impl_oid_carrier!(Oid256, "1.2.643.7.1.1.2.2");
-impl_oid_carrier!(Oid512, "1.2.643.7.1.1.2.3");
+/// Block-level types
+pub mod block_api;
+mod consts;
 
-/// Streebog256 hasher.
-pub type Streebog256 = CoreWrapper<CtVariableCoreWrapper<StreebogVarCore, U32, Oid256>>;
-/// Streebog512 hasher.
-pub type Streebog512 = CoreWrapper<CtVariableCoreWrapper<StreebogVarCore, U64, Oid512>>;
+use block_api::StreebogVarCore;
+use digest::{
+    block_api::CtOutWrapper,
+    consts::{U32, U64},
+};
+
+digest::buffer_fixed!(
+    /// Streebog256 hasher.
+    pub struct Streebog256(CtOutWrapper<StreebogVarCore, U32>);
+    oid: "1.2.643.7.1.1.2.2";
+    impl: FixedHashTraits;
+);
+
+digest::buffer_fixed!(
+    /// Streebog512 hasher.
+    pub struct Streebog512(CtOutWrapper<StreebogVarCore, U64>);
+    oid: "1.2.643.7.1.1.2.3";
+    impl: FixedHashTraits;
+);

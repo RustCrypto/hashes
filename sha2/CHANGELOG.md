@@ -10,8 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
 - Relax MSRV policy and allow MSRV bumps in patch releases
 - Update to `digest` v0.11
+- Replace type aliases with newtypes ([#678])
+- `compress256` and `compress512` are moved to the `block_api` module ([#678])
 
 ### Added
+- `alloc` crate feature ([#678])
 - RISC-V scalar crypto extension support gated behind `sha2_backend = "riscv-zknh"` or
   `sha2_backend = "riscv-zknh-compact"` configuration flags ([#614])
 - `sha2_backend = "soft"` configuration flag ([#615])
@@ -21,11 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `asm`, `asm-aarch64`, `loongarch64_asm`, and `compress` crate features ([#542])
 - `soft` crate feature ([#615])
 - `force-soft-compact` crate feature ([#686])
+- `std` crate feature ([#678])
 
 [#542]: https://github.com/RustCrypto/hashes/pull/542
 [#614]: https://github.com/RustCrypto/hashes/pull/614
 [#615]: https://github.com/RustCrypto/hashes/pull/615
 [#652]: https://github.com/RustCrypto/hashes/pull/652
+[#678]: https://github.com/RustCrypto/hashes/pull/678
 [#686]: https://github.com/RustCrypto/hashes/pull/686
 
 ## 0.10.9 (2025-04-30)

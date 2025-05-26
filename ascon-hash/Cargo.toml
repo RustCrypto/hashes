@@ -16,7 +16,7 @@ keywords = ["crypto", "hash", "ascon"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "=0.11.0-pre.10", default-features = false, features = ["core-api"] }
+digest = "=0.11.0-pre.10"
 ascon = { version = "0.4", default-features = false }
 
 [dev-dependencies]
@@ -26,8 +26,8 @@ hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
 [features]
-default = ["std"]
-std = ["digest/std"]
+default = ["alloc"]
+alloc = ["digest/alloc"]
 zeroize = ["ascon/zeroize", "digest/zeroize"]
 
 [package.metadata.docs.rs]

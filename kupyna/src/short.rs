@@ -1,148 +1,95 @@
-use crate::{
-    short_compress::{COLS, compress, t_xor_l},
-    utils::{read_u64_le, write_u64_le, xor_bytes},
-};
-use core::fmt;
-use digest::{
-    HashMarker, InvalidOutputSize, Output,
-    block_buffer::Eager,
-    core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
-        UpdateCore, VariableOutputCore,
-    },
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    typenum::{U32, U64, U72, Unsigned},
-};
+use crate::utils::{add_constant_plus, add_constant_xor, apply_s_box, mix_columns, xor_bytes};
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+pub(crate) const COLS: usize = 8;
+const ROUNDS: u64 = 10;
 
-/// Lowest-level core hasher state of the short Kupyna variant.
-#[derive(Clone)]
-pub struct KupynaShortVarCore {
-    state: [u64; COLS],
-    blocks_len: u64,
+type Matrix = [[u8; 8]; 8];
+
+pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 64]) {
+    let mut prev_vector_u8 = [0u8; 64];
+    for (src, dst) in prev_vector.iter().zip(prev_vector_u8.chunks_exact_mut(8)) {
+        dst.copy_from_slice(&src.to_be_bytes());
+    }
+
+    let m_xor_p = xor_bytes(*message_block, prev_vector_u8);
+
+    let t_xor_mp = t_xor_l(m_xor_p);
+
+    let t_plus_m = t_plus_l(*message_block);
+
+    prev_vector_u8 = xor_bytes(xor_bytes(t_xor_mp, t_plus_m), prev_vector_u8);
+
+    for (dst, src) in prev_vector.iter_mut().zip(prev_vector_u8.chunks_exact(8)) {
+        *dst = u64::from_be_bytes(src.try_into().unwrap());
+    }
 }
 
-impl HashMarker for KupynaShortVarCore {}
-
-impl BlockSizeUser for KupynaShortVarCore {
-    type BlockSize = U64;
+fn t_plus_l(block: [u8; 64]) -> [u8; 64] {
+    let mut state = block_to_matrix(block);
+    for nu in 0..ROUNDS {
+        state = add_constant_plus(state, nu as usize);
+        state = apply_s_box(state);
+        state = rotate_rows(state);
+        state = mix_columns(state);
+    }
+    matrix_to_block(state)
 }
 
-impl BufferKindUser for KupynaShortVarCore {
-    type BufferKind = Eager;
-}
+fn block_to_matrix(block: [u8; 64]) -> Matrix {
+    const ROWS: usize = 8;
+    const COLS: usize = 8;
 
-impl UpdateCore for KupynaShortVarCore {
-    #[inline]
-    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-        self.blocks_len += blocks.len() as u64;
-        for block in blocks {
-            compress(&mut self.state, block.as_ref());
+    let mut matrix = [[0u8; COLS]; ROWS];
+    for i in 0..ROWS {
+        for j in 0..COLS {
+            matrix[i][j] = block[i * COLS + j];
         }
     }
+    matrix
 }
 
-impl OutputSizeUser for KupynaShortVarCore {
-    type OutputSize = U32;
-}
+fn matrix_to_block(matrix: Matrix) -> [u8; 64] {
+    const ROWS: usize = 8;
+    const COLS: usize = 8;
 
-impl VariableOutputCore for KupynaShortVarCore {
-    const TRUNC_SIDE: TruncSide = TruncSide::Right;
-
-    #[inline]
-    fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
-        if output_size > Self::OutputSize::USIZE {
-            return Err(InvalidOutputSize);
-        }
-        let mut state = [0; COLS];
-        state[0] = 0x40;
-        state[0] <<= 56;
-        let blocks_len = 0;
-        Ok(Self { state, blocks_len })
-    }
-
-    #[inline]
-    fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-        let block_size = Self::BlockSize::USIZE as u128;
-        let msg_len_bytes = (self.blocks_len as u128) * block_size + (buffer.get_pos() as u128);
-        let msg_len_bits = 8 * msg_len_bytes;
-
-        buffer.digest_pad(0x80, &msg_len_bits.to_le_bytes()[0..12], |block| {
-            compress(&mut self.state, block.as_ref());
-        });
-
-        let mut state_u8 = [0u8; 64];
-        for (src, dst) in self.state.iter().zip(state_u8.chunks_exact_mut(8)) {
-            dst.copy_from_slice(&src.to_be_bytes());
-        }
-
-        // Call t_xor_l with u8 array
-        let t_xor_ult_processed_block = t_xor_l(state_u8);
-
-        let result_u8 = xor_bytes(state_u8, t_xor_ult_processed_block);
-
-        // Convert result back to u64s
-        let mut res = [0u64; 8];
-        for (dst, src) in res.iter_mut().zip(result_u8.chunks_exact(8)) {
-            *dst = u64::from_be_bytes(src.try_into().unwrap());
-        }
-        let n = COLS / 2;
-        for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
-            chunk.copy_from_slice(&v.to_be_bytes());
+    let mut block = [0u8; ROWS * COLS];
+    for i in 0..ROWS {
+        for j in 0..COLS {
+            block[i * COLS + j] = matrix[i][j];
         }
     }
+    block
 }
 
-impl AlgorithmName for KupynaShortVarCore {
-    #[inline]
-    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("KupynaShort")
-    }
-}
+fn rotate_rows(mut state: Matrix) -> Matrix {
+    const ROWS: usize = 8;
+    let cols = 8;
 
-impl fmt::Debug for KupynaShortVarCore {
-    #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("KupynaShortVarCore { ... }")
-    }
-}
-
-impl Drop for KupynaShortVarCore {
-    #[inline]
-    fn drop(&mut self) {
-        #[cfg(feature = "zeroize")]
-        {
-            self.state.zeroize();
-            self.blocks_len.zeroize();
+    let mut temp = [0u8; ROWS];
+    let mut shift: i32 = -1;
+    for i in 0..cols {
+        if i == cols - 1 {
+            shift = 7;
+        } else {
+            shift += 1;
+        }
+        for col in 0..ROWS {
+            temp[(col + shift as usize) % ROWS] = state[col][i];
+        }
+        for col in 0..ROWS {
+            state[col][i] = temp[col];
         }
     }
+    state
 }
 
-impl SerializableState for KupynaShortVarCore {
-    type SerializedStateSize = U72;
-
-    #[inline]
-    fn serialize(&self) -> SerializedState<Self> {
-        let mut serialized_state = SerializedState::<Self>::default();
-        let (state_dst, len_dst) = serialized_state.split_at_mut(64);
-        write_u64_le(&self.state, state_dst);
-        len_dst.copy_from_slice(&self.blocks_len.to_le_bytes());
-        serialized_state
+pub(crate) fn t_xor_l(block: [u8; 64]) -> [u8; 64] {
+    let mut state = block_to_matrix(block);
+    for nu in 0..ROUNDS {
+        state = add_constant_xor(state, nu as usize);
+        state = apply_s_box(state);
+        state = rotate_rows(state);
+        state = mix_columns(state);
     }
-
-    #[inline]
-    fn deserialize(
-        serialized_state: &SerializedState<Self>,
-    ) -> Result<Self, DeserializeStateError> {
-        let (serialized_state, serialized_block_len) = serialized_state.split::<U64>();
-        Ok(Self {
-            state: read_u64_le(&serialized_state.0),
-            blocks_len: u64::from_le_bytes(serialized_block_len.0),
-        })
-    }
+    matrix_to_block(state)
 }
-
-#[cfg(feature = "zeroize")]
-impl ZeroizeOnDrop for KupynaShortVarCore {}
