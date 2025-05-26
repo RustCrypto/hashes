@@ -1,6 +1,6 @@
 use crate::{
     long, short,
-    utils::{read_u64_le, write_u64_le, xor_words},
+    utils::{read_u64_le, write_u64_le, xor},
 };
 use core::fmt;
 use digest::{
@@ -75,7 +75,7 @@ impl VariableOutputCore for KupynaShortVarCore {
         // Process final state with t_xor_l
         let t_xor_ult_processed_block = short::t_xor_l(self.state);
 
-        let result_state = xor_words(self.state, t_xor_ult_processed_block);
+        let result_state = xor(self.state, t_xor_ult_processed_block);
 
         // println!("final_result(pre truncate):=");
         // for v in result_state.iter() {
@@ -202,7 +202,7 @@ impl VariableOutputCore for KupynaLongVarCore {
         // Process final state with t_xor_l
         let t_xor_ult_processed_block = long::t_xor_l(self.state);
 
-        let result_state = xor_words(self.state, t_xor_ult_processed_block);
+        let result_state = xor(self.state, t_xor_ult_processed_block);
 
         let n = long::COLS / 2;
         for (chunk, v) in out.chunks_exact_mut(8).zip(result_state[n..].iter()) {

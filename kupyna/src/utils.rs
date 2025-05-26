@@ -128,7 +128,7 @@ pub(crate) fn add_constant_plus<const N: usize>(mut state: [u64; N], round: usiz
 }
 
 #[inline(always)]
-pub(crate) fn xor_words<const N: usize>(a: [u64; N], b: [u64; N]) -> [u64; N] {
+pub(crate) fn xor<const N: usize>(a: [u64; N], b: [u64; N]) -> [u64; N] {
     let mut result = [0u64; N];
     for i in 0..N {
         result[i] = a[i] ^ b[i];

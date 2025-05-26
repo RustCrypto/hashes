@@ -1,5 +1,5 @@
 use crate::utils::{
-    add_constant_plus, add_constant_xor, apply_s_box, convert_message_block, mix_columns, xor_words,
+    add_constant_plus, add_constant_xor, apply_s_box, convert_message_block, mix_columns, xor,
 };
 
 pub(crate) const COLS: usize = 8;
@@ -19,7 +19,7 @@ pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 64]) 
     //     println!("{:016X?}", v);
     // }
 
-    let m_xor_p = xor_words(*prev_vector, message_u64);
+    let m_xor_p = xor(*prev_vector, message_u64);
 
     // println!("m_xor_p:=");
     // for v in m_xor_p.iter() {
@@ -40,7 +40,7 @@ pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 64]) 
     //     println!("{:016X?}", v);
     // }
 
-    *prev_vector = xor_words(xor_words(t_xor_mp, t_plus_m), *prev_vector);
+    *prev_vector = xor(xor(t_xor_mp, t_plus_m), *prev_vector);
 
     // println!("prev vector after xor:=");
     // for v in prev_vector.iter() {

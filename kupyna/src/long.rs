@@ -1,5 +1,5 @@
 use crate::utils::{
-    add_constant_plus, add_constant_xor, apply_s_box, convert_message_block, mix_columns, xor_words,
+    add_constant_plus, add_constant_xor, apply_s_box, convert_message_block, mix_columns, xor,
 };
 
 pub(crate) const COLS: usize = 16;
@@ -9,13 +9,13 @@ pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128])
     // Convert message block from u8 to u64 (column-major order as per paper)
     let message_u64 = convert_message_block::<128, COLS>(message_block);
 
-    let m_xor_p = xor_words(*prev_vector, message_u64);
+    let m_xor_p = xor(*prev_vector, message_u64);
 
     let t_xor_mp = t_xor_l(m_xor_p);
 
     let t_plus_m = t_plus_l(message_u64);
 
-    *prev_vector = xor_words(xor_words(t_xor_mp, t_plus_m), *prev_vector);
+    *prev_vector = xor(xor(t_xor_mp, t_plus_m), *prev_vector);
 }
 
 pub(crate) fn t_plus_l(state: [u64; COLS]) -> [u64; COLS] {
