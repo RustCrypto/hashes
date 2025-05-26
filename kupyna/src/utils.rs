@@ -153,3 +153,12 @@ pub(crate) fn write_u64_le(src: &[u64], dst: &mut [u8]) {
         dst.copy_from_slice(&src.to_le_bytes())
     }
 }
+
+#[inline(always)]
+pub(crate) fn convert_message_block<const N: usize, const M: usize>(message_block: &[u8; N]) -> [u64; M] {
+    debug_assert_eq!(N, 8 * M, "Message block size must be 8 times the number of columns");
+    core::array::from_fn(|i| {
+        let chunk = message_block[8*i..][..8].try_into().unwrap();
+        u64::from_be_bytes(chunk)
+    })
+}

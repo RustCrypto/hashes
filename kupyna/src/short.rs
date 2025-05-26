@@ -1,14 +1,12 @@
-use crate::utils::{add_constant_plus, add_constant_xor, apply_s_box, mix_columns, xor_words};
+use crate::utils::{add_constant_plus, add_constant_xor, apply_s_box, convert_message_block, mix_columns, xor_words};
 
 pub(crate) const COLS: usize = 8;
 const ROUNDS: u64 = 10;
 
 pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 64]) {
     // Convert message block from u8 to u64 (column-major order as per paper)
-    let mut message_u64 = [0u64; COLS];
-    for (chunk, v) in message_block.chunks_exact(8).zip(message_u64.iter_mut()) {
-        *v = u64::from_be_bytes(chunk.try_into().unwrap());
-    }
+    let message_u64 = convert_message_block::<64, COLS>(message_block);
+
 
     // println!("prev vector:=");
     // for v in prev_vector.iter() {
