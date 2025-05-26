@@ -11,7 +11,7 @@ pub use digest::{self, Digest};
 
 /// Block-level types
 pub mod block_api;
-pub(crate) mod compress;
+mod compress;
 
 digest::buffer_fixed!(
     /// SHA-1 hasher.
