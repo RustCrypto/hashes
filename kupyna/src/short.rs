@@ -1,4 +1,6 @@
-use crate::utils::{add_constant_plus, add_constant_xor, apply_s_box, convert_message_block, mix_columns, xor_words};
+use crate::utils::{
+    add_constant_plus, add_constant_xor, apply_s_box, convert_message_block, mix_columns, xor_words,
+};
 
 pub(crate) const COLS: usize = 8;
 const ROUNDS: u64 = 10;
@@ -6,7 +8,6 @@ const ROUNDS: u64 = 10;
 pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 64]) {
     // Convert message block from u8 to u64 (column-major order as per paper)
     let message_u64 = convert_message_block::<64, COLS>(message_block);
-
 
     // println!("prev vector:=");
     // for v in prev_vector.iter() {
