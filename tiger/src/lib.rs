@@ -9,20 +9,19 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod compress;
 mod tables;
 
-pub use block_api::TigerCore;
-
 digest::buffer_fixed!(
     /// Tiger hasher.
-    pub struct Tiger(TigerCore<false>);
+    pub struct Tiger(block_api::TigerCore<false>);
     impl: FixedHashTraits;
 );
 
 digest::buffer_fixed!(
     /// Tiger2 hasher.
-    pub struct Tiger2(TigerCore<true>);
+    pub struct Tiger2(block_api::TigerCore<true>);
     impl: FixedHashTraits;
 );

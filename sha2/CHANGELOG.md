@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Relax MSRV policy and allow MSRV bumps in patch releases
 - Update to `digest` v0.11
 - Replace type aliases with newtypes [#678]
+- `compress256` and `compress512` are moved to the `block_api` module [#678]
 
 ### Added
 - RISC-V scalar crypto extension support gated behind `sha2_backend = "riscv-zknh"` or

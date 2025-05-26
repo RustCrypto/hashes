@@ -10,33 +10,32 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod consts;
 mod long;
 mod short;
 pub(crate) mod utils;
 
-pub use block_api::{KupynaLongVarCore, KupynaShortVarCore};
-
 use digest::consts::{U28, U32, U48, U64};
 
 digest::buffer_ct_variable!(
     /// Short Kupyna variant generic over output size.
-    pub struct KupynaShort<OutSize>(KupynaShortVarCore);
+    pub struct KupynaShort<OutSize>(block_api::KupynaShortVarCore);
     max_size: U32;
 );
 digest::buffer_rt_variable!(
     /// Short Kupyna variant which allows to select output size at runtime.
-    pub struct KupynaShortVar(KupynaShortVarCore);
+    pub struct KupynaShortVar(block_api::KupynaShortVarCore);
 );
 digest::buffer_ct_variable!(
     /// Long Kupyna variant generic over output size.
-    pub struct KupynaLong<OutSize>(KupynaLongVarCore);
+    pub struct KupynaLong<OutSize>(block_api::KupynaLongVarCore);
     max_size: U64;
 );
 digest::buffer_rt_variable!(
     /// Long Kupyna variant which allows to select output size at runtime.
-    pub struct KupynaLongVar(KupynaLongVarCore);
+    pub struct KupynaLongVar(block_api::KupynaLongVarCore);
 );
 
 /// Kupyna-224 hasher.

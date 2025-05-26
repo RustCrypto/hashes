@@ -8,16 +8,17 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+pub use digest::{self, Digest};
+
+/// Block-level types
+pub mod block_api;
+mod consts;
+
+use block_api::StreebogVarCore;
 use digest::{
     block_api::CtOutWrapper,
     consts::{U32, U64},
 };
-
-mod block_api;
-mod consts;
-
-pub use block_api::StreebogVarCore;
-pub use digest::{self, Digest};
 
 digest::buffer_fixed!(
     /// Streebog256 hasher.

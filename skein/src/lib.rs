@@ -15,22 +15,22 @@ pub use digest::{
 
 use digest::array::ArraySize;
 
-mod block_api;
-pub use block_api::{Skein256Core, Skein512Core, Skein1024Core};
+/// Block-level types
+pub mod block_api;
 
 digest::buffer_fixed!(
     /// Skein-256 hasher generic over output size
-    pub struct Skein256<N: ArraySize>(Skein256Core<N>);
+    pub struct Skein256<N: ArraySize>(block_api::Skein256Core<N>);
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// Skein-512 hasher generic over output size
-    pub struct Skein512<N: ArraySize>(Skein512Core<N>);
+    pub struct Skein512<N: ArraySize>(block_api::Skein512Core<N>);
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// Skein-1024 hasher generic over output size
-    pub struct Skein1024<N: ArraySize>(Skein1024Core<N>);
+    pub struct Skein1024<N: ArraySize>(block_api::Skein1024Core<N>);
     impl: FixedHashTraits;
 );
 

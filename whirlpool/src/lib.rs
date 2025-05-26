@@ -10,14 +10,13 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod compress;
 mod consts;
 
-pub use block_api::WhirlpoolCore;
-
 digest::buffer_fixed!(
     /// Whirlpool hasher.
-    pub struct Whirlpool(WhirlpoolCore);
+    pub struct Whirlpool(block_api::WhirlpoolCore);
     impl: FixedHashTraits;
 );

@@ -33,7 +33,7 @@ use digest::{
 #[cfg(feature = "zeroize")]
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-const BLOCK_SIZE: usize = <sha1::Sha1Core as BlockSizeUser>::BlockSize::USIZE;
+const BLOCK_SIZE: usize = <sha1::block_api::Sha1Core as BlockSizeUser>::BlockSize::USIZE;
 const STATE_LEN: usize = 5;
 const INITIAL_H: [u32; 5] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
 
@@ -112,7 +112,9 @@ impl Sha1 {
             compress::finalize(h, bs * self.block_len, last_block, ctx);
         } else {
             let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
-            buffer.len64_padding_be(bit_len, |b| sha1::compress(h, from_ref(b.into())));
+            buffer.len64_padding_be(bit_len, |b| {
+                sha1::block_api::compress(h, from_ref(b.into()))
+            });
         }
 
         for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
@@ -186,7 +188,7 @@ impl Update for Sha1 {
                 compress::compress(h, ctx, blocks);
             } else {
                 let blocks = Array::cast_slice_to_core(blocks);
-                sha1::compress(h, blocks);
+                sha1::block_api::compress(h, blocks);
             }
         });
     }

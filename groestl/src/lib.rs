@@ -10,32 +10,32 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
+
 mod compress_long;
 mod compress_short;
 mod table;
-
-pub use block_api::{GroestlLongVarCore, GroestlShortVarCore};
 
 use digest::consts::{U28, U32, U48, U64};
 
 digest::buffer_ct_variable!(
     /// Short Groestl variant generic over output size.
-    pub struct GroestlShort<OutSize>(GroestlShortVarCore);
+    pub struct GroestlShort<OutSize>(block_api::GroestlShortVarCore);
     max_size: U32;
 );
 digest::buffer_rt_variable!(
     /// Long Groestl variant which allows to select output size at runtime.
-    pub struct GroestlShortVar(GroestlShortVarCore);
+    pub struct GroestlShortVar(block_api::GroestlShortVarCore);
 );
 digest::buffer_ct_variable!(
     /// Long Groestl variant generic over output size.
-    pub struct GroestlLong<OutSize>(GroestlLongVarCore);
+    pub struct GroestlLong<OutSize>(block_api::GroestlLongVarCore);
     max_size: U64;
 );
 digest::buffer_rt_variable!(
     /// Long Groestl variant which allows to select output size at runtime.
-    pub struct GroestlLongVar(GroestlLongVarCore);
+    pub struct GroestlLongVar(block_api::GroestlLongVarCore);
 );
 
 /// Groestl-224 hasher.

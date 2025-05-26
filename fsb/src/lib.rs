@@ -13,31 +13,31 @@ pub use digest::{self, Digest};
 
 static PI: &[u8; 272_384] = include_bytes!("pi.bin");
 
-mod block_api;
-pub use block_api::{Fsb160Core, Fsb224Core, Fsb256Core, Fsb384Core, Fsb512Core};
+/// Block-level types
+pub mod block_api;
 
 digest::buffer_fixed!(
     /// FSB-160 hasher.
-    pub struct Fsb160(Fsb160Core);
+    pub struct Fsb160(block_api::Fsb160Core);
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// FSB-224 hasher.
-    pub struct Fsb224(Fsb224Core);
+    pub struct Fsb224(block_api::Fsb224Core);
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// FSB-256 hasher.
-    pub struct Fsb256(Fsb256Core);
+    pub struct Fsb256(block_api::Fsb256Core);
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// FSB-384 hasher.
-    pub struct Fsb384(Fsb384Core);
+    pub struct Fsb384(block_api::Fsb384Core);
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// FSB-512 hasher.
-    pub struct Fsb512(Fsb512Core);
+    pub struct Fsb512(block_api::Fsb512Core);
     impl: FixedHashTraits;
 );

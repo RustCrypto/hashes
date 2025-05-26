@@ -1,3 +1,4 @@
+use crate::consts;
 use core::fmt;
 use digest::{
     HashMarker, InvalidOutputSize, Output,
@@ -10,7 +11,7 @@ use digest::{
     typenum::{U32, U40, U64, U80, U128, Unsigned},
 };
 
-use crate::{consts, sha256::compress256, sha512::compress512};
+pub use crate::{sha256::compress256, sha512::compress512};
 
 /// Core block-level SHA-256 hasher with variable output size.
 ///

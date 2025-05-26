@@ -9,14 +9,14 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod compress;
 mod consts;
-pub use block_api::Md5Core;
 
 digest::buffer_fixed!(
     /// MD5 hasher state.
-    pub struct Md5(Md5Core);
+    pub struct Md5(block_api::Md5Core);
     oid: "1.2.840.113549.2.5";
     impl: FixedHashTraits;
 );

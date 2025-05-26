@@ -10,13 +10,13 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod compress;
-pub use block_api::Md4Core;
 
 digest::buffer_fixed!(
     /// MD4 hash.
-    pub struct Md4(Md4Core);
+    pub struct Md4(block_api::Md4Core);
     oid: "1.2.840.113549.2.4";
     impl: FixedHashTraits;
 );

@@ -10,7 +10,8 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod compress;
 mod consts;
 
@@ -18,6 +19,6 @@ pub use block_api::Sm3Core;
 
 digest::buffer_fixed!(
     /// ShangMi 3 (SM3) hasher.
-    pub struct Sm3(Sm3Core);
+    pub struct Sm3(block_api::Sm3Core);
     impl: FixedHashTraits;
 );

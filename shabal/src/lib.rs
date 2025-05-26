@@ -8,13 +8,16 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-#[rustfmt::skip]
-mod consts;
-mod block_api;
-
-pub use block_api::ShabalVarCore;
 pub use digest::{self, Digest};
 
+/// Block-level types
+pub mod block_api;
+
+#[rustfmt::skip]
+mod consts;
+
+
+use block_api::ShabalVarCore;
 use digest::{
     block_api::CtOutWrapper,
     consts::{U24, U28, U32, U48, U64},

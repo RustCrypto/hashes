@@ -10,13 +10,12 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod c128;
 mod c160;
 mod c256;
 mod c320;
-
-pub use block_api::{Ripemd128Core, Ripemd160Core, Ripemd256Core, Ripemd320Core};
 
 // Note about used OIDs: there are two OIDs defined for RIPEMD-128/160.
 // The Teletrust one (which is used by almost anybody, including BouncyCastle,
@@ -25,24 +24,24 @@ pub use block_api::{Ripemd128Core, Ripemd160Core, Ripemd256Core, Ripemd320Core};
 
 digest::buffer_fixed!(
     /// RIPEMD-128 hasher
-    pub struct Ripemd128(Ripemd128Core);
+    pub struct Ripemd128(block_api::Ripemd128Core);
     oid: "1.3.36.3.2.2";
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// RIPEMD-160 hasher
-    pub struct Ripemd160(Ripemd160Core);
+    pub struct Ripemd160(block_api::Ripemd160Core);
     oid: "1.3.36.3.2.1";
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// RIPEMD-256 hasher
-    pub struct Ripemd256(Ripemd256Core);
+    pub struct Ripemd256(block_api::Ripemd256Core);
     oid: "1.3.36.3.2.3";
     impl: FixedHashTraits;
 );
 digest::buffer_fixed!(
     /// RIPEMD-320 hasher
-    pub struct Ripemd320(Ripemd320Core);
+    pub struct Ripemd320(block_api::Ripemd320Core);
     impl: FixedHashTraits;
 );

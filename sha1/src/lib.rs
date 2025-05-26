@@ -9,15 +9,13 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
-mod compress;
-
-pub use block_api::Sha1Core;
-pub use compress::compress;
+/// Block-level types
+pub mod block_api;
+pub(crate) mod compress;
 
 digest::buffer_fixed!(
     /// SHA-1 hasher.
-    pub struct Sha1(Sha1Core);
+    pub struct Sha1(block_api::Sha1Core);
     oid: "1.3.14.3.2.26";
     impl: FixedHashTraits;
 );

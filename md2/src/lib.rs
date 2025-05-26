@@ -10,14 +10,13 @@
 
 pub use digest::{self, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod consts;
-
-pub use block_api::Md2Core;
 
 digest::buffer_fixed!(
     /// MD2 hasher.
-    pub struct Md2(Md2Core);
+    pub struct Md2(block_api::Md2Core);
     oid: "1.2.840.113549.2.2";
     impl: FixedHashTraits;
 );

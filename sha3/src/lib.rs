@@ -10,18 +10,15 @@
 
 pub use digest::{self, CustomizedInit, Digest};
 
-mod block_api;
+/// Block-level types
+pub mod block_api;
 mod cshake;
 mod turbo_shake;
-mod xof_reader;
 
-pub use block_api::Sha3HasherCore;
-pub use cshake::{
-    CShake128, CShake128Core, CShake128Reader, CShake256, CShake256Core, CShake256Reader,
-};
+pub use cshake::{CShake128, CShake128Reader, CShake256, CShake256Reader};
 pub use turbo_shake::{TurboShake128, TurboShake128Reader, TurboShake256, TurboShake256Reader};
-pub use xof_reader::Sha3ReaderCore;
 
+use block_api::{Sha3HasherCore, Sha3ReaderCore};
 use digest::consts::{U0, U28, U32, U48, U64, U72, U104, U136, U144, U168, U200};
 
 // Paddings

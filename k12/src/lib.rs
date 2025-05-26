@@ -10,9 +10,8 @@
 
 pub use digest;
 
-mod block_api;
-
-pub use block_api::{KangarooTwelveCore, KangarooTwelveReaderCore};
+/// Block-level types
+pub mod block_api;
 
 use core::fmt;
 use digest::{
@@ -25,7 +24,7 @@ use digest::{
 /// `KangarooTwelve` hasher.
 #[derive(Default, Clone)]
 pub struct KangarooTwelve<'cs> {
-    core: KangarooTwelveCore<'cs>,
+    core: block_api::KangarooTwelveCore<'cs>,
     buffer: BlockBuffer<U128, Eager>,
 }
 
@@ -33,7 +32,7 @@ impl<'cs> KangarooTwelve<'cs> {
     /// Creates a new KangarooTwelve instance with the given customization.
     pub fn new(customization: &'cs [u8]) -> Self {
         Self {
-            core: KangarooTwelveCore::new(customization),
+            core: block_api::KangarooTwelveCore::new(customization),
             buffer: Default::default(),
         }
     }
@@ -88,7 +87,7 @@ impl digest::zeroize::ZeroizeOnDrop for KangarooTwelve<'_> {}
 
 /// `KangarooTwelve` XOF reader.
 pub struct KangarooTwelveReader {
-    core: KangarooTwelveReaderCore,
+    core: block_api::KangarooTwelveReaderCore,
     buffer: ReadBuffer<U168>,
 }
 
