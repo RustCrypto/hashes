@@ -15,10 +15,10 @@ pub mod block_api;
 
 use core::fmt;
 use digest::{
-    ExtendableOutput, HashMarker, Reset, Update, XofReader,
+    CollisionResistance, ExtendableOutput, HashMarker, Reset, Update, XofReader,
     block_api::{AlgorithmName, BlockSizeUser, ExtendableOutputCore, UpdateCore, XofReaderCore},
     block_buffer::{BlockBuffer, Eager, ReadBuffer},
-    consts::{U128, U168},
+    consts::{U16, U128, U168},
 };
 
 /// `KangarooTwelve` hasher.
@@ -80,6 +80,11 @@ impl ExtendableOutput for KangarooTwelve<'_> {
             buffer: Default::default(),
         }
     }
+}
+
+impl CollisionResistance for KangarooTwelve<'_> {
+    // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-7
+    type CollisionResistance = U16;
 }
 
 #[cfg(feature = "zeroize")]

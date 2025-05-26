@@ -8,7 +8,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs, missing_debug_implementations)]
 
-pub use digest::{self, CustomizedInit, Digest};
+pub use digest::{self, CollisionResistance, CustomizedInit, Digest};
 
 /// Block-level types
 pub mod block_api;
@@ -19,7 +19,7 @@ pub use cshake::{CShake128, CShake128Reader, CShake256, CShake256Reader};
 pub use turbo_shake::{TurboShake128, TurboShake128Reader, TurboShake256, TurboShake256Reader};
 
 use block_api::{Sha3HasherCore, Sha3ReaderCore};
-use digest::consts::{U0, U28, U32, U48, U64, U72, U104, U136, U144, U168, U200};
+use digest::consts::{U0, U16, U28, U32, U48, U64, U72, U104, U136, U144, U168, U200};
 
 // Paddings
 const KECCAK_PAD: u8 = 0x01;
@@ -98,3 +98,13 @@ digest::buffer_fixed!(
     pub struct Keccak512(Sha3HasherCore<U72, U64, KECCAK_PAD>);
     impl: FixedHashTraits;
 );
+
+impl CollisionResistance for Shake128 {
+    // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf#page=31
+    type CollisionResistance = U16;
+}
+
+impl CollisionResistance for Shake256 {
+    // https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf#page=31
+    type CollisionResistance = U32;
+}
