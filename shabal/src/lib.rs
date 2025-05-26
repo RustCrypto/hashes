@@ -8,25 +8,43 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-#[rustfmt::skip]
-mod consts;
-mod core_api;
-
-pub use core_api::ShabalVarCore;
 pub use digest::{self, Digest};
 
+/// Block-level types
+pub mod block_api;
+
+#[rustfmt::skip]
+mod consts;
+
+
+use block_api::ShabalVarCore;
 use digest::{
+    block_api::CtOutWrapper,
     consts::{U24, U28, U32, U48, U64},
-    core_api::{CoreWrapper, CtVariableCoreWrapper},
 };
 
-/// Shabal192 hasher.
-pub type Shabal192 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U24>>;
-/// Shabal224 hasher.
-pub type Shabal224 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U28>>;
-/// Shabal256 hasher.
-pub type Shabal256 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U32>>;
-/// Shabal384 hasher.
-pub type Shabal384 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U48>>;
-/// Shabal512 hasher.
-pub type Shabal512 = CoreWrapper<CtVariableCoreWrapper<ShabalVarCore, U64>>;
+digest::buffer_fixed!(
+    /// Shabal-192 hasher.
+    pub struct Shabal192(CtOutWrapper<ShabalVarCore, U24>);
+    impl: FixedHashTraits;
+);
+digest::buffer_fixed!(
+    /// Shabal-224 hasher.
+    pub struct Shabal224(CtOutWrapper<ShabalVarCore, U28>);
+    impl: FixedHashTraits;
+);
+digest::buffer_fixed!(
+    /// Shabal-256 hasher.
+    pub struct Shabal256(CtOutWrapper<ShabalVarCore, U32>);
+    impl: FixedHashTraits;
+);
+digest::buffer_fixed!(
+    /// Shabal-384 hasher.
+    pub struct Shabal384(CtOutWrapper<ShabalVarCore, U48>);
+    impl: FixedHashTraits;
+);
+digest::buffer_fixed!(
+    /// Shabal-512 hasher.
+    pub struct Shabal512(CtOutWrapper<ShabalVarCore, U64>);
+    impl: FixedHashTraits;
+);

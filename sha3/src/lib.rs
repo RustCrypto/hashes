@@ -6,158 +6,95 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
-#![warn(missing_docs)]
+#![warn(missing_docs, missing_debug_implementations)]
 
 pub use digest::{self, CustomizedInit, Digest};
 
-use core::fmt;
-use digest::{
-    HashMarker, Output,
-    array::typenum::Unsigned,
-    block_buffer::Eager,
-    consts::{U28, U32, U48, U64, U72, U104, U136, U144, U168, U200},
-    core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
-        ExtendableOutputCore, FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
-        XofReaderCoreWrapper,
-    },
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-};
+/// Block-level types
+pub mod block_api;
+mod cshake;
+mod turbo_shake;
 
-#[cfg(feature = "oid")]
-use digest::const_oid::{AssociatedOid, ObjectIdentifier};
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+pub use cshake::{CShake128, CShake128Reader, CShake256, CShake256Reader};
+pub use turbo_shake::{TurboShake128, TurboShake128Reader, TurboShake256, TurboShake256Reader};
 
-#[macro_use]
-mod macros;
-mod state;
-
-use crate::state::Sha3State;
+use block_api::{Sha3HasherCore, Sha3ReaderCore};
+use digest::consts::{U0, U28, U32, U48, U64, U72, U104, U136, U144, U168, U200};
 
 // Paddings
-const KECCAK: u8 = 0x01;
-const SHA3: u8 = 0x06;
-const SHAKE: u8 = 0x1f;
-const CSHAKE: u8 = 0x4;
+const KECCAK_PAD: u8 = 0x01;
+const SHA3_PAD: u8 = 0x06;
+const SHAKE_PAD: u8 = 0x1f;
+const CSHAKE_PAD: u8 = 0x04;
 
-// Round counts
-const TURBO_SHAKE_ROUND_COUNT: usize = 12;
+const PLEN: usize = 25;
+const DEFAULT_ROUND_COUNT: usize = 24;
 
-impl_sha3!(Keccak224Core, Keccak224, U28, U144, KECCAK, "Keccak-224");
-impl_sha3!(Keccak256Core, Keccak256, U32, U136, KECCAK, "Keccak-256");
-impl_sha3!(Keccak384Core, Keccak384, U48, U104, KECCAK, "Keccak-384");
-impl_sha3!(Keccak512Core, Keccak512, U64, U72, KECCAK, "Keccak-512");
-
-impl_sha3!(
-    Keccak256FullCore,
-    Keccak256Full,
-    U200,
-    U136,
-    KECCAK,
-    "SHA-3 CryptoNight variant",
+digest::buffer_fixed!(
+    /// SHA-3-224 hasher.
+    pub struct Sha3_224(Sha3HasherCore<U144, U28, SHA3_PAD>);
+    oid: "2.16.840.1.101.3.4.2.7";
+    impl: FixedHashTraits;
 );
-
-impl_sha3!(
-    Sha3_224Core,
-    Sha3_224,
-    U28,
-    U144,
-    SHA3,
-    "SHA-3-224",
-    "2.16.840.1.101.3.4.2.7",
+digest::buffer_fixed!(
+    /// SHA-3-256 hasher.
+    pub struct Sha3_256(Sha3HasherCore<U136, U32, SHA3_PAD>);
+    oid: "2.16.840.1.101.3.4.2.8";
+    impl: FixedHashTraits;
 );
-impl_sha3!(
-    Sha3_256Core,
-    Sha3_256,
-    U32,
-    U136,
-    SHA3,
-    "SHA-3-256",
-    "2.16.840.1.101.3.4.2.8",
+digest::buffer_fixed!(
+    /// SHA-3-384 hasher.
+    pub struct Sha3_384(Sha3HasherCore<U104, U48, SHA3_PAD>);
+    oid: "2.16.840.1.101.3.4.2.9";
+    impl: FixedHashTraits;
 );
-impl_sha3!(
-    Sha3_384Core,
-    Sha3_384,
-    U48,
-    U104,
-    SHA3,
-    "SHA-3-384",
-    "2.16.840.1.101.3.4.2.9",
+digest::buffer_fixed!(
+    /// SHA-3-512 hasher.
+    pub struct Sha3_512(Sha3HasherCore<U72, U64, SHA3_PAD>);
+    oid: "2.16.840.1.101.3.4.2.10";
+    impl: FixedHashTraits;
 );
-impl_sha3!(
-    Sha3_512Core,
-    Sha3_512,
-    U64,
-    U72,
-    SHA3,
-    "SHA-3-512",
-    "2.16.840.1.101.3.4.2.10",
+digest::buffer_xof!(
+    /// SHAKE128 hasher.
+    pub struct Shake128(Sha3HasherCore<U168, U0, SHAKE_PAD>);
+    oid: "2.16.840.1.101.3.4.2.11";
+    impl: XofHasherTraits;
+    /// SHAKE128 XOF reader.
+    pub struct Shake128Reader(Sha3ReaderCore<U168>);
+    impl: XofReaderTraits;
+);
+digest::buffer_xof!(
+    /// SHAKE256 hasher.
+    pub struct Shake256(Sha3HasherCore<U136, U0, SHAKE_PAD>);
+    oid: "2.16.840.1.101.3.4.2.12";
+    impl: XofHasherTraits;
+    /// SHAKE256 XOF reader.
+    pub struct Shake256Reader(Sha3ReaderCore<U136>);
+    impl: XofReaderTraits;
 );
 
-impl_shake!(
-    Shake128Core,
-    Shake128,
-    Shake128ReaderCore,
-    Shake128Reader,
-    U168,
-    SHAKE,
-    "SHAKE128",
-    "2.16.840.1.101.3.4.2.11",
+digest::buffer_fixed!(
+    /// SHA-3 CryptoNight variant.
+    pub struct Keccak256Full(Sha3HasherCore<U136, U200, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
-impl_shake!(
-    Shake256Core,
-    Shake256,
-    Shake256ReaderCore,
-    Shake256Reader,
-    U136,
-    SHAKE,
-    "SHAKE256",
-    "2.16.840.1.101.3.4.2.11",
+digest::buffer_fixed!(
+    /// Keccak-224 hasher.
+    pub struct Keccak224(Sha3HasherCore<U144, U28, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
-
-impl_turbo_shake!(
-    TurboShake128Core,
-    TurboShake128,
-    TurboShake128ReaderCore,
-    TurboShake128Reader,
-    U168,
-    "TurboSHAKE128",
+digest::buffer_fixed!(
+    /// Keccak-256 hasher.
+    pub struct Keccak256(Sha3HasherCore<U136, U32, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
-impl_turbo_shake!(
-    TurboShake256Core,
-    TurboShake256,
-    TurboShake256ReaderCore,
-    TurboShake256Reader,
-    U136,
-    "TurboSHAKE256",
+digest::buffer_fixed!(
+    /// Keccak-384 hasher.
+    pub struct Keccak384(Sha3HasherCore<U104, U48, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
-
-impl_cshake!(
-    CShake128Core,
-    CShake128,
-    CShake128ReaderCore,
-    CShake128Reader,
-    U168,
-    SHAKE,
-    CSHAKE,
-    "CSHAKE128",
+digest::buffer_fixed!(
+    /// Keccak-512 hasher.
+    pub struct Keccak512(Sha3HasherCore<U72, U64, KECCAK_PAD>);
+    impl: FixedHashTraits;
 );
-impl_cshake!(
-    CShake256Core,
-    CShake256,
-    CShake256ReaderCore,
-    CShake256Reader,
-    U136,
-    SHAKE,
-    CSHAKE,
-    "CSHAKE256",
-);
-
-#[inline(always)]
-pub(crate) fn left_encode(val: u64, b: &mut [u8; 9]) -> &[u8] {
-    b[1..].copy_from_slice(&val.to_be_bytes());
-    let i = b[1..8].iter().take_while(|&&a| a == 0).count();
-    b[i] = (8 - i) as u8;
-    &b[i..]
-}

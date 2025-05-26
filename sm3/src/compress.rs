@@ -1,5 +1,5 @@
 #![allow(clippy::many_single_char_names, clippy::too_many_arguments)]
-use crate::{Block, Sm3Core, consts::T32};
+use crate::consts::T32;
 
 #[inline(always)]
 fn ff1(x: u32, y: u32, z: u32) -> u32 {
@@ -235,7 +235,7 @@ fn compress_u32(state: &mut [u32; 8], block: &[u32; 16]) {
     state[7] ^= h;
 }
 
-pub(crate) fn compress(state: &mut [u32; 8], blocks: &[Block<Sm3Core>]) {
+pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     for block in blocks {
         let mut w = [0u32; 16];
         for (o, chunk) in w.iter_mut().zip(block.chunks_exact(4)) {

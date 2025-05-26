@@ -1,19 +1,17 @@
-use crate::{consts, sha256::compress256, sha512::compress512};
-use core::{convert::TryInto, fmt, slice::from_ref};
+use crate::consts;
+use core::fmt;
 use digest::{
     HashMarker, InvalidOutputSize, Output,
     array::Array,
-    block_buffer::Eager,
-    core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
-        UpdateCore, VariableOutputCore,
+    block_api::{
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser,
+        TruncSide, UpdateCore, VariableOutputCore,
     },
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{U32, U40, U64, U80, U128, Unsigned},
 };
 
-#[cfg(feature = "zeroize")]
-use digest::zeroize::{Zeroize, ZeroizeOnDrop};
+pub use crate::{sha256::compress256, sha512::compress512};
 
 /// Core block-level SHA-256 hasher with variable output size.
 ///
@@ -66,7 +64,7 @@ impl VariableOutputCore for Sha256VarCore {
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let bs = Self::BlockSize::U64;
         let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
-        buffer.len64_padding_be(bit_len, |b| compress256(&mut self.state, from_ref(&b.0)));
+        buffer.len64_padding_be(bit_len, |b| compress256(&mut self.state, &[b.0]));
 
         for (chunk, v) in out.chunks_exact_mut(4).zip(self.state.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
@@ -92,6 +90,7 @@ impl Drop for Sha256VarCore {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
+            use digest::zeroize::Zeroize;
             self.state.zeroize();
             self.block_len.zeroize();
         }
@@ -99,7 +98,7 @@ impl Drop for Sha256VarCore {
 }
 
 #[cfg(feature = "zeroize")]
-impl ZeroizeOnDrop for Sha256VarCore {}
+impl digest::zeroize::ZeroizeOnDrop for Sha256VarCore {}
 
 impl SerializableState for Sha256VarCore {
     type SerializedStateSize = U40;
@@ -184,7 +183,7 @@ impl VariableOutputCore for Sha512VarCore {
     fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let bs = Self::BlockSize::U64 as u128;
         let bit_len = 8 * (buffer.get_pos() as u128 + bs * self.block_len);
-        buffer.len128_padding_be(bit_len, |b| compress512(&mut self.state, from_ref(&b.0)));
+        buffer.len128_padding_be(bit_len, |b| compress512(&mut self.state, &[b.0]));
 
         for (chunk, v) in out.chunks_exact_mut(8).zip(self.state.iter()) {
             chunk.copy_from_slice(&v.to_be_bytes());
@@ -210,13 +209,14 @@ impl Drop for Sha512VarCore {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
+            use digest::zeroize::Zeroize;
             self.state.zeroize();
             self.block_len.zeroize();
         }
     }
 }
 #[cfg(feature = "zeroize")]
-impl ZeroizeOnDrop for Sha512VarCore {}
+impl digest::zeroize::ZeroizeOnDrop for Sha512VarCore {}
 
 impl SerializableState for Sha512VarCore {
     type SerializedStateSize = U80;

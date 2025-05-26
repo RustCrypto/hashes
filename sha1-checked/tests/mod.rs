@@ -24,7 +24,6 @@ fn sha1_collision_rand() {
     );
 }
 
-#[cfg(feature = "std")]
 #[test]
 fn shambles_1() {
     collision_test(
@@ -37,7 +36,6 @@ fn shambles_1() {
     );
 }
 
-#[cfg(feature = "std")]
 #[test]
 fn shambles_2() {
     collision_test(
@@ -50,7 +48,6 @@ fn shambles_2() {
     );
 }
 
-#[cfg(feature = "std")]
 #[test]
 fn shattered_1() {
     collision_test(
@@ -63,7 +60,6 @@ fn shattered_1() {
     );
 }
 
-#[cfg(feature = "std")]
 #[test]
 fn shattered_2() {
     collision_test(
@@ -76,7 +72,6 @@ fn shattered_2() {
     );
 }
 
-#[cfg(feature = "std")]
 #[test]
 fn reducedsha_coll() {
     collision_test(
@@ -89,7 +84,6 @@ fn reducedsha_coll() {
     );
 }
 
-#[cfg(feature = "std")]
 fn collision_test(
     input_path: &str,
     hash: [u8; 20],

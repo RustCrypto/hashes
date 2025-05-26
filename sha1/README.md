@@ -9,7 +9,7 @@
 
 Pure Rust implementation of the [SHA-1] cryptographic hash algorithm.
 
-## 🚨 Warning: Cryptographically Broken! 🚨
+## Warning: Cryptographically Broken!
 
 The SHA-1 hash function should be considered cryptographically broken and
 unsuitable for further use in any security critical capacity, as it is

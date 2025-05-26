@@ -23,20 +23,17 @@ pub use digest::{self, Digest};
 
 use core::slice::from_ref;
 
-#[cfg(feature = "std")]
-extern crate std;
-
 use digest::{
     FixedOutput, FixedOutputReset, HashMarker, Output, OutputSizeUser, Reset, Update,
     array::Array,
+    block_api::BlockSizeUser,
     block_buffer::{BlockBuffer, Eager},
-    core_api::BlockSizeUser,
     typenum::{U20, U64, Unsigned},
 };
 #[cfg(feature = "zeroize")]
 use zeroize::{Zeroize, ZeroizeOnDrop};
 
-const BLOCK_SIZE: usize = <sha1::Sha1Core as BlockSizeUser>::BlockSize::USIZE;
+const BLOCK_SIZE: usize = <sha1::block_api::Sha1Core as BlockSizeUser>::BlockSize::USIZE;
 const STATE_LEN: usize = 5;
 const INITIAL_H: [u32; 5] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
 
@@ -115,7 +112,9 @@ impl Sha1 {
             compress::finalize(h, bs * self.block_len, last_block, ctx);
         } else {
             let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
-            buffer.len64_padding_be(bit_len, |b| sha1::compress(h, from_ref(b.into())));
+            buffer.len64_padding_be(bit_len, |b| {
+                sha1::block_api::compress(h, from_ref(b.into()))
+            });
         }
 
         for (chunk, v) in out.chunks_exact_mut(4).zip(h.iter()) {
@@ -189,7 +188,7 @@ impl Update for Sha1 {
                 compress::compress(h, ctx, blocks);
             } else {
                 let blocks = Array::cast_slice_to_core(blocks);
-                sha1::compress(h, blocks);
+                sha1::block_api::compress(h, blocks);
             }
         });
     }
@@ -241,21 +240,7 @@ impl ZeroizeOnDrop for DetectionState {}
 
 #[cfg(feature = "oid")]
 impl digest::const_oid::AssociatedOid for Sha1 {
-    const OID: digest::const_oid::ObjectIdentifier = sha1::Sha1Core::OID;
-}
-
-#[cfg(feature = "std")]
-impl std::io::Write for Sha1 {
-    #[inline]
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        Update::update(self, buf);
-        Ok(buf.len())
-    }
-
-    #[inline]
-    fn flush(&mut self) -> std::io::Result<()> {
-        Ok(())
-    }
+    const OID: digest::const_oid::ObjectIdentifier = sha1::Sha1::OID;
 }
 
 /// Builder for collision detection configuration.

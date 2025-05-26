@@ -1,9 +1,21 @@
+use crate::PI;
+use core::fmt;
+use digest::{
+    Digest, HashMarker, Output,
+    block_api::{
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
+        OutputSizeUser, Reset, UpdateCore,
+    },
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::{Sum, U8, Unsigned},
+};
+
 macro_rules! fsb_impl {
     (
-        $full_state:ident, $state:ident, $state_num:expr, $blocksize:ident, $outputsize:ident, $statesize:ident,
-        $n:expr, $w:expr, $r:expr, $p:expr, $s:expr, $full_doc:expr, $doc:expr,
+        $state:ident, $block_size:ident, $output_size:ident, $state_size:ident,
+        $n:expr, $w:expr, $r:expr, $p:expr, $s:expr, $doc:expr,
     ) => {
-        use digest::consts::{$blocksize, $outputsize, $statesize};
+        use digest::consts::{$block_size, $output_size, $state_size};
 
         #[derive(Clone)]
         #[doc=$doc]
@@ -12,17 +24,14 @@ macro_rules! fsb_impl {
             state: [u8; $r / 8],
         }
 
-        #[doc=$full_doc]
-        pub type $full_state = CoreWrapper<$state>;
-
         impl HashMarker for $state {}
 
         impl BlockSizeUser for $state {
-            type BlockSize = $blocksize;
+            type BlockSize = $block_size;
         }
 
         impl OutputSizeUser for $state {
-            type OutputSize = $outputsize;
+            type OutputSize = $output_size;
         }
 
         impl BufferKindUser for $state {
@@ -86,6 +95,7 @@ macro_rules! fsb_impl {
             fn drop(&mut self) {
                 #[cfg(feature = "zeroize")]
                 {
+                    use digest::zeroize::Zeroize;
                     self.state.zeroize();
                     self.blocks_len.zeroize();
                 }
@@ -93,10 +103,10 @@ macro_rules! fsb_impl {
         }
 
         #[cfg(feature = "zeroize")]
-        impl ZeroizeOnDrop for $state {}
+        impl digest::zeroize::ZeroizeOnDrop for $state {}
 
         impl SerializableState for $state {
-            type SerializedStateSize = <$statesize as Add<U8>>::Output;
+            type SerializedStateSize = Sum<$state_size, U8>;
 
             fn serialize(&self) -> SerializedState<Self> {
                 let mut serialized_state = SerializedState::<Self>::default();
@@ -112,7 +122,7 @@ macro_rules! fsb_impl {
                 serialized_state: &SerializedState<Self>,
             ) -> Result<Self, DeserializeStateError> {
                 let (serialized_state, serialized_block_len) =
-                    serialized_state.split::<$statesize>();
+                    serialized_state.split::<$state_size>();
 
                 let mut state = [0; $r / 8];
                 state.copy_from_slice(serialized_state.as_ref());
@@ -321,3 +331,64 @@ macro_rules! fsb_impl {
         }
     };
 }
+
+fsb_impl!(
+    Fsb160Core,
+    U60,
+    U20,
+    U80,
+    5 << 18,
+    80,
+    640,
+    653,
+    1120,
+    "Core FSB-160 hasher state",
+);
+fsb_impl!(
+    Fsb224Core,
+    U84,
+    U28,
+    U112,
+    7 << 18,
+    112,
+    896,
+    907,
+    1568,
+    "Core FSB-224 hasher state",
+);
+fsb_impl!(
+    Fsb256Core,
+    U96,
+    U32,
+    U128,
+    1 << 21,
+    128,
+    1024,
+    1061,
+    1792,
+    "Core FSB-256 hasher state",
+);
+fsb_impl!(
+    Fsb384Core,
+    U115,
+    U48,
+    U184,
+    23 << 16,
+    184,
+    1472,
+    1483,
+    2392,
+    "Core FSB-384 hasher state",
+);
+fsb_impl!(
+    Fsb512Core,
+    U155,
+    U64,
+    U248,
+    31 << 16,
+    248,
+    1984,
+    1987,
+    3224,
+    "Core FSB-512 hasher state",
+);
