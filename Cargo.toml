@@ -32,4 +32,4 @@ opt-level = 2
 [patch.crates-io]
 # https://github.com/RustCrypto/traits/pull/1787
 # https://github.com/RustCrypto/traits/pull/1799
-digest = { git = "https://github.com/RustCrypto/traits", branch = "digest/newtype" }
+digest = { git = "https://github.com/RustCrypto/traits" }
