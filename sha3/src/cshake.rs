@@ -4,12 +4,12 @@ use crate::{
 };
 use core::fmt;
 use digest::{
-    CustomizedInit, HashMarker, Reset,
+    CollisionResistance, CustomizedInit, HashMarker, Reset,
     block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         UpdateCore,
     },
-    consts::{U136, U168, U400},
+    consts::{U16, U32, U136, U168, U400},
     crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::Unsigned,
 };
@@ -212,3 +212,13 @@ macro_rules! impl_cshake {
 
 impl_cshake!(CShake128Core, CShake128, CShake128Reader, U168, "cSHAKE128");
 impl_cshake!(CShake256Core, CShake256, CShake256Reader, U136, "cSHAKE256");
+
+impl CollisionResistance for CShake128 {
+    // https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf#[{"num":68,"gen":0},{"name":"XYZ"},108,440,null]
+    type CollisionResistance = U16;
+}
+
+impl CollisionResistance for CShake256 {
+    // https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf#[{"num":68,"gen":0},{"name":"XYZ"},108,440,null]
+    type CollisionResistance = U32;
+}

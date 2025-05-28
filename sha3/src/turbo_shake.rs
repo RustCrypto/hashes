@@ -1,12 +1,12 @@
 use crate::{Sha3HasherCore, Sha3ReaderCore};
 use core::fmt;
 use digest::{
-    ExtendableOutput, ExtendableOutputReset, HashMarker, Update, XofReader,
+    CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Update, XofReader,
     block_api::{
         AlgorithmName, BlockSizeUser, ExtendableOutputCore, Reset, UpdateCore, XofReaderCore,
     },
     block_buffer::{EagerBuffer, ReadBuffer},
-    consts::{U0, U136, U168},
+    consts::{U0, U16, U32, U136, U168},
 };
 
 const TURBO_SHAKE_ROUND_COUNT: usize = 12;
@@ -121,3 +121,13 @@ macro_rules! impl_turbo_shake {
 
 impl_turbo_shake!(TurboShake128, TurboShake128Reader, U168, "TurboSHAKE128");
 impl_turbo_shake!(TurboShake256, TurboShake256Reader, U136, "TurboSHAKE256");
+
+impl<const DS: u8> CollisionResistance for TurboShake128<DS> {
+    // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-7
+    type CollisionResistance = U16;
+}
+
+impl<const DS: u8> CollisionResistance for TurboShake256<DS> {
+    // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-8
+    type CollisionResistance = U32;
+}
