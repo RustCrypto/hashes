@@ -13,11 +13,11 @@ keywords = ["crypto", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "=0.11.0-pre.10"
-sha3 = { version = "=0.11.0-pre.5", default-features = false, path = "../sha3" }
+digest = "0.11.0-rc.0"
+sha3 = { version = "0.11.0-rc.0", default-features = false, path = "../sha3" }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.10", features = ["alloc", "dev"] }
+digest = { version = "0.11.0-rc.0", features = ["alloc", "dev"] }
 hex-literal = "1"
 
 [features]
