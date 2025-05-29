@@ -18,12 +18,12 @@ exclude = [
 ]
 
 [dependencies]
-digest = "=0.11.0-pre.10"
-sha1 = { version = "=0.11.0-pre.5", path = "../sha1", default-features = false }
+digest = "0.11.0-rc.0"
+sha1 = { version = "0.11.0-rc.0", path = "../sha1", default-features = false }
 zeroize = { version = "1.8", default-features = false, optional = true }
 
 [dev-dependencies]
-digest = { version = "=0.11.0-pre.10", features = ["dev"] }
+digest = { version = "0.11.0-rc.0", features = ["dev"] }
 hex-literal = "1"
 base16ct = { version = "0.2", features = ["alloc"] }
 
