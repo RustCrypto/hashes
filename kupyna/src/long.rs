@@ -30,33 +30,23 @@ pub(crate) fn t_plus_l(state: [u64; COLS]) -> [u64; COLS] {
 }
 
 fn rotate_rows(state: [u64; COLS]) -> [u64; COLS] {
-    // Convert to matrix format (column-major as per paper)
-    let mut matrix = [[0u8; COLS]; 8];
-    for col in 0..COLS {
-        let bytes = state[col].to_be_bytes();
-        for row in 0..8 {
-            matrix[row][col] = bytes[row];
-        }
-    }
+    //shift amounts for each row (0-6: row index, 7: special case = 11)
+    const SHIFTS: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 11];
 
-    // Apply row rotation as per paper: row i rotated by i positions, row 7 by 11 positions for l=1024
-    let mut result_matrix = [[0u8; COLS]; 8];
-
-    for row in 0..8 {
-        let shift = if row == 7 { 11 } else { row };
-        for col in 0..COLS {
-            result_matrix[row][(col + shift) % COLS] = matrix[row][col];
-        }
-    }
-
-    // Convert back to u64 array
     let mut result = [0u64; COLS];
+
     for col in 0..COLS {
-        let mut bytes = [0u8; 8];
+        let mut rotated_bytes = [0u8; 8];
+
+        // Apply rotation for each row
         for row in 0..8 {
-            bytes[row] = result_matrix[row][col];
+            let shift = SHIFTS[row];
+            let src_col = (col + COLS - shift) % COLS;  // Reverse the rotation direction
+            let src_bytes = state[src_col].to_be_bytes();
+            rotated_bytes[row] = src_bytes[row];
         }
-        result[col] = u64::from_be_bytes(bytes);
+
+        result[col] = u64::from_be_bytes(rotated_bytes);
     }
 
     result
