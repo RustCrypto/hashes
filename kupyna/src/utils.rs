@@ -47,34 +47,111 @@ fn multiply_gf(x: u8, y: u8) -> u8 {
 pub(crate) fn mix_columns<const N: usize>(state: [u64; N]) -> [u64; N] {
     let mut result = [0u64; N];
 
-    // Convert state to matrix format (column-major)
-    let mut matrix = [[0u8; N]; 8];
+    // Process each column independently using bit operations
     for col in 0..N {
-        let bytes = state[col].to_be_bytes();
-        for row in 0..8 {
-            matrix[row][col] = bytes[row];
-        }
-    }
+        let input = state[col];
+        let mut output = 0u64;
 
-    // Apply MDS matrix to each column
-    let mut result_matrix = [[0u8; N]; 8];
-    for col in 0..N {
-        for row in 0..8 {
-            let mut product = 0u8;
-            for b in 0..8 {
-                product ^= multiply_gf(matrix[b][col], MDS_MATRIX[row][b]);
-            }
-            result_matrix[row][col] = product;
-        }
-    }
+        // Extract each byte (row) from the u64 using bit shifts and masks
+        let byte0 = ((input >> 56) & 0xFF) as u8;
+        let byte1 = ((input >> 48) & 0xFF) as u8;
+        let byte2 = ((input >> 40) & 0xFF) as u8;
+        let byte3 = ((input >> 32) & 0xFF) as u8;
+        let byte4 = ((input >> 24) & 0xFF) as u8;
+        let byte5 = ((input >> 16) & 0xFF) as u8;
+        let byte6 = ((input >> 8) & 0xFF) as u8;
+        let byte7 = (input & 0xFF) as u8;
 
-    // Convert back to u64 array
-    for col in 0..N {
-        let mut bytes = [0u8; 8];
-        for row in 0..8 {
-            bytes[row] = result_matrix[row][col];
-        }
-        result[col] = u64::from_be_bytes(bytes);
+        // Compute each output row and directly place it in the result u64
+        // Row 0: MDS_MATRIX[0] · input_column
+        let out0 = multiply_gf(byte0, MDS_MATRIX[0][0]) ^
+            multiply_gf(byte1, MDS_MATRIX[0][1]) ^
+            multiply_gf(byte2, MDS_MATRIX[0][2]) ^
+            multiply_gf(byte3, MDS_MATRIX[0][3]) ^
+            multiply_gf(byte4, MDS_MATRIX[0][4]) ^
+            multiply_gf(byte5, MDS_MATRIX[0][5]) ^
+            multiply_gf(byte6, MDS_MATRIX[0][6]) ^
+            multiply_gf(byte7, MDS_MATRIX[0][7]);
+        output |= (out0 as u64) << 56;
+
+        // Row 1
+        let out1 = multiply_gf(byte0, MDS_MATRIX[1][0]) ^
+            multiply_gf(byte1, MDS_MATRIX[1][1]) ^
+            multiply_gf(byte2, MDS_MATRIX[1][2]) ^
+            multiply_gf(byte3, MDS_MATRIX[1][3]) ^
+            multiply_gf(byte4, MDS_MATRIX[1][4]) ^
+            multiply_gf(byte5, MDS_MATRIX[1][5]) ^
+            multiply_gf(byte6, MDS_MATRIX[1][6]) ^
+            multiply_gf(byte7, MDS_MATRIX[1][7]);
+        output |= (out1 as u64) << 48;
+
+        // Row 2
+        let out2 = multiply_gf(byte0, MDS_MATRIX[2][0]) ^
+            multiply_gf(byte1, MDS_MATRIX[2][1]) ^
+            multiply_gf(byte2, MDS_MATRIX[2][2]) ^
+            multiply_gf(byte3, MDS_MATRIX[2][3]) ^
+            multiply_gf(byte4, MDS_MATRIX[2][4]) ^
+            multiply_gf(byte5, MDS_MATRIX[2][5]) ^
+            multiply_gf(byte6, MDS_MATRIX[2][6]) ^
+            multiply_gf(byte7, MDS_MATRIX[2][7]);
+        output |= (out2 as u64) << 40;
+
+        // Row 3
+        let out3 = multiply_gf(byte0, MDS_MATRIX[3][0]) ^
+            multiply_gf(byte1, MDS_MATRIX[3][1]) ^
+            multiply_gf(byte2, MDS_MATRIX[3][2]) ^
+            multiply_gf(byte3, MDS_MATRIX[3][3]) ^
+            multiply_gf(byte4, MDS_MATRIX[3][4]) ^
+            multiply_gf(byte5, MDS_MATRIX[3][5]) ^
+            multiply_gf(byte6, MDS_MATRIX[3][6]) ^
+            multiply_gf(byte7, MDS_MATRIX[3][7]);
+        output |= (out3 as u64) << 32;
+
+        // Row 4
+        let out4 = multiply_gf(byte0, MDS_MATRIX[4][0]) ^
+            multiply_gf(byte1, MDS_MATRIX[4][1]) ^
+            multiply_gf(byte2, MDS_MATRIX[4][2]) ^
+            multiply_gf(byte3, MDS_MATRIX[4][3]) ^
+            multiply_gf(byte4, MDS_MATRIX[4][4]) ^
+            multiply_gf(byte5, MDS_MATRIX[4][5]) ^
+            multiply_gf(byte6, MDS_MATRIX[4][6]) ^
+            multiply_gf(byte7, MDS_MATRIX[4][7]);
+        output |= (out4 as u64) << 24;
+
+        // Row 5
+        let out5 = multiply_gf(byte0, MDS_MATRIX[5][0]) ^
+            multiply_gf(byte1, MDS_MATRIX[5][1]) ^
+            multiply_gf(byte2, MDS_MATRIX[5][2]) ^
+            multiply_gf(byte3, MDS_MATRIX[5][3]) ^
+            multiply_gf(byte4, MDS_MATRIX[5][4]) ^
+            multiply_gf(byte5, MDS_MATRIX[5][5]) ^
+            multiply_gf(byte6, MDS_MATRIX[5][6]) ^
+            multiply_gf(byte7, MDS_MATRIX[5][7]);
+        output |= (out5 as u64) << 16;
+
+        // Row 6
+        let out6 = multiply_gf(byte0, MDS_MATRIX[6][0]) ^
+            multiply_gf(byte1, MDS_MATRIX[6][1]) ^
+            multiply_gf(byte2, MDS_MATRIX[6][2]) ^
+            multiply_gf(byte3, MDS_MATRIX[6][3]) ^
+            multiply_gf(byte4, MDS_MATRIX[6][4]) ^
+            multiply_gf(byte5, MDS_MATRIX[6][5]) ^
+            multiply_gf(byte6, MDS_MATRIX[6][6]) ^
+            multiply_gf(byte7, MDS_MATRIX[6][7]);
+        output |= (out6 as u64) << 8;
+
+        // Row 7
+        let out7 = multiply_gf(byte0, MDS_MATRIX[7][0]) ^
+            multiply_gf(byte1, MDS_MATRIX[7][1]) ^
+            multiply_gf(byte2, MDS_MATRIX[7][2]) ^
+            multiply_gf(byte3, MDS_MATRIX[7][3]) ^
+            multiply_gf(byte4, MDS_MATRIX[7][4]) ^
+            multiply_gf(byte5, MDS_MATRIX[7][5]) ^
+            multiply_gf(byte6, MDS_MATRIX[7][6]) ^
+            multiply_gf(byte7, MDS_MATRIX[7][7]);
+        output |= out7 as u64;
+
+        result[col] = output;
     }
 
     result
