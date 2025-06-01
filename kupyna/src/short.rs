@@ -83,7 +83,7 @@ fn rotate_rows(state: [u64; COLS]) -> [u64; COLS] {
         // Apply rotation
         for row in 0..8 {
             let shift = SHIFTS[row];
-            let src_col = (col + COLS - shift) % COLS;  // Reverse the rotation direction
+            let src_col = (col + COLS - shift) % COLS; // Reverse the rotation direction
             let src_bytes = state[src_col].to_be_bytes();
             rotated_bytes[row] = src_bytes[row];
         }
