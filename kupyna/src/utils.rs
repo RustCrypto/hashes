@@ -44,9 +44,7 @@ fn multiply_gf(x: u8, y: u8) -> u8 {
 }
 
 #[allow(clippy::needless_range_loop)]
-pub(crate) fn mix_columns<const N: usize>(state: [u64; N]) -> [u64; N] {
-    let mut result = [0u64; N];
-
+pub(crate) fn mix_columns<const N: usize>(state: &mut [u64; N]) {
     // Process each column independently using bit operations
     for col in 0..N {
         let input = state[col];
@@ -151,10 +149,8 @@ pub(crate) fn mix_columns<const N: usize>(state: [u64; N]) -> [u64; N] {
             multiply_gf(byte7, MDS_MATRIX[7][7]);
         output |= out7 as u64;
 
-        result[col] = output;
+        state[col] = output;
     }
-
-    result
 }
 
 pub(crate) fn apply_s_box<const N: usize>(state: &mut [u64; N]) {
