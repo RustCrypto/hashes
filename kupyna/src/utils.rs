@@ -157,10 +157,8 @@ pub(crate) fn mix_columns<const N: usize>(state: [u64; N]) -> [u64; N] {
     result
 }
 
-pub(crate) fn apply_s_box<const N: usize>(state: [u64; N]) -> [u64; N] {
-    let mut result = [0u64; N];
-
-    for (col, &word) in state.iter().enumerate() {
+pub(crate) fn apply_s_box<const N: usize>(state: &mut [u64; N]) {
+    for word in state.iter_mut() {
         // Extract all bytes at once
         let bytes = word.to_be_bytes();
 
@@ -176,11 +174,9 @@ pub(crate) fn apply_s_box<const N: usize>(state: [u64; N]) -> [u64; N] {
             SBOXES[3][bytes[7] as usize], // row 7 -> S-box 3 (7 % 4 = 3)
         ];
 
-        // Reconstruct the u64 word
-        result[col] = u64::from_be_bytes(transformed_bytes);
+        // Update the word in-place
+        *word = u64::from_be_bytes(transformed_bytes);
     }
-
-    result
 }
 
 pub(crate) fn add_constant_xor<const N: usize>(state: &mut [u64; N], round: usize) {

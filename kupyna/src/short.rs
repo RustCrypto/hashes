@@ -58,7 +58,7 @@ fn t_plus_l(state: [u64; COLS]) -> [u64; COLS] {
 
     for nu in 0..ROUNDS {
         add_constant_plus(&mut state, nu as usize);
-        state = apply_s_box(state);
+        apply_s_box(&mut state);
         state = rotate_rows(state);
         state = mix_columns(state);
     }
@@ -104,7 +104,7 @@ pub(crate) fn t_xor_l(state: [u64; COLS]) -> [u64; COLS] {
 
     for nu in 0..ROUNDS {
         add_constant_xor(&mut state, nu as usize);
-        state = apply_s_box(state);
+        apply_s_box(&mut state);
         state = rotate_rows(state);
         state = mix_columns(state);
     }
