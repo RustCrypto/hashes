@@ -65,22 +65,10 @@ pub(crate) fn mix_columns<const N: usize>(state: &mut [u64; N]) {
 
 pub(crate) fn apply_s_box<const N: usize>(state: &mut [u64; N]) {
     for word in state.iter_mut() {
-        // Extract all bytes at once
         let bytes = word.to_be_bytes();
-
-        // Transform each byte using the appropriate S-box
-        let transformed_bytes = [
-            SBOXES[0][bytes[0] as usize], // row 0 -> S-box 0
-            SBOXES[1][bytes[1] as usize], // row 1 -> S-box 1
-            SBOXES[2][bytes[2] as usize], // row 2 -> S-box 2
-            SBOXES[3][bytes[3] as usize], // row 3 -> S-box 3
-            SBOXES[0][bytes[4] as usize], // row 4 -> S-box 0 (4 % 4 = 0)
-            SBOXES[1][bytes[5] as usize], // row 5 -> S-box 1 (5 % 4 = 1)
-            SBOXES[2][bytes[6] as usize], // row 6 -> S-box 2 (6 % 4 = 2)
-            SBOXES[3][bytes[7] as usize], // row 7 -> S-box 3 (7 % 4 = 3)
-        ];
-
-        // Update the word in-place
+        let transformed_bytes = core::array::from_fn(|i| {
+            SBOXES[i % 4][bytes[i] as usize]
+        });
         *word = u64::from_be_bytes(transformed_bytes);
     }
 }
