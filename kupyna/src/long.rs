@@ -18,7 +18,7 @@ pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128])
     *prev_vector = xor(xor(t_xor_mp, t_plus_m), *prev_vector);
 }
 
-pub(crate) fn t_plus_l(state: [u64; COLS]) -> [u64; COLS] {
+fn t_plus_l(state: [u64; COLS]) -> [u64; COLS] {
     let mut state = state;
     for nu in 0..ROUNDS {
         add_constant_plus(&mut state, nu as usize);

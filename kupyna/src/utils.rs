@@ -43,113 +43,23 @@ fn multiply_gf(x: u8, y: u8) -> u8 {
     GF_LOOKUP_TABLE[usize::from(x)][usize::from(y)]
 }
 
+fn multiply_gf_array(a: &[u8; 8], b: &[u8; 8]) -> u8 {
+    let mut res = 0;
+    for i in 0..8 {
+        res ^= multiply_gf(a[i], b[i]);
+    }
+    res
+}
+
 #[allow(clippy::needless_range_loop)]
 pub(crate) fn mix_columns<const N: usize>(state: &mut [u64; N]) {
-    // Process each column independently using bit operations
     for col in 0..N {
         let input = state[col];
-        let mut output = 0u64;
-
-        // Extract each byte (row) from the u64 using bit shifts and masks
-        let byte0 = ((input >> 56) & 0xFF) as u8;
-        let byte1 = ((input >> 48) & 0xFF) as u8;
-        let byte2 = ((input >> 40) & 0xFF) as u8;
-        let byte3 = ((input >> 32) & 0xFF) as u8;
-        let byte4 = ((input >> 24) & 0xFF) as u8;
-        let byte5 = ((input >> 16) & 0xFF) as u8;
-        let byte6 = ((input >> 8) & 0xFF) as u8;
-        let byte7 = (input & 0xFF) as u8;
-
-        // Compute each output row and directly place it in the result u64
-        // Row 0: MDS_MATRIX[0] · input_column
-        let out0 = multiply_gf(byte0, MDS_MATRIX[0][0])
-            ^ multiply_gf(byte1, MDS_MATRIX[0][1])
-            ^ multiply_gf(byte2, MDS_MATRIX[0][2])
-            ^ multiply_gf(byte3, MDS_MATRIX[0][3])
-            ^ multiply_gf(byte4, MDS_MATRIX[0][4])
-            ^ multiply_gf(byte5, MDS_MATRIX[0][5])
-            ^ multiply_gf(byte6, MDS_MATRIX[0][6])
-            ^ multiply_gf(byte7, MDS_MATRIX[0][7]);
-        output |= (out0 as u64) << 56;
-
-        // Row 1
-        let out1 = multiply_gf(byte0, MDS_MATRIX[1][0])
-            ^ multiply_gf(byte1, MDS_MATRIX[1][1])
-            ^ multiply_gf(byte2, MDS_MATRIX[1][2])
-            ^ multiply_gf(byte3, MDS_MATRIX[1][3])
-            ^ multiply_gf(byte4, MDS_MATRIX[1][4])
-            ^ multiply_gf(byte5, MDS_MATRIX[1][5])
-            ^ multiply_gf(byte6, MDS_MATRIX[1][6])
-            ^ multiply_gf(byte7, MDS_MATRIX[1][7]);
-        output |= (out1 as u64) << 48;
-
-        // Row 2
-        let out2 = multiply_gf(byte0, MDS_MATRIX[2][0])
-            ^ multiply_gf(byte1, MDS_MATRIX[2][1])
-            ^ multiply_gf(byte2, MDS_MATRIX[2][2])
-            ^ multiply_gf(byte3, MDS_MATRIX[2][3])
-            ^ multiply_gf(byte4, MDS_MATRIX[2][4])
-            ^ multiply_gf(byte5, MDS_MATRIX[2][5])
-            ^ multiply_gf(byte6, MDS_MATRIX[2][6])
-            ^ multiply_gf(byte7, MDS_MATRIX[2][7]);
-        output |= (out2 as u64) << 40;
-
-        // Row 3
-        let out3 = multiply_gf(byte0, MDS_MATRIX[3][0])
-            ^ multiply_gf(byte1, MDS_MATRIX[3][1])
-            ^ multiply_gf(byte2, MDS_MATRIX[3][2])
-            ^ multiply_gf(byte3, MDS_MATRIX[3][3])
-            ^ multiply_gf(byte4, MDS_MATRIX[3][4])
-            ^ multiply_gf(byte5, MDS_MATRIX[3][5])
-            ^ multiply_gf(byte6, MDS_MATRIX[3][6])
-            ^ multiply_gf(byte7, MDS_MATRIX[3][7]);
-        output |= (out3 as u64) << 32;
-
-        // Row 4
-        let out4 = multiply_gf(byte0, MDS_MATRIX[4][0])
-            ^ multiply_gf(byte1, MDS_MATRIX[4][1])
-            ^ multiply_gf(byte2, MDS_MATRIX[4][2])
-            ^ multiply_gf(byte3, MDS_MATRIX[4][3])
-            ^ multiply_gf(byte4, MDS_MATRIX[4][4])
-            ^ multiply_gf(byte5, MDS_MATRIX[4][5])
-            ^ multiply_gf(byte6, MDS_MATRIX[4][6])
-            ^ multiply_gf(byte7, MDS_MATRIX[4][7]);
-        output |= (out4 as u64) << 24;
-
-        // Row 5
-        let out5 = multiply_gf(byte0, MDS_MATRIX[5][0])
-            ^ multiply_gf(byte1, MDS_MATRIX[5][1])
-            ^ multiply_gf(byte2, MDS_MATRIX[5][2])
-            ^ multiply_gf(byte3, MDS_MATRIX[5][3])
-            ^ multiply_gf(byte4, MDS_MATRIX[5][4])
-            ^ multiply_gf(byte5, MDS_MATRIX[5][5])
-            ^ multiply_gf(byte6, MDS_MATRIX[5][6])
-            ^ multiply_gf(byte7, MDS_MATRIX[5][7]);
-        output |= (out5 as u64) << 16;
-
-        // Row 6
-        let out6 = multiply_gf(byte0, MDS_MATRIX[6][0])
-            ^ multiply_gf(byte1, MDS_MATRIX[6][1])
-            ^ multiply_gf(byte2, MDS_MATRIX[6][2])
-            ^ multiply_gf(byte3, MDS_MATRIX[6][3])
-            ^ multiply_gf(byte4, MDS_MATRIX[6][4])
-            ^ multiply_gf(byte5, MDS_MATRIX[6][5])
-            ^ multiply_gf(byte6, MDS_MATRIX[6][6])
-            ^ multiply_gf(byte7, MDS_MATRIX[6][7]);
-        output |= (out6 as u64) << 8;
-
-        // Row 7
-        let out7 = multiply_gf(byte0, MDS_MATRIX[7][0])
-            ^ multiply_gf(byte1, MDS_MATRIX[7][1])
-            ^ multiply_gf(byte2, MDS_MATRIX[7][2])
-            ^ multiply_gf(byte3, MDS_MATRIX[7][3])
-            ^ multiply_gf(byte4, MDS_MATRIX[7][4])
-            ^ multiply_gf(byte5, MDS_MATRIX[7][5])
-            ^ multiply_gf(byte6, MDS_MATRIX[7][6])
-            ^ multiply_gf(byte7, MDS_MATRIX[7][7]);
-        output |= out7 as u64;
-
-        state[col] = output;
+        let bytes = input.to_be_bytes();
+        let transformed_bytes = core::array::from_fn(|i|
+            multiply_gf_array(&bytes, &MDS_MATRIX[i])
+        );
+        state[col] = u64::from_be_bytes(transformed_bytes);
     }
 }
 
@@ -176,16 +86,15 @@ pub(crate) fn apply_s_box<const N: usize>(state: &mut [u64; N]) {
 }
 
 pub(crate) fn add_constant_xor<const N: usize>(state: &mut [u64; N], round: usize) {
-    for (j, word) in state.iter_mut().enumerate() {
-        let constant = ((j * 0x10) ^ round) as u64;
+    for (i, word) in state.iter_mut().enumerate() {
+        let constant = ((i * 0x10) ^ round) as u64;
         *word ^= constant << 56; // Place the constant in the most significant byte
     }
 }
 
 pub(crate) fn add_constant_plus<const N: usize>(state: &mut [u64; N], round: usize) {
-    for (j, word) in state.iter_mut().enumerate() {
-        *word = word.swap_bytes().wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((N - j - 1) * 0x10) ^ round) as u64) << 56)).swap_bytes();
-        println!("word after addition: {:016X?}", word);
+    for (i, word) in state.iter_mut().enumerate() {
+        *word = word.swap_bytes().wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((N - i - 1) * 0x10) ^ round) as u64) << 56)).swap_bytes();
     }
 }
 

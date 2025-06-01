@@ -1,4 +1,4 @@
-#![no_std]
+// #![no_std]
 #![doc = include_str!("../README.md")]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
