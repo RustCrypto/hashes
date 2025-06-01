@@ -21,7 +21,7 @@ pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128])
 pub(crate) fn t_plus_l(state: [u64; COLS]) -> [u64; COLS] {
     let mut state = state;
     for nu in 0..ROUNDS {
-        state = add_constant_plus(state, nu as usize);
+        add_constant_plus(&mut state, nu as usize);
         state = apply_s_box(state);
         state = rotate_rows(state);
         state = mix_columns(state);
@@ -55,7 +55,7 @@ fn rotate_rows(state: [u64; COLS]) -> [u64; COLS] {
 pub(crate) fn t_xor_l(state: [u64; COLS]) -> [u64; COLS] {
     let mut state = state;
     for nu in 0..ROUNDS {
-        state = add_constant_xor(state, nu as usize);
+        add_constant_xor(&mut state, nu as usize);
         state = apply_s_box(state);
         state = rotate_rows(state);
         state = mix_columns(state);

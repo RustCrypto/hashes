@@ -183,17 +183,16 @@ pub(crate) fn apply_s_box<const N: usize>(state: [u64; N]) -> [u64; N] {
     result
 }
 
-pub(crate) fn add_constant_xor<const N: usize>(mut state: [u64; N], round: usize) -> [u64; N] {
+pub(crate) fn add_constant_xor<const N: usize>(state: &mut [u64; N], round: usize) {
     for (j, word) in state.iter_mut().enumerate() {
         let constant = ((j * 0x10) ^ round) as u8;
         let mut bytes = word.to_be_bytes();
         bytes[0] ^= constant;
         *word = u64::from_be_bytes(bytes);
     }
-    state
 }
 
-pub(crate) fn add_constant_plus<const N: usize>(mut state: [u64; N], round: usize) -> [u64; N] {
+pub(crate) fn add_constant_plus<const N: usize>(state: &mut [u64; N], round: usize) {
     for (j, word) in state.iter_mut().enumerate() {
         // Convert to little-endian bytes to match original behavior
         let mut row_as_u64 = u64::from_le_bytes(word.to_be_bytes());
@@ -201,7 +200,6 @@ pub(crate) fn add_constant_plus<const N: usize>(mut state: [u64; N], round: usiz
             .wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((N - j - 1) * 0x10) ^ round) as u64) << 56));
         *word = u64::from_be_bytes(row_as_u64.to_le_bytes());
     }
-    state
 }
 
 #[inline(always)]
