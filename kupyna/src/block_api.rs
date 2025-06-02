@@ -1,6 +1,6 @@
 use crate::{
     long, short,
-    utils::{read_u64_le, write_u64_le, xor_bytes},
+    utils::{read_u64_le, write_u64_be, write_u64_le, xor},
 };
 use core::fmt;
 use digest::{
@@ -72,25 +72,12 @@ impl VariableOutputCore for KupynaShortVarCore {
             short::compress(&mut self.state, block.as_ref());
         });
 
-        let mut state_u8 = [0u8; 64];
-        for (src, dst) in self.state.iter().zip(state_u8.chunks_exact_mut(8)) {
-            dst.copy_from_slice(&src.to_be_bytes());
-        }
+        // Process final state with t_xor_l
+        let t_xor_ult_processed_block = short::t_xor_l(self.state);
 
-        // Call t_xor_l with u8 array
-        let t_xor_ult_processed_block = short::t_xor_l(state_u8);
+        let result_state = xor(self.state, t_xor_ult_processed_block);
 
-        let result_u8 = xor_bytes(state_u8, t_xor_ult_processed_block);
-
-        // Convert result back to u64s
-        let mut res = [0u64; 8];
-        for (dst, src) in res.iter_mut().zip(result_u8.chunks_exact(8)) {
-            *dst = u64::from_be_bytes(src.try_into().unwrap());
-        }
-        let n = short::COLS / 2;
-        for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
-            chunk.copy_from_slice(&v.to_be_bytes());
-        }
+        write_u64_be(&result_state[short::COLS / 2..], out);
     }
 }
 
@@ -204,25 +191,12 @@ impl VariableOutputCore for KupynaLongVarCore {
             long::compress(&mut self.state, block.as_ref());
         });
 
-        let mut state_u8 = [0u8; 128];
-        for (src, dst) in self.state.iter().zip(state_u8.chunks_exact_mut(8)) {
-            dst.copy_from_slice(&src.to_be_bytes());
-        }
+        // Process final state with t_xor_l
+        let t_xor_ult_processed_block = long::t_xor_l(self.state);
 
-        // Call t_xor_l with u8 array
-        let t_xor_ult_processed_block = long::t_xor_l(state_u8);
+        let result_state = xor(self.state, t_xor_ult_processed_block);
 
-        let result_u8 = xor_bytes(state_u8, t_xor_ult_processed_block);
-
-        // Convert result back to u64s
-        let mut res = [0u64; 16];
-        for (dst, src) in res.iter_mut().zip(result_u8.chunks_exact(8)) {
-            *dst = u64::from_be_bytes(src.try_into().unwrap());
-        }
-        let n = long::COLS / 2;
-        for (chunk, v) in out.chunks_exact_mut(8).zip(res[n..].iter()) {
-            chunk.copy_from_slice(&v.to_be_bytes());
-        }
+        write_u64_be(&result_state[long::COLS / 2..], out);
     }
 }
 

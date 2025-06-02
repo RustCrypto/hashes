@@ -1,4 +1,5 @@
 use crate::consts::{MDS_MATRIX, SBOXES};
+use core::array;
 
 const fn gf_multiply(x: u8, y: u8) -> u8 {
     const REDUCTION_POLYNOMIAL: u16 = 0x011d;
@@ -43,59 +44,52 @@ fn multiply_gf(x: u8, y: u8) -> u8 {
     GF_LOOKUP_TABLE[usize::from(x)][usize::from(y)]
 }
 
+fn mix_u64(val: &mut u64) {
+    let mix_bytes = array::from_fn(|i| {
+        let a = val.to_ne_bytes();
+        let b = MDS_MATRIX[i].to_ne_bytes();
+
+        let mut res = 0;
+        for i in 0..8 {
+            res ^= multiply_gf(a[i], b[i]);
+        }
+        res
+    });
+    *val = u64::from_be_bytes(mix_bytes);
+}
+
 #[allow(clippy::needless_range_loop)]
-pub(crate) fn mix_columns<const N: usize>(state: [[u8; 8]; N]) -> [[u8; 8]; N] {
-    let mut result = [[0u8; 8]; N];
-
-    for col in 0..N {
-        for row in 0..8 {
-            let mut product = 0u8;
-            for b in 0..8 {
-                product ^= multiply_gf(state[col][b], MDS_MATRIX[row][b]);
-            }
-            result[col][row] = product;
-        }
-    }
-
-    result
+pub(crate) fn mix_columns<const N: usize>(state: &mut [u64; N]) {
+    state.iter_mut().for_each(mix_u64);
 }
 
-pub(crate) fn apply_s_box<const N: usize>(mut state: [[u8; 8]; N]) -> [[u8; 8]; N] {
-    for i in 0..8 {
-        for row in state.iter_mut() {
-            row[i] = SBOXES[i % 4][row[i] as usize];
-        }
+pub(crate) fn apply_s_box<const N: usize>(state: &mut [u64; N]) {
+    for word in state.iter_mut() {
+        let bytes = word.to_be_bytes();
+        let transformed_bytes = array::from_fn(|i| SBOXES[i % 4][bytes[i] as usize]);
+        *word = u64::from_be_bytes(transformed_bytes);
     }
-    state
 }
 
-pub(crate) fn add_constant_xor<const N: usize>(
-    mut state: [[u8; 8]; N],
-    round: usize,
-) -> [[u8; 8]; N] {
-    for (j, row) in state.iter_mut().enumerate() {
-        let constant = ((j * 0x10) ^ round) as u8;
-        row[0] ^= constant;
+pub(crate) fn add_constant_xor<const N: usize>(state: &mut [u64; N], round: usize) {
+    for (i, word) in state.iter_mut().enumerate() {
+        let constant = ((i * 0x10) ^ round) as u64;
+        *word ^= constant << 56; // Place the constant in the most significant byte
     }
-    state
 }
 
-pub(crate) fn add_constant_plus<const N: usize>(
-    mut state: [[u8; 8]; N],
-    round: usize,
-) -> [[u8; 8]; N] {
-    for (j, row) in state.iter_mut().enumerate() {
-        let mut row_as_u64 = u64::from_le_bytes(*row);
-        row_as_u64 = row_as_u64
-            .wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((N - j - 1) * 0x10) ^ round) as u64) << 56));
-        row[0..8].copy_from_slice(&row_as_u64.to_le_bytes());
+pub(crate) fn add_constant_plus<const N: usize>(state: &mut [u64; N], round: usize) {
+    for (i, word) in state.iter_mut().enumerate() {
+        *word = word
+            .swap_bytes()
+            .wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((N - i - 1) * 0x10) ^ round) as u64) << 56))
+            .swap_bytes();
     }
-    state
 }
 
 #[inline(always)]
-pub(crate) fn xor_bytes<const N: usize>(a: [u8; N], b: [u8; N]) -> [u8; N] {
-    let mut result = [0u8; N];
+pub(crate) fn xor<const N: usize>(a: [u64; N], b: [u64; N]) -> [u64; N] {
+    let mut result = [0u64; N];
     for i in 0..N {
         result[i] = a[i] ^ b[i];
     }
@@ -118,4 +112,20 @@ pub(crate) fn write_u64_le(src: &[u64], dst: &mut [u8]) {
     for (src, dst) in src.iter().zip(dst.chunks_exact_mut(8)) {
         dst.copy_from_slice(&src.to_le_bytes())
     }
+}
+
+#[inline(always)]
+pub(crate) fn write_u64_be(src: &[u64], dst: &mut [u8]) {
+    assert_eq!(8 * src.len(), dst.len());
+    for (src, dst) in src.iter().zip(dst.chunks_exact_mut(8)) {
+        dst.copy_from_slice(&src.to_be_bytes())
+    }
+}
+
+#[inline(always)]
+pub(crate) fn read_u64s_be<const N: usize, const M: usize>(block: &[u8; N]) -> [u64; M] {
+    array::from_fn(|i| {
+        let chunk = block[8 * i..][..8].try_into().unwrap();
+        u64::from_be_bytes(chunk)
+    })
 }
