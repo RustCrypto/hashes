@@ -1,4 +1,5 @@
 use crate::consts::{MDS_MATRIX, SBOXES};
+use core::array;
 
 const fn gf_multiply(x: u8, y: u8) -> u8 {
     const REDUCTION_POLYNOMIAL: u16 = 0x011d;
@@ -43,32 +44,29 @@ fn multiply_gf(x: u8, y: u8) -> u8 {
     GF_LOOKUP_TABLE[usize::from(x)][usize::from(y)]
 }
 
-fn multiply_gf_array(a: &[u8; 8], b: &[u8; 8]) -> u8 {
-    let mut res = 0;
-    for i in 0..8 {
-        res ^= multiply_gf(a[i], b[i]);
-    }
-    res
+fn mix_u64(val: &mut u64) {
+    let mix_bytes = array::from_fn(|i| {
+        let a = val.to_ne_bytes();
+        let b = MDS_MATRIX[i].to_ne_bytes();
+
+        let mut res = 0;
+        for i in 0..8 {
+            res ^= multiply_gf(a[i], b[i]);
+        }
+        res
+    });
+    *val = u64::from_be_bytes(mix_bytes);
 }
 
 #[allow(clippy::needless_range_loop)]
 pub(crate) fn mix_columns<const N: usize>(state: &mut [u64; N]) {
-    for col in 0..N {
-        let input = state[col];
-        let bytes = input.to_be_bytes();
-        let transformed_bytes = core::array::from_fn(|i|
-            multiply_gf_array(&bytes, &MDS_MATRIX[i])
-        );
-        state[col] = u64::from_be_bytes(transformed_bytes);
-    }
+    state.iter_mut().for_each(mix_u64);
 }
 
 pub(crate) fn apply_s_box<const N: usize>(state: &mut [u64; N]) {
     for word in state.iter_mut() {
         let bytes = word.to_be_bytes();
-        let transformed_bytes = core::array::from_fn(|i| {
-            SBOXES[i % 4][bytes[i] as usize]
-        });
+        let transformed_bytes = array::from_fn(|i| SBOXES[i % 4][bytes[i] as usize]);
         *word = u64::from_be_bytes(transformed_bytes);
     }
 }
@@ -82,7 +80,10 @@ pub(crate) fn add_constant_xor<const N: usize>(state: &mut [u64; N], round: usiz
 
 pub(crate) fn add_constant_plus<const N: usize>(state: &mut [u64; N], round: usize) {
     for (i, word) in state.iter_mut().enumerate() {
-        *word = word.swap_bytes().wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((N - i - 1) * 0x10) ^ round) as u64) << 56)).swap_bytes();
+        *word = word
+            .swap_bytes()
+            .wrapping_add(0x00F0F0F0F0F0F0F3u64 ^ (((((N - i - 1) * 0x10) ^ round) as u64) << 56))
+            .swap_bytes();
     }
 }
 
@@ -114,11 +115,17 @@ pub(crate) fn write_u64_le(src: &[u64], dst: &mut [u8]) {
 }
 
 #[inline(always)]
-pub(crate) fn convert_message_block<const N: usize, const M: usize>(
-    message_block: &[u8; N],
-) -> [u64; M] {
-    core::array::from_fn(|i| {
-        let chunk = message_block[8 * i..][..8].try_into().unwrap();
+pub(crate) fn write_u64_be(src: &[u64], dst: &mut [u8]) {
+    assert_eq!(8 * src.len(), dst.len());
+    for (src, dst) in src.iter().zip(dst.chunks_exact_mut(8)) {
+        dst.copy_from_slice(&src.to_be_bytes())
+    }
+}
+
+#[inline(always)]
+pub(crate) fn read_u64s_be<const N: usize, const M: usize>(block: &[u8; N]) -> [u64; M] {
+    array::from_fn(|i| {
+        let chunk = block[8 * i..][..8].try_into().unwrap();
         u64::from_be_bytes(chunk)
     })
 }

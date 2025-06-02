@@ -1,20 +1,17 @@
 use crate::utils::{
-    add_constant_plus, add_constant_xor, apply_s_box, convert_message_block, mix_columns, xor,
+    add_constant_plus, add_constant_xor, apply_s_box, mix_columns, read_u64s_be, xor,
 };
+use core::array;
 
 pub(crate) const COLS: usize = 16;
 const ROUNDS: u64 = 14;
 
 pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128]) {
     // Convert message block from u8 to u64 (column-major order as per paper)
-    let message_u64 = convert_message_block::<128, COLS>(message_block);
-
+    let message_u64 = read_u64s_be::<128, COLS>(message_block);
     let m_xor_p = xor(*prev_vector, message_u64);
-
     let t_xor_mp = t_xor_l(m_xor_p);
-
     let t_plus_m = t_plus_l(message_u64);
-
     *prev_vector = xor(xor(t_xor_mp, t_plus_m), *prev_vector);
 }
 
@@ -33,23 +30,15 @@ fn rotate_rows(state: [u64; COLS]) -> [u64; COLS] {
     //shift amounts for each row (0-6: row index, 7: special case = 11)
     const SHIFTS: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 11];
 
-    let mut result = [0u64; COLS];
-
-    for col in 0..COLS {
-        let mut rotated_bytes = [0u8; 8];
-
-        // Apply rotation for each row
-        for row in 0..8 {
+    array::from_fn(|col| {
+        let rotated_bytes = array::from_fn(|row| {
             let shift = SHIFTS[row];
-            let src_col = (col + COLS - shift) % COLS; // Reverse the rotation direction
+            let src_col = (col + COLS - shift) % COLS;
             let src_bytes = state[src_col].to_be_bytes();
-            rotated_bytes[row] = src_bytes[row];
-        }
-
-        result[col] = u64::from_be_bytes(rotated_bytes);
-    }
-
-    result
+            src_bytes[row]
+        });
+        u64::from_be_bytes(rotated_bytes)
+    })
 }
 
 pub(crate) fn t_xor_l(state: [u64; COLS]) -> [u64; COLS] {

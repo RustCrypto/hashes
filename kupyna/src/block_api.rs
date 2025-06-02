@@ -1,6 +1,6 @@
 use crate::{
     long, short,
-    utils::{read_u64_le, write_u64_le, xor},
+    utils::{read_u64_le, write_u64_be, write_u64_le, xor},
 };
 use core::fmt;
 use digest::{
@@ -77,15 +77,7 @@ impl VariableOutputCore for KupynaShortVarCore {
 
         let result_state = xor(self.state, t_xor_ult_processed_block);
 
-        // println!("final_result(pre truncate):=");
-        // for v in result_state.iter() {
-        //     println!("{:02X?}", v);
-        // }
-
-        let n = short::COLS / 2;
-        for (chunk, v) in out.chunks_exact_mut(8).zip(result_state[n..].iter()) {
-            chunk.copy_from_slice(&v.to_be_bytes());
-        }
+        write_u64_be(&result_state[short::COLS / 2..], out);
     }
 }
 
@@ -204,10 +196,7 @@ impl VariableOutputCore for KupynaLongVarCore {
 
         let result_state = xor(self.state, t_xor_ult_processed_block);
 
-        let n = long::COLS / 2;
-        for (chunk, v) in out.chunks_exact_mut(8).zip(result_state[n..].iter()) {
-            chunk.copy_from_slice(&v.to_be_bytes());
-        }
+        write_u64_be(&result_state[long::COLS / 2..], out);
     }
 }
 
