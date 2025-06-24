@@ -155,8 +155,7 @@ jobs:
         # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
         working-directory: .
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/cross-tests
+      - uses: RustCrypto/actions/cross-tests@master
         with:
           rust: ${{ matrix.rust }}
           package: ${{ github.workflow }}
