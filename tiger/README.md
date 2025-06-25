@@ -59,5 +59,5 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, without 
 
 [//]: # (general links)
 
-[Tiger]: http://www.cs.technion.ac.il/~biham/Reports/Tiger/tiger/tiger.html
+[Tiger]: https://en.wikipedia.org/wiki/Tiger_(hash_function)
 [examples section]: https://github.com/RustCrypto/hashes#Examples
