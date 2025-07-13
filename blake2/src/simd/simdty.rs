@@ -65,6 +65,14 @@ impl<T: Zeroize> Zeroize for Simd4<T> {
     }
 }
 
+impl<T: PartialEq> PartialEq for Simd4<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0 && self.1 == other.1 && self.2 == other.2 && self.3 == other.3
+    }
+}
+
+impl<T: Eq> Eq for Simd4<T> {}
+
 pub(crate) type u64x2 = Simd2<u64>;
 
 pub(crate) type u32x4 = Simd4<u32>;
