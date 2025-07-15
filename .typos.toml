@@ -1,6 +1,7 @@
 [files]
 extend-exclude = [
-    ".git/"
+    ".git/",
+    "blake2/tests/data/*"
 ]
 
 [default.extend-words]
