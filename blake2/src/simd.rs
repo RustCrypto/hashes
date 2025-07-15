@@ -12,29 +12,41 @@ mod simdty;
 
 pub(crate) use self::simdty::{u32x4, u64x4};
 
+/// SIMD vector operations for 4-element vectors used in Blake2 compression.
 pub(crate) trait Vector4<T>: Copy {
+    /// Gather elements from a slice at specified indices into a 4-element vector.
     fn gather(src: &[T], i0: usize, i1: usize, i2: usize, i3: usize) -> Self;
 
+    /// Convert from little-endian byte order (no-op on little-endian targets).
     #[allow(clippy::wrong_self_convention)]
     fn from_le(self) -> Self;
+    /// Convert to little-endian byte order (no-op on little-endian targets).
     fn to_le(self) -> Self;
 
+    /// Wrapping addition of two vectors.
     fn wrapping_add(self, rhs: Self) -> Self;
 
+    /// Rotate all elements right by a constant number of bits.
     fn rotate_right_const(self, n: u32) -> Self;
 
+    /// Shuffle elements left by 1 position: \[a,b,c,d\] -> \[b,c,d,a\].
     fn shuffle_left_1(self) -> Self;
+    /// Shuffle elements left by 2 positions: \[a,b,c,d\] -> \[c,d,a,b\].
     fn shuffle_left_2(self) -> Self;
+    /// Shuffle elements left by 3 positions: \[a,b,c,d\] -> \[d,a,b,c\].
     fn shuffle_left_3(self) -> Self;
 
+    /// Shuffle elements right by 1 position: \[a,b,c,d\] -> \[d,a,b,c\].
     #[inline(always)]
     fn shuffle_right_1(self) -> Self {
         self.shuffle_left_3()
     }
+    /// Shuffle elements right by 2 positions: \[a,b,c,d\] -> \[c,d,a,b\].
     #[inline(always)]
     fn shuffle_right_2(self) -> Self {
         self.shuffle_left_2()
     }
+    /// Shuffle elements right by 3 positions: \[a,b,c,d\] -> \[b,c,d,a\].
     #[inline(always)]
     fn shuffle_right_3(self) -> Self {
         self.shuffle_left_1()

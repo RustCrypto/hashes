@@ -34,6 +34,7 @@ use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 mod as_bytes;
 mod consts;
 
+/// SIMD vector operations and types for Blake2 compression function.
 pub mod simd;
 
 #[macro_use]
