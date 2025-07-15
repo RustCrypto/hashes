@@ -73,7 +73,9 @@ impl<T: Eq> Eq for Simd4<T> {}
 
 pub type u64x2 = Simd2<u64>;
 
+/// SIMD vector of four 32-bit unsigned integers.
 pub type u32x4 = Simd4<u32>;
+/// SIMD vector of four 64-bit unsigned integers.
 pub type u64x4 = Simd4<u64>;
 
 pub type u16x8 = Simd8<u16>;

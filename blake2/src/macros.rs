@@ -7,9 +7,12 @@ macro_rules! blake2_impl {
         #[derive(Clone)]
         #[doc=$vardoc]
         pub struct $name {
+            /// Blake2 state vector (8 words total, stored as 2 SIMD vectors).
             pub h: [$vec; 2],
+            /// Total number of bytes processed so far.
             pub t: u64,
             #[cfg(feature = "reset")]
+            /// Initial state vector for reset functionality.
             pub h0: [$vec; 2],
         }
 
