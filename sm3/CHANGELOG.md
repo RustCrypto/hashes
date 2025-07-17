@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.5.0 (UNRELEASED)
 ### Added
 - `alloc` crate feature ([#678])
+- `oid` crate feature and `AssociatedOid` trait implementation ([#706])
 
 ### Changed
 - Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
+[#706]: https://github.com/RustCrypto/hashes/pull/706
 
 ## 0.4.2 (2023-05-16)
 ### Changed

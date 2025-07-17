@@ -20,5 +20,8 @@ pub use block_api::Sm3Core;
 digest::buffer_fixed!(
     /// ShangMi 3 (SM3) hasher.
     pub struct Sm3(block_api::Sm3Core);
+    // Note that we use the GM/T OID here.
+    // SM3 has also an alternative ISO OID assigned to it.
+    oid: "1.2.156.10197.1.401";
     impl: FixedHashTraits;
 );
