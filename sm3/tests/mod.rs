@@ -29,3 +29,13 @@ fn sm3_rand() {
         hex!("ad154967b08d636a148dd4c688a6df7add1ed1946af18eb358a9b320de2aca86"),
     );
 }
+
+#[cfg(feature = "oid")]
+#[test]
+fn sm3_oid() {
+    use sm3::digest::const_oid::{AssociatedOid, ObjectIdentifier};
+    assert_eq!(
+        Sm3::OID,
+        ObjectIdentifier::new_unwrap("1.2.156.10197.1.401")
+    );
+}
