@@ -1,0 +1,47 @@
+use digest::hash_serialization_test;
+
+hash_serialization_test!(
+    keccak_224_serialization,
+    sha3::Keccak224,
+    include_bytes!("data/keccak_224_ser.bin")
+);
+hash_serialization_test!(
+    keccak_256_serialization,
+    sha3::Keccak256,
+    include_bytes!("data/keccak_256_ser.bin")
+);
+hash_serialization_test!(
+    keccak_384_serialization,
+    sha3::Keccak384,
+    include_bytes!("data/keccak_384_ser.bin")
+);
+hash_serialization_test!(
+    keccak_512_serialization,
+    sha3::Keccak512,
+    include_bytes!("data/keccak_512_ser.bin")
+);
+hash_serialization_test!(
+    keccak_256_full_serialization,
+    sha3::Keccak256Full,
+    include_bytes!("data/keccak_256_full_ser.bin")
+);
+hash_serialization_test!(
+    sha3_224_serialization,
+    sha3::Sha3_224,
+    include_bytes!("data/sha3_224_ser.bin")
+);
+hash_serialization_test!(
+    sha3_256_serialization,
+    sha3::Sha3_256,
+    include_bytes!("data/sha3_256_ser.bin")
+);
+hash_serialization_test!(
+    sha3_384_serialization,
+    sha3::Sha3_384,
+    include_bytes!("data/sha3_384_ser.bin")
+);
+hash_serialization_test!(
+    sha3_512_serialization,
+    sha3::Sha3_512,
+    include_bytes!("data/sha3_512_ser.bin")
+);
