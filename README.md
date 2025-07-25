@@ -9,7 +9,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 
 ## Supported Algorithms
 
-**Note:** For new applications, or where compatibility with other existing standards is not a primary concern, we strongly recommend to use either BLAKE2, SHA-2 or SHA-3.
+**Note:** For new applications, or where compatibility with other existing standards is not a primary concern, we strongly recommend to use either [BLAKE3][`blake3`], SHA-2 or SHA-3.
 
 | Algorithm | Crate | Crates.io | Documentation | MSRV | [Security] |
 |-----------|-------|:---------:|:-------------:|:----:|:----------:|
