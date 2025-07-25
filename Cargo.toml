@@ -33,3 +33,8 @@ opt-level = 2
 sha1 = { path = "sha1" }
 sha3 = { path = "sha3" }
 whirlpool = { path = "whirlpool" }
+
+# https://github.com/RustCrypto/utils/pull/1187
+blobby = { git = "https://github.com/RustCrypto/utils" }
+# https://github.com/RustCrypto/traits/pull/1916
+digest = { git = "https://github.com/RustCrypto/traits", branch = "const_blobby" }

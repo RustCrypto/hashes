@@ -1,11 +1,19 @@
 use core::fmt::Debug;
 use digest::ExtendableOutput;
 
+#[derive(Debug, Clone, Copy)]
+pub struct TestVector {
+    pub input: &'static [u8],
+    pub input_pattern_length: &'static [u8],
+    pub output: &'static [u8],
+    pub truncate_output: &'static [u8],
+}
+
 pub(crate) fn turbo_shake_test<D>(
     input: &[u8],
     output: &[u8],
     truncate_output: usize,
-) -> Option<&'static str>
+) -> Result<(), &'static str>
 where
     D: ExtendableOutput + Default + Debug + Clone,
 {
@@ -17,7 +25,7 @@ where
     let mut hasher2 = hasher.clone();
     hasher.finalize_xof_into(buf);
     if &buf[truncate_output..] != output {
-        return Some("whole message");
+        return Err("whole message");
     }
     buf.iter_mut().for_each(|b| *b = 0);
 
@@ -30,23 +38,27 @@ where
         }
         hasher.finalize_xof_into(buf);
         if &buf[truncate_output..] != output {
-            return Some("message in chunks");
+            return Err("message in chunks");
         }
         buf.iter_mut().for_each(|b| *b = 0);
     }
 
-    None
+    Ok(())
 }
 
 macro_rules! new_turbo_shake_test {
     ($name:ident, $test_name:expr, $hasher:ty, $test_func:ident $(,)?) => {
         #[test]
         fn $name() {
-            use digest::dev::blobby::Blob4Iterator;
-            let data = include_bytes!(concat!("data/", $test_name, ".blb"));
+            digest::dev::blobby::parse_into_structs!(
+                include_bytes!(concat!("data/", $test_name, ".blb"));
+                static TEST_VECTORS: &[TestVector {
+                    input, input_pattern_length, output, truncate_output
+                }];
+            );
 
-            for (i, row) in Blob4Iterator::new(data).unwrap().enumerate() {
-                let [input, input_pattern_length, output, truncate_output] = row.unwrap();
+            for (i, tv) in TEST_VECTORS.iter().enumerate() {
+                let &TestVector { input, input_pattern_length, output, truncate_output } = tv;
 
                 let input = if (input_pattern_length.len() == 0) {
                     input.to_vec()
@@ -70,7 +82,7 @@ macro_rules! new_turbo_shake_test {
 
                 println!("before func: {:?}", truncate_output.len());
 
-                if let Some(desc) = $test_func::<$hasher>(
+                if let Err(desc) = $test_func::<$hasher>(
                     &input,
                     output,
                     u64::from_be_bytes(truncate_output.try_into().unwrap())
