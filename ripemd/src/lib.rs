@@ -20,7 +20,7 @@ mod c320;
 // Note about used OIDs: there are two OIDs defined for RIPEMD-128/160.
 // The Teletrust one (which is used by almost anybody, including BouncyCastle,
 // OpenSSL, GnuTLS, etc.) and the ISO one (1.0.10118.3.0.50/49), which seems
-// to be used by by Go and nobody else.
+// to be used by Go and nobody else.
 
 digest::buffer_fixed!(
     /// RIPEMD-128 hasher
