@@ -3,7 +3,6 @@ use crate::consts::K32;
 fn compress_u32(state: &mut [u32; 8], mut block: [u32; 16]) {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
-    // Use circular buffer approach instead of full w[64] array for better cache efficiency
     for i in 0..64 {
         let w = if i < 16 {
             block[i]
