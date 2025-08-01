@@ -1,29 +1,31 @@
 use crate::consts::K32;
 
-fn compress_u32(state: &mut [u32; 8], block: [u32; 16]) {
+fn compress_u32(state: &mut [u32; 8], mut block: [u32; 16]) {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
-    let mut w = [0; 64];
-    w[..16].copy_from_slice(&block);
-
-    for i in 16..64 {
-        let w15 = w[i - 15];
-        let s0 = (w15.rotate_right(7)) ^ (w15.rotate_right(18)) ^ (w15 >> 3);
-        let w2 = w[i - 2];
-        let s1 = (w2.rotate_right(17)) ^ (w2.rotate_right(19)) ^ (w2 >> 10);
-        w[i] = w[i - 16]
-            .wrapping_add(s0)
-            .wrapping_add(w[i - 7])
-            .wrapping_add(s1);
-    }
-
+    // Use circular buffer approach instead of full w[64] array for better cache efficiency
     for i in 0..64 {
+        let w = if i < 16 {
+            block[i]
+        } else {
+            let w15 = block[(i - 15) % 16];
+            let s0 = (w15.rotate_right(7)) ^ (w15.rotate_right(18)) ^ (w15 >> 3);
+            let w2 = block[(i - 2) % 16];
+            let s1 = (w2.rotate_right(17)) ^ (w2.rotate_right(19)) ^ (w2 >> 10);
+            let new_w = block[(i - 16) % 16]
+                .wrapping_add(s0)
+                .wrapping_add(block[(i - 7) % 16])
+                .wrapping_add(s1);
+            block[i % 16] = new_w;
+            new_w
+        };
+
         let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
             .wrapping_add(K32[i])
-            .wrapping_add(w[i])
+            .wrapping_add(w)
             .wrapping_add(h);
         let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
         let maj = (a & b) ^ (a & c) ^ (b & c);
