@@ -43,5 +43,6 @@ digest::buffer_fixed!(
 digest::buffer_fixed!(
     /// RIPEMD-320 hasher
     pub struct Ripemd320(block_api::Ripemd320Core);
+    oid: "1.3.36.3.2.4";
     impl: FixedHashTraits;
 );
