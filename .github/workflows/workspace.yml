@@ -9,6 +9,11 @@ on:
     paths-ignore:
       - README.md
 
+# Cancels CI jobs when new commits are pushed to a PR branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   clippy:
     runs-on: ubuntu-latest
