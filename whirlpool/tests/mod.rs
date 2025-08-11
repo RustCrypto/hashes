@@ -5,8 +5,8 @@ use whirlpool::{Digest, Whirlpool};
 digest::new_test!(whirlpool_main, "whirlpool", Whirlpool, fixed_reset_test);
 digest::hash_serialization_test!(
     whirlpool_serialization,
+    "whirlpool_serialization",
     Whirlpool,
-    "whirlpool_serialization"
 );
 
 #[test]

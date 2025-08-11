@@ -13,23 +13,23 @@ new_test!(ripemd320_main, "ripemd320", Ripemd320, fixed_reset_test);
 
 hash_serialization_test!(
     ripemd128_serialization,
+    "ripemd128_serialization",
     Ripemd128,
-    "ripemd128_serialization"
 );
 hash_serialization_test!(
     ripemd160_serialization,
+    "ripemd160_serialization",
     Ripemd160,
-    "ripemd160_serialization"
 );
 hash_serialization_test!(
     ripemd256_serialization,
+    "ripemd256_serialization",
     Ripemd256,
-    "ripemd256_serialization"
 );
 hash_serialization_test!(
     ripemd320_serialization,
+    "ripemd320_serialization",
     Ripemd320,
-    "ripemd320_serialization"
 );
 
 #[test]

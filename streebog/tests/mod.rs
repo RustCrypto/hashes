@@ -20,13 +20,13 @@ new_test!(
 
 hash_serialization_test!(
     streebog256_serialization,
+    "streebog256_serialization",
     Streebog256,
-    "streebog256_serialization"
 );
 hash_serialization_test!(
     streebog512_serialization,
+    "streebog512_serialization",
     Streebog512,
-    "streebog512_serialization"
 );
 
 /// Test vectors from:

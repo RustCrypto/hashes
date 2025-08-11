@@ -13,28 +13,28 @@ new_test!(shabal512_main, "shabal512", Shabal512, fixed_reset_test);
 
 hash_serialization_test!(
     shabal192_serialization,
-    Shabal192,
     "shabal192_serialization",
+    Shabal192,
 );
 hash_serialization_test!(
     shabal224_serialization,
-    Shabal224,
     "shabal224_serialization",
+    Shabal224,
 );
 hash_serialization_test!(
     shabal256_serialization,
-    Shabal256,
     "shabal256_serialization",
+    Shabal256,
 );
 hash_serialization_test!(
     shabal384_serialization,
-    Shabal384,
     "shabal384_serialization",
+    Shabal384,
 );
 hash_serialization_test!(
     shabal512_serialization,
-    Shabal512,
     "shabal512_serialization",
+    Shabal512,
 );
 
 #[test]

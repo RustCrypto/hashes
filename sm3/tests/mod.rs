@@ -3,7 +3,7 @@ use hex_literal::hex;
 use sm3::{Digest, Sm3};
 
 digest::new_test!(sm3_main, "sm3", Sm3, fixed_reset_test);
-digest::hash_serialization_test!(sm3_serialization, Sm3, "sm3_serialization");
+digest::hash_serialization_test!(sm3_serialization, "sm3_serialization", Sm3);
 
 #[test]
 fn sm3_rand() {

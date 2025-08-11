@@ -19,13 +19,13 @@ new_test!(kupyna512, "kupyna512", Kupyna512, fixed_reset_test);
 
 hash_serialization_test!(
     kupyna256_serialization,
-    Kupyna256,
     "kupyna256_serialization",
+    Kupyna256,
 );
 hash_serialization_test!(
     kupyna512_serialization,
-    Kupyna512,
     "kupyna512_serialization",
+    Kupyna512,
 );
 
 #[test]

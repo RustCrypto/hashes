@@ -2,46 +2,46 @@ use digest::hash_serialization_test;
 
 hash_serialization_test!(
     keccak_224_serialization,
+    "keccak_224_serialization",
     sha3::Keccak224,
-    "keccak_224_serialization"
 );
 hash_serialization_test!(
     keccak_256_serialization,
+    "keccak_256_serialization",
     sha3::Keccak256,
-    "keccak_256_serialization"
 );
 hash_serialization_test!(
     keccak_384_serialization,
+    "keccak_384_serialization",
     sha3::Keccak384,
-    "keccak_384_serialization"
 );
 hash_serialization_test!(
     keccak_512_serialization,
+    "keccak_512_serialization",
     sha3::Keccak512,
-    "keccak_512_serialization"
 );
 hash_serialization_test!(
     keccak_256_full_serialization,
+    "keccak_256_full_serialization",
     sha3::Keccak256Full,
-    "keccak_256_full_serialization"
 );
 hash_serialization_test!(
     sha3_224_serialization,
+    "sha3_224_serialization",
     sha3::Sha3_224,
-    "sha3_224_serialization"
 );
 hash_serialization_test!(
     sha3_256_serialization,
+    "sha3_256_serialization",
     sha3::Sha3_256,
-    "sha3_256_serialization"
 );
 hash_serialization_test!(
     sha3_384_serialization,
+    "sha3_384_serialization",
     sha3::Sha3_384,
-    "sha3_384_serialization"
 );
 hash_serialization_test!(
     sha3_512_serialization,
+    "sha3_512_serialization",
     sha3::Sha3_512,
-    "sha3_512_serialization"
 );

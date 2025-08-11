@@ -15,20 +15,20 @@ new_test!(
 
 hash_serialization_test!(
     gost94_cryptopro_serialization,
-    Gost94CryptoPro,
     "gost94_cryptopro_serialization",
+    Gost94CryptoPro,
 );
 hash_serialization_test!(
     gost94_test_serialization,
-    Gost94Test,
     "gost94_test_serialization",
+    Gost94Test,
 );
-hash_serialization_test!(gost94_ua_serialization, Gost94UA, "gost94_ua_serialization");
 hash_serialization_test!(
     gost94_s2015_serialization,
-    Gost94s2015,
     "gost94_s2015_serialization",
+    Gost94s2015,
 );
+hash_serialization_test!(gost94_ua_serialization, "gost94_ua_serialization", Gost94UA);
 
 #[test]
 fn gost94_test_rand() {

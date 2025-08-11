@@ -19,4 +19,4 @@ fn belt_rand() {
     );
 }
 
-digest::hash_serialization_test!(belt_hash_serialization, BeltHash, "serialization");
+digest::hash_serialization_test!(belt_hash_serialization, "serialization", BeltHash);
