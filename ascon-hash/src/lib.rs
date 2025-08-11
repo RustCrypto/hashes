@@ -73,6 +73,18 @@ struct HashCore<P: HashParameters> {
     phantom: PhantomData<P>,
 }
 
+#[cfg(feature = "zeroize")]
+impl<P: HashParameters> digest::zeroize::ZeroizeOnDrop for HashCore<P> {}
+
+#[allow(dead_code)]
+#[cfg(feature = "zeroize")]
+const _: () = {
+    // State is the only field in AsconCore
+    fn check_core(v: &State) {
+        let _ = v as &dyn digest::zeroize::ZeroizeOnDrop;
+    }
+};
+
 impl<P: HashParameters> HashCore<P> {
     fn absorb_block(&mut self, block: &[u8; 8]) {
         self.state[0] ^= u64::from_le_bytes(*block);
@@ -194,6 +206,18 @@ impl SerializableState for AsconCore {
         })
     }
 }
+
+#[cfg(feature = "zeroize")]
+impl digest::zeroize::ZeroizeOnDrop for AsconCore {}
+
+#[allow(dead_code)]
+#[cfg(feature = "zeroize")]
+const _: () = {
+    // HashCore is the only field in AsconCore
+    fn check_core(v: &HashCore<Parameters>) {
+        let _ = v as &dyn digest::zeroize::ZeroizeOnDrop;
+    }
+};
 
 /// Ascon XOF
 #[derive(Clone, Debug, Default)]
