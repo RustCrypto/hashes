@@ -62,8 +62,7 @@ source = "git+https://github.com/RustCrypto/utils#0e7e6e662608a3a862a4beb930b8ff
 [[package]]
 name = "block-buffer"
 version = "0.11.0-rc.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a229bfd78e4827c91b9b95784f69492c1b77c1ab75a45a8a037b139215086f94"
+source = "git+https://github.com/RustCrypto/utils#0e7e6e662608a3a862a4beb930b8ffedbea6563d"
 dependencies = [
  "hybrid-array",
  "zeroize",
