@@ -77,6 +77,7 @@ struct HashCore<P: HashParameters> {
 impl<P: HashParameters> digest::zeroize::ZeroizeOnDrop for HashCore<P> {}
 
 #[allow(dead_code)]
+#[cfg(feature = "zeroize")]
 const _: () = {
     // State is the only field in AsconCore
     fn check_core(v: &State) {
@@ -210,6 +211,7 @@ impl SerializableState for AsconCore {
 impl digest::zeroize::ZeroizeOnDrop for AsconCore {}
 
 #[allow(dead_code)]
+#[cfg(feature = "zeroize")]
 const _: () = {
     // HashCore is the only field in AsconCore
     fn check_core(v: &HashCore<Parameters>) {
