@@ -19,16 +19,4 @@ fn belt_rand() {
     );
 }
 
-digest::hash_serialization_test!(
-    belt_hash_serialization,
-    BeltHash,
-    hex!(
-        "01000000000000000000000000000000"
-        "bc4b8fefbfe791959b5a2f023ec29cb8"
-        "2c189f8308af980828175e12d98f5b1f"
-        "50b479051c6dfd067ce4a9b9c9ec1a24"
-        "01130000000000000000000000000000"
-        "00000000000000000000000000000000"
-        "00"
-    )
-);
+digest::hash_serialization_test!(belt_hash_serialization, BeltHash, "serialization");
