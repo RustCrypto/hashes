@@ -37,4 +37,4 @@ whirlpool = { path = "whirlpool" }
 # https://github.com/RustCrypto/utils/pull/1187
 blobby = { git = "https://github.com/RustCrypto/utils" }
 # https://github.com/RustCrypto/traits/pull/1916
-digest = { git = "https://github.com/RustCrypto/traits", branch = "const_blobby" }
+digest = { git = "https://github.com/RustCrypto/traits" }
