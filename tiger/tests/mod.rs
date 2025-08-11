@@ -6,8 +6,8 @@ use tiger::{Digest, Tiger, Tiger2};
 new_test!(tiger, "tiger", tiger::Tiger, fixed_reset_test);
 new_test!(tiger2, "tiger2", tiger::Tiger2, fixed_reset_test);
 
-hash_serialization_test!(tiger_serialization, "tiger_serialization", Tiger);
-hash_serialization_test!(tiger2_serialization, "tiger_serialization", Tiger2);
+hash_serialization_test!(tiger_serialization, Tiger);
+hash_serialization_test!(tiger2_serialization, Tiger2);
 
 #[test]
 fn tiger_rand() {

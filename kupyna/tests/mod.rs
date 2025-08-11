@@ -17,16 +17,8 @@ new_test!(kupyna256, "kupyna256", Kupyna256, fixed_reset_test);
 new_test!(kupyna384, "kupyna384", Kupyna384, fixed_reset_test);
 new_test!(kupyna512, "kupyna512", Kupyna512, fixed_reset_test);
 
-hash_serialization_test!(
-    kupyna256_serialization,
-    "kupyna256_serialization",
-    Kupyna256,
-);
-hash_serialization_test!(
-    kupyna512_serialization,
-    "kupyna512_serialization",
-    Kupyna512,
-);
+hash_serialization_test!(kupyna256_serialization, Kupyna256,);
+hash_serialization_test!(kupyna512_serialization, Kupyna512,);
 
 #[test]
 fn kupyna256_rand() {

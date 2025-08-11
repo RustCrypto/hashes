@@ -11,26 +11,10 @@ new_test!(ripemd160_main, "ripemd160", Ripemd160, fixed_reset_test);
 new_test!(ripemd256_main, "ripemd256", Ripemd256, fixed_reset_test);
 new_test!(ripemd320_main, "ripemd320", Ripemd320, fixed_reset_test);
 
-hash_serialization_test!(
-    ripemd128_serialization,
-    "ripemd128_serialization",
-    Ripemd128,
-);
-hash_serialization_test!(
-    ripemd160_serialization,
-    "ripemd160_serialization",
-    Ripemd160,
-);
-hash_serialization_test!(
-    ripemd256_serialization,
-    "ripemd256_serialization",
-    Ripemd256,
-);
-hash_serialization_test!(
-    ripemd320_serialization,
-    "ripemd320_serialization",
-    Ripemd320,
-);
+hash_serialization_test!(ripemd128_serialization, Ripemd128);
+hash_serialization_test!(ripemd160_serialization, Ripemd160);
+hash_serialization_test!(ripemd256_serialization, Ripemd256);
+hash_serialization_test!(ripemd320_serialization, Ripemd320);
 
 #[test]
 fn ripemd128_1mil_a() {

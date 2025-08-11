@@ -3,7 +3,7 @@ use hex_literal::hex;
 use sha1::{Digest, Sha1};
 
 digest::new_test!(sha1_main, "sha1", Sha1, fixed_reset_test);
-digest::hash_serialization_test!(sha1_serialization, "sha1_serialization", Sha1);
+digest::hash_serialization_test!(sha1_serialization, Sha1);
 
 #[test]
 fn sha1_rand() {

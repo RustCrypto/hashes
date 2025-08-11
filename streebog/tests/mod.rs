@@ -18,16 +18,8 @@ new_test!(
     fixed_reset_test,
 );
 
-hash_serialization_test!(
-    streebog256_serialization,
-    "streebog256_serialization",
-    Streebog256,
-);
-hash_serialization_test!(
-    streebog512_serialization,
-    "streebog512_serialization",
-    Streebog512,
-);
+hash_serialization_test!(streebog256_serialization, Streebog256,);
+hash_serialization_test!(streebog512_serialization, Streebog512,);
 
 /// Test vectors from:
 /// https://github.com/gost-engine/engine/blob/master/test/01-digest.t

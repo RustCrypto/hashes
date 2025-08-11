@@ -3,7 +3,7 @@ use hex_literal::hex;
 use md2::{Digest, Md2};
 
 digest::new_test!(md2_main, "md2", Md2, fixed_reset_test);
-digest::hash_serialization_test!(md2_serialization, "md2_serialization", Md2);
+digest::hash_serialization_test!(md2_serialization, Md2);
 
 #[test]
 fn md2_rand() {

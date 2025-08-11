@@ -8,26 +8,10 @@ new_test!(groestl256_main, "groestl256", Groestl256, fixed_reset_test);
 new_test!(groestl384_main, "groestl384", Groestl384, fixed_reset_test);
 new_test!(groestl512_main, "groestl512", Groestl512, fixed_reset_test);
 
-hash_serialization_test!(
-    groestl224_serialization,
-    "groestl224_serialization",
-    Groestl224,
-);
-hash_serialization_test!(
-    groestl256_serialization,
-    "groestl256_serialization",
-    Groestl256,
-);
-hash_serialization_test!(
-    groestl384_serialization,
-    "groestl384_serialization",
-    Groestl384,
-);
-hash_serialization_test!(
-    groestl512_serialization,
-    "groestl512_serialization",
-    Groestl512,
-);
+hash_serialization_test!(groestl224_serialization, Groestl224);
+hash_serialization_test!(groestl256_serialization, Groestl256);
+hash_serialization_test!(groestl384_serialization, Groestl384);
+hash_serialization_test!(groestl512_serialization, Groestl512);
 
 // TODO: re-enable after fixing impl in the macro
 /*

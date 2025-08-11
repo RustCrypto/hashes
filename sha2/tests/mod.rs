@@ -12,20 +12,12 @@ new_test!(sha512_main, "sha512", Sha512, fixed_reset_test);
 new_test!(sha512_224_main, "sha512_224", Sha512_224, fixed_reset_test);
 new_test!(sha512_256_main, "sha512_256", Sha512_256, fixed_reset_test);
 
-hash_serialization_test!(sha224_serialization, "sha224_serialization", Sha224);
-hash_serialization_test!(sha256_serialization, "sha256_serialization", Sha256);
-hash_serialization_test!(sha384_serialization, "sha384_serialization", Sha384);
-hash_serialization_test!(sha512_serialization, "sha512_serialization", Sha512);
-hash_serialization_test!(
-    sha512_224_serialization,
-    "sha512_224_serialization",
-    Sha512_224,
-);
-hash_serialization_test!(
-    sha512_256_serialization,
-    "sha512_256_serialization",
-    Sha512_256,
-);
+hash_serialization_test!(sha224_serialization, Sha224);
+hash_serialization_test!(sha256_serialization, Sha256);
+hash_serialization_test!(sha384_serialization, Sha384);
+hash_serialization_test!(sha512_serialization, Sha512);
+hash_serialization_test!(sha512_224_serialization, Sha512_224);
+hash_serialization_test!(sha512_256_serialization, Sha512_256);
 
 #[test]
 fn sha256_rand() {

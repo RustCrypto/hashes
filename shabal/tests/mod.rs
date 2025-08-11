@@ -11,31 +11,11 @@ new_test!(shabal256_main, "shabal256", Shabal256, fixed_reset_test);
 new_test!(shabal384_main, "shabal384", Shabal384, fixed_reset_test);
 new_test!(shabal512_main, "shabal512", Shabal512, fixed_reset_test);
 
-hash_serialization_test!(
-    shabal192_serialization,
-    "shabal192_serialization",
-    Shabal192,
-);
-hash_serialization_test!(
-    shabal224_serialization,
-    "shabal224_serialization",
-    Shabal224,
-);
-hash_serialization_test!(
-    shabal256_serialization,
-    "shabal256_serialization",
-    Shabal256,
-);
-hash_serialization_test!(
-    shabal384_serialization,
-    "shabal384_serialization",
-    Shabal384,
-);
-hash_serialization_test!(
-    shabal512_serialization,
-    "shabal512_serialization",
-    Shabal512,
-);
+hash_serialization_test!(shabal192_serialization, Shabal192);
+hash_serialization_test!(shabal224_serialization, Shabal224);
+hash_serialization_test!(shabal256_serialization, Shabal256);
+hash_serialization_test!(shabal384_serialization, Shabal384);
+hash_serialization_test!(shabal512_serialization, Shabal512);
 
 #[test]
 fn shabal192_rand() {

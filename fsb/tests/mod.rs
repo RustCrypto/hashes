@@ -11,11 +11,11 @@ new_test!(fsb256_main, "fsb256", Fsb256, fixed_reset_test);
 new_test!(fsb384_main, "fsb384", Fsb384, fixed_reset_test);
 new_test!(fsb512_main, "fsb512", Fsb512, fixed_reset_test);
 
-hash_serialization_test!(fsb160_serialization, "fsb160_serialization", Fsb160);
-hash_serialization_test!(fsb224_serialization, "fsb224_serialization", Fsb224);
-hash_serialization_test!(fsb256_serialization, "fsb256_serialization", Fsb256);
-hash_serialization_test!(fsb384_serialization, "fsb384_serialization", Fsb384);
-hash_serialization_test!(fsb512_serialization, "fsb512_serialization", Fsb512);
+hash_serialization_test!(fsb160_serialization, Fsb160);
+hash_serialization_test!(fsb224_serialization, Fsb224);
+hash_serialization_test!(fsb256_serialization, Fsb256);
+hash_serialization_test!(fsb384_serialization, Fsb384);
+hash_serialization_test!(fsb512_serialization, Fsb512);
 
 #[test]
 fn fsb160_rand() {
