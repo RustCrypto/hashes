@@ -3,22 +3,7 @@ use hex_literal::hex;
 use whirlpool::{Digest, Whirlpool};
 
 digest::new_test!(whirlpool_main, "whirlpool", Whirlpool, fixed_reset_test);
-
-digest::hash_serialization_test!(
-    whirlpool_serialization,
-    Whirlpool,
-    hex!(
-        "44b95aeb60cdf5910f83d556a3382cd8"
-        "58f03d791dfb7675125d6ede083dc917"
-        "47be004f1982289c065eb53491e06729"
-        "f5935532c376541ca78e23ed572516a9"
-        "01000000000000000113000000000000"
-        "00000000000000000000000000000000"
-        "00000000000000000000000000000000"
-        "00000000000000000000000000000000"
-        "000000000000000000"
-    )
-);
+digest::hash_serialization_test!(whirlpool_serialization, Whirlpool);
 
 #[test]
 fn whirlpool_rand() {

@@ -57,12 +57,12 @@ dependencies = [
 [[package]]
 name = "blobby"
 version = "0.4.0-pre.0"
-source = "git+https://github.com/RustCrypto/utils#0e7e6e662608a3a862a4beb930b8ffedbea6563d"
+source = "git+https://github.com/RustCrypto/utils#f5ac85f6aa02aa39614f62a6a1add9468be67892"
 
 [[package]]
 name = "block-buffer"
 version = "0.11.0-rc.4"
-source = "git+https://github.com/RustCrypto/utils#0e7e6e662608a3a862a4beb930b8ffedbea6563d"
+source = "git+https://github.com/RustCrypto/utils#f5ac85f6aa02aa39614f62a6a1add9468be67892"
 dependencies = [
  "hybrid-array",
  "zeroize",
@@ -92,7 +92,7 @@ dependencies = [
 [[package]]
 name = "crypto-common"
 version = "0.2.0-rc.3"
-source = "git+https://github.com/RustCrypto/traits#832c889be55234ec3f6271d0b2133017a0f5703b"
+source = "git+https://github.com/RustCrypto/traits#7bbc010a76ef459a04c696ac9f4e6694a776fe7e"
 dependencies = [
  "hybrid-array",
 ]
@@ -100,7 +100,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.11.0-rc.0"
-source = "git+https://github.com/RustCrypto/traits#832c889be55234ec3f6271d0b2133017a0f5703b"
+source = "git+https://github.com/RustCrypto/traits#7bbc010a76ef459a04c696ac9f4e6694a776fe7e"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -241,9 +241,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.96"
+version = "1.0.97"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "beef09f85ae72cea1ef96ba6870c51e6382ebfa4f0e85b643459331f3daa5be0"
+checksum = "d61789d7719defeb74ea5fe81f2fdfdbd28a803847077cecce2ff14e1472f6f1"
 dependencies = [
  "unicode-ident",
 ]

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Relax MSRV policy and allow MSRV bumps in patch releases
 - Update to `digest` v0.11
 - Replace type aliases with newtypes ([#678])
+- Implementation of the `SerializableState` trait ([#716])
 
 ### Removed
 - `std` crate feature ([#678])
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
 [#706]: https://github.com/RustCrypto/hashes/pull/706
+[#716]: https://github.com/RustCrypto/hashes/pull/716
 
 ## 0.4.2 (2023-05-16)
 ### Changed

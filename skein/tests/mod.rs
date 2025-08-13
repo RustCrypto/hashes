@@ -1,4 +1,4 @@
-use skein::digest::{dev::fixed_test, new_test};
+use skein::digest::{dev::fixed_test, hash_serialization_test, new_test};
 
 new_test!(
     skein256_256,
@@ -42,6 +42,10 @@ new_test!(
     skein::Skein1024_1024,
     fixed_test,
 );
+
+hash_serialization_test!(skein256_serialization, skein::Skein256_256);
+hash_serialization_test!(skein512_serialization, skein::Skein512_512);
+hash_serialization_test!(skein1024_serialization, skein::Skein1024_1024);
 
 /// Regression tests for https://github.com/RustCrypto/hashes/issues/681
 #[test]

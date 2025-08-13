@@ -3,6 +3,7 @@ use hex_literal::hex;
 use sha1::{Digest, Sha1};
 
 digest::new_test!(sha1_main, "sha1", Sha1, fixed_reset_test);
+digest::hash_serialization_test!(sha1_serialization, Sha1);
 
 #[test]
 fn sha1_rand() {
@@ -13,17 +14,3 @@ fn sha1_rand() {
         hex!("7e565a25a8b123e9881addbcedcd927b23377a78"),
     );
 }
-
-#[rustfmt::skip]
-digest::hash_serialization_test!(
-    sha1_serialization,
-    Sha1,
-    hex!("
-        ad0eca12d0aaa48af970c03f1420a28d
-        260b50df010000000000000001130000
-        00000000000000000000000000000000
-        00000000000000000000000000000000
-        00000000000000000000000000000000
-        00000000000000000000000000
-    ")
-);
