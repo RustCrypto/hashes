@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update to `digest` v0.11
 - Replace type aliases with newtypes ([#678])
 - `compress256` and `compress512` are moved to the `block_api` module ([#678])
+- Implementation of the `SerializableState` trait ([#716])
 
 ### Added
 - `alloc` crate feature ([#678])
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
 [#686]: https://github.com/RustCrypto/hashes/pull/686
+[#716]: https://github.com/RustCrypto/hashes/pull/716
 
 ## 0.10.9 (2025-04-30)
 ### Added
