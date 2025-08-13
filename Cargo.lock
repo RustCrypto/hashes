@@ -62,7 +62,7 @@ source = "git+https://github.com/RustCrypto/utils#0e7e6e662608a3a862a4beb930b8ff
 [[package]]
 name = "block-buffer"
 version = "0.11.0-rc.4"
-source = "git+https://github.com/RustCrypto/utils?branch=block-buffer%2Fserialization#f57451f62fb3f87c5ee3f71fe4b1afdf3752abf5"
+source = "git+https://github.com/RustCrypto/utils#f5ac85f6aa02aa39614f62a6a1add9468be67892"
 dependencies = [
  "hybrid-array",
  "zeroize",
@@ -92,7 +92,7 @@ dependencies = [
 [[package]]
 name = "crypto-common"
 version = "0.2.0-rc.3"
-source = "git+https://github.com/RustCrypto/traits?branch=digest%2Fserialization#27383b9a01d3689920afec803c4ac922916a0825"
+source = "git+https://github.com/RustCrypto/traits#7bbc010a76ef459a04c696ac9f4e6694a776fe7e"
 dependencies = [
  "hybrid-array",
 ]
@@ -100,7 +100,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.11.0-rc.0"
-source = "git+https://github.com/RustCrypto/traits?branch=digest%2Fserialization#27383b9a01d3689920afec803c4ac922916a0825"
+source = "git+https://github.com/RustCrypto/traits#7bbc010a76ef459a04c696ac9f4e6694a776fe7e"
 dependencies = [
  "blobby",
  "block-buffer",
