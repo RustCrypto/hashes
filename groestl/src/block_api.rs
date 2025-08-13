@@ -1,4 +1,4 @@
-use core::fmt;
+use core::{fmt, slice};
 use digest::{
     HashMarker, InvalidOutputSize, Output,
     block_api::{
@@ -36,9 +36,7 @@ macro_rules! impl_variant {
             #[inline]
             fn update_blocks(&mut self, blocks: &[Block<Self>]) {
                 self.blocks_len += blocks.len() as u64;
-                for block in blocks {
-                    $compress::compress(&mut self.state, block.as_ref());
-                }
+                $compress::compress(&mut self.state, Block::<Self>::cast_slice_to_core(blocks));
             }
         }
 
@@ -72,7 +70,7 @@ macro_rules! impl_variant {
                     self.blocks_len + 1
                 };
                 buffer.len64_padding_be(blocks_len, |block| {
-                    $compress::compress(&mut self.state, block.as_ref())
+                    $compress::compress(&mut self.state, slice::from_ref(block.as_ref()))
                 });
                 let res = $compress::p(&self.state);
                 let n = $compress::COLS / 2;
