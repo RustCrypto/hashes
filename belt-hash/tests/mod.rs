@@ -4,7 +4,7 @@ use hex_literal::hex;
 
 // Test vectors from STB 34.101.31-2020 (Section A.11, Table A.23):
 // http://apmi.bsu.by/assets/files/std/belt-spec371.pdf
-digest::new_test!(belt_stb, "stb", BeltHash, fixed_reset_test);
+digest::new_test!(belt_hash_kat, BeltHash, fixed_reset_test);
 
 #[test]
 fn belt_rand() {

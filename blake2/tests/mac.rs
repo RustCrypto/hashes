@@ -5,8 +5,8 @@ use digest::dev::reset_mac_test as test_fn;
 
 use digest::new_mac_test;
 
-new_mac_test!(blake2b_mac, "blake2b/mac", blake2::Blake2bMac512, test_fn);
-new_mac_test!(blake2s_mac, "blake2s/mac", blake2::Blake2sMac256, test_fn);
+new_mac_test!(blake2b_mac_kat, blake2::Blake2bMac512, test_fn);
+new_mac_test!(blake2s_mac_kat, blake2::Blake2sMac256, test_fn);
 
 #[test]
 fn blake2b_new_test() {

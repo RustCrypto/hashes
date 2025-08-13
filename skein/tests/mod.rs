@@ -1,47 +1,12 @@
 use skein::digest::{dev::fixed_test, hash_serialization_test, new_test};
 
-new_test!(
-    skein256_256,
-    "skein256_256",
-    skein::Skein256_256,
-    fixed_test,
-);
-new_test!(
-    skein256_512,
-    "skein256_512",
-    skein::Skein256_512,
-    fixed_test,
-);
-new_test!(
-    skein512_256,
-    "skein512_256",
-    skein::Skein512_256,
-    fixed_test,
-);
-new_test!(
-    skein512_512,
-    "skein512_512",
-    skein::Skein512_512,
-    fixed_test,
-);
-new_test!(
-    skein1024_256,
-    "skein1024_256",
-    skein::Skein1024_256,
-    fixed_test,
-);
-new_test!(
-    skein1024_512,
-    "skein1024_512",
-    skein::Skein1024_512,
-    fixed_test,
-);
-new_test!(
-    skein1024_1024,
-    "skein1024_1024",
-    skein::Skein1024_1024,
-    fixed_test,
-);
+new_test!(skein256_256_kat, skein::Skein256_256, fixed_test);
+new_test!(skein256_512_kat, skein::Skein256_512, fixed_test);
+new_test!(skein512_256_kat, skein::Skein512_256, fixed_test);
+new_test!(skein512_512_kat, skein::Skein512_512, fixed_test);
+new_test!(skein1024_256_kat, skein::Skein1024_256, fixed_test);
+new_test!(skein1024_512_kat, skein::Skein1024_512, fixed_test);
+new_test!(skein1024_1024_kat, skein::Skein1024_1024, fixed_test);
 
 hash_serialization_test!(skein256_serialization, skein::Skein256_256);
 hash_serialization_test!(skein512_serialization, skein::Skein512_512);

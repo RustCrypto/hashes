@@ -2,7 +2,7 @@ use digest::dev::{feed_rand_16mib, fixed_reset_test};
 use hex_literal::hex;
 use sm3::{Digest, Sm3};
 
-digest::new_test!(sm3_main, "sm3", Sm3, fixed_reset_test);
+digest::new_test!(sm3_kat, Sm3, fixed_reset_test);
 digest::hash_serialization_test!(sm3_serialization, Sm3);
 
 #[test]

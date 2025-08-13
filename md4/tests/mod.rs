@@ -2,7 +2,7 @@ use digest::dev::{feed_rand_16mib, fixed_reset_test};
 use hex_literal::hex;
 use md4::{Digest, Md4};
 
-digest::new_test!(md4_main, "md4", Md4, fixed_reset_test);
+digest::new_test!(md4_kat, Md4, fixed_reset_test);
 digest::hash_serialization_test!(md4_serialization, Md4);
 
 #[test]
