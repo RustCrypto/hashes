@@ -5,12 +5,12 @@ use digest::{
 use hex_literal::hex;
 use sha2::{Digest, Sha224, Sha256, Sha384, Sha512, Sha512_224, Sha512_256};
 
-new_test!(sha224_main, "sha224", Sha224, fixed_reset_test);
-new_test!(sha256_main, "sha256", Sha256, fixed_reset_test);
-new_test!(sha384_main, "sha384", Sha384, fixed_reset_test);
-new_test!(sha512_main, "sha512", Sha512, fixed_reset_test);
-new_test!(sha512_224_main, "sha512_224", Sha512_224, fixed_reset_test);
-new_test!(sha512_256_main, "sha512_256", Sha512_256, fixed_reset_test);
+new_test!(sha224_kat, Sha224, fixed_reset_test);
+new_test!(sha256_kat, Sha256, fixed_reset_test);
+new_test!(sha384_kat, Sha384, fixed_reset_test);
+new_test!(sha512_kat, Sha512, fixed_reset_test);
+new_test!(sha512_224_kat, Sha512_224, fixed_reset_test);
+new_test!(sha512_256_kat, Sha512_256, fixed_reset_test);
 
 hash_serialization_test!(sha224_serialization, Sha224);
 hash_serialization_test!(sha256_serialization, Sha256);

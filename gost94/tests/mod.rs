@@ -5,13 +5,8 @@ use digest::{hash_serialization_test, new_test};
 use gost94::{Digest, Gost94CryptoPro, Gost94Test, Gost94UA, Gost94s2015};
 use hex_literal::hex;
 
-new_test!(gost94_test_main, "test", Gost94Test, fixed_reset_test);
-new_test!(
-    gost94_cryptopro_main,
-    "cryptopro",
-    Gost94CryptoPro,
-    fixed_reset_test
-);
+new_test!(gost94_test_kat, Gost94Test, fixed_reset_test);
+new_test!(gost94_cryptopro_kat, Gost94CryptoPro, fixed_reset_test);
 
 hash_serialization_test!(gost94_cryptopro_serialization, Gost94CryptoPro);
 hash_serialization_test!(gost94_test_serialization, Gost94Test);

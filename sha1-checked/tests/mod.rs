@@ -2,7 +2,7 @@ use digest::dev::{feed_rand_16mib, fixed_reset_test};
 use hex_literal::hex;
 use sha1_checked::{Digest, Sha1};
 
-digest::new_test!(sha1_checked_main, "sha1", Sha1, fixed_reset_test);
+digest::new_test!(sha1_checked_kat, Sha1, fixed_reset_test);
 
 #[test]
 fn sha1_rand() {

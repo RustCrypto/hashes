@@ -12,10 +12,10 @@ type Kupyna48 = KupynaShort<U6>;
 
 // Test vectors from the original paper:
 // https://eprint.iacr.org/2015/885.pdf
-new_test!(kupyna48, "kupyna48", Kupyna48, fixed_reset_test);
-new_test!(kupyna256, "kupyna256", Kupyna256, fixed_reset_test);
-new_test!(kupyna384, "kupyna384", Kupyna384, fixed_reset_test);
-new_test!(kupyna512, "kupyna512", Kupyna512, fixed_reset_test);
+new_test!(kupyna48_kat, Kupyna48, fixed_reset_test);
+new_test!(kupyna256_kat, Kupyna256, fixed_reset_test);
+new_test!(kupyna384_kat, Kupyna384, fixed_reset_test);
+new_test!(kupyna512_kat, Kupyna512, fixed_reset_test);
 
 hash_serialization_test!(kupyna256_serialization, Kupyna256);
 hash_serialization_test!(kupyna512_serialization, Kupyna512);

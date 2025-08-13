@@ -6,10 +6,10 @@ use ripemd::{Digest, Ripemd128, Ripemd160, Ripemd256, Ripemd320};
 // Test vectors from FIPS 180-1 and from the [RIPEMD webpage][1].
 //
 // [1] https://homes.esat.kuleuven.be/~bosselae/ripemd160.html
-new_test!(ripemd128_main, "ripemd128", Ripemd128, fixed_reset_test);
-new_test!(ripemd160_main, "ripemd160", Ripemd160, fixed_reset_test);
-new_test!(ripemd256_main, "ripemd256", Ripemd256, fixed_reset_test);
-new_test!(ripemd320_main, "ripemd320", Ripemd320, fixed_reset_test);
+new_test!(ripemd128_kat, Ripemd128, fixed_reset_test);
+new_test!(ripemd160_kat, Ripemd160, fixed_reset_test);
+new_test!(ripemd256_kat, Ripemd256, fixed_reset_test);
+new_test!(ripemd320_kat, Ripemd320, fixed_reset_test);
 
 hash_serialization_test!(ripemd128_serialization, Ripemd128);
 hash_serialization_test!(ripemd160_serialization, Ripemd160);

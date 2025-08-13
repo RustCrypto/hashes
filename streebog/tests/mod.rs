@@ -5,18 +5,8 @@ use streebog::{Digest, Streebog256, Streebog512};
 
 // Test vectors from:
 // https://github.com/gost-engine/engine/tree/master/etalon
-new_test!(
-    streebog256_main,
-    "streebog256",
-    Streebog256,
-    fixed_reset_test,
-);
-new_test!(
-    streebog512_main,
-    "streebog512",
-    Streebog512,
-    fixed_reset_test,
-);
+new_test!(streebog256_kat, Streebog256, fixed_reset_test);
+new_test!(streebog512_kat, Streebog512, fixed_reset_test);
 
 hash_serialization_test!(streebog256_serialization, Streebog256);
 hash_serialization_test!(streebog512_serialization, Streebog512);

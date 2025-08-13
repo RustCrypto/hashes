@@ -5,11 +5,11 @@ use digest::{
 use fsb::{Digest, Fsb160, Fsb224, Fsb256, Fsb384, Fsb512};
 use hex_literal::hex;
 
-new_test!(fsb160_main, "fsb160", Fsb160, fixed_reset_test);
-new_test!(fsb224_main, "fsb224", Fsb224, fixed_reset_test);
-new_test!(fsb256_main, "fsb256", Fsb256, fixed_reset_test);
-new_test!(fsb384_main, "fsb384", Fsb384, fixed_reset_test);
-new_test!(fsb512_main, "fsb512", Fsb512, fixed_reset_test);
+new_test!(fsb160_kat, Fsb160, fixed_reset_test);
+new_test!(fsb224_kat, Fsb224, fixed_reset_test);
+new_test!(fsb256_kat, Fsb256, fixed_reset_test);
+new_test!(fsb384_kat, Fsb384, fixed_reset_test);
+new_test!(fsb512_kat, Fsb512, fixed_reset_test);
 
 hash_serialization_test!(fsb160_serialization, Fsb160);
 hash_serialization_test!(fsb224_serialization, Fsb224);

@@ -3,8 +3,8 @@ use digest::{hash_serialization_test, new_test};
 use hex_literal::hex;
 use tiger::{Digest, Tiger, Tiger2};
 
-new_test!(tiger, "tiger", tiger::Tiger, fixed_reset_test);
-new_test!(tiger2, "tiger2", tiger::Tiger2, fixed_reset_test);
+new_test!(tiger_kat, tiger::Tiger, fixed_reset_test);
+new_test!(tiger2_kat, tiger::Tiger2, fixed_reset_test);
 
 hash_serialization_test!(tiger_serialization, Tiger);
 hash_serialization_test!(tiger2_serialization, Tiger2);

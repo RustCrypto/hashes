@@ -3,10 +3,10 @@ use digest::{hash_serialization_test, new_test};
 use groestl::{Digest, Groestl224, Groestl256, Groestl384, Groestl512};
 use hex_literal::hex;
 
-new_test!(groestl224_main, "groestl224", Groestl224, fixed_reset_test);
-new_test!(groestl256_main, "groestl256", Groestl256, fixed_reset_test);
-new_test!(groestl384_main, "groestl384", Groestl384, fixed_reset_test);
-new_test!(groestl512_main, "groestl512", Groestl512, fixed_reset_test);
+new_test!(groestl224_kat, Groestl224, fixed_reset_test);
+new_test!(groestl256_kat, Groestl256, fixed_reset_test);
+new_test!(groestl384_kat, Groestl384, fixed_reset_test);
+new_test!(groestl512_kat, Groestl512, fixed_reset_test);
 
 hash_serialization_test!(groestl224_serialization, Groestl224);
 hash_serialization_test!(groestl256_serialization, Groestl256);

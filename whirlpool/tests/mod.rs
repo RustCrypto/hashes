@@ -2,7 +2,7 @@ use digest::dev::{feed_rand_16mib, fixed_reset_test};
 use hex_literal::hex;
 use whirlpool::{Digest, Whirlpool};
 
-digest::new_test!(whirlpool_main, "whirlpool", Whirlpool, fixed_reset_test);
+digest::new_test!(whirlpool_kat, Whirlpool, fixed_reset_test);
 digest::hash_serialization_test!(whirlpool_serialization, Whirlpool);
 
 #[test]

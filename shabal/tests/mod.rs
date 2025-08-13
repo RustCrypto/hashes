@@ -5,11 +5,11 @@ use digest::{hash_serialization_test, new_test};
 use hex_literal::hex;
 use shabal::{Digest, Shabal192, Shabal224, Shabal256, Shabal384, Shabal512};
 
-new_test!(shabal192_main, "shabal192", Shabal192, fixed_reset_test);
-new_test!(shabal224_main, "shabal224", Shabal224, fixed_reset_test);
-new_test!(shabal256_main, "shabal256", Shabal256, fixed_reset_test);
-new_test!(shabal384_main, "shabal384", Shabal384, fixed_reset_test);
-new_test!(shabal512_main, "shabal512", Shabal512, fixed_reset_test);
+new_test!(shabal192_kat, Shabal192, fixed_reset_test);
+new_test!(shabal224_kat, Shabal224, fixed_reset_test);
+new_test!(shabal256_kat, Shabal256, fixed_reset_test);
+new_test!(shabal384_kat, Shabal384, fixed_reset_test);
+new_test!(shabal512_kat, Shabal512, fixed_reset_test);
 
 hash_serialization_test!(shabal192_serialization, Shabal192);
 hash_serialization_test!(shabal224_serialization, Shabal224);
