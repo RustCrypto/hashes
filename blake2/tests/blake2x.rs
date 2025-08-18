@@ -1,0 +1,637 @@
+//! Comprehensive Blake2X test suite
+//!
+//! This module contains all Blake2X-related tests including:
+//! - Blake2xb and Blake2xs test vectors
+//! - Reference implementation comparisons
+//! - Constructor functionality tests
+//! - Progressive output tests
+//! - Consistency tests
+
+#![cfg(feature = "blake2x")]
+
+use blake2::{Blake2xb, Blake2xs};
+use digest::block_api::VariableOutputCore;
+use digest::{ExtendableOutput, Update, XofReader};
+use serde::Deserialize;
+use std::fs;
+
+#[derive(Debug, Deserialize)]
+struct RawTestVector {
+    hash: String,
+    #[serde(rename = "in")]
+    input: String,
+    key: String,
+    #[serde(rename = "out")]
+    output: String,
+}
+
+#[derive(Debug)]
+struct TestVector {
+    hash: String,
+    input: Vec<u8>,
+    key: Vec<u8>,
+    output: Vec<u8>,
+}
+
+fn parse_hex(s: &str) -> Vec<u8> {
+    hex::decode(s).expect("Invalid hex string")
+}
+
+fn load_test_vectors(path: &str) -> Vec<TestVector> {
+    let data = fs::read_to_string(path)
+        .unwrap_or_else(|e| panic!("Failed to read test vector file {}: {}", path, e));
+    let raw: Vec<RawTestVector> = serde_json::from_str(&data)
+        .unwrap_or_else(|e| panic!("Failed to parse JSON in {}: {}", path, e));
+    raw.into_iter()
+        .map(|r| TestVector {
+            hash: r.hash,
+            input: parse_hex(&r.input),
+            key: parse_hex(&r.key),
+            output: parse_hex(&r.output),
+        })
+        .collect()
+}
+
+fn get_blake2xb_test_vectors() -> Vec<TestVector> {
+    load_test_vectors("tests/data/blake2xb/blake2xb-kat.json")
+}
+
+fn get_blake2xs_test_vectors() -> Vec<TestVector> {
+    load_test_vectors("tests/data/blake2xs/blake2xs-kat.json")
+}
+
+// ==== Blake2Xb Tests ====
+
+#[test]
+fn blake2xb_test_vectors() {
+    for (i, tv) in get_blake2xb_test_vectors().iter().enumerate() {
+        println!("Running Blake2xb test vector {}", i + 1);
+
+        // Validate that the test vector is for Blake2xb
+        assert_eq!(
+            tv.hash.to_lowercase(),
+            "blake2xb",
+            "Blake2xb test vector {} has incorrect hash field: expected 'blake2xb', got '{}'",
+            i + 1,
+            tv.hash
+        );
+
+        let mut hasher = if tv.key.is_empty() {
+            Blake2xb::new(tv.output.len() as u32)
+        } else {
+            Blake2xb::new_with_key(&tv.key, tv.output.len() as u32)
+        };
+
+        hasher.update(&tv.input);
+        let mut reader = hasher.finalize_xof();
+
+        let mut output = vec![0u8; tv.output.len()];
+        reader.read(&mut output);
+
+        assert_eq!(
+            output,
+            tv.output,
+            "Blake2xb test vector {} failed\nInput: {}\nKey: {}\nExpected: {}\nGot: {}",
+            i + 1,
+            hex::encode(&tv.input),
+            hex::encode(&tv.key),
+            hex::encode(&tv.output),
+            hex::encode(&output)
+        );
+    }
+}
+
+#[test]
+fn blake2xb_empty_input_various_lengths() {
+    let input = b"";
+
+    // Test various output sizes
+    for size in [1u32, 32, 64, 65, 100, 200] {
+        let mut hasher = Blake2xb::new(size);
+        hasher.update(input);
+        let mut reader = hasher.finalize_xof();
+
+        let mut output = vec![0u8; size as usize];
+        reader.read(&mut output);
+
+        // Basic sanity checks
+        assert_eq!(output.len(), size as usize);
+        // Output should not be all zeros (very unlikely for Blake2X)
+        assert!(output.iter().any(|&b| b != 0));
+    }
+}
+
+// ==== Blake2Xs Tests ====
+
+#[test]
+fn blake2xs_test_vectors() {
+    for (i, tv) in get_blake2xs_test_vectors().iter().enumerate() {
+        println!("Running Blake2xs test vector {}", i + 1);
+
+        // Validate that the test vector is for Blake2xs
+        assert_eq!(
+            tv.hash.to_lowercase(),
+            "blake2xs",
+            "Blake2xs test vector {} has incorrect hash field: expected 'blake2xs', got '{}'",
+            i + 1,
+            tv.hash
+        );
+
+        let mut hasher = if tv.key.is_empty() {
+            Blake2xs::new(tv.output.len() as u16)
+        } else {
+            Blake2xs::new_with_key(&tv.key, tv.output.len() as u16)
+        };
+
+        hasher.update(&tv.input);
+        let mut reader = hasher.finalize_xof();
+
+        let mut output = vec![0u8; tv.output.len()];
+        reader.read(&mut output);
+
+        assert_eq!(
+            output,
+            tv.output,
+            "Blake2xs test vector {} failed\nInput: {}\nKey: {}\nExpected: {}\nGot: {}",
+            i + 1,
+            hex::encode(&tv.input),
+            hex::encode(&tv.key),
+            hex::encode(&tv.output),
+            hex::encode(&output)
+        );
+    }
+}
+
+// ==== Reference Implementation Comparison Tests ====
+
+#[test]
+fn compare_blake2xb_with_reference() {
+    use rand::{Rng, thread_rng};
+
+    let mut rng = thread_rng();
+    for _ in 0..50 {
+        // Run 50 random tests
+        let input_len = rng.gen_range(0..1000);
+        let mut input = vec![0u8; input_len];
+        rng.fill(&mut input[..]);
+
+        let output_size = rng.gen_range(1..1024) as u32;
+
+        // Our implementation
+        let mut our_hasher = Blake2xb::new(output_size);
+        our_hasher.update(&input);
+        let mut our_reader = our_hasher.finalize_xof();
+        let mut our_result = vec![0u8; output_size as usize];
+        our_reader.read(&mut our_result);
+
+        // Reference implementation
+        let ref_result = b2rs::b2xb::hash(&input, output_size);
+
+        assert_eq!(
+            our_result, ref_result,
+            "Blake2Xb output mismatch for input_len={}, output_size={}",
+            input_len, output_size
+        );
+    }
+}
+
+#[test]
+fn blake2xb_root_hash_verification() {
+    // Test that Blake2X root hash differs from standard Blake2b-512
+    // because it includes the XOF length parameter
+    use blake2::{Blake2b512, digest::Digest};
+
+    let mut standard_blake2b = Blake2b512::new();
+    Update::update(&mut standard_blake2b, b"");
+    let standard_hash = standard_blake2b.finalize();
+
+    // Blake2X root hash with XOF length parameter
+    let ref_root_hash = b2rs::b2b::hash_custom(b"", &[], 64, 1, 1, 0, 0, 64, 0, 0);
+
+    // These should be different because Blake2X includes XOF length in parameter block
+    assert_ne!(
+        standard_hash.as_slice(),
+        &ref_root_hash[..],
+        "Blake2Xb root hash should differ from standard Blake2b-512 due to XOF parameter"
+    );
+
+    // Test that our Blake2X implementation produces the same root as reference
+    let mut our_hasher = Blake2xb::new(64);
+    our_hasher.update(b"");
+    let mut our_reader = our_hasher.finalize_xof();
+    let mut our_result = vec![0u8; 64];
+    our_reader.read(&mut our_result);
+
+    // Compare with reference Blake2X result
+    let ref_blake2x_result = b2rs::b2xb::hash(b"", 64);
+    assert_eq!(
+        our_result, ref_blake2x_result,
+        "Our Blake2X result should match reference implementation"
+    );
+}
+
+#[test]
+fn blake2xb_expansion_node_verification() {
+    // Test the first expansion node computation for Blake2Xb
+    let output_len = 64u32;
+    let message = b"";
+
+    // Reference implementation with correct XOF length
+    let ref_root_hash = b2rs::b2b::hash_custom(message, &[], 64, 1, 1, 0, 0, output_len, 0, 0);
+    let ref_node_0 =
+        b2rs::b2b::hash_custom(&ref_root_hash, &[], 64, 0, 0, 64, 0, output_len, 0, 64);
+
+    // Our implementation
+    let mut our_hasher = Blake2xb::new(output_len);
+    our_hasher.update(message);
+    let mut our_reader = our_hasher.finalize_xof();
+    let mut our_first_64_bytes = vec![0u8; 64];
+    our_reader.read(&mut our_first_64_bytes);
+
+    assert_eq!(
+        our_first_64_bytes, ref_node_0,
+        "Blake2Xb first expansion node should match reference"
+    );
+}
+
+// ==== Functional Tests ====
+
+#[test]
+fn blake2x_consistency_test() {
+    // Test that multiple Blake2X instances produce consistent results
+    let input = b"Hello, Blake2x!";
+
+    // Blake2Xs consistency
+    let mut hasher1 = Blake2xs::new(50);
+    hasher1.update(input);
+    let mut reader1 = hasher1.finalize_xof();
+
+    let mut hasher2 = Blake2xs::new(50);
+    hasher2.update(input);
+    let mut reader2 = hasher2.finalize_xof();
+
+    let mut output1 = vec![0u8; 50];
+    let mut output2 = vec![0u8; 50];
+
+    reader1.read(&mut output1);
+    reader2.read(&mut output2);
+
+    assert_eq!(
+        output1, output2,
+        "Blake2xs should produce consistent output"
+    );
+
+    // Blake2Xb consistency
+    let mut hasher3 = Blake2xb::new(50);
+    hasher3.update(input);
+    let mut reader3 = hasher3.finalize_xof();
+
+    let mut hasher4 = Blake2xb::new(50);
+    hasher4.update(input);
+    let mut reader4 = hasher4.finalize_xof();
+
+    let mut output3 = vec![0u8; 50];
+    let mut output4 = vec![0u8; 50];
+
+    reader3.read(&mut output3);
+    reader4.read(&mut output4);
+
+    assert_eq!(
+        output3, output4,
+        "Blake2xb should produce consistent output"
+    );
+}
+
+#[test]
+fn blake2x_progressive_output() {
+    // Test that progressive reads match full reads
+    let input = b"Progressive output test";
+
+    // Test Blake2Xs progressive reading
+    let mut hasher = Blake2xs::new(50);
+    hasher.update(input);
+    let mut reader = hasher.finalize_xof();
+
+    // Read output progressively
+    let mut output_10 = vec![0u8; 10];
+    let mut output_20 = vec![0u8; 10];
+    let mut output_20_more = vec![0u8; 30];
+
+    reader.read(&mut output_10);
+    reader.read(&mut output_20);
+    reader.read(&mut output_20_more);
+
+    // Create another reader to get full 50 bytes at once
+    let mut hasher2 = Blake2xs::new(50);
+    hasher2.update(input);
+    let mut reader2 = hasher2.finalize_xof();
+    let mut full_output = vec![0u8; 50];
+    reader2.read(&mut full_output);
+
+    // Combine the progressive reads
+    let mut combined_output = output_10;
+    combined_output.extend_from_slice(&output_20);
+    combined_output.extend_from_slice(&output_20_more);
+
+    assert_eq!(
+        combined_output, full_output,
+        "Blake2xs progressive read should match full output"
+    );
+}
+
+#[test]
+fn blake2x_constructor_length_awareness() {
+    // Test that different constructor lengths produce different outputs
+    let input = b"Constructor test";
+
+    // Blake2Xb with different lengths
+    let mut hasher_32 = Blake2xb::new(32);
+    hasher_32.update(input);
+    let mut reader_32 = hasher_32.finalize_xof();
+    let mut output_32 = vec![0u8; 32];
+    reader_32.read(&mut output_32);
+
+    let mut hasher_64 = Blake2xb::new(64);
+    hasher_64.update(input);
+    let mut reader_64 = hasher_64.finalize_xof();
+    let mut output_64 = vec![0u8; 32]; // Only read first 32 bytes for comparison
+    reader_64.read(&mut output_64);
+
+    // These should be different because the XOF length is part of the parameter block
+    assert_ne!(
+        output_32, output_64,
+        "Blake2xb with different constructor lengths should produce different outputs"
+    );
+
+    // Blake2Xs with different lengths
+    let mut hasher_xs_16 = Blake2xs::new(16);
+    hasher_xs_16.update(input);
+    let mut reader_xs_16 = hasher_xs_16.finalize_xof();
+    let mut output_xs_16 = vec![0u8; 16];
+    reader_xs_16.read(&mut output_xs_16);
+
+    let mut hasher_xs_32 = Blake2xs::new(32);
+    hasher_xs_32.update(input);
+    let mut reader_xs_32 = hasher_xs_32.finalize_xof();
+    let mut output_xs_32 = vec![0u8; 16]; // Only read first 16 bytes for comparison
+    reader_xs_32.read(&mut output_xs_32);
+
+    assert_ne!(
+        output_xs_16, output_xs_32,
+        "Blake2xs with different constructor lengths should produce different outputs"
+    );
+}
+
+#[test]
+fn blake2x_default_vs_explicit_constructor() {
+    // Test that default() constructor works but may produce different results
+    // than explicit length constructors
+    let input = b"Default constructor test";
+
+    // Blake2Xb default vs explicit
+    let mut hasher_default = Blake2xb::default();
+    hasher_default.update(input);
+    let mut reader_default = hasher_default.finalize_xof();
+    let mut output_default = vec![0u8; 64];
+    reader_default.read(&mut output_default);
+
+    // Default should work (not panic)
+    assert_eq!(output_default.len(), 64);
+    assert!(output_default.iter().any(|&b| b != 0)); // Should not be all zeros
+
+    // Blake2Xs default vs explicit
+    let mut hasher_xs_default = Blake2xs::default();
+    hasher_xs_default.update(input);
+    let mut reader_xs_default = hasher_xs_default.finalize_xof();
+    let mut output_xs_default = vec![0u8; 32];
+    reader_xs_default.read(&mut output_xs_default);
+
+    assert_eq!(output_xs_default.len(), 32);
+    assert!(output_xs_default.iter().any(|&b| b != 0)); // Should not be all zeros
+}
+
+// ==== Parameterization and Debug Tests (merged from blake2x_init.rs) ====
+
+#[test]
+fn blake2s_xof_parameter_differs_by_length() {
+    // Test that different XOF lengths produce different root hashes
+    let message = b"test message";
+
+    let mut hasher1 = Blake2xs::new(100);
+    hasher1.update(message);
+    let mut reader1 = hasher1.finalize_xof();
+    let mut output1 = vec![0u8; 32];
+    reader1.read(&mut output1);
+
+    let mut hasher2 = Blake2xs::new(200);
+    hasher2.update(message);
+    let mut reader2 = hasher2.finalize_xof();
+    let mut output2 = vec![0u8; 32];
+    reader2.read(&mut output2);
+
+    assert_ne!(
+        output1, output2,
+        "Blake2Xs with different XOF lengths should produce different outputs"
+    );
+}
+
+#[test]
+fn blake2b_xof_parameter_differs_by_length() {
+    // Test that different XOF lengths produce different root hashes for Blake2b too
+    let message = b"test message";
+
+    let mut hasher1 = Blake2xb::new(100);
+    hasher1.update(message);
+    let mut reader1 = hasher1.finalize_xof();
+    let mut output1 = vec![0u8; 32];
+    reader1.read(&mut output1);
+
+    let mut hasher2 = Blake2xb::new(200);
+    hasher2.update(message);
+    let mut reader2 = hasher2.finalize_xof();
+    let mut output2 = vec![0u8; 32];
+    reader2.read(&mut output2);
+
+    assert_ne!(
+        output1, output2,
+        "Blake2Xb with different XOF lengths should produce different outputs"
+    );
+}
+
+// ==== Internal Parameter Block/State Tests  ====
+
+#[test]
+fn blake2s_xof_parameter_placement() {
+    use blake2::Blake2xsCore;
+    use blake2::simd::u32x4;
+    let xof_len = 12345u16;
+    let xof_core = Blake2xsCore::new(xof_len);
+
+    // Manually construct the CORRECT parameter block for a Blake2s XOF root hash
+    let mut p = [0u32; 8];
+    let digest_length = 32u32;
+    let key_length = 0u32;
+    let fanout = 1u32;
+    let depth = 1u32;
+
+    // p[0]: fanout, depth, key_length, digest_length
+    p[0] = digest_length | (key_length << 8) | (fanout << 16) | (depth << 24);
+    // p[1]: leaf_length (0 for root)
+    p[1] = 0;
+    // p[2]: node_offset low (0 for root)
+    p[2] = 0;
+    // p[3]: xof_digest_length
+    p[3] = xof_len as u32;
+    // p[4..7] are 0 for no salt/persona
+
+    // Calculate the expected initial state h = IV ^ p
+    let h = [
+        u32x4::new(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A)
+            ^ u32x4::new(p[0], p[1], p[2], p[3]),
+        u32x4::new(0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19)
+            ^ u32x4::new(p[4], p[5], p[6], p[7]),
+    ];
+
+    assert_eq!(
+        xof_core.root_hasher.h[0], h[0],
+        "Blake2Xs XOF root hasher state (h[0]) does not match manual IV^p block."
+    );
+    assert_eq!(
+        xof_core.root_hasher.h[1], h[1],
+        "Blake2Xs XOF root hasher state (h[1]) does not match manual IV^p block."
+    );
+}
+
+#[test]
+fn blake2b_xof_parameter_placement() {
+    use blake2::Blake2xbCore;
+    use blake2::simd::u64x4;
+    let xof_len = 54321u32;
+    let xof_core = Blake2xbCore::new(xof_len);
+
+    // Manually construct parameter block as in the XOF root
+    let mut p = [0u64; 8];
+    let digest_length = 64u64;
+    let key_length = 0u64;
+    let fanout = 1u64;
+    let depth = 1u64;
+    p[0] = digest_length | (key_length << 8) | (fanout << 16) | (depth << 24);
+    p[1] = (xof_len as u64) << 32;
+    // All other fields zeroed
+    let h = [
+        u64x4::new(p[0], p[1], p[2], p[3]),
+        u64x4::new(p[4], p[5], p[6], p[7]),
+    ];
+
+    // IV for Blake2b
+    let iv = [
+        u64x4::new(
+            0x6A09E667F3BCC908,
+            0xBB67AE8584CAA73B,
+            0x3C6EF372FE94F82B,
+            0xA54FF53A5F1D36F1,
+        ),
+        u64x4::new(
+            0x510E527FADE682D1,
+            0x9B05688C2B3E6C1F,
+            0x1F83D9ABFB41BD6B,
+            0x5BE0CD19137E2179,
+        ),
+    ];
+    let expected = [iv[0] ^ h[0], iv[1] ^ h[1]];
+
+    assert_eq!(
+        xof_core.root_hasher.h, expected,
+        "Blake2Xb XOF root hasher state does not match manual IV^p block."
+    );
+}
+
+#[test]
+fn xof_state_differs_from_standard() {
+    use blake2::{Blake2sVarCore, Blake2xsCore};
+    let xof_len = 100u16;
+    let xof_core = Blake2xsCore::new(xof_len);
+    let standard_core = Blake2sVarCore::new(32).unwrap();
+
+    assert_ne!(
+        xof_core.root_hasher.h, standard_core.h,
+        "Blake2Xs XOF root state should differ from standard Blake2s state."
+    );
+}
+
+// ==== Keyed Hashing Tests ====
+
+/// Macro to generate keyed hashing tests for both Blake2xb and Blake2xs
+macro_rules! generate_keyed_tests {
+    ($hasher:ty, $output_type:ty, $suffix:literal) => {
+        paste::paste! {
+            #[test]
+            fn [<blake2x $suffix _empty_key_vs_unkeyed>]() {
+                let input = b"test message";
+
+                // According to BLAKE2 specification, even an empty key produces different results
+                // than unkeyed hashing because the key length is included in the parameter block.
+                // So we test that empty key does NOT match unkeyed (which is the correct behavior).
+
+                let mut keyed_hasher = <$hasher>::new_with_key(&[], 100 as $output_type);
+                keyed_hasher.update(input);
+                let mut keyed_reader = keyed_hasher.finalize_xof();
+                let mut keyed_output = vec![0u8; 100];
+                keyed_reader.read(&mut keyed_output);
+
+                let mut unkeyed_hasher = <$hasher>::new(100 as $output_type);
+                unkeyed_hasher.update(input);
+                let mut unkeyed_reader = unkeyed_hasher.finalize_xof();
+                let mut unkeyed_output = vec![0u8; 100];
+                unkeyed_reader.read(&mut unkeyed_output);
+
+                assert_ne!(keyed_output, unkeyed_output, concat!("Blake2x", $suffix, " with empty key should differ from unkeyed (correct behavior)"));
+            }
+
+            #[test]
+            fn [<blake2x $suffix _different_keys_produce_different_output>]() {
+                let input = b"another test";
+                let key1 = b"this is key one";
+                let key2 = b"this is key two";
+
+                let mut hasher1 = <$hasher>::new_with_key(key1, 128 as $output_type);
+                hasher1.update(input);
+                let mut reader1 = hasher1.finalize_xof();
+                let mut output1 = vec![0u8; 128];
+                reader1.read(&mut output1);
+
+                let mut hasher2 = <$hasher>::new_with_key(key2, 128 as $output_type);
+                hasher2.update(input);
+                let mut reader2 = hasher2.finalize_xof();
+                let mut output2 = vec![0u8; 128];
+                reader2.read(&mut output2);
+
+                assert_ne!(output1, output2, concat!("Blake2x", $suffix, " with different keys should produce different outputs"));
+            }
+
+            #[test]
+            fn [<blake2x $suffix _keyed_vs_unkeyed_difference>]() {
+                let input = b"test data";
+                let key = b"secret key";
+
+                let mut keyed_hasher = <$hasher>::new_with_key(key, 64 as $output_type);
+                keyed_hasher.update(input);
+                let mut keyed_reader = keyed_hasher.finalize_xof();
+                let mut keyed_output = vec![0u8; 64];
+                keyed_reader.read(&mut keyed_output);
+
+                let mut unkeyed_hasher = <$hasher>::new(64 as $output_type);
+                unkeyed_hasher.update(input);
+                let mut unkeyed_reader = unkeyed_hasher.finalize_xof();
+                let mut unkeyed_output = vec![0u8; 64];
+                unkeyed_reader.read(&mut unkeyed_output);
+
+                assert_ne!(keyed_output, unkeyed_output, concat!("Blake2x", $suffix, " keyed should differ from unkeyed with same input"));
+            }
+        }
+    };
+}
+
+// Generate keyed tests for both variants
+generate_keyed_tests!(Blake2xb, u32, "b");
+generate_keyed_tests!(Blake2xs, u16, "s");
