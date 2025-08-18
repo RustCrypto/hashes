@@ -15,7 +15,7 @@ jobs:
     name: Security Audit
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: RustCrypto/actions/cargo-cache@master
       - name: Cache cargo bin
         uses: actions/cache@v4
