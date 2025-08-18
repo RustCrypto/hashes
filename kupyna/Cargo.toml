@@ -8,7 +8,7 @@ readme = "README.md"
 edition = "2024"
 documentation = "https://docs.rs/kupyna"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "hash", "kupyna"]
+keywords = ["hash", "kupyna"]
 categories = ["cryptography", "no-std"]
 rust-version = "1.85"
 

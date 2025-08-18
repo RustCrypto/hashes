@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/gost94"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "gost94", "gost", "hash", "digest"]
+keywords = ["gost94", "gost", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]

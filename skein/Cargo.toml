@@ -9,7 +9,7 @@ rust-version = "1.85"
 readme = "README.md"
 documentation = "https://docs.rs/skein"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "skein", "hash", "digest"]
+keywords = ["skein", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]

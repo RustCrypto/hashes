@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/tiger"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "hash", "tiger", "digest"]
+keywords = ["hash", "tiger", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]

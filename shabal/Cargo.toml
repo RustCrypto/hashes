@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/shabal"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "shabal", "hash", "digest"]
+keywords = ["shabal", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]

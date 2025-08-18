@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/groestl"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "groestl", "grostl", "hash", "digest"]
+keywords = ["groestl", "grostl", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
