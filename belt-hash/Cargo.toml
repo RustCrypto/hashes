@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/belt-hash"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "belt", "stb", "hash", "digest"]
+keywords = ["belt", "stb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]

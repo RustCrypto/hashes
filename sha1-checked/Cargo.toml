@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/sha1-checked"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "sha1", "hash", "digest"]
+keywords = ["sha1", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 exclude = [

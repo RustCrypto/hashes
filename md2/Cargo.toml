@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/md2"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "md2", "hash", "digest"]
+keywords = ["md2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]

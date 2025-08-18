@@ -13,7 +13,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/sha3"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "sha3", "keccak", "hash", "digest"]
+keywords = ["sha3", "keccak", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]

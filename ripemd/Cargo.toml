@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/ripemd"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "ripemd", "hash", "digest"]
+keywords = ["ripemd", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]

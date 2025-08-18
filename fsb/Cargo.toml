@@ -9,7 +9,7 @@ edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/fsb"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "fsb", "hash", "digest"]
+keywords = ["fsb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
