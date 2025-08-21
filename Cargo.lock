@@ -57,12 +57,12 @@ dependencies = [
 [[package]]
 name = "blobby"
 version = "0.4.0-pre.0"
-source = "git+https://github.com/RustCrypto/utils#f5ac85f6aa02aa39614f62a6a1add9468be67892"
+source = "git+https://github.com/RustCrypto/utils#dfcd9a0a75c45085f0e594597fb0d1dc8b781b86"
 
 [[package]]
 name = "block-buffer"
 version = "0.11.0-rc.4"
-source = "git+https://github.com/RustCrypto/utils#f5ac85f6aa02aa39614f62a6a1add9468be67892"
+source = "git+https://github.com/RustCrypto/utils#dfcd9a0a75c45085f0e594597fb0d1dc8b781b86"
 dependencies = [
  "hybrid-array",
  "zeroize",
@@ -70,9 +70,9 @@ dependencies = [
 
 [[package]]
 name = "cfg-if"
-version = "1.0.1"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9555578bc9e57714c812a1f84e4fc5b4d21fcb063490c624de019f7464c91268"
+checksum = "2fd1289c04a9ea8cb22300a459a72a385d7c73d3259e2ed7dcb2af674838cfa9"
 
 [[package]]
 name = "const-oid"
@@ -92,7 +92,7 @@ dependencies = [
 [[package]]
 name = "crypto-common"
 version = "0.2.0-rc.3"
-source = "git+https://github.com/RustCrypto/traits#441824ae3d55d55f15c7bccd6a254b2aacba2c4a"
+source = "git+https://github.com/RustCrypto/traits#40508e0480c748542358c620e055b12aa858b042"
 dependencies = [
  "hybrid-array",
 ]
@@ -100,7 +100,7 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.11.0-rc.0"
-source = "git+https://github.com/RustCrypto/traits#441824ae3d55d55f15c7bccd6a254b2aacba2c4a"
+source = "git+https://github.com/RustCrypto/traits#40508e0480c748542358c620e055b12aa858b042"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -241,9 +241,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.97"
+version = "1.0.101"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d61789d7719defeb74ea5fe81f2fdfdbd28a803847077cecce2ff14e1472f6f1"
+checksum = "89ae43fd86e4158d6db51ad8e2b80f313af9cc74f5c0e03ccb87de09998732de"
 dependencies = [
  "unicode-ident",
 ]
@@ -360,9 +360,9 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
-version = "2.0.104"
+version = "2.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17b6f705963418cdb9927482fa304bc562ece2fdd4f616084c50b7023b435a40"
+checksum = "ede7c438028d4436d71104916910f5bb611972c5cfd7f89b8300a8186e6fada6"
 dependencies = [
  "proc-macro2",
  "quote",
