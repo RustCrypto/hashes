@@ -19,7 +19,7 @@ whirlpool = { version = "0.11.0-rc.0", default-features = false }
 [dev-dependencies]
 digest = { version = "0.11.0-rc.0", features = ["dev"] }
 hex-literal = "1"
-base16ct = { version = "0.2", features = ["alloc"] }
+base16ct = { version = "0.3", features = ["alloc"] }
 
 [features]
 default = ["alloc"]
