@@ -14,6 +14,10 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.11.0-rc.0"
+cfg-if = "1"
+
+[target.'cfg(any(target_arch = "x86_64", target_arch = "x86"))'.dependencies]
+cpufeatures = "0.2.12"
 
 [dev-dependencies]
 digest = { version = "0.11.0-rc.0", features = ["dev"] }
@@ -24,6 +28,10 @@ base16ct = { version = "0.3", features = ["alloc"] }
 default = ["alloc"]
 alloc = ["digest/alloc"]
 zeroize = ["digest/zeroize"]
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = ["cfg(groestl_force_soft)"]
 
 [package.metadata.docs.rs]
 all-features = true
