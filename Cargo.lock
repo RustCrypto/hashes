@@ -47,7 +47,7 @@ dependencies = [
 
 [[package]]
 name = "blake2"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.1"
 dependencies = [
  "base16ct",
  "digest",
@@ -61,8 +61,9 @@ source = "git+https://github.com/RustCrypto/utils#adfccfea2686ef191b607f653cc358
 
 [[package]]
 name = "block-buffer"
-version = "0.11.0-rc.4"
-source = "git+https://github.com/RustCrypto/utils#adfccfea2686ef191b607f653cc3587753b6ec66"
+version = "0.11.0-rc.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9ef36a6fcdb072aa548f3da057640ec10859eb4e91ddf526ee648d50c76a949"
 dependencies = [
  "hybrid-array",
  "zeroize",
@@ -91,16 +92,18 @@ dependencies = [
 
 [[package]]
 name = "crypto-common"
-version = "0.2.0-rc.3"
-source = "git+https://github.com/RustCrypto/traits#062af9bd26c388f371dfec79cdaf889b515fe381"
+version = "0.2.0-rc.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a8235645834fbc6832939736ce2f2d08192652269e11010a6240f61b908a1c6"
 dependencies = [
  "hybrid-array",
 ]
 
 [[package]]
 name = "digest"
-version = "0.11.0-rc.0"
-source = "git+https://github.com/RustCrypto/traits#062af9bd26c388f371dfec79cdaf889b515fe381"
+version = "0.11.0-rc.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a4aae35a0fcbe22ff1be50fe96df72002d5a4a6fb4aae9193cf2da0daa36da2"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -204,7 +207,7 @@ checksum = "6a82ae493e598baaea5209805c49bbf2ea7de956d50d7da0da1164f9c6d28543"
 
 [[package]]
 name = "md-5"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.1"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -268,7 +271,7 @@ dependencies = [
 
 [[package]]
 name = "sha1"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.1"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -290,7 +293,7 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.1"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -301,7 +304,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.1"
 dependencies = [
  "base16ct",
  "digest",
@@ -345,7 +348,7 @@ checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 
 [[package]]
 name = "streebog"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.1"
 dependencies = [
  "base16ct",
  "digest",
@@ -401,7 +404,7 @@ checksum = "5a5f39404a5da50712a4c1eecf25e90dd62b613502b7e925fd4e4d19b5c96512"
 
 [[package]]
 name = "whirlpool"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.1"
 dependencies = [
  "base16ct",
  "digest",

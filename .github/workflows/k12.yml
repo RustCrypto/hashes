@@ -26,7 +26,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.85.0
+      msrv: 1.85.0
 
   build:
     needs: set-msrv
@@ -66,7 +66,8 @@ jobs:
       - uses: RustCrypto/actions/cargo-hack-install@master
       - run: cargo hack test --feature-powerset
 
-  minimal-versions:
-    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
-    with:
-        working-directory: ${{ github.workflow }}
+# Disabled until new `sha3` prerelease is cut (@tarcieri)
+#  minimal-versions:
+#    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+#    with:
+#        working-directory: ${{ github.workflow }}

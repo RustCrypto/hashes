@@ -51,10 +51,11 @@ jobs:
       - uses: RustCrypto/actions/cargo-hack-install@master
       - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
 
-  minimal-versions:
-    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
-    with:
-      working-directory: ${{ github.workflow }}
+  # Disabled until new `sha1` prerelease is cut (@tarcieri)
+  #  minimal-versions:
+  #    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+  #    with:
+  #      working-directory: ${{ github.workflow }}
 
   # Linux tests
   linux:
