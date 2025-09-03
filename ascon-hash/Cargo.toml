@@ -17,7 +17,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.11.0-rc.1"
-ascon = { version = "0.4", default-features = false }
+ascon = { version = "0.5.0-rc.0", default-features = false }
 
 [dev-dependencies]
 spectral = { version = "0.6", default-features = false }

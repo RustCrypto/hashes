@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "ascon"
-version = "0.4.0"
+version = "0.5.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f0e716048a18530cce4684daf98a7563a499d710e1ed8ef35567fcb43a7c5f1"
+checksum = "953707d565de11d13f8cf7d880e9a46c9c403693cb7d79dcfa49feaac2d2020f"
 dependencies = [
  "zeroize",
 ]
