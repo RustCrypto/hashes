@@ -18,7 +18,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.11.0-rc.1"
-keccak = "=0.2.0-pre.0"
+keccak = "0.2.0-rc.0"
 
 [dev-dependencies]
 digest = { version = "0.11.0-rc.1", features = ["dev"] }
