@@ -1,6 +1,6 @@
 [package]
 name = "sha1"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.2"
 description = "SHA-1 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -13,14 +13,14 @@ keywords = ["sha1", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.0"
+digest = "0.11.0-rc.1"
 cfg-if = "1.0"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86", target_arch = "x86_64"))'.dependencies]
 cpufeatures = "0.2"
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.0", features = ["dev"] }
+digest = { version = "0.11.0-rc.1", features = ["dev"] }
 hex-literal = "1"
 base16ct = { version = "0.3", features = ["alloc"] }
 

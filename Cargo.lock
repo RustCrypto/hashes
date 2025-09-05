@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "ascon"
-version = "0.4.0"
+version = "0.5.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f0e716048a18530cce4684daf98a7563a499d710e1ed8ef35567fcb43a7c5f1"
+checksum = "953707d565de11d13f8cf7d880e9a46c9c403693cb7d79dcfa49feaac2d2020f"
 dependencies = [
  "zeroize",
 ]
@@ -37,7 +37,7 @@ checksum = "d9aa1eef3994e2ccd304a78fe3fea4a73e5792007f85f09b79bb82143ca5f82b"
 
 [[package]]
 name = "belt-hash"
-version = "0.2.0-rc.0"
+version = "0.2.0-rc.1"
 dependencies = [
  "base16ct",
  "belt-block",
@@ -47,7 +47,7 @@ dependencies = [
 
 [[package]]
 name = "blake2"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.2"
 dependencies = [
  "base16ct",
  "digest",
@@ -62,7 +62,8 @@ source = "git+https://github.com/RustCrypto/utils#8fd37074861e2d8e400a53d68e10ce
 [[package]]
 name = "block-buffer"
 version = "0.11.0-rc.5"
-source = "git+https://github.com/RustCrypto/utils#8fd37074861e2d8e400a53d68e10ce713944fa65"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9ef36a6fcdb072aa548f3da057640ec10859eb4e91ddf526ee648d50c76a949"
 dependencies = [
  "hybrid-array",
  "zeroize",
@@ -92,7 +93,8 @@ dependencies = [
 [[package]]
 name = "crypto-common"
 version = "0.2.0-rc.4"
-source = "git+https://github.com/RustCrypto/traits#e0b946691a9af9c875045c554317bcb9726ad370"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a8235645834fbc6832939736ce2f2d08192652269e11010a6240f61b908a1c6"
 dependencies = [
  "hybrid-array",
 ]
@@ -100,7 +102,8 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.11.0-rc.1"
-source = "git+https://github.com/RustCrypto/traits#e0b946691a9af9c875045c554317bcb9726ad370"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a4aae35a0fcbe22ff1be50fe96df72002d5a4a6fb4aae9193cf2da0daa36da2"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -180,9 +183,9 @@ dependencies = [
 
 [[package]]
 name = "keccak"
-version = "0.2.0-pre.0"
+version = "0.2.0-rc.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7cdd4f0dc5807b9a2b25dd48a3f58e862606fe7bd47f41ecde36e97422d7e90"
+checksum = "3d546793a04a1d3049bd192856f804cfe96356e2cf36b54b4e575155babe9f41"
 dependencies = [
  "cpufeatures",
 ]
@@ -204,7 +207,7 @@ checksum = "6a82ae493e598baaea5209805c49bbf2ea7de956d50d7da0da1164f9c6d28543"
 
 [[package]]
 name = "md-5"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.2"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -259,7 +262,7 @@ dependencies = [
 
 [[package]]
 name = "ripemd"
-version = "0.2.0-rc.0"
+version = "0.2.0-rc.1"
 dependencies = [
  "base16ct",
  "digest",
@@ -268,7 +271,7 @@ dependencies = [
 
 [[package]]
 name = "sha1"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.2"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -290,7 +293,7 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.2"
 dependencies = [
  "base16ct",
  "cfg-if",
@@ -301,7 +304,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.3"
 dependencies = [
  "base16ct",
  "digest",
@@ -330,7 +333,7 @@ dependencies = [
 
 [[package]]
 name = "sm3"
-version = "0.5.0-rc.0"
+version = "0.5.0-rc.1"
 dependencies = [
  "base16ct",
  "digest",
@@ -345,7 +348,7 @@ checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 
 [[package]]
 name = "streebog"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.2"
 dependencies = [
  "base16ct",
  "digest",
@@ -401,7 +404,7 @@ checksum = "5a5f39404a5da50712a4c1eecf25e90dd62b613502b7e925fd4e4d19b5c96512"
 
 [[package]]
 name = "whirlpool"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.2"
 dependencies = [
  "base16ct",
  "digest",
