@@ -36,7 +36,7 @@ whirlpool = { path = "whirlpool" }
 
 # https://github.com/RustCrypto/utils/pull/1187
 # https://github.com/RustCrypto/utils/pull/1207
-blobby = { git = "https://github.com/RustCrypto/utils", branch = "blobby/tweak_format" }
+blobby = { git = "https://github.com/RustCrypto/utils" }
 # https://github.com/RustCrypto/traits/pull/1916
 # https://github.com/RustCrypto/traits/pull/1953
 # https://github.com/RustCrypto/traits/pull/1958
