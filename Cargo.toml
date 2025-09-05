@@ -35,4 +35,5 @@ sha3 = { path = "sha3" }
 whirlpool = { path = "whirlpool" }
 
 # https://github.com/RustCrypto/utils/pull/1187
+# https://github.com/RustCrypto/utils/pull/1207
 blobby = { git = "https://github.com/RustCrypto/utils" }
