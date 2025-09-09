@@ -6,6 +6,7 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs)]
+#![warn(unreachable_pub)]
 #![cfg_attr(
     any(sha2_backend = "riscv-zknh", sha2_backend = "riscv-zknh-compact"),
     feature(riscv_ext_intrinsics)

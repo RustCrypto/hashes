@@ -7,6 +7,7 @@
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![forbid(unsafe_code)]
 #![warn(missing_docs, missing_debug_implementations)]
+#![warn(unreachable_pub)]
 
 pub use digest::{self, CollisionResistance, CustomizedInit, Digest};
 

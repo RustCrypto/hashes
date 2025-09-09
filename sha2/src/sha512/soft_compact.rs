@@ -49,7 +49,7 @@ fn compress_u64(state: &mut [u64; 8], block: [u64; 16]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     for block in blocks.iter() {
         compress_u64(state, super::to_u64s(block));
     }

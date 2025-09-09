@@ -9,9 +9,9 @@ use core::mem;
 use core::slice;
 
 #[allow(clippy::missing_safety_doc)]
-pub unsafe trait Safe {}
+pub(crate) unsafe trait Safe {}
 
-pub trait AsBytes {
+pub(crate) trait AsBytes {
     fn as_bytes(&self) -> &[u8];
 }
 

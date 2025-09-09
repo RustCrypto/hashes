@@ -50,7 +50,7 @@ fn compress_u32(state: &mut [u32; 8], mut block: [u32; 16]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     for block in blocks.iter() {
         compress_u32(state, super::to_u32s(block));
     }

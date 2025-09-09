@@ -6,8 +6,7 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs)]
-
-//! Collision checked Sha1.
+#![warn(unreachable_pub)]
 //!
 //! General techniques and implementation are based on the research and implementation done in [1], [2] by
 //! Marc Stevens.
