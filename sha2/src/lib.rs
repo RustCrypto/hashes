@@ -33,6 +33,9 @@ mod consts;
 mod sha256;
 mod sha512;
 
+pub use sha256::compress256;
+pub use sha512::compress512;
+
 digest::buffer_fixed!(
     /// SHA-256 hasher.
     pub struct Sha256(CtOutWrapper<block_api::Sha256VarCore, U32>);
