@@ -6,6 +6,7 @@
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(missing_docs)]
+#![warn(unreachable_pub)]
 #![deny(unsafe_code)]
 
 pub use digest::{

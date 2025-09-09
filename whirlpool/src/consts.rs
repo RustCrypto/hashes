@@ -1,8 +1,8 @@
 #![allow(clippy::unreadable_literal)]
 
-pub const R: usize = 10;
+pub(crate) const R: usize = 10;
 
-pub const RC: [u64; R] = [
+pub(crate) const RC: [u64; R] = [
     0x4f01b887e8c62318,
     0x52916f79f5d2a636,
     0x357b0ca38e9bbc60,
@@ -15,7 +15,7 @@ pub const RC: [u64; R] = [
     0x33835aad07bf2dca,
 ];
 
-pub const C0: [u64; 256] = [
+pub(crate) const C0: [u64; 256] = [
     0xd83078c018601818,
     0x2646af05238c2323,
     0xb891f97ec63fc6c6,
@@ -274,7 +274,7 @@ pub const C0: [u64; 256] = [
     0xc211a44486228686,
 ];
 
-pub const C1: [u64; 256] = [
+pub(crate) const C1: [u64; 256] = [
     0x3078c018601818d8,
     0x46af05238c232326,
     0x91f97ec63fc6c6b8,
@@ -533,7 +533,7 @@ pub const C1: [u64; 256] = [
     0x11a44486228686c2,
 ];
 
-pub const C2: [u64; 256] = [
+pub(crate) const C2: [u64; 256] = [
     0x78c018601818d830,
     0xaf05238c23232646,
     0xf97ec63fc6c6b891,
@@ -792,7 +792,7 @@ pub const C2: [u64; 256] = [
     0xa44486228686c211,
 ];
 
-pub const C3: [u64; 256] = [
+pub(crate) const C3: [u64; 256] = [
     0xc018601818d83078,
     0x05238c23232646af,
     0x7ec63fc6c6b891f9,
@@ -1051,7 +1051,7 @@ pub const C3: [u64; 256] = [
     0x4486228686c211a4,
 ];
 
-pub const C4: [u64; 256] = [
+pub(crate) const C4: [u64; 256] = [
     0x18601818d83078c0,
     0x238c23232646af05,
     0xc63fc6c6b891f97e,
@@ -1310,7 +1310,7 @@ pub const C4: [u64; 256] = [
     0x86228686c211a444,
 ];
 
-pub const C5: [u64; 256] = [
+pub(crate) const C5: [u64; 256] = [
     0x601818d83078c018,
     0x8c23232646af0523,
     0x3fc6c6b891f97ec6,
@@ -1569,7 +1569,7 @@ pub const C5: [u64; 256] = [
     0x228686c211a44486,
 ];
 
-pub const C6: [u64; 256] = [
+pub(crate) const C6: [u64; 256] = [
     0x1818d83078c01860,
     0x23232646af05238c,
     0xc6c6b891f97ec63f,
@@ -1828,7 +1828,7 @@ pub const C6: [u64; 256] = [
     0x8686c211a4448622,
 ];
 
-pub const C7: [u64; 256] = [
+pub(crate) const C7: [u64; 256] = [
     0x18d83078c0186018,
     0x232646af05238c23,
     0xc6b891f97ec63fc6,
