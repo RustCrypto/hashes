@@ -143,6 +143,7 @@ pub fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
 }
 
 #[inline]
+/// MD5 compression function
 pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
     for block in blocks {
         compress_block(state, block)

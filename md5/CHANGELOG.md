@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.11.0 (UNRELEASED)
 ### Added
 - `alloc` crate feature ([#678])
+- Expose compression function from the `block_api` module ([#735])
 
 ### Changed
 - Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
