@@ -5,8 +5,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/meta/master/logo.svg"
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-#![warn(missing_docs)]
-#![warn(unreachable_pub)]
+#![warn(missing_docs, unreachable_pub)]
 
 use core::marker::PhantomData;
 

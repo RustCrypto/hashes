@@ -5,8 +5,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
-#![warn(missing_docs)]
-#![warn(unreachable_pub)]
+#![warn(missing_docs, unreachable_pub)]
 
 //! Collision checked Sha1.
 //!
