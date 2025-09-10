@@ -30,7 +30,7 @@ pub mod u64x4;
 #[cfg(not(feature = "simd"))]
 macro_rules! simd_opt {
     ($vec:ident) => {
-        pub(super) mod $vec {
+        pub(crate) mod $vec {
             use crate::simd::simdty::$vec;
 
             #[inline(always)]
