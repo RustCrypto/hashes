@@ -101,7 +101,7 @@ fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     }
 }
 
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     for block in blocks.iter().map(super::riscv_zknh_utils::load_block) {
         compress_block(state, block);
     }

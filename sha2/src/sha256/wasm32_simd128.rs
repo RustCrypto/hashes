@@ -4,7 +4,7 @@ use core::mem::size_of;
 
 use crate::consts::K32;
 
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     assert_eq!(SHA256_HASH_WORDS_NUM, 8);
     assert_eq!(SHA256_BLOCK_WORDS_NUM, 16);
     let mut ms = [u64x2(0, 0); 4];

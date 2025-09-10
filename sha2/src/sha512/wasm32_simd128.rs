@@ -5,7 +5,7 @@ use core::mem::size_of;
 
 use crate::consts::K64;
 
-pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     let mut ms = [u64x2(0, 0); 8];
     let mut x = [u64x2(0, 0); 8];
 

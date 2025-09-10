@@ -1,11 +1,11 @@
 use digest::typenum::U32;
 
-pub const DIGEST_BUF_LEN: usize = 8;
-pub const HALF_DIGEST_BUF_LEN: usize = DIGEST_BUF_LEN / 2;
-pub const WORK_BUF_LEN: usize = 16;
-pub type DigestBufByteLen = U32;
+pub(super) const DIGEST_BUF_LEN: usize = 8;
+pub(super) const HALF_DIGEST_BUF_LEN: usize = DIGEST_BUF_LEN / 2;
+pub(super) const WORK_BUF_LEN: usize = 16;
+pub(super) type DigestBufByteLen = U32;
 
-pub const H0: [u32; DIGEST_BUF_LEN] = [
+pub(super) const H0: [u32; DIGEST_BUF_LEN] = [
     0x6745_2301,
     0xefcd_ab89,
     0x98ba_dcfe,
@@ -119,7 +119,7 @@ macro_rules! process_block(
     });
 );
 
-pub fn compress(h: &mut [u32; DIGEST_BUF_LEN], data: &[u8; 64]) {
+pub(super) fn compress(h: &mut [u32; DIGEST_BUF_LEN], data: &[u8; 64]) {
     let mut w = [0u32; WORK_BUF_LEN];
     for (o, chunk) in w.iter_mut().zip(data.chunks_exact(4)) {
         *o = u32::from_le_bytes(chunk.try_into().unwrap());

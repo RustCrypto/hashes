@@ -7,7 +7,7 @@ use crate::consts::K64;
 
 cpufeatures::new!(sha3_hwcap, "sha3");
 
-pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
     if sha3_hwcap::get() {

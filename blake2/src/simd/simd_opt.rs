@@ -30,11 +30,11 @@ pub mod u64x4;
 #[cfg(not(feature = "simd"))]
 macro_rules! simd_opt {
     ($vec:ident) => {
-        pub mod $vec {
+        pub(crate) mod $vec {
             use crate::simd::simdty::$vec;
 
             #[inline(always)]
-            pub fn rotate_right_const(vec: $vec, n: u32) -> $vec {
+            pub(crate) fn rotate_right_const(vec: $vec, n: u32) -> $vec {
                 $vec::new(
                     vec.0.rotate_right(n),
                     vec.1.rotate_right(n),
