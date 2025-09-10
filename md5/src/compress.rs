@@ -12,6 +12,6 @@ cfg_if::cfg_if! {
 }
 
 /// md5 compression function
-pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
+pub(crate) fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
     compress_inner(state, blocks)
 }

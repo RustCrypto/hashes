@@ -10,8 +10,7 @@ use digest::{
     typenum::{U16, U24, U64, Unsigned},
 };
 
-pub use crate::compress::compress;
-use crate::consts;
+use crate::{compress::compress, consts};
 
 const STATE_LEN: usize = 4;
 
