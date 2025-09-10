@@ -92,7 +92,7 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
 
 cpufeatures::new!(shani_cpuid, "sha", "sse2", "ssse3", "sse4.1");
 
-pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
     if shani_cpuid::get() {

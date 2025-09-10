@@ -3,10 +3,10 @@
 //! In the code for optimization purposes `table::SHUFFLED_LIN_TABLE` is used
 //! instead of `A` and `P`
 
-pub const BLOCK_SIZE: usize = 64;
+pub(crate) const BLOCK_SIZE: usize = 64;
 
 /// Linear transformation matrix
-pub const A: [u64; BLOCK_SIZE] = [
+pub(crate) const A: [u64; BLOCK_SIZE] = [
     0x641c314b2b8ee083,
     0xc83862965601dd1b,
     0x8d70c431ac02a736,
@@ -74,7 +74,7 @@ pub const A: [u64; BLOCK_SIZE] = [
 ];
 
 /// Substitution table
-pub const P: [u8; 256] = [
+pub(crate) const P: [u8; 256] = [
     252, 238, 221, 17, 207, 110, 49, 22, 251, 196, 250, 218, 35, 197, 4, 77, 233, 119, 240, 219,
     147, 46, 153, 186, 23, 54, 241, 187, 20, 205, 95, 193, 249, 24, 101, 90, 226, 92, 239, 33, 129,
     28, 60, 66, 139, 1, 142, 79, 5, 132, 2, 174, 227, 106, 143, 160, 6, 11, 237, 152, 127, 212,
@@ -91,7 +91,7 @@ pub const P: [u8; 256] = [
 ];
 
 /// Iteration constants
-pub const C: [[u8; BLOCK_SIZE]; 12] = [
+pub(crate) const C: [[u8; BLOCK_SIZE]; 12] = [
     [
         0x07, 0x45, 0xa6, 0xf2, 0x59, 0x65, 0x80, 0xdd, 0x23, 0x4d, 0x74, 0xcc, 0x36, 0x74, 0x76,
         0x05, 0x15, 0xd3, 0x60, 0xa4, 0x08, 0x2a, 0x42, 0xa2, 0x01, 0x69, 0x67, 0x92, 0x91, 0xe0,
@@ -179,7 +179,7 @@ pub const C: [[u8; BLOCK_SIZE]; 12] = [
 ];
 
 /// Iteration constants represented as `[u64; 8]`
-pub const C64: [[u64; 8]; 12] = {
+pub(crate) const C64: [[u64; 8]; 12] = {
     let mut res = [[0u64; 8]; 12];
     let mut i = 0;
     let mut buf = [0u8; 8];
@@ -201,7 +201,7 @@ pub const C64: [[u64; 8]; 12] = {
 
 /// Precomputed, pre-shuffled table for linear transformation using matrix
 /// `const::A` and shuffled using `const::P`
-pub const SHUFFLED_LIN_TABLE: [[u64; 256]; 8] = {
+pub(crate) const SHUFFLED_LIN_TABLE: [[u64; 256]; 8] = {
     let mut table = [[0u64; 256]; 8];
     let mut i = 0;
     while i < 8 {

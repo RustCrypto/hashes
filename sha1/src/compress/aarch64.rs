@@ -173,7 +173,7 @@ unsafe fn compress_sha1_neon(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     state[4] = e0;
 }
 
-pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725 after stabilization
     if sha1_hwcap::get() {
         unsafe {

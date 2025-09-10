@@ -41,7 +41,7 @@ fn op_i(w: u32, x: u32, y: u32, z: u32, m: u32, c: u32, s: u32) -> u32 {
 }
 
 #[inline]
-pub fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
+fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     let mut a = state[0];
     let mut b = state[1];
     let mut c = state[2];
@@ -143,8 +143,7 @@ pub fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
 }
 
 #[inline]
-/// MD5 compression function
-pub fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 4], blocks: &[[u8; 64]]) {
     for block in blocks {
         compress_block(state, block)
     }

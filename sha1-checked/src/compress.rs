@@ -665,7 +665,7 @@ fn xor(a: &[u32; 5], b: &[u32; 5]) -> u32 {
 }
 
 #[inline]
-pub(super) fn compress(
+pub(crate) fn compress(
     state: &mut [u32; 5],
     ctx: &mut DetectionState,
     blocks: &[[u8; BLOCK_SIZE]],

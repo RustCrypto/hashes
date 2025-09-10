@@ -1,40 +1,40 @@
 #![allow(dead_code)]
 
-pub type State256 = [u32; 8];
-pub type State512 = [u64; 8];
+pub(crate) type State256 = [u32; 8];
+pub(crate) type State512 = [u64; 8];
 
-pub const H256_224: State256 = [
+pub(crate) const H256_224: State256 = [
     0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939,
     0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4,
 ];
 
-pub const H256_256: State256 = [
+pub(crate) const H256_256: State256 = [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
 ];
 
-pub const H512_224: State512 = [
+pub(crate) const H512_224: State512 = [
     0x8c3d37c819544da2, 0x73e1996689dcd4d6, 0x1dfab7ae32ff9c82, 0x679dd514582f9fcf,
     0x0f6d2b697bd44da8, 0x77e36f7304c48942, 0x3f9d85a86a1d36c8, 0x1112e6ad91d692a1,
 ];
 
-pub const H512_256: State512 = [
+pub(crate) const H512_256: State512 = [
     0x22312194fc2bf72c, 0x9f555fa3c84c64c2, 0x2393b86b6f53b151, 0x963877195940eabd,
     0x96283ee2a88effe3, 0xbe5e1e2553863992, 0x2b0199fc2c85b8aa, 0x0eb72ddc81c52ca2,
 ];
 
-pub const H512_384: State512 = [
+pub(crate) const H512_384: State512 = [
     0xcbbb9d5dc1059ed8, 0x629a292a367cd507, 0x9159015a3070dd17, 0x152fecd8f70e5939,
     0x67332667ffc00b31, 0x8eb44a8768581511, 0xdb0c2e0d64f98fa7, 0x47b5481dbefa4fa4,
 ];
 
-pub const H512_512: State512 = [
+pub(crate) const H512_512: State512 = [
     0x6a09e667f3bcc908, 0xbb67ae8584caa73b, 0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1,
     0x510e527fade682d1, 0x9b05688c2b3e6c1f, 0x1f83d9abfb41bd6b, 0x5be0cd19137e2179,
 ];
 
 /// Round constants for SHA-256 family of digests
-pub static K32: [u32; 64] = [
+pub(crate) static K32: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -46,7 +46,7 @@ pub static K32: [u32; 64] = [
 ];
 
 /// Round constants for SHA-512 family of digests
-pub const K64: [u64; 80] = [
+pub(crate) const K64: [u64; 80] = [
     0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f, 0xe9b5dba58189dbbc,
     0x3956c25bf348b538, 0x59f111f1b605d019, 0x923f82a4af194f9b, 0xab1c5ed5da6d8118,
     0xd807aa98a3030242, 0x12835b0145706fbe, 0x243185be4ee4b28c, 0x550c7dc3d5ffb4e2,
@@ -70,7 +70,7 @@ pub const K64: [u64; 80] = [
 ];
 
 /// Swapped round constants for SHA-256 family of digests
-pub static K32X4: [[u32; 4]; 16] = {
+pub(crate) static K32X4: [[u32; 4]; 16] = {
     let mut res = [[0u32; 4]; 16];
     let mut i = 0;
     while i < 16 {
@@ -81,7 +81,7 @@ pub static K32X4: [[u32; 4]; 16] = {
 };
 
 /// Swapped round constants for SHA-512 family of digests
-pub const K64X2: [[u64; 2]; 40] = {
+pub(crate) const K64X2: [[u64; 2]; 40] = {
     let mut res = [[0u64; 2]; 40];
     let mut i = 0;
     while i < 16 {

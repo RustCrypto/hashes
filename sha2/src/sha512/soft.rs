@@ -87,7 +87,7 @@ fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-pub fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     for block in blocks {
         compress_block(state, block);
     }

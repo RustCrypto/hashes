@@ -9,7 +9,7 @@ use crate::consts::K32;
 
 cpufeatures::new!(sha2_hwcap, "sha2");
 
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
     // after stabilization
     if sha2_hwcap::get() {

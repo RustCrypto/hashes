@@ -35,22 +35,24 @@ macro_rules! decl_simd {
 }
 
 decl_simd! {
-    pub struct Simd2<T>(pub T, pub T);
-    pub struct Simd4<T>(pub T, pub T, pub T, pub T);
-    pub struct Simd8<T>(pub T, pub T, pub T, pub T,
-                        pub T, pub T, pub T, pub T);
-    pub struct Simd16<T>(pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T);
-    pub struct Simd32<T>(pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T,
-                         pub T, pub T, pub T, pub T);
+    pub(crate) struct Simd2<T>(pub(crate) T, pub(crate) T);
+    pub(crate) struct Simd4<T>(pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T);
+    pub(crate) struct Simd8<T>(pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                               pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T);
+
+    pub(crate) struct Simd16<T>(pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T);
+
+    pub(crate) struct Simd32<T>(pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T,
+                                pub(crate) T, pub(crate) T, pub(crate) T, pub(crate) T);
 }
 
 #[cfg(feature = "zeroize")]
@@ -63,22 +65,22 @@ impl<T: Zeroize> Zeroize for Simd4<T> {
     }
 }
 
-pub type u64x2 = Simd2<u64>;
+pub(crate) type u64x2 = Simd2<u64>;
 
-pub type u32x4 = Simd4<u32>;
-pub type u64x4 = Simd4<u64>;
+pub(crate) type u32x4 = Simd4<u32>;
+pub(crate) type u64x4 = Simd4<u64>;
 
-pub type u16x8 = Simd8<u16>;
-pub type u32x8 = Simd8<u32>;
+pub(crate) type u16x8 = Simd8<u16>;
+pub(crate) type u32x8 = Simd8<u32>;
 
-pub type u8x16 = Simd16<u8>;
-pub type u16x16 = Simd16<u16>;
+pub(crate) type u8x16 = Simd16<u8>;
+pub(crate) type u16x16 = Simd16<u16>;
 
-pub type u8x32 = Simd32<u8>;
+pub(crate) type u8x32 = Simd32<u8>;
 
 impl<T> Simd4<T> {
     #[inline(always)]
-    pub fn new(e0: T, e1: T, e2: T, e3: T) -> Simd4<T> {
+    pub(crate) fn new(e0: T, e1: T, e2: T, e3: T) -> Simd4<T> {
         Simd4(e0, e1, e2, e3)
     }
 }

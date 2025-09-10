@@ -17,7 +17,7 @@ fn xor(a: [u32; 4], b: [u32; 4]) -> [u32; 4] {
 }
 
 #[inline]
-pub fn sha1_first_add(e: u32, w0: [u32; 4]) -> [u32; 4] {
+fn sha1_first_add(e: u32, w0: [u32; 4]) -> [u32; 4] {
     let [a, b, c, d] = w0;
     [e.wrapping_add(a), b, c, d]
 }
@@ -242,7 +242,7 @@ fn sha1_digest_block_u32(state: &mut [u32; 5], block: &[u32; 16]) {
     state[4] = state[4].wrapping_add(e);
 }
 
-pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     let mut block_u32 = [0u32; 16];
     // since LLVM can't properly use aliasing yet it will make
     // unnecessary state stores without this copy

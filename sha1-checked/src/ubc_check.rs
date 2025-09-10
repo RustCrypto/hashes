@@ -40,24 +40,24 @@ const DV_II_55_0_BIT: u32 = 1 << 30;
 const DV_II_56_0_BIT: u32 = 1 << 31;
 
 /// Disturbance Vector (DV).
-pub struct Info {
+pub(crate) struct Info {
     /// The step to do the recompression from for collision detection.
-    pub testt: Testt,
+    pub(crate) testt: Testt,
     /// Defines the bit to check for each DV in the dvmask returned by [`ubc_check`].
-    pub maskb: i32,
+    pub(crate) maskb: i32,
     /// The expanded message block XOR-difference defined by the DV.
-    pub dm: [u32; 80],
+    pub(crate) dm: [u32; 80],
 }
 
 #[derive(Copy, Clone)]
 #[repr(u32)]
-pub enum Testt {
+pub(crate) enum Testt {
     T58 = 58,
     T65 = 65,
 }
 
 /// The list of SHA-1 Disturbance Vectors (DV) to check.
-pub const SHA1_DVS: [Info; 32] = [
+pub(crate) const SHA1_DVS: [Info; 32] = [
     // DV: type=1, K=43, B=0,
     Info {
         testt: Testt::T58,
@@ -599,7 +599,7 @@ pub const SHA1_DVS: [Info; 32] = [
 /// all unavoidable bitconditions for that DV have been met thus one needs to do the
 /// recompression check for each DV that has its bit set.
 #[inline]
-pub const fn ubc_check(w: &[u32; 80]) -> u32 {
+pub(crate) const fn ubc_check(w: &[u32; 80]) -> u32 {
     let mut mask: u32 = !0;
     mask &= (((w[44] ^ w[45]) >> 29) & 1).wrapping_sub(1)
         | !(DV_I_48_0_BIT
