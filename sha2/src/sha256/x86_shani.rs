@@ -48,10 +48,10 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
 
     let state_ptr: *const __m128i = state.as_ptr().cast();
     let dcba = _mm_loadu_si128(state_ptr.add(0));
-    let efgh = _mm_loadu_si128(state_ptr.add(1));
+    let hgfe = _mm_loadu_si128(state_ptr.add(1));
 
     let cdab = _mm_shuffle_epi32(dcba, 0xB1);
-    let efgh = _mm_shuffle_epi32(efgh, 0x1B);
+    let efgh = _mm_shuffle_epi32(hgfe, 0x1B);
     let mut abef = _mm_alignr_epi8(cdab, efgh, 8);
     let mut cdgh = _mm_blend_epi16(efgh, cdab, 0xF0);
 
