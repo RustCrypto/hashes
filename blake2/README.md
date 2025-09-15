@@ -2,83 +2,33 @@
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
-[![Build Status][build-image]][build-link]
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
+[![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [BLAKE2] hash function family.
+Pure Rust implementation of the [BLAKE2 hash function][1] family.
 
-## Examples
+[Documentation][docs-link]
 
-### Fixed output size
+## Minimum Supported Rust Version
 
-```rust
-use blake2::{Blake2b512, Blake2s256, Digest};
-use hex_literal::hex;
+Rust **1.41** or higher.
 
-// create a Blake2b512 object
-let mut hasher = Blake2b512::new();
+Minimum supported Rust version can be changed in the future, but it will be
+done with a minor version bump.
 
-// write input message
-hasher.update(b"hello world");
+## SemVer Policy
 
-// read hash digest and consume hasher
-let hash = hasher.finalize();
-assert_eq!(hash, hex!(
-    "021ced8799296ceca557832ab941a50b4a11f83478cf141f51f933f653ab9fbc"
-    "c05a037cddbed06e309bf334942c4e58cdf1a46e237911ccd7fcf9787cbc7fd0"
-));
-
-// same example for Blake2s256:
-let mut hasher = Blake2s256::new();
-hasher.update(b"hello world");
-let hash = hasher.finalize();
-assert_eq!(hash, hex!("9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b");
-```
-
-Also, see the [examples section] in the RustCrypto/hashes readme.
-
-### Variable output size
-
-This implementation supports run and compile time variable sizes.
-
-Output size set at run time:
-```rust
-use blake2::Blake2bVar;
-use blake2::digest::{Update, VariableOutput};
-use hex_literal::hex;
-
-let mut hasher = Blake2bVar::new(10).unwrap();
-hasher.update(b"my_input");
-let mut buf = [0u8; 10];
-hasher.finalize_variable(&mut buf).unwrap();
-assert_eq!(buf, hex!("2cc55c84e416924e6400"));
-```
-
-Output size set at compile time:
-```rust
-use blake2::{Blake2b, Digest, digest::consts::U10};
-use hex_literal::hex;
-
-type Blake2b80 = Blake2b<U10>;
-
-let mut hasher = Blake2b80::new();
-hasher.update(b"my_input");
-let res = hasher.finalize();
-assert_eq!(res, hex!("2cc55c84e416924e6400"));
-```
+- All on-by-default features of this library are covered by SemVer
+- MSRV is considered exempt from SemVer as noted above
 
 ## License
 
-The crate is licensed under either of:
+Licensed under either of:
 
-* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-* [MIT license](http://opensource.org/licenses/MIT)
+ * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+ * [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -97,11 +47,10 @@ dual licensed as above, without any additional terms or conditions.
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
-[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/blake2.yml/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/blake2.yml?query=branch:master
+[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[build-image]: https://github.com/RustCrypto/hashes/workflows/blake2/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Ablake2
 
 [//]: # (general links)
 
-[BLAKE2]: https://blake2.net/
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[1]: https://blake2.net/
