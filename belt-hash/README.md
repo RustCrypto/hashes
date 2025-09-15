@@ -2,33 +2,37 @@
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
+[![Build Status][build-image]][build-link]
 ![Apache2/MIT licensed][license-image]
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
-[![Build Status][build-image]][build-link]
 
 Pure Rust implementation of the [BelT] hash function specified in [STB 34.101.31-2020].
 
-[Documentation][docs-link]
+## Examples
+```rust
+use belt_hash::{BeltHash, Digest};
+use hex_literal::hex;
 
-## Minimum Supported Rust Version
+let mut hasher = BeltHash::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
 
-Rust **1.57** or higher.
+assert_eq!(hash, hex!("afb175816416fbadad4629ecbd78e1887789881f2d2e5b80c22a746b7ac7ba88"));
 
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "afb175816416fbadad4629ecbd78e1887789881f2d2e5b80c22a746b7ac7ba88");
+```
 
-## SemVer Policy
-
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -45,13 +49,14 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/belt-hash/badge.svg
 [docs-link]: https://docs.rs/belt-hash
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.57+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/belt-hash/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Abelt-hash
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/belt-hash.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/belt-hash.yml?query=branch:master
 
 [//]: # (general links)
 
 [BelT]: https://ru.wikipedia.org/wiki/BelT
 [STB 34.101.31-2020]: http://apmi.bsu.by/assets/files/std/belt-spec371.pdf
+[examples section]: https://github.com/RustCrypto/hashes#Examples

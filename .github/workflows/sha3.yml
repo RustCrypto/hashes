@@ -17,13 +17,16 @@ env:
   RUSTFLAGS: "-Dwarnings"
   CARGO_INCREMENTAL: 0
 
+# Cancels CI jobs when new commits are pushed to a PR branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        # Crate supports MSRV 1.41 without `oid` feature. We test true MSRV
-        # in the `test-msrv` job.
-        msrv: 1.57.0
+        msrv: 1.85.0
 
   build:
     needs: set-msrv
@@ -37,20 +40,14 @@ jobs:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.target }}
-          override: true
-      - run: cargo build --no-default-features --target ${{ matrix.target }}
-
-  minimal-versions:
-    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
-    with:
-        working-directory: ${{ github.workflow }}
+          targets: ${{ matrix.target }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,asm
 
   test:
     needs: set-msrv
@@ -61,28 +58,30 @@ jobs:
           - ${{needs.set-msrv.outputs.msrv}}
           - stable
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
-          override: true
-      - run: cargo check --all-features
-      - run: cargo test --no-default-features
-      - run: cargo test
-      - run: cargo test --all-features
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack test --feature-powerset
+
+  minimal-versions:
+    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+    with:
+        working-directory: ${{ github.workflow }}
 
   # Cross-compiled tests
   cross:
+    needs: set-msrv
     strategy:
       matrix:
         rust:
-          - 1.51.0 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - aarch64-unknown-linux-gnu
-          - mips-unknown-linux-gnu
+          - powerpc-unknown-linux-gnu
         features:
           - default
 
@@ -92,24 +91,9 @@ jobs:
       # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
         working-directory: .
     steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/cross-tests
+      - uses: RustCrypto/actions/cross-tests@master
         with:
           rust: ${{ matrix.rust }}
           package: ${{ github.workflow }}
           target: ${{ matrix.target }}
           features: ${{ matrix.features }}
-
-  # TODO: remove on MSRV bump to 1.57 or higher
-  test-msrv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: RustCrypto/actions/cargo-cache@master
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: 1.41.0
-          override: true
-      - run: cargo test --no-default-features
-      - run: cargo test

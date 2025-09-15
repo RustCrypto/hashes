@@ -1,30 +1,31 @@
 [package]
 name = "belt-hash"
-version = "0.1.0"
+version = "0.2.0-rc.1"
 description = "BelT hash function (STB 34.101.31-2020)"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-edition = "2021"
-rust-version = "1.57"
+edition = "2024"
+rust-version = "1.85"
 documentation = "https://docs.rs/belt-hash"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "belt", "stb", "hash", "digest"]
+keywords = ["belt", "stb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10.4"
+digest = "0.11.0-rc.1"
 belt-block = { version = "0.1.1", default-features = false }
 
 [dev-dependencies]
-digest = { version = "0.10.4", features = ["dev"] }
-hex-literal = "0.3.3"
+digest = { version = "0.11.0-rc.1", features = ["dev"] }
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
 
 [features]
-default = ["std"]
-std = ["digest/std"]
+default = ["alloc", "oid"]
+alloc = ["digest/alloc"]
 oid = ["digest/oid"]
+zeroize = ["digest/zeroize"]
 
-# TODO: remove when crate will be part of the root workspace
-[profile.dev]
-opt-level = 2
+[package.metadata.docs.rs]
+all-features = true

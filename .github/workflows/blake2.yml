@@ -3,6 +3,7 @@ name: blake2
 on:
   pull_request:
     paths:
+      - ".github/workflows/blake2.yml"
       - "blake2/**"
       - "Cargo.*"
   push:
@@ -16,42 +17,98 @@ env:
   CARGO_INCREMENTAL: 0
   RUSTFLAGS: "-Dwarnings"
 
+# Cancels CI jobs when new commits are pushed to a PR branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
+  set-msrv:
+    uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
+    with:
+        msrv: 1.85.0
+
   build:
+    needs: set-msrv
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
-          - 1.41.0 # MSRV
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v5
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.target }}
-          override: true
-      - run: cargo build --target ${{ matrix.target }} --release --no-default-features
-      - run: cargo build --target ${{ matrix.target }} --release --no-default-features --features blake2b
-      - run: cargo build --target ${{ matrix.target }} --release --no-default-features --features blake2s
-      - run: cargo build --target ${{ matrix.target }} --release --no-default-features --features blake2b,blake2s
+          targets: ${{ matrix.target }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std,simd,simd_asm,simd_opt
 
   test:
+    needs: set-msrv
     runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
-          - 1.41.0 # MSRV
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ matrix.rust }}
-        override: true
-    - run: cargo test --release
+      - uses: actions/checkout@v5
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack test --feature-powerset --exclude-features simd,simd_asm,simd_opt
+
+
+  minimal-versions:
+    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+    with:
+        working-directory: ${{ github.workflow }}
+        stable-cmd: cargo hack test --release --feature-powerset --exclude-features simd,simd_opt,simd_asm
+
+# No longer builds on recent nightlies
+#  simd:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v5
+#      - uses: RustCrypto/actions/cargo-cache@master
+#      - uses: dtolnay/rust-toolchain@master
+#        with:
+#          toolchain: nightly-2021-05-01
+#      - run: cargo test --features simd
+#      - run: cargo test --features simd_opt
+#      - run: cargo test --features simd_asm
+
+  # Cross-compiled tests
+  cross:
+    needs: set-msrv
+    strategy:
+      matrix:
+        rust:
+          - ${{needs.set-msrv.outputs.msrv}}
+          - stable
+        target:
+          - aarch64-unknown-linux-gnu
+          - powerpc-unknown-linux-gnu
+        features:
+          - default
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+      # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
+        working-directory: .
+    steps:
+      - uses: RustCrypto/actions/cross-tests@master
+        with:
+          rust: ${{ matrix.rust }}
+          package: ${{ github.workflow }}
+          target: ${{ matrix.target }}
+          features: ${{ matrix.features }}

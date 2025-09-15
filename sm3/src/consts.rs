@@ -11,6 +11,8 @@ pub(crate) const T32: [u32; 64] = [
     0x8a7a879d, 0x14f50f3b, 0x29ea1e76, 0x53d43cec, 0xa7a879d8, 0x4f50f3b1, 0x9ea1e762, 0x3d43cec5,
 ];
 
-pub(crate) static H0: [u32; 8] = [
+pub(crate) static H0: [u32; H_LEN] = [
     0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600, 0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e,
 ];
+
+pub(crate) const H_LEN: usize = 8;

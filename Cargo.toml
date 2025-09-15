@@ -1,27 +1,39 @@
 [workspace]
-# This causes issues like https://github.com/RustCrypto/hashes/issues/396
-# Do not uncomment it until MSRV is bumped to 1.51 or higher.
-# resolver = "2"
+resolver = "3"
 members = [
+    "ascon-hash",
+    "belt-hash",
     "blake2",
     "fsb",
     "gost94",
     "groestl",
+    "jh",
     "k12",
+    "kupyna",
     "md2",
     "md4",
     "md5",
     "ripemd",
     "sha1",
+    "sha1-checked",
     "sha2",
     "sha3",
     "shabal",
+    "skein",
     "sm3",
     "streebog",
     "tiger",
     "whirlpool",
 ]
-exclude = ["belt-hash"]
 
 [profile.dev]
 opt-level = 2
+
+[patch.crates-io]
+sha1 = { path = "sha1" }
+sha3 = { path = "sha3" }
+whirlpool = { path = "whirlpool" }
+
+# https://github.com/RustCrypto/utils/pull/1187
+# https://github.com/RustCrypto/utils/pull/1207
+blobby = { git = "https://github.com/RustCrypto/utils" }

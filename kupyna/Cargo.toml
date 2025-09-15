@@ -1,0 +1,29 @@
+[package]
+name = "kupyna"
+version = "0.1.0"
+description = "Kupyna (DSTU 7564:2014) hash function"
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+edition = "2024"
+documentation = "https://docs.rs/kupyna"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["hash", "kupyna"]
+categories = ["cryptography", "no-std"]
+rust-version = "1.85"
+
+[dependencies]
+digest = "0.11.0-rc.1"
+
+[dev-dependencies]
+digest = { version = "0.11.0-rc.1", features = ["dev"] }
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
+
+[features]
+default = ["alloc"]
+alloc = ["digest/alloc"]
+zeroize = ["digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true

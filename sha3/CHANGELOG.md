@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.11.0 (UNRELEASED)
+### Added
+- `alloc` crate feature ([#678])
+
+### Changed
+- Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
+- Relax MSRV policy and allow MSRV bumps in patch releases
+- Update to `digest` v0.11
+- Replace type aliases with newtypes ([#678])
+- Implementation of the `SerializableState` trait ([#716])
+
+### Removed
+- `std` crate feature ([#678])
+
+[#652]: https://github.com/RustCrypto/hashes/pull/652
+[#678]: https://github.com/RustCrypto/hashes/pull/678
+[#716]: https://github.com/RustCrypto/hashes/pull/716
+
+## 0.10.8 (2023-04-08)
+### Fixed
+- Performance regression: now uses `p1600` fn ([#472])
+
+[#472]: https://github.com/RustCrypto/hashes/pull/472
+
+## 0.10.7 (2023-04-11)
+### Added
+- `asm` feature ([#437])
+- TurboSHAKE ([#458])
+
+[#437]: https://github.com/RustCrypto/hashes/pull/437
+[#458]: https://github.com/RustCrypto/hashes/pull/458
+
 ## 0.10.6 (2022-10-19)
 ### Fixed
 - XOF reader type aliases ([#427])

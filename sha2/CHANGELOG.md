@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.11.0 (UNRELEASED)
+### Changed
+- Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
+- Relax MSRV policy and allow MSRV bumps in patch releases
+- Update to `digest` v0.11
+- Replace type aliases with newtypes ([#678])
+- `compress256` and `compress512` are moved to the `block_api` module ([#678])
+- Implementation of the `SerializableState` trait ([#716])
+
+### Added
+- `alloc` crate feature ([#678])
+- RISC-V scalar crypto extension support gated behind `sha2_backend = "riscv-zknh"` or
+  `sha2_backend = "riscv-zknh-compact"` configuration flags ([#614])
+- `sha2_backend = "soft"` configuration flag ([#615])
+- `sha2_backend = "soft-compact"` configuration flag ([#686])
+
+### Removed
+- `asm`, `asm-aarch64`, `loongarch64_asm`, and `compress` crate features ([#542])
+- `soft` crate feature ([#615])
+- `force-soft-compact` crate feature ([#686])
+- `std` crate feature ([#678])
+
+[#542]: https://github.com/RustCrypto/hashes/pull/542
+[#614]: https://github.com/RustCrypto/hashes/pull/614
+[#615]: https://github.com/RustCrypto/hashes/pull/615
+[#652]: https://github.com/RustCrypto/hashes/pull/652
+[#678]: https://github.com/RustCrypto/hashes/pull/678
+[#686]: https://github.com/RustCrypto/hashes/pull/686
+[#716]: https://github.com/RustCrypto/hashes/pull/716
+
+## 0.10.9 (2025-04-30)
+### Added
+- `force-soft-compact` crate feature to enable compact software backend (backport of [#686]) [#687]
+
+[#687]: https://github.com/RustCrypto/hashes/pull/687
+
+## 0.10.8 (2023-09-26)
+### Added
+- `asm!`-based backend for LoongArch64 targets gated behind `loongarch64_asm` feature [#507]
+
+[#507]: https://github.com/RustCrypto/hashes/pull/507
+
+## 0.10.7 (2023-06-15)
+### Added
+- AArch64 Neon-based backend ([#490])
+
+[#490]: https://github.com/RustCrypto/hashes/pull/490
+
 ## 0.10.6 (2022-09-16)
 ### Added
 - Feature-gated OID support ([#405])
@@ -106,7 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.9.1 (2020-06-24)
 ### Added
-- x86 hardware acceleration of SHA-256 via SHA extension instrinsics. ([#167])
+- x86 hardware acceleration of SHA-256 via SHA extension intrinsics. ([#167])
 
 [#167]: https://github.com/RustCrypto/hashes/pull/167
 

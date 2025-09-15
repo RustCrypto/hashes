@@ -5,7 +5,6 @@ pub(crate) type Block = [u8; 32];
 pub(crate) type SBox = [[u8; 16]; 8];
 
 /// Trait for storing parameter constants.
-// TODO: replace with const generics
 pub trait Gost94Params {
     /// S-box value.
     const S_BOX: SBox;

@@ -7,28 +7,34 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [SM3 (OSCCA GM/T 0004-2012)][1] hash function.
+Pure Rust implementation of the [SM3] cryptographic hash function defined
+in OSCCA GM/T 0004-2012.
 
-[Documentation][docs-link]
+## Examples
 
-## Minimum Supported Rust Version
+```rust
+use sm3::{Digest, Sm3};
+use hex_literal::hex;
 
-Rust **1.41** or higher.
+let mut hasher = Sm3::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
 
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
+assert_eq!(hash, hex!("44f0061e69fa6fdfc290c494654a05dc0c053da7e5c52b84ef93a9d67d3fff88"));
 
-## SemVer Policy
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "44f0061e69fa6fdfc290c494654a05dc0c053da7e5c52b84ef93a9d67d3fff88");
+```
 
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -45,12 +51,13 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/sm3/badge.svg
 [docs-link]: https://docs.rs/sm3/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/sm3/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Asm3
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/sm3.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/sm3.yml?query=branch:master
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/sm3
+[SM3]: https://en.wikipedia.org/wiki/SM3_(hash_function)
+[examples section]: https://github.com/RustCrypto/hashes#Examples

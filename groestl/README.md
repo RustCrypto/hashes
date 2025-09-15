@@ -7,28 +7,33 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Grøstl hash function][1].
+Pure Rust implementation of the [Grøstl] cryptographic hash function.
 
-[Documentation][docs-link]
+## Examples
 
-## Minimum Supported Rust Version
+```rust
+use groestl::{Digest, Groestl256};
+use hex_literal::hex;
 
-Rust **1.41** or higher.
+let mut hasher = Groestl256::default();
+hasher.update(b"my message");
+let hash = hasher.finalize();
 
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
+assert_eq!(hash, hex!("dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86"));
 
-## SemVer Policy
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86");
+```
 
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -45,12 +50,13 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/groestl/badge.svg
 [docs-link]: https://docs.rs/groestl/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/groestl/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Agroestl
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/groestl.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/groestl.yml?query=branch:master
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/Gr%C3%B8stl
+[Grøstl]: https://en.wikipedia.org/wiki/Grøstl
+[examples section]: https://github.com/RustCrypto/hashes#Examples

@@ -1,0 +1,30 @@
+[package]
+name = "skein"
+version = "0.2.0-pre"
+description = "Skein hash functions"
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+edition = "2024"
+rust-version = "1.85"
+readme = "README.md"
+documentation = "https://docs.rs/skein"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["skein", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+digest = "0.11.0-rc.1"
+threefish = { version = "0.5.2", default-features = false }
+
+[dev-dependencies]
+digest = { version = "0.11.0-rc.1", features = ["dev"] }
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
+
+[features]
+default = ["alloc"]
+alloc = ["digest/alloc"]
+zeroize = ["digest/zeroize", "threefish/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true

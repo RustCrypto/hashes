@@ -1,0 +1,34 @@
+[package]
+name = "ascon-hash"
+version = "0.3.0-pre"
+description = "Implementation of Ascon-Hash256 and Ascon-XOF256"
+authors = [
+    "Sebastian Ramacher <sebastian.ramacher@ait.ac.at>",
+    "RustCrypto Developers",
+]
+license = "Apache-2.0 OR MIT"
+readme = "README.md"
+edition = "2024"
+rust-version = "1.85"
+documentation = "https://docs.rs/ascon-hash"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["hash", "ascon"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+digest = "0.11.0-rc.1"
+ascon = { version = "0.5.0-rc.0", default-features = false }
+
+[dev-dependencies]
+spectral = { version = "0.6", default-features = false }
+hex = "0.4"
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
+
+[features]
+default = ["alloc"]
+alloc = ["digest/alloc"]
+zeroize = ["ascon/zeroize", "digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true

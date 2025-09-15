@@ -7,25 +7,41 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the [FSB hash function][1] family.
+Pure Rust implementation of the [FSB] cryptographic hash algorithms.
 
-[Documentation][docs-link]
+There are 5 standard versions of the FSB hash function:
 
-## Minimum Supported Rust Version
+* `FSB-160`
+* `FSB-224`
+* `FSB-256`
+* `FSB-384`
+* `FSB-512`
 
-Rust **1.41** or higher.
+## Examples
 
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
+Output size of FSB-256 is fixed, so its functionality is usually
+accessed via the `Digest` trait:
 
-## SemVer Policy
+```rust
+use fsb::{Digest, Fsb256};
+use hex_literal::hex;
 
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
+let mut hasher = Fsb256::new();
+hasher.update(b"hello");
+let hash = hasher.finalize();
+
+assert_eq!(hash, hex!("0f036dc3761aed2cba9de586a85976eedde6fa8f115c0190763decc02f28edbc"));
+
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "0f036dc3761aed2cba9de586a85976eedde6fa8f115c0190763decc02f28edbc");
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
 * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 * [MIT license](http://opensource.org/licenses/MIT)
@@ -47,10 +63,11 @@ dual licensed as above, without any additional terms or conditions.
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[rustc-image]: https://img.shields.io/badge/rustc-1.47+-blue.svg
-[build-image]: https://github.com/RustCrypto/hashes/workflows/fsb/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Afsb
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/fsb.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/fsb.yml?query=branch:master
 
 [//]: # (general links)
 
-[1]: https://www.paris.inria.fr/secret/CBCrypto/index.php?pg=fsb
+[FSB]: https://www.paris.inria.fr/secret/CBCrypto/index.php?pg=fsb
+[examples section]: https://github.com/RustCrypto/hashes#Examples

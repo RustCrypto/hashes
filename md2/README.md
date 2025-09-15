@@ -7,28 +7,33 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [MD2 hash function][1].
+Pure Rust implementation of the [MD2] cryptographic hash algorithm.
 
-[Documentation][docs-link]
+## Examples
 
-## Minimum Supported Rust Version
+```rust
+use md2::{Md2, Digest};
+use hex_literal::hex;
 
-Rust **1.41** or higher.
+let mut hasher = Md2::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
 
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
+assert_eq!(hash, hex!("d9cce882ee690a5c1ce70beff3a78c77"));
 
-## SemVer Policy
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "d9cce882ee690a5c1ce70beff3a78c77");
+```
 
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -45,12 +50,13 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/md2/badge.svg
 [docs-link]: https://docs.rs/md2/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/md2/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Amd2
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/md2.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/md2.yml?query=branch:master
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/MD2_(hash_function)
+[MD2]: https://en.wikipedia.org/wiki/MD2_(hash_function)
+[examples section]: https://github.com/RustCrypto/hashes#Examples

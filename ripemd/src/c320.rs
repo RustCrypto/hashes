@@ -1,10 +1,11 @@
-use core::{convert::TryInto, mem::swap};
+use digest::typenum::U40;
 
-pub const HALF_DIGEST_BUF_LEN: usize = 5;
-pub const DIGEST_BUF_LEN: usize = 10;
-pub const WORK_BUF_LEN: usize = 16;
+pub(super) const HALF_DIGEST_BUF_LEN: usize = 5;
+pub(super) const DIGEST_BUF_LEN: usize = 10;
+pub(super) const WORK_BUF_LEN: usize = 16;
+pub(super) type DigestBufByteLen = U40;
 
-pub const H0: [u32; DIGEST_BUF_LEN] = [
+pub(super) const H0: [u32; DIGEST_BUF_LEN] = [
     0x6745_2301,
     0xefcd_ab89,
     0x98ba_dcfe,
@@ -28,7 +29,7 @@ macro_rules! round(
 
 #[inline(always)]
 fn swap_idx(bb: &mut [u32; HALF_DIGEST_BUF_LEN], bbb: &mut [u32; HALF_DIGEST_BUF_LEN], idx: usize) {
-    swap(&mut bb[idx], &mut bbb[idx]);
+    core::mem::swap(&mut bb[idx], &mut bbb[idx]);
 }
 
 macro_rules! process_block(
@@ -141,7 +142,7 @@ macro_rules! process_block(
     });
 );
 
-pub fn compress(h: &mut [u32; DIGEST_BUF_LEN], data: &[u8; 64]) {
+pub(super) fn compress(h: &mut [u32; DIGEST_BUF_LEN], data: &[u8; 64]) {
     let mut w = [0u32; WORK_BUF_LEN];
     for (o, chunk) in w.iter_mut().zip(data.chunks_exact(4)) {
         *o = u32::from_le_bytes(chunk.try_into().unwrap());

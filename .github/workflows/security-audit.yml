@@ -1,7 +1,9 @@
 name: Security Audit
 on:
   pull_request:
-    paths: Cargo.lock
+    paths:
+      - .github/workflows/security-audit.yml
+      - Cargo.lock
   push:
     branches: master
     paths: Cargo.lock
@@ -11,15 +13,15 @@ on:
 jobs:
   security_audit:
     name: Security Audit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: RustCrypto/actions/cargo-cache@master
       - name: Cache cargo bin
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-audit-v0.12.0
-      - uses: actions-rs/audit-check@v1
+          key: ${{ runner.os }}-cargo-audit-v0.20-ubuntu-v24.04
+      - uses: rustsec/audit-check@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

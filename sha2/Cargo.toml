@@ -1,6 +1,6 @@
 [package]
 name = "sha2"
-version = "0.10.6"
+version = "0.11.0-rc.2"
 description = """
 Pure Rust implementation of the SHA-2 hash function family
 including SHA-224, SHA-256, SHA-384, and SHA-512.
@@ -8,33 +8,36 @@ including SHA-224, SHA-256, SHA-384, and SHA-512.
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-edition = "2018"
+edition = "2024"
+rust-version = "1.85"
 documentation = "https://docs.rs/sha2"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "sha2", "hash", "digest"]
+keywords = ["sha2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10.4"
-cfg-if = "1.0"
+digest = "0.11.0-rc.1"
+cfg-if = "1"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
 cpufeatures = "0.2"
-sha2-asm = { version = "0.6.1", optional = true }
 
 [dev-dependencies]
-digest = { version = "0.10.4", features = ["dev"] }
-hex-literal = "0.2.2"
+digest = { version = "0.11.0-rc.1", features = ["dev"] }
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
 
 [features]
-default = ["std"]
-std = ["digest/std"]
-oid = ["digest/oid"] # Enable OID support. WARNING: Bumps MSRV to 1.57
-asm = ["sha2-asm"] # WARNING: this feature SHOULD NOT be enabled by library crates
-compress = [] # Expose compress functions
-force-soft = [] # Force software implementation
-asm-aarch64 = ["asm"] # DEPRECATED: use `asm` instead
+default = ["alloc", "oid"]
+alloc = ["digest/alloc"]
+zeroize = ["digest/zeroize"]
+oid = ["digest/oid"]
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = [
+    'cfg(sha2_backend, values("soft", "soft-compact", "riscv-zknh", "riscv-zknh-compact"))',
+]
 
 [package.metadata.docs.rs]
 all-features = true
-rustdoc-args = ["--cfg", "docsrs"]

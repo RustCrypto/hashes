@@ -17,13 +17,16 @@ env:
   RUSTFLAGS: "-Dwarnings"
   CARGO_INCREMENTAL: 0
 
+# Cancels CI jobs when new commits are pushed to a PR branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        # Crate supports MSRV 1.41 without `oid` feature. We test true MSRV
-        # in the `test-msrv` job.
-        msrv: 1.57.0
+      msrv: 1.85.0
 
   # Builds for no_std platforms
   build:
@@ -37,16 +40,16 @@ jobs:
         target:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
+          - loongarch64-unknown-linux-gnu
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.target }}
-          override: true
-      - run: cargo build --no-default-features --target ${{ matrix.target }}
+          targets: ${{ matrix.target }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
 
   minimal-versions:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
@@ -60,8 +63,6 @@ jobs:
       matrix:
         include:
           # 32-bit Linux/x86
-          # *** NOTE: Currently broken with `asm` feature enabled! See:
-          #     https://github.com/RustCrypto/hashes/issues/251
           #- target: i686-unknown-linux-gnu
           #  rust: ${{needs.set-msrv.outputs.msrv}}
           #  deps: sudo apt update && sudo apt install gcc-multilib
@@ -77,19 +78,15 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.target }}
-          override: true
+          targets: ${{ matrix.target }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
       - run: ${{ matrix.deps }}
-      - run: cargo test --target ${{ matrix.target }} --no-default-features
-      - run: cargo test --target ${{ matrix.target }}
-      - run: cargo test --target ${{ matrix.target }} --features asm
-      - run: cargo test --target ${{ matrix.target }} --all-features
+      - run: cargo hack test --feature-powerset
 
   # macOS tests
   macos:
@@ -102,17 +99,14 @@ jobs:
 
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ matrix.rust }}
-          target: x86_64-apple-darwin
-          override: true
+          targets: x86_64-apple-darwin
       - run: cargo test --no-default-features
       - run: cargo test
-      - run: cargo test --features asm
       - run: cargo test --all-features
 
   # Windows tests
@@ -122,43 +116,35 @@ jobs:
       matrix:
         include:
           # 64-bit Windows (GNU)
-          # TODO(tarcieri): try re-enabling this when we bump MSRV
-          #- target: x86_64-pc-windows-gnu
-          #  toolchain: ${{needs.set-msrv.outputs.msrv}}
           - target: x86_64-pc-windows-gnu
-            rust: stable
+            toolchain: ${{needs.set-msrv.outputs.msrv}}
+          - target: x86_64-pc-windows-gnu
+            toolchain: stable
 
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.target }}
-          override: true
+          toolchain: ${{ matrix.toolchain }}
+          targets: ${{ matrix.target }}
       - uses: msys2/setup-msys2@v2
       - run: cargo test --target ${{ matrix.target }}
 
   # Cross-compiled tests
   cross:
+    needs: set-msrv
     strategy:
       matrix:
         rust:
-          - 1.51.0 # 1.41-1.50 `--features` can't be used inside virtual manifest
+          - ${{needs.set-msrv.outputs.msrv}}
           - stable
         target:
           - aarch64-unknown-linux-gnu
-          - mips-unknown-linux-gnu
+          - powerpc-unknown-linux-gnu
         features:
           - default
-  # **** NOTE: Currently broken with `asm` feature enabled! See:
-  #      https://github.com/RustCrypto/hashes/issues/251
-  #      include:
-  #          - rust: stable
-  #            target: aarch64-unknown-linux-gnu
-  #            features: asm
 
     runs-on: ubuntu-latest
     defaults:
@@ -166,24 +152,9 @@ jobs:
       # Cross mounts only current package, i.e. by default it ignores workspace's Cargo.toml
         working-directory: .
     steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/cross-tests
+      - uses: RustCrypto/actions/cross-tests@master
         with:
           rust: ${{ matrix.rust }}
           package: ${{ github.workflow }}
           target: ${{ matrix.target }}
           features: ${{ matrix.features }}
-
-  # TODO: remove on MSRV bump to 1.57 or higher
-  test-msrv:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: RustCrypto/actions/cargo-cache@master
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: 1.41.0
-          override: true
-      - run: cargo test --no-default-features
-      - run: cargo test

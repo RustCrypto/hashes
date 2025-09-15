@@ -1,0 +1,38 @@
+[package]
+name = "sha1-checked"
+version = "0.11.0-pre"
+description = "SHA-1 hash function with collision detection"
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+edition = "2024"
+rust-version = "1.85"
+documentation = "https://docs.rs/sha1-checked"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["sha1", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+exclude = [
+    "sha1-checked/tests/data/shattered-1.pdf",
+    "sha1-checked/tests/data/shattered-2.pdf",
+]
+
+[dependencies]
+digest = "0.11.0-rc.1"
+sha1 = { version = "0.11.0-rc.2", default-features = false }
+zeroize = { version = "1.8", default-features = false, optional = true }
+
+[dev-dependencies]
+digest = { version = "0.11.0-rc.1", features = ["dev"] }
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
+
+[features]
+default = ["alloc", "oid"]
+alloc = ["digest/alloc", "sha1/alloc"]
+oid = ["digest/oid", "sha1/oid"] # Enable OID support
+zeroize = ["dep:zeroize"]
+
+
+[package.metadata.docs.rs]
+all-features = true

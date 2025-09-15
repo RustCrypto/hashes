@@ -1,25 +1,25 @@
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::dev::{feed_rand_16mib, fixed_reset_test};
-use digest::new_test;
-use gost94::{Digest, Gost94CryptoPro, Gost94Test, Gost94UA};
+use digest::{hash_serialization_test, new_test};
+use gost94::{Digest, Gost94CryptoPro, Gost94Test, Gost94UA, Gost94s2015};
 use hex_literal::hex;
 
-new_test!(gost94_test_main, "test", Gost94Test, fixed_reset_test);
-new_test!(
-    gost94_cryptopro_main,
-    "cryptopro",
-    Gost94CryptoPro,
-    fixed_reset_test
-);
+new_test!(gost94_test_kat, Gost94Test, fixed_reset_test);
+new_test!(gost94_cryptopro_kat, Gost94CryptoPro, fixed_reset_test);
+
+hash_serialization_test!(gost94_cryptopro_serialization, Gost94CryptoPro);
+hash_serialization_test!(gost94_test_serialization, Gost94Test);
+hash_serialization_test!(gost94_s2015_serialization, Gost94s2015);
+hash_serialization_test!(gost94_ua_serialization, Gost94UA);
 
 #[test]
 fn gost94_test_rand() {
     let mut h = Gost94Test::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!("fdd1b9f220898c117f82d664716795e12f5e9f458ee8cd71d014329438db5089")[..]
+        h.finalize(),
+        hex!("fdd1b9f220898c117f82d664716795e12f5e9f458ee8cd71d014329438db5089")
     );
 }
 
@@ -28,8 +28,8 @@ fn gost94_cryptopro_rand() {
     let mut h = Gost94CryptoPro::new();
     feed_rand_16mib(&mut h);
     assert_eq!(
-        h.finalize()[..],
-        hex!("1d539ea8a318df8c13d304fcfd9beeec188bb48683d9d7f4c4a3750cff6ef22a")[..]
+        h.finalize(),
+        hex!("1d539ea8a318df8c13d304fcfd9beeec188bb48683d9d7f4c4a3750cff6ef22a")
     );
 }
 
@@ -42,7 +42,7 @@ fn gost_engine_tests() {
         h.update(b"12345670");
     }
     assert_eq!(
-        h.finalize_reset().as_slice(),
+        h.finalize_reset(),
         hex!("f7fc6d16a6a5c12ac4f7d320e0fd0d8354908699125e09727a4ef929122b1cae"),
     );
 
@@ -50,7 +50,7 @@ fn gost_engine_tests() {
         h.update(b"\x00\x01\x02\x15\x84\x67\x45\x31");
     }
     assert_eq!(
-        h.finalize_reset().as_slice(),
+        h.finalize_reset(),
         hex!("69f529aa82d9344ab0fa550cdf4a70ecfd92a38b5520b1906329763e09105196"),
     );
 
@@ -60,7 +60,7 @@ fn gost_engine_tests() {
     }
     h.update(&buf[0..539]);
     assert_eq!(
-        h.finalize_reset().as_slice(),
+        h.finalize_reset(),
         hex!("bd5f1e4b539c7b00f0866afdbc8ed452503a18436061747a343f43efe888aac9"),
     );
 
@@ -72,7 +72,7 @@ fn gost_engine_tests() {
     }
     h.update("12345\n");
     assert_eq!(
-        h.finalize().as_slice(),
+        h.finalize(),
         hex!("e5d3ac4ea3f67896c51ff919cedb9405ad771e39f0f2eab103624f9a758e506f"),
     );
 }
@@ -81,7 +81,7 @@ fn gost_engine_tests() {
 fn arithmetic_overflow_regression() {
     let mut h = Gost94Test::default();
     h.update(&include_bytes!("data/arithmetic_overflow.bin")[..]);
-    h.finalize().as_slice();
+    h.finalize();
 }
 
 #[test]
@@ -89,7 +89,7 @@ fn gost_ua_engine_tests() {
     let mut h = Gost94UA::new();
     h.update(b"test");
     assert_eq!(
-        h.finalize_reset().as_slice(),
+        h.finalize_reset(),
         hex!("7c536414f8b5b9cc649fdf3cccb2685c1a12622956308e34f31c50ed7b3af56c"),
     );
 }

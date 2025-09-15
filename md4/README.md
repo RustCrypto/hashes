@@ -7,28 +7,38 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [MD4 hash function][1].
+Pure Rust implementation of the [MD4] cryptographic hash algorithm.
 
-[Documentation][docs-link]
+## Examples
 
-## Minimum Supported Rust Version
+```rust
+use md4::{Md4, Digest};
+use hex_literal::hex;
 
-Rust **1.41** or higher.
+// create a Md4 hasher instance
+let mut hasher = Md4::new();
 
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
+// process input message
+hasher.update(b"hello world");
 
-## SemVer Policy
+// acquire hash digest in the form of Array,
+// which in this case is equivalent to [u8; 16]
+let hash = hasher.finalize();
+assert_eq!(hash, hex!("aa010fbc1d14c795d86ef98c95479d17"));
 
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "aa010fbc1d14c795d86ef98c95479d17");
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -45,12 +55,13 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/md4/badge.svg
 [docs-link]: https://docs.rs/md4/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/md4/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Amd4
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/md4.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/md4.yml?query=branch:master
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/MD4
+[MD4]: https://en.wikipedia.org/wiki/MD4
+[examples section]: https://github.com/RustCrypto/hashes#Examples

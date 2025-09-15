@@ -7,28 +7,35 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [Tiger] hash function.
+Pure Rust implementation of the [Tiger] cryptographic hash algorithms.
 
-[Documentation][docs-link]
+Tiger2 is a variant of the original Tiger with a small padding tweak.
 
-## Minimum Supported Rust Version
+## Examples
 
-Rust **1.41** or higher.
+```rust
+use tiger::{Tiger, Digest};
+use hex_literal::hex;
 
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
+let mut hasher = Tiger::new();
+hasher.update(b"hello world");
+let hash = hasher.finalize();
 
-## SemVer Policy
+assert_eq!(hash, hex!("4c8fbddae0b6f25832af45e7c62811bb64ec3e43691e9cc3"));
 
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "4c8fbddae0b6f25832af45e7c62811bb64ec3e43691e9cc3");
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -44,12 +51,13 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, without 
 [docs-image]: https://docs.rs/tiger/badge.svg
 [docs-link]: https://docs.rs/tiger/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/tiger/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Atiger
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/tiger.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/tiger.yml?query=branch:master
 
 [//]: # (general links)
 
-[Tiger]: http://www.cs.technion.ac.il/~biham/Reports/Tiger/tiger/tiger.html
+[Tiger]: https://en.wikipedia.org/wiki/Tiger_(hash_function)
+[examples section]: https://github.com/RustCrypto/hashes#Examples

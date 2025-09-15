@@ -7,28 +7,38 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [GOST R 34.11-94 hash function][1].
+Pure Rust implementation of the [GOST R 34.11-94] cryptographic hash algorithm.
 
-[Documentation][docs-link]
+## Examples
 
-## Minimum Supported Rust Version
+```rust
+use gost94::{Gost94CryptoPro, Digest};
+use hex_literal::hex;
 
-Rust **1.41** or higher.
+let mut hasher = Gost94CryptoPro::new();
+hasher.update("The quick brown fox jumps over the lazy dog");
+let hash = hasher.finalize();
 
-Minimum supported Rust version can be changed in the future, but it will be
-done with a minor version bump.
+assert_eq!(hash, hex!("9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76"));
 
-## SemVer Policy
+// Hex-encode hash using https://docs.rs/base16ct
+let hex_hash = base16ct::lower::encode_string(&hash);
+assert_eq!(hex_hash, "9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76");
+```
 
-- All on-by-default features of this library are covered by SemVer
-- MSRV is considered exempt from SemVer as noted above
+Also, see the [examples section] in the RustCrypto/hashes readme.
+
+## Associated OIDs.
+There can be a confusion regarding OIDs associated with declared types.
+According to the [RFC 4357], the OIDs 1.2.643.2.2.30.1 and 1.2.643.2.2.30.0 are used to identify the hash function parameter sets (CryptoPro vs Test ones).
+According to [RFC 4490] the OID 1.2.643.2.2.9 identifies the GOST 34.311-95 (former GOST R 34.11-94) function, but then it continues that this function MUST be used only with the CryptoPro parameter set.
 
 ## License
 
-Licensed under either of:
+The crate is licensed under either of:
 
- * [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
- * [MIT license](http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+* [MIT license](http://opensource.org/licenses/MIT)
 
 at your option.
 
@@ -45,12 +55,15 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/gost94/badge.svg
 [docs-link]: https://docs.rs/gost94/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.41+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/workflows/gost94/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions?query=workflow%3Agost94
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/gost94.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/gost94.yml?query=branch:master
 
 [//]: # (general links)
 
-[1]: https://en.wikipedia.org/wiki/GOST_(hash_function)
+[GOST R 34.11-94]: https://en.wikipedia.org/wiki/GOST_(hash_function)
+[RFC 4357]: https://www.rfc-editor.org/rfc/rfc4357
+[RFC 4490]: https://www.rfc-editor.org/rfc/rfc4490
+[examples section]: https://github.com/RustCrypto/hashes#Examples

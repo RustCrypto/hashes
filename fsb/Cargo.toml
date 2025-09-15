@@ -1,24 +1,30 @@
 [package]
 name = "fsb"
-version = "0.1.3"
+version = "0.2.0-pre"
 description = "FSB hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-edition = "2018"
+edition = "2024"
+rust-version = "1.85"
 documentation = "https://docs.rs/fsb"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["crypto", "fsb", "hash", "digest"]
+keywords = ["fsb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.10.3"
-whirlpool = { version = "0.10.1", path = "../whirlpool", default-features = false }
+digest = "0.11.0-rc.1"
+whirlpool = { version = "0.11.0-rc.1", default-features = false }
 
 [dev-dependencies]
-digest = { version = "0.10.3", features = ["dev"] }
-hex-literal = "0.2.2"
+digest = { version = "0.11.0-rc.1", features = ["dev"] }
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
 
 [features]
-default = ["std"]
-std = ["digest/std"]
+default = ["alloc"]
+alloc = ["digest/alloc"]
+zeroize = ["digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true

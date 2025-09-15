@@ -1,19 +1,17 @@
-use super::tables::{T1, T2, T3, T4};
-use super::State;
-use core::convert::TryInto;
+use crate::tables::TABLES;
 
 #[inline(always)]
 fn round(a: &mut u64, b: &mut u64, c: &mut u64, x: &u64, mul: u8) {
     *c ^= *x;
     let c2: [u8; 8] = c.to_le_bytes();
-    let a2 = T1[usize::from(c2[0])]
-        ^ T2[usize::from(c2[2])]
-        ^ T3[usize::from(c2[4])]
-        ^ T4[usize::from(c2[6])];
-    let b2 = T4[usize::from(c2[1])]
-        ^ T3[usize::from(c2[3])]
-        ^ T2[usize::from(c2[5])]
-        ^ T1[usize::from(c2[7])];
+    let a2 = TABLES[0][usize::from(c2[0])]
+        ^ TABLES[1][usize::from(c2[2])]
+        ^ TABLES[2][usize::from(c2[4])]
+        ^ TABLES[3][usize::from(c2[6])];
+    let b2 = TABLES[3][usize::from(c2[1])]
+        ^ TABLES[2][usize::from(c2[3])]
+        ^ TABLES[1][usize::from(c2[5])]
+        ^ TABLES[0][usize::from(c2[7])];
     *a = a.wrapping_sub(a2);
     *b = b.wrapping_add(b2).wrapping_mul(u64::from(mul));
 }
@@ -50,7 +48,7 @@ fn key_schedule(x: &mut [u64; 8]) {
     x[7] = x[7].wrapping_sub(x[6] ^ 0x0123_4567_89AB_CDEF);
 }
 
-pub(crate) fn compress(state: &mut State, raw_block: &[u8; 64]) {
+pub(crate) fn compress(state: &mut [u64; 3], raw_block: &[u8; 64]) {
     let mut block: [u64; 8] = Default::default();
     for (o, chunk) in block.iter_mut().zip(raw_block.chunks_exact(8)) {
         *o = u64::from_le_bytes(chunk.try_into().unwrap());
