@@ -26,9 +26,9 @@ fn sbox(a: u32, s: &SBox) -> u32 {
 
     #[allow(clippy::needless_range_loop)]
     for i in 0..8 {
-        let shft = 4 * i;
-        let k = ((a & (0b1111u32 << shft)) >> shft) as usize;
-        v += u32::from(s[i][k]) << shft;
+        let shift = 4 * i;
+        let k = ((a & (0b1111u32 << shift)) >> shift) as usize;
+        v += u32::from(s[i][k]) << shift;
     }
 
     v
