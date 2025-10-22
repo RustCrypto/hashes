@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - `std` crate feature ([#678])
+- `GroestlShortVar` and `GroestlLongVar` types
 
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678

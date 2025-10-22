@@ -34,6 +34,4 @@ sha1 = { path = "sha1" }
 sha3 = { path = "sha3" }
 whirlpool = { path = "whirlpool" }
 
-# https://github.com/RustCrypto/utils/pull/1187
-# https://github.com/RustCrypto/utils/pull/1207
-blobby = { git = "https://github.com/RustCrypto/utils" }
+digest = { git = "https://github.com/RustCrypto/traits", branch = "digest/rm_rt_variable" }
