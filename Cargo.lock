@@ -30,6 +30,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8b59d472eab27ade8d770dcb11da7201c11234bef9f82ce7aa517be028d462b"
 
 [[package]]
+name = "bash-f"
+version = "0.1.0-rc.0"
+
+[[package]]
+name = "bash-hash"
+version = "0.2.0-rc.1"
+dependencies = [
+ "base16ct",
+ "bash-f",
+ "digest",
+ "hex-literal",
+ "subtle",
+]
+
+[[package]]
 name = "belt-block"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
