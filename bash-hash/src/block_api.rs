@@ -1,20 +1,18 @@
 use core::fmt;
 use digest::{
     HashMarker, Output,
-    array::{Array, ArraySize},
+    array::Array,
     block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    crypto_common::{
-        BlockSizes,
-        hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    },
-    typenum::NonZero,
-    typenum::{U32, U48, U64, U96, U128, U192},
+    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::U192,
 };
 
+use crate::variants::{Bash256, Bash384, Bash512, Variant};
 use bash_f::{STATE_WORDS, bash_f};
+use digest::typenum::Unsigned;
 
 /// Core Bash hasher state with generic security level.
 ///
@@ -23,20 +21,14 @@ use bash_f::{STATE_WORDS, bash_f};
 /// - BlockSize: block size r = (1536 - 4ℓ) / 8 bytes
 /// - OutputSize: output size 2ℓ / 8 bytes
 #[derive(Clone)]
-pub struct BashHashCore<BlockSize, OutputSize>
-where
-    BlockSize: ArraySize,
-    OutputSize: ArraySize,
-{
+pub struct BashHashCore<V: Variant> {
     state: [u64; STATE_WORDS],
-    _block_size: core::marker::PhantomData<BlockSize>,
-    _output_size: core::marker::PhantomData<OutputSize>,
+    _variant: core::marker::PhantomData<V>,
 }
 
-impl<BS, OS> BashHashCore<BS, OS>
+impl<V> BashHashCore<V>
 where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
+    V: Variant,
 {
     /// Calculate security level ℓ
     ///
@@ -44,13 +36,13 @@ where
     #[inline]
     const fn get_level() -> usize {
         // 3. ℓ ← OutSize * 8 / 2
-        OS::USIZE * 4
+        V::OutputSize::USIZE * 4
     }
 
     /// Calculate buffer size r in bytes
     #[inline]
     const fn get_r_bytes() -> usize {
-        BS::USIZE
+        V::BlockSize::USIZE
     }
 
     /// Compress one data block
@@ -69,41 +61,32 @@ where
     }
 }
 
-impl<BS, OS> HashMarker for BashHashCore<BS, OS>
+impl<V> HashMarker for BashHashCore<V> where V: Variant {}
+
+impl<V> BlockSizeUser for BashHashCore<V>
 where
-    BS: ArraySize,
-    OS: ArraySize,
+    V: Variant,
 {
+    type BlockSize = V::BlockSize;
 }
 
-impl<BS, OS> BlockSizeUser for BashHashCore<BS, OS>
+impl<V> BufferKindUser for BashHashCore<V>
 where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
-{
-    type BlockSize = BS;
-}
-
-impl<BS, OS> BufferKindUser for BashHashCore<BS, OS>
-where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
+    V: Variant,
 {
     type BufferKind = Eager;
 }
 
-impl<BS, OS> OutputSizeUser for BashHashCore<BS, OS>
+impl<V> OutputSizeUser for BashHashCore<V>
 where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
+    V: Variant,
 {
-    type OutputSize = OS;
+    type OutputSize = V::OutputSize;
 }
 
-impl<BS, OS> UpdateCore for BashHashCore<BS, OS>
+impl<V> UpdateCore for BashHashCore<V>
 where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
+    V: Variant,
 {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
@@ -113,17 +96,16 @@ where
     }
 }
 
-impl<BS, OS> FixedOutputCore for BashHashCore<BS, OS>
+impl<V> FixedOutputCore for BashHashCore<V>
 where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
+    V: Variant,
 {
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
         let pos = buffer.get_pos();
 
         // 1. Split(X || 01, r) - split message with appended 01
         // 2: Xn ← Xn || 0^(1536-4ℓ-|Xn|) - pad last block with zeros
-        let mut padding_block = Array::<u8, BS>::default();
+        let mut padding_block = Array::<u8, V::BlockSize>::default();
         let block = buffer.pad_with_zeros();
         padding_block.copy_from_slice(&block);
         padding_block[pos] = 0x40;
@@ -135,16 +117,15 @@ where
         self.state
             .iter()
             .flat_map(|w| w.to_le_bytes())
-            .take(OS::USIZE)
+            .take(V::OutputSize::USIZE)
             .zip(out.iter_mut())
             .for_each(|(src, dst)| *dst = src);
     }
 }
 
-impl<BS, OS> Default for BashHashCore<BS, OS>
+impl<V> Default for BashHashCore<V>
 where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
+    V: Variant,
 {
     #[inline]
     fn default() -> Self {
@@ -156,16 +137,14 @@ where
 
         Self {
             state,
-            _block_size: core::marker::PhantomData,
-            _output_size: core::marker::PhantomData,
+            _variant: core::marker::PhantomData,
         }
     }
 }
 
-impl<BS, OS> Reset for BashHashCore<BS, OS>
+impl<V> Reset for BashHashCore<V>
 where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
+    V: Variant,
 {
     #[inline]
     fn reset(&mut self) {
@@ -173,10 +152,9 @@ where
     }
 }
 
-impl<BS, OS> AlgorithmName for BashHashCore<BS, OS>
+impl<V> AlgorithmName for BashHashCore<V>
 where
-    BS: ArraySize + NonZero + BlockSizes,
-    OS: ArraySize,
+    V: Variant,
 {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let level = Self::get_level();
@@ -184,20 +162,18 @@ where
     }
 }
 
-impl<BS, OS> fmt::Debug for BashHashCore<BS, OS>
+impl<V> fmt::Debug for BashHashCore<V>
 where
-    BS: ArraySize,
-    OS: ArraySize,
+    V: Variant,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("BashHashCore { ... }")
     }
 }
 
-impl<BS, OS> Drop for BashHashCore<BS, OS>
+impl<V> Drop for BashHashCore<V>
 where
-    BS: ArraySize,
-    OS: ArraySize,
+    V: Variant,
 {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
@@ -209,17 +185,11 @@ where
 }
 
 #[cfg(feature = "zeroize")]
-impl<BS, OS> digest::zeroize::ZeroizeOnDrop for BashHashCore<BS, OS>
-where
-    BS: ArraySize,
-    OS: ArraySize,
-{
-}
+impl<V> digest::zeroize::ZeroizeOnDrop for BashHashCore<V> where V: Variant {}
 
-impl<BS, OS> SerializableState for BashHashCore<BS, OS>
+impl<V> SerializableState for BashHashCore<V>
 where
-    BS: ArraySize,
-    OS: ArraySize,
+    V: Variant,
 {
     type SerializedStateSize = U192;
 
@@ -248,8 +218,7 @@ where
 
         Ok(Self {
             state,
-            _block_size: core::marker::PhantomData,
-            _output_size: core::marker::PhantomData,
+            _variant: core::marker::PhantomData,
         })
     }
 }
@@ -258,6 +227,6 @@ where
 // Bash256: ℓ = 128, output = 2ℓ = 256 bits, block = (1536 - 4×128)/8 = 128 bytes
 // Bash384: ℓ = 192, output = 2ℓ = 384 bits, block = (1536 - 4×192)/8 = 96 bytes
 // Bash512: ℓ = 256, output = 2ℓ = 512 bits, block = (1536 - 4×256)/8 = 64 bytes
-pub(crate) type Bash256Core = BashHashCore<U128, U32>;
-pub(crate) type Bash384Core = BashHashCore<U96, U48>;
-pub(crate) type Bash512Core = BashHashCore<U64, U64>;
+pub(crate) type Bash256Core = BashHashCore<Bash256>;
+pub(crate) type Bash384Core = BashHashCore<Bash384>;
+pub(crate) type Bash512Core = BashHashCore<Bash512>;

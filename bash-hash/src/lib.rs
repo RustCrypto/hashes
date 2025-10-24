@@ -12,6 +12,7 @@ pub use digest::{self, Digest};
 
 /// Block-level types
 pub mod block_api;
+mod variants;
 
 digest::buffer_fixed!(
     /// BASH256 hasher state.
