@@ -7,6 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## 0.1.0 (UNRELEASED)
-- Initial release ([#1])
+- Initial release ([#745])
 
-[#1]: https://github.com/RustCrypto/hashes/pull/745
+[#745]: https://github.com/RustCrypto/hashes/pull/745
