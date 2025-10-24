@@ -45,22 +45,8 @@ Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ### Variable output size
 
-This implementation supports run and compile time variable sizes.
+This implementation supports output sizes variable at compile time:
 
-Output size set at run time:
-```rust
-use blake2::Blake2bVar;
-use blake2::digest::{Update, VariableOutput};
-use hex_literal::hex;
-
-let mut hasher = Blake2bVar::new(10).unwrap();
-hasher.update(b"my_input");
-let mut buf = [0u8; 10];
-hasher.finalize_variable(&mut buf).unwrap();
-assert_eq!(buf, hex!("2cc55c84e416924e6400"));
-```
-
-Output size set at compile time:
 ```rust
 use blake2::{Blake2b, Digest, digest::consts::U10};
 use hex_literal::hex;

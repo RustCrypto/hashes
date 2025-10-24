@@ -17,9 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - `std` crate feature ([#678])
+- `Blake2bVar` and `Blake2sVar` types ([#744])
 
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
+[#744]: https://github.com/RustCrypto/hashes/pull/744
 
 ## 0.10.6 (2022-12-16)
 ### Added

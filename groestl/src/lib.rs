@@ -24,18 +24,10 @@ digest::buffer_ct_variable!(
     pub struct GroestlShort<OutSize>(block_api::GroestlShortVarCore);
     max_size: U32;
 );
-digest::buffer_rt_variable!(
-    /// Long Groestl variant which allows to select output size at runtime.
-    pub struct GroestlShortVar(block_api::GroestlShortVarCore);
-);
 digest::buffer_ct_variable!(
     /// Long Groestl variant generic over output size.
     pub struct GroestlLong<OutSize>(block_api::GroestlLongVarCore);
     max_size: U64;
-);
-digest::buffer_rt_variable!(
-    /// Long Groestl variant which allows to select output size at runtime.
-    pub struct GroestlLongVar(block_api::GroestlLongVarCore);
 );
 
 /// Groestl-224 hasher.
