@@ -31,7 +31,9 @@ checksum = "d8b59d472eab27ade8d770dcb11da7201c11234bef9f82ce7aa517be028d462b"
 
 [[package]]
 name = "bash-f"
-version = "0.1.0-rc.0"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfed5cd32720841afa8cd58c89a317e9efb0c8083e1b349dae4098f022620353"
 
 [[package]]
 name = "bash-hash"

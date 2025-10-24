@@ -14,8 +14,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.11.0-rc.3"
-# TODO: Migrate to crate
-bash-f = { path = "../../sponges/bash-f" }
+bash-f = { version = "0.1.0-rc.0" }
 subtle = { version = "2" }
 
 [dev-dependencies]
