@@ -8,29 +8,30 @@
 #![warn(missing_docs, unreachable_pub)]
 #![forbid(unsafe_code)]
 
+use digest::typenum::{U32, U48, U64};
 pub use digest::{self, Digest};
 
 /// Block-level types
 pub mod block_api;
+#[cfg(feature = "oid")]
+mod oids;
+mod serialize;
 mod variants;
 
-digest::buffer_fixed!(
-    /// BASH256 hasher state.
-    pub struct BashHash256(block_api::Bash256Core);
-    oid: "1.2.112.0.2.0.34.101.77.11";
-    impl: FixedHashTraits;
-);
+pub use variants::OutputSize;
 
 digest::buffer_fixed!(
-    /// BASH384 hasher state.
-    pub struct BashHash384(block_api::Bash384Core);
-    oid: "1.2.112.0.2.0.34.101.77.12";
-    impl: FixedHashTraits;
+    /// `bash-hash` hasher state generic over output size.
+    pub struct BashHash<OS: OutputSize>(block_api::BashHashCore<OS>);
+    // note: `SerializableState` is implemented in the `serialize` module
+    // to work around issues with complex trait bounds
+    impl: BaseFixedTraits AlgorithmName Default Clone HashMarker
+        Reset FixedOutputReset ZeroizeOnDrop;
 );
 
-digest::buffer_fixed!(
-    /// BASH512 hasher state.
-    pub struct BashHash512(block_api::Bash512Core);
-    oid: "1.2.112.0.2.0.34.101.77.13";
-    impl: FixedHashTraits;
-);
+/// `bash-hash-256` hasher state.
+pub type BashHash256 = BashHash<U32>;
+/// `bash-hash-384` hasher state.
+pub type BashHash384 = BashHash<U48>;
+/// `bash-hash-512` hasher state.
+pub type BashHash512 = BashHash<U64>;

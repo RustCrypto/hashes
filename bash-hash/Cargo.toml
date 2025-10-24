@@ -14,7 +14,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.11.0-rc.3"
-bash-f = { version = "0.1.0" }
+bash-f = "0.1"
 
 [dev-dependencies]
 digest = { version = "0.11.0-rc.3", features = ["dev"] }
