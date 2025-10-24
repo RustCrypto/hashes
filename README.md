@@ -26,6 +26,7 @@ Additionally all crates do not require the standard library (i.e. `no_std` capab
 | [MD2] | [`md2`] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) | [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | 1.85 | :broken_heart: |
 | [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | 1.85 | :broken_heart: |
 | [MD5] | [`md5`] [:exclamation:] | [![crates.io](https://img.shields.io/crates/v/md-5.svg)](https://crates.io/crates/md-5) | [![Documentation](https://docs.rs/md-5/badge.svg)](https://docs.rs/md-5) | 1.85 | :broken_heart: |
+| [MD6] | [`md6`] | [![crates.io](https://img.shields.io/crates/v/md-6.svg)](https://crates.io/crates/md-6) | [![Documentation](https://docs.rs/md-6/badge.svg)](https://docs.rs/md-6) | 1.85 | :green_heart: |
 | [RIPEMD] | [`ripemd`] | [![crates.io](https://img.shields.io/crates/v/ripemd.svg)](https://crates.io/crates/ripemd) | [![Documentation](https://docs.rs/ripemd/badge.svg)](https://docs.rs/ripemd) | 1.85 | :green_heart: |
 | [SHA-1] | [`sha1`] | [![crates.io](https://img.shields.io/crates/v/sha1.svg)](https://crates.io/crates/sha1) | [![Documentation](https://docs.rs/sha1/badge.svg)](https://docs.rs/sha1) | 1.85 | :broken_heart: |
 | [SHA-1 Checked] | [`sha1-checked`] | [![crates.io](https://img.shields.io/crates/v/sha1-checked.svg)](https://crates.io/crates/sha1-checked) | [![Documentation](https://docs.rs/sha1-checked/badge.svg)](https://docs.rs/sha1-checked) | 1.85 | :yellow_heart: |
@@ -248,6 +249,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`md2`]: ./md2
 [`md4`]: ./md4
 [`md5`]: ./md5
+[`md6`]: ./md6
 [`ripemd`]: ./ripemd
 [`sha1`]: ./sha1
 [`sha1-checked`]: ./sha1-checked
@@ -292,6 +294,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [MD2]: https://en.wikipedia.org/wiki/MD2_(cryptography)
 [MD4]: https://en.wikipedia.org/wiki/MD4
 [MD5]: https://en.wikipedia.org/wiki/MD5
+[MD6]: https://en.wikipedia.org/wiki/MD6
 [RIPEMD]: https://en.wikipedia.org/wiki/RIPEMD
 [SHA-1]: https://en.wikipedia.org/wiki/SHA-1
 [SHA-1 Checked]: https://github.com/cr-marcstevens/sha1collisiondetection

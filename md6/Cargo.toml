@@ -1,0 +1,28 @@
+[package]
+name = "md6"
+version = "0.11.0-pre.5"
+description = "MD6 hash function"
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+edition = "2024"
+rust-version = "1.85"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["crypto", "md6", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+digest = "=0.11.0-pre.10"
+
+[dev-dependencies]
+digest = { version = "=0.11.0-pre.10", features = ["dev"] }
+hex-literal = "0.4"
+
+[features]
+default = ["oid", "std"]
+std = ["digest/std"]
+oid = ["digest/oid"]
+zeroize = ["digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true
