@@ -1,0 +1,31 @@
+[package]
+name = "bash-hash"
+version = "0.1.0"
+description = "bash hash function (STB 34.101.77-2020)"
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+edition = "2024"
+rust-version = "1.85"
+documentation = "https://docs.rs/belt-hash"
+repository = "https://github.com/RustCrypto/hashes"
+keywords = ["belt", "stb", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+[dependencies]
+digest = "0.11.0-rc.3"
+bash-f = { version = "0.1.0" }
+
+[dev-dependencies]
+digest = { version = "0.11.0-rc.3", features = ["dev"] }
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
+
+[features]
+default = ["alloc", "oid"]
+alloc = ["digest/alloc"]
+oid = ["digest/oid"]
+zeroize = ["digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true
