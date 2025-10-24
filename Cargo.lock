@@ -43,7 +43,6 @@ dependencies = [
  "bash-f",
  "digest",
  "hex-literal",
- "subtle",
 ]
 
 [[package]]
