@@ -1,43 +1,43 @@
-use digest::{
-    array::ArraySize,
-    crypto_common::BlockSizes,
-    typenum::{U32, U48, U64, U96, U128},
-};
+use digest::{array::ArraySize, crypto_common::BlockSizes, typenum};
 
 /// Sealed trait to prevent external implementations.
-pub trait Sealed: Clone {}
+pub trait Sealed {}
 
-/// Trait for Bash hash variants.
-pub trait Variant: Sealed {
-    type BlockSize: ArraySize + BlockSizes;
-    type OutputSize: ArraySize;
+/// Trait implemented for output sizes supported by `bash-hash`.
+///
+/// Supported output sizes form the following list: U4, U8, ..., U60, U64.
+pub trait OutputSize: ArraySize + Sealed {
+    /// Block size in bytes computed as `192 - 2 * OutputSize`.
+    type BlockSize: BlockSizes;
 }
 
-#[derive(Clone)]
-/// `Bash256` variant with 256-bit output and 128-byte block size.
-pub struct Bash256;
-#[derive(Clone)]
-/// `Bash384` variant with 384-bit output and 96-byte block size.
-pub struct Bash384;
-#[derive(Clone)]
-/// `Bash512` variant with 512-bit output and 64-byte block size.
-pub struct Bash512;
+macro_rules! impl_sizes {
+    ($($variant:ident, $block_size:ident;)*) => {
+        $(
+            impl Sealed for typenum::$variant {}
 
-impl Sealed for Bash256 {}
-impl Sealed for Bash384 {}
-impl Sealed for Bash512 {}
-
-impl Variant for Bash256 {
-    type BlockSize = U128;
-    type OutputSize = U32;
+            impl OutputSize for typenum::$variant {
+                type BlockSize = typenum::$block_size;
+            }
+        )*
+    };
 }
 
-impl Variant for Bash384 {
-    type BlockSize = U96;
-    type OutputSize = U48;
-}
-
-impl Variant for Bash512 {
-    type BlockSize = U64;
-    type OutputSize = U64;
-}
+impl_sizes!(
+    U4,  U184;
+    U8,  U176;
+    U12, U168;
+    U16, U160;
+    U20, U152;
+    U24, U144;
+    U28, U136;
+    U32, U128;
+    U36, U120;
+    U40, U112;
+    U44, U104;
+    U48, U96;
+    U52, U88;
+    U56, U80;
+    U60, U72;
+    U64, U64;
+);

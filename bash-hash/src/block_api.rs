@@ -1,7 +1,6 @@
-use core::fmt;
+use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
-    array::Array,
     block_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
@@ -10,48 +9,33 @@ use digest::{
     typenum::U192,
 };
 
-use crate::variants::{Bash256, Bash384, Bash512, Variant};
+use crate::OutputSize;
 use bash_f::{STATE_WORDS, bash_f};
-use digest::typenum::Unsigned;
 
-/// Core Bash hasher state with generic security level.
+/// Core `bash-hash` hasher generic over output size.
 ///
-/// Implements bash-hash[ℓ] algorithm according to section 7 of STB 34.101.77-2020.
-/// Parameters:
-/// - BlockSize: block size r = (1536 - 4ℓ) / 8 bytes
-/// - OutputSize: output size 2ℓ / 8 bytes
-#[derive(Clone)]
-pub struct BashHashCore<V: Variant> {
+/// Specified in Section 7 of STB 34.101.77-2020.
+pub struct BashHashCore<OS: OutputSize> {
     state: [u64; STATE_WORDS],
-    _variant: core::marker::PhantomData<V>,
+    _pd: PhantomData<OS>,
 }
 
-impl<V> BashHashCore<V>
-where
-    V: Variant,
-{
-    /// Calculate security level ℓ
-    ///
-    /// According to section 5.3: ℓ = OutputSize * 8 / 2 = OutputSize * 4
+impl<OS: OutputSize> Clone for BashHashCore<OS> {
     #[inline]
-    const fn get_level() -> usize {
-        // 3. ℓ ← OutSize * 8 / 2
-        V::OutputSize::USIZE * 4
+    fn clone(&self) -> Self {
+        Self {
+            state: self.state,
+            _pd: PhantomData,
+        }
     }
+}
 
-    /// Calculate buffer size r in bytes
-    #[inline]
-    const fn get_r_bytes() -> usize {
-        V::BlockSize::USIZE
-    }
-
+impl<OS: OutputSize> BashHashCore<OS> {
     /// Compress one data block
     fn compress_block(&mut self, block: &Block<Self>) {
-        let r_bytes = Self::get_r_bytes();
-        debug_assert_eq!(r_bytes % 8, 0);
-
         // 4.1: S[...1536 - 4ℓ) ← Xi
-        for (dst, chunk) in self.state.iter_mut().zip(block[..r_bytes].chunks_exact(8)) {
+        // TODO: use `as_chunks` after MSRV is bumped to 1.88+
+        for (dst, chunk) in self.state.iter_mut().zip(block.chunks_exact(8)) {
             // `chunk` is guaranteed to be 8 bytes long due to `r_bytes` being a multiple of 8
             *dst = u64::from_le_bytes(chunk.try_into().unwrap());
         }
@@ -61,33 +45,21 @@ where
     }
 }
 
-impl<V> HashMarker for BashHashCore<V> where V: Variant {}
+impl<OS: OutputSize> HashMarker for BashHashCore<OS> {}
 
-impl<V> BlockSizeUser for BashHashCore<V>
-where
-    V: Variant,
-{
-    type BlockSize = V::BlockSize;
+impl<OS: OutputSize> BlockSizeUser for BashHashCore<OS> {
+    type BlockSize = OS::BlockSize;
 }
 
-impl<V> BufferKindUser for BashHashCore<V>
-where
-    V: Variant,
-{
+impl<OS: OutputSize> BufferKindUser for BashHashCore<OS> {
     type BufferKind = Eager;
 }
 
-impl<V> OutputSizeUser for BashHashCore<V>
-where
-    V: Variant,
-{
-    type OutputSize = V::OutputSize;
+impl<OS: OutputSize> OutputSizeUser for BashHashCore<OS> {
+    type OutputSize = OS;
 }
 
-impl<V> UpdateCore for BashHashCore<V>
-where
-    V: Variant,
-{
+impl<OS: OutputSize> UpdateCore for BashHashCore<OS> {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         for block in blocks {
@@ -96,85 +68,62 @@ where
     }
 }
 
-impl<V> FixedOutputCore for BashHashCore<V>
-where
-    V: Variant,
-{
+impl<OS: OutputSize> FixedOutputCore for BashHashCore<OS> {
     fn finalize_fixed_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-        let pos = buffer.get_pos();
-
         // 1. Split(X || 01, r) - split message with appended 01
         // 2: Xn ← Xn || 0^(1536-4ℓ-|Xn|) - pad last block with zeros
-        let mut padding_block = Array::<u8, V::BlockSize>::default();
-        let block = buffer.pad_with_zeros();
-        padding_block.copy_from_slice(&block);
-        padding_block[pos] = 0x40;
+        let pos = buffer.get_pos();
+        let mut block = buffer.pad_with_zeros();
+        block[pos] = 0x40;
 
         // 4. for i = 1, 2, ..., n, do:
-        self.compress_block(&padding_block);
+        self.compress_block(&block);
 
-        //5. Y ← S[...2ℓ)
-        self.state
-            .iter()
-            .flat_map(|w| w.to_le_bytes())
-            .take(V::OutputSize::USIZE)
-            .zip(out.iter_mut())
-            .for_each(|(src, dst)| *dst = src);
-    }
-}
-
-impl<V> Default for BashHashCore<V>
-where
-    V: Variant,
-{
-    #[inline]
-    fn default() -> Self {
-        let mut state = [0u64; STATE_WORDS];
-
-        // 3. S ← 0^1472 || ⟨ℓ/4⟩_64
-        let level = Self::get_level();
-        state[23] = (level / 4) as u64;
-
-        Self {
-            state,
-            _variant: core::marker::PhantomData,
+        // 5. Y ← S[...2ℓ)
+        // TODO: use `as_chunks` after MSRV is bumped to 1.88+
+        for (src, dst) in self.state.iter().zip(out.chunks_exact_mut(8)) {
+            dst.copy_from_slice(&src.to_le_bytes());
         }
     }
 }
 
-impl<V> Reset for BashHashCore<V>
-where
-    V: Variant,
-{
+impl<OS: OutputSize> Default for BashHashCore<OS> {
+    #[inline]
+    fn default() -> Self {
+        let mut state = [0u64; STATE_WORDS];
+
+        // 3. ℓ ← OutSize * 8 / 2
+        let level = OS::USIZE * 4;
+        // 3. S ← 0^1472 || ⟨ℓ/4⟩_64
+        state[23] = (level / 4) as u64;
+
+        Self {
+            state,
+            _pd: PhantomData,
+        }
+    }
+}
+
+impl<OS: OutputSize> Reset for BashHashCore<OS> {
     #[inline]
     fn reset(&mut self) {
         *self = Default::default();
     }
 }
 
-impl<V> AlgorithmName for BashHashCore<V>
-where
-    V: Variant,
-{
+impl<OS: OutputSize> AlgorithmName for BashHashCore<OS> {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let level = Self::get_level();
-        write!(f, "Bash{}", level * 2)
+        write!(f, "BashHash{}", OS::USIZE)
     }
 }
 
-impl<V> fmt::Debug for BashHashCore<V>
-where
-    V: Variant,
-{
+impl<OS: OutputSize> fmt::Debug for BashHashCore<OS> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("BashHashCore { ... }")
     }
 }
 
-impl<V> Drop for BashHashCore<V>
-where
-    V: Variant,
-{
+impl<OS: OutputSize> Drop for BashHashCore<OS> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
@@ -185,48 +134,31 @@ where
 }
 
 #[cfg(feature = "zeroize")]
-impl<V> digest::zeroize::ZeroizeOnDrop for BashHashCore<V> where V: Variant {}
+impl<OS: OutputSize> digest::zeroize::ZeroizeOnDrop for BashHashCore<OS> {}
 
-impl<V> SerializableState for BashHashCore<V>
-where
-    V: Variant,
-{
+impl<OS: OutputSize> SerializableState for BashHashCore<OS> {
     type SerializedStateSize = U192;
 
     fn serialize(&self) -> SerializedState<Self> {
-        let mut dst = SerializedState::<Self>::default();
-
-        for (word, chunk) in self.state.iter().zip(dst.chunks_exact_mut(8)) {
-            // `word` is guaranteed to be 8 bytes long due to `STATE_WORDS` being a multiple of 8
-            // and `chunk` being a slice of 8 bytes
-            chunk.copy_from_slice(&word.to_le_bytes());
+        let mut res = SerializedState::<Self>::default();
+        // TODO: use `as_chunks` after MSRV is bumped to 1.88+
+        for (src, dst) in self.state.iter().zip(res.chunks_exact_mut(8)) {
+            dst.copy_from_slice(&src.to_le_bytes());
         }
-
-        dst
+        res
     }
 
     fn deserialize(
         serialized_state: &SerializedState<Self>,
     ) -> Result<Self, DeserializeStateError> {
         let mut state = [0u64; STATE_WORDS];
-
-        for (dst, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
-            // `chunk` is guaranteed to be 8 bytes long due to `STATE_WORDS` being a multiple of 8
-            // and `dst` being a slice of 8 bytes
-            *dst = u64::from_le_bytes(chunk.try_into().map_err(|_| DeserializeStateError)?);
+        // TODO: use `as_chunks` after MSRV is bumped to 1.88+
+        for (src, dst) in serialized_state.chunks_exact(8).zip(state.iter_mut()) {
+            *dst = u64::from_le_bytes(src.try_into().unwrap());
         }
-
         Ok(Self {
             state,
-            _variant: core::marker::PhantomData,
+            _pd: PhantomData,
         })
     }
 }
-
-// Standard Bash hash variants according to section 5.3 and 7.1
-// Bash256: ℓ = 128, output = 2ℓ = 256 bits, block = (1536 - 4×128)/8 = 128 bytes
-// Bash384: ℓ = 192, output = 2ℓ = 384 bits, block = (1536 - 4×192)/8 = 96 bytes
-// Bash512: ℓ = 256, output = 2ℓ = 512 bits, block = (1536 - 4×256)/8 = 64 bytes
-pub(crate) type Bash256Core = BashHashCore<Bash256>;
-pub(crate) type Bash384Core = BashHashCore<Bash384>;
-pub(crate) type Bash512Core = BashHashCore<Bash512>;
