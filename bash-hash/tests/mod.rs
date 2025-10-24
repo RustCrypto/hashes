@@ -29,8 +29,8 @@ test_bash_rand!(
     bash384_rand,
     BashHash384,
     hex!(
-        "3a2932e47780b88aab04c33e0df3c9f53035e4e47daa89e5f8dddf43f4b21c20
-        73d36887684245b87042661c0a3bb8ce"
+        "3a2932e47780b88aab04c33e0df3c9f53035e4e47daa89e5f8dddf43f4b21c20"
+        "73d36887684245b87042661c0a3bb8ce"
     )
 );
 
@@ -38,8 +38,8 @@ test_bash_rand!(
     bash512_rand,
     BashHash512,
     hex!(
-        "f85aacf9fb6fe864d86604fb8d93485b533f29d874b49cd5521ad8afb1c11e8b
-        710f8469b95c6af39147a132787801d194473d1bd7ce24fc23e97dc182bf8a9f"
+        "f85aacf9fb6fe864d86604fb8d93485b533f29d874b49cd5521ad8afb1c11e8b"
+        "710f8469b95c6af39147a132787801d194473d1bd7ce24fc23e97dc182bf8a9f"
     )
 );
 
