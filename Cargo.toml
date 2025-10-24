@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "ascon-hash",
+    "bash-hash",
     "belt-hash",
     "blake2",
     "fsb",
