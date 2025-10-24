@@ -7,7 +7,7 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the bash hash function specified in [STB 34.101.31-2020].
+Pure Rust implementation of the bash hash function specified in [STB 34.101.77-2020].
 
 ## Examples
 ```rust
