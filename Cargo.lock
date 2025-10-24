@@ -35,7 +35,7 @@ version = "0.1.0-rc.0"
 
 [[package]]
 name = "bash-hash"
-version = "0.2.0-rc.1"
+version = "0.1.0"
 dependencies = [
  "base16ct",
  "bash-f",

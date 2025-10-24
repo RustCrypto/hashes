@@ -1,4 +1,4 @@
-name: belt-hash
+name: bash-hash
 
 on:
   pull_request:
