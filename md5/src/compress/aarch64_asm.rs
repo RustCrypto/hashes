@@ -226,11 +226,69 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     asm_op_f!(c, d, a, b, data[14], RC[14], 17);
     asm_op_f!(b, c, d, a, data[15], RC[15], 22);
 
-    // round 2
-    asm_op_g!(a, b, c, d, data[1], RC[16], 5);
-    asm_op_g!(d, a, b, c, data[6], RC[17], 9);
-    asm_op_g!(c, d, a, b, data[11], RC[18], 14);
-    asm_op_g!(b, c, d, a, data[0], RC[19], 20);
+    // round 2 - first 4 G operations with packed constants optimization
+    unsafe {
+        let k2: u64 = MD5_CONSTANTS_PACKED[8];  // Contains RC[16] and RC[17]
+        let k3: u64 = MD5_CONSTANTS_PACKED[9];  // Contains RC[18] and RC[19]
+        
+        core::arch::asm!(
+            // G0: a, b, c, d, data[1], RC[16], 5
+            "and    w8, {b:w}, {d:w}",          // b & d  
+            "bic    w9, {c:w}, {d:w}",          // c & !d
+            "add    w10, {data1:w}, {k2:w}",    // data[1] + RC[16] (lower 32 bits)
+            "add    w10, {a:w}, w10",           // a + data[1] + RC[16]
+            "add    w10, w10, w9",              // a + data[1] + RC[16] + (c & !d)
+            "add    w8, w10, w8",               // ADD shortcut: + (b & d)
+            "ror    w8, w8, #27",               // rotate by 32-5=27
+            "add    {a:w}, {b:w}, w8",          // b + rotated -> new a
+            
+            // G1: d, a, b, c, data[6], RC[17], 9
+            "and    w8, {a:w}, {c:w}",          // a & c (using updated a)
+            "bic    w9, {b:w}, {c:w}",          // b & !c
+            "lsr    {k2}, {k2}, #32",           // get RC[17] from upper 32 bits
+            "add    w10, {data6:w}, {k2:w}",    // data[6] + RC[17]
+            "add    w10, {d:w}, w10",           // d + data[6] + RC[17]
+            "add    w10, w10, w9",              // d + data[6] + RC[17] + (b & !c)
+            "add    w8, w10, w8",               // ADD shortcut: + (a & c)
+            "ror    w8, w8, #23",               // rotate by 32-9=23
+            "add    {d:w}, {a:w}, w8",          // a + rotated -> new d
+            
+            // G2: c, d, a, b, data[11], RC[18], 14
+            "and    w8, {d:w}, {b:w}",          // d & b
+            "bic    w9, {a:w}, {b:w}",          // a & !b
+            "add    w10, {data11:w}, {k3:w}",   // data[11] + RC[18] (lower 32 bits)
+            "add    w10, {c:w}, w10",           // c + data[11] + RC[18]
+            "add    w10, w10, w9",              // c + data[11] + RC[18] + (a & !b)
+            "add    w8, w10, w8",               // ADD shortcut: + (d & b)
+            "ror    w8, w8, #18",               // rotate by 32-14=18
+            "add    {c:w}, {d:w}, w8",          // d + rotated -> new c
+            
+            // G3: b, c, d, a, data[0], RC[19], 20
+            "and    w8, {c:w}, {a:w}",          // c & a
+            "bic    w9, {d:w}, {a:w}",          // d & !a
+            "lsr    {k3}, {k3}, #32",           // get RC[19] from upper 32 bits
+            "add    w10, {data0:w}, {k3:w}",    // data[0] + RC[19]
+            "add    w10, {b:w}, w10",           // b + data[0] + RC[19]
+            "add    w10, w10, w9",              // b + data[0] + RC[19] + (d & !a)
+            "add    w8, w10, w8",               // ADD shortcut: + (c & a)
+            "ror    w8, w8, #12",               // rotate by 32-20=12
+            "add    {b:w}, {c:w}, w8",          // c + rotated -> new b
+            
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            data1 = in(reg) data[1],
+            data6 = in(reg) data[6],
+            data11 = in(reg) data[11],
+            data0 = in(reg) data[0],
+            k2 = in(reg) k2,
+            k3 = in(reg) k3,
+            out("w8") _,
+            out("w9") _,
+            out("w10") _,
+        );
+    }
 
     asm_op_g!(a, b, c, d, data[5], RC[20], 5);
     asm_op_g!(d, a, b, c, data[10], RC[21], 9);
