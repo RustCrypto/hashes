@@ -55,13 +55,13 @@ macro_rules! asm_op_g {
     ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
         unsafe {
             core::arch::asm!(
-                // Animetosho's G shortcut: use ADD instead of OR for better scheduling
-                "and    w8, {b:w}, {d:w}",      // b & d  
-                "bic    w9, {c:w}, {d:w}",      // c & !d
-                "add    w10, {a:w}, {rc:w}",    // a + rc (delay dependency on b)
+                // Animetosho G function ADD shortcut: delay dependency on b
+                "add    w10, {a:w}, {rc:w}",    // a + rc
                 "add    w10, w10, {m:w}",       // a + rc + m
-                "add    w10, w10, w9",          // a + rc + m + (c & !d)  
-                "add    w8, w10, w8",           // add (b & d) - use ADD not OR!
+                "bic    w9, {c:w}, {d:w}",      // c & !d (no dependency on b)
+                "add    w10, w10, w9",          // a + rc + m + (c & !d)
+                "and    w8, {b:w}, {d:w}",      // b & d (now we depend on b)
+                "add    w8, w10, w8",           // a + rc + m + (c & !d) + (b & d)
                 "ror    w8, w8, #{ror}",        // rotate
                 "add    {a:w}, {b:w}, w8",      // b + rotated_result
                 a = inout(reg) $a,
@@ -83,11 +83,11 @@ macro_rules! asm_op_h {
     ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
         unsafe {
             core::arch::asm!(
-                // Optimized H function: delay dependency on b for better scheduling
-                "add    w9, {m:w}, {rc:w}",     // m + rc first (no dependency)
-                "eor    w8, {c:w}, {d:w}",      // c ^ d first (no dependency on b)
+                // Standard H function: b ^ c ^ d
+                "eor    w8, {b:w}, {c:w}",      // b ^ c
+                "add    w9, {m:w}, {rc:w}",     // m + rc
+                "eor    w8, w8, {d:w}",         // (b ^ c) ^ d = b ^ c ^ d
                 "add    w9, {a:w}, w9",         // a + m + rc 
-                "eor    w8, w8, {b:w}",         // (c ^ d) ^ b = b ^ c ^ d (delay b use)
                 "add    w8, w9, w8",            // add h_result
                 "ror    w8, w8, #{ror}",        // rotate
                 "add    {a:w}, {b:w}, w8",      // b + rotated_result
@@ -109,11 +109,12 @@ macro_rules! asm_op_i {
     ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
         unsafe {
             core::arch::asm!(
-                // Optimize I function with same pattern
-                "orn    w8, {b:w}, {d:w}",      // b | !d (OR NOT)
-                "add    w9, {m:w}, {rc:w}",     // m + rc in parallel
-                "eor    w8, w8, {c:w}",         // c ^ (b | !d)
+                // Standard I function: c ^ (b | !d)
+                "mvn    w8, {d:w}",             // !d (bitwise NOT)
+                "add    w9, {m:w}, {rc:w}",     // m + rc
+                "orr    w8, {b:w}, w8",         // b | !d
                 "add    w9, {a:w}, w9",         // a + m + rc
+                "eor    w8, {c:w}, w8",         // c ^ (b | !d)
                 "add    w8, w9, w8",            // add i_result
                 "ror    w8, w8, #{ror}",        // rotate
                 "add    {a:w}, {b:w}, w8",      // b + rotated_result
