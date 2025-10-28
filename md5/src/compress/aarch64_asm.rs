@@ -7,7 +7,6 @@ use crate::consts::RC;
 // For now, we'll optimize the I function with ORN instruction (available in scalar AArch64)
 
 // Pack constants into 64-bit values for more efficient loading with ldp
-#[allow(dead_code)]
 static MD5_CONSTANTS_PACKED: [u64; 32] = [
     // F round constants (packed pairs)
     0xe8c7b756d76aa478,
