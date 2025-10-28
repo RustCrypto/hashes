@@ -181,12 +181,11 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     
     // Additional optimizations: better instruction scheduling and reduced dependencies
 
-    // round 1 - first 4 operations with packed constants optimization
+    // round 1 - first 4 operations with ldp constants optimization
     unsafe {
-        let k0: u64 = MD5_CONSTANTS_PACKED[0]; // Contains RC[0] and RC[1]
-        let k1: u64 = MD5_CONSTANTS_PACKED[1]; // Contains RC[2] and RC[3]
-        
         core::arch::asm!(
+            // Load first two constant pairs with ldp
+            "ldp    {k0}, {k1}, [{const_ptr}]",  // Load RC[0,1] and RC[2,3] pairs
             // F0: a, b, c, d, data[0], RC[0], 7
             "and    w8, {b:w}, {c:w}",          // b & c
             "bic    w9, {d:w}, {b:w}",          // d & !b
@@ -237,8 +236,9 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             data1 = in(reg) cache1,
             data2 = in(reg) cache2, 
             data3 = in(reg) cache3,
-            k0 = in(reg) k0,
-            k1 = in(reg) k1,
+            k0 = out(reg) _,
+            k1 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
             out("w8") _,
             out("w9") _,
             out("w10") _,
@@ -260,12 +260,11 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     asm_op_f!(c, d, a, b, cache14, RC[14], 17);
     asm_op_f!(b, c, d, a, cache15, RC[15], 22);
 
-    // round 2 - first 4 G operations with packed constants optimization
+    // round 2 - first 4 G operations with ldp constants optimization
     unsafe {
-        let k2: u64 = MD5_CONSTANTS_PACKED[8];  // Contains RC[16] and RC[17]
-        let k3: u64 = MD5_CONSTANTS_PACKED[9];  // Contains RC[18] and RC[19]
-        
         core::arch::asm!(
+            // Load G round constant pairs with ldp  
+            "ldp    {k2}, {k3}, [{const_ptr}, #64]", // Load RC[16,17] and RC[18,19] pairs
             // G0: a, b, c, d, cache1, RC[16], 5
             "and    w8, {b:w}, {d:w}",          // b & d  
             "bic    w9, {c:w}, {d:w}",          // c & !d
@@ -316,8 +315,9 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             data6 = in(reg) cache6,
             data11 = in(reg) cache11,
             data0 = in(reg) cache0,
-            k2 = in(reg) k2,
-            k3 = in(reg) k3,
+            k2 = out(reg) _,
+            k3 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
             out("w8") _,
             out("w9") _,
             out("w10") _,
