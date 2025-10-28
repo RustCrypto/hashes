@@ -2,6 +2,9 @@ cfg_if::cfg_if! {
     if #[cfg(feature = "force-soft")] {
         mod soft;
         use soft::compress as compress_inner;
+    } else if #[cfg(target_arch = "aarch64")] {
+        mod aarch64_asm;
+        use aarch64_asm::compress as compress_inner;
     } else if #[cfg(target_arch = "loongarch64")] {
         mod loongarch64_asm;
         use loongarch64_asm::compress as compress_inner;
