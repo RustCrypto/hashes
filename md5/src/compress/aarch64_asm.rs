@@ -109,19 +109,24 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         );
     }
 
-    // Optimized F rounds (0-7): Larger asm block for better cross-round optimization
-    // Limited by Rust's register allocation but still better than individual macros
+    // Optimized F rounds (0-7): Enhanced memory access patterns for better bandwidth utilization
+    // Focus on reducing memory stalls and improving superscalar dispatch
     unsafe {
         core::arch::asm!(
-            // Load constants for F0-F7
+            // Ultra-aggressive constant and data prefetching for maximum memory bandwidth
             "ldp    x10, x11, [{kptr}]",        // RC[0,1] and RC[2,3]
             "ldp    x12, x13, [{kptr}, #16]",   // RC[4,5] and RC[6,7]
 
-            // F0: A += F(B,C,D) + cache0 + RC[0]; A = rotl(A, 7) + B - improved scheduling
+            // Prefetch all subsequent round constants aggressively
+            "prfm   pldl1keep, [{kptr}, #32]",  // Prefetch G round constants
+            "prfm   pldl1keep, [{kptr}, #64]",  // Prefetch H round constants
+            "prfm   pldl1keep, [{kptr}, #96]",  // Prefetch I round constants
+
+            // F0: A += F(B,C,D) + cache0 + RC[0]; A = rotl(A, 7) + B - optimized pipeline
             "eor    w8, {c:w}, {d:w}",          // c ^ d (F function start)
             "add    w9, {cache0:w}, w10",       // cache0 + RC[0] (parallel)
             "and    w8, w8, {b:w}",             // (c ^ d) & b
-            "lsr    x10, x10, #32",             // prepare RC[1] (early)
+            "lsr    x10, x10, #32",             // prepare RC[1] (early, dual-issue)
             "eor    w8, w8, {d:w}",             // F(b,c,d)
             "add    {a:w}, {a:w}, w9",          // a += cache0 + RC[0]
             "add    {a:w}, {a:w}, w8",          // a += F(b,c,d)
@@ -601,48 +606,49 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
 
     // round 3 - H function
 
-    // H rounds 32-35: optimized assembly block for maximum performance
+    // H rounds 32-35: interleaved pair optimization for better superscalar utilization
     unsafe {
         core::arch::asm!(
-            // Load H round constant pairs with ldp
+            // Load both constant pairs early for better memory bandwidth
             "ldp    {k2}, {k3}, [{const_ptr}, #128]", // Load RC[32,33] and RC[34,35] pairs
-            // H0: a, b, c, d, cache5, RC[32], 4 - optimized H function (b ^ c ^ d)
-            "add    w10, {data5:w}, {k2:w}",     // cache5 + RC[32] (lower 32 bits) - early
-            "eor    w8, {c:w}, {d:w}",           // c ^ d (first part of H function)
-            "add    w10, {a:w}, w10",            // a + cache5 + RC[32]
-            "eor    w8, w8, {b:w}",              // H(b,c,d) = b ^ c ^ d
-            "add    w8, w10, w8",                // a + cache5 + RC[32] + H(b,c,d)
-            "lsr    {k2}, {k2}, #32",            // prepare RC[33] for next round
-            "ror    w8, w8, #28",                // rotate by 32-4=28
-            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
 
-            // H1: d, a, b, c, cache8, RC[33], 11 - improved constant handling
-            "add    w10, {data8:w}, {k2:w}",     // cache8 + RC[33] - early
-            "eor    w8, {b:w}, {c:w}",           // b ^ c (with updated values)
-            "add    w10, {d:w}, w10",            // d + cache8 + RC[33]
-            "eor    w8, w8, {a:w}",              // H(a,b,c) = a ^ b ^ c (using updated a)
-            "add    w8, w10, w8",                // d + cache8 + RC[33] + H(a,b,c)
-            "ror    w8, w8, #21",                // rotate by 32-11=21
-            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+            // Interleave H0 and H2 setup - independent operations can run in parallel
+            "add    w10, {data5:w}, {k2:w}",     // H0: cache5 + RC[32] (lower 32 bits)
+            "add    w12, {data11:w}, {k3:w}",    // H2: cache11 + RC[34] (lower 32 bits) - parallel
+            "eor    w8, {c:w}, {d:w}",           // H0: c ^ d (first part of H function)
+            "add    w10, {a:w}, w10",            // H0: a + cache5 + RC[32]
+            "eor    w8, w8, {b:w}",              // H0: H(b,c,d) = b ^ c ^ d
+            "lsr    {k2}, {k2}, #32",            // prepare RC[33] for H1
+            "add    w8, w10, w8",                // H0: a + cache5 + RC[32] + H(b,c,d)
+            "ror    w8, w8, #28",                // H0: rotate by 32-4=28
+            "add    {a:w}, {b:w}, w8",           // H0: b + rotated -> new a
 
-            // H2: c, d, a, b, cache11, RC[34], 16 - improved register usage
-            "add    w10, {data11:w}, {k3:w}",    // cache11 + RC[34] (lower 32 bits) - early
-            "eor    w8, {a:w}, {b:w}",           // a ^ b (with updated a)
-            "add    w10, {c:w}, w10",            // c + cache11 + RC[34]
-            "eor    w8, w8, {d:w}",              // H(d,a,b) = d ^ a ^ b (using updated d)
-            "add    w8, w10, w8",                // c + cache11 + RC[34] + H(d,a,b)
-            "lsr    {k3}, {k3}, #32",            // prepare RC[35] for next round
-            "ror    w8, w8, #16",                // rotate by 32-16=16
-            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+            // Interleave H1 and H3 setup - use updated state from H0
+            "add    w11, {data8:w}, {k2:w}",     // H1: cache8 + RC[33]
+            "lsr    {k3}, {k3}, #32",            // prepare RC[35] for H3 - parallel
+            "eor    w9, {b:w}, {c:w}",           // H1: b ^ c (with updated values)
+            "add    w13, {data14:w}, {k3:w}",    // H3: cache14 + RC[35] - parallel
+            "add    w11, {d:w}, w11",            // H1: d + cache8 + RC[33]
+            "eor    w9, w9, {a:w}",              // H1: H(a,b,c) = a ^ b ^ c (using updated a)
+            "add    w9, w11, w9",                // H1: d + cache8 + RC[33] + H(a,b,c)
+            "ror    w9, w9, #21",                // H1: rotate by 32-11=21
+            "add    {d:w}, {a:w}, w9",           // H1: a + rotated -> new d
 
-            // H3: b, c, d, a, cache14, RC[35], 23 - optimized dependencies
-            "add    w10, {data14:w}, {k3:w}",    // cache14 + RC[35] - early
-            "eor    w8, {d:w}, {a:w}",           // d ^ a (with updated d)
-            "add    w10, {b:w}, w10",            // b + cache14 + RC[35]
-            "eor    w8, w8, {c:w}",              // H(c,d,a) = c ^ d ^ a (using updated c)
-            "add    w8, w10, w8",                // b + cache14 + RC[35] + H(c,d,a)
-            "ror    w8, w8, #9",                 // rotate by 32-23=9
-            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+            // Complete H2 using prefetched values - better pipeline utilization
+            "eor    w8, {a:w}, {b:w}",           // H2: a ^ b (with updated a)
+            "add    w12, {c:w}, w12",            // H2: c + cache11 + RC[34] (reuse prefetched w12)
+            "eor    w8, w8, {d:w}",              // H2: H(d,a,b) = d ^ a ^ b (using updated d)
+            "add    w8, w12, w8",                // H2: c + cache11 + RC[34] + H(d,a,b)
+            "ror    w8, w8, #16",                // H2: rotate by 32-16=16
+            "add    {c:w}, {d:w}, w8",           // H2: d + rotated -> new c
+
+            // Complete H3 using prefetched values - minimize dependencies
+            "eor    w9, {d:w}, {a:w}",           // H3: d ^ a (with updated d)
+            "add    w13, {b:w}, w13",            // H3: b + cache14 + RC[35] (reuse prefetched w13)
+            "eor    w9, w9, {c:w}",              // H3: H(c,d,a) = c ^ d ^ a (using updated c)
+            "add    w9, w13, w9",                // H3: b + cache14 + RC[35] + H(c,d,a)
+            "ror    w9, w9, #9",                 // H3: rotate by 32-23=9
+            "add    {b:w}, {c:w}, w9",           // H3: c + rotated -> new b
 
             a = inout(reg) a,
             b = inout(reg) b,
@@ -656,51 +662,56 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             k3 = out(reg) _,
             const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
             out("w8") _,
+            out("w9") _,
             out("w10") _,
+            out("w11") _,
+            out("w12") _,
+            out("w13") _,
         );
     }
-    // H rounds 36-39: optimized assembly block to match previous performance
+    // H rounds 36-39: interleaved pair optimization for better superscalar utilization
     unsafe {
         core::arch::asm!(
-            // Load H round constant pairs with ldp
+            // Load both constant pairs early for better memory bandwidth
             "ldp    {k2}, {k3}, [{const_ptr}, #144]", // Load RC[36,37] and RC[38,39] pairs
-            // H4: a, b, c, d, cache1, RC[36], 4 - optimized H function
-            "add    w10, {data1:w}, {k2:w}",     // cache1 + RC[36] (lower 32 bits) - early
-            "eor    w8, {c:w}, {d:w}",           // c ^ d (first part of H function)
-            "add    w10, {a:w}, w10",            // a + cache1 + RC[36]
-            "eor    w8, w8, {b:w}",              // H(b,c,d) = b ^ c ^ d
-            "add    w8, w10, w8",                // a + cache1 + RC[36] + H(b,c,d)
-            "lsr    {k2}, {k2}, #32",            // prepare RC[37] for next round
-            "ror    w8, w8, #28",                // rotate by 32-4=28
-            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
 
-            // H5: d, a, b, c, cache4, RC[37], 11 - improved constant handling
-            "add    w10, {data4:w}, {k2:w}",     // cache4 + RC[37] - early
-            "eor    w8, {b:w}, {c:w}",           // b ^ c (with updated values)
-            "add    w10, {d:w}, w10",            // d + cache4 + RC[37]
-            "eor    w8, w8, {a:w}",              // H(a,b,c) = a ^ b ^ c (using updated a)
-            "add    w8, w10, w8",                // d + cache4 + RC[37] + H(a,b,c)
-            "ror    w8, w8, #21",                // rotate by 32-11=21
-            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+            // Interleave H4 and H6 setup - independent operations can run in parallel
+            "add    w10, {data1:w}, {k2:w}",     // H4: cache1 + RC[36] (lower 32 bits)
+            "add    w12, {data7:w}, {k3:w}",     // H6: cache7 + RC[38] (lower 32 bits) - parallel
+            "eor    w8, {c:w}, {d:w}",           // H4: c ^ d (first part of H function)
+            "add    w10, {a:w}, w10",            // H4: a + cache1 + RC[36]
+            "eor    w8, w8, {b:w}",              // H4: H(b,c,d) = b ^ c ^ d
+            "lsr    {k2}, {k2}, #32",            // prepare RC[37] for H5
+            "add    w8, w10, w8",                // H4: a + cache1 + RC[36] + H(b,c,d)
+            "ror    w8, w8, #28",                // H4: rotate by 32-4=28
+            "add    {a:w}, {b:w}, w8",           // H4: b + rotated -> new a
 
-            // H6: c, d, a, b, cache7, RC[38], 16 - improved register usage
-            "add    w10, {data7:w}, {k3:w}",     // cache7 + RC[38] (lower 32 bits) - early
-            "eor    w8, {a:w}, {b:w}",           // a ^ b (with updated a)
-            "add    w10, {c:w}, w10",            // c + cache7 + RC[38]
-            "eor    w8, w8, {d:w}",              // H(d,a,b) = d ^ a ^ b (using updated d)
-            "add    w8, w10, w8",                // c + cache7 + RC[38] + H(d,a,b)
-            "lsr    {k3}, {k3}, #32",            // prepare RC[39] for next round
-            "ror    w8, w8, #16",                // rotate by 32-16=16
-            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+            // Interleave H5 and H7 setup - use updated state from H4
+            "add    w11, {data4:w}, {k2:w}",     // H5: cache4 + RC[37]
+            "lsr    {k3}, {k3}, #32",            // prepare RC[39] for H7 - parallel
+            "eor    w9, {b:w}, {c:w}",           // H5: b ^ c (with updated values)
+            "add    w13, {data10:w}, {k3:w}",    // H7: cache10 + RC[39] - parallel
+            "add    w11, {d:w}, w11",            // H5: d + cache4 + RC[37]
+            "eor    w9, w9, {a:w}",              // H5: H(a,b,c) = a ^ b ^ c (using updated a)
+            "add    w9, w11, w9",                // H5: d + cache4 + RC[37] + H(a,b,c)
+            "ror    w9, w9, #21",                // H5: rotate by 32-11=21
+            "add    {d:w}, {a:w}, w9",           // H5: a + rotated -> new d
 
-            // H7: b, c, d, a, cache10, RC[39], 23 - optimized dependencies
-            "add    w10, {data10:w}, {k3:w}",    // cache10 + RC[39] - early
-            "eor    w8, {d:w}, {a:w}",           // d ^ a (with updated d)
-            "add    w10, {b:w}, w10",            // b + cache10 + RC[39]
-            "eor    w8, w8, {c:w}",              // H(c,d,a) = c ^ d ^ a (using updated c)
-            "add    w8, w10, w8",                // b + cache10 + RC[39] + H(c,d,a)
-            "ror    w8, w8, #9",                 // rotate by 32-23=9
-            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+            // Complete H6 using prefetched values - better pipeline utilization
+            "eor    w8, {a:w}, {b:w}",           // H6: a ^ b (with updated a)
+            "add    w12, {c:w}, w12",            // H6: c + cache7 + RC[38] (reuse prefetched w12)
+            "eor    w8, w8, {d:w}",              // H6: H(d,a,b) = d ^ a ^ b (using updated d)
+            "add    w8, w12, w8",                // H6: c + cache7 + RC[38] + H(d,a,b)
+            "ror    w8, w8, #16",                // H6: rotate by 32-16=16
+            "add    {c:w}, {d:w}, w8",           // H6: d + rotated -> new c
+
+            // Complete H7 using prefetched values - minimize dependencies
+            "eor    w9, {d:w}, {a:w}",           // H7: d ^ a (with updated d)
+            "add    w13, {b:w}, w13",            // H7: b + cache10 + RC[39] (reuse prefetched w13)
+            "eor    w9, w9, {c:w}",              // H7: H(c,d,a) = c ^ d ^ a (using updated c)
+            "add    w9, w13, w9",                // H7: b + cache10 + RC[39] + H(c,d,a)
+            "ror    w9, w9, #9",                 // H7: rotate by 32-23=9
+            "add    {b:w}, {c:w}, w9",           // H7: c + rotated -> new b
 
             a = inout(reg) a,
             b = inout(reg) b,
@@ -714,7 +725,11 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             k3 = out(reg) _,
             const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
             out("w8") _,
+            out("w9") _,
             out("w10") _,
+            out("w11") _,
+            out("w12") _,
+            out("w13") _,
         );
     }
     // H rounds 40-43: optimized assembly block for consistent performance
