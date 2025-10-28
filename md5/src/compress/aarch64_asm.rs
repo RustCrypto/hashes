@@ -204,43 +204,43 @@ macro_rules! rf4_integrated {
 
                 // F round 0: A += F(B,C,D) + cache0 + RC[k]; A = rotl(A, 7) + B
                 "eor    w12, {c:w}, {d:w}",              // c ^ d (independent F calc first)
-                "add    {a:w}, {a:w}, {cache0:w}",       // a += cache0 (parallel)
+                "add    w8, {a:w}, {cache0:w}",          // a + cache0 (use w8 to avoid dependency)
                 "and    w12, w12, {b:w}",                // (c ^ d) & b (parallel)
-                "add    {a:w}, {a:w}, w10",              // a += RC[k0] (lower 32 bits)
+                "add    w8, w8, w10",                    // add RC[k0] (parallel)
                 "lsr    x10, x10, #32",                  // shift for next constant (early)
                 "eor    w12, w12, {d:w}",                // F(b,c,d)
-                "add    {a:w}, {a:w}, w12",              // a += F(b,c,d)
+                "add    {a:w}, w8, w12",                 // combine all additions
                 "ror    {a:w}, {a:w}, #25",              // rotate by 25 (optimized)
                 "add    {a:w}, {a:w}, {b:w}",            // a += b
 
                 // F round 1: D += F(A,B,C) + cache1 + RC[k+1]; D = rotl(D, 12) + A
                 "eor    w12, {b:w}, {c:w}",              // b ^ c (independent calc first)
-                "add    {d:w}, {d:w}, {cache1:w}",       // d += cache1 (parallel)
-                "and    w12, w12, {a:w}",                // (b ^ c) & a
-                "add    {d:w}, {d:w}, w10",              // d += RC[k+1]
+                "add    w8, {d:w}, {cache1:w}",          // d + cache1 (use w8 to avoid dependency)
+                "and    w12, w12, {a:w}",                // (b ^ c) & a (parallel)
+                "add    w8, w8, w10",                    // add RC[k+1] (parallel)
                 "eor    w12, w12, {c:w}",                // F(a,b,c)
-                "add    {d:w}, {d:w}, w12",              // d += F(a,b,c)
+                "add    {d:w}, w8, w12",                 // combine all additions
                 "ror    {d:w}, {d:w}, #20",              // rotate by 20 (optimized)
                 "add    {d:w}, {d:w}, {a:w}",            // d += a
 
                 // F round 2: C += F(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 17) + D
                 "eor    w12, {a:w}, {b:w}",              // a ^ b (independent calc first)
-                "add    {c:w}, {c:w}, {cache2:w}",       // c += cache2 (parallel)
-                "and    w12, w12, {d:w}",                // (a ^ b) & d
-                "add    {c:w}, {c:w}, w11",              // c += RC[k+2] (lower k1)
+                "add    w9, {c:w}, {cache2:w}",          // c + cache2 (use w9 to avoid dependency)
+                "and    w12, w12, {d:w}",                // (a ^ b) & d (parallel)
+                "add    w9, w9, w11",                    // add RC[k+2] (parallel)
                 "lsr    x11, x11, #32",                  // shift for next constant (early)
                 "eor    w12, w12, {b:w}",                // F(d,a,b)
-                "add    {c:w}, {c:w}, w12",              // c += F(d,a,b)
+                "add    {c:w}, w9, w12",                 // combine all additions
                 "ror    {c:w}, {c:w}, #15",              // rotate by 15 (optimized)
                 "add    {c:w}, {c:w}, {d:w}",            // c += d
 
                 // F round 3: B += F(C,D,A) + cache3 + RC[k+3]; B = rotl(B, 22) + C
                 "eor    w12, {d:w}, {a:w}",              // d ^ a (independent calc first)
-                "add    {b:w}, {b:w}, {cache3:w}",       // b += cache3 (parallel)
-                "and    w12, w12, {c:w}",                // (d ^ a) & c
-                "add    {b:w}, {b:w}, w11",              // b += RC[k+3]
+                "add    w8, {b:w}, {cache3:w}",          // b + cache3 (use w8 to avoid dependency)
+                "and    w12, w12, {c:w}",                // (d ^ a) & c (parallel)
+                "add    w8, w8, w11",                    // add RC[k+3] (parallel)
                 "eor    w12, w12, {a:w}",                // F(c,d,a)
-                "add    {b:w}, {b:w}, w12",              // b += F(c,d,a)
+                "add    {b:w}, w8, w12",                 // combine all additions
                 "ror    {b:w}, {b:w}, #10",              // rotate by 10 (optimized)
                 "add    {b:w}, {b:w}, {c:w}",            // b += c
 
@@ -272,12 +272,12 @@ macro_rules! rg4_integrated {
 
                 // G round 0: A += G(B,C,D) + cache0 + RC[k]; A = rotl(A, 5) + B
                 "bic    w12, {c:w}, {d:w}",              // c & ~d (independent G calc first)
-                "add    {a:w}, {a:w}, {cache0:w}",       // a += cache0 (parallel)
+                "add    w9, {a:w}, {cache0:w}",          // a + cache0 (use w9 to avoid dependency)
                 "and    w8, {d:w}, {b:w}",               // d & b (parallel)
-                "add    {a:w}, {a:w}, w10",              // a += RC[k0] (lower 32 bits)
+                "add    w9, w9, w10",                    // add RC[k0] (parallel)
                 "lsr    x10, x10, #32",                  // shift for next constant (early)
                 "orr    w12, w12, w8",                   // G(b,c,d)
-                "add    {a:w}, {a:w}, w12",              // a += G(b,c,d)
+                "add    {a:w}, w9, w12",                 // combine all additions
                 "ror    {a:w}, {a:w}, #27",              // rotate 32-5=27
                 "add    {a:w}, {a:w}, {b:w}",            // a += b
 
@@ -285,7 +285,7 @@ macro_rules! rg4_integrated {
                 "bic    w12, {b:w}, {c:w}",              // b & ~c (independent G calc first)
                 "add    {d:w}, {d:w}, {cache1:w}",       // d += cache1 (parallel)
                 "and    w8, {c:w}, {a:w}",               // c & a (parallel)
-                "add    {d:w}, {d:w}, w10",              // d += RC[k+1]
+                "add    {d:w}, {d:w}, w10",              // d += RC[k+1] (parallel)
                 "orr    w12, w12, w8",                   // G(a,b,c)
                 "add    {d:w}, {d:w}, w12",              // d += G(a,b,c)
                 "ror    {d:w}, {d:w}, #23",              // rotate 32-9=23
@@ -293,20 +293,20 @@ macro_rules! rg4_integrated {
 
                 // G round 2: C += G(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 14) + D
                 "bic    w12, {a:w}, {b:w}",              // a & ~b (independent G calc first)
-                "add    {c:w}, {c:w}, {cache2:w}",       // c += cache2 (parallel)
+                "add    w10, {c:w}, {cache2:w}",         // c + cache2 (use w10 to avoid dependency)
                 "and    w8, {b:w}, {d:w}",               // b & d (parallel)
-                "add    {c:w}, {c:w}, w11",              // c += RC[k+2] (lower k1)
+                "add    w10, w10, w11",                  // add RC[k+2] (parallel)
                 "lsr    x11, x11, #32",                  // shift for next constant (early)
                 "orr    w12, w12, w8",                   // G(d,a,b)
-                "add    {c:w}, {c:w}, w12",              // c += G(d,a,b)
+                "add    {c:w}, w10, w12",                // combine all additions
                 "ror    {c:w}, {c:w}, #18",              // rotate 32-14=18
                 "add    {c:w}, {c:w}, {d:w}",            // c += d
 
                 // G round 3: B += G(C,D,A) + cache3 + RC[k+3]; B = rotl(B, 20) + C
-                "add    {b:w}, {b:w}, {cache3:w}",       // b += cache3
-                "bic    w12, {d:w}, {a:w}",              // d & ~a
-                "add    {b:w}, {b:w}, w11",              // b += RC[k+3]
-                "and    w8, {a:w}, {c:w}",               // a & c
+                "bic    w12, {d:w}, {a:w}",              // d & ~a (independent G calc first)
+                "add    {b:w}, {b:w}, {cache3:w}",       // b += cache3 (parallel)
+                "and    w8, {a:w}, {c:w}",               // a & c (parallel)
+                "add    {b:w}, {b:w}, w11",              // b += RC[k+3] (parallel)
                 "orr    w12, w12, w8",                   // G(c,d,a)
                 "add    {b:w}, {b:w}, w12",              // b += G(c,d,a)
                 "ror    {b:w}, {b:w}, #12",              // rotate 32-20=12
@@ -342,8 +342,8 @@ macro_rules! ri4_integrated {
                 // I round 0: A += I(B,C,D) + cache0 + RC[k]; A = rotl(A, 6) + B
                 "orn    w12, {b:w}, {d:w}",              // b | ~d (independent I function calc)
                 "add    {a:w}, {a:w}, {cache0:w}",       // a += cache0 (parallel)
-                "eor    w12, w12, {c:w}",                // (b | ~d) ^ c = I(b,c,d)
-                "add    {a:w}, {a:w}, w10",              // a += RC[k0] (lower 32 bits)
+                "add    {a:w}, {a:w}, w10",              // a += RC[k0] (early)
+                "eor    w12, w12, {c:w}",                // (b | ~d) ^ c = I(b,c,d) 
                 "lsr    x10, x10, #32",                  // shift for next constant (early)
                 "add    {a:w}, {a:w}, w12",              // a += I(b,c,d)
                 "ror    {a:w}, {a:w}, #26",              // rotate 32-6=26
@@ -351,29 +351,29 @@ macro_rules! ri4_integrated {
 
                 // I round 1: D += I(A,B,C) + cache1 + RC[k+1]; D = rotl(D, 10) + A
                 "orn    w12, {a:w}, {c:w}",              // a | ~c (independent I function calc)
-                "add    {d:w}, {d:w}, {cache1:w}",       // d += cache1 (parallel)
-                "eor    w12, w12, {b:w}",                // (a | ~c) ^ b = I(a,b,c)
-                "add    {d:w}, {d:w}, w10",              // d += RC[k+1]
-                "add    {d:w}, {d:w}, w12",              // d += I(a,b,c)
+                "add    w9, {d:w}, {cache1:w}",          // d + cache1 (use w9 to avoid dependency)
+                "eor    w12, w12, {b:w}",                // (a | ~c) ^ b = I(a,b,c) (parallel)
+                "add    w9, w9, w10",                    // add RC[k+1] (parallel)
+                "add    {d:w}, w9, w12",                 // combine all additions
                 "ror    {d:w}, {d:w}, #22",              // rotate 32-10=22
                 "add    {d:w}, {d:w}, {a:w}",            // d += a
 
                 // I round 2: C += I(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 15) + D
                 "orn    w12, {d:w}, {b:w}",              // d | ~b (independent I function calc)
-                "add    {c:w}, {c:w}, {cache2:w}",       // c += cache2 (parallel)
-                "eor    w12, w12, {a:w}",                // (d | ~b) ^ a = I(d,a,b)
-                "add    {c:w}, {c:w}, w11",              // c += RC[k+2] (lower k1)
+                "add    w8, {c:w}, {cache2:w}",          // c + cache2 (use w8 to avoid dependency)
+                "eor    w12, w12, {a:w}",                // (d | ~b) ^ a = I(d,a,b) (parallel)
+                "add    w8, w8, w11",                    // add RC[k+2] (parallel)
                 "lsr    x11, x11, #32",                  // shift for next constant (early)
-                "add    {c:w}, {c:w}, w12",              // c += I(d,a,b)
+                "add    {c:w}, w8, w12",                 // combine all additions
                 "ror    {c:w}, {c:w}, #17",              // rotate 32-15=17
                 "add    {c:w}, {c:w}, {d:w}",            // c += d
 
                 // I round 3: B += I(C,D,A) + cache3 + RC[k+3]; B = rotl(B, 21) + C
                 "orn    w12, {c:w}, {a:w}",              // c | ~a (independent I function calc)
-                "add    {b:w}, {b:w}, {cache3:w}",       // b += cache3 (parallel)
-                "eor    w12, w12, {d:w}",                // (c | ~a) ^ d = I(c,d,a)
-                "add    {b:w}, {b:w}, w11",              // b += RC[k+3]
-                "add    {b:w}, {b:w}, w12",              // b += I(c,d,a)
+                "add    w9, {b:w}, {cache3:w}",          // b + cache3 (use w9 to avoid dependency)
+                "eor    w12, w12, {d:w}",                // (c | ~a) ^ d = I(c,d,a) (parallel)
+                "add    w9, w9, w11",                    // add RC[k+3] (parallel)
+                "add    {b:w}, w9, w12",                 // combine all additions
                 "ror    {b:w}, {b:w}, #11",              // rotate 32-21=11
                 "add    {b:w}, {b:w}, {c:w}",            // b += c
 
