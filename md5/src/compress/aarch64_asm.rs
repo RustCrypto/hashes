@@ -140,72 +140,7 @@ macro_rules! rh4_integrated {
 }
 
 // Integrated RF4 with data and constant loading - loads from cache array like current approach
-macro_rules! rf4_integrated {
-    ($a:ident, $b:ident, $c:ident, $d:ident, $cache0:ident, $cache1:ident, $cache2:ident, $cache3:ident, $rc0:expr, $rc1:expr, $rc2:expr, $rc3:expr, $const_ptr:expr, $offset:expr) => {
-        unsafe {
-            core::arch::asm!(
-                // Load RC constant pairs with ldp for better throughput
-                "ldp    x10, x11, [{const_ptr}, #{k_offset}]",    // Load RC pair
-
-                // F round 0: A += F(B,C,D) + cache0 + RC[k]; A = rotl(A, 7) + B
-                "eor    w12, {c:w}, {d:w}",              // c ^ d (independent F calc first)
-                "add    w8, {a:w}, {cache0:w}",          // a + cache0 (use w8 to avoid dependency)
-                "and    w12, w12, {b:w}",                // (c ^ d) & b (parallel)
-                "add    w8, w8, w10",                    // add RC[k0] (parallel)
-                "lsr    x10, x10, #32",                  // shift for next constant (early)
-                "eor    w12, w12, {d:w}",                // F(b,c,d)
-                "add    {a:w}, w8, w12",                 // combine all additions
-                "ror    {a:w}, {a:w}, #25",              // rotate by 25 (optimized)
-                "add    {a:w}, {a:w}, {b:w}",            // a += b
-
-                // F round 1: D += F(A,B,C) + cache1 + RC[k+1]; D = rotl(D, 12) + A
-                "eor    w12, {b:w}, {c:w}",              // b ^ c (independent calc first)
-                "add    w8, {d:w}, {cache1:w}",          // d + cache1 (use w8 to avoid dependency)
-                "and    w12, w12, {a:w}",                // (b ^ c) & a (parallel)
-                "add    w8, w8, w10",                    // add RC[k+1] (parallel)
-                "eor    w12, w12, {c:w}",                // F(a,b,c)
-                "add    {d:w}, w8, w12",                 // combine all additions
-                "ror    {d:w}, {d:w}, #20",              // rotate by 20 (optimized)
-                "add    {d:w}, {d:w}, {a:w}",            // d += a
-
-                // F round 2: C += F(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 17) + D
-                "eor    w12, {a:w}, {b:w}",              // a ^ b (independent calc first)
-                "add    w9, {c:w}, {cache2:w}",          // c + cache2 (use w9 to avoid dependency)
-                "and    w12, w12, {d:w}",                // (a ^ b) & d (parallel)
-                "add    w9, w9, w11",                    // add RC[k+2] (parallel)
-                "lsr    x11, x11, #32",                  // shift for next constant (early)
-                "eor    w12, w12, {b:w}",                // F(d,a,b)
-                "add    {c:w}, w9, w12",                 // combine all additions
-                "ror    {c:w}, {c:w}, #15",              // rotate by 15 (optimized)
-                "add    {c:w}, {c:w}, {d:w}",            // c += d
-
-                // F round 3: B += F(C,D,A) + cache3 + RC[k+3]; B = rotl(B, 22) + C
-                "eor    w12, {d:w}, {a:w}",              // d ^ a (independent calc first)
-                "add    w8, {b:w}, {cache3:w}",          // b + cache3 (use w8 to avoid dependency)
-                "and    w12, w12, {c:w}",                // (d ^ a) & c (parallel)
-                "add    w8, w8, w11",                    // add RC[k+3] (parallel)
-                "eor    w12, w12, {a:w}",                // F(c,d,a)
-                "add    {b:w}, w8, w12",                 // combine all additions
-                "ror    {b:w}, {b:w}, #10",              // rotate by 10 (optimized)
-                "add    {b:w}, {b:w}, {c:w}",            // b += c
-
-                a = inout(reg) $a,
-                b = inout(reg) $b,
-                c = inout(reg) $c,
-                d = inout(reg) $d,
-                cache0 = in(reg) $cache0,
-                cache1 = in(reg) $cache1,
-                cache2 = in(reg) $cache2,
-                cache3 = in(reg) $cache3,
-                const_ptr = in(reg) $const_ptr,
-                k_offset = const $offset, // Byte offset for packed constants
-                out("x10") _,
-                out("x11") _,
-                out("w12") _,
-            );
-        }
-    };
-}
+// Macro rf4_integrated removed - all F rounds now use optimized assembly blocks
 
 // Macro rg4_integrated removed - all G rounds now use optimized assembly blocks
 
@@ -700,47 +635,47 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         core::arch::asm!(
             // Load G round constant pairs with ldp
             "ldp    {k2}, {k3}, [{const_ptr}, #96]", // Load RC[24,25] and RC[26,27] pairs
-            // G8: a, b, c, d, cache9, RC[24], 5 - optimized scheduling
-            "add    w10, {data9:w}, {k2:w}",     // cache9 + RC[24] (lower 32 bits) - early
-            "bic    w8, {c:w}, {d:w}",           // c & ~d
-            "add    w10, {a:w}, w10",            // a + cache9 + RC[24]
-            "and    w9, {d:w}, {b:w}",           // d & b
-            "add    w10, w10, w8",               // a + cache9 + RC[24] + (c & ~d)
-            "add    w8, w10, w9",                // ADD shortcut: + (d & b)
-            "ror    w8, w8, #27",                // rotate by 32-5=27
-            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
+            // G8: a, b, c, d, cache9, RC[24], 5 - optimized G function with direct additions
+            "bic    w8, {c:w}, {d:w}",           // c & ~d (start G function early)
+            "add    w10, {data9:w}, {k2:w}",     // cache9 + RC[24] (parallel)
+            "and    w9, {b:w}, {d:w}",           // b & d (parallel)
+            "add    {a:w}, {a:w}, w10",          // a += cache9 + RC[24]
+            "add    {a:w}, {a:w}, w8",           // a += (c & ~d)
+            "add    {a:w}, {a:w}, w9",           // a += (b & d) - direct to target register
+            "ror    {a:w}, {a:w}, #27",          // rotate by 32-5=27
+            "add    {a:w}, {a:w}, {b:w}",        // a += b
             "lsr    {k2}, {k2}, #32",            // prepare RC[25] for next round
 
-            // G9: d, a, b, c, cache14, RC[25], 9 - improved constant handling
-            "add    w10, {data14:w}, {k2:w}",    // cache14 + RC[25] - early
-            "bic    w8, {b:w}, {c:w}",           // b & ~c
-            "add    w10, {d:w}, w10",            // d + cache14 + RC[25]
-            "and    w9, {c:w}, {a:w}",           // c & a (using updated a)
-            "add    w10, w10, w8",               // d + cache14 + RC[25] + (b & ~c)
-            "add    w8, w10, w9",                // ADD shortcut: + (c & a)
-            "ror    w8, w8, #23",                // rotate by 32-9=23
-            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+            // G9: d, a, b, c, cache14, RC[25], 9 - optimized G function with direct additions
+            "bic    w8, {b:w}, {c:w}",           // b & ~c (start G function early)
+            "add    w10, {data14:w}, {k2:w}",    // cache14 + RC[25] (parallel)
+            "and    w9, {a:w}, {c:w}",           // a & c (parallel, using updated a)
+            "add    {d:w}, {d:w}, w10",          // d += cache14 + RC[25]
+            "add    {d:w}, {d:w}, w8",           // d += (b & ~c)
+            "add    {d:w}, {d:w}, w9",           // d += (a & c) - direct to target register
+            "ror    {d:w}, {d:w}, #23",          // rotate by 32-9=23
+            "add    {d:w}, {d:w}, {a:w}",        // d += a
 
-            // G10: c, d, a, b, cache3, RC[26], 14 - improved register usage
-            "add    w10, {data3:w}, {k3:w}",     // cache3 + RC[26] (lower 32 bits) - early
-            "bic    w8, {a:w}, {b:w}",           // a & ~b
-            "add    w10, {c:w}, w10",            // c + cache3 + RC[26]
-            "and    w9, {b:w}, {d:w}",           // b & d
-            "add    w10, w10, w8",               // c + cache3 + RC[26] + (a & ~b)
-            "add    w8, w10, w9",                // ADD shortcut: + (b & d)
-            "ror    w8, w8, #18",                // rotate by 32-14=18
-            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+            // G10: c, d, a, b, cache3, RC[26], 14 - optimized G function with direct additions
+            "bic    w8, {a:w}, {b:w}",           // a & ~b (start G function early)
+            "add    w10, {data3:w}, {k3:w}",     // cache3 + RC[26] (parallel)
+            "and    w9, {d:w}, {b:w}",           // d & b (parallel)
+            "add    {c:w}, {c:w}, w10",          // c += cache3 + RC[26]
+            "add    {c:w}, {c:w}, w8",           // c += (a & ~b)
+            "add    {c:w}, {c:w}, w9",           // c += (d & b) - direct to target register
+            "ror    {c:w}, {c:w}, #18",          // rotate by 32-14=18
+            "add    {c:w}, {c:w}, {d:w}",        // c += d
             "lsr    {k3}, {k3}, #32",            // prepare RC[27] for next round
 
-            // G11: b, c, d, a, cache8, RC[27], 20 - optimized dependencies
-            "add    w10, {data8:w}, {k3:w}",     // cache8 + RC[27] - early
-            "bic    w8, {d:w}, {a:w}",           // d & ~a
-            "add    w10, {b:w}, w10",            // b + cache8 + RC[27]
-            "and    w9, {a:w}, {c:w}",           // a & c
-            "add    w10, w10, w8",               // b + cache8 + RC[27] + (d & ~a)
-            "add    w8, w10, w9",                // ADD shortcut: + (a & c)
-            "ror    w8, w8, #12",                // rotate by 32-20=12
-            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+            // G11: b, c, d, a, cache8, RC[27], 20 - optimized G function with direct additions
+            "bic    w8, {d:w}, {a:w}",           // d & ~a (start G function early)
+            "add    w10, {data8:w}, {k3:w}",     // cache8 + RC[27] (parallel)
+            "and    w9, {c:w}, {a:w}",           // c & a (parallel)
+            "add    {b:w}, {b:w}, w10",          // b += cache8 + RC[27]
+            "add    {b:w}, {b:w}, w8",           // b += (d & ~a)
+            "add    {b:w}, {b:w}, w9",           // b += (c & a) - direct to target register
+            "ror    {b:w}, {b:w}, #12",          // rotate by 32-20=12
+            "add    {b:w}, {b:w}, {c:w}",        // b += c
 
             a = inout(reg) a,
             b = inout(reg) b,
@@ -763,47 +698,47 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         core::arch::asm!(
             // Load G round constant pairs with ldp
             "ldp    {k2}, {k3}, [{const_ptr}, #112]", // Load RC[28,29] and RC[30,31] pairs
-            // G12: a, b, c, d, cache13, RC[28], 5 - optimized scheduling
-            "add    w10, {data13:w}, {k2:w}",    // cache13 + RC[28] (lower 32 bits) - early
-            "bic    w8, {c:w}, {d:w}",           // c & ~d
-            "add    w10, {a:w}, w10",            // a + cache13 + RC[28]
-            "and    w9, {d:w}, {b:w}",           // d & b
-            "add    w10, w10, w8",               // a + cache13 + RC[28] + (c & ~d)
-            "add    w8, w10, w9",                // ADD shortcut: + (d & b)
-            "ror    w8, w8, #27",                // rotate by 32-5=27
-            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
+            // G12: a, b, c, d, cache13, RC[28], 5 - optimized G function with direct additions
+            "bic    w8, {c:w}, {d:w}",           // c & ~d (start G function early)
+            "add    w10, {data13:w}, {k2:w}",    // cache13 + RC[28] (parallel)
+            "and    w9, {b:w}, {d:w}",           // b & d (parallel)
+            "add    {a:w}, {a:w}, w10",          // a += cache13 + RC[28]
+            "add    {a:w}, {a:w}, w8",           // a += (c & ~d)
+            "add    {a:w}, {a:w}, w9",           // a += (b & d) - direct to target register
+            "ror    {a:w}, {a:w}, #27",          // rotate by 32-5=27
+            "add    {a:w}, {a:w}, {b:w}",        // a += b
             "lsr    {k2}, {k2}, #32",            // prepare RC[29] for next round
 
-            // G13: d, a, b, c, cache2, RC[29], 9 - improved constant handling
-            "add    w10, {data2:w}, {k2:w}",     // cache2 + RC[29] - early
-            "bic    w8, {b:w}, {c:w}",           // b & ~c
-            "add    w10, {d:w}, w10",            // d + cache2 + RC[29]
-            "and    w9, {c:w}, {a:w}",           // c & a (using updated a)
-            "add    w10, w10, w8",               // d + cache2 + RC[29] + (b & ~c)
-            "add    w8, w10, w9",                // ADD shortcut: + (c & a)
-            "ror    w8, w8, #23",                // rotate by 32-9=23
-            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+            // G13: d, a, b, c, cache2, RC[29], 9 - optimized G function with direct additions
+            "bic    w8, {b:w}, {c:w}",           // b & ~c (start G function early)
+            "add    w10, {data2:w}, {k2:w}",     // cache2 + RC[29] (parallel)
+            "and    w9, {a:w}, {c:w}",           // a & c (parallel, using updated a)
+            "add    {d:w}, {d:w}, w10",          // d += cache2 + RC[29]
+            "add    {d:w}, {d:w}, w8",           // d += (b & ~c)
+            "add    {d:w}, {d:w}, w9",           // d += (a & c) - direct to target register
+            "ror    {d:w}, {d:w}, #23",          // rotate by 32-9=23
+            "add    {d:w}, {d:w}, {a:w}",        // d += a
 
-            // G14: c, d, a, b, cache7, RC[30], 14 - improved register usage
-            "add    w10, {data7:w}, {k3:w}",     // cache7 + RC[30] (lower 32 bits) - early
-            "bic    w8, {a:w}, {b:w}",           // a & ~b
-            "add    w10, {c:w}, w10",            // c + cache7 + RC[30]
-            "and    w9, {b:w}, {d:w}",           // b & d
-            "add    w10, w10, w8",               // c + cache7 + RC[30] + (a & ~b)
-            "add    w8, w10, w9",                // ADD shortcut: + (b & d)
-            "ror    w8, w8, #18",                // rotate by 32-14=18
-            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+            // G14: c, d, a, b, cache7, RC[30], 14 - optimized G function with direct additions
+            "bic    w8, {a:w}, {b:w}",           // a & ~b (start G function early)
+            "add    w10, {data7:w}, {k3:w}",     // cache7 + RC[30] (parallel)
+            "and    w9, {d:w}, {b:w}",           // d & b (parallel)
+            "add    {c:w}, {c:w}, w10",          // c += cache7 + RC[30]
+            "add    {c:w}, {c:w}, w8",           // c += (a & ~b)
+            "add    {c:w}, {c:w}, w9",           // c += (d & b) - direct to target register
+            "ror    {c:w}, {c:w}, #18",          // rotate by 32-14=18
+            "add    {c:w}, {c:w}, {d:w}",        // c += d
             "lsr    {k3}, {k3}, #32",            // prepare RC[31] for next round
 
-            // G15: b, c, d, a, cache12, RC[31], 20 - optimized dependencies
-            "add    w10, {data12:w}, {k3:w}",    // cache12 + RC[31] - early
-            "bic    w8, {d:w}, {a:w}",           // d & ~a
-            "add    w10, {b:w}, w10",            // b + cache12 + RC[31]
-            "and    w9, {a:w}, {c:w}",           // a & c
-            "add    w10, w10, w8",               // b + cache12 + RC[31] + (d & ~a)
-            "add    w8, w10, w9",                // ADD shortcut: + (a & c)
-            "ror    w8, w8, #12",                // rotate by 32-20=12
-            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+            // G15: b, c, d, a, cache12, RC[31], 20 - optimized G function with direct additions
+            "bic    w8, {d:w}, {a:w}",           // d & ~a (start G function early)
+            "add    w10, {data12:w}, {k3:w}",    // cache12 + RC[31] (parallel)
+            "and    w9, {c:w}, {a:w}",           // c & a (parallel)
+            "add    {b:w}, {b:w}, w10",          // b += cache12 + RC[31]
+            "add    {b:w}, {b:w}, w8",           // b += (d & ~a)
+            "add    {b:w}, {b:w}, w9",           // b += (c & a) - direct to target register
+            "ror    {b:w}, {b:w}, #12",          // rotate by 32-20=12
+            "add    {b:w}, {b:w}, {c:w}",        // b += c
 
             a = inout(reg) a,
             b = inout(reg) b,
