@@ -156,9 +156,9 @@ macro_rules! rh4_integrated {
                 "add    {d:w}, {a:w}, w8",               // a + rotated_result
 
                 // H round 2: C += H(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 16) + D
-                "add    w9, {cache2:w}, w11",            // cache2 + RC[k+2] (lower k1)
-                "eor    {tmp:w}, {tmp:w}, {d:w}",        // reuse: tmp (a^b) ^ d = d^a^b
-                "lsr    x11, x11, #32",                  // shift for next constant
+                "eor    {tmp:w}, {tmp:w}, {d:w}",        // reuse: tmp (a^b) ^ d = d^a^b (independent first)
+                "add    w9, {cache2:w}, w11",            // cache2 + RC[k+2] (parallel)
+                "lsr    x11, x11, #32",                  // shift for next constant (early)
                 "add    w9, {c:w}, w9",                  // c + cache2 + RC[k+2]
                 "add    w8, w9, {tmp:w}",                // add h_result
                 "eor    {tmp:w}, {tmp:w}, {b:w}",        // prepare for next: (d^a^b) ^ b = d^a
@@ -166,8 +166,8 @@ macro_rules! rh4_integrated {
                 "add    {c:w}, {d:w}, w8",               // d + rotated_result
 
                 // H round 3: B += H(C,D,A) + cache3 + RC[k+3]; B = rotl(B, 23) + C
-                "add    w9, {cache3:w}, w11",            // cache3 + RC[k+3]
-                "eor    {tmp:w}, {tmp:w}, {c:w}",        // reuse: tmp (d^a) ^ c = c^d^a
+                "eor    {tmp:w}, {tmp:w}, {c:w}",        // reuse: tmp (d^a) ^ c = c^d^a (independent first)
+                "add    w9, {cache3:w}, w11",            // cache3 + RC[k+3] (parallel)
                 "add    w9, {b:w}, w9",                  // b + cache3 + RC[k+3]
                 "add    w8, w9, {tmp:w}",                // add h_result
                 "eor    {tmp:w}, {tmp:w}, {a:w}",        // prepare for next: (c^d^a) ^ a = c^d
@@ -203,11 +203,11 @@ macro_rules! rf4_integrated {
                 "ldp    x10, x11, [{const_ptr}, #{k_offset}]",    // Load RC pair
 
                 // F round 0: A += F(B,C,D) + cache0 + RC[k]; A = rotl(A, 7) + B
-                "add    {a:w}, {a:w}, {cache0:w}",       // a += cache0
-                "eor    w12, {c:w}, {d:w}",              // c ^ d (alt F function)
+                "eor    w12, {c:w}, {d:w}",              // c ^ d (independent F calc first)
+                "add    {a:w}, {a:w}, {cache0:w}",       // a += cache0 (parallel)
+                "and    w12, w12, {b:w}",                // (c ^ d) & b (parallel)
                 "add    {a:w}, {a:w}, w10",              // a += RC[k0] (lower 32 bits)
-                "and    w12, w12, {b:w}",                // (c ^ d) & b
-                "lsr    x10, x10, #32",                  // shift for next constant
+                "lsr    x10, x10, #32",                  // shift for next constant (early)
                 "eor    w12, w12, {d:w}",                // F(b,c,d)
                 "add    {a:w}, {a:w}, w12",              // a += F(b,c,d)
                 "ror    {a:w}, {a:w}, #25",              // rotate by 25 (optimized)
