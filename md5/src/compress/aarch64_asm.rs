@@ -109,12 +109,11 @@ macro_rules! asm_op_i {
     ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
         unsafe {
             core::arch::asm!(
-                // Standard I function: c ^ (b | !d)
-                "mvn    w8, {d:w}",             // !d (bitwise NOT)
-                "add    w9, {m:w}, {rc:w}",     // m + rc
-                "orr    w8, {b:w}, w8",         // b | !d
-                "add    w9, {a:w}, w9",         // a + m + rc
+                // Optimized I function: use ORN (OR-NOT) instruction
+                "orn    w8, {b:w}, {d:w}",      // b | !d in one instruction (ORN)
+                "add    w9, {m:w}, {rc:w}",     // m + rc in parallel
                 "eor    w8, {c:w}, w8",         // c ^ (b | !d)
+                "add    w9, {a:w}, w9",         // a + m + rc
                 "add    w8, w9, w8",            // add i_result
                 "ror    w8, w8, #{ror}",        // rotate
                 "add    {a:w}, {b:w}, w8",      // b + rotated_result
