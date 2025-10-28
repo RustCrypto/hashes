@@ -483,9 +483,9 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             "add    {d:w}, {a:w}, w8",          // a + rotated -> new d
 
             // F2: c, d, a, b, cache2, RC[2], 17 - optimized scheduling
-            "add    w10, {data2:w}, {k1:w}",    // cache2 + RC[2] (lower 32 bits) - start early
-            "and    w8, {d:w}, {a:w}",          // d & a
-            "bic    w9, {b:w}, {d:w}",          // b & !d
+            "and    w8, {d:w}, {a:w}",          // d & a (independent calc first)
+            "add    w10, {data2:w}, {k1:w}",    // cache2 + RC[2] (parallel)
+            "bic    w9, {b:w}, {d:w}",          // b & !d (parallel)
             "add    w9, {c:w}, w9",             // c + (b & !d)
             "add    w10, w9, w10",              // c + (b & !d) + cache2 + RC[2]
             "add    w8, w10, w8",               // add (d & a)
