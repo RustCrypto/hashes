@@ -128,6 +128,78 @@ macro_rules! asm_op_h {
     };
 }
 
+// Advanced RF4 with animetosho-style constant preloading optimization  
+macro_rules! rf4_advanced {
+    ($a:ident, $b:ident, $c:ident, $d:ident, $cache0:ident, $cache1:ident, $cache2:ident, $cache3:ident, $rc0:expr, $rc1:expr, $rc2:expr, $rc3:expr, $const_ptr:expr, $offset:expr, $next_offset:expr) => {
+        unsafe {
+            core::arch::asm!(
+                // Load current constants and preload next ones (animetosho technique)
+                "ldp    x10, x11, [{const_ptr}, #{k_offset}]",     // Load RC pair for this round
+                "ldp    x12, x13, [{const_ptr}, #{next_k_offset}]", // Preload next RC pair
+
+                // F round 0: A += F(B,C,D) + cache0 + RC[k]; A = rotl(A, 7) + B
+                "add    {a:w}, {a:w}, {cache0:w}",       // a += cache0
+                "eor    w14, {c:w}, {d:w}",              // c ^ d (alt F function)
+                "add    {a:w}, {a:w}, w10",              // a += RC[k0] (lower 32 bits)
+                "and    w14, w14, {b:w}",                // (c ^ d) & b
+                "lsr    x10, x10, #32",                  // shift for next constant
+                "eor    w14, w14, {d:w}",                // F(b,c,d)
+                "add    {a:w}, {a:w}, w14",              // a += F(b,c,d)
+                "ror    {a:w}, {a:w}, #25",              // rotate by 25
+                "add    {a:w}, {a:w}, {b:w}",            // a += b
+
+                // F round 1: D += F(A,B,C) + cache1 + RC[k+1]; D = rotl(D, 12) + A
+                "add    {d:w}, {d:w}, {cache1:w}",       // d += cache1
+                "eor    w14, {b:w}, {c:w}",              // b ^ c
+                "add    {d:w}, {d:w}, w10",              // d += RC[k+1]
+                "and    w14, w14, {a:w}",                // (b ^ c) & a
+                "eor    w14, w14, {c:w}",                // F(a,b,c)
+                "add    {d:w}, {d:w}, w14",              // d += F(a,b,c)
+                "ror    {d:w}, {d:w}, #20",              // rotate by 20
+                "add    {d:w}, {d:w}, {a:w}",            // d += a
+
+                // F round 2: C += F(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 17) + D
+                "add    {c:w}, {c:w}, {cache2:w}",       // c += cache2
+                "eor    w14, {a:w}, {b:w}",              // a ^ b
+                "add    {c:w}, {c:w}, w11",              // c += RC[k+2] (lower k1)
+                "and    w14, w14, {d:w}",                // (a ^ b) & d
+                "lsr    x11, x11, #32",                  // shift for next constant
+                "eor    w14, w14, {b:w}",                // F(d,a,b)
+                "add    {c:w}, {c:w}, w14",              // c += F(d,a,b)
+                "ror    {c:w}, {c:w}, #15",              // rotate by 15
+                "add    {c:w}, {c:w}, {d:w}",            // c += d
+
+                // F round 3: B += F(C,D,A) + cache3 + RC[k+3]; B = rotl(B, 22) + C
+                "add    {b:w}, {b:w}, {cache3:w}",       // b += cache3
+                "eor    w14, {d:w}, {a:w}",              // d ^ a
+                "add    {b:w}, {b:w}, w11",              // b += RC[k+3]
+                "and    w14, w14, {c:w}",                // (d ^ a) & c
+                "eor    w14, w14, {a:w}",                // F(c,d,a)
+                "add    {b:w}, {b:w}, w14",              // b += F(c,d,a)
+                "ror    {b:w}, {b:w}, #10",              // rotate by 10
+                "add    {b:w}, {b:w}, {c:w}",            // b += c
+
+                a = inout(reg) $a,
+                b = inout(reg) $b,
+                c = inout(reg) $c,
+                d = inout(reg) $d,
+                cache0 = in(reg) $cache0,
+                cache1 = in(reg) $cache1,
+                cache2 = in(reg) $cache2,
+                cache3 = in(reg) $cache3,
+                const_ptr = in(reg) $const_ptr,
+                k_offset = const $offset,
+                next_k_offset = const $next_offset,
+                out("x10") _,
+                out("x11") _,
+                out("x12") _,
+                out("x13") _,
+                out("w14") _,
+            );
+        }
+    };
+}
+
 // Integrated RH4 with H function reuse optimization and ldp constant loading
 macro_rules! rh4_integrated {
     ($a:ident, $b:ident, $c:ident, $d:ident, $cache0:ident, $cache1:ident, $cache2:ident, $cache3:ident, $rc0:expr, $rc1:expr, $rc2:expr, $rc3:expr, $const_ptr:expr, $offset:expr, $tmp:ident) => {
@@ -210,7 +282,7 @@ macro_rules! rf4_integrated {
                 "lsr    x10, x10, #32",                  // shift for next constant
                 "eor    w12, w12, {d:w}",                // F(b,c,d)
                 "add    {a:w}, {a:w}, w12",              // a += F(b,c,d)
-                "ror    {a:w}, {a:w}, #25",              // rotate 32-7=25
+                "ror    {a:w}, {a:w}, #25",              // rotate by 25 (animetosho-style)
                 "add    {a:w}, {a:w}, {b:w}",            // a += b
 
                 // F round 1: D += F(A,B,C) + cache1 + RC[k+1]; D = rotl(D, 12) + A
@@ -220,7 +292,7 @@ macro_rules! rf4_integrated {
                 "and    w12, w12, {a:w}",                // (b ^ c) & a
                 "eor    w12, w12, {c:w}",                // F(a,b,c)
                 "add    {d:w}, {d:w}, w12",              // d += F(a,b,c)
-                "ror    {d:w}, {d:w}, #20",              // rotate 32-12=20
+                "ror    {d:w}, {d:w}, #20",              // rotate by 20 (animetosho-style)
                 "add    {d:w}, {d:w}, {a:w}",            // d += a
 
                 // F round 2: C += F(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 17) + D
@@ -231,7 +303,7 @@ macro_rules! rf4_integrated {
                 "lsr    x11, x11, #32",                  // shift for next constant
                 "eor    w12, w12, {b:w}",                // F(d,a,b)
                 "add    {c:w}, {c:w}, w12",              // c += F(d,a,b)
-                "ror    {c:w}, {c:w}, #15",              // rotate 32-17=15
+                "ror    {c:w}, {c:w}, #15",              // rotate by 15 (animetosho-style)
                 "add    {c:w}, {c:w}, {d:w}",            // c += d
 
                 // F round 3: B += F(C,D,A) + cache3 + RC[k+3]; B = rotl(B, 22) + C
@@ -241,7 +313,7 @@ macro_rules! rf4_integrated {
                 "and    w12, w12, {c:w}",                // (d ^ a) & c
                 "eor    w12, w12, {a:w}",                // F(c,d,a)
                 "add    {b:w}, {b:w}, w12",              // b += F(c,d,a)
-                "ror    {b:w}, {b:w}, #10",              // rotate 32-22=10
+                "ror    {b:w}, {b:w}, #10",              // rotate by 10 (animetosho-style)
                 "add    {b:w}, {b:w}, {c:w}",            // b += c
 
                 a = inout(reg) $a,
@@ -402,30 +474,57 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     let mut c = state[2];
     let mut d = state[3];
 
-    // Load data efficiently and cache frequently used values
-    let mut data = [0u32; 16];
-    for (o, chunk) in data.iter_mut().zip(input.chunks_exact(4)) {
-        *o = u32::from_le_bytes(chunk.try_into().unwrap());
-    }
+    // Animetosho-style input data loading optimization: use ldp to load data pairs directly
+    // This eliminates the intermediate array and reduces memory bandwidth
+    let mut cache0: u32;
+    let mut cache1: u32;
+    let mut cache2: u32;
+    let mut cache3: u32;
+    let mut cache4: u32;
+    let mut cache5: u32;
+    let mut cache6: u32;
+    let mut cache7: u32;
+    let mut cache8: u32;
+    let mut cache9: u32;
+    let mut cache10: u32;
+    let mut cache11: u32;
+    let mut cache12: u32;
+    let mut cache13: u32;
+    let mut cache14: u32;
+    let mut cache15: u32;
 
-    // Register caching optimization: cache ALL data values to eliminate memory accesses
-    // Full cache array approach (Cache16 optimization)
-    let cache0 = data[0];
-    let cache1 = data[1];
-    let cache2 = data[2];
-    let cache3 = data[3];
-    let cache4 = data[4];
-    let cache5 = data[5];
-    let cache6 = data[6];
-    let cache7 = data[7];
-    let cache8 = data[8];
-    let cache9 = data[9];
-    let cache10 = data[10];
-    let cache11 = data[11];
-    let cache12 = data[12];
-    let cache13 = data[13];
-    let cache14 = data[14];
-    let cache15 = data[15];
+    // Load all input data using ldp instructions for better memory bandwidth
+    // Animetosho-style optimization: direct ldp loading eliminates intermediate array
+    unsafe {
+        core::arch::asm!(
+            // Load input data pairs with ldp - more efficient than individual loads
+            "ldp    {cache0:w}, {cache1:w}, [{input_ptr}, #0]",    // data[0], data[1]
+            "ldp    {cache2:w}, {cache3:w}, [{input_ptr}, #8]",    // data[2], data[3]
+            "ldp    {cache4:w}, {cache5:w}, [{input_ptr}, #16]",   // data[4], data[5]
+            "ldp    {cache6:w}, {cache7:w}, [{input_ptr}, #24]",   // data[6], data[7]
+            "ldp    {cache8:w}, {cache9:w}, [{input_ptr}, #32]",   // data[8], data[9]
+            "ldp    {cache10:w}, {cache11:w}, [{input_ptr}, #40]", // data[10], data[11]
+            "ldp    {cache12:w}, {cache13:w}, [{input_ptr}, #48]", // data[12], data[13]
+            "ldp    {cache14:w}, {cache15:w}, [{input_ptr}, #56]", // data[14], data[15]
+            input_ptr = in(reg) input.as_ptr(),
+            cache0 = out(reg) cache0,
+            cache1 = out(reg) cache1,
+            cache2 = out(reg) cache2,
+            cache3 = out(reg) cache3,
+            cache4 = out(reg) cache4,
+            cache5 = out(reg) cache5,
+            cache6 = out(reg) cache6,
+            cache7 = out(reg) cache7,
+            cache8 = out(reg) cache8,
+            cache9 = out(reg) cache9,
+            cache10 = out(reg) cache10,
+            cache11 = out(reg) cache11,
+            cache12 = out(reg) cache12,
+            cache13 = out(reg) cache13,
+            cache14 = out(reg) cache14,
+            cache15 = out(reg) cache15,
+        );
+    }
 
     // Additional optimizations: better instruction scheduling and reduced dependencies
 
