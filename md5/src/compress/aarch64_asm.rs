@@ -472,10 +472,10 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             "add    {a:w}, {b:w}, w8",          // b + rotated -> new a
 
             // F1: d, a, b, c, cache1, RC[1], 12 - optimized scheduling
-            "lsr    {k0}, {k0}, #32",           // get RC[1] from upper 32 bits - start early
-            "and    w8, {a:w}, {b:w}",          // a & b (using updated a)
+            "and    w8, {a:w}, {b:w}",          // a & b (using updated a) - start early
+            "lsr    {k0}, {k0}, #32",           // get RC[1] from upper 32 bits (parallel)
+            "bic    w9, {c:w}, {a:w}",          // c & !a (parallel)
             "add    w10, {data1:w}, {k0:w}",    // cache1 + RC[1]
-            "bic    w9, {c:w}, {a:w}",          // c & !a
             "add    w9, {d:w}, w9",             // d + (c & !a)
             "add    w10, w9, w10",              // d + (c & !a) + cache1 + RC[1]
             "add    w8, w10, w8",               // add (a & b)
@@ -731,7 +731,26 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         );
     }
     // Last 4 H rounds use regular asm_op_h! not reuse
-    asm_op_h!(a, b, c, d, cache9, RC[44], 4);
+    // H44: Inline optimized version
+    unsafe {
+        core::arch::asm!(
+            "eor    w8, {c:w}, {d:w}",          // c ^ d first (independent)
+            "add    w9, {m:w}, {rc:w}",         // m + rc in parallel
+            "eor    w8, w8, {b:w}",             // (c ^ d) ^ b = b ^ c ^ d
+            "add    w9, {a:w}, w9",             // a + m + rc
+            "add    w8, w9, w8",                // add h_result
+            "ror    w8, w8, #28",               // rotate 32-4=28
+            "add    {a:w}, {b:w}, w8",          // b + rotated_result
+            a = inout(reg) a,
+            b = in(reg) b,
+            c = in(reg) c,
+            d = in(reg) d,
+            m = in(reg) cache9,
+            rc = in(reg) RC[44],
+            out("w8") _,
+            out("w9") _,
+        );
+    }
     asm_op_h!(d, a, b, c, cache12, RC[45], 11);
     asm_op_h!(c, d, a, b, cache15, RC[46], 16);
     asm_op_h!(b, c, d, a, cache2, RC[47], 23);
