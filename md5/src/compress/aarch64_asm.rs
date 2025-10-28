@@ -83,11 +83,11 @@ macro_rules! asm_op_h {
     ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
         unsafe {
             core::arch::asm!(
-                // Standard H function: b ^ c ^ d
-                "eor    w8, {b:w}, {c:w}",      // b ^ c
-                "add    w9, {m:w}, {rc:w}",     // m + rc
-                "eor    w8, w8, {d:w}",         // (b ^ c) ^ d = b ^ c ^ d
+                // Optimized H function: delay b dependency for better scheduling
+                "add    w9, {m:w}, {rc:w}",     // m + rc first (no b dependency)
+                "eor    w8, {c:w}, {d:w}",      // c ^ d first (no b dependency)
                 "add    w9, {a:w}, w9",         // a + m + rc 
+                "eor    w8, w8, {b:w}",         // (c ^ d) ^ b = b ^ c ^ d (delay b use)
                 "add    w8, w9, w8",            // add h_result
                 "ror    w8, w8, #{ror}",        // rotate
                 "add    {a:w}, {b:w}, w8",      // b + rotated_result
