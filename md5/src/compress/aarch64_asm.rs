@@ -666,16 +666,73 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         );
     }
 
-    // F rounds 4-12: test alternative F function with eor+and+eor pattern
-    asm_op_f_alt!(a, b, c, d, cache4, RC[4], 7);
-    asm_op_f_alt!(d, a, b, c, cache5, RC[5], 12);
-    asm_op_f_alt!(c, d, a, b, cache6, RC[6], 17);
-    asm_op_f_alt!(b, c, d, a, cache7, RC[7], 22);
+    // F rounds 4-15: implement interleaved data loading optimization from animetosho ARM64
+    unsafe {
+        core::arch::asm!(
+            // Load constants with ldp for rounds 4-7
+            "ldp    x10, x11, [{const_ptr}, #16]",    // Load RC[4,5] and RC[6,7] pairs
+            
+            // F round 4: A += F(B,C,D) + cache4 + RC[4]; A = rotl(A, 7) + B
+            "eor    w8, {c:w}, {d:w}",              // c ^ d (alternative F style)
+            "add    {a:w}, {a:w}, {cache4:w}",      // a += cache4
+            "and    w8, w8, {b:w}",                 // (c ^ d) & b 
+            "add    {a:w}, {a:w}, w10",             // a += RC[4] (lower 32 bits)
+            "eor    w8, w8, {d:w}",                 // F(b,c,d) = ((c ^ d) & b) ^ d
+            "lsr    x10, x10, #32",                 // shift for RC[5]
+            "add    {a:w}, {a:w}, w8",              // a += F(b,c,d)
+            "ror    {a:w}, {a:w}, #25",             // rotate 32-7=25
+            "add    {a:w}, {a:w}, {b:w}",           // a += b
+            
+            // F round 5: D += F(A,B,C) + cache5 + RC[5]; D = rotl(D, 12) + A
+            "eor    w8, {b:w}, {c:w}",              // b ^ c
+            "add    {d:w}, {d:w}, {cache5:w}",      // d += cache5
+            "and    w8, w8, {a:w}",                 // (b ^ c) & a
+            "add    {d:w}, {d:w}, w10",             // d += RC[5]
+            "eor    w8, w8, {c:w}",                 // F(a,b,c) = ((b ^ c) & a) ^ c
+            "add    {d:w}, {d:w}, w8",              // d += F(a,b,c)
+            "ror    {d:w}, {d:w}, #20",             // rotate 32-12=20
+            "add    {d:w}, {d:w}, {a:w}",           // d += a
+            
+            // F round 6: C += F(D,A,B) + cache6 + RC[6]; C = rotl(C, 17) + D
+            "eor    w8, {a:w}, {b:w}",              // a ^ b
+            "add    {c:w}, {c:w}, {cache6:w}",      // c += cache6
+            "and    w8, w8, {d:w}",                 // (a ^ b) & d
+            "add    {c:w}, {c:w}, w11",             // c += RC[6] (lower k1)
+            "eor    w8, w8, {b:w}",                 // F(d,a,b) = ((a ^ b) & d) ^ b
+            "lsr    x11, x11, #32",                 // shift for RC[7]
+            "add    {c:w}, {c:w}, w8",              // c += F(d,a,b)
+            "ror    {c:w}, {c:w}, #15",             // rotate 32-17=15
+            "add    {c:w}, {c:w}, {d:w}",           // c += d
+            
+            // F round 7: B += F(C,D,A) + cache7 + RC[7]; B = rotl(B, 22) + C
+            "eor    w8, {d:w}, {a:w}",              // d ^ a
+            "add    {b:w}, {b:w}, {cache7:w}",      // b += cache7
+            "and    w8, w8, {c:w}",                 // (d ^ a) & c
+            "add    {b:w}, {b:w}, w11",             // b += RC[7]
+            "eor    w8, w8, {a:w}",                 // F(c,d,a) = ((d ^ a) & c) ^ a
+            "add    {b:w}, {b:w}, w8",              // b += F(c,d,a)
+            "ror    {b:w}, {b:w}, #10",             // rotate 32-22=10
+            "add    {b:w}, {b:w}, {c:w}",           // b += c
+            
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            cache4 = in(reg) cache4,
+            cache5 = in(reg) cache5,
+            cache6 = in(reg) cache6,
+            cache7 = in(reg) cache7,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
+            out("x10") _,
+            out("x11") _,
+            out("w8") _,
+        );
+    }
     rf4_integrated!(
         a, b, c, d, cache8, cache9, cache10, cache11, RC[8], RC[9], RC[10], RC[11], MD5_CONSTANTS_PACKED.as_ptr(), 32
     );
-    rf4!(
-        a, b, c, d, cache12, cache13, cache14, cache15, RC[12], RC[13], RC[14], RC[15]
+    rf4_integrated!(
+        a, b, c, d, cache12, cache13, cache14, cache15, RC[12], RC[13], RC[14], RC[15], MD5_CONSTANTS_PACKED.as_ptr(), 48
     );
 
     // round 2 - first 4 G operations with ldp constants optimization
@@ -750,8 +807,8 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     rg4_integrated!(
         a, b, c, d, cache9, cache14, cache3, cache8, RC[24], RC[25], RC[26], RC[27], MD5_CONSTANTS_PACKED.as_ptr(), 96
     );
-    rg4!(
-        a, b, c, d, cache13, cache2, cache7, cache12, RC[28], RC[29], RC[30], RC[31]
+    rg4_integrated!(
+        a, b, c, d, cache13, cache2, cache7, cache12, RC[28], RC[29], RC[30], RC[31], MD5_CONSTANTS_PACKED.as_ptr(), 112
     );
 
     // round 3 - H function with re-use optimization
@@ -792,14 +849,14 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     ri4_integrated!(
         a, b, c, d, cache0, cache7, cache14, cache5, RC[48], RC[49], RC[50], RC[51], MD5_CONSTANTS_PACKED.as_ptr(), 192
     );
-    ri4!(
-        a, b, c, d, cache12, cache3, cache10, cache1, RC[52], RC[53], RC[54], RC[55]
+    ri4_integrated!(
+        a, b, c, d, cache12, cache3, cache10, cache1, RC[52], RC[53], RC[54], RC[55], MD5_CONSTANTS_PACKED.as_ptr(), 208
     );
-    ri4!(
-        a, b, c, d, cache8, cache15, cache6, cache13, RC[56], RC[57], RC[58], RC[59]
+    ri4_integrated!(
+        a, b, c, d, cache8, cache15, cache6, cache13, RC[56], RC[57], RC[58], RC[59], MD5_CONSTANTS_PACKED.as_ptr(), 224
     );
-    ri4!(
-        a, b, c, d, cache4, cache11, cache2, cache9, RC[60], RC[61], RC[62], RC[63]
+    ri4_integrated!(
+        a, b, c, d, cache4, cache11, cache2, cache9, RC[60], RC[61], RC[62], RC[63], MD5_CONSTANTS_PACKED.as_ptr(), 240
     );
 
     state[0] = state[0].wrapping_add(a);
