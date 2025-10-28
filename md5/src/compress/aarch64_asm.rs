@@ -47,61 +47,6 @@ static MD5_CONSTANTS_PACKED: [u64; 32] = [
     0xeb86d3912ad7d2bb,
 ];
 
-// Alternative F function implementation with eor+and+eor pattern
-macro_rules! asm_op_f_alt {
-    ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
-        unsafe {
-            core::arch::asm!(
-                // Alternative F function: F(b,c,d) = (c^d)&b ^ d
-                "add    {a:w}, {a:w}, {m:w}",       // a += m
-                "eor    w8, {c:w}, {d:w}",          // c ^ d
-                "add    {a:w}, {a:w}, {rc:w}",      // a += rc
-                "and    w8, w8, {b:w}",             // (c ^ d) & b
-                "eor    w8, w8, {d:w}",             // ((c ^ d) & b) ^ d = F(b,c,d)
-                "add    {a:w}, {a:w}, w8",          // a += F(b,c,d)
-                "ror    {a:w}, {a:w}, #{ror}",      // rotate
-                "add    {a:w}, {a:w}, {b:w}",       // a += b
-                a = inout(reg) $a,
-                b = in(reg) $b,
-                c = in(reg) $c,
-                d = in(reg) $d,
-                m = in(reg) $m,
-                rc = in(reg) $rc,
-                ror = const (32 - $s),
-                out("w8") _,
-            );
-        }
-    };
-}
-
-// Alternative G function implementation with bic+and pattern
-macro_rules! asm_op_g_alt {
-    ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
-        unsafe {
-            core::arch::asm!(
-                // Alternative G function: G(b,c,d) = (c & !d) + (b & d) - optimized scheduling
-                "bic    w8, {c:w}, {d:w}",      // c & !d (independent calc first)
-                "and    w9, {b:w}, {d:w}",      // b & d (parallel independent calc)
-                "add    {a:w}, {a:w}, {rc:w}",  // a += rc (parallel)
-                "add    w8, w8, w9",            // (c & !d) + (b & d) = G(b,c,d)
-                "add    {a:w}, {a:w}, {m:w}",   // a += m
-                "add    {a:w}, {a:w}, w8",      // a += G(b,c,d)
-                "ror    {a:w}, {a:w}, #{ror}",  // rotate
-                "add    {a:w}, {a:w}, {b:w}",   // a += b
-                a = inout(reg) $a,
-                b = in(reg) $b,
-                c = in(reg) $c,
-                d = in(reg) $d,
-                m = in(reg) $m,
-                rc = in(reg) $rc,
-                ror = const (32 - $s),
-                out("w8") _,
-                out("w9") _,
-            );
-        }
-    };
-}
-
 macro_rules! asm_op_h {
     ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
         unsafe {
@@ -343,7 +288,7 @@ macro_rules! ri4_integrated {
                 "orn    w12, {b:w}, {d:w}",              // b | ~d (independent I function calc)
                 "add    {a:w}, {a:w}, {cache0:w}",       // a += cache0 (parallel)
                 "add    {a:w}, {a:w}, w10",              // a += RC[k0] (early)
-                "eor    w12, w12, {c:w}",                // (b | ~d) ^ c = I(b,c,d) 
+                "eor    w12, w12, {c:w}",                // (b | ~d) ^ c = I(b,c,d)
                 "lsr    x10, x10, #32",                  // shift for next constant (early)
                 "add    {a:w}, {a:w}, w12",              // a += I(b,c,d)
                 "ror    {a:w}, {a:w}, #26",              // rotate 32-6=26
@@ -521,10 +466,22 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     }
 
     // F rounds 4-12: test alternative F function with eor+and+eor pattern
-    asm_op_f_alt!(a, b, c, d, cache4, RC[4], 7);
-    asm_op_f_alt!(d, a, b, c, cache5, RC[5], 12);
-    asm_op_f_alt!(c, d, a, b, cache6, RC[6], 17);
-    asm_op_f_alt!(b, c, d, a, cache7, RC[7], 22);
+    rf4_integrated!(
+        a,
+        b,
+        c,
+        d,
+        cache4,
+        cache5,
+        cache6,
+        cache7,
+        RC[4],
+        RC[5],
+        RC[6],
+        RC[7],
+        MD5_CONSTANTS_PACKED.as_ptr(),
+        16
+    );
     rf4_integrated!(
         a,
         b,
@@ -594,7 +551,7 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             "ror    w8, w8, #18",               // rotate by 32-14=18
             "add    {c:w}, {d:w}, w8",          // d + rotated -> new c
 
-            // G3: b, c, d, a, data[0], RC[19], 20 - optimized dependencies  
+            // G3: b, c, d, a, data[0], RC[19], 20 - optimized dependencies
             "lsr    {k3}, {k3}, #32",           // get RC[19] from upper 32 bits - early
             "add    w10, {data0:w}, {k3:w}",    // data[0] + RC[19]
             "and    w8, {c:w}, {a:w}",          // c & a
@@ -622,11 +579,23 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         );
     }
 
-    // G rounds 20-32: test alternative G function with bic+and pattern
-    asm_op_g_alt!(a, b, c, d, cache5, RC[20], 5);
-    asm_op_g_alt!(d, a, b, c, cache10, RC[21], 9);
-    asm_op_g_alt!(c, d, a, b, cache15, RC[22], 14);
-    asm_op_g_alt!(b, c, d, a, cache4, RC[23], 20);
+    // G rounds 20-23: use integrated macro for better performance
+    rg4_integrated!(
+        a,
+        b,
+        c,
+        d,
+        cache5,
+        cache10,
+        cache15,
+        cache4,
+        RC[20],
+        RC[21],
+        RC[22],
+        RC[23],
+        MD5_CONSTANTS_PACKED.as_ptr(),
+        80
+    );
     rg4_integrated!(
         a,
         b,
@@ -751,9 +720,66 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             out("w9") _,
         );
     }
-    asm_op_h!(d, a, b, c, cache12, RC[45], 11);
-    asm_op_h!(c, d, a, b, cache15, RC[46], 16);
-    asm_op_h!(b, c, d, a, cache2, RC[47], 23);
+    // H round 45: D += H(A,B,C) + cache12 + RC[45]; D = rotl(D, 11) + A - optimized
+    unsafe {
+        core::arch::asm!(
+            "eor    w8, {b:w}, {c:w}",          // b ^ c first (independent)
+            "add    w9, {cache12:w}, {rc45:w}", // cache12 + RC[45] (parallel)
+            "eor    w8, w8, {a:w}",             // (b ^ c) ^ a = a ^ b ^ c
+            "add    w9, {d:w}, w9",             // d + cache12 + RC[45]
+            "add    w8, w9, w8",                // add h_result
+            "ror    w8, w8, #21",               // rotate 32-11=21
+            "add    {d:w}, {a:w}, w8",          // a + rotated_result
+            a = in(reg) a,
+            b = in(reg) b,
+            c = in(reg) c,
+            d = inout(reg) d,
+            cache12 = in(reg) cache12,
+            rc45 = in(reg) RC[45],
+            out("w8") _,
+            out("w9") _,
+        );
+    }
+    // H round 46: C += H(D,A,B) + cache15 + RC[46]; C = rotl(C, 16) + D - optimized
+    unsafe {
+        core::arch::asm!(
+            "eor    w8, {a:w}, {b:w}",          // a ^ b first (independent)
+            "add    w9, {cache15:w}, {rc46:w}", // cache15 + RC[46] (parallel)
+            "eor    w8, w8, {d:w}",             // (a ^ b) ^ d = d ^ a ^ b
+            "add    w9, {c:w}, w9",             // c + cache15 + RC[46]
+            "add    w8, w9, w8",                // add h_result
+            "ror    w8, w8, #16",               // rotate 32-16=16
+            "add    {c:w}, {d:w}, w8",          // d + rotated_result
+            a = in(reg) a,
+            b = in(reg) b,
+            c = inout(reg) c,
+            d = in(reg) d,
+            cache15 = in(reg) cache15,
+            rc46 = in(reg) RC[46],
+            out("w8") _,
+            out("w9") _,
+        );
+    }
+    // H round 47: B += H(C,D,A) + cache2 + RC[47]; B = rotl(B, 23) + C - optimized
+    unsafe {
+        core::arch::asm!(
+            "eor    w8, {d:w}, {a:w}",          // d ^ a first (independent)
+            "add    w9, {cache2:w}, {rc47:w}",  // cache2 + RC[47] (parallel)
+            "eor    w8, w8, {c:w}",             // (d ^ a) ^ c = c ^ d ^ a
+            "add    w9, {b:w}, w9",             // b + cache2 + RC[47]
+            "add    w8, w9, w8",                // add h_result
+            "ror    w8, w8, #9",                // rotate 32-23=9
+            "add    {b:w}, {c:w}, w8",          // c + rotated_result
+            a = in(reg) a,
+            b = inout(reg) b,
+            c = in(reg) c,
+            d = in(reg) d,
+            cache2 = in(reg) cache2,
+            rc47 = in(reg) RC[47],
+            out("w8") _,
+            out("w9") _,
+        );
+    }
 
     // I rounds 48-64: use RI4 macro for better instruction scheduling
     ri4_integrated!(
