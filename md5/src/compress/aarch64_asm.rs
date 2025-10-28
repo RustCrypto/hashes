@@ -207,74 +207,7 @@ macro_rules! rf4_integrated {
     };
 }
 
-// Integrated RG4 with alternative G function and ldp constant loading
-macro_rules! rg4_integrated {
-    ($a:ident, $b:ident, $c:ident, $d:ident, $cache0:ident, $cache1:ident, $cache2:ident, $cache3:ident, $rc0:expr, $rc1:expr, $rc2:expr, $rc3:expr, $const_ptr:expr, $offset:expr) => {
-        unsafe {
-            core::arch::asm!(
-                // Load RC constant pairs with ldp for better throughput
-                "ldp    x10, x11, [{const_ptr}, #{k_offset}]",    // Load RC pair
-
-                // G round 0: A += G(B,C,D) + cache0 + RC[k]; A = rotl(A, 5) + B
-                "bic    w12, {c:w}, {d:w}",              // c & ~d (independent G calc first)
-                "add    w9, {a:w}, {cache0:w}",          // a + cache0 (use w9 to avoid dependency)
-                "and    w8, {d:w}, {b:w}",               // d & b (parallel)
-                "add    w9, w9, w10",                    // add RC[k0] (parallel)
-                "lsr    x10, x10, #32",                  // shift for next constant (early)
-                "orr    w12, w12, w8",                   // G(b,c,d)
-                "add    {a:w}, w9, w12",                 // combine all additions
-                "ror    {a:w}, {a:w}, #27",              // rotate 32-5=27
-                "add    {a:w}, {a:w}, {b:w}",            // a += b
-
-                // G round 1: D += G(A,B,C) + cache1 + RC[k+1]; D = rotl(D, 9) + A
-                "bic    w12, {b:w}, {c:w}",              // b & ~c (independent G calc first)
-                "add    {d:w}, {d:w}, {cache1:w}",       // d += cache1 (parallel)
-                "and    w8, {c:w}, {a:w}",               // c & a (parallel)
-                "add    {d:w}, {d:w}, w10",              // d += RC[k+1] (parallel)
-                "orr    w12, w12, w8",                   // G(a,b,c)
-                "add    {d:w}, {d:w}, w12",              // d += G(a,b,c)
-                "ror    {d:w}, {d:w}, #23",              // rotate 32-9=23
-                "add    {d:w}, {d:w}, {a:w}",            // d += a
-
-                // G round 2: C += G(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 14) + D
-                "bic    w12, {a:w}, {b:w}",              // a & ~b (independent G calc first)
-                "add    w10, {c:w}, {cache2:w}",         // c + cache2 (use w10 to avoid dependency)
-                "and    w8, {b:w}, {d:w}",               // b & d (parallel)
-                "add    w10, w10, w11",                  // add RC[k+2] (parallel)
-                "lsr    x11, x11, #32",                  // shift for next constant (early)
-                "orr    w12, w12, w8",                   // G(d,a,b)
-                "add    {c:w}, w10, w12",                // combine all additions
-                "ror    {c:w}, {c:w}, #18",              // rotate 32-14=18
-                "add    {c:w}, {c:w}, {d:w}",            // c += d
-
-                // G round 3: B += G(C,D,A) + cache3 + RC[k+3]; B = rotl(B, 20) + C
-                "bic    w12, {d:w}, {a:w}",              // d & ~a (independent G calc first)
-                "add    {b:w}, {b:w}, {cache3:w}",       // b += cache3 (parallel)
-                "and    w8, {a:w}, {c:w}",               // a & c (parallel)
-                "add    {b:w}, {b:w}, w11",              // b += RC[k+3] (parallel)
-                "orr    w12, w12, w8",                   // G(c,d,a)
-                "add    {b:w}, {b:w}, w12",              // b += G(c,d,a)
-                "ror    {b:w}, {b:w}, #12",              // rotate 32-20=12
-                "add    {b:w}, {b:w}, {c:w}",            // b += c
-
-                a = inout(reg) $a,
-                b = inout(reg) $b,
-                c = inout(reg) $c,
-                d = inout(reg) $d,
-                cache0 = in(reg) $cache0,
-                cache1 = in(reg) $cache1,
-                cache2 = in(reg) $cache2,
-                cache3 = in(reg) $cache3,
-                const_ptr = in(reg) $const_ptr,
-                k_offset = const $offset, // Byte offset for packed constants
-                out("x10") _,
-                out("x11") _,
-                out("w8") _,
-                out("w12") _,
-            );
-        }
-    };
-}
+// Macro rg4_integrated removed - all G rounds now use optimized assembly blocks
 
 // Integrated RI4 with alternative I function and ldp constant loading
 macro_rules! ri4_integrated {
@@ -509,39 +442,130 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         );
     }
 
-    // F rounds 8-15: Use remaining integrated macros
-    rf4_integrated!(
-        a,
-        b,
-        c,
-        d,
-        cache8,
-        cache9,
-        cache10,
-        cache11,
-        RC[8],
-        RC[9],
-        RC[10],
-        RC[11],
-        MD5_CONSTANTS_PACKED.as_ptr(),
-        32
-    );
-    rf4_integrated!(
-        a,
-        b,
-        c,
-        d,
-        cache12,
-        cache13,
-        cache14,
-        cache15,
-        RC[12],
-        RC[13],
-        RC[14],
-        RC[15],
-        MD5_CONSTANTS_PACKED.as_ptr(),
-        48
-    );
+    // F rounds 8-11: optimized assembly block for maximum performance
+    unsafe {
+        core::arch::asm!(
+            // Load F round constant pairs with ldp
+            "ldp    {k2}, {k3}, [{const_ptr}, #32]", // Load RC[8,9] and RC[10,11] pairs
+            // F8: a, b, c, d, cache8, RC[8], 7 - optimized scheduling
+            "add    w10, {data8:w}, {k2:w}",     // cache8 + RC[8] (lower 32 bits) - early
+            "eor    w8, {c:w}, {d:w}",           // c ^ d
+            "add    w10, {a:w}, w10",            // a + cache8 + RC[8]
+            "and    w8, w8, {b:w}",              // (c ^ d) & b
+            "eor    w8, w8, {d:w}",              // F(b,c,d)
+            "add    w10, w10, w8",               // complete addition
+            "ror    w10, w10, #25",              // rotate 32-7=25
+            "add    {a:w}, {b:w}, w10",          // b + rotated -> new a
+            "lsr    {k2}, {k2}, #32",            // prepare RC[9] for next round
+
+            // F9: d, a, b, c, cache9, RC[9], 12 - improved constant handling
+            "add    w10, {data9:w}, {k2:w}",     // cache9 + RC[9] - early
+            "eor    w8, {b:w}, {c:w}",           // b ^ c
+            "add    w10, {d:w}, w10",            // d + cache9 + RC[9]
+            "and    w8, w8, {a:w}",              // (b ^ c) & a (using updated a)
+            "eor    w8, w8, {c:w}",              // F(a,b,c)
+            "add    w10, w10, w8",               // complete addition
+            "ror    w10, w10, #20",              // rotate 32-12=20
+            "add    {d:w}, {a:w}, w10",          // a + rotated -> new d
+
+            // F10: c, d, a, b, cache10, RC[10], 17 - improved register usage
+            "add    w10, {data10:w}, {k3:w}",    // cache10 + RC[10] (lower 32 bits) - early
+            "eor    w8, {a:w}, {b:w}",           // a ^ b
+            "add    w10, {c:w}, w10",            // c + cache10 + RC[10]
+            "and    w8, w8, {d:w}",              // (a ^ b) & d
+            "eor    w8, w8, {b:w}",              // F(d,a,b)
+            "add    w10, w10, w8",               // complete addition
+            "ror    w10, w10, #15",              // rotate 32-17=15
+            "add    {c:w}, {d:w}, w10",          // d + rotated -> new c
+            "lsr    {k3}, {k3}, #32",            // prepare RC[11] for next round
+
+            // F11: b, c, d, a, cache11, RC[11], 22 - optimized dependencies
+            "add    w10, {data11:w}, {k3:w}",    // cache11 + RC[11] - early
+            "eor    w8, {d:w}, {a:w}",           // d ^ a
+            "add    w10, {b:w}, w10",            // b + cache11 + RC[11]
+            "and    w8, w8, {c:w}",              // (d ^ a) & c
+            "eor    w8, w8, {a:w}",              // F(c,d,a)
+            "add    w10, w10, w8",               // complete addition
+            "ror    w10, w10, #10",              // rotate 32-22=10
+            "add    {b:w}, {c:w}, w10",          // c + rotated -> new b
+
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            data8 = in(reg) cache8,
+            data9 = in(reg) cache9,
+            data10 = in(reg) cache10,
+            data11 = in(reg) cache11,
+            k2 = out(reg) _,
+            k3 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
+            out("w8") _,
+            out("w10") _,
+        );
+    }
+    // F rounds 12-15: optimized assembly block for maximum performance
+    unsafe {
+        core::arch::asm!(
+            // Load F round constant pairs with ldp
+            "ldp    {k2}, {k3}, [{const_ptr}, #48]", // Load RC[12,13] and RC[14,15] pairs
+            // F12: a, b, c, d, cache12, RC[12], 7 - optimized scheduling
+            "add    w10, {data12:w}, {k2:w}",    // cache12 + RC[12] (lower 32 bits) - early
+            "eor    w8, {c:w}, {d:w}",           // c ^ d
+            "add    w10, {a:w}, w10",            // a + cache12 + RC[12]
+            "and    w8, w8, {b:w}",              // (c ^ d) & b
+            "eor    w8, w8, {d:w}",              // F(b,c,d)
+            "add    w10, w10, w8",               // complete addition
+            "ror    w10, w10, #25",              // rotate 32-7=25
+            "add    {a:w}, {b:w}, w10",          // b + rotated -> new a
+            "lsr    {k2}, {k2}, #32",            // prepare RC[13] for next round
+
+            // F13: d, a, b, c, cache13, RC[13], 12 - improved constant handling
+            "add    w10, {data13:w}, {k2:w}",    // cache13 + RC[13] - early
+            "eor    w8, {b:w}, {c:w}",           // b ^ c
+            "add    w10, {d:w}, w10",            // d + cache13 + RC[13]
+            "and    w8, w8, {a:w}",              // (b ^ c) & a (using updated a)
+            "eor    w8, w8, {c:w}",              // F(a,b,c)
+            "add    w10, w10, w8",               // complete addition
+            "ror    w10, w10, #20",              // rotate 32-12=20
+            "add    {d:w}, {a:w}, w10",          // a + rotated -> new d
+
+            // F14: c, d, a, b, cache14, RC[14], 17 - improved register usage
+            "add    w10, {data14:w}, {k3:w}",    // cache14 + RC[14] (lower 32 bits) - early
+            "eor    w8, {a:w}, {b:w}",           // a ^ b
+            "add    w10, {c:w}, w10",            // c + cache14 + RC[14]
+            "and    w8, w8, {d:w}",              // (a ^ b) & d
+            "eor    w8, w8, {b:w}",              // F(d,a,b)
+            "add    w10, w10, w8",               // complete addition
+            "ror    w10, w10, #15",              // rotate 32-17=15
+            "add    {c:w}, {d:w}, w10",          // d + rotated -> new c
+            "lsr    {k3}, {k3}, #32",            // prepare RC[15] for next round
+
+            // F15: b, c, d, a, cache15, RC[15], 22 - optimized dependencies
+            "add    w10, {data15:w}, {k3:w}",    // cache15 + RC[15] - early
+            "eor    w8, {d:w}, {a:w}",           // d ^ a
+            "add    w10, {b:w}, w10",            // b + cache15 + RC[15]
+            "and    w8, w8, {c:w}",              // (d ^ a) & c
+            "eor    w8, w8, {a:w}",              // F(c,d,a)
+            "add    w10, w10, w8",               // complete addition
+            "ror    w10, w10, #10",              // rotate 32-22=10
+            "add    {b:w}, {c:w}, w10",          // c + rotated -> new b
+
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            data12 = in(reg) cache12,
+            data13 = in(reg) cache13,
+            data14 = in(reg) cache14,
+            data15 = in(reg) cache15,
+            k2 = out(reg) _,
+            k3 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
+            out("w8") _,
+            out("w10") _,
+        );
+    }
 
     // G rounds 16-19: optimized individual rounds with proper constant loading
     unsafe {
@@ -669,39 +693,134 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             out("w9") _,
             out("w10") _,
         );
-    } // G rounds 24-31: Use remaining integrated macros
-    rg4_integrated!(
-        a,
-        b,
-        c,
-        d,
-        cache9,
-        cache14,
-        cache3,
-        cache8,
-        RC[24],
-        RC[25],
-        RC[26],
-        RC[27],
-        MD5_CONSTANTS_PACKED.as_ptr(),
-        96
-    );
-    rg4_integrated!(
-        a,
-        b,
-        c,
-        d,
-        cache13,
-        cache2,
-        cache7,
-        cache12,
-        RC[28],
-        RC[29],
-        RC[30],
-        RC[31],
-        MD5_CONSTANTS_PACKED.as_ptr(),
-        112
-    );
+    }
+
+    // G rounds 24-27: optimized assembly block for maximum performance
+    unsafe {
+        core::arch::asm!(
+            // Load G round constant pairs with ldp
+            "ldp    {k2}, {k3}, [{const_ptr}, #96]", // Load RC[24,25] and RC[26,27] pairs
+            // G8: a, b, c, d, cache9, RC[24], 5 - optimized scheduling
+            "add    w10, {data9:w}, {k2:w}",     // cache9 + RC[24] (lower 32 bits) - early
+            "bic    w8, {c:w}, {d:w}",           // c & ~d
+            "add    w10, {a:w}, w10",            // a + cache9 + RC[24]
+            "and    w9, {d:w}, {b:w}",           // d & b
+            "add    w10, w10, w8",               // a + cache9 + RC[24] + (c & ~d)
+            "add    w8, w10, w9",                // ADD shortcut: + (d & b)
+            "ror    w8, w8, #27",                // rotate by 32-5=27
+            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
+            "lsr    {k2}, {k2}, #32",            // prepare RC[25] for next round
+
+            // G9: d, a, b, c, cache14, RC[25], 9 - improved constant handling
+            "add    w10, {data14:w}, {k2:w}",    // cache14 + RC[25] - early
+            "bic    w8, {b:w}, {c:w}",           // b & ~c
+            "add    w10, {d:w}, w10",            // d + cache14 + RC[25]
+            "and    w9, {c:w}, {a:w}",           // c & a (using updated a)
+            "add    w10, w10, w8",               // d + cache14 + RC[25] + (b & ~c)
+            "add    w8, w10, w9",                // ADD shortcut: + (c & a)
+            "ror    w8, w8, #23",                // rotate by 32-9=23
+            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+
+            // G10: c, d, a, b, cache3, RC[26], 14 - improved register usage
+            "add    w10, {data3:w}, {k3:w}",     // cache3 + RC[26] (lower 32 bits) - early
+            "bic    w8, {a:w}, {b:w}",           // a & ~b
+            "add    w10, {c:w}, w10",            // c + cache3 + RC[26]
+            "and    w9, {b:w}, {d:w}",           // b & d
+            "add    w10, w10, w8",               // c + cache3 + RC[26] + (a & ~b)
+            "add    w8, w10, w9",                // ADD shortcut: + (b & d)
+            "ror    w8, w8, #18",                // rotate by 32-14=18
+            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+            "lsr    {k3}, {k3}, #32",            // prepare RC[27] for next round
+
+            // G11: b, c, d, a, cache8, RC[27], 20 - optimized dependencies
+            "add    w10, {data8:w}, {k3:w}",     // cache8 + RC[27] - early
+            "bic    w8, {d:w}, {a:w}",           // d & ~a
+            "add    w10, {b:w}, w10",            // b + cache8 + RC[27]
+            "and    w9, {a:w}, {c:w}",           // a & c
+            "add    w10, w10, w8",               // b + cache8 + RC[27] + (d & ~a)
+            "add    w8, w10, w9",                // ADD shortcut: + (a & c)
+            "ror    w8, w8, #12",                // rotate by 32-20=12
+            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            data9 = in(reg) cache9,
+            data14 = in(reg) cache14,
+            data3 = in(reg) cache3,
+            data8 = in(reg) cache8,
+            k2 = out(reg) _,
+            k3 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
+            out("w8") _,
+            out("w9") _,
+            out("w10") _,
+        );
+    }
+    // G rounds 28-31: optimized assembly block for maximum performance
+    unsafe {
+        core::arch::asm!(
+            // Load G round constant pairs with ldp
+            "ldp    {k2}, {k3}, [{const_ptr}, #112]", // Load RC[28,29] and RC[30,31] pairs
+            // G12: a, b, c, d, cache13, RC[28], 5 - optimized scheduling
+            "add    w10, {data13:w}, {k2:w}",    // cache13 + RC[28] (lower 32 bits) - early
+            "bic    w8, {c:w}, {d:w}",           // c & ~d
+            "add    w10, {a:w}, w10",            // a + cache13 + RC[28]
+            "and    w9, {d:w}, {b:w}",           // d & b
+            "add    w10, w10, w8",               // a + cache13 + RC[28] + (c & ~d)
+            "add    w8, w10, w9",                // ADD shortcut: + (d & b)
+            "ror    w8, w8, #27",                // rotate by 32-5=27
+            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
+            "lsr    {k2}, {k2}, #32",            // prepare RC[29] for next round
+
+            // G13: d, a, b, c, cache2, RC[29], 9 - improved constant handling
+            "add    w10, {data2:w}, {k2:w}",     // cache2 + RC[29] - early
+            "bic    w8, {b:w}, {c:w}",           // b & ~c
+            "add    w10, {d:w}, w10",            // d + cache2 + RC[29]
+            "and    w9, {c:w}, {a:w}",           // c & a (using updated a)
+            "add    w10, w10, w8",               // d + cache2 + RC[29] + (b & ~c)
+            "add    w8, w10, w9",                // ADD shortcut: + (c & a)
+            "ror    w8, w8, #23",                // rotate by 32-9=23
+            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+
+            // G14: c, d, a, b, cache7, RC[30], 14 - improved register usage
+            "add    w10, {data7:w}, {k3:w}",     // cache7 + RC[30] (lower 32 bits) - early
+            "bic    w8, {a:w}, {b:w}",           // a & ~b
+            "add    w10, {c:w}, w10",            // c + cache7 + RC[30]
+            "and    w9, {b:w}, {d:w}",           // b & d
+            "add    w10, w10, w8",               // c + cache7 + RC[30] + (a & ~b)
+            "add    w8, w10, w9",                // ADD shortcut: + (b & d)
+            "ror    w8, w8, #18",                // rotate by 32-14=18
+            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+            "lsr    {k3}, {k3}, #32",            // prepare RC[31] for next round
+
+            // G15: b, c, d, a, cache12, RC[31], 20 - optimized dependencies
+            "add    w10, {data12:w}, {k3:w}",    // cache12 + RC[31] - early
+            "bic    w8, {d:w}, {a:w}",           // d & ~a
+            "add    w10, {b:w}, w10",            // b + cache12 + RC[31]
+            "and    w9, {a:w}, {c:w}",           // a & c
+            "add    w10, w10, w8",               // b + cache12 + RC[31] + (d & ~a)
+            "add    w8, w10, w9",                // ADD shortcut: + (a & c)
+            "ror    w8, w8, #12",                // rotate by 32-20=12
+            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            data13 = in(reg) cache13,
+            data2 = in(reg) cache2,
+            data7 = in(reg) cache7,
+            data12 = in(reg) cache12,
+            k2 = out(reg) _,
+            k3 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
+            out("w8") _,
+            out("w9") _,
+            out("w10") _,
+        );
+    }
 
     // round 3 - H function with re-use optimization
     // Initialize tmp register for H function re-use
@@ -1031,54 +1150,182 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             out("w10") _,
         );
     }
-    ri4_integrated!(
-        a,
-        b,
-        c,
-        d,
-        cache12,
-        cache3,
-        cache10,
-        cache1,
-        RC[52],
-        RC[53],
-        RC[54],
-        RC[55],
-        MD5_CONSTANTS_PACKED.as_ptr(),
-        208
-    );
-    ri4_integrated!(
-        a,
-        b,
-        c,
-        d,
-        cache8,
-        cache15,
-        cache6,
-        cache13,
-        RC[56],
-        RC[57],
-        RC[58],
-        RC[59],
-        MD5_CONSTANTS_PACKED.as_ptr(),
-        224
-    );
-    ri4_integrated!(
-        a,
-        b,
-        c,
-        d,
-        cache4,
-        cache11,
-        cache2,
-        cache9,
-        RC[60],
-        RC[61],
-        RC[62],
-        RC[63],
-        MD5_CONSTANTS_PACKED.as_ptr(),
-        240
-    );
+    // I rounds 52-55: optimized assembly block for maximum performance
+    unsafe {
+        core::arch::asm!(
+            // Load I round constant pairs with ldp
+            "ldp    {k2}, {k3}, [{const_ptr}, #208]", // Load RC[52,53] and RC[54,55] pairs
+            // I4: a, b, c, d, cache12, RC[52], 6 - optimized I function
+            "add    w10, {data12:w}, {k2:w}",    // cache12 + RC[52] (lower 32 bits) - early
+            "orn    w8, {b:w}, {d:w}",           // b | ~d (first part of I function)
+            "add    w10, {a:w}, w10",            // a + cache12 + RC[52]
+            "eor    w8, w8, {c:w}",              // I(b,c,d) = (b | ~d) ^ c
+            "add    w8, w10, w8",                // a + cache12 + RC[52] + I(b,c,d)
+            "lsr    {k2}, {k2}, #32",            // prepare RC[53] for next round
+            "ror    w8, w8, #26",                // rotate by 32-6=26
+            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
+
+            // I5: d, a, b, c, cache3, RC[53], 10 - improved constant handling
+            "add    w10, {data3:w}, {k2:w}",     // cache3 + RC[53] - early
+            "orn    w8, {a:w}, {c:w}",           // a | ~c (with updated a)
+            "add    w10, {d:w}, w10",            // d + cache3 + RC[53]
+            "eor    w8, w8, {b:w}",              // I(a,b,c) = (a | ~c) ^ b
+            "add    w8, w10, w8",                // d + cache3 + RC[53] + I(a,b,c)
+            "ror    w8, w8, #22",                // rotate by 32-10=22
+            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+
+            // I6: c, d, a, b, cache10, RC[54], 15 - improved register usage
+            "add    w10, {data10:w}, {k3:w}",    // cache10 + RC[54] (lower 32 bits) - early
+            "orn    w8, {d:w}, {b:w}",           // d | ~b (with updated d)
+            "add    w10, {c:w}, w10",            // c + cache10 + RC[54]
+            "eor    w8, w8, {a:w}",              // I(d,a,b) = (d | ~b) ^ a
+            "add    w8, w10, w8",                // c + cache10 + RC[54] + I(d,a,b)
+            "lsr    {k3}, {k3}, #32",            // prepare RC[55] for next round
+            "ror    w8, w8, #17",                // rotate by 32-15=17
+            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+
+            // I7: b, c, d, a, cache1, RC[55], 21 - optimized dependencies
+            "add    w10, {data1:w}, {k3:w}",     // cache1 + RC[55] - early
+            "orn    w8, {c:w}, {a:w}",           // c | ~a (with updated c)
+            "add    w10, {b:w}, w10",            // b + cache1 + RC[55]
+            "eor    w8, w8, {d:w}",              // I(c,d,a) = (c | ~a) ^ d
+            "add    w8, w10, w8",                // b + cache1 + RC[55] + I(c,d,a)
+            "ror    w8, w8, #11",                // rotate by 32-21=11
+            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            data12 = in(reg) cache12,
+            data3 = in(reg) cache3,
+            data10 = in(reg) cache10,
+            data1 = in(reg) cache1,
+            k2 = out(reg) _,
+            k3 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
+            out("w8") _,
+            out("w10") _,
+        );
+    }
+
+    // I rounds 56-59: optimized assembly block for maximum performance
+    unsafe {
+        core::arch::asm!(
+            // Load I round constant pairs with ldp
+            "ldp    {k2}, {k3}, [{const_ptr}, #224]", // Load RC[56,57] and RC[58,59] pairs
+            // I8: a, b, c, d, cache8, RC[56], 6 - optimized I function
+            "add    w10, {data8:w}, {k2:w}",     // cache8 + RC[56] (lower 32 bits) - early
+            "orn    w8, {b:w}, {d:w}",           // b | ~d (first part of I function)
+            "add    w10, {a:w}, w10",            // a + cache8 + RC[56]
+            "eor    w8, w8, {c:w}",              // I(b,c,d) = (b | ~d) ^ c
+            "add    w8, w10, w8",                // a + cache8 + RC[56] + I(b,c,d)
+            "lsr    {k2}, {k2}, #32",            // prepare RC[57] for next round
+            "ror    w8, w8, #26",                // rotate by 32-6=26
+            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
+
+            // I9: d, a, b, c, cache15, RC[57], 10 - improved constant handling
+            "add    w10, {data15:w}, {k2:w}",    // cache15 + RC[57] - early
+            "orn    w8, {a:w}, {c:w}",           // a | ~c (with updated a)
+            "add    w10, {d:w}, w10",            // d + cache15 + RC[57]
+            "eor    w8, w8, {b:w}",              // I(a,b,c) = (a | ~c) ^ b
+            "add    w8, w10, w8",                // d + cache15 + RC[57] + I(a,b,c)
+            "ror    w8, w8, #22",                // rotate by 32-10=22
+            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+
+            // I10: c, d, a, b, cache6, RC[58], 15 - improved register usage
+            "add    w10, {data6:w}, {k3:w}",     // cache6 + RC[58] (lower 32 bits) - early
+            "orn    w8, {d:w}, {b:w}",           // d | ~b (with updated d)
+            "add    w10, {c:w}, w10",            // c + cache6 + RC[58]
+            "eor    w8, w8, {a:w}",              // I(d,a,b) = (d | ~b) ^ a
+            "add    w8, w10, w8",                // c + cache6 + RC[58] + I(d,a,b)
+            "lsr    {k3}, {k3}, #32",            // prepare RC[59] for next round
+            "ror    w8, w8, #17",                // rotate by 32-15=17
+            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+
+            // I11: b, c, d, a, cache13, RC[59], 21 - optimized dependencies
+            "add    w10, {data13:w}, {k3:w}",    // cache13 + RC[59] - early
+            "orn    w8, {c:w}, {a:w}",           // c | ~a (with updated c)
+            "add    w10, {b:w}, w10",            // b + cache13 + RC[59]
+            "eor    w8, w8, {d:w}",              // I(c,d,a) = (c | ~a) ^ d
+            "add    w8, w10, w8",                // b + cache13 + RC[59] + I(c,d,a)
+            "ror    w8, w8, #11",                // rotate by 32-21=11
+            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            data8 = in(reg) cache8,
+            data15 = in(reg) cache15,
+            data6 = in(reg) cache6,
+            data13 = in(reg) cache13,
+            k2 = out(reg) _,
+            k3 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
+            out("w8") _,
+            out("w10") _,
+        );
+    }
+
+    // I rounds 60-63: final optimized assembly block for maximum performance
+    unsafe {
+        core::arch::asm!(
+            // Load I round constant pairs with ldp
+            "ldp    {k2}, {k3}, [{const_ptr}, #240]", // Load RC[60,61] and RC[62,63] pairs
+            // I12: a, b, c, d, cache4, RC[60], 6 - optimized I function
+            "add    w10, {data4:w}, {k2:w}",     // cache4 + RC[60] (lower 32 bits) - early
+            "orn    w8, {b:w}, {d:w}",           // b | ~d (first part of I function)
+            "add    w10, {a:w}, w10",            // a + cache4 + RC[60]
+            "eor    w8, w8, {c:w}",              // I(b,c,d) = (b | ~d) ^ c
+            "add    w8, w10, w8",                // a + cache4 + RC[60] + I(b,c,d)
+            "lsr    {k2}, {k2}, #32",            // prepare RC[61] for next round
+            "ror    w8, w8, #26",                // rotate by 32-6=26
+            "add    {a:w}, {b:w}, w8",           // b + rotated -> new a
+
+            // I13: d, a, b, c, cache11, RC[61], 10 - improved constant handling
+            "add    w10, {data11:w}, {k2:w}",    // cache11 + RC[61] - early
+            "orn    w8, {a:w}, {c:w}",           // a | ~c (with updated a)
+            "add    w10, {d:w}, w10",            // d + cache11 + RC[61]
+            "eor    w8, w8, {b:w}",              // I(a,b,c) = (a | ~c) ^ b
+            "add    w8, w10, w8",                // d + cache11 + RC[61] + I(a,b,c)
+            "ror    w8, w8, #22",                // rotate by 32-10=22
+            "add    {d:w}, {a:w}, w8",           // a + rotated -> new d
+
+            // I14: c, d, a, b, cache2, RC[62], 15 - improved register usage
+            "add    w10, {data2:w}, {k3:w}",     // cache2 + RC[62] (lower 32 bits) - early
+            "orn    w8, {d:w}, {b:w}",           // d | ~b (with updated d)
+            "add    w10, {c:w}, w10",            // c + cache2 + RC[62]
+            "eor    w8, w8, {a:w}",              // I(d,a,b) = (d | ~b) ^ a
+            "add    w8, w10, w8",                // c + cache2 + RC[62] + I(d,a,b)
+            "lsr    {k3}, {k3}, #32",            // prepare RC[63] for next round
+            "ror    w8, w8, #17",                // rotate by 32-15=17
+            "add    {c:w}, {d:w}, w8",           // d + rotated -> new c
+
+            // I15: b, c, d, a, cache9, RC[63], 21 - final optimized dependencies
+            "add    w10, {data9:w}, {k3:w}",     // cache9 + RC[63] - early
+            "orn    w8, {c:w}, {a:w}",           // c | ~a (with updated c)
+            "add    w10, {b:w}, w10",            // b + cache9 + RC[63]
+            "eor    w8, w8, {d:w}",              // I(c,d,a) = (c | ~a) ^ d
+            "add    w8, w10, w8",                // b + cache9 + RC[63] + I(c,d,a)
+            "ror    w8, w8, #11",                // rotate by 32-21=11
+            "add    {b:w}, {c:w}, w8",           // c + rotated -> new b
+
+            a = inout(reg) a,
+            b = inout(reg) b,
+            c = inout(reg) c,
+            d = inout(reg) d,
+            data4 = in(reg) cache4,
+            data11 = in(reg) cache11,
+            data2 = in(reg) cache2,
+            data9 = in(reg) cache9,
+            k2 = out(reg) _,
+            k3 = out(reg) _,
+            const_ptr = in(reg) MD5_CONSTANTS_PACKED.as_ptr(),
+            out("w8") _,
+            out("w10") _,
+        );
+    }
 
     state[0] = state[0].wrapping_add(a);
     state[1] = state[1].wrapping_add(b);
