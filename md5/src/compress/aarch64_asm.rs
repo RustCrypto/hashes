@@ -105,6 +105,33 @@ macro_rules! asm_op_h {
     };
 }
 
+// Animetosho H function re-use optimization: eliminates MOV instructions
+macro_rules! asm_op_h_reuse {
+    ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr, $tmp:ident) => {
+        unsafe {
+            core::arch::asm!(
+                // H function with re-use: tmp should contain c^d from previous round
+                "add    w9, {m:w}, {rc:w}",     // m + rc first (no b dependency)
+                "eor    {tmp:w}, {tmp:w}, {b:w}", // reuse: tmp (c^d) ^ b = b^c^d
+                "add    w9, {a:w}, w9",         // a + m + rc 
+                "add    w8, w9, {tmp:w}",       // add h_result
+                "eor    {tmp:w}, {tmp:w}, {d:w}", // prepare for next: (b^c^d) ^ d = b^c
+                "ror    w8, w8, #{ror}",        // rotate
+                "add    {a:w}, {b:w}, w8",      // b + rotated_result
+                a = inout(reg) $a,
+                b = in(reg) $b,
+                d = in(reg) $d,
+                m = in(reg) $m,
+                rc = in(reg) $rc,
+                tmp = inout(reg) $tmp,
+                ror = const (32 - $s),
+                out("w8") _,
+                out("w9") _,
+            );
+        }
+    };
+}
+
 macro_rules! asm_op_i {
     ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
         unsafe {
@@ -144,6 +171,13 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     for (o, chunk) in data.iter_mut().zip(input.chunks_exact(4)) {
         *o = u32::from_le_bytes(chunk.try_into().unwrap());
     }
+    
+    // Register caching optimization: cache frequently used data values
+    // Cache every 4th element for even distribution: data[0], data[4], data[8], data[12]
+    let cache0 = data[0];
+    let cache4 = data[4];  
+    let cache8 = data[8];
+    let cache12 = data[12];
     
     // Additional optimizations: better instruction scheduling and reduced dependencies
 
@@ -199,7 +233,7 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             b = inout(reg) b,
             c = inout(reg) c,
             d = inout(reg) d,
-            data0 = in(reg) data[0],
+            data0 = in(reg) cache0,
             data1 = in(reg) data[1],
             data2 = in(reg) data[2], 
             data3 = in(reg) data[3],
@@ -211,17 +245,17 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         );
     }
 
-    asm_op_f!(a, b, c, d, data[4], RC[4], 7);
+    asm_op_f!(a, b, c, d, cache4, RC[4], 7);
     asm_op_f!(d, a, b, c, data[5], RC[5], 12);
     asm_op_f!(c, d, a, b, data[6], RC[6], 17);
     asm_op_f!(b, c, d, a, data[7], RC[7], 22);
 
-    asm_op_f!(a, b, c, d, data[8], RC[8], 7);
+    asm_op_f!(a, b, c, d, cache8, RC[8], 7);
     asm_op_f!(d, a, b, c, data[9], RC[9], 12);
     asm_op_f!(c, d, a, b, data[10], RC[10], 17);
     asm_op_f!(b, c, d, a, data[11], RC[11], 22);
 
-    asm_op_f!(a, b, c, d, data[12], RC[12], 7);
+    asm_op_f!(a, b, c, d, cache12, RC[12], 7);
     asm_op_f!(d, a, b, c, data[13], RC[13], 12);
     asm_op_f!(c, d, a, b, data[14], RC[14], 17);
     asm_op_f!(b, c, d, a, data[15], RC[15], 22);
@@ -293,36 +327,49 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     asm_op_g!(a, b, c, d, data[5], RC[20], 5);
     asm_op_g!(d, a, b, c, data[10], RC[21], 9);
     asm_op_g!(c, d, a, b, data[15], RC[22], 14);
-    asm_op_g!(b, c, d, a, data[4], RC[23], 20);
+    asm_op_g!(b, c, d, a, cache4, RC[23], 20);
 
     asm_op_g!(a, b, c, d, data[9], RC[24], 5);
     asm_op_g!(d, a, b, c, data[14], RC[25], 9);
     asm_op_g!(c, d, a, b, data[3], RC[26], 14);
-    asm_op_g!(b, c, d, a, data[8], RC[27], 20);
+    asm_op_g!(b, c, d, a, cache8, RC[27], 20);
 
     asm_op_g!(a, b, c, d, data[13], RC[28], 5);
     asm_op_g!(d, a, b, c, data[2], RC[29], 9);
     asm_op_g!(c, d, a, b, data[7], RC[30], 14);
-    asm_op_g!(b, c, d, a, data[12], RC[31], 20);
+    asm_op_g!(b, c, d, a, cache12, RC[31], 20);
 
-    // round 3
-    asm_op_h!(a, b, c, d, data[5], RC[32], 4);
-    asm_op_h!(d, a, b, c, data[8], RC[33], 11);
-    asm_op_h!(c, d, a, b, data[11], RC[34], 16);
-    asm_op_h!(b, c, d, a, data[14], RC[35], 23);
+    // round 3 - H function with re-use optimization (animetosho technique)
+    // Initialize tmp register for H function re-use
+    #[allow(unused_assignments)] // Last H reuse writes tmp_h but it's not used after
+    let mut tmp_h: u32;
+    unsafe {
+        // Initialize tmp with c^d for first H round
+        core::arch::asm!(
+            "eor {tmp:w}, {c:w}, {d:w}",
+            tmp = out(reg) tmp_h,
+            c = in(reg) c,
+            d = in(reg) d,
+        );
+    }
+    
+    asm_op_h_reuse!(a, b, c, d, data[5], RC[32], 4, tmp_h);
+    asm_op_h_reuse!(d, a, b, c, cache8, RC[33], 11, tmp_h);
+    asm_op_h_reuse!(c, d, a, b, data[11], RC[34], 16, tmp_h);
+    asm_op_h_reuse!(b, c, d, a, data[14], RC[35], 23, tmp_h);
 
-    asm_op_h!(a, b, c, d, data[1], RC[36], 4);
-    asm_op_h!(d, a, b, c, data[4], RC[37], 11);
-    asm_op_h!(c, d, a, b, data[7], RC[38], 16);
-    asm_op_h!(b, c, d, a, data[10], RC[39], 23);
+    asm_op_h_reuse!(a, b, c, d, data[1], RC[36], 4, tmp_h);
+    asm_op_h_reuse!(d, a, b, c, cache4, RC[37], 11, tmp_h);
+    asm_op_h_reuse!(c, d, a, b, data[7], RC[38], 16, tmp_h);
+    asm_op_h_reuse!(b, c, d, a, data[10], RC[39], 23, tmp_h);
 
-    asm_op_h!(a, b, c, d, data[13], RC[40], 4);
-    asm_op_h!(d, a, b, c, data[0], RC[41], 11);
-    asm_op_h!(c, d, a, b, data[3], RC[42], 16);
-    asm_op_h!(b, c, d, a, data[6], RC[43], 23);
+    asm_op_h_reuse!(a, b, c, d, data[13], RC[40], 4, tmp_h);
+    asm_op_h_reuse!(d, a, b, c, data[0], RC[41], 11, tmp_h);
+    asm_op_h_reuse!(c, d, a, b, data[3], RC[42], 16, tmp_h);
+    asm_op_h_reuse!(b, c, d, a, data[6], RC[43], 23, tmp_h);
 
     asm_op_h!(a, b, c, d, data[9], RC[44], 4);
-    asm_op_h!(d, a, b, c, data[12], RC[45], 11);
+    asm_op_h!(d, a, b, c, cache12, RC[45], 11);
     asm_op_h!(c, d, a, b, data[15], RC[46], 16);
     asm_op_h!(b, c, d, a, data[2], RC[47], 23);
 
@@ -332,17 +379,17 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
     asm_op_i!(c, d, a, b, data[14], RC[50], 15);
     asm_op_i!(b, c, d, a, data[5], RC[51], 21);
 
-    asm_op_i!(a, b, c, d, data[12], RC[52], 6);
+    asm_op_i!(a, b, c, d, cache12, RC[52], 6);
     asm_op_i!(d, a, b, c, data[3], RC[53], 10);
     asm_op_i!(c, d, a, b, data[10], RC[54], 15);
     asm_op_i!(b, c, d, a, data[1], RC[55], 21);
 
-    asm_op_i!(a, b, c, d, data[8], RC[56], 6);
+    asm_op_i!(a, b, c, d, cache8, RC[56], 6);
     asm_op_i!(d, a, b, c, data[15], RC[57], 10);
     asm_op_i!(c, d, a, b, data[6], RC[58], 15);
     asm_op_i!(b, c, d, a, data[13], RC[59], 21);
 
-    asm_op_i!(a, b, c, d, data[4], RC[60], 6);
+    asm_op_i!(a, b, c, d, cache4, RC[60], 6);
     asm_op_i!(d, a, b, c, data[11], RC[61], 10);
     asm_op_i!(c, d, a, b, data[2], RC[62], 15);
     asm_op_i!(b, c, d, a, data[9], RC[63], 21);
