@@ -275,86 +275,86 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
             "ldp    x10, x11, [{kptr}]",        // RC[0,1] and RC[2,3]
             "ldp    x12, x13, [{kptr}, #16]",   // RC[4,5] and RC[6,7]
 
-            // F0: A += F(B,C,D) + cache0 + RC[0]; A = rotl(A, 7) + B
+            // F0: A += F(B,C,D) + cache0 + RC[0]; A = rotl(A, 7) + B - improved scheduling
             "eor    w8, {c:w}, {d:w}",          // c ^ d (F function start)
             "add    w9, {cache0:w}, w10",       // cache0 + RC[0] (parallel)
             "and    w8, w8, {b:w}",             // (c ^ d) & b
-            "add    {a:w}, {a:w}, w9",          // a += cache0 + RC[0]
+            "lsr    x10, x10, #32",             // prepare RC[1] (early)
             "eor    w8, w8, {d:w}",             // F(b,c,d)
-            "lsr    x10, x10, #32",             // prepare RC[1]
+            "add    {a:w}, {a:w}, w9",          // a += cache0 + RC[0]
             "add    {a:w}, {a:w}, w8",          // a += F(b,c,d)
             "ror    {a:w}, {a:w}, #25",         // rotate 32-7=25
             "add    {a:w}, {a:w}, {b:w}",       // a += b
 
-            // F1: D += F(A,B,C) + cache1 + RC[1]; D = rotl(D, 12) + A
+            // F1: D += F(A,B,C) + cache1 + RC[1]; D = rotl(D, 12) + A - improved scheduling
             "eor    w8, {b:w}, {c:w}",          // b ^ c (start early with updated values)
             "add    w9, {cache1:w}, w10",       // cache1 + RC[1] (parallel)
             "and    w8, w8, {a:w}",             // (b ^ c) & a
-            "add    {d:w}, {d:w}, w9",          // d += cache1 + RC[1]
             "eor    w8, w8, {c:w}",             // F(a,b,c)
+            "add    {d:w}, {d:w}, w9",          // d += cache1 + RC[1]
             "add    {d:w}, {d:w}, w8",          // d += F(a,b,c)
             "ror    {d:w}, {d:w}, #20",         // rotate 32-12=20
             "add    {d:w}, {d:w}, {a:w}",       // d += a
 
-            // F2: C += F(D,A,B) + cache2 + RC[2]; C = rotl(C, 17) + D
+            // F2: C += F(D,A,B) + cache2 + RC[2]; C = rotl(C, 17) + D - improved scheduling
             "eor    w8, {a:w}, {b:w}",          // a ^ b (with updated a)
             "add    w9, {cache2:w}, w11",       // cache2 + RC[2] (parallel)
             "and    w8, w8, {d:w}",             // (a ^ b) & d
-            "add    {c:w}, {c:w}, w9",          // c += cache2 + RC[2]
+            "lsr    x11, x11, #32",             // prepare RC[3] (early)
             "eor    w8, w8, {b:w}",             // F(d,a,b)
-            "lsr    x11, x11, #32",             // prepare RC[3]
+            "add    {c:w}, {c:w}, w9",          // c += cache2 + RC[2]
             "add    {c:w}, {c:w}, w8",          // c += F(d,a,b)
             "ror    {c:w}, {c:w}, #15",         // rotate 32-17=15
             "add    {c:w}, {c:w}, {d:w}",       // c += d
 
-            // F3: B += F(C,D,A) + cache3 + RC[3]; B = rotl(B, 22) + C
+            // F3: B += F(C,D,A) + cache3 + RC[3]; B = rotl(B, 22) + C - improved scheduling
             "eor    w8, {d:w}, {a:w}",          // d ^ a
             "add    w9, {cache3:w}, w11",       // cache3 + RC[3] (parallel)
             "and    w8, w8, {c:w}",             // (d ^ a) & c
-            "add    {b:w}, {b:w}, w9",          // b += cache3 + RC[3]
             "eor    w8, w8, {a:w}",             // F(c,d,a)
+            "add    {b:w}, {b:w}, w9",          // b += cache3 + RC[3]
             "add    {b:w}, {b:w}, w8",          // b += F(c,d,a)
             "ror    {b:w}, {b:w}, #10",         // rotate 32-22=10
             "add    {b:w}, {b:w}, {c:w}",       // b += c
 
-            // F4: A += F(B,C,D) + cache4 + RC[4]; A = rotl(A, 7) + B
+            // F4: A += F(B,C,D) + cache4 + RC[4]; A = rotl(A, 7) + B - improved scheduling
             "eor    w8, {c:w}, {d:w}",          // c ^ d
             "add    w9, {cache4:w}, w12",       // cache4 + RC[4]
             "and    w8, w8, {b:w}",             // (c ^ d) & b
-            "add    {a:w}, {a:w}, w9",          // a += cache4 + RC[4]
+            "lsr    x12, x12, #32",             // prepare RC[5] (early)
             "eor    w8, w8, {d:w}",             // F(b,c,d)
-            "lsr    x12, x12, #32",             // prepare RC[5]
+            "add    {a:w}, {a:w}, w9",          // a += cache4 + RC[4]
             "add    {a:w}, {a:w}, w8",          // a += F(b,c,d)
             "ror    {a:w}, {a:w}, #25",         // rotate
             "add    {a:w}, {a:w}, {b:w}",       // a += b
 
-            // F5: D += F(A,B,C) + cache5 + RC[5]; D = rotl(D, 12) + A
+            // F5: D += F(A,B,C) + cache5 + RC[5]; D = rotl(D, 12) + A - improved scheduling  
             "eor    w8, {b:w}, {c:w}",          // b ^ c
             "add    w9, {cache5:w}, w12",       // cache5 + RC[5]
             "and    w8, w8, {a:w}",             // (b ^ c) & a
-            "add    {d:w}, {d:w}, w9",          // d += cache5 + RC[5]
             "eor    w8, w8, {c:w}",             // F(a,b,c)
+            "add    {d:w}, {d:w}, w9",          // d += cache5 + RC[5]
             "add    {d:w}, {d:w}, w8",          // d += F(a,b,c)
             "ror    {d:w}, {d:w}, #20",         // rotate
             "add    {d:w}, {d:w}, {a:w}",       // d += a
 
-            // F6: C += F(D,A,B) + cache6 + RC[6]; C = rotl(C, 17) + D
+            // F6: C += F(D,A,B) + cache6 + RC[6]; C = rotl(C, 17) + D - improved scheduling
             "eor    w8, {a:w}, {b:w}",          // a ^ b
             "add    w9, {cache6:w}, w13",       // cache6 + RC[6]
             "and    w8, w8, {d:w}",             // (a ^ b) & d
-            "add    {c:w}, {c:w}, w9",          // c += cache6 + RC[6]
+            "lsr    x13, x13, #32",             // prepare RC[7] (early)
             "eor    w8, w8, {b:w}",             // F(d,a,b)
-            "lsr    x13, x13, #32",             // prepare RC[7]
+            "add    {c:w}, {c:w}, w9",          // c += cache6 + RC[6]
             "add    {c:w}, {c:w}, w8",          // c += F(d,a,b)
             "ror    {c:w}, {c:w}, #15",         // rotate
             "add    {c:w}, {c:w}, {d:w}",       // c += d
 
-            // F7: B += F(C,D,A) + cache7 + RC[7]; B = rotl(B, 22) + C
+            // F7: B += F(C,D,A) + cache7 + RC[7]; B = rotl(B, 22) + C - improved scheduling
             "eor    w8, {d:w}, {a:w}",          // d ^ a
             "add    w9, {cache7:w}, w13",       // cache7 + RC[7]
             "and    w8, w8, {c:w}",             // (d ^ a) & c
-            "add    {b:w}, {b:w}, w9",          // b += cache7 + RC[7]
             "eor    w8, w8, {a:w}",             // F(c,d,a)
+            "add    {b:w}, {b:w}, w9",          // b += cache7 + RC[7]
             "add    {b:w}, {b:w}, w8",          // b += F(c,d,a)
             "ror    {b:w}, {b:w}, #10",         // rotate
             "add    {b:w}, {b:w}, {c:w}",       // b += c
@@ -382,47 +382,47 @@ fn compress_block(state: &mut [u32; 4], input: &[u8; 64]) {
         core::arch::asm!(
             // Load F round constant pairs with ldp
             "ldp    {k2}, {k3}, [{const_ptr}, #32]", // Load RC[8,9] and RC[10,11] pairs
-            // F8: a, b, c, d, cache8, RC[8], 7 - optimized scheduling
-            "add    w10, {data8:w}, {k2:w}",     // cache8 + RC[8] (lower 32 bits) - early
+            // F8: a, b, c, d, cache8, RC[8], 7 - improved scheduling
             "eor    w8, {c:w}, {d:w}",           // c ^ d
-            "add    w10, {a:w}, w10",            // a + cache8 + RC[8]
+            "add    w10, {data8:w}, {k2:w}",     // cache8 + RC[8] (parallel)
             "and    w8, w8, {b:w}",              // (c ^ d) & b
+            "lsr    {k2}, {k2}, #32",            // prepare RC[9] (early)
             "eor    w8, w8, {d:w}",              // F(b,c,d)
-            "add    w10, w10, w8",               // complete addition
-            "ror    w10, w10, #25",              // rotate 32-7=25
-            "add    {a:w}, {b:w}, w10",          // b + rotated -> new a
-            "lsr    {k2}, {k2}, #32",            // prepare RC[9] for next round
+            "add    {a:w}, {a:w}, w10",          // a += cache8 + RC[8]
+            "add    {a:w}, {a:w}, w8",           // a += F(b,c,d)
+            "ror    {a:w}, {a:w}, #25",          // rotate 32-7=25
+            "add    {a:w}, {a:w}, {b:w}",        // a += b
 
-            // F9: d, a, b, c, cache9, RC[9], 12 - improved constant handling
-            "add    w10, {data9:w}, {k2:w}",     // cache9 + RC[9] - early
+            // F9: d, a, b, c, cache9, RC[9], 12 - improved scheduling
             "eor    w8, {b:w}, {c:w}",           // b ^ c
-            "add    w10, {d:w}, w10",            // d + cache9 + RC[9]
+            "add    w10, {data9:w}, {k2:w}",     // cache9 + RC[9] (parallel)
             "and    w8, w8, {a:w}",              // (b ^ c) & a (using updated a)
             "eor    w8, w8, {c:w}",              // F(a,b,c)
-            "add    w10, w10, w8",               // complete addition
-            "ror    w10, w10, #20",              // rotate 32-12=20
-            "add    {d:w}, {a:w}, w10",          // a + rotated -> new d
+            "add    {d:w}, {d:w}, w10",          // d += cache9 + RC[9]
+            "add    {d:w}, {d:w}, w8",           // d += F(a,b,c)
+            "ror    {d:w}, {d:w}, #20",          // rotate 32-12=20
+            "add    {d:w}, {d:w}, {a:w}",        // d += a
 
-            // F10: c, d, a, b, cache10, RC[10], 17 - improved register usage
-            "add    w10, {data10:w}, {k3:w}",    // cache10 + RC[10] (lower 32 bits) - early
+            // F10: c, d, a, b, cache10, RC[10], 17 - improved scheduling
             "eor    w8, {a:w}, {b:w}",           // a ^ b
-            "add    w10, {c:w}, w10",            // c + cache10 + RC[10]
+            "add    w10, {data10:w}, {k3:w}",    // cache10 + RC[10] (parallel)
             "and    w8, w8, {d:w}",              // (a ^ b) & d
+            "lsr    {k3}, {k3}, #32",            // prepare RC[11] (early)
             "eor    w8, w8, {b:w}",              // F(d,a,b)
-            "add    w10, w10, w8",               // complete addition
-            "ror    w10, w10, #15",              // rotate 32-17=15
-            "add    {c:w}, {d:w}, w10",          // d + rotated -> new c
-            "lsr    {k3}, {k3}, #32",            // prepare RC[11] for next round
+            "add    {c:w}, {c:w}, w10",          // c += cache10 + RC[10]
+            "add    {c:w}, {c:w}, w8",           // c += F(d,a,b)
+            "ror    {c:w}, {c:w}, #15",          // rotate 32-17=15
+            "add    {c:w}, {c:w}, {d:w}",        // c += d
 
-            // F11: b, c, d, a, cache11, RC[11], 22 - optimized dependencies
-            "add    w10, {data11:w}, {k3:w}",    // cache11 + RC[11] - early
+            // F11: b, c, d, a, cache11, RC[11], 22 - improved scheduling
             "eor    w8, {d:w}, {a:w}",           // d ^ a
-            "add    w10, {b:w}, w10",            // b + cache11 + RC[11]
+            "add    w10, {data11:w}, {k3:w}",    // cache11 + RC[11] (parallel)
             "and    w8, w8, {c:w}",              // (d ^ a) & c
             "eor    w8, w8, {a:w}",              // F(c,d,a)
-            "add    w10, w10, w8",               // complete addition
-            "ror    w10, w10, #10",              // rotate 32-22=10
-            "add    {b:w}, {c:w}, w10",          // c + rotated -> new b
+            "add    {b:w}, {b:w}, w10",          // b += cache11 + RC[11]
+            "add    {b:w}, {b:w}, w8",           // b += F(c,d,a)
+            "ror    {b:w}, {b:w}, #10",          // rotate 32-22=10
+            "add    {b:w}, {b:w}, {c:w}",        // b += c
 
             a = inout(reg) a,
             b = inout(reg) b,
