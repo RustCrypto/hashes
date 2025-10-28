@@ -79,12 +79,12 @@ macro_rules! asm_op_g_alt {
     ($a:ident, $b:ident, $c:ident, $d:ident, $m:expr, $rc:expr, $s:expr) => {
         unsafe {
             core::arch::asm!(
-                // Alternative G function: G(b,c,d) = (c & !d) + (b & d)
-                "bic    w8, {c:w}, {d:w}",      // c & !d
-                "add    {a:w}, {a:w}, {rc:w}",  // a += rc
-                "and    w9, {b:w}, {d:w}",      // b & d
-                "add    {a:w}, {a:w}, {m:w}",   // a += m
+                // Alternative G function: G(b,c,d) = (c & !d) + (b & d) - optimized scheduling
+                "bic    w8, {c:w}, {d:w}",      // c & !d (independent calc first)
+                "and    w9, {b:w}, {d:w}",      // b & d (parallel independent calc)
+                "add    {a:w}, {a:w}, {rc:w}",  // a += rc (parallel)
                 "add    w8, w8, w9",            // (c & !d) + (b & d) = G(b,c,d)
+                "add    {a:w}, {a:w}, {m:w}",   // a += m
                 "add    {a:w}, {a:w}, w8",      // a += G(b,c,d)
                 "ror    {a:w}, {a:w}, #{ror}",  // rotate
                 "add    {a:w}, {a:w}, {b:w}",   // a += b
@@ -137,9 +137,9 @@ macro_rules! rh4_integrated {
                 "ldp    x10, x11, [{const_ptr}, #{k_offset}]",    // Load RC pair
 
                 // H round 0: A += H(B,C,D) + cache0 + RC[k]; A = rotl(A, 4) + B
-                "add    w9, {cache0:w}, w10",            // cache0 + RC[k0] (lower 32 bits)
-                "eor    {tmp:w}, {tmp:w}, {b:w}",        // reuse: tmp (c^d) ^ b = b^c^d
-                "lsr    x10, x10, #32",                  // shift for next constant
+                "eor    {tmp:w}, {tmp:w}, {b:w}",        // reuse: tmp (c^d) ^ b = b^c^d (independent first)
+                "add    w9, {cache0:w}, w10",            // cache0 + RC[k0] (parallel)
+                "lsr    x10, x10, #32",                  // shift for next constant (early)
                 "add    w9, {a:w}, w9",                  // a + cache0 + RC[k0]
                 "add    w8, w9, {tmp:w}",                // add h_result
                 "eor    {tmp:w}, {tmp:w}, {d:w}",        // prepare for next: (b^c^d) ^ d = b^c
@@ -147,8 +147,8 @@ macro_rules! rh4_integrated {
                 "add    {a:w}, {b:w}, w8",               // b + rotated_result
 
                 // H round 1: D += H(A,B,C) + cache1 + RC[k+1]; D = rotl(D, 11) + A
-                "add    w9, {cache1:w}, w10",            // cache1 + RC[k+1]
-                "eor    {tmp:w}, {tmp:w}, {a:w}",        // reuse: tmp (b^c) ^ a = a^b^c
+                "eor    {tmp:w}, {tmp:w}, {a:w}",        // reuse: tmp (b^c) ^ a = a^b^c (independent first)
+                "add    w9, {cache1:w}, w10",            // cache1 + RC[k+1] (parallel)
                 "add    w9, {d:w}, w9",                  // d + cache1 + RC[k+1]
                 "add    w8, w9, {tmp:w}",                // add h_result
                 "eor    {tmp:w}, {tmp:w}, {c:w}",        // prepare for next: (a^b^c) ^ c = a^b
@@ -292,11 +292,11 @@ macro_rules! rg4_integrated {
                 "add    {d:w}, {d:w}, {a:w}",            // d += a
 
                 // G round 2: C += G(D,A,B) + cache2 + RC[k+2]; C = rotl(C, 14) + D
-                "add    {c:w}, {c:w}, {cache2:w}",       // c += cache2
-                "bic    w12, {a:w}, {b:w}",              // a & ~b
+                "bic    w12, {a:w}, {b:w}",              // a & ~b (independent G calc first)
+                "add    {c:w}, {c:w}, {cache2:w}",       // c += cache2 (parallel)
+                "and    w8, {b:w}, {d:w}",               // b & d (parallel)
                 "add    {c:w}, {c:w}, w11",              // c += RC[k+2] (lower k1)
-                "and    w8, {b:w}, {d:w}",               // b & d
-                "lsr    x11, x11, #32",                  // shift for next constant
+                "lsr    x11, x11, #32",                  // shift for next constant (early)
                 "orr    w12, w12, w8",                   // G(d,a,b)
                 "add    {c:w}, {c:w}, w12",              // c += G(d,a,b)
                 "ror    {c:w}, {c:w}, #18",              // rotate 32-14=18
