@@ -109,16 +109,18 @@ dependencies = [
 
 [[package]]
 name = "crypto-common"
-version = "0.2.0-rc.4"
-source = "git+https://github.com/RustCrypto/traits#b0d40cd1ae3f4adf07769436e661434f6333816c"
+version = "0.2.0-rc.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "919bd05924682a5480aec713596b9e2aabed3a0a6022fab6847f85a99e5f190a"
 dependencies = [
  "hybrid-array",
 ]
 
 [[package]]
 name = "digest"
-version = "0.11.0-rc.3"
-source = "git+https://github.com/RustCrypto/traits#b0d40cd1ae3f4adf07769436e661434f6333816c"
+version = "0.11.0-rc.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea390c940e465846d64775e55e3115d5dc934acb953de6f6e6360bc232fe2bf7"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -319,7 +321,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "base16ct",
  "digest",
