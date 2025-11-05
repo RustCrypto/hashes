@@ -472,3 +472,195 @@ macro_rules! blake2_mac_impl {
         }
     };
 }
+
+/// Creates a buffered wrapper around block-level "core" type which implements variable output size traits
+/// with output size selected at run time.
+#[macro_export]
+macro_rules! buffer_rt_variable {
+    (
+        $(#[$attr:meta])*
+        $vis:vis struct $name:ident($core_ty:ty);
+        exclude: SerializableState;
+    ) => {
+        $(#[$attr])*
+        $vis struct $name {
+            core: $core_ty,
+            buffer: digest::block_api::Buffer<$core_ty>,
+            output_size: u8,
+        }
+
+        impl core::fmt::Debug for $name {
+            #[inline]
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                f.write_str(concat!(stringify!($name), " { ... }"))
+            }
+        }
+
+        impl digest::crypto_common::AlgorithmName for $name {
+            #[inline]
+            fn write_alg_name(f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
+                <$core_ty as digest::crypto_common::AlgorithmName>::write_alg_name(f)
+            }
+        }
+
+        impl Clone for $name {
+            #[inline]
+            fn clone(&self) -> Self {
+                Self {
+                    core: Clone::clone(&self.core),
+                    buffer: Clone::clone(&self.buffer),
+                    output_size: self.output_size,
+                }
+            }
+        }
+
+        impl digest::Reset for $name {
+            #[inline]
+            fn reset(&mut self) {
+                let size = self.output_size.into();
+                self.core = <$core_ty as digest::block_api::VariableOutputCore>::new(size).unwrap();
+                self.buffer.reset();
+            }
+        }
+
+        impl digest::block_api::BlockSizeUser for $name {
+            type BlockSize = <$core_ty as digest::crypto_common::BlockSizeUser>::BlockSize;
+        }
+
+        impl digest::HashMarker for $name {}
+
+        impl digest::Update for $name {
+            #[inline]
+            fn update(&mut self, data: &[u8]) {
+                let Self { core, buffer, .. } = self;
+                buffer.digest_blocks(data, |blocks| {
+                    digest::block_api::UpdateCore::update_blocks(core, blocks);
+                });
+            }
+        }
+
+        impl $name {
+            /// Maximum size of output hash in bytes.
+            pub const MAX_OUTPUT_SIZE: usize = <
+                <$core_ty as digest::block_api::OutputSizeUser>::OutputSize
+                as digest::typenum::Unsigned
+            >::USIZE;
+
+            /// Create new hasher instance with the given output size in bytes.
+            ///
+            /// It will return `Err(InvalidOutputSize)` in case if hasher can not return
+            /// hash of the specified output size.
+            #[inline]
+            pub fn new(output_size: usize) -> Result<Self, digest::InvalidOutputSize> {
+                let output_size = u8::try_from(output_size).map_err(|_| digest::InvalidOutputSize)?;
+                let buffer = Default::default();
+                let core = <$core_ty as digest::block_api::VariableOutputCore>::new(output_size.into())?;
+                Ok(Self {
+                    core,
+                    buffer,
+                    output_size,
+                })
+            }
+
+            /// Get output size in bytes of the hasher instance provided to the `new` method
+            #[inline]
+            pub fn output_size(&self) -> usize {
+                self.output_size.into()
+            }
+
+            /// Write result into the output buffer.
+            ///
+            /// Returns `Err(InvalidOutputSize)` if `out` size is not equal to
+            /// `self.output_size()`.
+            #[inline]
+            pub fn finalize_variable(mut self, out: &mut [u8]) -> Result<(), digest::InvalidBufferSize> {
+                self.finalize_dirty(out)
+            }
+
+            /// Write result into the output buffer and reset the hasher state.
+            ///
+            /// Returns `Err(InvalidOutputSize)` if `out` size is not equal to
+            /// `self.output_size()`.
+            #[inline]
+            pub fn finalize_variable_reset(
+                &mut self,
+                out: &mut [u8],
+            ) -> Result<(), digest::InvalidBufferSize> {
+                self.finalize_dirty(out)?;
+                digest::Reset::reset(self);
+                Ok(())
+            }
+
+            #[inline]
+            fn finalize_dirty(&mut self, out: &mut [u8]) -> Result<(), digest::InvalidBufferSize> {
+                let Self {
+                    core,
+                    buffer,
+                    output_size,
+                } = self;
+                let size_u8 = u8::try_from(out.len()).map_err(|_| digest::InvalidBufferSize)?;
+
+                let max_size = Self::MAX_OUTPUT_SIZE;
+                if out.len() > max_size || size_u8 != *output_size {
+                    return Err(digest::InvalidBufferSize);
+                }
+                let mut full_res = Default::default();
+                digest::block_api::VariableOutputCore::finalize_variable_core(core, buffer, &mut full_res);
+                let n = out.len();
+                let m = full_res.len() - n;
+                use digest::block_api::TruncSide::{Left, Right};
+                let side = <$core_ty as digest::block_api::VariableOutputCore>::TRUNC_SIDE;
+                match side {
+                    Left => out.copy_from_slice(&full_res[..n]),
+                    Right => out.copy_from_slice(&full_res[m..]),
+                }
+                Ok(())
+            }
+        }
+
+        impl Drop for $name {
+            #[inline]
+            fn drop(&mut self) {
+                #[cfg(feature = "zeroize")]
+                {
+                    use digest::zeroize::Zeroize;
+                    self.buffer.zeroize();
+                    self.output_size.zeroize();
+                }
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl digest::zeroize::ZeroizeOnDrop for $name {}
+    };
+
+    (
+        $(#[$attr:meta])*
+        $vis:vis struct $name:ident($core_ty:ty);
+    ) => {
+        buffer_rt_variable!(
+            $(#[$attr])*
+            $vis struct $name($core_ty);
+            exclude: SerializableState;
+        );
+
+        impl digest::crypto_common::hazmat::SerializableState for $name {
+            type SerializedStateSize = digest::typenum::Add1<digest::typenum::Sum<
+                <$core_ty as digest::crypto_common::hazmat::SerializableState>::SerializedStateSize,
+                <$core_ty as digest::block_api::BlockSizeUser>::BlockSize,
+            >>;
+
+            #[inline]
+            fn serialize(&self) -> digest::crypto_common::hazmat::SerializedState<Self> {
+                todo!()
+            }
+
+            #[inline]
+            fn deserialize(
+                serialized_state: &digest::crypto_common::hazmat::SerializedState<Self>,
+            ) -> Result<Self, digest::crypto_common::hazmat::DeserializeStateError> {
+                todo!()
+            }
+        }
+    };
+}
