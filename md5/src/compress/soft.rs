@@ -12,10 +12,10 @@ fn op_f(w: u32, x: u32, y: u32, z: u32, m: u32, c: u32, s: u32) -> u32 {
 }
 #[inline(always)]
 fn op_g(w: u32, x: u32, y: u32, z: u32, m: u32, c: u32, s: u32) -> u32 {
-    // Here we replace the logical OR in `(x & z) | (y & !z)` with addition.
+    // We replace the logical OR in `(x & z) | (y & !z)` with addition.
     // Since masked bits do not overlap, the expressions are equivalent;
     // however, addition results in better performance on high-end CPUs,
-    // likely due to improved ALU utilization..
+    // likely due to improved ALU utilization.
     ((x & z).wrapping_add(y & !z))
         .wrapping_add(w)
         .wrapping_add(m)
