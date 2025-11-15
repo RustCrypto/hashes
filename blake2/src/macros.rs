@@ -309,7 +309,8 @@ macro_rules! blake2_mac_impl {
                 let kl = key.map_or(0, |k| k.len());
                 let bs = <$hash as BlockSizeUser>::BlockSize::USIZE;
                 let qbs = bs / 4;
-                if key.is_some() && kl == 0 || kl > bs || salt.len() > qbs || persona.len() > qbs {
+                if (key.is_some() && kl == 0) || kl > bs || salt.len() > qbs || persona.len() > qbs
+                {
                     return Err(InvalidLength);
                 }
                 let buffer = if let Some(k) = key {
