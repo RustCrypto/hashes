@@ -77,7 +77,7 @@ impl StreebogVarCore {
         let mut carry = false;
         // Note: `len` can not be bigger than block size, so `8 * len` never overflows
         adc(&mut self.n[0], 8 * len, &mut carry);
-        for i in 1..7 {
+        for i in 1..8 {
             adc(&mut self.n[i], 0, &mut carry);
         }
     }
@@ -216,4 +216,40 @@ fn from_bytes(b: &Block) -> [u64; 8] {
         *v = u64::from_le_bytes(chunk.try_into().unwrap());
     }
     t
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn counter_carry_propagates_to_top_limb() {
+        let mut core = StreebogVarCore {
+            h: [0u64; 8],
+            n: [0u64; 8],
+            sigma: [0u64; 8],
+        };
+        core.n[0] = u64::MAX - 511;
+        for i in 1..=6 {
+            core.n[i] = u64::MAX;
+        }
+        core.n[7] = 0;
+        core.update_n(64);
+        for i in 0..=6 {
+            assert_eq!(core.n[i], 0);
+        }
+        assert_eq!(core.n[7], 1);
+    }
+
+    #[test]
+    fn counter_zero_len_no_change() {
+        let mut core = StreebogVarCore {
+            h: [0u64; 8],
+            n: [1, 2, 3, 4, 5, 6, 7, 8],
+            sigma: [0u64; 8],
+        };
+        let before = core.n;
+        core.update_n(0);
+        assert_eq!(core.n, before);
+    }
 }
