@@ -30,3 +30,8 @@ force-soft = [] # Reserved for potential future software-only toggle
 
 [package.metadata.docs.rs]
 all-features = true
+
+[[bench]]
+name = "digest_bench"
+path = "benches/digest_bench.rs"
+harness = true
