@@ -16,19 +16,19 @@ fn compress_block(hash: &mut [u32; 5], block: &[u8; 64]) {
     }
 
     // Derive words 16..31
-    x[16] = x[0] ^ x[1] ^ x[2] ^ x[3];      // rounds  1..20
+    x[16] = x[0] ^ x[1] ^ x[2] ^ x[3]; // rounds  1..20
     x[17] = x[4] ^ x[5] ^ x[6] ^ x[7];
     x[18] = x[8] ^ x[9] ^ x[10] ^ x[11];
     x[19] = x[12] ^ x[13] ^ x[14] ^ x[15];
-    x[20] = x[3] ^ x[6] ^ x[9] ^ x[12];     // rounds 21..40
+    x[20] = x[3] ^ x[6] ^ x[9] ^ x[12]; // rounds 21..40
     x[21] = x[2] ^ x[5] ^ x[8] ^ x[15];
     x[22] = x[1] ^ x[4] ^ x[11] ^ x[14];
     x[23] = x[0] ^ x[7] ^ x[10] ^ x[13];
-    x[24] = x[5] ^ x[7] ^ x[12] ^ x[14];    // rounds 41..60
+    x[24] = x[5] ^ x[7] ^ x[12] ^ x[14]; // rounds 41..60
     x[25] = x[0] ^ x[2] ^ x[9] ^ x[11];
     x[26] = x[4] ^ x[6] ^ x[13] ^ x[15];
     x[27] = x[1] ^ x[3] ^ x[8] ^ x[10];
-    x[28] = x[2] ^ x[7] ^ x[8] ^ x[13];     // rounds 61..80
+    x[28] = x[2] ^ x[7] ^ x[8] ^ x[13]; // rounds 61..80
     x[29] = x[3] ^ x[4] ^ x[9] ^ x[14];
     x[30] = x[0] ^ x[5] ^ x[10] ^ x[15];
     x[31] = x[1] ^ x[6] ^ x[11] ^ x[12];
@@ -182,13 +182,7 @@ mod tests {
 
     #[test]
     fn state_changes_on_zero_block() {
-        let mut st = [
-            0x67452301,
-            0xEFCDAB89,
-            0x98BADCFE,
-            0x10325476,
-            0xC3D2E1F0,
-        ];
+        let mut st = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
         let before = st;
         let blk = [0u8; 64];
         compress(&mut st, &[blk]);

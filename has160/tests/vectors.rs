@@ -42,48 +42,66 @@ fn test_vector_abc() {
 
 #[test]
 fn test_vector_a() {
-   let expected = "4872bcbc4cd0f0a9dc7c2f7045e5b43b6c830db8";
-   let got = has160_hex(b"a");
-   assert_eq!(got, expected, "HAS-160(\"a\") mismatch: got {got}, expected {expected}");
+    let expected = "4872bcbc4cd0f0a9dc7c2f7045e5b43b6c830db8";
+    let got = has160_hex(b"a");
+    assert_eq!(
+        got, expected,
+        "HAS-160(\"a\") mismatch: got {got}, expected {expected}"
+    );
 }
 
 #[test]
 fn test_vector_message_digest() {
-   let expected = "2338dbc8638d31225f73086246ba529f96710bc6";
-   let got = has160_hex(b"message digest");
-   assert_eq!(got, expected, "HAS-160(\"message digest\") mismatch: got {got}, expected {expected}");
+    let expected = "2338dbc8638d31225f73086246ba529f96710bc6";
+    let got = has160_hex(b"message digest");
+    assert_eq!(
+        got, expected,
+        "HAS-160(\"message digest\") mismatch: got {got}, expected {expected}"
+    );
 }
 
 #[test]
 fn test_vector_alphabet() {
-   let expected = "596185c9ab6703d0d0dbb98702bc0f5729cd1d3c";
-   let got = has160_hex(b"abcdefghijklmnopqrstuvwxyz");
-   assert_eq!(got, expected, "HAS-160(alphabet) mismatch: got {got}, expected {expected}");
+    let expected = "596185c9ab6703d0d0dbb98702bc0f5729cd1d3c";
+    let got = has160_hex(b"abcdefghijklmnopqrstuvwxyz");
+    assert_eq!(
+        got, expected,
+        "HAS-160(alphabet) mismatch: got {got}, expected {expected}"
+    );
 }
 
 #[test]
 fn test_vector_alphanum() {
-   let expected = "cb5d7efbca2f02e0fb7167cabb123af5795764e5";
-   let got = has160_hex(b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-   assert_eq!(got, expected, "HAS-160(alphanum) mismatch: got {got}, expected {expected}");
+    let expected = "cb5d7efbca2f02e0fb7167cabb123af5795764e5";
+    let got = has160_hex(b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+    assert_eq!(
+        got, expected,
+        "HAS-160(alphanum) mismatch: got {got}, expected {expected}"
+    );
 }
 
 #[test]
 fn test_vector_repeated_digits() {
-   // eight repetitions of "1234567890"
-   let input = b"12345678901234567890123456789012345678901234567890123456789012345678901234567890";
-   assert_eq!(input.len(), 80);
-   let expected = "07f05c8c0773c55ca3a5a695ce6aca4c438911b5";
-   let got = has160_hex(input);
-   assert_eq!(got, expected, "HAS-160(8x\"1234567890\") mismatch: got {got}, expected {expected}");
+    // eight repetitions of "1234567890"
+    let input = b"12345678901234567890123456789012345678901234567890123456789012345678901234567890";
+    assert_eq!(input.len(), 80);
+    let expected = "07f05c8c0773c55ca3a5a695ce6aca4c438911b5";
+    let got = has160_hex(input);
+    assert_eq!(
+        got, expected,
+        "HAS-160(8x\"1234567890\") mismatch: got {got}, expected {expected}"
+    );
 }
 
 #[test]
 fn test_vector_million_a() {
-   let expected = "d6ad6f0608b878da9b87999c2525cc84f4c9f18d";
-   let million = vec![b'a'; 1_000_000];
-   let got = has160_hex(&million);
-   assert_eq!(got, expected, "HAS-160(1e6 * 'a') mismatch: got {got}, expected {expected}");
+    let expected = "d6ad6f0608b878da9b87999c2525cc84f4c9f18d";
+    let million = vec![b'a'; 1_000_000];
+    let got = has160_hex(&million);
+    assert_eq!(
+        got, expected,
+        "HAS-160(1e6 * 'a') mismatch: got {got}, expected {expected}"
+    );
 }
 #[test]
 fn test_streaming_equivalence() {
@@ -104,7 +122,8 @@ fn test_long_message_reproducibility() {
     let whole = has160_hex(msg);
 
     // Split into irregular chunks
-    let chunked = has160_hex_chunked(&[&msg[..5], &msg[5..9], &msg[9..17], &msg[17..30], &msg[30..]]);
+    let chunked =
+        has160_hex_chunked(&[&msg[..5], &msg[5..9], &msg[9..17], &msg[17..30], &msg[30..]]);
 
     assert_eq!(
         whole, chunked,
@@ -155,7 +174,11 @@ fn test_serialization_roundtrip() {
         let ser = manual.serialize();
         let deser = Has160Core::deserialize(&ser).expect("deserialize");
         let ser2 = deser.serialize();
-        assert_eq!(&ser[..], &ser2[..], "Roundtrip serialization failed for default state");
+        assert_eq!(
+            &ser[..],
+            &ser2[..],
+            "Roundtrip serialization failed for default state"
+        );
     }
 
     // Now test non-default (after processing data) by hashing through high-level API,

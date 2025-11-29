@@ -11,8 +11,6 @@ pub(crate) const STATE_INIT: [u32; 5] = [
     0xC3D2_E1F0,
 ];
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -22,6 +20,4 @@ mod tests {
         assert_eq!(STATE_INIT[0], 0x6745_2301);
         assert_eq!(STATE_INIT[4], 0xC3D2_E1F0);
     }
-
-
 }
