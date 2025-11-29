@@ -1,28 +1,13 @@
-//! HAS-160 compression function.
-
-/// Compress a sequence of 512-bit (64-byte) message blocks into the in-place
-/// 160-bit chaining `state`.
-///
-/// Each block is interpreted as 16 little-endian 32-bit words; a fixed
-/// schedule of 32 derived words is then used for 80 HAS-160 rounds
-/// (four groups of twenty) updating `state`.
-///
-/// Parameters:
-/// - `state`: mutable reference to the 5-word chaining state (little-endian)
-/// - `blocks`: slice of 64-byte blocks to be processed sequentially
-///
-/// This function is internal to the `Has160Core` update/finalize path and
-/// mirrors the signature style used by other hash implementations in
-/// the workspace (e.g. SHA-1, MD5). It assumes correct block sizing and
-/// performs no padding; padding is handled in the core finalization.
-#[inline(always)]
+/// HAS-160 compression function.
+/// Processes 64-byte blocks, updating the 5-word state in place.
+/// Words are interpreted as little-endian u32 values. The schedule
+/// consists of the initial 16 words plus 16 derived XOR words.
 pub fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     for block in blocks {
         compress_block(state, block);
     }
 }
 
-#[inline(always)]
 fn compress_block(hash: &mut [u32; 5], block: &[u8; 64]) {
     // Load 16 little-endian 32-bit words
     let mut x = [0u32; 32];
@@ -30,7 +15,7 @@ fn compress_block(hash: &mut [u32; 5], block: &[u8; 64]) {
         x[i] = u32::from_le_bytes(chunk.try_into().unwrap());
     }
 
-    // Derive words 16..31 exactly as per HAS-160 spec
+    // Derive words 16..31
     x[16] = x[0] ^ x[1] ^ x[2] ^ x[3];      // rounds  1..20
     x[17] = x[4] ^ x[5] ^ x[6] ^ x[7];
     x[18] = x[8] ^ x[9] ^ x[10] ^ x[11];
@@ -55,7 +40,6 @@ fn compress_block(hash: &mut [u32; 5], block: &[u8; 64]) {
     let mut d = hash[3];
     let mut e = hash[4];
 
-    // Boolean/round macros translated directly.
     macro_rules! step_f1 {
         ($A:ident,$B:ident,$C:ident,$D:ident,$E:ident,$msg:expr,$rot:expr) => {{
             $E = $E
@@ -96,7 +80,6 @@ fn compress_block(hash: &mut [u32; 5], block: &[u8; 64]) {
         }};
     }
 
-    // Round sequence (20 steps per group) exactly matching reference.
     // Group F1 (rounds 1..20)
     step_f1!(a, b, c, d, e, x[18], 5);
     step_f1!(e, a, b, c, d, x[0], 11);
