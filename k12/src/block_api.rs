@@ -47,7 +47,6 @@ impl<'cs> KangarooTwelveCore<'cs> {
         }
 
         self.chain_length += 1;
-        self.buffer = [0u8; CHUNK_SIZE];
         self.bufpos = 0;
     }
 
