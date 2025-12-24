@@ -21,7 +21,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.cargo/bin
-          key: ${{ runner.os }}-cargo-audit-v0.20-ubuntu-v24.04
+          key: ${{ runner.os }}-cargo-audit-v0.22.0
       - uses: rustsec/audit-check@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
