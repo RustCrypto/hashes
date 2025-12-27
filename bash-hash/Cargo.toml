@@ -13,11 +13,11 @@ keywords = ["belt", "stb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.4"
+digest = "0.11.0-rc.5"
 bash-f = "0.1"
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.4", features = ["dev"] }
+digest = { version = "0.11.0-rc.5", features = ["dev"] }
 hex-literal = "1"
 base16ct = { version = "0.3", features = ["alloc"] }
 
