@@ -6,7 +6,7 @@ use std::include_str;
 
 use spectral::prelude::{OrderedAssertions, asserting};
 
-use ascon_hash::{AsconHash256, AsconXof128, Digest, ExtendableOutput, Reset, XofReader};
+use ascon_hash256::{AsconHash256, AsconXof128, Digest, ExtendableOutput, Reset, XofReader};
 
 #[derive(Debug)]
 struct TestVector {

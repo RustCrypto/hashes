@@ -1,6 +1,6 @@
 [package]
-name = "ascon-hash"
-version = "0.3.0-pre"
+name = "ascon-hash256"
+version = "0.5.0-pre"
 description = "Implementation of Ascon-Hash256 and Ascon-XOF256"
 authors = [
     "Sebastian Ramacher <sebastian.ramacher@ait.ac.at>",
@@ -10,7 +10,7 @@ license = "Apache-2.0 OR MIT"
 readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
-documentation = "https://docs.rs/ascon-hash"
+documentation = "https://docs.rs/ascon-hash256"
 repository = "https://github.com/RustCrypto/hashes"
 keywords = ["hash", "ascon"]
 categories = ["cryptography", "no-std"]

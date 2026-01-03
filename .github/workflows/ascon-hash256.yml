@@ -1,4 +1,4 @@
-name: ascon-hash
+name: ascon-hash256
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ on:
 
 defaults:
   run:
-    working-directory: ascon-hash
+    working-directory: ascon-hash256
 
 env:
   RUSTFLAGS: "-Dwarnings"
@@ -26,7 +26,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        msrv: 1.85.0
+      msrv: 1.85.0
 
   build:
     needs: set-msrv
@@ -52,7 +52,7 @@ jobs:
   minimal-versions:
     uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
     with:
-        working-directory: ${{ github.workflow }}
+      working-directory: ${{ github.workflow }}
 
   test:
     needs: set-msrv
