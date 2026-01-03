@@ -8,6 +8,7 @@ members = [
     "fsb",
     "gost94",
     "groestl",
+    "has160",
     "jh",
     "k12",
     "kupyna",
