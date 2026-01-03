@@ -7,8 +7,8 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the lightweight cryptographic hash function
-[AsconHash256][1] and the extendable output functions (XOF) AsconXOF256.
+Pure Rust implementation of the lightweight cryptographic hash function [AsconHash256][1] and the
+extendable output functions (XOF) AsconXOF256.
 
 ## Security Notes
 
@@ -19,7 +19,7 @@ USE AT YOUR OWN RISK!
 ## Examples
 Fixed output size hashing:
 ```rust
-use ascon_hash::{AsconHash256, Digest};
+use ascon_hash256::{AsconHash256, Digest};
 use hex_literal::hex;
 
 let mut hasher = AsconHash256::new();
@@ -35,7 +35,7 @@ assert_eq!(hex_hash, "e909c2f6da9cb3028423265c8f23fc2d26bfc0f3db704683ef16b787a9
 
 XOF hashing:
 ```rust
-use ascon_hash::{AsconXof128, ExtendableOutput, Update, XofReader};
+use ascon_hash256::{AsconXof128, ExtendableOutput, Update, XofReader};
 use hex_literal::hex;
 
 let mut xof = AsconXof128::default();
@@ -65,16 +65,16 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (badges)
 
-[crate-image]: https://img.shields.io/crates/v/ascon-hash.svg
-[crate-link]: https://crates.io/crates/ascon-hash
-[docs-image]: https://docs.rs/ascon-hash/badge.svg
-[docs-link]: https://docs.rs/ascon-hash/
+[crate-image]: https://img.shields.io/crates/v/ascon-hash256.svg
+[crate-link]: https://crates.io/crates/ascon-hash256
+[docs-image]: https://docs.rs/ascon-hash256/badge.svg
+[docs-link]: https://docs.rs/ascon-hash256/
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-hash256.yml/badge.svg
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-hash256.yml
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-hash.yml/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-hash.yml?query=branch:master
 
 [//]: # (general links)
 
