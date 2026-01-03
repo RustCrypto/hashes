@@ -19,7 +19,7 @@ bash-f = "0.1"
 [dev-dependencies]
 digest = { version = "0.11.0-rc.5", features = ["dev"] }
 hex-literal = "1"
-base16ct = { version = "0.3", features = ["alloc"] }
+base16ct = { version = "1", features = ["alloc"] }
 
 [features]
 default = ["alloc", "oid"]
