@@ -1,6 +1,6 @@
 [package]
 name = "jh"
-version = "0.2.0-pre"
+version = "0.2.0-rc.0"
 description = "Pure Rust implementation of the JH cryptographic hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
