@@ -1,6 +1,6 @@
 [package]
 name = "ascon-hash256"
-version = "0.5.0-pre"
+version = "0.5.0-rc.0"
 description = "Implementation of Ascon-Hash256 and Ascon-XOF256"
 authors = [
     "Sebastian Ramacher <sebastian.ramacher@ait.ac.at>",

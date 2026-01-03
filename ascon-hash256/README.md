@@ -1,4 +1,4 @@
-# RustCrypto: Ascon
+# RustCrypto: Ascon-Hash256 and Ascon-XOF128
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
@@ -7,8 +7,8 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the lightweight cryptographic hash function [AsconHash256][1] and the
-extendable output functions (XOF) AsconXOF256.
+Pure Rust implementation of the lightweight cryptographic hash function [Ascon-Hash256][1] and the
+extendable output functions (XOF) Ascon-XOF128.
 
 ## Security Notes
 

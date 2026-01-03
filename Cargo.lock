@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "ascon-hash256"
-version = "0.5.0-pre"
+version = "0.5.0-rc.0"
 dependencies = [
  "ascon",
  "base16ct",
@@ -132,7 +132,7 @@ dependencies = [
 
 [[package]]
 name = "fsb"
-version = "0.2.0-pre"
+version = "0.2.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -142,7 +142,7 @@ dependencies = [
 
 [[package]]
 name = "gost94"
-version = "0.11.0-pre"
+version = "0.11.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -151,7 +151,7 @@ dependencies = [
 
 [[package]]
 name = "groestl"
-version = "0.11.0-pre"
+version = "0.11.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -181,7 +181,7 @@ dependencies = [
 
 [[package]]
 name = "jh"
-version = "0.2.0-pre"
+version = "0.2.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -191,7 +191,7 @@ dependencies = [
 
 [[package]]
 name = "k12"
-version = "0.4.0-pre"
+version = "0.4.0-rc.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -234,7 +234,7 @@ dependencies = [
 
 [[package]]
 name = "md2"
-version = "0.11.0-pre"
+version = "0.11.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -243,7 +243,7 @@ dependencies = [
 
 [[package]]
 name = "md4"
-version = "0.11.0-pre"
+version = "0.11.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -299,7 +299,7 @@ dependencies = [
 
 [[package]]
 name = "sha1-checked"
-version = "0.11.0-pre"
+version = "0.11.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -331,7 +331,7 @@ dependencies = [
 
 [[package]]
 name = "shabal"
-version = "0.5.0-pre"
+version = "0.5.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -340,7 +340,7 @@ dependencies = [
 
 [[package]]
 name = "skein"
-version = "0.2.0-pre"
+version = "0.2.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
@@ -400,7 +400,7 @@ dependencies = [
 
 [[package]]
 name = "tiger"
-version = "0.3.0-pre"
+version = "0.3.0-rc.0"
 dependencies = [
  "base16ct",
  "digest",
