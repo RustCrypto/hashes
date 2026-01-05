@@ -46,6 +46,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bash-prg-hash"
+version = "0.1.0"
+dependencies = [
+ "base16ct",
+ "bash-f",
+ "digest",
+ "hex-literal",
+]
+
+[[package]]
 name = "belt-block"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
