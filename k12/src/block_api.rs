@@ -39,7 +39,7 @@ impl<'cs> KangarooTwelveCore<'cs> {
     }
 
     fn process_chunk(&mut self) {
-        debug_assert!(self.bufpos == CHUNK_SIZE);
+        debug_assert_eq!(self.bufpos, CHUNK_SIZE);
         if self.chain_length == 0 {
             self.final_tshk.update(&self.buffer);
         } else {
@@ -47,7 +47,6 @@ impl<'cs> KangarooTwelveCore<'cs> {
         }
 
         self.chain_length += 1;
-        self.buffer = [0u8; CHUNK_SIZE];
         self.bufpos = 0;
     }
 
