@@ -71,6 +71,6 @@ jobs:
       - run: cargo hack test --feature-powerset
 
   minimal-versions:
-    uses: newpavlov/actions/.github/workflows/minimal-versions.yml@master
+    uses: newpavlov/actions/.github/workflows/minimal-versions.yml@master 
     with:
         working-directory: ${{ github.workflow }}
