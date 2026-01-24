@@ -1,6 +1,6 @@
 [package]
 name = "skein"
-version = "0.2.0-rc.0"
+version = "0.2.0-rc.1"
 description = "Skein hash functions"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"

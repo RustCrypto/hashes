@@ -19,7 +19,7 @@ exclude = [
 
 [dependencies]
 digest = "0.11.0-rc.8"
-sha1 = { version = "0.11.0-rc.3", default-features = false }
+sha1 = { version = "0.11.0-rc.4", default-features = false }
 zeroize = { version = "1.8", default-features = false, optional = true }
 
 [dev-dependencies]
