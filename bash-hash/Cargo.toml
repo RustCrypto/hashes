@@ -1,6 +1,6 @@
 [package]
 name = "bash-hash"
-version = "0.1.0"
+version = "0.1.0-rc.0"
 description = "bash hash function (STB 34.101.77-2020)"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"

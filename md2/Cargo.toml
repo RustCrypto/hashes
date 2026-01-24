@@ -1,6 +1,6 @@
 [package]
 name = "md2"
-version = "0.11.0-rc.0"
+version = "0.11.0-rc.1"
 license = "MIT OR Apache-2.0"
 authors = ["RustCrypto Developers"]
 description = "MD2 hash function"
