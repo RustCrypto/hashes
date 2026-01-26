@@ -16,11 +16,11 @@ categories = ["cryptography", "no-std"]
 name = "md5"
 
 [dependencies]
-digest = "0.11.0-rc.8"
+digest = "0.11.0-rc.9"
 cfg-if = "1"
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.8", features = ["dev"] }
+digest = { version = "0.11.0-rc.9", features = ["dev"] }
 hex-literal = "1"
 base16ct = { version = "1", features = ["alloc"] }
 
