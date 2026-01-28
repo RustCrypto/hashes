@@ -1,7 +1,7 @@
 //! Comprehensive Blake2X test suite
 //!
 //! This module contains all Blake2X-related tests including:
-//! - Blake2xb and Blake2xs test vectors
+//! - Blake2xb and Blake2xs test vectors (downloaded from BLAKE2 RFC repo)
 //! - Reference implementation comparisons
 //! - Constructor functionality tests
 //! - Progressive output tests
@@ -13,6 +13,14 @@ use blake2::{Blake2xb, Blake2xs};
 use digest::{ExtendableOutput, Update, XofReader};
 use serde::Deserialize;
 use std::fs;
+use std::path::Path;
+
+// BLAKE2 RFC repository - test vectors URL (commit hash pinned for reproducibility)
+const BLAKE2_KAT_URL: &str = "https://raw.githubusercontent.com/BLAKE2/BLAKE2/ed1974ea83433eba7b2d95c5dcd9ac33cb847913/testvectors/blake2-kat.json";
+
+// Expected BLAKE2b-256 hash of the blake2-kat.json file
+// Used to verify integrity of downloaded test vectors
+const BLAKE2_KAT_HASH: &str = "932e18217263891b85cd1a428ec2c67cba2db8e49e48ef893f56a480f8fd9d98";
 
 #[derive(Debug, Deserialize)]
 struct RawTestVector {
@@ -36,12 +44,88 @@ fn parse_hex(s: &str) -> Vec<u8> {
     hex::decode(s).expect("Invalid hex string")
 }
 
-fn load_test_vectors(path: &str) -> Vec<TestVector> {
-    let data = fs::read_to_string(path)
-        .unwrap_or_else(|e| panic!("Failed to read test vector file {}: {}", path, e));
-    let raw: Vec<RawTestVector> = serde_json::from_str(&data)
-        .unwrap_or_else(|e| panic!("Failed to parse JSON in {}: {}", path, e));
-    raw.into_iter()
+/// Computes BLAKE2b-256 hash of file contents
+fn compute_file_hash(path: &Path) -> Result<String, Box<dyn std::error::Error>> {
+    use blake2::Blake2b256;
+    use digest::Digest;
+
+    let data = fs::read(path)?;
+    let hash = Blake2b256::digest(&data);
+    Ok(hex::encode(hash))
+}
+
+/// Downloads a file from a URL to the specified path
+fn download_file(url: &str, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    let response = ureq::get(url).call()?;
+    let mut reader = response.into_reader();
+    let mut file = fs::File::create(path)?;
+    std::io::copy(&mut reader, &mut file)?;
+    Ok(())
+}
+
+/// Gets the path to store test vectors, downloading them if necessary.
+/// Uses caching: if the file exists and has the correct hash, it is not re-downloaded.
+fn get_test_vectors_path(filename: &str) -> std::path::PathBuf {
+    // Use OUT_DIR if available (during cargo test), otherwise use a cache directory
+    let base_dir = if let Ok(out_dir) = std::env::var("OUT_DIR") {
+        Path::new(&out_dir).join("test_data")
+    } else {
+        // Fallback: use a cache directory in the target folder
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("target")
+            .join("test_data_cache")
+    };
+
+    fs::create_dir_all(&base_dir).expect("Failed to create test data directory");
+    base_dir.join(filename)
+}
+
+/// Verifies the cached file hash matches the expected value
+fn verify_cached_file(path: &Path) -> bool {
+    if !path.exists() {
+        return false;
+    }
+
+    match compute_file_hash(path) {
+        Ok(hash) => hash == BLAKE2_KAT_HASH,
+        Err(_) => false,
+    }
+}
+
+/// Downloads the BLAKE2 KAT JSON file and extracts test vectors for the specified hash type.
+/// Uses caching with hash verification to avoid re-downloading.
+fn get_test_vectors(hash_type: &str) -> Vec<TestVector> {
+    let kat_path = get_test_vectors_path("blake2-kat.json");
+
+    // Download only if file doesn't exist or hash doesn't match
+    if !verify_cached_file(&kat_path) {
+        download_file(BLAKE2_KAT_URL, &kat_path)
+            .expect("Failed to download blake2-kat.json from BLAKE2 RFC repository");
+
+        // Verify the downloaded file
+        let actual_hash =
+            compute_file_hash(&kat_path).expect("Failed to compute hash of downloaded file");
+        assert_eq!(
+            actual_hash, BLAKE2_KAT_HASH,
+            "Downloaded file hash mismatch. Expected: {}, Got: {}",
+            BLAKE2_KAT_HASH, actual_hash
+        );
+    }
+
+    // Load and filter test vectors
+    let data = fs::read_to_string(&kat_path).unwrap_or_else(|e| {
+        panic!(
+            "Failed to read test vector file {}: {}",
+            kat_path.display(),
+            e
+        )
+    });
+    let all_vectors: Vec<RawTestVector> = serde_json::from_str(&data)
+        .unwrap_or_else(|e| panic!("Failed to parse JSON in {}: {}", kat_path.display(), e));
+
+    all_vectors
+        .into_iter()
+        .filter(|v| v.hash == hash_type)
         .map(|r| TestVector {
             hash: r.hash,
             input: parse_hex(&r.input),
@@ -52,11 +136,11 @@ fn load_test_vectors(path: &str) -> Vec<TestVector> {
 }
 
 fn get_blake2xb_test_vectors() -> Vec<TestVector> {
-    load_test_vectors("tests/data/blake2xb/blake2xb-kat.json")
+    get_test_vectors("blake2xb")
 }
 
 fn get_blake2xs_test_vectors() -> Vec<TestVector> {
-    load_test_vectors("tests/data/blake2xs/blake2xs-kat.json")
+    get_test_vectors("blake2xs")
 }
 
 // ==== Blake2Xb Tests ====
