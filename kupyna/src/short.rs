@@ -40,10 +40,7 @@ fn t_plus_l(mut state: [u64; COLS]) -> [u64; COLS] {
         }
         // Fused SubBytes + ShiftRows + MixColumns via T-tables
         let prev = state;
-        for col in 0..4 {
-            state[col] = column(&prev, col);
-        }
-        for col in 4..COLS {
+        for col in 0..COLS {
             state[col] = column(&prev, col);
         }
     }
@@ -59,10 +56,7 @@ pub(crate) fn t_xor_l(mut state: [u64; COLS]) -> [u64; COLS] {
         }
         // Fused SubBytes + ShiftRows + MixColumns via T-tables
         let prev = state;
-        for col in 0..4 {
-            state[col] = column(&prev, col);
-        }
-        for col in 4..COLS {
+        for col in 0..COLS {
             state[col] = column(&prev, col);
         }
     }
