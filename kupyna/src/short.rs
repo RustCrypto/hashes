@@ -1,5 +1,6 @@
 use crate::table::TABLE;
 use crate::utils::{read_u64s_be, xor};
+use core::array;
 
 pub(crate) const COLS: usize = 8;
 const ROUNDS: usize = 10;
@@ -39,16 +40,8 @@ fn t_plus_l(mut state: [u64; COLS]) -> [u64; COLS] {
                 .swap_bytes();
         }
         // Fused SubBytes + ShiftRows + MixColumns via T-tables
-        state = [
-            column(&state, 0),
-            column(&state, 1),
-            column(&state, 2),
-            column(&state, 3),
-            column(&state, 4),
-            column(&state, 5),
-            column(&state, 6),
-            column(&state, 7),
-        ];
+        let prev = state;
+        state = array::from_fn(|col| column(&prev, col));
     }
     state
 }
@@ -61,16 +54,8 @@ pub(crate) fn t_xor_l(mut state: [u64; COLS]) -> [u64; COLS] {
             state[i] ^= constant << 56;
         }
         // Fused SubBytes + ShiftRows + MixColumns via T-tables
-        state = [
-            column(&state, 0),
-            column(&state, 1),
-            column(&state, 2),
-            column(&state, 3),
-            column(&state, 4),
-            column(&state, 5),
-            column(&state, 6),
-            column(&state, 7),
-        ];
+        let prev = state;
+        state = array::from_fn(|col| column(&prev, col));
     }
     state
 }
