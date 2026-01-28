@@ -46,8 +46,8 @@ fn column(x: &[u64; COLS], col: usize) -> u64 {
 fn t_plus_l(mut state: [u64; COLS]) -> [u64; COLS] {
     for round in 0..ROUNDS {
         // AddConstantPlus
-        for i in 0..COLS {
-            state[i] = state[i]
+        for (i, word) in state.iter_mut().enumerate() {
+            *word = word
                 .swap_bytes()
                 .wrapping_add(
                     0x00F0F0F0F0F0F0F3u64 ^ (((((COLS - i - 1) * 0x10) ^ round) as u64) << 56),
@@ -56,8 +56,8 @@ fn t_plus_l(mut state: [u64; COLS]) -> [u64; COLS] {
         }
         // Fused SubBytes + ShiftRows + MixColumns via T-tables
         let prev = state;
-        for col in 0..COLS {
-            state[col] = column(&prev, col);
+        for (col, slot) in state.iter_mut().enumerate() {
+            *slot = column(&prev, col);
         }
     }
     state
@@ -66,14 +66,14 @@ fn t_plus_l(mut state: [u64; COLS]) -> [u64; COLS] {
 pub(crate) fn t_xor_l(mut state: [u64; COLS]) -> [u64; COLS] {
     for round in 0..ROUNDS {
         // AddConstantXor
-        for i in 0..COLS {
+        for (i, word) in state.iter_mut().enumerate() {
             let constant = ((i * 0x10) ^ round) as u64;
-            state[i] ^= constant << 56;
+            *word ^= constant << 56;
         }
         // Fused SubBytes + ShiftRows + MixColumns via T-tables
         let prev = state;
-        for col in 0..COLS {
-            state[col] = column(&prev, col);
+        for (col, slot) in state.iter_mut().enumerate() {
+            *slot = column(&prev, col);
         }
     }
     state
