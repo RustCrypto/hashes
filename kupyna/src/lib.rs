@@ -15,6 +15,7 @@ pub mod block_api;
 mod consts;
 mod long;
 mod short;
+mod table;
 pub(crate) mod utils;
 
 use digest::consts::{U28, U32, U48, U64};
