@@ -4,8 +4,27 @@ use crate::utils::{read_u64s_be, xor};
 pub(crate) const COLS: usize = 16;
 const ROUNDS: usize = 14;
 
+// Bit shift amounts to extract each byte from a u64
+const BYTE_SHIFTS: [usize; 8] = [56, 48, 40, 32, 24, 16, 8, 0];
+
 // ShiftRows offsets for long variant: rows 0-6 shift by index, row 7 shifts by 11
 const SHIFTS: [usize; 8] = [0, 1, 2, 3, 4, 5, 6, 11];
+
+// Precomputed source columns: SRC_COLS[col][row] = (col + COLS - SHIFTS[row]) % COLS
+const fn compute_src_cols() -> [[usize; 8]; COLS] {
+    let mut result = [[0; 8]; COLS];
+    let mut col = 0;
+    while col < COLS {
+        let mut row = 0;
+        while row < 8 {
+            result[col][row] = (col + COLS - SHIFTS[row]) % COLS;
+            row += 1;
+        }
+        col += 1;
+    }
+    result
+}
+const SRC_COLS: [[usize; 8]; COLS] = compute_src_cols();
 
 pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128]) {
     let message_u64 = read_u64s_be::<128, COLS>(message_block);
@@ -20,8 +39,7 @@ pub(crate) fn compress(prev_vector: &mut [u64; COLS], message_block: &[u8; 128])
 fn column(x: &[u64; COLS], col: usize) -> u64 {
     let mut t = 0u64;
     for row in 0..8 {
-        let src_col = (col + COLS - SHIFTS[row]) % COLS;
-        let byte = ((x[src_col] >> (8 * (7 - row))) & 0xFF) as usize;
+        let byte = ((x[SRC_COLS[col][row]] >> BYTE_SHIFTS[row]) & 0xFF) as usize;
         t ^= TABLE[row][byte];
     }
     t
