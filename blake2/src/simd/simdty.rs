@@ -65,9 +65,19 @@ impl<T: Zeroize> Zeroize for Simd4<T> {
     }
 }
 
+impl<T: PartialEq> PartialEq for Simd4<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0 && self.1 == other.1 && self.2 == other.2 && self.3 == other.3
+    }
+}
+
+impl<T: Eq> Eq for Simd4<T> {}
+
 pub(crate) type u64x2 = Simd2<u64>;
 
+/// SIMD vector of four 32-bit unsigned integers.
 pub(crate) type u32x4 = Simd4<u32>;
+/// SIMD vector of four 64-bit unsigned integers.
 pub(crate) type u64x4 = Simd4<u64>;
 
 pub(crate) type u16x8 = Simd8<u16>;
