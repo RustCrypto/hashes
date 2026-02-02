@@ -7,7 +7,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
     },
-    crypto_common::{
+    common::{
         BlockSizes,
         hazmat::{DeserializeStateError, SerializableState, SerializedState},
     },

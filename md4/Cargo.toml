@@ -1,6 +1,6 @@
 [package]
 name = "md4"
-version = "0.11.0-rc.1"
+version = "0.11.0-rc.2"
 description = "MD4 hash function"
 authors = ["RustCrypto Developers"]
 license = "MIT OR Apache-2.0"
@@ -13,10 +13,10 @@ keywords = ["md4", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.9"
+digest = "0.11.0-rc.11"
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.9", features = ["dev"] }
+digest = { version = "0.11.0-rc.11", features = ["dev"] }
 hex-literal = "1"
 base16ct = { version = "1", features = ["alloc"] }
 

@@ -7,8 +7,8 @@ use digest::{
         AlgorithmName, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore,
     },
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     consts::{U8, U48, U64, U184},
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 
 type BlockSize = U64;

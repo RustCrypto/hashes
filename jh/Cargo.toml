@@ -13,12 +13,12 @@ keywords = ["jh", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.9"
+digest = "0.11.0-rc.11"
 hex-literal = "1"
 simd = { package = "ppv-lite86", version = "0.2.6" }
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.9", features = ["dev"] }
+digest = { version = "0.11.0-rc.11", features = ["dev"] }
 base16ct = { version = "1", features = ["alloc"] }
 
 [features]

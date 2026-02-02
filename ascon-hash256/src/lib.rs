@@ -17,8 +17,8 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         FixedOutputCore, UpdateCore, XofReaderCore,
     },
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     consts::{U8, U16, U32, U40},
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 
 /// Produce mask for padding.

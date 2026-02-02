@@ -1,6 +1,6 @@
 [package]
 name = "sha2"
-version = "0.11.0-rc.4"
+version = "0.11.0-rc.5"
 description = """
 Pure Rust implementation of the SHA-2 hash function family
 including SHA-224, SHA-256, SHA-384, and SHA-512.
@@ -16,14 +16,14 @@ keywords = ["sha2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.9"
+digest = "0.11.0-rc.11"
 cfg-if = "1"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
 cpufeatures = "0.2"
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.9", features = ["dev"] }
+digest = { version = "0.11.0-rc.11", features = ["dev"] }
 hex-literal = "1"
 base16ct = { version = "1", features = ["alloc"] }
 
