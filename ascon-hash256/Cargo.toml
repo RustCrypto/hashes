@@ -16,7 +16,7 @@ keywords = ["hash", "ascon"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.9"
+digest = "0.11.0-rc.10"
 ascon = { version = "0.5.0-rc.0", default-features = false }
 
 [dev-dependencies]
