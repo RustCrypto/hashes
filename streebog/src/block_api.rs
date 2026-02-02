@@ -6,8 +6,8 @@ use digest::{
         AlgorithmName, Block as GenBlock, BlockSizeUser, Buffer, BufferKindUser, Eager,
         OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
     },
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     consts::{U64, U192},
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 
 #[cfg(feature = "zeroize")]

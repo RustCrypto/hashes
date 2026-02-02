@@ -4,5 +4,6 @@ extend-exclude = [
 ]
 
 [default.extend-words]
-"GOST" = "GOST"
-
+consts = "consts"
+cpy = "cpy"
+GOST = "GOST"

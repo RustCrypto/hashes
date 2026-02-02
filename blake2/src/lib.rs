@@ -21,8 +21,8 @@ use digest::{
         UpdateCore, VariableOutputCore, VariableOutputCoreCustomized,
     },
     block_buffer::{Lazy, LazyBuffer},
+    common::{InvalidLength, Key, KeyInit, KeySizeUser},
     consts::{U4, U16, U32, U64, U128},
-    crypto_common::{InvalidLength, Key, KeyInit, KeySizeUser},
     typenum::{IsLessOrEqual, True, Unsigned},
 };
 #[cfg(feature = "reset")]

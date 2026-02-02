@@ -9,8 +9,8 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         UpdateCore,
     },
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     consts::{U16, U32, U136, U168, U400},
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::Unsigned,
 };
 
