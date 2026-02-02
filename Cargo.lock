@@ -391,9 +391,9 @@ dependencies = [
 
 [[package]]
 name = "threefish"
-version = "0.6.0-rc.0"
+version = "0.6.0-rc.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5cd7fdb58d3b9c24db1d799b0e52853efac97926be93914efa648d9204ff52f"
+checksum = "dd8620a71dd833b597b37a17af3c07782f81c232978da6027842eb3ab006119d"
 dependencies = [
  "zeroize",
 ]
