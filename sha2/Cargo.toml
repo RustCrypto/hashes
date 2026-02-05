@@ -20,7 +20,7 @@ digest = "0.11.0-rc.11"
 cfg-if = "1"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
-cpufeatures = "0.2"
+cpufeatures = "0.3"
 
 [dev-dependencies]
 digest = { version = "0.11.0-rc.11", features = ["dev"] }
