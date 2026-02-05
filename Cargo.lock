@@ -108,6 +108,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cpufeatures"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b2a41393f66f16b0823bb79094d54ac5fbd34ab292ddafb9a0456ac9f87d201"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "crypto-common"
 version = "0.2.0-rc.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -204,7 +213,7 @@ version = "0.2.0-rc.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a412fe37705d515cba9dbf1448291a717e187e2351df908cfc0137cbec3d480"
 dependencies = [
- "cpufeatures",
+ "cpufeatures 0.2.17",
 ]
 
 [[package]]
@@ -292,7 +301,7 @@ version = "0.11.0-rc.5"
 dependencies = [
  "base16ct",
  "cfg-if",
- "cpufeatures",
+ "cpufeatures 0.3.0",
  "digest",
  "hex-literal",
 ]
@@ -314,7 +323,7 @@ version = "0.11.0-rc.5"
 dependencies = [
  "base16ct",
  "cfg-if",
- "cpufeatures",
+ "cpufeatures 0.3.0",
  "digest",
  "hex-literal",
 ]
