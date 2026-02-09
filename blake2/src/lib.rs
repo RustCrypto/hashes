@@ -34,7 +34,8 @@ use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 mod as_bytes;
 mod consts;
 
-mod simd;
+/// SIMD vector operations and types for Blake2 compression function.
+pub mod simd;
 
 #[macro_use]
 mod macros;
@@ -136,3 +137,11 @@ blake2_mac_impl!(Blake2sMac, Blake2sVarCore, U32, "Blake2s MAC function");
 
 /// BLAKE2s-256 MAC state.
 pub type Blake2sMac256 = Blake2sMac<U32>;
+
+#[cfg(feature = "blake2x")]
+mod blake2x;
+#[cfg(feature = "blake2x")]
+pub use self::blake2x::{Blake2xbCore, Blake2xsCore};
+
+#[cfg(feature = "blake2x")]
+pub use blake2x::{Blake2xb, Blake2xbReader, Blake2xs, Blake2xsReader};

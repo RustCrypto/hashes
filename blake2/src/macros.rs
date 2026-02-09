@@ -7,10 +7,13 @@ macro_rules! blake2_impl {
         #[derive(Clone)]
         #[doc=$vardoc]
         pub struct $name {
-            h: [$vec; 2],
-            t: u64,
+            /// Blake2 state vector (8 words total, stored as 2 SIMD vectors).
+            pub(crate) h: [$vec; 2],
+            /// Total number of bytes processed so far.
+            pub t: u64,
             #[cfg(feature = "reset")]
-            h0: [$vec; 2],
+            /// Initial state vector for reset functionality.
+            pub(crate) h0: [$vec; 2],
         }
 
         impl $name {
@@ -470,5 +473,274 @@ macro_rules! blake2_mac_impl {
             OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>
         {
         }
+    };
+}
+
+#[cfg(feature = "blake2x")]
+macro_rules! blake2x_impl {
+    (
+        $core_name:ident, $reader_name:ident, $hasher_name:ident, $reader_type:ident,
+        $alg_name:expr, $word:ident, $vec:ident, $bytes:ident, $hash_size:expr,
+        $block_size:ident, $reader_block_size:ident, $xof_len_type:ident, $IV:expr,
+        $vardoc:expr, $base_core:path,
+    ) => {
+        /// Blake2X XOF core implementation.
+        ///
+        /// Implements the Blake2X extended output function which builds on top of Blake2b/Blake2s
+        /// to provide variable-length output. The XOF length parameter is incorporated into the
+        /// root hash computation to ensure different output lengths produce different results.
+        #[derive(Clone)]
+        pub struct $core_name {
+            /// The root hasher for this variant of Blake2X.
+            pub root_hasher: $base_core,
+            /// The XOF length for this variant of Blake2X.
+            xof_len: $xof_len_type,
+        }
+
+        impl $core_name {
+            /// Create new core with specified output length.
+            pub fn new(xof_len: $xof_len_type) -> Self {
+                Self {
+                    root_hasher: Self::new_root_hasher(xof_len),
+                    xof_len,
+                }
+            }
+
+            /// Create new core with specified output length and a key.
+            pub fn new_with_key(key: &[u8], xof_len: $xof_len_type) -> Self {
+                Self {
+                    root_hasher: Self::new_keyed_root_hasher(key, xof_len),
+                    xof_len,
+                }
+            }
+
+            /// Apply XOF length parameter adjustments to a Blake2 hasher state.
+            ///
+            /// The Blake2X specification requires the total output length (xof_len) to be
+            /// incorporated into the parameter block of the root hash computation. This ensures
+            /// that Blake2X(M, L1) and Blake2X(M, L2) produce different outputs when L1 ≠ L2.
+            fn apply_xof_param(hasher: &mut $base_core, xof_len: $xof_len_type) {
+                let xof_param_vec = if core::mem::size_of::<$word>() == 8 {
+                    // Blake2b: xof_length is a u32 in the high 32-bits of parameter word p[1]
+                    let xof_param_val = ((xof_len as u64) << 32) as $word;
+                    $vec::new(0, xof_param_val, 0, 0)
+                } else {
+                    // Blake2s: xof_digest_length is a u32 in parameter word p[3]
+                    $vec::new(0, 0, 0, xof_len as $word)
+                };
+                hasher.h[0] = hasher.h[0] ^ xof_param_vec;
+                #[cfg(feature = "reset")]
+                { hasher.h0[0] = hasher.h0[0] ^ xof_param_vec; }
+            }
+
+            /// Create Blake2 hasher specifically for Blake2X root hash computation.
+            fn new_root_hasher(xof_len: $xof_len_type) -> $base_core {
+                let mut hasher = <$base_core>::new_with_params(&[], &[], 0, $hash_size);
+                Self::apply_xof_param(&mut hasher, xof_len);
+                hasher
+            }
+
+            /// Create Blake2 hasher for a keyed Blake2X root hash.
+            fn new_keyed_root_hasher(key: &[u8], xof_len: $xof_len_type) -> $base_core {
+                let mut hasher = <$base_core>::new_with_params(&[], &[], key.len(), $hash_size);
+                Self::apply_xof_param(&mut hasher, xof_len);
+                hasher
+            }
+        }
+
+        impl Default for $core_name {
+            fn default() -> Self {
+                Self::new(<$xof_len_type>::MAX)
+            }
+        }
+
+        impl HashMarker for $core_name {}
+
+        impl BlockSizeUser for $core_name {
+            type BlockSize = $block_size;
+        }
+
+        impl BufferKindUser for $core_name {
+            type BufferKind = Lazy;
+        }
+
+        impl UpdateCore for $core_name {
+            #[inline]
+            fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+                self.root_hasher.update_blocks(blocks);
+            }
+        }
+
+        impl ExtendableOutputCore for $core_name {
+            type ReaderCore = $reader_name;
+
+            fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
+                let mut root_output = Output::<$base_core>::default();
+                self.root_hasher.finalize_variable_core(buffer, &mut root_output);
+                $reader_name::new(root_output.into(), self.xof_len)
+            }
+        }
+
+        impl AlgorithmName for $core_name {
+            fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str($alg_name)
+            }
+        }
+
+        impl fmt::Debug for $core_name {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(concat!(stringify!($core_name), " { ... }"))
+            }
+        }
+
+        #[cfg(feature = "reset")]
+        impl Reset for $core_name {
+            fn reset(&mut self) {
+                self.root_hasher.reset();
+            }
+        }
+
+        impl SerializableState for $core_name {
+            type SerializedStateSize = $bytes;
+
+            fn serialize(&self) -> digest::crypto_common::hazmat::SerializedState<Self> {
+                let mut state = digest::crypto_common::hazmat::SerializedState::<Self>::default();
+                let len_bytes = core::mem::size_of::<$xof_len_type>();
+                state[..len_bytes].copy_from_slice(&self.xof_len.to_le_bytes());
+                state
+            }
+
+            fn deserialize(
+                serialized_state: &digest::crypto_common::hazmat::SerializedState<Self>,
+            ) -> Result<Self, digest::crypto_common::hazmat::DeserializeStateError> {
+                let len_bytes = core::mem::size_of::<$xof_len_type>();
+                let xof_len = <$xof_len_type>::from_le_bytes(
+                    serialized_state[..len_bytes].try_into().unwrap()
+                );
+                Ok(Self::new(xof_len))
+            }
+        }
+
+        /// XOF reader core.
+        #[derive(Clone)]
+        pub struct $reader_name {
+            root_hash: [u8; $hash_size],
+            node_offset: u32,
+            remaining: $xof_len_type,
+            total_xof_len: $xof_len_type,
+        }
+
+        impl $reader_name {
+            fn new(root_hash: [u8; $hash_size], xof_len: $xof_len_type) -> Self {
+                Self {
+                    root_hash,
+                    node_offset: 0,
+                    remaining: xof_len,
+                    total_xof_len: xof_len,
+                }
+            }
+
+            /// Build expansion node parameter array for Blake2X.
+            fn build_node_params(
+                node_offset: u32,
+                output_size: usize,
+                total_xof_len: $xof_len_type
+            ) -> [$word; 8] {
+                let mut p = [0 as $word; 8];
+
+                if core::mem::size_of::<$word>() == 4 {
+                    // Blake2s (32-bit words)
+                    p[0] = output_size as $word;
+                    p[1] = $hash_size as $word;
+                    p[2] = node_offset as $word;
+                    // xof_len(u16) | node_depth(u8, 0) << 16 | inner_len(u8, hash_size) << 24
+                    p[3] = (total_xof_len as $word) | (($hash_size as $word) << 24);
+                } else {
+                    // Blake2b (64-bit words)
+                    // p[0]: digest_length | key_length(0) << 8 | fanout(0) << 16 | depth(0) << 24 | leaf_length << 32
+                    p[0] = (output_size as u64 | (($hash_size as u64) << 32)) as $word;
+                    // p[1]: node_offset with XOF length in upper 32 bits
+                    p[1] = (((total_xof_len as u64) << 32) | (node_offset as u64)) as $word;
+                    // p[2]: node_depth(0) | inner_length << 8
+                    p[2] = (($hash_size as u64) << 8) as $word;
+                }
+
+                p
+            }
+
+            /// Create hasher with expansion node parameter state.
+            fn create_hasher_with_params(p: &[$word; 8]) -> $base_core {
+                let mut node = <$base_core>::new_with_params(&[], &[], 0, $hash_size);
+                node.h = [
+                    $vec::new($IV[0], $IV[1], $IV[2], $IV[3]) ^ $vec::new(p[0], p[1], p[2], p[3]),
+                    $vec::new($IV[4], $IV[5], $IV[6], $IV[7]) ^ $vec::new(p[4], p[5], p[6], p[7]),
+                ];
+                #[cfg(feature = "reset")]
+                { node.h0 = node.h; }
+                node
+            }
+
+            /// Blake2X expansion node function.
+            fn expand_node(
+                &self,
+                node_offset: u32,
+                output_size: usize
+            ) -> [u8; $hash_size] {
+                let p = Self::build_node_params(node_offset, output_size, self.total_xof_len);
+                let mut node_hasher = Self::create_hasher_with_params(&p);
+
+                // Hash the root hash as a single block
+                let mut buffer = LazyBuffer::default();
+                buffer.digest_blocks(&self.root_hash, |blocks| {
+                    node_hasher.update_blocks(blocks);
+                });
+
+                let mut var_output = Output::<$base_core>::default();
+                node_hasher.finalize_variable_core(&mut buffer, &mut var_output);
+
+                let mut output = [0u8; $hash_size];
+                output[..output_size].copy_from_slice(&var_output[..output_size]);
+                output
+            }
+        }
+
+        impl BlockSizeUser for $reader_name {
+            type BlockSize = $reader_block_size;
+        }
+
+        impl XofReaderCore for $reader_name {
+            fn read_block(&mut self) -> Block<Self> {
+                let mut block = Block::<Self>::default();
+
+                if self.remaining == 0 {
+                    return block;
+                }
+
+                let output_size = core::cmp::min(self.remaining as usize, $hash_size);
+                let node_output = self.expand_node(self.node_offset, output_size);
+                block[..output_size].copy_from_slice(&node_output[..output_size]);
+
+                self.node_offset += 1;
+                self.remaining -= output_size as $xof_len_type;
+
+                block
+            }
+        }
+
+        impl fmt::Debug for $reader_name {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str(concat!(stringify!($reader_name), " { ... }"))
+            }
+        }
+
+        // Use buffer_xof macro to create the wrapper types
+        digest::buffer_xof!(
+            #[doc=$vardoc]
+            pub struct $hasher_name($core_name);
+            impl: Debug AlgorithmName Clone Default BlockSizeUser CoreProxy HashMarker Update;
+            /// XOF reader.
+            pub struct $reader_type($reader_name);
+            impl: XofReaderTraits;
+        );
     };
 }

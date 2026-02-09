@@ -19,12 +19,20 @@ digest = { version = "0.11.0-rc.11", features = ["mac"] }
 digest = { version = "0.11.0-rc.11", features = ["dev"] }
 hex-literal = "1"
 base16ct = { version = "1", features = ["alloc"] }
+hex = "0.4"
+b2rs = { git = "https://github.com/veorq/b2rs.git", branch = "master" }
+rand = "0.8"
+paste = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+ureq = "2"
 
 [features]
 default = ["alloc"]
 alloc = ["digest/alloc"]
 zeroize = ["digest/zeroize"]
 reset = [] # Enable reset functionality
+blake2x = [] # Enable Blake2X XOF functionality
 #simd = []
 #simd_opt = ["simd"]
 #simd_asm = ["simd_opt"]
