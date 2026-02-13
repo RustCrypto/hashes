@@ -13,11 +13,11 @@ keywords = ["fsb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.11"
+digest = "0.11.0"
 whirlpool = { version = "0.11.0-rc.3", default-features = false }
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.11", features = ["dev"] }
+digest = { version = "0.11.0", features = ["dev"] }
 hex-literal = "1"
 base16ct = { version = "1", features = ["alloc"] }
 

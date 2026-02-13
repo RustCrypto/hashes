@@ -93,6 +93,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
+name = "cmov"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de0758edba32d61d1fd9f4d69491b47604b91ee2f7e6b33de7e54ca4ebe55dc3"
+
+[[package]]
 name = "const-oid"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -118,24 +124,33 @@ dependencies = [
 
 [[package]]
 name = "crypto-common"
-version = "0.2.0-rc.15"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f8441110cea75afde0b89a8d796e2bc67b23432f5a9566cb15d9d365d91a2b0"
+checksum = "211f05e03c7d03754740fd9e585de910a095d6b99f8bcfffdef8319fa02a8331"
 dependencies = [
  "hybrid-array",
 ]
 
 [[package]]
-name = "digest"
-version = "0.11.0-rc.11"
+name = "ctutils"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02b42f1d9edf5207c137646b568a0168ca0ec25b7f9eaf7f9961da51a3d91cea"
+checksum = "1005a6d4446f5120ef475ad3d2af2b30c49c2c9c6904258e3bb30219bebed5e4"
+dependencies = [
+ "cmov",
+]
+
+[[package]]
+name = "digest"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8bf3682cdec91817be507e4aa104314898b95b84d74f3d43882210101a545b6"
 dependencies = [
  "blobby",
  "block-buffer",
  "const-oid",
  "crypto-common",
- "subtle",
+ "ctutils",
  "zeroize",
 ]
 
@@ -181,9 +196,9 @@ checksum = "e712f64ec3850b98572bffac52e2c6f282b29fe6c5fa6d42334b30be438d95c1"
 
 [[package]]
 name = "hybrid-array"
-version = "0.4.5"
+version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f471e0a81b2f90ffc0cb2f951ae04da57de8baa46fa99112b062a5173a5088d0"
+checksum = "e1b229d73f5803b562cc26e4da0396c8610a4ee209f4fac8fa4f8d709166dc45"
 dependencies = [
  "typenum",
 ]
@@ -380,12 +395,6 @@ dependencies = [
  "digest",
  "hex-literal",
 ]
-
-[[package]]
-name = "subtle"
-version = "2.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "syn"
