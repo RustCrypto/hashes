@@ -1,11 +1,15 @@
 # RustCrypto: Hashes
 
-[![Project Chat][chat-image]][chat-link] [![dependency status][deps-image]][deps-link] ![Apache2/MIT licensed][license-image]
+[![Project Chat][chat-image]][chat-link]
+[![dependency status][deps-image]][deps-link]
+![Apache2/MIT licensed][license-image]
 
 Collection of [cryptographic hash functions][1] written in pure Rust.
 
 All algorithms reside in separate crates and are implemented using traits from [`digest`] crate.
-Additionally all crates do not require the standard library (i.e. `no_std` capable) and can be easily used for bare-metal or WebAssembly programming.
+Usage examples are provided in `digest` and hash implementation crate docs.
+Additionally all crates do not require the standard library (i.e. `no_std` capable) and can be
+easily used for bare-metal or WebAssembly programming by disabling default crate features.
 
 ## Supported Algorithms
 
@@ -62,155 +66,6 @@ Owners of `md5` [declined](https://github.com/stainless-steel/md5/pull/) to part
 This crate does not implement the [`digest`] traits, so it is not interoperable with the RustCrypto ecosystem.
 This is why we publish our MD5 implementation as `md-5` and mark it with the :exclamation: mark.
 Note that the library itself is named as `md5`, i.e. inside `use` statements you should use `md5`, not `md_5`.
-
-The SHA-1 implementation was previously published as `sha-1`, but migrated to `sha1` since v0.10.0.
-`sha-1` will continue to receive v0.10.x patch updates, but will be deprecated after `sha1` v0.11 release.
-
-## Examples
-
-Let us demonstrate how to use crates in this repository using SHA-2 as an example.
-
-First add [`sha2`](https://docs.rs/sha2) crate to your `Cargo.toml`:
-
-```toml
-[dependencies]
-sha2 = "0.10"
-```
-
-Note that all crates in this repository have an enabled by default `std` feature.
-So if you plan to use the crate in `no_std` environments, don't forget to disable it:
-
-```toml
-[dependencies]
-sha2 = { version = "0.10", default-features = false }
-```
-
-[`sha2`](https://docs.rs/sha2) and the other hash implementation crates re-export the [`digest`] crate and the [`Digest`] trait for convenience, so you don't have to include it in your `Cargo.toml` it as an explicit dependency.
-
-Now you can write the following code:
-
-```rust
-use sha2::{Sha256, Digest};
-
-let mut hasher = Sha256::new();
-let data = b"Hello world!";
-hasher.update(data);
-// `update` can be called repeatedly and is generic over `AsRef<[u8]>`
-hasher.update("String data");
-// Note that calling `finalize()` consumes hasher
-let hash = hasher.finalize();
-println!("Binary hash: {:?}", hash);
-```
-
-In this example `hash` has type `GenericArray<u8, U32>`, which is a generic alternative to `[u8; 32]` defined in the [`generic-array`] crate.
-If you need to serialize hash value into string, you can use crates like [`base16ct`] and [`base64ct`]:
-```rust
-use base64ct::{Base64, Encoding};
-
-let base64_hash = Base64::encode_string(&hash);
-println!("Base64-encoded hash: {}", base64_hash);
-
-let hex_hash = base16ct::lower::encode_string(&hash);
-println!("Hex-encoded hash: {}", hex_hash);
-```
-
-Instead of calling `update`, you also can use a chained approach:
-
-```rust
-use sha2::{Sha256, Digest};
-
-let hash = Sha256::new()
-    .chain_update(b"Hello world!")
-    .chain_update("String data")
-    .finalize();
-```
-
-If a complete message is available, then you can use the convenience [`Digest::digest`] method:
-
-```rust
-use sha2::{Sha256, Digest};
-
-let hash = Sha256::digest(b"my message");
-```
-
-### Hashing `Read`able Objects
-
-If you want to hash data from a type which implements the [`Read`] trait, you can rely on implementation of the [`Write`] trait (requires enabled-by-default `std` feature):
-
-```rust
-use sha2::{Sha256, Digest};
-use std::{fs, io};
-
-let mut file = fs::File::open(&path)?;
-let mut hasher = Sha256::new();
-let n = io::copy(&mut file, &mut hasher)?;
-let hash = hasher.finalize();
-```
-
-### Hash-based Message Authentication Code (HMAC)
-
-If you want to calculate [Hash-based Message Authentication Code][HMAC] (HMAC), you can use the generic implementation from [`hmac`] crate, which is a part of the [RustCrypto/MACs] repository.
-
-### Generic Code
-
-You can write generic code over the [`Digest`] trait (or other traits from the [`digest`] crate) which will work over different hash functions:
-
-```rust
-use sha2::{Sha256, Sha512, Digest};
-
-// Toy example, do not use it in practice!
-// Instead use crates from: https://github.com/RustCrypto/password-hashing
-fn hash_password<D: Digest>(password: &str, salt: &str, output: &mut [u8]) {
-    let mut hasher = D::new();
-    hasher.update(password.as_bytes());
-    hasher.update(b"$");
-    hasher.update(salt.as_bytes());
-    output.copy_from_slice(&hasher.finalize())
-}
-
-let mut buf1 = [0u8; 32];
-hash_password::<Sha256>("my_password", "abcd", &mut buf1);
-
-let mut buf2 = [0u8; 64];
-hash_password::<Sha512>("my_password", "abcd", &mut buf2);
-```
-
-If you want to use hash functions with trait objects, you can use the [`DynDigest`] trait:
-
-```rust
-use digest::DynDigest;
-
-// Dynamic hash function
-fn use_hasher(hasher: &mut dyn DynDigest, data: &[u8]) -> Box<[u8]> {
-    hasher.update(data);
-    hasher.finalize_reset()
-}
-
-// You can use something like this when parsing user input, CLI arguments, etc.
-// DynDigest needs to be boxed here, since function return should be sized.
-fn select_hasher(s: &str) -> Box<dyn DynDigest> {
-    match s {
-        "md5" => Box::new(md5::Md5::default()),
-        "sha1" => Box::new(sha1::Sha1::default()),
-        "sha224" => Box::new(sha2::Sha224::default()),
-        "sha256" => Box::new(sha2::Sha256::default()),
-        "sha384" => Box::new(sha2::Sha384::default()),
-        "sha512" => Box::new(sha2::Sha512::default()),
-        _ => unimplemented!("unsupported digest: {}", s),
-    }
-}
-
-let mut hasher1 = select_hasher("md5");
-let mut hasher2 = select_hasher("sha512");
-
-// the `&mut *hasher` is to DerefMut the value out of the Box
-// this is equivalent to `DerefMut::deref_mut(&mut hasher)`
-
-// can be reused due to `finalize_reset()`
-let hash1_1 = use_hasher(&mut *hasher1, b"foo");
-let hash1_2 = use_hasher(&mut *hasher1, b"bar");
-let hash2_1 = use_hasher(&mut *hasher2, b"foo");
-```
 
 ## License
 
