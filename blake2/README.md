@@ -35,10 +35,6 @@ let mut hasher = Blake2s256::new();
 hasher.update(b"hello world");
 let hash = hasher.finalize();
 assert_eq!(hash, hex!("9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "9aec6806794561107e594b1f6a8a6b0c92a0cba9acf5e5e93cca06f781813b0b");
 ```
 
 See the [`digest`] crate docs for additional examples.

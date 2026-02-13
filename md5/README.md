@@ -33,10 +33,6 @@ hasher.update(b"hello world");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("5eb63bbbe01eeed093cb22bb8f5acdc3"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "5eb63bbbe01eeed093cb22bb8f5acdc3");
 ```
 
 See the [`digest`] crate docs for additional examples.

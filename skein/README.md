@@ -26,10 +26,6 @@ hasher.update(b"jumps over the lazy dog");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("b3250457e05d3060b1a4bbc1428bc75a3f525ca389aeab96cfa34638d96e492a"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "b3250457e05d3060b1a4bbc1428bc75a3f525ca389aeab96cfa34638d96e492a");
 ```
 
 See the [`digest`] crate docs for additional examples.

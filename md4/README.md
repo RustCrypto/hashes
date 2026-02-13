@@ -25,10 +25,6 @@ hasher.update(b"hello world");
 // which in this case is equivalent to [u8; 16]
 let hash = hasher.finalize();
 assert_eq!(hash, hex!("aa010fbc1d14c795d86ef98c95479d17"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "aa010fbc1d14c795d86ef98c95479d17");
 ```
 
 See the [`digest`] crate docs for additional examples.
