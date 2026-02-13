@@ -43,13 +43,9 @@ hasher.update(b"hello world");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -83,5 +79,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [SHA-1]: https://en.wikipedia.org/wiki/SHA-1
 [1]: https://sha-mbles.github.io/
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest
 [sha1-checked]: https://crates.io/crates/sha1-checked

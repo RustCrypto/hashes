@@ -26,13 +26,9 @@ hasher.update(b"jumps over the lazy dog");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("b3250457e05d3060b1a4bbc1428bc75a3f525ca389aeab96cfa34638d96e492a"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "b3250457e05d3060b1a4bbc1428bc75a3f525ca389aeab96cfa34638d96e492a");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -65,4 +61,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [Skein]: https://schneier.com/academic/skein
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

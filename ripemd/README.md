@@ -27,10 +27,6 @@ let hash160 = hasher.finalize();
 
 assert_eq!(hash160, hex!("7f772647d88750add82d8e1a7a3e5c0902a346a3"));
 
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash160 = base16ct::lower::encode_string(&hash160);
-assert_eq!(hex_hash160, "7f772647d88750add82d8e1a7a3e5c0902a346a3");
-
 // Same example for RIPEMD-320
 let mut hasher = Ripemd320::new();
 hasher.update(b"Hello world!");
@@ -42,7 +38,7 @@ assert_eq!(hash320, hex!(
 ));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -75,4 +71,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [RIPEMD]: https://en.wikipedia.org/wiki/RIPEMD
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

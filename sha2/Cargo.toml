@@ -25,7 +25,6 @@ cpufeatures = "0.3"
 [dev-dependencies]
 digest = { version = "0.11", features = ["dev"] }
 hex-literal = "1"
-base16ct = { version = "1", features = ["alloc"] }
 
 [features]
 default = ["alloc", "oid"]

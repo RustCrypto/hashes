@@ -27,10 +27,6 @@ hasher.update(b"some bytes");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("e909c2f6da9cb3028423265c8f23fc2d26bfc0f3db704683ef16b787a945ed68"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "e909c2f6da9cb3028423265c8f23fc2d26bfc0f3db704683ef16b787a945ed68");
 ```
 
 XOF hashing:
@@ -46,7 +42,7 @@ reader.read(&mut dst);
 assert_eq!(dst, hex!("8c7dd114a0"));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -79,4 +75,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [1]: https://doi.org/10.6028/NIST.SP.800-232.ipd
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

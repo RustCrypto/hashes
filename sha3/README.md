@@ -34,10 +34,6 @@ hasher.update(b"abc");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532");
 ```
 
 SHAKE functions have an extendable output, so finalization method returns
@@ -57,7 +53,7 @@ reader.read(&mut buf);
 assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -89,6 +85,6 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[examples section]: https://github.com/RustCrypto/hashes#Examples
 [SHA-3]: https://en.wikipedia.org/wiki/SHA-3
 [SHA-3 Derived Functions]: https://csrc.nist.gov/pubs/sp/800/185/final
+[`digest`]: https://docs.rs/digest

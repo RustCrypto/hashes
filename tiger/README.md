@@ -22,13 +22,9 @@ hasher.update(b"hello world");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("4c8fbddae0b6f25832af45e7c62811bb64ec3e43691e9cc3"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "4c8fbddae0b6f25832af45e7c62811bb64ec3e43691e9cc3");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -60,4 +56,4 @@ for inclusion in the work by you, as defined in the Apache-2.0 license, without 
 [//]: # (general links)
 
 [Tiger]: https://en.wikipedia.org/wiki/Tiger_(hash_function)
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

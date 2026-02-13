@@ -16,18 +16,11 @@ name = "ascon-hash256"
 version = "0.5.0-rc.2"
 dependencies = [
  "ascon",
- "base16ct",
  "digest",
  "hex",
  "hex-literal",
  "spectral",
 ]
-
-[[package]]
-name = "base16ct"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd307490d624467aa6f74b0eabb77633d1f758a7b25f12bceb0b22e08d9726f6"
 
 [[package]]
 name = "bash-f"
@@ -39,7 +32,6 @@ checksum = "bfed5cd32720841afa8cd58c89a317e9efb0c8083e1b349dae4098f022620353"
 name = "bash-hash"
 version = "0.1.0-rc.1"
 dependencies = [
- "base16ct",
  "bash-f",
  "digest",
  "hex-literal",
@@ -55,7 +47,6 @@ checksum = "d9aa1eef3994e2ccd304a78fe3fea4a73e5792007f85f09b79bb82143ca5f82b"
 name = "belt-hash"
 version = "0.2.0-rc.5"
 dependencies = [
- "base16ct",
  "belt-block",
  "digest",
  "hex-literal",
@@ -65,7 +56,6 @@ dependencies = [
 name = "blake2"
 version = "0.11.0-rc.5"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -158,7 +148,6 @@ dependencies = [
 name = "fsb"
 version = "0.2.0-rc.2"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
  "whirlpool",
@@ -168,7 +157,6 @@ dependencies = [
 name = "gost94"
 version = "0.11.0-rc.2"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -177,7 +165,6 @@ dependencies = [
 name = "groestl"
 version = "0.11.0-rc.2"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -207,7 +194,6 @@ dependencies = [
 name = "jh"
 version = "0.2.0-rc.1"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
  "ppv-lite86",
@@ -235,7 +221,6 @@ dependencies = [
 name = "kupyna"
 version = "0.1.0-pre.0"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -250,7 +235,6 @@ checksum = "6800badb6cb2082ffd7b6a67e6125bb39f18782f793520caee8cb8846be06112"
 name = "md-5"
 version = "0.11.0-rc.5"
 dependencies = [
- "base16ct",
  "cfg-if",
  "digest",
  "hex-literal",
@@ -260,7 +244,6 @@ dependencies = [
 name = "md2"
 version = "0.11.0-rc.2"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -269,7 +252,6 @@ dependencies = [
 name = "md4"
 version = "0.11.0-rc.2"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -305,7 +287,6 @@ dependencies = [
 name = "ripemd"
 version = "0.2.0-rc.5"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -314,7 +295,6 @@ dependencies = [
 name = "sha1"
 version = "0.11.0-rc.5"
 dependencies = [
- "base16ct",
  "cfg-if",
  "cpufeatures 0.3.0",
  "digest",
@@ -325,7 +305,6 @@ dependencies = [
 name = "sha1-checked"
 version = "0.11.0-rc.0"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
  "sha1",
@@ -336,7 +315,6 @@ dependencies = [
 name = "sha2"
 version = "0.11.0-rc.5"
 dependencies = [
- "base16ct",
  "cfg-if",
  "cpufeatures 0.3.0",
  "digest",
@@ -347,7 +325,6 @@ dependencies = [
 name = "sha3"
 version = "0.11.0-rc.7"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
  "keccak",
@@ -357,7 +334,6 @@ dependencies = [
 name = "shabal"
 version = "0.5.0-rc.2"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -366,7 +342,6 @@ dependencies = [
 name = "skein"
 version = "0.2.0-rc.2"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
  "threefish",
@@ -376,7 +351,6 @@ dependencies = [
 name = "sm3"
 version = "0.5.0-rc.5"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -391,7 +365,6 @@ checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 name = "streebog"
 version = "0.11.0-rc.5"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -420,7 +393,6 @@ dependencies = [
 name = "tiger"
 version = "0.3.0-rc.2"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]
@@ -441,7 +413,6 @@ checksum = "537dd038a89878be9b64dd4bd1b260315c1bb94f4d784956b81e27a088d9a09e"
 name = "whirlpool"
 version = "0.11.0-rc.5"
 dependencies = [
- "base16ct",
  "digest",
  "hex-literal",
 ]

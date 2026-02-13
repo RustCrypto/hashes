@@ -28,10 +28,6 @@ use hex_literal::hex;
 
 let hash = Sha256::digest(b"hello world");
 assert_eq!(hash, hex!("b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
 ```
 
 ### Incremental API
@@ -57,7 +53,7 @@ assert_eq!(hash512, hex!(
 ));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## Backends
 
@@ -113,4 +109,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [SHA-2]: https://en.wikipedia.org/wiki/SHA-2
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest
