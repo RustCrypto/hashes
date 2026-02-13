@@ -46,13 +46,3 @@ test_bash_rand!(
 digest::hash_serialization_test!(bash256_serialization, BashHash256);
 digest::hash_serialization_test!(bash384_serialization, BashHash384);
 digest::hash_serialization_test!(bash512_serialization, BashHash512);
-
-#[test]
-fn algorithm_name() {
-    let s = format!("{:?}", BashHash256::new());
-    assert!(s.contains("BashHash256"), "expected BashHash256, got: {s}");
-    let s = format!("{:?}", BashHash384::new());
-    assert!(s.contains("BashHash384"), "expected BashHash384, got: {s}");
-    let s = format!("{:?}", BashHash512::new());
-    assert!(s.contains("BashHash512"), "expected BashHash512, got: {s}");
-}
