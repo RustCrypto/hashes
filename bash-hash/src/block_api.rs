@@ -113,7 +113,7 @@ impl<OS: OutputSize> Reset for BashHashCore<OS> {
 
 impl<OS: OutputSize> AlgorithmName for BashHashCore<OS> {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "BashHash{}", OS::USIZE)
+        write!(f, "BashHash{}", OS::USIZE * 8)
     }
 }
 
