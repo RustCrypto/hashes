@@ -9,7 +9,8 @@
 
 Pure Rust implementation of the [Shabal] cryptographic hash algorithm.
 
-There are 5 standard algorithms specified in the Shabal standard: [`Shabal192`], [`Shabal224`], [`Shabal256`], [`Shabal384`], [`Shabal512`].
+There are 5 standard algorithms specified in the Shabal standard:
+`Shabal192`, `Shabal224`, `Shabal256`, `Shabal384`, `Shabal512`.
 
 ## Examples
 
