@@ -26,7 +26,7 @@ let hex_hash = base16ct::lower::encode_string(&hash);
 assert_eq!(hex_hash, "dc0283ca481efa76b7c19dd5a0b763dff0e867451bd9488a9c59f6c8b8047a86");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -59,4 +59,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [Grøstl]: https://en.wikipedia.org/wiki/Grøstl
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

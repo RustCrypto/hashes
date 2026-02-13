@@ -52,7 +52,7 @@ assert_eq!(result.hash().as_ref(), hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846e
 assert!(!result.has_collision());
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -86,6 +86,6 @@ dual licensed as above, without any additional terms or conditions.
 
 [SHA-1]: https://en.wikipedia.org/wiki/SHA-1
 [1]: https://sha-mbles.github.io/
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest
 [algorithm]: https://github.com/cr-marcstevens/sha1collisiondetection
 [paper]: https://marc-stevens.nl/research/papers/C13-S.pdf

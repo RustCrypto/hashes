@@ -36,7 +36,7 @@ assert_eq!(hash512, hex!(
 ));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -69,4 +69,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [Streebog]: https://en.wikipedia.org/wiki/Streebog
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

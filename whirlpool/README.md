@@ -44,7 +44,7 @@ assert_eq!(
 );
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -78,4 +78,4 @@ dual licensed as above, without any additional terms or conditions.
 
 [Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(hash_function)
 [1]: https://web.archive.org/web/20171129084214/http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

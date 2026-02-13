@@ -25,7 +25,7 @@ let hex_hash = base16ct::lower::encode_string(&hash);
 assert_eq!(hex_hash, "afb175816416fbadad4629ecbd78e1887789881f2d2e5b80c22a746b7ac7ba88");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -59,4 +59,4 @@ dual licensed as above, without any additional terms or conditions.
 
 [BelT]: https://ru.wikipedia.org/wiki/BelT
 [STB 34.101.31-2020]: http://apmi.bsu.by/assets/files/std/belt-spec371.pdf
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

@@ -57,7 +57,7 @@ assert_eq!(hash512, hex!(
 ));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## Backends
 
@@ -113,4 +113,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [SHA-2]: https://en.wikipedia.org/wiki/SHA-2
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

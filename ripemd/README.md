@@ -42,7 +42,7 @@ assert_eq!(hash320, hex!(
 ));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -75,4 +75,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [RIPEMD]: https://en.wikipedia.org/wiki/RIPEMD
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

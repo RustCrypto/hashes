@@ -57,7 +57,7 @@ reader.read(&mut buf);
 assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -89,6 +89,6 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[examples section]: https://github.com/RustCrypto/hashes#Examples
 [SHA-3]: https://en.wikipedia.org/wiki/SHA-3
 [SHA-3 Derived Functions]: https://csrc.nist.gov/pubs/sp/800/185/final
+[`digest`]: https://docs.rs/digest

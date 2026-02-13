@@ -27,7 +27,7 @@ let hex_hash = base16ct::lower::encode_string(&hash);
 assert_eq!(hex_hash, "44f0061e69fa6fdfc290c494654a05dc0c053da7e5c52b84ef93a9d67d3fff88");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -60,4 +60,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [SM3]: https://en.wikipedia.org/wiki/SM3_(hash_function)
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

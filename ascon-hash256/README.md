@@ -46,7 +46,7 @@ reader.read(&mut dst);
 assert_eq!(dst, hex!("8c7dd114a0"));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -79,4 +79,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [1]: https://doi.org/10.6028/NIST.SP.800-232.ipd
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

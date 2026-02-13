@@ -26,7 +26,7 @@ let hex_hash = base16ct::lower::encode_string(&hash);
 assert_eq!(hex_hash, "538e2e238142df05e954702aa75d6942cebe30d44bd514df365d13bdcb6b1458");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -59,4 +59,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [Kupyna]: https://eprint.iacr.org/2015/885.pdf
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest
