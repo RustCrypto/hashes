@@ -29,7 +29,6 @@ default = ["alloc", "oid"]
 alloc = ["digest/alloc"]
 oid = ["digest/oid"] # Enable OID support.
 zeroize = ["digest/zeroize"]
-asm = ["keccak/asm"] # Enable ASM (currently ARMv8 only).
 
 [package.metadata.docs.rs]
 all-features = true
