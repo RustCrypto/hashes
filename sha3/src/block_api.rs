@@ -13,6 +13,7 @@ use digest::{
     },
     typenum::{IsLessOrEqual, True, U0, U200},
 };
+use keccak::KeccakP1600;
 
 pub use crate::cshake::{CShake128Core, CShake256Core};
 
@@ -27,7 +28,7 @@ pub struct Sha3HasherCore<
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
-    state: [u64; PLEN],
+    state: KeccakP1600,
     _pd: PhantomData<(Rate, OutputSize)>,
 }
 
@@ -75,8 +76,8 @@ where
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
         for block in blocks {
-            xor_block(&mut self.state, block);
-            keccak::p1600(&mut self.state, ROUNDS);
+            xor_block(self.state.as_mut(), block);
+            self.state.p1600(ROUNDS);
         }
     }
 }
@@ -95,10 +96,10 @@ where
         let n = block.len();
         block[n - 1] |= 0x80;
 
-        xor_block(&mut self.state, &block);
-        keccak::p1600(&mut self.state, ROUNDS);
+        xor_block(self.state.as_mut(), &block);
+        self.state.p1600(ROUNDS);
 
-        for (o, s) in out.chunks_mut(8).zip(self.state.iter()) {
+        for (o, s) in out.chunks_mut(8).zip(self.state.as_mut().iter()) {
             o.copy_from_slice(&s.to_le_bytes()[..o.len()]);
         }
     }
@@ -119,10 +120,10 @@ where
         let n = block.len();
         block[n - 1] |= 0x80;
 
-        xor_block(&mut self.state, &block);
-        keccak::p1600(&mut self.state, ROUNDS);
+        xor_block(self.state.as_mut(), &block);
+        self.state.p1600(ROUNDS);
 
-        Sha3ReaderCore::new(&self.state)
+        Sha3ReaderCore::new(self.state.as_ref())
     }
 }
 
@@ -185,7 +186,7 @@ where
         #[cfg(feature = "zeroize")]
         {
             use digest::zeroize::Zeroize;
-            self.state.zeroize();
+            self.state.as_mut().zeroize();
         }
     }
 }
@@ -210,7 +211,7 @@ where
     fn serialize(&self) -> SerializedState<Self> {
         let mut serialized_state = SerializedState::<Self>::default();
         let chunks = serialized_state.chunks_exact_mut(8);
-        for (val, chunk) in self.state.iter().zip(chunks) {
+        for (val, chunk) in self.state.as_ref().iter().zip(chunks) {
             chunk.copy_from_slice(&val.to_le_bytes());
         }
 
@@ -227,7 +228,7 @@ where
         }
 
         Ok(Self {
-            state,
+            state: KeccakP1600::from(state),
             _pd: PhantomData,
         })
     }
