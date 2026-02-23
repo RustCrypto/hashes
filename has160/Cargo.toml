@@ -1,0 +1,37 @@
+[package]
+name = "has160"
+version = "0.1.0"
+description = "HAS-160 hash function"
+authors = ["RustCrypto Developers"]
+license = "MIT OR Apache-2.0"
+edition = "2024"
+rust-version = "1.85"
+repository = "https://github.com/RustCrypto/hashes"
+documentation = "https://docs.rs/has160"
+keywords = ["has160", "hash", "digest"]
+categories = ["cryptography", "no-std"]
+
+[lib]
+name = "has160"
+
+[dependencies]
+digest = "0.11.0-rc.4"
+
+[dev-dependencies]
+digest = { version = "0.11.0-rc.4", features = ["dev"] }
+hex-literal = "1"
+base16ct = { version = "0.3", features = ["alloc"] }
+
+[features]
+default = ["alloc"]
+alloc = ["digest/alloc"]
+zeroize = ["digest/zeroize"]
+force-soft = [] # Reserved for potential future software-only toggle
+
+[package.metadata.docs.rs]
+all-features = true
+
+[[bench]]
+name = "digest_bench"
+path = "benches/digest_bench.rs"
+harness = true
