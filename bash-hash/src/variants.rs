@@ -1,4 +1,4 @@
-use digest::{array::ArraySize, common::BlockSizes, typenum};
+use digest::{array::ArraySize, block_buffer::BlockSizes, typenum};
 
 /// Sealed trait to prevent external implementations.
 pub trait Sealed {}
