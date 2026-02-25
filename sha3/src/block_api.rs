@@ -7,10 +7,8 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, ExtendableOutputCore,
         FixedOutputCore, OutputSizeUser, Reset, UpdateCore, XofReaderCore,
     },
-    common::{
-        BlockSizes,
-        hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    },
+    block_buffer::BlockSizes,
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{IsLessOrEqual, True, U0, U200},
 };
 use keccak::KeccakP1600;
