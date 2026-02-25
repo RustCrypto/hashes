@@ -106,7 +106,8 @@ dependencies = [
 [[package]]
 name = "crypto-common"
 version = "0.2.1"
-source = "git+https://github.com/RustCrypto/traits?branch=block_sizes#8359276d485a3cae7c47f969d267a66245fa669b"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77727bb15fa921304124b128af125e7e3b968275d1b108b379190264f4423710"
 dependencies = [
  "hybrid-array",
 ]
@@ -123,7 +124,8 @@ dependencies = [
 [[package]]
 name = "digest"
 version = "0.11.1"
-source = "git+https://github.com/RustCrypto/traits?branch=block_sizes#8359276d485a3cae7c47f969d267a66245fa669b"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "285743a676ccb6b3e116bc14cc69319b957867930ae9c4822f8e0f54509d7243"
 dependencies = [
  "blobby",
  "block-buffer",

@@ -36,5 +36,3 @@ sha3 = { path = "sha3" }
 whirlpool = { path = "whirlpool" }
 
 keccak = { git = "https://github.com/RustCrypto/sponges" }
-crypto-common = { git = "https://github.com/RustCrypto/traits", branch = "block_sizes" }
-digest = { git = "https://github.com/RustCrypto/traits", branch = "block_sizes" }
