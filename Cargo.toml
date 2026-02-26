@@ -34,5 +34,3 @@ opt-level = 2
 sha1 = { path = "sha1" }
 sha3 = { path = "sha3" }
 whirlpool = { path = "whirlpool" }
-
-keccak = { git = "https://github.com/RustCrypto/sponges" }

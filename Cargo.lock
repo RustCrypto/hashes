@@ -201,8 +201,9 @@ dependencies = [
 
 [[package]]
 name = "keccak"
-version = "0.2.0-rc.1"
-source = "git+https://github.com/RustCrypto/sponges#38d10d219450dae3c2d4506f7b2ce13e6eb32f63"
+version = "0.2.0-rc.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "882b69cb15b1f78b51342322a97ccd16f5123d1dc8a3da981a95244f488e8692"
 dependencies = [
  "cpufeatures",
 ]
@@ -313,7 +314,7 @@ dependencies = [
 
 [[package]]
 name = "sha3"
-version = "0.11.0-rc.7"
+version = "0.11.0-rc.8"
 dependencies = [
  "digest",
  "hex-literal",
