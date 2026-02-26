@@ -1,6 +1,6 @@
 [package]
 name = "sha3"
-version = "0.11.0-rc.7"
+version = "0.11.0-rc.8"
 description = """
 Pure Rust implementation of SHA-3, a family of Keccak-based hash functions
 including the SHAKE family of eXtendable-Output Functions (XOFs), as well as
@@ -18,7 +18,7 @@ categories = ["cryptography", "no-std"]
 
 [dependencies]
 digest = "0.11"
-keccak = "0.2.0-rc.1"
+keccak = "0.2.0-rc.2"
 
 [dev-dependencies]
 digest = { version = "0.11", features = ["dev"] }
