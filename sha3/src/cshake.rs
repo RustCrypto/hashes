@@ -1,7 +1,4 @@
-use crate::{
-    CSHAKE_PAD, DEFAULT_ROUND_COUNT as ROUNDS, PLEN, SHAKE_PAD, Sha3ReaderCore,
-    block_api::xor_block,
-};
+use crate::{CSHAKE_PAD, SHAKE_PAD, Sha3ReaderCore, block_api::xor_block};
 use core::fmt;
 use digest::{
     CollisionResistance, CustomizedInit, HashMarker, Reset,
@@ -13,6 +10,7 @@ use digest::{
     consts::{U16, U32, U136, U168, U400},
     typenum::Unsigned,
 };
+use keccak::{F1600_ROUNDS as ROUNDS, Keccak, State1600};
 
 macro_rules! impl_cshake {
     (
@@ -22,8 +20,9 @@ macro_rules! impl_cshake {
         #[doc = " core hasher."]
         #[derive(Clone, Default)]
         pub struct $name {
-            state: [u64; PLEN],
-            initial_state: [u64; PLEN],
+            state: State1600,
+            initial_state: State1600,
+            keccak: Keccak,
         }
 
         impl $name {
@@ -87,10 +86,12 @@ macro_rules! impl_cshake {
         impl UpdateCore for $name {
             #[inline]
             fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-                for block in blocks {
-                    xor_block(&mut self.state, block);
-                    keccak::p1600(&mut self.state, ROUNDS);
-                }
+                self.keccak.with_p1600::<ROUNDS>(|p1600| {
+                    for block in blocks {
+                        xor_block(&mut self.state, block);
+                        p1600(&mut self.state);
+                    }
+                })
             }
         }
 
@@ -101,7 +102,7 @@ macro_rules! impl_cshake {
             fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
                 let pos = buffer.get_pos();
                 let mut block = buffer.pad_with_zeros();
-                let pad = if self.initial_state == [0; PLEN] {
+                let pad = if self.initial_state == State1600::default() {
                     SHAKE_PAD
                 } else {
                     CSHAKE_PAD
@@ -110,10 +111,12 @@ macro_rules! impl_cshake {
                 let n = block.len();
                 block[n - 1] |= 0x80;
 
-                xor_block(&mut self.state, &block);
-                keccak::p1600(&mut self.state, ROUNDS);
+                self.keccak.with_p1600::<ROUNDS>(|p1600| {
+                    xor_block(&mut self.state, &block);
+                    p1600(&mut self.state);
+                });
 
-                Sha3ReaderCore::new(&self.state)
+                Sha3ReaderCore::new(&self.state, self.keccak)
             }
         }
 
@@ -179,7 +182,7 @@ macro_rules! impl_cshake {
                     let chunk = initial_state_src[8 * i..][..8].try_into().unwrap();
                     u64::from_le_bytes(chunk)
                 });
-                Ok(Self{ state, initial_state })
+                Ok(Self{ state, initial_state, keccak: Keccak::new() })
             }
         }
 
