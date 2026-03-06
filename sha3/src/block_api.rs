@@ -11,7 +11,7 @@ use digest::{
     common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{IsLessOrEqual, True, U0, U200},
 };
-use keccak::KeccakP1600;
+use keccak::{Keccak, State1600};
 
 pub use crate::cshake::{CShake128Core, CShake256Core};
 
@@ -26,7 +26,8 @@ pub struct Sha3HasherCore<
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
-    state: KeccakP1600,
+    state: State1600,
+    keccak: Keccak,
     _pd: PhantomData<(Rate, OutputSize)>,
 }
 
@@ -73,10 +74,12 @@ where
 {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-        for block in blocks {
-            xor_block(self.state.as_mut(), block);
-            self.state.p1600(ROUNDS);
-        }
+        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+            for block in blocks {
+                xor_block(&mut self.state, block);
+                p1600(&mut self.state);
+            }
+        });
     }
 }
 
@@ -94,12 +97,14 @@ where
         let n = block.len();
         block[n - 1] |= 0x80;
 
-        xor_block(self.state.as_mut(), &block);
-        self.state.p1600(ROUNDS);
+        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+            xor_block(&mut self.state, &block);
+            p1600(&mut self.state);
 
-        for (o, s) in out.chunks_mut(8).zip(self.state.as_mut().iter()) {
-            o.copy_from_slice(&s.to_le_bytes()[..o.len()]);
-        }
+            for (o, s) in out.chunks_mut(8).zip(self.state.as_mut().iter()) {
+                o.copy_from_slice(&s.to_le_bytes()[..o.len()]);
+            }
+        });
     }
 }
 
@@ -118,10 +123,12 @@ where
         let n = block.len();
         block[n - 1] |= 0x80;
 
-        xor_block(self.state.as_mut(), &block);
-        self.state.p1600(ROUNDS);
+        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+            xor_block(&mut self.state, &block);
+            p1600(&mut self.state);
+        });
 
-        Sha3ReaderCore::new(self.state.as_ref())
+        Sha3ReaderCore::new(&self.state, self.keccak)
     }
 }
 
@@ -135,6 +142,7 @@ where
     fn default() -> Self {
         Self {
             state: Default::default(),
+            keccak: Keccak::new(),
             _pd: PhantomData,
         }
     }
@@ -219,14 +227,15 @@ where
     fn deserialize(
         serialized_state: &SerializedState<Self>,
     ) -> Result<Self, DeserializeStateError> {
-        let mut state = [0; PLEN];
+        let mut state = State1600::default();
         let chunks = serialized_state.chunks_exact(8);
         for (val, chunk) in state.iter_mut().zip(chunks) {
             *val = u64::from_le_bytes(chunk.try_into().unwrap());
         }
 
         Ok(Self {
-            state: KeccakP1600::from(state),
+            state,
+            keccak: Keccak::new(),
             _pd: PhantomData,
         })
     }
@@ -238,7 +247,8 @@ pub struct Sha3ReaderCore<Rate, const ROUNDS: usize = DEFAULT_ROUND_COUNT>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
-    state: [u64; PLEN],
+    state: State1600,
+    keccak: Keccak,
     _pd: PhantomData<Rate>,
 }
 
@@ -246,11 +256,9 @@ impl<Rate, const ROUNDS: usize> Sha3ReaderCore<Rate, ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
-    pub(crate) fn new(state: &[u64; PLEN]) -> Self {
-        Self {
-            state: *state,
-            _pd: PhantomData,
-        }
+    pub(crate) fn new(&state: &[u64; PLEN], keccak: Keccak) -> Self {
+        let _pd = PhantomData;
+        Self { state, keccak, _pd }
     }
 }
 
@@ -271,7 +279,8 @@ where
         for (src, dst) in self.state.iter().zip(block.chunks_mut(8)) {
             dst.copy_from_slice(&src.to_le_bytes()[..dst.len()]);
         }
-        keccak::p1600(&mut self.state, ROUNDS);
+        self.keccak
+            .with_p1600::<ROUNDS>(|p1600| p1600(&mut self.state));
         block
     }
 }
