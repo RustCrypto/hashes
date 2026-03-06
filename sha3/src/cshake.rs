@@ -1,7 +1,4 @@
-use crate::{
-    CSHAKE_PAD, DEFAULT_ROUND_COUNT as ROUNDS, PLEN, SHAKE_PAD, Sha3ReaderCore,
-    block_api::xor_block,
-};
+use crate::{CSHAKE_PAD, SHAKE_PAD, Sha3ReaderCore, block_api::xor_block};
 use core::fmt;
 use digest::{
     CollisionResistance, CustomizedInit, HashMarker, Reset,
@@ -13,7 +10,7 @@ use digest::{
     consts::{U16, U32, U136, U168, U400},
     typenum::Unsigned,
 };
-use keccak::{Keccak, State1600};
+use keccak::{F1600_ROUNDS as ROUNDS, Keccak, State1600};
 
 macro_rules! impl_cshake {
     (
@@ -105,7 +102,7 @@ macro_rules! impl_cshake {
             fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
                 let pos = buffer.get_pos();
                 let mut block = buffer.pad_with_zeros();
-                let pad = if self.initial_state == [0; PLEN] {
+                let pad = if self.initial_state == State1600::default() {
                     SHAKE_PAD
                 } else {
                     CSHAKE_PAD

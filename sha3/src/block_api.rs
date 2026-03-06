@@ -1,4 +1,3 @@
-use crate::{DEFAULT_ROUND_COUNT, PLEN};
 use core::{fmt, marker::PhantomData};
 use digest::{
     HashMarker, Output,
@@ -11,18 +10,14 @@ use digest::{
     common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{IsLessOrEqual, True, U0, U200},
 };
-use keccak::{Keccak, State1600};
+use keccak::{F1600_ROUNDS, Keccak, State1600};
 
 pub use crate::cshake::{CShake128Core, CShake256Core};
 
 /// Core Sha3 fixed output hasher state.
 #[derive(Clone)]
-pub struct Sha3HasherCore<
-    Rate,
-    OutputSize,
-    const PAD: u8,
-    const ROUNDS: usize = DEFAULT_ROUND_COUNT,
-> where
+pub struct Sha3HasherCore<Rate, OutputSize, const PAD: u8, const ROUNDS: usize = F1600_ROUNDS>
+where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
@@ -243,7 +238,7 @@ where
 
 /// Core Sha3 XOF reader.
 #[derive(Clone)]
-pub struct Sha3ReaderCore<Rate, const ROUNDS: usize = DEFAULT_ROUND_COUNT>
+pub struct Sha3ReaderCore<Rate, const ROUNDS: usize = F1600_ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
@@ -256,7 +251,7 @@ impl<Rate, const ROUNDS: usize> Sha3ReaderCore<Rate, ROUNDS>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
-    pub(crate) fn new(&state: &[u64; PLEN], keccak: Keccak) -> Self {
+    pub(crate) fn new(&state: &State1600, keccak: Keccak) -> Self {
         let _pd = PhantomData;
         Self { state, keccak, _pd }
     }
@@ -313,8 +308,8 @@ impl<Rate, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop for Sha3ReaderCor
 {
 }
 
-pub(crate) fn xor_block(state: &mut [u64; PLEN], block: &[u8]) {
-    assert!(block.len() < 8 * PLEN);
+pub(crate) fn xor_block(state: &mut State1600, block: &[u8]) {
+    assert!(size_of_val(block) < size_of_val(state));
 
     let mut chunks = block.chunks_exact(8);
     for (s, chunk) in state.iter_mut().zip(&mut chunks) {

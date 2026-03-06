@@ -28,9 +28,6 @@ const SHA3_PAD: u8 = 0x06;
 const SHAKE_PAD: u8 = 0x1f;
 const CSHAKE_PAD: u8 = 0x04;
 
-const PLEN: usize = 25;
-const DEFAULT_ROUND_COUNT: usize = 24;
-
 digest::buffer_fixed!(
     /// SHA-3-224 hasher.
     pub struct Sha3_224(Sha3HasherCore<U144, U28, SHA3_PAD>);
