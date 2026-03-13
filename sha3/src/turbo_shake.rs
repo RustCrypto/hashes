@@ -1,12 +1,12 @@
 use crate::{Sha3HasherCore, Sha3ReaderCore};
 use core::fmt;
 use digest::{
-    CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Update, XofReader,
     block_api::{
         AlgorithmName, BlockSizeUser, ExtendableOutputCore, Reset, UpdateCore, XofReaderCore,
     },
     block_buffer::{EagerBuffer, ReadBuffer},
-    consts::{U0, U16, U32, U136, U168},
+    consts::{U0, U136, U16, U168, U32},
+    CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Update, XofReader,
 };
 
 const TURBO_SHAKE_ROUND_COUNT: usize = 12;
@@ -16,7 +16,8 @@ macro_rules! impl_turbo_shake {
         $name:ident, $reader_name:ident, $rate:ty, $alg_name:expr
     ) => {
         #[doc = $alg_name]
-        #[doc = " hasher."]
+        #[doc = " hasher with domain separator `DS`. `DS` MUST be in the range `0x01..=0x7f`. \
+        Default is `0x1f`."]
         #[derive(Clone)]
         pub struct $name<const DS: u8> {
             core: Sha3HasherCore<$rate, U0, DS, TURBO_SHAKE_ROUND_COUNT>,
