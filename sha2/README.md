@@ -63,8 +63,10 @@ This crate supports the following backends:
 - `aarch64-sha2`: uses the AArch64 `sha2` extension, fallbacks to the `soft` backend
   if the extension is not available
 - `loongarch64-asm`: `asm!`-based implementation for LoongArch64 targets
-- `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension (experimental)
-- `riscv-zknh-compact`: same as `riscv_zknh` but does not unroll rounds (experimental)
+- `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension. Experimental,
+  requires Nightly compiler and to enable `Zknh` and `Zbkb` (or `Zbb`)
+  target features at compile time.
+- `riscv-zknh-compact`: same as `riscv-zknh` but does not unroll rounds.
 - `wasm32-simd`: uses the WASM `simd128` extension
 - `x86-shani`: uses the x86 SHA-NI extension, fallbacks to the `soft` backend
   if the extension is not available (SHA-256 only)
@@ -72,11 +74,8 @@ This crate supports the following backends:
   if the extension is not available (SHA-512 only)
 
 You can force backend selection using the `sha2_backend` configuration flag. It can be enabled
-using either environment variable (e.g. `RUSTFLAGS='--cfg sha2_backend="soft"' cargo build`), or
-by modifying your `.cargo/config.toml` file. Currently the flag supports the following values:
-`soft`, `soft-compact`, `riscv-zknh`, and `riscv-zknh-compact`.
-
-Note that the RISC-V backends are experimental and require Nightly compiler.
+using either environment variable (e.g. `RUSTFLAGS='--cfg sha2_backend="soft"'`),
+or by modifying your `.cargo/config.toml` file.
 
 ## License
 
