@@ -66,7 +66,7 @@ This crate supports the following backends:
 - `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension. Experimental,
   requires Nightly compiler and to enable `Zknh` and `Zbkb` (or `Zbb`)
   target features at compile time.
-- `riscv-zknh-compact`: same as `riscv_zknh` but does not unroll rounds.
+- `riscv-zknh-compact`: same as `riscv-zknh` but does not unroll rounds.
 - `wasm32-simd`: uses the WASM `simd128` extension
 - `x86-shani`: uses the x86 SHA-NI extension, fallbacks to the `soft` backend
   if the extension is not available (SHA-256 only)
