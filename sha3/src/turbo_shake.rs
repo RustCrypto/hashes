@@ -16,8 +16,10 @@ macro_rules! impl_turbo_shake {
         $name:ident, $reader_name:ident, $rate:ty, $alg_name:expr
     ) => {
         #[doc = $alg_name]
-        #[doc = " hasher with domain separator `DS`. `DS` MUST be in the range `0x01..=0x7f`. \
-        Default is `0x1f`."]
+        #[doc = "hasher with domain separator."]
+        #[doc = ""]
+        #[doc = "Domain separator `DS` MUST be in the range `0x01..=0x7f`, the default value is `0x1F`."]
+        #[doc = "Using `DS` outside of the range will result in a panic during initialization."]
         #[derive(Clone)]
         pub struct $name<const DS: u8> {
             core: Sha3HasherCore<$rate, U0, DS, TURBO_SHAKE_ROUND_COUNT>,
