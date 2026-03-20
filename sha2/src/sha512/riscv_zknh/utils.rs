@@ -129,8 +129,10 @@ fn load_unaligned_block(block: &[u8; 128]) -> [u64; 16] {
 }
 
 /// This function returns `k[R]`, but prevents compiler from inlining the indexed value
-#[cfg(sha2_backend = "riscv-zknh")]
+#[cfg(not(sha2_backend_riscv_zknh = "compact"))]
 pub(super) fn opaque_load<const R: usize>(k: &[u64]) -> u64 {
+    use core::arch::asm;
+
     assert!(R < k.len());
     #[cfg(target_arch = "riscv64")]
     unsafe {
