@@ -7,6 +7,7 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
+#[target_feature(enable = "sha,sse2,ssse3,sse4.1")]
 unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i) -> __m128i {
     let t1 = _mm_sha256msg1_epu32(v0, v1);
     let t2 = _mm_alignr_epi8(v3, v2, 4);
@@ -39,7 +40,7 @@ macro_rules! schedule_rounds4 {
 // we use unaligned loads with `__m128i` pointers
 #[allow(clippy::cast_ptr_alignment)]
 #[target_feature(enable = "sha,sse2,ssse3,sse4.1")]
-unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     #[allow(non_snake_case)]
     let MASK: __m128i = _mm_set_epi64x(
         0x0C0D_0E0F_0809_0A0Bu64 as i64,
@@ -95,18 +96,4 @@ unsafe fn digest_blocks(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     let state_ptr_mut: *mut __m128i = state.as_mut_ptr().cast();
     _mm_storeu_si128(state_ptr_mut.add(0), dcba);
     _mm_storeu_si128(state_ptr_mut.add(1), hgef);
-}
-
-cpufeatures::new!(shani_cpuid, "sha", "sse2", "ssse3", "sse4.1");
-
-pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
-    // after stabilization
-    if shani_cpuid::get() {
-        unsafe {
-            digest_blocks(state, blocks);
-        }
-    } else {
-        super::soft::compress(state, blocks);
-    }
 }

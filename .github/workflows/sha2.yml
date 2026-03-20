@@ -86,7 +86,7 @@ jobs:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
       - run: cargo test --all-features
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact"
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" --cfg sha2_backend_soft="compact"
 
   # macOS tests
   macos:
@@ -112,7 +112,7 @@ jobs:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
       - run: cargo test --all-features
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact"
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" --cfg sha2_backend_soft="compact"
 
   # Windows tests
   windows:
@@ -139,7 +139,7 @@ jobs:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
       - run: cargo test --all-features
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact"
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" --cfg sha2_backend_soft="compact"
 
   # Cross-compiled tests
   cross:
@@ -186,16 +186,16 @@ jobs:
           toolchain: nightly
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh,+zbkb
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact" -C target-feature=+zknh,+zbkb
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" --cfg sha2_backend_soft="compact"
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh,+zbkb
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh,+zbkb
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" --cfg sha2_backend_riscv_zknh="compact" -C target-feature=+zknh,+zbkb
 
   riscv32-zknh:
     runs-on: ubuntu-latest
@@ -208,16 +208,16 @@ jobs:
           components: rust-src
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" -C target-feature=+zknh,+zbkb
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft-compact" -C target-feature=+zknh,+zbkb
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" --cfg sha2_backend_soft="compact"
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh,+zbkb
       - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
         env:
-          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh-compact" -C target-feature=+zknh,+zbkb
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" --cfg sha2_backend_riscv_zknh="compact" -C target-feature=+zknh,+zbkb
 
   # wasmtime tests
   wasm:
