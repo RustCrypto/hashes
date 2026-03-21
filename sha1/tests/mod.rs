@@ -79,9 +79,9 @@ fn one_million_a_file_has_expected_sha1_digest() {
         .expect("system time should be after the unix epoch")
         .as_nanos();
     let path = std::env::temp_dir().join(format!("tester-sha1-{unique}.txt"));
-    let contents = vec![b'a'; 1_000_000];
+    let bytes: Vec<u8> = std::iter::repeat(b'a').take(1_000_000).collect();
 
-    fs::write(&path, contents).expect("should write test file");
+    fs::write(&path, bytes).expect("should write test file");
     let digest = sha1_file_hex(&path).expect("should hash test file");
 
     let _ = fs::remove_file(&path);
