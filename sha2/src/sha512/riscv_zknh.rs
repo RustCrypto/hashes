@@ -1,3 +1,6 @@
+#[cfg(not(any(target_arch = "riscv32", target_arch = "riscv64")))]
+compile_error!("riscv-zknh backend can be used only on riscv32 and riscv64 target arches");
+
 mod utils;
 
 cfg_if::cfg_if! {

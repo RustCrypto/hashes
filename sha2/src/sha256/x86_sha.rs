@@ -2,6 +2,9 @@
 
 #![allow(clippy::many_single_char_names, unsafe_op_in_unsafe_fn)]
 
+#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+compile_error!("x86-sha backend can be used only on x86 and x86_64 target arches");
+
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]

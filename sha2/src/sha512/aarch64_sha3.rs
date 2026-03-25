@@ -1,6 +1,9 @@
 // Implementation adapted from mbedtls.
 #![allow(unsafe_op_in_unsafe_fn)]
 
+#[cfg(not(target_arch = "aarch64"))]
+compile_error!("aarch64-sha3 backend can be used only aarch64 target arches");
+
 use crate::consts::K64;
 use core::arch::aarch64::*;
 

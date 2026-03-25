@@ -6,17 +6,8 @@
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(missing_docs, unreachable_pub)]
-#![cfg_attr(
-    any(sha2_backend = "riscv-zknh", sha2_backend = "riscv-zknh-compact"),
-    feature(riscv_ext_intrinsics)
-)]
+#![cfg_attr(any(sha2_backend = "riscv-zknh"), feature(riscv_ext_intrinsics))]
 #![allow(clippy::needless_range_loop)]
-
-#[cfg(all(
-    any(sha2_backend = "riscv-zknh", sha2_backend = "riscv-zknh-compact"),
-    not(any(any(target_arch = "riscv32", target_arch = "riscv64")))
-))]
-compile_error!("The Zknh backends can be enabled only for RISC-V targets");
 
 pub use digest::{self, Digest};
 
