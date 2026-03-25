@@ -1,16 +1,16 @@
 [package]
 name = "sha1"
 version = "0.11.0-rc.5"
-description = "SHA-1 hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/sha1"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["sha1", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "SHA-1 hash function"
 
 [dependencies]
 digest = "0.11"

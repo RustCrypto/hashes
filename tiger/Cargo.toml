@@ -1,16 +1,16 @@
 [package]
 name = "tiger"
 version = "0.3.0-rc.2"
-description = "Tiger hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/tiger"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["hash", "tiger", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Tiger hash function"
 
 [dependencies]
 digest = "0.11"
