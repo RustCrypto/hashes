@@ -1,16 +1,16 @@
 [package]
 name = "gost94"
 version = "0.11.0-rc.2"
-description = "GOST R 34.11-94 hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/gost94"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["gost94", "gost", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "GOST R 34.11-94 hash function"
 
 [dependencies]
 digest = "0.11"

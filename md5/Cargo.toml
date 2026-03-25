@@ -1,16 +1,16 @@
 [package]
 name = "md-5"
 version = "0.11.0-rc.5"
-description = "MD5 hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/md-5"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["md5", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "MD5 hash function"
 
 [lib]
 name = "md5"

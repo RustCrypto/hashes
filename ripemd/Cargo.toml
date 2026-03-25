@@ -1,16 +1,16 @@
 [package]
 name = "ripemd"
 version = "0.2.0-rc.5"
-description = "Pure Rust implementation of the RIPEMD hash functions"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/ripemd"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["ripemd", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Pure Rust implementation of the RIPEMD hash functions"
 
 [dependencies]
 digest = "0.11"
