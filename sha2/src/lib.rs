@@ -6,7 +6,14 @@
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(missing_docs, unreachable_pub)]
-#![cfg_attr(any(sha2_backend = "riscv-zknh"), feature(riscv_ext_intrinsics))]
+#![cfg_attr(
+    any(
+        sha2_backend = "riscv-zknh",
+        sha2_256_backend = "riscv-zknh",
+        sha2_256_backend = "riscv-zknh",
+    ),
+    feature(riscv_ext_intrinsics)
+)]
 #![allow(clippy::needless_range_loop)]
 
 pub use digest::{self, Digest};
