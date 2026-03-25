@@ -80,7 +80,7 @@ fn load_unaligned_block(block: &[u8; 64]) -> [u32; 16] {
 }
 
 /// This function returns `k[R]`, but prevents compiler from inlining the indexed value
-#[cfg(sha2_backend = "riscv-zknh")]
+#[cfg(not(sha2_backend_riscv_zknh = "compact"))]
 pub(super) fn opaque_load<const R: usize>(k: &[u32]) -> u32 {
     assert!(R < k.len());
     let dst;

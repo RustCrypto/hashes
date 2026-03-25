@@ -13,13 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace type aliases with newtypes ([#678])
 - `compress256` and `compress512` are moved to the `block_api` module ([#678])
 - Implementation of the `SerializableState` trait ([#716])
+- Configuration flags for backend selection ([#614], [#615], [#686], [#802])
 
 ### Added
 - `alloc` crate feature ([#678])
-- RISC-V scalar crypto extension support gated behind `sha2_backend = "riscv-zknh"` or
-  `sha2_backend = "riscv-zknh-compact"` configuration flags ([#614])
-- `sha2_backend = "soft"` configuration flag ([#615])
-- `sha2_backend = "soft-compact"` configuration flag ([#686])
+- RISC-V scalar crypto extension support ([#614])
 
 ### Removed
 - `asm`, `asm-aarch64`, `loongarch64_asm`, and `compress` crate features ([#542])
@@ -34,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#678]: https://github.com/RustCrypto/hashes/pull/678
 [#686]: https://github.com/RustCrypto/hashes/pull/686
 [#716]: https://github.com/RustCrypto/hashes/pull/716
+[#802]: https://github.com/RustCrypto/hashes/pull/802
 
 ## 0.10.9 (2025-04-30)
 ### Added

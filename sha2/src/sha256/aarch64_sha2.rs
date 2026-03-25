@@ -1,26 +1,16 @@
 //! SHA-256 `aarch64` backend.
+//!
+//! Implementation adapted from mbedtls.
 #![allow(unsafe_op_in_unsafe_fn)]
 
-// Implementation adapted from mbedtls.
-
-use core::arch::aarch64::*;
+#[cfg(not(target_arch = "aarch64"))]
+compile_error!("aarch64-sha2 backend can be used only aarch64 target arches");
 
 use crate::consts::K32;
-
-cpufeatures::new!(sha2_hwcap, "sha2");
-
-pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
-    // after stabilization
-    if sha2_hwcap::get() {
-        unsafe { sha256_compress(state, blocks) }
-    } else {
-        super::soft::compress(state, blocks);
-    }
-}
+use core::arch::aarch64::*;
 
 #[target_feature(enable = "sha2")]
-unsafe fn sha256_compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // SAFETY: Requires the sha2 feature.
 
     // Load state into vectors.

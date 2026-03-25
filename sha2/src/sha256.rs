@@ -1,32 +1,45 @@
 cfg_if::cfg_if! {
-    if #[cfg(sha2_backend = "soft")] {
+    if #[cfg(any(sha2_backend = "soft", sha2_256_backend = "soft"))] {
         mod soft;
         use soft::compress;
-    } else if #[cfg(sha2_backend = "soft-compact")] {
-        mod soft_compact;
-        use soft_compact::compress;
-    } else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
-        mod soft;
-        mod x86_shani;
-        use x86_shani::compress;
-    } else if #[cfg(all(
-        any(target_arch = "riscv32", target_arch = "riscv64"),
-        sha2_backend = "riscv-zknh"
-    ))] {
+    } else if #[cfg(any(sha2_backend = "riscv-zknh", sha2_256_backend = "riscv-zknh"))] {
         mod riscv_zknh;
-        mod riscv_zknh_utils;
-        use riscv_zknh::compress;
-    } else if #[cfg(all(
-        any(target_arch = "riscv32", target_arch = "riscv64"),
-        sha2_backend = "riscv-zknh-compact"
-    ))] {
-        mod riscv_zknh_compact;
-        mod riscv_zknh_utils;
-        use riscv_zknh_compact::compress;
-    } else if #[cfg(target_arch = "aarch64")] {
-        mod soft;
+
+        #[cfg(not(all(
+            target_feature = "zknh",
+            any(target_feature = "zbb", target_feature = "zbkb")
+        )))]
+        compile_error!("riscv-zknh backend requires zknh and zbkb (or zbb) target features");
+
+        fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+            // SAFETY: we checked above that the required target features are enabled
+            unsafe { riscv_zknh::compress(state, blocks) }
+        }
+    } else if #[cfg(sha2_256_backend = "x86-sha")] {
+        mod x86_sha;
+
+        #[cfg(not(all(
+            target_feature = "sha",
+            target_feature = "sse2",
+            target_feature = "ssse3",
+            target_feature = "sse4.1",
+        )))]
+        compile_error!("x86-sha backend requires sha, sse2, ssse3, sse4.1 target features");
+
+        fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+            // SAFETY: we checked above that the required target features are enabled
+            unsafe { x86_sha::compress(state, blocks) }
+        }
+    } else if #[cfg(sha2_256_backend = "aarch64-sha2")] {
         mod aarch64_sha2;
-        use aarch64_sha2::compress;
+
+        #[cfg(not(target_feature = "sha2"))]
+        compile_error!("aarch64-sha2 backend requires sha2 target feature");
+
+        fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+            // SAFETY: we checked above that the required target features are enabled
+            unsafe { aarch64_sha2::compress(state, blocks) }
+        }
     } else if #[cfg(target_arch = "loongarch64")] {
         mod loongarch64_asm;
         use loongarch64_asm::compress;
@@ -35,17 +48,35 @@ cfg_if::cfg_if! {
         use wasm32_simd128::compress;
     } else {
         mod soft;
-        use soft::compress;
-    }
-}
 
-#[inline(always)]
-#[allow(dead_code)]
-fn to_u32s(block: &[u8; 64]) -> [u32; 16] {
-    core::array::from_fn(|i| {
-        let chunk = block[4 * i..][..4].try_into().unwrap();
-        u32::from_be_bytes(chunk)
-    })
+        cfg_if::cfg_if! {
+            if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
+                mod x86_sha;
+                cpufeatures::new!(shani_cpuid, "sha", "sse2", "ssse3", "sse4.1");
+            } else if #[cfg(target_arch = "aarch64")] {
+                mod aarch64_sha2;
+                cpufeatures::new!(sha2_hwcap, "sha2");
+            }
+        }
+
+        fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+            cfg_if::cfg_if! {
+                if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
+                    if shani_cpuid::get() {
+                        // SAFETY: we checked that required target features are available
+                        return unsafe { x86_sha::compress(state, blocks) };
+                    }
+                } else if #[cfg(target_arch = "aarch64")] {
+                    if sha2_hwcap::get() {
+                        // SAFETY: we checked that `sha2` target feature is available
+                        return unsafe { aarch64_sha2::compress(state, blocks) };
+                    }
+                }
+            }
+
+            soft::compress(state, blocks);
+        }
+    }
 }
 
 /// Raw SHA-256 compression function.

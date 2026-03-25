@@ -2,6 +2,9 @@
 
 #![allow(clippy::many_single_char_names, unsafe_op_in_unsafe_fn)]
 
+#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+compile_error!("x86-avx2 backend can be used only on x86 and x86_64 target arches");
+
 use core::mem::size_of;
 
 #[cfg(target_arch = "x86")]
@@ -11,22 +14,8 @@ use core::arch::x86_64::*;
 
 use crate::consts::K64;
 
-cpufeatures::new!(avx2_cpuid, "avx2");
-
-pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
-    // after stabilization
-    if avx2_cpuid::get() {
-        unsafe {
-            sha512_compress_x86_64_avx2(state, blocks);
-        }
-    } else {
-        super::soft::compress(state, blocks);
-    }
-}
-
 #[target_feature(enable = "avx2")]
-unsafe fn sha512_compress_x86_64_avx2(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub(super) unsafe fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     let mut start_block = 0;
 
     if blocks.len() & 0b1 != 0 {

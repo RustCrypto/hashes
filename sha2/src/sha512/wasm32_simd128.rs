@@ -1,5 +1,10 @@
 #![allow(clippy::many_single_char_names, unsafe_op_in_unsafe_fn)]
 
+#[cfg(not(target_arch = "wasm32"))]
+compile_error!("wasm32-simd128 backend can be used only on wasm32 target arches");
+#[cfg(not(target_feature = "simd128"))]
+compile_error!("wasm32-simd128 backend requires simd128 target feature");
+
 use core::arch::wasm32::*;
 use core::mem::size_of;
 

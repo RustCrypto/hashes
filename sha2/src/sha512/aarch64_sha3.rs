@@ -1,24 +1,14 @@
 // Implementation adapted from mbedtls.
 #![allow(unsafe_op_in_unsafe_fn)]
 
-use core::arch::aarch64::*;
+#[cfg(not(target_arch = "aarch64"))]
+compile_error!("aarch64-sha3 backend can be used only aarch64 target arches");
 
 use crate::consts::K64;
-
-cpufeatures::new!(sha3_hwcap, "sha3");
-
-pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
-    // after stabilization
-    if sha3_hwcap::get() {
-        unsafe { sha512_compress(state, blocks) }
-    } else {
-        super::soft::compress(state, blocks);
-    }
-}
+use core::arch::aarch64::*;
 
 #[target_feature(enable = "sha3")]
-unsafe fn sha512_compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub(super) unsafe fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     // SAFETY: Requires the sha3 feature.
 
     // Load state into vectors.
