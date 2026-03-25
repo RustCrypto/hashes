@@ -76,12 +76,12 @@ SHA-512 only backends:
 - `x86-avx2`: uses the x86 AVX2 extension.
 
 By default the following backends are used:
-- `target_arch = "aarch64"`: use `aarch64-sha2` and `aarch64-sha3` if required target features
-  detected at runtime, fallback to `soft` otherwise.
-- `any(target_arch = "x86", target_arch = "x86_64")`: use `x86-sha` and `x86-avx` if
-  required target features detected at runtime, fallback to `soft` otherwise.
+- `target_arch = "aarch64"`: use `aarch64-sha2` and `aarch64-sha3` when the required
+  target features are detected at runtime; otherwise fall back to `soft`.
+- `any(target_arch = "x86", target_arch = "x86_64")`: use `x86-sha` and `x86-avx` when
+  the required target features are detected at runtime; otherwise fall back to `soft`.
 - `target_arch = "loongarch64"`: use `loongarch64-asm`.
-- `all(target_arch = "wasm3", target_feature = "simd128)`: use `wasm32-simd128`.
+- `all(target_arch = "wasm32", target_feature = "simd128")`: use `wasm32-simd128`.
 - All other targets: use `soft`.
 
 You can force backend selection using the following configuration flags:
