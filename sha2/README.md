@@ -57,25 +57,51 @@ See the [`digest`] crate docs for additional examples.
 
 ## Backends
 
-This crate supports the following backends:
-- `soft`: portable implementation with fully unrolled rounds
-- `soft-compact`: portable implementation which produces smaller binaries
-- `aarch64-sha2`: uses the AArch64 `sha2` extension, fallbacks to the `soft` backend
-  if the extension is not available
+This crate supports a number of different backends.
+
+SHA-256 and SHA-512 backends:
+- `soft`: portable software implementation
 - `loongarch64-asm`: `asm!`-based implementation for LoongArch64 targets
 - `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension. Experimental,
   requires Nightly compiler and to enable `Zknh` and `Zbkb` (or `Zbb`)
   target features at compile time.
-- `riscv-zknh-compact`: same as `riscv-zknh` but does not unroll rounds.
-- `wasm32-simd`: uses the WASM `simd128` extension
-- `x86-shani`: uses the x86 SHA-NI extension, fallbacks to the `soft` backend
-  if the extension is not available (SHA-256 only)
-- `x86-avx2`: uses the x86 AVX2 extension, fallbacks to the `soft` backend
-  if the extension is not available (SHA-512 only)
+- `wasm32-simd128`: uses the WASM `simd128` extension.
 
-You can force backend selection using the `sha2_backend` configuration flag. It can be enabled
-using either environment variable (e.g. `RUSTFLAGS='--cfg sha2_backend="soft"'`),
-or by modifying your `.cargo/config.toml` file.
+SHA-256 only backends:
+- `aarch64-sha2`: uses the AArch64 `sha2` extension.
+- `x86-sha`: uses the x86 SHA-NI extension.
+
+SHA-512 only backends:
+- `aarch64-sha3`: uses the AArch64 `sha3` extension.
+- `x86-avx2`: uses the x86 AVX2 extension.
+
+By default the following backends are used:
+- `target_arch = "aarch64"`: use `aarch64-sha2` and `aarch64-sha3` if required target features
+  detected at runtime, fallback to `soft` otherwise.
+- `any(target_arch = "x86", target_arch = "x86_64")`: use `x86-sha` and `x86-avx` if
+  required target features detected at runtime, fallback to `soft` otherwise.
+- `target_arch = "loongarch64"`: use `loongarch64-asm`.
+- `all(target_arch = "wasm3", target_feature = "simd128)`: use `wasm32-simd128`.
+- All other targets: use `soft`.
+
+You can force backend selection using the following configuration flags:
+- `sha2_backend`: select SHA-256 and SHA-512 backends. Supported values: `soft`, `riscv-zknh`.
+- `sha2_256_backend`: select SHA-256 backend. Supported values: `aarch64-sha2`, `soft`,
+  `riscv-zknh`, `x86-sha`.
+- `sha2_512_backend`: select SHA-512 backend. Supported values: `aarch64-sha3`, `soft`,
+  `riscv-zknh`, `x86-avx2`.
+
+They can be enabled using either the `RUSTFLAGS` environment variable
+(e.g. `RUSTFLAGS='--cfg sha2_backend="soft"'`), or by modifying your `.cargo/config.toml` file.
+
+Note that `sha2_backend` has higher priority than `sha2_256_backend` and `sha2_512_backend`.
+In other words, using `--cfg sha2_backend="soft" --cfg sha2_256_backend="x86_sha"` will result
+in selection of the software backend for SHA-256.
+
+By default `soft` and `riscv-zknh` backends unroll round loops, which results in a better
+performance at the cost of a bigger resulting binary. You can disable unrolling in the backends
+by using `sha2_backend_soft = "compact"` and `sha2_backend_riscv_zknh = "compact"` configuration
+flags respectively.
 
 ## License
 
