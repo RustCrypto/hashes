@@ -1,16 +1,16 @@
 [package]
 name = "whirlpool"
 version = "0.11.0-rc.5"
-description = "Whirlpool hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/whirlpool"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["whirlpool", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Whirlpool hash function"
 
 [dependencies]
 digest = "0.11"

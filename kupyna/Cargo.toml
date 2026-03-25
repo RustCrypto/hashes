@@ -1,16 +1,16 @@
 [package]
 name = "kupyna"
 version = "0.1.0-pre.0"
-description = "Kupyna (DSTU 7564:2014) hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
+rust-version = "1.85"
 documentation = "https://docs.rs/kupyna"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["hash", "kupyna"]
 categories = ["cryptography", "no-std"]
-rust-version = "1.85"
+description = "Kupyna (DSTU 7564:2014) hash function"
 
 [dependencies]
 digest = "0.11"

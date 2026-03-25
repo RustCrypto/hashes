@@ -1,16 +1,16 @@
 [package]
 name = "md2"
 version = "0.11.0-rc.2"
-license = "MIT OR Apache-2.0"
 authors = ["RustCrypto Developers"]
-description = "MD2 hash function"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/md2"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["md2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "MD2 hash function"
 
 [dependencies]
 digest = "0.11"

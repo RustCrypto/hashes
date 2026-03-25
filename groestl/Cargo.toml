@@ -1,16 +1,16 @@
 [package]
 name = "groestl"
 version = "0.11.0-rc.2"
-description = "Grøstl hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/groestl"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["groestl", "grostl", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Grøstl hash function"
 
 [dependencies]
 digest = "0.11"

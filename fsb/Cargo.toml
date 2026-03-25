@@ -1,16 +1,16 @@
 [package]
 name = "fsb"
 version = "0.2.0-rc.2"
-description = "FSB hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/fsb"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["fsb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "FSB hash function"
 
 [dependencies]
 digest = "0.11"

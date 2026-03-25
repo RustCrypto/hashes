@@ -1,16 +1,16 @@
 [package]
 name = "streebog"
 version = "0.11.0-rc.5"
-description = "Streebog (GOST R 34.11-2012) hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/streebog"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["streebog", "gost", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Streebog (GOST R 34.11-2012) hash function"
 
 [dependencies]
 digest = "0.11"

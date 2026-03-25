@@ -1,16 +1,16 @@
 [package]
 name = "jh"
 version = "0.2.0-rc.1"
-description = "Pure Rust implementation of the JH cryptographic hash function"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/jh"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["jh", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Pure Rust implementation of the JH cryptographic hash function"
 
 [dependencies]
 digest = "0.11"

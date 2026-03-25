@@ -2,11 +2,11 @@
 name = "benches"
 version = "0.0.0"
 authors = ["RustCrypto Developers"]
-license = "Apache-2.0 OR MIT"
-description = "Criterion benchmarks of the hash crates"
 edition = "2024"
 rust-version = "1.85"
+license = "Apache-2.0 OR MIT"
 publish = false
+description = "Criterion benchmarks of the hash crates"
 
 [workspace]
 
