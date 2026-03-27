@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `alloc` crate feature ([#678])
 - Expose compression function from the `block_api` module ([#735])
+- `md5_backend` configuration flag ([#813])
 
 ### Changed
 - Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
@@ -18,14 +19,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation of the `SerializableState` trait ([#716])
 
 ### Removed
-- `asm` and `loongarch64_asm` crate features [#542]
-- `std` crate feature ([#678])
+- `asm`, `loongarch64_asm`, `force-soft`, and `std` crate features ([#542], [#678], [#813])
 
 [#542]: https://github.com/RustCrypto/hashes/pull/542
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
 [#716]: https://github.com/RustCrypto/hashes/pull/716
 [#735]: https://github.com/RustCrypto/hashes/pull/735
+[#813]: https://github.com/RustCrypto/hashes/pull/813
 
 ## 0.10.6 (2023-09-22)
 ### Added
