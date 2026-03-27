@@ -62,7 +62,7 @@ See the [Security] page on Wikipedia for more information.
 ### Crate Names
 
 Whenever possible crates are published under the same name as the crate folder.
-Owners of `md5` [declined](https://github.com/stainless-steel/md5/pull/) to participate in this project.
+Owners of `md5` [declined](https://github.com/stainless-steel/md5/pull/2) to participate in this project.
 This crate does not implement the [`digest`] traits, so it is not interoperable with the RustCrypto ecosystem.
 This is why we publish our MD5 implementation as `md-5` and mark it with the :exclamation: mark.
 Note that the library itself is named as `md5`, i.e. inside `use` statements you should use `md5`, not `md_5`.
