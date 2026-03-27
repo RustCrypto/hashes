@@ -1,6 +1,7 @@
 //! SHA-1 `x86`/`x86_64` backend
 
-#![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+compile_error!("x86-sha backend can be used only on x86 and x86_64 target arches");
 
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
@@ -32,7 +33,7 @@ macro_rules! schedule_rounds4 {
 
 #[target_feature(enable = "sha,sse2,ssse3,sse4.1")]
 #[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+pub(crate) unsafe fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     #[allow(non_snake_case)]
     let MASK: __m128i = _mm_set_epi64x(0x0001_0203_0405_0607, 0x0809_0A0B_0C0D_0E0F);
 
@@ -88,18 +89,4 @@ unsafe fn digest_blocks(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     state_abcd = _mm_shuffle_epi32(state_abcd, 0b00011011);
     _mm_storeu_si128(state.as_mut_ptr().cast(), state_abcd);
     state[4] = _mm_extract_epi32(state_e, 3) as u32;
-}
-
-cpufeatures::new!(shani_cpuid, "sha", "sse2", "ssse3", "sse4.1");
-
-pub(super) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
-    // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725
-    // after stabilization
-    if shani_cpuid::get() {
-        unsafe {
-            digest_blocks(state, blocks);
-        }
-    } else {
-        super::soft::compress(state, blocks);
-    }
 }

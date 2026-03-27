@@ -13,15 +13,17 @@ use digest::{
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
-pub use crate::compress::compress;
+use crate::consts::{H0, State};
 
-const STATE_LEN: usize = 5;
-const H0: [u32; STATE_LEN] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
+/// SHA-1 compression function
+pub fn compress(state: &mut State, blocks: &[[u8; 64]]) {
+    crate::compress::compress(state, blocks);
+}
 
 /// Core SHA-1 hasher state.
 #[derive(Clone)]
 pub struct Sha1Core {
-    h: [u32; STATE_LEN],
+    h: State,
     block_len: u64,
 }
 
@@ -123,7 +125,7 @@ impl SerializableState for Sha1Core {
     ) -> Result<Self, DeserializeStateError> {
         let (serialized_h, serialized_block_len) = serialized_state.split::<U20>();
 
-        let mut h = [0; STATE_LEN];
+        let mut h = State::default();
         for (val, chunk) in h.iter_mut().zip(serialized_h.chunks_exact(4)) {
             *val = u32::from_le_bytes(chunk.try_into().unwrap());
         }
