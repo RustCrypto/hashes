@@ -1,18 +1,14 @@
 //! SHA-1 `aarch64` backend.
 
-use super::K;
+use crate::consts::K;
 
-// Per rustc target feature docs for `aarch64-unknown-linux-gnu` and
-// `aarch64-apple-darwin` platforms, the `sha2` target feature enables
-// SHA-1 as well:
-//
-// > Enable SHA1 and SHA256 support.
-cpufeatures::new!(sha1_hwcap, "sha2");
+#[cfg(not(target_arch = "aarch64"))]
+compile_error!("aarch64-sha2 backend can be used only aarch64 target arches");
 
 // note that `sha2` implicitly enables `neon`
 #[target_feature(enable = "sha2")]
 #[allow(unsafe_op_in_unsafe_fn)]
-unsafe fn compress_sha1_neon(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+pub(crate) unsafe fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     use core::arch::aarch64::*;
 
     let mut abcd = vld1q_u32(state.as_ptr());
@@ -171,15 +167,4 @@ unsafe fn compress_sha1_neon(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     // Save state
     vst1q_u32(state.as_mut_ptr(), abcd);
     state[4] = e0;
-}
-
-pub(super) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
-    // TODO: Replace with https://github.com/rust-lang/rfcs/pull/2725 after stabilization
-    if sha1_hwcap::get() {
-        unsafe {
-            compress_sha1_neon(state, blocks);
-        }
-    } else {
-        super::soft::compress(state, blocks);
-    }
 }
