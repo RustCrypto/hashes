@@ -249,7 +249,7 @@ fn read_block(block: &[u8; 64]) -> [u32; 16] {
     })
 }
 
-pub(super) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+pub(crate) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     for block in blocks.iter().map(read_block) {
         digest_block(state, block);
     }
