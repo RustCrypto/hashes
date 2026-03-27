@@ -87,6 +87,9 @@ jobs:
       - uses: RustCrypto/actions/cargo-hack-install@master
       - run: ${{ matrix.deps }}
       - run: cargo hack test --feature-powerset
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha1_backend="soft"
 
   # macOS tests
   macos:
@@ -108,6 +111,9 @@ jobs:
       - run: cargo test --no-default-features
       - run: cargo test
       - run: cargo test --all-features
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha1_backend="aarch64-sha2"
 
   # Windows tests
   windows:
