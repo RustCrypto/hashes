@@ -30,7 +30,7 @@ checksum = "bfed5cd32720841afa8cd58c89a317e9efb0c8083e1b349dae4098f022620353"
 
 [[package]]
 name = "bash-hash"
-version = "0.1.0-rc.1"
+version = "0.1.0"
 dependencies = [
  "bash-f",
  "digest",
@@ -45,7 +45,7 @@ checksum = "d9aa1eef3994e2ccd304a78fe3fea4a73e5792007f85f09b79bb82143ca5f82b"
 
 [[package]]
 name = "belt-hash"
-version = "0.2.0-rc.5"
+version = "0.2.0"
 dependencies = [
  "belt-block",
  "digest",
@@ -137,7 +137,7 @@ dependencies = [
 
 [[package]]
 name = "fsb"
-version = "0.2.0-rc.2"
+version = "0.2.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -146,7 +146,7 @@ dependencies = [
 
 [[package]]
 name = "gost94"
-version = "0.11.0-rc.2"
+version = "0.11.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -154,7 +154,7 @@ dependencies = [
 
 [[package]]
 name = "groestl"
-version = "0.11.0-rc.2"
+version = "0.11.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -183,7 +183,7 @@ dependencies = [
 
 [[package]]
 name = "jh"
-version = "0.2.0-rc.1"
+version = "0.2.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -211,7 +211,7 @@ dependencies = [
 
 [[package]]
 name = "kupyna"
-version = "0.1.0-pre.0"
+version = "0.1.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -225,7 +225,7 @@ checksum = "b5b646652bf6661599e1da8901b3b9522896f01e736bad5f723fe7a3a27f899d"
 
 [[package]]
 name = "md-5"
-version = "0.11.0-rc.5"
+version = "0.11.0"
 dependencies = [
  "cfg-if",
  "digest",
@@ -234,7 +234,7 @@ dependencies = [
 
 [[package]]
 name = "md2"
-version = "0.11.0-rc.2"
+version = "0.11.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -242,7 +242,7 @@ dependencies = [
 
 [[package]]
 name = "md4"
-version = "0.11.0-rc.2"
+version = "0.11.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -277,7 +277,7 @@ dependencies = [
 
 [[package]]
 name = "ripemd"
-version = "0.2.0-rc.5"
+version = "0.2.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -324,7 +324,7 @@ dependencies = [
 
 [[package]]
 name = "shabal"
-version = "0.5.0-rc.2"
+version = "0.5.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -332,7 +332,7 @@ dependencies = [
 
 [[package]]
 name = "skein"
-version = "0.2.0-rc.2"
+version = "0.2.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -341,7 +341,7 @@ dependencies = [
 
 [[package]]
 name = "sm3"
-version = "0.5.0-rc.5"
+version = "0.5.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -355,7 +355,7 @@ checksum = "ae3c15181f4b14e52eeaac3efaeec4d2764716ce9c86da0c934c3e318649c5ba"
 
 [[package]]
 name = "streebog"
-version = "0.11.0-rc.5"
+version = "0.11.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -383,7 +383,7 @@ dependencies = [
 
 [[package]]
 name = "tiger"
-version = "0.3.0-rc.2"
+version = "0.3.0"
 dependencies = [
  "digest",
  "hex-literal",
@@ -403,7 +403,7 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "whirlpool"
-version = "0.11.0-rc.5"
+version = "0.11.0"
 dependencies = [
  "digest",
  "hex-literal",
