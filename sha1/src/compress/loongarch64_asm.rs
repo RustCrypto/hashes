@@ -104,7 +104,7 @@ macro_rules! roundtail {
     };
 }
 
-pub(super) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
+pub(crate) fn compress(state: &mut [u32; 5], blocks: &[[u8; 64]]) {
     if blocks.is_empty() {
         return;
     }
