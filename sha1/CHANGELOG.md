@@ -18,9 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation of the `SerializableState` trait ([#716])
 
 ### Removed
-- `asm`, `loongarch64_asm`, and `compress` crate features [#542]
-- `std` crate feature ([#678])
-- `force-soft` crate feature ([#808])
+- `asm`, `loongarch64_asm`, `force-soft`, `std`, and `compress` crate features
+  ([#542], [#678], [#808])
 
 [#542]: https://github.com/RustCrypto/hashes/pull/542
 [#652]: https://github.com/RustCrypto/hashes/pull/652
