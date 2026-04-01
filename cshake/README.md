@@ -12,22 +12,32 @@ defined in the NIST [SHA-3 Derived Functions].
 
 ## Examples
 
-SHAKE functions have an extendable output, so finalization method returns
-XOF reader from which results of arbitrary length can be read. Note that
-these functions do not implement `Digest`, so lower-level traits have to
-be imported:
+cSHAKE functions have an extendable output, so finalization methods return
+XOF reader from which results of arbitrary length can be read.
 
-```rust,ignore
-// TODO: update to cSHAKE
-use sha3::{Shake128, digest::{Update, ExtendableOutput, XofReader}};
+```rust
+use cshake::CShake128;
+use cshake::digest::{CustomizedInit, Update, ExtendableOutput, XofReader};
 use hex_literal::hex;
 
-let mut hasher = Shake128::default();
+let mut hasher = CShake128::default();
 hasher.update(b"abc");
 let mut reader = hasher.finalize_xof();
 let mut buf = [0u8; 10];
 reader.read(&mut buf);
 assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
+reader.read(&mut buf);
+assert_eq!(buf, hex!("ddb793fbcba74097d5c5"));
+
+// With customization string
+let mut hasher = CShake128::new_customized(b"my customization string");
+hasher.update(b"abc");
+let mut reader = hasher.finalize_xof();
+let mut buf = [0u8; 10];
+reader.read(&mut buf);
+assert_eq!(buf, hex!("a296533c8d5753bf3421"));
+reader.read(&mut buf);
+assert_eq!(buf, hex!("124e8eb79262233170ce"));
 ```
 
 See the [`digest`] crate docs for additional examples.

@@ -16,17 +16,35 @@ XOF reader from which results of arbitrary length can be read. Note that
 these functions do not implement `Digest`, so lower-level traits have to
 be imported:
 
-```rust,ignore
-// TODO: update to TurboSHAKE
-use sha3::{Shake128, digest::{Update, ExtendableOutput, XofReader}};
+```rust
+use turbo_shake::TurboShake128;
+use turbo_shake::digest::{Update, ExtendableOutput, XofReader};
 use hex_literal::hex;
 
-let mut hasher = Shake128::default();
+// With the default domain separator.
+// 
+// Note that we have to use `<TurboShake128>` because of
+// the inadequate handling of defaults in Rust.
+// Alternatively, you could use `let mut hasher: TurboShake128 = Default::default();`
+// or `TurboShake128::<DEFAULT_DS>::default()`.
+let mut hasher = <TurboShake128>::default();
 hasher.update(b"abc");
 let mut reader = hasher.finalize_xof();
 let mut buf = [0u8; 10];
 reader.read(&mut buf);
-assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
+assert_eq!(buf, hex!("dcf1646dfe993a8eb6b7"));
+reader.read(&mut buf);
+assert_eq!(buf, hex!("82d1faaca6d82416a5dc"));
+
+// With a custom domain separator
+let mut hasher = TurboShake128::<0x10>::default();
+hasher.update(b"abc");
+let mut reader = hasher.finalize_xof();
+let mut buf = [0u8; 10];
+reader.read(&mut buf);
+assert_eq!(buf, hex!("6702f7b19ea87087ed0f"));
+reader.read(&mut buf);
+assert_eq!(buf, hex!("45a2fa692bc18c3526d3"));
 ```
 
 See the [`digest`] crate docs for additional examples.

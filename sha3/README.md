@@ -49,6 +49,8 @@ let mut reader = hasher.finalize_xof();
 let mut buf = [0u8; 10];
 reader.read(&mut buf);
 assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
+reader.read(&mut buf);
+assert_eq!(buf, hex!("ddb793fbcba74097d5c5"));
 ```
 
 See the [`digest`] crate docs for additional examples.
