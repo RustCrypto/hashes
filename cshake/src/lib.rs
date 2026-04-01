@@ -66,7 +66,7 @@ impl<Rate: BlockSizes> CShake<Rate> {
         }
 
         #[inline(always)]
-        pub(crate) fn left_encode(val: u64, b: &mut [u8; 9]) -> &[u8] {
+        fn left_encode(val: u64, b: &mut [u8; 9]) -> &[u8] {
             b[1..].copy_from_slice(&val.to_be_bytes());
             let i = b[1..8].iter().take_while(|&&a| a == 0).count();
             b[i] = (8 - i) as u8;
@@ -77,19 +77,22 @@ impl<Rate: BlockSizes> CShake<Rate> {
             let mut buffer: EagerBuffer<Rate> = Default::default();
             let state = &mut state.state;
             let mut b = [0u8; 9];
+
             buffer.digest_blocks(left_encode(Rate::U64, &mut b), |blocks| {
                 update_blocks(f1600, state, blocks)
             });
-            buffer.digest_blocks(
-                left_encode(8 * (function_name.len() as u64), &mut b),
-                |blocks| update_blocks(f1600, state, blocks),
-            );
-            buffer.digest_blocks(function_name, |blocks| update_blocks(f1600, state, blocks));
-            buffer.digest_blocks(
-                left_encode(8 * (customization.len() as u64), &mut b),
-                |blocks| update_blocks(f1600, state, blocks),
-            );
-            buffer.digest_blocks(customization, |blocks| update_blocks(f1600, state, blocks));
+
+            let mut encode_str = |str: &[u8]| {
+                let str_bits_len = 8 * u64::try_from(str.len())
+                    .expect("in practice strings can not be longer than u64::MAX");
+                let encoded_len = left_encode(str_bits_len, &mut b);
+                buffer.digest_blocks(encoded_len, |blocks| update_blocks(f1600, state, blocks));
+                buffer.digest_blocks(str, |blocks| update_blocks(f1600, state, blocks));
+            };
+
+            encode_str(function_name);
+            encode_str(customization);
+
             update_blocks(f1600, state, &[buffer.pad_with_zeros()])
         });
 
