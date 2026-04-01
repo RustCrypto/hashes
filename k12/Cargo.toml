@@ -14,7 +14,7 @@ description = "Pure Rust implementation of the KangarooTwelve hash function"
 
 [dependencies]
 digest = "0.11"
-sha3 = { version = "0.11.0-rc.7", default-features = false }
+turbo-shake = { version = "0.1.0", default-features = false }
 
 [dev-dependencies]
 digest = { version = "0.11", features = ["alloc", "dev"] }
@@ -23,7 +23,7 @@ hex-literal = "1"
 [features]
 default = ["alloc"]
 alloc = ["digest/alloc"]
-zeroize = ["digest/zeroize", "sha3/zeroize"]
+zeroize = ["digest/zeroize", "turbo-shake/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true

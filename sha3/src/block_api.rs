@@ -10,13 +10,11 @@ use digest::{
     common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{IsLessOrEqual, True, U0, U200},
 };
-use keccak::{F1600_ROUNDS, Keccak, State1600};
+use keccak::{Keccak, State1600};
 
-pub use crate::cshake::{CShake128Core, CShake256Core};
-
-/// Core Sha3 fixed output hasher state.
+/// Core SHA-3 hasher state.
 #[derive(Clone)]
-pub struct Sha3HasherCore<Rate, OutputSize, const PAD: u8, const ROUNDS: usize = F1600_ROUNDS>
+pub struct Sha3HasherCore<Rate, OutputSize, const PAD: u8>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -26,16 +24,14 @@ where
     _pd: PhantomData<(Rate, OutputSize)>,
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> HashMarker
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> HashMarker for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> BlockSizeUser
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> BlockSizeUser for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -43,8 +39,7 @@ where
     type BlockSize = Rate;
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> BufferKindUser
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> BufferKindUser for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -52,8 +47,7 @@ where
     type BufferKind = Eager;
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> OutputSizeUser
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> OutputSizeUser for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -61,25 +55,23 @@ where
     type OutputSize = OutputSize;
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> UpdateCore
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> UpdateCore for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     #[inline]
     fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+        self.keccak.with_f1600(|f1600| {
             for block in blocks {
                 xor_block(&mut self.state, block);
-                p1600(&mut self.state);
+                f1600(&mut self.state);
             }
         });
     }
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> FixedOutputCore
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> FixedOutputCore for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -92,9 +84,9 @@ where
         let n = block.len();
         block[n - 1] |= 0x80;
 
-        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+        self.keccak.with_f1600(|f1600| {
             xor_block(&mut self.state, &block);
-            p1600(&mut self.state);
+            f1600(&mut self.state);
 
             for (o, s) in out.chunks_mut(8).zip(self.state.as_mut().iter()) {
                 o.copy_from_slice(&s.to_le_bytes()[..o.len()]);
@@ -103,12 +95,11 @@ where
     }
 }
 
-impl<Rate, const PAD: u8, const ROUNDS: usize> ExtendableOutputCore
-    for Sha3HasherCore<Rate, U0, PAD, ROUNDS>
+impl<Rate, const PAD: u8> ExtendableOutputCore for Sha3HasherCore<Rate, U0, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
-    type ReaderCore = Sha3ReaderCore<Rate, ROUNDS>;
+    type ReaderCore = Sha3ReaderCore<Rate>;
 
     #[inline]
     fn finalize_xof_core(&mut self, buffer: &mut Buffer<Self>) -> Self::ReaderCore {
@@ -118,17 +109,16 @@ where
         let n = block.len();
         block[n - 1] |= 0x80;
 
-        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+        self.keccak.with_f1600(|f1600| {
             xor_block(&mut self.state, &block);
-            p1600(&mut self.state);
+            f1600(&mut self.state);
         });
 
         Sha3ReaderCore::new(&self.state, self.keccak)
     }
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Default
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> Default for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -143,8 +133,7 @@ where
     }
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Reset
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> Reset for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -155,19 +144,18 @@ where
     }
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> AlgorithmName
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> AlgorithmName for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Sha3") // TODO
+        // TODO: change algorithm name depending on the generic parameters
+        f.write_str("Sha3")
     }
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> fmt::Debug
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> fmt::Debug for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -177,8 +165,7 @@ where
     }
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> Drop
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> Drop for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -193,16 +180,15 @@ where
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> digest::zeroize::ZeroizeOnDrop
+    for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
 {
 }
 
-impl<Rate, OutputSize, const PAD: u8, const ROUNDS: usize> SerializableState
-    for Sha3HasherCore<Rate, OutputSize, PAD, ROUNDS>
+impl<Rate, OutputSize, const PAD: u8> SerializableState for Sha3HasherCore<Rate, OutputSize, PAD>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
     OutputSize: ArraySize + IsLessOrEqual<U200, Output = True>,
@@ -236,9 +222,9 @@ where
     }
 }
 
-/// Core Sha3 XOF reader.
+/// Core SHA-3 XOF reader.
 #[derive(Clone)]
-pub struct Sha3ReaderCore<Rate, const ROUNDS: usize = F1600_ROUNDS>
+pub struct Sha3ReaderCore<Rate>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
@@ -247,7 +233,7 @@ where
     _pd: PhantomData<Rate>,
 }
 
-impl<Rate, const ROUNDS: usize> Sha3ReaderCore<Rate, ROUNDS>
+impl<Rate> Sha3ReaderCore<Rate>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
@@ -257,14 +243,14 @@ where
     }
 }
 
-impl<Rate, const ROUNDS: usize> BlockSizeUser for Sha3ReaderCore<Rate, ROUNDS>
+impl<Rate> BlockSizeUser for Sha3ReaderCore<Rate>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
     type BlockSize = Rate;
 }
 
-impl<Rate, const ROUNDS: usize> XofReaderCore for Sha3ReaderCore<Rate, ROUNDS>
+impl<Rate> XofReaderCore for Sha3ReaderCore<Rate>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
@@ -274,13 +260,12 @@ where
         for (src, dst) in self.state.iter().zip(block.chunks_mut(8)) {
             dst.copy_from_slice(&src.to_le_bytes()[..dst.len()]);
         }
-        self.keccak
-            .with_p1600::<ROUNDS>(|p1600| p1600(&mut self.state));
+        self.keccak.with_f1600(|f1600| f1600(&mut self.state));
         block
     }
 }
 
-impl<Rate, const ROUNDS: usize> Drop for Sha3ReaderCore<Rate, ROUNDS>
+impl<Rate> Drop for Sha3ReaderCore<Rate>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
@@ -293,7 +278,7 @@ where
     }
 }
 
-impl<Rate, const ROUNDS: usize> fmt::Debug for Sha3ReaderCore<Rate, ROUNDS>
+impl<Rate> fmt::Debug for Sha3ReaderCore<Rate>
 where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>,
 {
@@ -303,7 +288,7 @@ where
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate, const ROUNDS: usize> digest::zeroize::ZeroizeOnDrop for Sha3ReaderCore<Rate, ROUNDS> where
+impl<Rate> digest::zeroize::ZeroizeOnDrop for Sha3ReaderCore<Rate> where
     Rate: BlockSizes + IsLessOrEqual<U200, Output = True>
 {
 }

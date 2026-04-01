@@ -1,4 +1,4 @@
-# RustCrypto: SHA-3
+# RustCrypto: cSHAKE
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
@@ -7,39 +7,18 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Implementation of the [SHA-3] family of cryptographic hash algorithms.
-
-There are 6 standard algorithms specified in the SHA-3 standard:
-
-- `SHA3-224`, `SHA3-256`, `SHA3-384`, `SHA3-512`
-- `SHAKE128` and `SHAKE256` (an extendable output function (XOF))
-
-Additionally, this crate supports:
-- `KeccakFull`: CryptoNight variant of SHA-3
-- `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512`: NIST submission without padding changes
+Implementation of the cSHAKE family of extendable-output functions (XOFs)
+defined in the NIST [SHA-3 Derived Functions].
 
 ## Examples
-
-Output size of SHA3-256 is fixed, so its functionality is usually
-accessed via the `Digest` trait:
-
-```rust
-use hex_literal::hex;
-use sha3::{Digest, Sha3_256};
-
-let mut hasher = Sha3_256::new();
-hasher.update(b"abc");
-let hash = hasher.finalize();
-
-assert_eq!(hash, hex!("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532"));
-```
 
 SHAKE functions have an extendable output, so finalization method returns
 XOF reader from which results of arbitrary length can be read. Note that
 these functions do not implement `Digest`, so lower-level traits have to
 be imported:
 
-```rust
+```rust,ignore
+// TODO: update to cSHAKE
 use sha3::{Shake128, digest::{Update, ExtendableOutput, XofReader}};
 use hex_literal::hex;
 
@@ -83,5 +62,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[SHA-3]: https://en.wikipedia.org/wiki/SHA-3
+[SHA-3 Derived Functions]: https://csrc.nist.gov/pubs/sp/800/185/final
 [`digest`]: https://docs.rs/digest
