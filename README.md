@@ -21,6 +21,7 @@ easily used for bare-metal or WebAssembly programming by disabling default crate
 | [Bash] hash | [`bash‑hash`] | [![crates.io](https://img.shields.io/crates/v/bash-hash.svg)](https://crates.io/crates/bash-hash) | [![Documentation](https://docs.rs/bash-hash/badge.svg)](https://docs.rs/bash-hash) | 1.85 | :green_heart: |
 | [BelT] hash | [`belt‑hash`] | [![crates.io](https://img.shields.io/crates/v/belt-hash.svg)](https://crates.io/crates/belt-hash) | [![Documentation](https://docs.rs/belt-hash/badge.svg)](https://docs.rs/belt-hash) | 1.85 | :green_heart: |
 | [BLAKE2] | [`blake2`] | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | 1.85 | :green_heart: |
+| [cSHAKE] | [`cshake`] | [![crates.io](https://img.shields.io/crates/v/cshake.svg)](https://crates.io/crates/cshake) | [![Documentation](https://docs.rs/cshake/badge.svg)](https://docs.rs/cshake) | 1.85 | :green_heart: |
 | [FSB] | [`fsb`] | [![crates.io](https://img.shields.io/crates/v/fsb.svg)](https://crates.io/crates/fsb) | [![Documentation](https://docs.rs/fsb/badge.svg)](https://docs.rs/fsb) | 1.85 | :green_heart: |
 | [GOST R 34.11-94][GOST94] | [`gost94`] | [![crates.io](https://img.shields.io/crates/v/gost94.svg)](https://crates.io/crates/gost94) | [![Documentation](https://docs.rs/gost94/badge.svg)](https://docs.rs/gost94) | 1.85 | :yellow_heart: |
 | [Grøstl] (Groestl) | [`groestl`] | [![crates.io](https://img.shields.io/crates/v/groestl.svg)](https://crates.io/crates/groestl) | [![Documentation](https://docs.rs/groestl/badge.svg)](https://docs.rs/groestl) | 1.85 | :green_heart: |
@@ -40,6 +41,7 @@ easily used for bare-metal or WebAssembly programming by disabling default crate
 | [SM3] (OSCCA GM/T 0004-2012) | [`sm3`] | [![crates.io](https://img.shields.io/crates/v/sm3.svg)](https://crates.io/crates/sm3) | [![Documentation](https://docs.rs/sm3/badge.svg)](https://docs.rs/sm3) | 1.85 | :green_heart: |
 | [Streebog] (GOST R 34.11-2012) | [`streebog`] | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) | [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | 1.85 | :yellow_heart: |
 | [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | 1.85 | :green_heart: |
+| [TurboSHAKE] | [`turbo-shake`] | [![crates.io](https://img.shields.io/crates/v/turbo-shake.svg)](https://crates.io/crates/turbo-shake) | [![Documentation](https://docs.rs/turbo-shake/badge.svg)](https://docs.rs/turbo-shake) | 1.85 | :green_heart: |
 | [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | 1.85 | :green_heart: |
 
 NOTE: the [`blake3`] crate implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
@@ -94,6 +96,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`bash‑hash`]: ./bash-hash
 [`belt‑hash`]: ./belt-hash
 [`blake2`]: ./blake2
+[`cshake`]: ./cshake
 [`fsb`]: ./fsb
 [`gost94`]: ./gost94
 [`groestl`]: ./groestl
@@ -113,6 +116,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`sm3`]: ./sm3
 [`streebog`]: ./streebog
 [`tiger`]: ./tiger
+[`turbo-shake`]: ./turbo-shake
 [`whirlpool`]: ./whirlpool
 
 [//]: # (footnotes)
@@ -138,6 +142,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [Bash]: https://apmi.bsu.by/assets/files/std/bash-spec241.pdf
 [BelT]: https://ru.wikipedia.org/wiki/BelT
 [BLAKE2]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
+[cSHAKE]: https://csrc.nist.gov/pubs/sp/800/185/final
 [FSB]: https://en.wikipedia.org/wiki/Fast_syndrome-based_hash
 [GOST94]: https://en.wikipedia.org/wiki/GOST_(hash_function)
 [Grøstl]: https://en.wikipedia.org/wiki/Grøstl
@@ -158,3 +163,4 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [Streebog]: https://en.wikipedia.org/wiki/Streebog
 [Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(cryptography)
 [Tiger]: http://www.cs.technion.ac.il/~biham/Reports/Tiger/tiger/tiger.html
+[TurboSHAKE]: https://keccak.team/turboshake.html
