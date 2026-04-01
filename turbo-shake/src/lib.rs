@@ -191,9 +191,14 @@ impl<Rate: BlockSizes> XofReader for TurboShakeReader<Rate> {
         } = self;
 
         buffer.read(buf, |block| {
-            for (src, dst) in state.iter().zip(block.chunks_mut(8)) {
-                dst.copy_from_slice(&src.to_le_bytes()[..dst.len()]);
+            let mut chunks = block.chunks_exact_mut(8);
+            for (src, dst) in state.iter().zip(&mut chunks) {
+                dst.copy_from_slice(&src.to_le_bytes());
             }
+            assert!(
+                chunks.into_remainder().is_empty(),
+                "rate is either 136 or 168",
+            );
             keccak.with_p1600::<ROUNDS>(|p1600| p1600(state));
         });
     }
