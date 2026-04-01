@@ -1,6 +1,6 @@
 [package]
-name = "sha3"
-version = "0.11.0-rc.9"
+name = "cshake"
+version = "0.1.0"
 authors = ["RustCrypto Developers"]
 edition = "2024"
 rust-version = "1.85"
@@ -8,9 +8,9 @@ documentation = "https://docs.rs/sha3"
 readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
 license = "MIT OR Apache-2.0"
-keywords = ["keccak", "hash", "xof", "digest"]
+keywords = ["sha3", "keccak", "hash", "xof", "digest"]
 categories = ["cryptography", "no-std"]
-description = "Implementation of the SHA-3 family of cryptographic hash algorithms"
+description = "Implementation of the cSHAKE family of extendable-output functions (XOFs)"
 
 [dependencies]
 digest = "0.11"

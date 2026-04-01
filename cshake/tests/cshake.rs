@@ -62,11 +62,11 @@ where
 }
 
 macro_rules! new_cshake_test {
-    ($name:ident, $test_name:expr, $hasher:ty $(,)?) => {
+    ($name:ident, $hasher:ty $(,)?) => {
         #[test]
         fn $name() {
             digest::dev::blobby::parse_into_structs!(
-                include_bytes!(concat!("data/", $test_name, ".blb"));
+                include_bytes!(concat!("data/", stringify!($name), ".blb"));
                 static TEST_VECTORS: &[TestVector { customization, input, output }];
             );
 
@@ -86,5 +86,5 @@ macro_rules! new_cshake_test {
     };
 }
 
-new_cshake_test!(cshake128_reset, "cshake128", sha3::CShake128);
-new_cshake_test!(cshake256_reset, "cshake256", sha3::CShake256);
+new_cshake_test!(cshake128, cshake::CShake128);
+new_cshake_test!(cshake256, cshake::CShake256);

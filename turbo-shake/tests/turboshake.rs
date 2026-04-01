@@ -1,5 +1,6 @@
 use core::fmt::Debug;
 use digest::ExtendableOutput;
+use turbo_shake::{TurboShake128, TurboShake256};
 
 #[derive(Debug, Clone, Copy)]
 pub struct TestVector {
@@ -80,8 +81,6 @@ macro_rules! new_turbo_shake_test {
                     );
                 };
 
-                println!("before func: {:?}", truncate_output.len());
-
                 if let Err(desc) = $test_func::<$hasher>(
                     &input,
                     output,
@@ -105,25 +104,25 @@ macro_rules! new_turbo_shake_test {
 new_turbo_shake_test!(
     turboshake128_6,
     "turboshake128_6",
-    sha3::TurboShake128<6>,
+    TurboShake128<6>,
     turbo_shake_test,
 );
 new_turbo_shake_test!(
     turboshake128_7,
     "turboshake128_7",
-    sha3::TurboShake128<7>,
+    TurboShake128<7>,
     turbo_shake_test,
 );
 new_turbo_shake_test!(
     turboshake256_6,
     "turboshake256_6",
-    sha3::TurboShake256<6>,
+    TurboShake256<6>,
     turbo_shake_test,
 );
 
 new_turbo_shake_test!(
     turboshake256_7,
     "turboshake256_7",
-    sha3::TurboShake256<7>,
+    TurboShake256<7>,
     turbo_shake_test,
 );

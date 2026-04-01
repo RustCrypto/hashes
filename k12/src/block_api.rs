@@ -7,7 +7,7 @@ use digest::{
     },
     consts::{U128, U136, U168},
 };
-use sha3::{TurboShake128, TurboShake128Reader, TurboShake256, TurboShake256Reader};
+use turbo_shake::{TurboShake128, TurboShake128Reader, TurboShake256, TurboShake256Reader};
 
 const CHUNK_SIZE: usize = 8192;
 const LENGTH_ENCODE_SIZE: usize = 255;

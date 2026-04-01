@@ -7,32 +7,9 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Implementation of the [SHA-3] family of cryptographic hash algorithms.
-
-There are 6 standard algorithms specified in the SHA-3 standard:
-
-- `SHA3-224`, `SHA3-256`, `SHA3-384`, `SHA3-512`
-- `SHAKE128` and `SHAKE256` (an extendable output function (XOF))
-
-Additionally, this crate supports:
-- `KeccakFull`: CryptoNight variant of SHA-3
-- `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512`: NIST submission without padding changes
+Implementation of the [TurboSHAKE] family of fast and secure extendable-output functions (XOFs).
 
 ## Examples
-
-Output size of SHA3-256 is fixed, so its functionality is usually
-accessed via the `Digest` trait:
-
-```rust
-use hex_literal::hex;
-use sha3::{Digest, Sha3_256};
-
-let mut hasher = Sha3_256::new();
-hasher.update(b"abc");
-let hash = hasher.finalize();
-
-assert_eq!(hash, hex!("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532"));
-```
 
 SHAKE functions have an extendable output, so finalization method returns
 XOF reader from which results of arbitrary length can be read. Note that
@@ -40,17 +17,34 @@ these functions do not implement `Digest`, so lower-level traits have to
 be imported:
 
 ```rust
-use sha3::{Shake128, digest::{Update, ExtendableOutput, XofReader}};
+use turbo_shake::TurboShake128;
+use turbo_shake::digest::{Update, ExtendableOutput, XofReader};
 use hex_literal::hex;
 
-let mut hasher = Shake128::default();
+// With the default domain separator.
+// 
+// Note that we have to use `<TurboShake128>` because of
+// the inadequate handling of defaults in Rust.
+// Alternatively, you could use `let mut hasher: TurboShake128 = Default::default();`
+// or `TurboShake128::<DEFAULT_DS>::default()`.
+let mut hasher = <TurboShake128>::default();
 hasher.update(b"abc");
 let mut reader = hasher.finalize_xof();
 let mut buf = [0u8; 10];
 reader.read(&mut buf);
-assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
+assert_eq!(buf, hex!("dcf1646dfe993a8eb6b7"));
 reader.read(&mut buf);
-assert_eq!(buf, hex!("ddb793fbcba74097d5c5"));
+assert_eq!(buf, hex!("82d1faaca6d82416a5dc"));
+
+// With a custom domain separator
+let mut hasher = TurboShake128::<0x10>::default();
+hasher.update(b"abc");
+let mut reader = hasher.finalize_xof();
+let mut buf = [0u8; 10];
+reader.read(&mut buf);
+assert_eq!(buf, hex!("6702f7b19ea87087ed0f"));
+reader.read(&mut buf);
+assert_eq!(buf, hex!("45a2fa692bc18c3526d3"));
 ```
 
 See the [`digest`] crate docs for additional examples.
@@ -85,5 +79,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[SHA-3]: https://en.wikipedia.org/wiki/SHA-3
+[TurboSHAKE]: https://keccak.team/turboshake.html
 [`digest`]: https://docs.rs/digest
