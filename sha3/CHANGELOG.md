@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.11.0 (UNRELEASED)
+## 0.11.0 (2026-04-02)
 ### Added
 - `alloc` crate feature ([#678])
 
@@ -15,16 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update to `digest` v0.11
 - Replace type aliases with newtypes ([#678])
 - Implementation of the `SerializableState` trait ([#716])
-- Added default value for domain separator generic parameter on
-  `TurboShake128/256` types equal to 0x1F ([#798])
 
 ### Removed
 - `std` crate feature ([#678])
+- `CShake128/256` and `TurboShake128/256` types by moving them to
+  `cshake` and `turbo-shake` crates respectively ([#815])
 
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
 [#716]: https://github.com/RustCrypto/hashes/pull/716
 [#798]: https://github.com/RustCrypto/hashes/pull/798
+[#815]: https://github.com/RustCrypto/hashes/pull/815
 
 ## 0.10.8 (2023-04-08)
 ### Fixed
