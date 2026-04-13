@@ -43,15 +43,7 @@ pub struct CShake<Rate: BlockSizes> {
 impl<Rate: BlockSizes> Default for CShake<Rate> {
     #[inline]
     fn default() -> Self {
-        const {
-            assert!(Rate::USIZE == 168 || Rate::USIZE == 136, "unsupported rate");
-        }
-        Self {
-            state: Default::default(),
-            buffer: Default::default(),
-            keccak: Keccak::new(),
-            pad: SHAKE_PAD,
-        }
+        Self::new_with_function_name(b"", b"")
     }
 }
 
@@ -61,10 +53,21 @@ impl<Rate: BlockSizes> CShake<Rate> {
     /// Note that the function name is intended for use by NIST and should only be set to
     /// values defined by NIST. You probably don't need to use this function.
     pub fn new_with_function_name(function_name: &[u8], customization: &[u8]) -> Self {
-        let mut state = Self::default();
+        const {
+            assert!(Rate::USIZE == 168 || Rate::USIZE == 136, "unsupported rate");
+        }
+
+        let buffer = Default::default();
+        let keccak = Keccak::new();
+        let mut state = State1600::default();
 
         if function_name.is_empty() && customization.is_empty() {
-            return state;
+            return Self {
+                state,
+                buffer,
+                keccak,
+                pad: SHAKE_PAD,
+            };
         }
 
         #[inline(always)]
@@ -75,9 +78,9 @@ impl<Rate: BlockSizes> CShake<Rate> {
             &b[i..]
         }
 
-        state.keccak.with_f1600(|f1600| {
+        keccak.with_f1600(|f1600| {
             let mut buffer: EagerBuffer<Rate> = Default::default();
-            let state = &mut state.state;
+            let state = &mut state;
             let mut b = [0u8; 9];
 
             buffer.digest_blocks(left_encode(Rate::U64, &mut b), |blocks| {
@@ -98,8 +101,12 @@ impl<Rate: BlockSizes> CShake<Rate> {
             update_blocks(f1600, state, &[buffer.pad_with_zeros()])
         });
 
-        state.pad = CSHAKE_PAD;
-        state
+        Self {
+            state,
+            buffer,
+            keccak,
+            pad: CSHAKE_PAD,
+        }
     }
 }
 
