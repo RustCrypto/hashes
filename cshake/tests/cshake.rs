@@ -1,4 +1,4 @@
-use digest::{CustomizedInit, ExtendableOutputReset};
+use digest::{CustomizedInit, ExtendableOutput};
 
 #[derive(Debug, Clone, Copy)]
 pub struct TestVector {
@@ -7,7 +7,7 @@ pub struct TestVector {
     pub output: &'static [u8],
 }
 
-pub(crate) fn cshake_reset_test<D>(
+pub(crate) fn cshake_test<D>(
     &TestVector {
         customization,
         input,
@@ -15,7 +15,7 @@ pub(crate) fn cshake_reset_test<D>(
     }: &TestVector,
 ) -> Result<(), &'static str>
 where
-    D: CustomizedInit + ExtendableOutputReset + Clone,
+    D: CustomizedInit + ExtendableOutput + Clone,
 {
     let mut hasher = D::new_customized(customization);
     let mut buf = [0u8; 1024];
@@ -29,15 +29,6 @@ where
     }
     buf.iter_mut().for_each(|b| *b = 0);
 
-    // Test if reset works correctly
-    hasher2.reset();
-    hasher2.update(input);
-    hasher2.finalize_xof_reset_into(buf);
-    if buf != output {
-        return Err("whole message after reset");
-    }
-    buf.iter_mut().for_each(|b| *b = 0);
-
     // Test that it works when accepting the message in chunks
     for n in 1..core::cmp::min(17, input.len()) {
         let mut hasher = D::new_customized(customization);
@@ -46,12 +37,6 @@ where
             hasher2.update(chunk);
         }
         hasher.finalize_xof_into(buf);
-        if buf != output {
-            return Err("message in chunks");
-        }
-        buf.iter_mut().for_each(|b| *b = 0);
-
-        hasher2.finalize_xof_reset_into(buf);
         if buf != output {
             return Err("message in chunks");
         }
@@ -71,9 +56,7 @@ macro_rules! new_cshake_test {
             );
 
             for (i, tv) in TEST_VECTORS.iter().enumerate() {
-                if let Err(reason) =
-                    cshake_reset_test::<$hasher>(tv)
-                {
+                if let Err(reason) = cshake_test::<$hasher>(tv) {
                     panic!(
                         "\n\
                          Failed test #{i}\n\

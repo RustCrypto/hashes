@@ -13,14 +13,16 @@ pub use digest;
 
 use core::fmt;
 use digest::{
-    CollisionResistance, CustomizedInit, ExtendableOutput, ExtendableOutputReset, HashMarker,
-    Reset, Update, XofReader,
+    CollisionResistance, CustomizedInit, ExtendableOutput, HashMarker, Update, XofReader,
     array::Array,
     block_api::{AlgorithmName, BlockSizeUser},
     block_buffer::{BlockSizes, EagerBuffer, ReadBuffer},
     consts::{U16, U32, U136, U168},
 };
 use keccak::{Keccak, State1600};
+
+const SHAKE_PAD: u8 = 0x1F;
+const CSHAKE_PAD: u8 = 0x04;
 
 /// cSHAKE128 hasher.
 pub type CShake128 = CShake<U168>;
@@ -33,23 +35,15 @@ pub type CShake256 = CShake<U136>;
 #[derive(Clone)]
 pub struct CShake<Rate: BlockSizes> {
     state: State1600,
-    initial_state: State1600,
-    keccak: Keccak,
     buffer: EagerBuffer<Rate>,
+    pad: u8,
+    keccak: Keccak,
 }
 
 impl<Rate: BlockSizes> Default for CShake<Rate> {
     #[inline]
     fn default() -> Self {
-        const {
-            assert!(Rate::USIZE == 168 || Rate::USIZE == 136, "unsupported rate");
-        }
-        Self {
-            state: Default::default(),
-            initial_state: Default::default(),
-            keccak: Keccak::new(),
-            buffer: Default::default(),
-        }
+        Self::new_with_function_name(b"", b"")
     }
 }
 
@@ -59,10 +53,21 @@ impl<Rate: BlockSizes> CShake<Rate> {
     /// Note that the function name is intended for use by NIST and should only be set to
     /// values defined by NIST. You probably don't need to use this function.
     pub fn new_with_function_name(function_name: &[u8], customization: &[u8]) -> Self {
-        let mut state = Self::default();
+        const {
+            assert!(Rate::USIZE == 168 || Rate::USIZE == 136, "unsupported rate");
+        }
+
+        let buffer = Default::default();
+        let keccak = Keccak::new();
+        let mut state = State1600::default();
 
         if function_name.is_empty() && customization.is_empty() {
-            return state;
+            return Self {
+                state,
+                buffer,
+                keccak,
+                pad: SHAKE_PAD,
+            };
         }
 
         #[inline(always)]
@@ -73,9 +78,9 @@ impl<Rate: BlockSizes> CShake<Rate> {
             &b[i..]
         }
 
-        state.keccak.with_f1600(|f1600| {
+        keccak.with_f1600(|f1600| {
             let mut buffer: EagerBuffer<Rate> = Default::default();
-            let state = &mut state.state;
+            let state = &mut state;
             let mut b = [0u8; 9];
 
             buffer.digest_blocks(left_encode(Rate::U64, &mut b), |blocks| {
@@ -96,8 +101,12 @@ impl<Rate: BlockSizes> CShake<Rate> {
             update_blocks(f1600, state, &[buffer.pad_with_zeros()])
         });
 
-        state.initial_state = state.state;
-        state
+        Self {
+            state,
+            buffer,
+            keccak,
+            pad: CSHAKE_PAD,
+        }
     }
 }
 
@@ -129,34 +138,18 @@ impl<Rate: BlockSizes> Update for CShake<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Reset for CShake<Rate> {
-    #[inline]
-    fn reset(&mut self) {
-        self.state = self.initial_state;
-        self.buffer.reset();
-    }
-}
-
 impl<Rate: BlockSizes> CShake<Rate> {
     fn finalize_dirty(&mut self) {
         let Self {
             state,
-            keccak,
             buffer,
-            initial_state,
+            pad,
+            keccak,
         } = self;
-
-        const SHAKE_PAD: u8 = 0x1f;
-        const CSHAKE_PAD: u8 = 0x04;
 
         let pos = buffer.get_pos();
         let mut block = buffer.pad_with_zeros();
-        let pad = if initial_state.iter().all(|&b| b == 0) {
-            SHAKE_PAD
-        } else {
-            CSHAKE_PAD
-        };
-        block[pos] = pad;
+        block[pos] = *pad;
         let n = block.len();
         block[n - 1] |= 0x80;
 
@@ -178,20 +171,6 @@ impl<Rate: BlockSizes> ExtendableOutput for CShake<Rate> {
             keccak: self.keccak,
             buffer: Default::default(),
         }
-    }
-}
-
-impl<Rate: BlockSizes> ExtendableOutputReset for CShake<Rate> {
-    #[inline]
-    fn finalize_xof_reset(&mut self) -> Self::Reader {
-        self.finalize_dirty();
-        let reader = Self::Reader {
-            state: self.state,
-            keccak: self.keccak,
-            buffer: Default::default(),
-        };
-        self.reset();
-        reader
     }
 }
 
@@ -223,7 +202,7 @@ impl<Rate: BlockSizes> Drop for CShake<Rate> {
         {
             use digest::zeroize::Zeroize;
             self.state.zeroize();
-            self.initial_state.zeroize();
+            self.pad.zeroize();
             // self.buffer is zeroized by its `Drop`
         }
     }
