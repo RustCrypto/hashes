@@ -28,6 +28,8 @@ on:
       'whirlpool-v*',
     ]
 
+permissions: {}
+
 jobs:
   publish:
     runs-on: ubuntu-latest

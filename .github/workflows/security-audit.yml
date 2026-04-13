@@ -10,6 +10,8 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions: {}
+
 jobs:
   security_audit:
     name: Security Audit
