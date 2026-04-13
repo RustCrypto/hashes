@@ -21,6 +21,9 @@ use digest::{
 };
 use keccak::{Keccak, State1600};
 
+const SHAKE_PAD: u8 = 0x1F;
+const CSHAKE_PAD: u8 = 0x04;
+
 /// cSHAKE128 hasher.
 pub type CShake128 = CShake<U168>;
 /// cSHAKE256 hasher.
@@ -33,7 +36,7 @@ pub type CShake256 = CShake<U136>;
 pub struct CShake<Rate: BlockSizes> {
     state: State1600,
     buffer: EagerBuffer<Rate>,
-    is_customized: bool,
+    pad: u8,
     keccak: Keccak,
 }
 
@@ -47,7 +50,7 @@ impl<Rate: BlockSizes> Default for CShake<Rate> {
             state: Default::default(),
             buffer: Default::default(),
             keccak: Keccak::new(),
-            is_customized: false,
+            pad: SHAKE_PAD,
         }
     }
 }
@@ -95,7 +98,7 @@ impl<Rate: BlockSizes> CShake<Rate> {
             update_blocks(f1600, state, &[buffer.pad_with_zeros()])
         });
 
-        state.is_customized = true;
+        state.pad = CSHAKE_PAD;
         state
     }
 }
@@ -133,21 +136,13 @@ impl<Rate: BlockSizes> CShake<Rate> {
         let Self {
             state,
             buffer,
-            is_customized,
+            pad,
             keccak,
         } = self;
 
-        const SHAKE_PAD: u8 = 0x1f;
-        const CSHAKE_PAD: u8 = 0x04;
-
         let pos = buffer.get_pos();
         let mut block = buffer.pad_with_zeros();
-        let pad = if *is_customized {
-            CSHAKE_PAD
-        } else {
-            SHAKE_PAD
-        };
-        block[pos] = pad;
+        block[pos] = *pad;
         let n = block.len();
         block[n - 1] |= 0x80;
 
@@ -200,7 +195,7 @@ impl<Rate: BlockSizes> Drop for CShake<Rate> {
         {
             use digest::zeroize::Zeroize;
             self.state.zeroize();
-            self.is_customized.zeroize();
+            self.pad.zeroize();
             // self.buffer is zeroized by its `Drop`
         }
     }
