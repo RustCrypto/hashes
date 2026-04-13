@@ -45,7 +45,7 @@ checksum = "0304188fd8684b910d24cae451c724cd5140a037c407e696247e94bb57b06434"
 
 [[package]]
 name = "belt-hash"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "belt-block",
  "digest",
