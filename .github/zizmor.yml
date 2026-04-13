@@ -1,0 +1,6 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Hash-pinning is not required for RustCrypto's own actions and reusable workflows.
+        RustCrypto/*: ref-pin
