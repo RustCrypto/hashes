@@ -21,9 +21,8 @@ digest = { version = "0.11", features = ["dev"] }
 hex-literal = "1"
 
 [features]
-default = ["alloc", "oid"]
+default = ["alloc"]
 alloc = ["digest/alloc"]
-oid = ["digest/oid"] # Enable OID support.
 zeroize = ["digest/zeroize"]
 
 [package.metadata.docs.rs]
