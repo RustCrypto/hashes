@@ -6,6 +6,7 @@ on:
       'bash-hash-v*',
       'belt-hash-v*',
       'blake2-v*',
+      'cshake-v*',
       'fsb-v*',
       'gost94-v*',
       'groestl-v*',
@@ -25,6 +26,7 @@ on:
       'sm3-v*',
       'streebog-v*',
       'tiger-v*',
+      'turbo-shake-v*',
       'whirlpool-v*',
     ]
 
