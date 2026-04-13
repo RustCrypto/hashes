@@ -48,7 +48,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
@@ -80,7 +80,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
@@ -108,7 +108,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: ${{ matrix.rust }}
           targets: x86_64-apple-darwin
@@ -138,7 +138,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: ${{ matrix.rust }}
           targets: ${{ matrix.target }}
@@ -193,7 +193,7 @@ jobs:
           # Do not fail on compilation warnings
           RUSTFLAGS: ""
         run: cargo install cross --git https://github.com/cross-rs/cross
-      - uses: dtolnay/rust-toolchain@master
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: nightly
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
@@ -216,7 +216,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: nightly
           components: rust-src
@@ -256,7 +256,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
         with:
           toolchain: ${{ matrix.rust }}
           targets: wasm32-wasip1
