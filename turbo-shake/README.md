@@ -7,7 +7,7 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Implementation of the [TurboSHAKE] family of fast and secure extendable-output functions (XOFs).
+Implementation of the [TurboSHAKE] family of extendable-output functions (XOFs).
 
 ## Examples
 
@@ -66,16 +66,16 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (badges)
 
-[crate-image]: https://img.shields.io/crates/v/sha3.svg
-[crate-link]: https://crates.io/crates/sha3
-[docs-image]: https://docs.rs/sha3/badge.svg
-[docs-link]: https://docs.rs/sha3/
+[crate-image]: https://img.shields.io/crates/v/turbo-shake.svg
+[crate-link]: https://crates.io/crates/turbo-shake
+[docs-image]: https://docs.rs/turbo-shake/badge.svg
+[docs-link]: https://docs.rs/turbo-shake
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/sha3.yml/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/sha3.yml?query=branch:master
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/turbo-shake.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/turbo-shake.yml?query=branch:master
 
 [//]: # (general links)
 
