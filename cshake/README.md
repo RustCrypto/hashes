@@ -59,10 +59,10 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (badges)
 
-[crate-image]: https://img.shields.io/crates/v/sha3.svg
-[crate-link]: https://crates.io/crates/sha3
-[docs-image]: https://docs.rs/sha3/badge.svg
-[docs-link]: https://docs.rs/sha3/
+[crate-image]: https://img.shields.io/crates/v/cshake.svg
+[crate-link]: https://crates.io/crates/cshake
+[docs-image]: https://docs.rs/cshake/badge.svg
+[docs-link]: https://docs.rs/cshake
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
