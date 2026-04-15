@@ -54,7 +54,7 @@ dependencies = [
 
 [[package]]
 name = "blake2"
-version = "0.11.0-rc.5"
+version = "0.11.0-rc.6"
 dependencies = [
  "digest",
  "hex-literal",
