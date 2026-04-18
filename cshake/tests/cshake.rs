@@ -71,3 +71,8 @@ macro_rules! new_cshake_test {
 
 new_cshake_test!(cshake128, cshake::CShake128);
 new_cshake_test!(cshake256, cshake::CShake256);
+
+// When bytepad output aligns exactly to the block boundary,
+// no extra zero block should be appended (SP 800-185 2.3.3).
+new_cshake_test!(cshake128_bytepad_block_aligned, cshake::CShake128);
+new_cshake_test!(cshake256_bytepad_block_aligned, cshake::CShake256);

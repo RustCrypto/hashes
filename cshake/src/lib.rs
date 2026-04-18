@@ -16,7 +16,7 @@ use digest::{
     CollisionResistance, CustomizedInit, ExtendableOutput, HashMarker, Update, XofReader,
     array::Array,
     block_api::{AlgorithmName, BlockSizeUser},
-    block_buffer::{BlockSizes, EagerBuffer, ReadBuffer},
+    block_buffer::{BlockSizes, EagerBuffer, LazyBuffer, ReadBuffer},
     consts::{U16, U32, U136, U168},
 };
 use keccak::{Keccak, State1600};
@@ -79,7 +79,7 @@ impl<Rate: BlockSizes> CShake<Rate> {
         }
 
         keccak.with_f1600(|f1600| {
-            let mut buffer: EagerBuffer<Rate> = Default::default();
+            let mut buffer: LazyBuffer<Rate> = Default::default();
             let state = &mut state;
             let mut b = [0u8; 9];
 
