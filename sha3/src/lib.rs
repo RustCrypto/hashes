@@ -9,7 +9,7 @@
 //! * `SHAKE128`, an extendable output function (XOF)
 //! * `SHAKE256`, an extendable output function (XOF)
 //! * `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512` (NIST submission
-//!    without padding changes)
+//!   without padding changes)
 //!
 //! Additionally supports `TurboSHAKE`.
 //!
@@ -72,7 +72,7 @@ use core::fmt;
 #[cfg(feature = "oid")]
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 use digest::{
-    block_buffer::Eager,
+    block_buffer::{Eager, LazyBuffer},
     consts::{U104, U136, U144, U168, U200, U28, U32, U48, U64, U72},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,

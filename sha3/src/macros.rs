@@ -394,7 +394,7 @@ macro_rules! impl_cshake {
                     };
                 }
 
-                let mut buffer = Buffer::<Self>::default();
+                let mut buffer = LazyBuffer::<$rate>::default();
                 let mut b = [0u8; 9];
                 buffer.digest_blocks(left_encode($rate::to_u64(), &mut b), |blocks| {
                     for block in blocks {
