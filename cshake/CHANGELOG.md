@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 0.1.1 (2026-04-19)
 ### Fixed
-- Non-compliant initialization when length of serialized function name and customization string
-  is multiple of block size ([#834])
+- Non-compliant initialization when serialized length of function name and customization string
+  is a multiple of the block size ([#834])
 
 [#834]: https://github.com/RustCrypto/hashes/pull/834
 
