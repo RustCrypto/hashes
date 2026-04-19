@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.10.9 (UNRELEASED)
+### Fixed
+- Non-compliant initialization of cSHAKE when serialized length of function name and
+  customization string is a multiple of the block size ([#836], backport of [#834])
+
+[#834]: https://github.com/RustCrypto/hashes/pull/834
+[#836]: https://github.com/RustCrypto/hashes/pull/836
+
 ## 0.10.8 (2023-04-08)
 ### Fixed
 - Performance regression: now uses `p1600` fn ([#472])
