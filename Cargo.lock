@@ -114,7 +114,7 @@ dependencies = [
 
 [[package]]
 name = "cshake"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "digest",
  "hex-literal",
