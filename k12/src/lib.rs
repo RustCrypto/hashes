@@ -10,146 +10,182 @@
 
 pub use digest;
 
-/// Block-level types
-pub mod block_api;
-
 use core::fmt;
 use digest::{
-    CollisionResistance, ExtendableOutput, HashMarker, Reset, Update, XofReader,
-    block_api::{AlgorithmName, BlockSizeUser, ExtendableOutputCore, UpdateCore, XofReaderCore},
-    block_buffer::{BlockBuffer, Eager, ReadBuffer},
-    consts::{U16, U32, U128, U136, U168},
+    CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
+    block_api::{AlgorithmName, BlockSizeUser},
+    block_buffer::BlockSizes,
+    consts::{U16, U32, U136, U168},
 };
 
-macro_rules! impl_k12 {
-    (
-        $name:ident, $reader_name:ident, $core_name:ident, $reader_core_name:ident, $rate:ty,
-        $alg_name:literal,
-    ) => {
-        #[doc = $alg_name]
-        #[doc = "hasher."]
-        #[derive(Default, Clone)]
-        pub struct $name<'cs> {
-            core: block_api::$core_name<'cs>,
-            buffer: BlockBuffer<U128, Eager>,
-        }
+mod consts;
+/// Customized variants.
+pub mod custom;
+/// Implementation of TurboSHAKE specialized for computation of chaining values on full nodes
+mod node_turbo_shake;
+/// Implementation of the XOF reader
+mod reader;
+/// Vendored implementation of TurboSHAKE
+mod turbo_shake;
+/// Implementation of the update closure generic over Keccak backend
+mod update;
+/// Utility functions
+mod utils;
 
-        impl<'cs> $name<'cs> {
-            #[doc = "Creates a new"]
-            #[doc = $alg_name]
-            #[doc = "instance with the given customization."]
-            pub fn new(customization: &'cs [u8]) -> Self {
-                Self {
-                    core: block_api::$core_name::new(customization),
-                    buffer: Default::default(),
-                }
-            }
-        }
+pub use custom::*;
+pub use reader::KtReader;
 
-        impl fmt::Debug for $name<'_> {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-                f.write_str(concat!(stringify!($name), " { .. }"))
-            }
-        }
+use consts::{CHUNK_SIZE_U64, FINAL_NODE_DS, INTERMEDIATE_NODE_DS, ROUNDS, SINGLE_NODE_DS};
+use turbo_shake::TurboShake;
+use utils::{copy_cv, length_encode};
 
-        impl AlgorithmName for $name<'_> {
-            fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                f.write_str($alg_name)
-            }
-        }
-
-        impl HashMarker for $name<'_> {}
-
-        impl BlockSizeUser for $name<'_> {
-            type BlockSize = U128;
-        }
-
-        impl Update for $name<'_> {
-            fn update(&mut self, data: &[u8]) {
-                let Self { core, buffer } = self;
-                buffer.digest_blocks(data, |blocks| core.update_blocks(blocks));
-            }
-        }
-
-        impl Reset for $name<'_> {
-            fn reset(&mut self) {
-                self.core.reset();
-                self.buffer.reset();
-            }
-        }
-
-        impl ExtendableOutput for $name<'_> {
-            type Reader = $reader_name;
-
-            #[inline]
-            fn finalize_xof(mut self) -> Self::Reader {
-                Self::Reader {
-                    core: self.core.finalize_xof_core(&mut self.buffer),
-                    buffer: Default::default(),
-                }
-            }
-        }
-
-        #[cfg(feature = "zeroize")]
-        impl digest::zeroize::ZeroizeOnDrop for $name<'_> {}
-
-        #[doc = $alg_name]
-        #[doc = "XOF reader."]
-        pub struct $reader_name {
-            core: block_api::$reader_core_name,
-            buffer: ReadBuffer<$rate>,
-        }
-
-        impl fmt::Debug for $reader_name {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-                f.write_str(concat!(stringify!($reader_name), " { .. }"))
-            }
-        }
-
-        impl XofReader for $reader_name {
-            #[inline]
-            fn read(&mut self, buffer: &mut [u8]) {
-                let Self { core, buffer: buf } = self;
-                buf.read(buffer, |block| *block = core.read_block());
-            }
-        }
-
-        #[cfg(feature = "zeroize")]
-        impl digest::zeroize::ZeroizeOnDrop for $reader_name {}
-    };
+/// KangarooTwelve hasher generic over rate.
+///
+/// Only `U136` and `U168` rates are supported which correspond to KT256 and KT128 respectively.
+/// Using other rates will result in a compilation error.
+#[derive(Clone)]
+pub struct Kt<Rate: BlockSizes> {
+    accum_tshk: TurboShake<Rate>,
+    node_tshk: TurboShake<Rate>,
+    consumed_len: u64,
+    keccak: keccak::Keccak,
 }
 
-impl_k12!(
-    Kt128,
-    Kt128Reader,
-    Kt128Core,
-    Kt128ReaderCore,
-    U168,
-    "KT128",
-);
-impl_k12!(
-    Kt256,
-    Kt256Reader,
-    Kt256Core,
-    Kt256ReaderCore,
-    U136,
-    "KT256",
-);
+impl<Rate: BlockSizes> Default for Kt<Rate> {
+    #[inline]
+    fn default() -> Self {
+        const { assert!(matches!(Rate::USIZE, 136 | 168)) }
+        Self {
+            accum_tshk: Default::default(),
+            node_tshk: Default::default(),
+            consumed_len: 0,
+            keccak: Default::default(),
+        }
+    }
+}
 
-impl CollisionResistance for Kt128<'_> {
+impl<Rate: BlockSizes> fmt::Debug for Kt<Rate> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "Kt{} {{ ... }}", 4 * (200 - Rate::USIZE))
+    }
+}
+
+impl<Rate: BlockSizes> AlgorithmName for Kt<Rate> {
+    #[inline]
+    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "KT{}", 4 * (200 - Rate::USIZE))
+    }
+}
+
+impl<Rate: BlockSizes> HashMarker for Kt<Rate> {}
+
+impl<Rate: BlockSizes> BlockSizeUser for Kt<Rate> {
+    type BlockSize = Rate;
+}
+
+impl<Rate: BlockSizes> Update for Kt<Rate> {
+    #[inline]
+    fn update(&mut self, data: &[u8]) {
+        let keccak = self.keccak;
+        let closure = update::Closure::<'_, Rate> { data, kt: self };
+        keccak.with_backend(closure);
+    }
+}
+
+impl<Rate: BlockSizes> Reset for Kt<Rate> {
+    #[inline]
+    fn reset(&mut self) {
+        self.accum_tshk.reset();
+        self.node_tshk.reset();
+        self.consumed_len = 0;
+    }
+}
+
+impl<Rate: BlockSizes> Kt<Rate> {
+    #[inline]
+    fn raw_finalize(&mut self) -> KtReader<Rate> {
+        let keccak = self.keccak;
+
+        keccak.with_p1600::<ROUNDS>(|p1600| {
+            if self.consumed_len <= CHUNK_SIZE_U64 {
+                self.accum_tshk.finalize::<SINGLE_NODE_DS>(p1600);
+            } else {
+                let nodes_len = (self.consumed_len - 1) / CHUNK_SIZE_U64;
+                let partial_node_len = self.consumed_len % CHUNK_SIZE_U64;
+
+                if partial_node_len != 0 {
+                    self.node_tshk.finalize::<INTERMEDIATE_NODE_DS>(p1600);
+                    // TODO: this should be [0u8; {200 - Rate}]
+                    let cv_dst = &mut [0u8; 200][..200 - Rate::USIZE];
+                    copy_cv(self.node_tshk.state(), cv_dst);
+                    self.accum_tshk.absorb(p1600, cv_dst);
+                }
+
+                length_encode(nodes_len, |enc_len| self.accum_tshk.absorb(p1600, enc_len));
+                self.accum_tshk.absorb(p1600, b"\xFF\xFF");
+                self.accum_tshk.finalize::<FINAL_NODE_DS>(p1600);
+            };
+        });
+
+        KtReader {
+            state: *self.accum_tshk.state(),
+            buffer: Default::default(),
+            keccak,
+        }
+    }
+}
+
+impl<Rate: BlockSizes> ExtendableOutput for Kt<Rate> {
+    type Reader = KtReader<Rate>;
+
+    #[inline]
+    fn finalize_xof(mut self) -> Self::Reader {
+        self.update(&[0x00]);
+        self.raw_finalize()
+    }
+}
+
+impl<Rate: BlockSizes> ExtendableOutputReset for Kt<Rate> {
+    #[inline]
+    fn finalize_xof_reset(&mut self) -> Self::Reader {
+        self.update(&[0x00]);
+        let reader = self.raw_finalize();
+        self.reset();
+        reader
+    }
+}
+
+impl<Rate: BlockSizes> Drop for Kt<Rate> {
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            use digest::zeroize::Zeroize;
+            self.consumed_len.zeroize();
+            // `accum_tshk` and `node_tshk` are zeroized by `Drop`
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl<Rate: BlockSizes> digest::zeroize::ZeroizeOnDrop for Kt<Rate> {}
+
+/// KT128 hasher.
+pub type Kt128 = Kt<U168>;
+/// KT256 hasher.
+pub type Kt256 = Kt<U136>;
+
+/// KT128 XOF reader.
+pub type Kt128Reader = KtReader<U168>;
+/// KT256 XOF reader.
+pub type Kt256Reader = KtReader<U136>;
+
+impl CollisionResistance for Kt128 {
     // https://www.rfc-editor.org/rfc/rfc9861.html#section-7-7
     type CollisionResistance = U16;
 }
 
-impl CollisionResistance for Kt256<'_> {
+impl CollisionResistance for Kt256 {
     // https://www.rfc-editor.org/rfc/rfc9861.html#section-7-8
     type CollisionResistance = U32;
 }
-
-/// KT128 hasher.
-#[deprecated(since = "0.4.0-pre", note = "use `Kt128` instead")]
-pub type KangarooTwelve<'cs> = Kt128<'cs>;
-
-/// KT128 XOF reader.
-#[deprecated(since = "0.4.0-pre", note = "use `Kt128Reader` instead")]
-pub type KangarooTwelveReader = Kt128Reader;

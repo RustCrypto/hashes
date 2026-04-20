@@ -1,9 +1,12 @@
-use core::iter;
+use core::iter::repeat_n;
 use hex_literal::hex;
 use k12::{
     Kt128, Kt256,
     digest::{ExtendableOutput, Update},
 };
+
+#[cfg(feature = "alloc")]
+use digest::CustomizedInit;
 
 macro_rules! digest_and_box {
     ($name:ident, $hasher:ty) => {
@@ -24,7 +27,7 @@ digest_and_box!(kt256_digest_and_box, Kt256);
 fn kt128_empty() {
     assert_eq!(
         kt128_digest_and_box(b"", 32)[..],
-        hex!("1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5")[..]
+        hex!("1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5")
     );
 
     assert_eq!(
@@ -32,12 +35,12 @@ fn kt128_empty() {
         hex!(
             "1ac2d450fc3b4205d19da7bfca1b37513c0803577ac7167f06fe2ce1f0ef39e5"
             "4269c056b8c82e48276038b6d292966cc07a3d4645272e31ff38508139eb0a71"
-        )[..],
+        ),
     );
 
     assert_eq!(
         kt128_digest_and_box(b"", 10032)[10000..],
-        hex!("e8dc563642f7228c84684c898405d3a834799158c079b12880277a1d28e2ff6d")[..]
+        hex!("e8dc563642f7228c84684c898405d3a834799158c079b12880277a1d28e2ff6d"),
     );
 }
 
@@ -48,7 +51,7 @@ fn kt256_empty() {
         hex!(
             "b23d2e9cea9f4904e02bec06817fc10ce38ce8e93ef4c89e6537076af8646404"
             "e3e8b68107b8833a5d30490aa33482353fd4adc7148ecb782855003aaebde4a9"
-        )[..],
+        ),
     );
 
     assert_eq!(
@@ -58,7 +61,7 @@ fn kt256_empty() {
             "e3e8b68107b8833a5d30490aa33482353fd4adc7148ecb782855003aaebde4a9"
             "b0925319d8ea1e121a609821ec19efea89e6d08daee1662b69c840289f188ba8"
             "60f55760b61f82114c030c97e5178449608ccd2cd2d919fc7829ff69931ac4d0"
-        )[..],
+        ),
     );
 
     assert_eq!(
@@ -66,7 +69,7 @@ fn kt256_empty() {
         hex!(
             "ad4a1d718cf950506709a4c33396139b4449041fc79a05d68da35f1e453522e0"
             "56c64fe94958e7085f2964888259b9932752f3ccd855288efee5fcbb8b563069"
-        )[..],
+        ),
     );
 }
 
@@ -81,13 +84,11 @@ fn kt128_pat_m() {
         hex!("844d610933b1b9963cbdeb5ae3b6b05cc7cbd67ceedf883eb678a0a8e0371682"),
         hex!("3c390782a8a4e89fa6367f72feaaf13255c8d95878481d3cd8ce85f58e880af8"),
     ];
-    for i in 0..5
-    /*NOTE: can be up to 7 but is slow*/
-    {
-        let len = 17usize.pow(i);
+    for (i, exp_res) in expected.into_iter().enumerate() {
+        let len = 17usize.pow(i as u32);
         let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
         let result = kt128_digest_and_box(&m, 32);
-        assert_eq!(result[..], expected[i as usize][..]);
+        assert_eq!(result[..], exp_res);
     }
 }
 
@@ -123,13 +124,11 @@ fn kt256_pat_m() {
             "31a5578f568f911e09cf44746da84224a5266e96a4a535e871324e4f9c7004da"
         ),
     ];
-    for i in 0..5
-    /*NOTE: can be up to 7 but is slow*/
-    {
-        let len = 17usize.pow(i);
+    for (i, exp_res) in expected.into_iter().enumerate() {
+        let len = 17usize.pow(i as u32);
         let m: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
         let result = kt256_digest_and_box(&m, 64);
-        assert_eq!(result[..], expected[i as usize][..]);
+        assert_eq!(result[..], exp_res);
     }
 }
 
@@ -141,14 +140,22 @@ fn kt128_pat_c() {
         hex!("c389e5009ae57120854c2e8c64670ac01358cf4c1baf89447a724234dc7ced74"),
         hex!("75d2f86a2e644566726b4fbcfc5657b9dbcf070c7b0dca06450ab291d7443bcf"),
     ];
-    for i in 0..4 {
-        let m: Vec<u8> = iter::repeat_n(0xFF, 2usize.pow(i) - 1).collect();
+    for (i, exp_res) in expected.into_iter().enumerate() {
+        let i = i as u32;
+        let m: Vec<u8> = repeat_n(0xFF, 2usize.pow(i) - 1).collect();
         let len = 41usize.pow(i);
         let c: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
-        let mut h = Kt128::new(&c);
+
+        let mut h = k12::CustomRefKt128::new_customized(&c);
         h.update(&m);
-        let result = h.finalize_boxed(32);
-        assert_eq!(result[..], expected[i as usize][..]);
+        assert_eq!(h.finalize_boxed(32)[..], exp_res);
+
+        #[cfg(feature = "alloc")]
+        {
+            let mut h = k12::CustomKt128::new_customized(&c);
+            h.update(&m);
+            assert_eq!(h.finalize_boxed(32)[..], exp_res);
+        }
     }
 }
 
@@ -172,14 +179,22 @@ fn kt256_pat_c() {
             "30a88cbf4ac2a91a2432743054fbcc9897670e86ba8cec2fc2ace9c966369724"
         ),
     ];
-    for i in 0..4 {
-        let m: Vec<u8> = iter::repeat_n(0xFF, 2usize.pow(i) - 1).collect();
+    for (i, exp_res) in expected.into_iter().enumerate() {
+        let i = i as u32;
+        let m: Vec<u8> = repeat_n(0xFF, 2usize.pow(i) - 1).collect();
         let len = 41usize.pow(i);
         let c: Vec<u8> = (0..len).map(|j| (j % 251) as u8).collect();
-        let mut h = Kt256::new(&c);
+
+        let mut h = k12::CustomRefKt256::new_customized(&c);
         h.update(&m);
-        let result = h.finalize_boxed(64);
-        assert_eq!(result[..], expected[i as usize][..]);
+        assert_eq!(h.finalize_boxed(64)[..], exp_res);
+
+        #[cfg(feature = "alloc")]
+        {
+            let mut h = k12::CustomKt256::new_customized(&c);
+            h.update(&m);
+            assert_eq!(h.finalize_boxed(64)[..], exp_res);
+        }
     }
 }
 

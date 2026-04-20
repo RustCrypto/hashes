@@ -34,5 +34,4 @@ opt-level = 2
 
 [patch.crates-io]
 sha1 = { path = "sha1" }
-turbo-shake = { path = "turbo-shake" }
 whirlpool = { path = "whirlpool" }
