@@ -216,7 +216,7 @@ mod tests {
                 }
 
                 let mut data_chunks = data_chunks.remainder().chunks_exact(CHUNK_SIZE);
-                let mut cvs_chunks = par_cvs.into_remainder().chunks_exact_mut(KT256_CV_LEN);
+                let mut cvs_chunks = par_cvs.into_remainder().chunks_exact_mut(KT128_CV_LEN);
 
                 for (data_chunk, par_cv) in (&mut data_chunks).zip(&mut cvs_chunks) {
                     scalar::<U168>(p1600, data_chunk, par_cv);
