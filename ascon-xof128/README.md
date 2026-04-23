@@ -1,4 +1,4 @@
-# RustCrypto: Ascon-Hash256
+# RustCrypto: Ascon-XOF128
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
@@ -7,19 +7,23 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the [Ascon-Hash256] cryptographic hash function.
+Pure Rust implementation of the [Ascon-XOF128] extendable output function (XOF).
 
 ## Examples
 
+Ascon-XOF128 has an extendable output, so finalization methods return
+XOF reader from which results of arbitrary length can be read.
+
 ```rust
-use ascon_hash256::{AsconHash256, Digest};
+use ascon_xof128::{AsconXof128, ExtendableOutput, Update, XofReader};
 use hex_literal::hex;
 
-let mut hasher = AsconHash256::new();
-hasher.update(b"some bytes");
-let hash = hasher.finalize();
-
-assert_eq!(hash, hex!("e909c2f6da9cb3028423265c8f23fc2d26bfc0f3db704683ef16b787a945ed68"));
+let mut xof = AsconXof128::default();
+xof.update(b"some bytes");
+let mut reader = xof.finalize_xof();
+let mut dst = [0u8; 5];
+reader.read(&mut dst);
+assert_eq!(dst, hex!("8c7dd114a0"));
 ```
 
 See the [`digest`] crate docs for additional examples.
@@ -41,12 +45,12 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (badges)
 
-[crate-image]: https://img.shields.io/crates/v/ascon-hash256.svg
-[crate-link]: https://crates.io/crates/ascon-hash256
-[docs-image]: https://docs.rs/ascon-hash256/badge.svg
-[docs-link]: https://docs.rs/ascon-hash256/
-[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-hash256.yml/badge.svg
-[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-hash256.yml
+[crate-image]: https://img.shields.io/crates/v/ascon-xof128.svg
+[crate-link]: https://crates.io/crates/ascon-xof128
+[docs-image]: https://docs.rs/ascon-xof128/badge.svg
+[docs-link]: https://docs.rs/ascon-xof128/
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-xof128.yml/badge.svg
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/ascon-xof128.yml
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
@@ -54,5 +58,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[Ascon-Hash256]: https://doi.org/10.6028/NIST.SP.800-232.ipd
+[Ascon-XOF128]: https://doi.org/10.6028/NIST.SP.800-232.ipd
 [`digest`]: https://docs.rs/digest
