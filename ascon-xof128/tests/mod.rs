@@ -56,6 +56,30 @@ fn ascon_xof128_rand() {
     assert_eq!(buf, expected_hash);
 }
 
+#[test]
+fn ascon_cxof128_rand() {
+    let mut h = AsconCxof128::new_customized(b"randomized cxof test");
+    feed_rand_16mib(&mut h);
+
+    let ser_state = h.serialize();
+    let ser_expected = include_bytes!("data/ascon_cxof128_serialization.bin");
+    assert_eq!(ser_state[..], ser_expected[..]);
+
+    let expected_hash = hex!(
+        "3E797ECD4EB7373C7283078BFCC53E5B0645B083AF703146A527FEC3AE209E85"
+        "DAA663270B7687540A221F87C44433906931BFE43BE3BA0333ADFAC62BC8EC1F"
+    );
+
+    let mut buf = [0u8; 64];
+    h.finalize_xof_into(&mut buf);
+    assert_eq!(buf, expected_hash);
+
+    h = AsconCxof128::deserialize(&ser_state).unwrap();
+    buf = [0u8; 64];
+    h.finalize_xof_into(&mut buf);
+    assert_eq!(buf, expected_hash);
+}
+
 #[derive(Debug, Clone, Copy)]
 struct CxofTestVector {
     input: &'static [u8],
