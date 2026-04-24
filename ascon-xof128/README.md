@@ -41,6 +41,13 @@ reader.read(&mut dst);
 assert_eq!(dst, hex!("7824810FF7"));
 ```
 
+Note that the NIST specifies that:
+
+>The length of the customization string **shall** be at most 2048 bits (i.e., 256 bytes).
+
+This limit is not enforced by the `new_customized` method; users must ensure their customization
+strings meet the size requirement if they intend to claim conformance to the standard.
+
 See the [`digest`] crate docs for additional examples.
 
 ## License

@@ -26,6 +26,7 @@ pub struct AsconCxof128 {
 impl CustomizedInit for AsconCxof128 {
     #[inline]
     fn new_customized(customization: &[u8]) -> Self {
+        // We assume that in practice customization strings are always smaller than 2^61 bytes.
         let bit_len = 8 * customization.len();
         let mut state = CXOF_INIT_STATE;
 
