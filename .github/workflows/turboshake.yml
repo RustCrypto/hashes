@@ -1,17 +1,17 @@
-name: turbo-shake
+name: turboshake
 
 on:
   pull_request:
     paths:
-      - ".github/workflows/turbo-shake.yml"
-      - "turbo-shake/**"
+      - ".github/workflows/turboshake.yml"
+      - "turboshake/**"
       - "Cargo.*"
   push:
     branches: master
 
 defaults:
   run:
-    working-directory: turbo-shake
+    working-directory: turboshake
 
 env:
   CARGO_INCREMENTAL: 0

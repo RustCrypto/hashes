@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 use digest::ExtendableOutput;
-use turbo_shake::{TurboShake128, TurboShake256};
+use turboshake::{TurboShake128, TurboShake256};
 
 #[derive(Debug, Clone, Copy)]
 pub struct TestVector {
@@ -47,7 +47,7 @@ where
     Ok(())
 }
 
-macro_rules! new_turbo_shake_test {
+macro_rules! new_test {
     ($name:ident, $test_name:expr, $hasher:ty, $test_func:ident $(,)?) => {
         #[test]
         fn $name() {
@@ -101,26 +101,26 @@ macro_rules! new_turbo_shake_test {
     };
 }
 
-new_turbo_shake_test!(
+new_test!(
     turboshake128_6,
     "turboshake128_6",
     TurboShake128<6>,
     turbo_shake_test,
 );
-new_turbo_shake_test!(
+new_test!(
     turboshake128_7,
     "turboshake128_7",
     TurboShake128<7>,
     turbo_shake_test,
 );
-new_turbo_shake_test!(
+new_test!(
     turboshake256_6,
     "turboshake256_6",
     TurboShake256<6>,
     turbo_shake_test,
 );
 
-new_turbo_shake_test!(
+new_test!(
     turboshake256_7,
     "turboshake256_7",
     TurboShake256<7>,

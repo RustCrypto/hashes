@@ -17,8 +17,8 @@ these functions do not implement `Digest`, so lower-level traits have to
 be imported:
 
 ```rust
-use turbo_shake::TurboShake128;
-use turbo_shake::digest::{Update, ExtendableOutput, XofReader};
+use turboshake::TurboShake128;
+use turboshake::digest::{Update, ExtendableOutput, XofReader};
 use hex_literal::hex;
 
 // With the default domain separator.
@@ -66,16 +66,16 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (badges)
 
-[crate-image]: https://img.shields.io/crates/v/turbo-shake.svg
-[crate-link]: https://crates.io/crates/turbo-shake
-[docs-image]: https://docs.rs/turbo-shake/badge.svg
-[docs-link]: https://docs.rs/turbo-shake
+[crate-image]: https://img.shields.io/crates/v/turboshake.svg
+[crate-link]: https://crates.io/crates/turboshake
+[docs-image]: https://docs.rs/turboshake/badge.svg
+[docs-link]: https://docs.rs/turboshake
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/turbo-shake.yml/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/turbo-shake.yml?query=branch:master
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/turboshake.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/turboshake.yml?query=branch:master
 
 [//]: # (general links)
 

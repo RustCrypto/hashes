@@ -3,7 +3,7 @@ extern crate test;
 
 use digest::bench_update;
 use test::Bencher;
-use turbo_shake::{TurboShake128, TurboShake256};
+use turboshake::{TurboShake128, TurboShake256};
 
 bench_update!(
     <TurboShake128>::default();

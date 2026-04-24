@@ -42,7 +42,7 @@ easily used for bare-metal or WebAssembly programming by disabling default crate
 | [SM3] (OSCCA GM/T 0004-2012) | [`sm3`] | [![crates.io](https://img.shields.io/crates/v/sm3.svg)](https://crates.io/crates/sm3) | [![Documentation](https://docs.rs/sm3/badge.svg)](https://docs.rs/sm3) | 1.85 | :green_heart: |
 | [Streebog] (GOST R 34.11-2012) | [`streebog`] | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) | [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | 1.85 | :yellow_heart: |
 | [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | 1.85 | :green_heart: |
-| [TurboSHAKE] | [`turbo-shake`] | [![crates.io](https://img.shields.io/crates/v/turbo-shake.svg)](https://crates.io/crates/turbo-shake) | [![Documentation](https://docs.rs/turbo-shake/badge.svg)](https://docs.rs/turbo-shake) | 1.85 | :green_heart: |
+| [TurboSHAKE] | [`turboshake`] | [![crates.io](https://img.shields.io/crates/v/turboshake.svg)](https://crates.io/crates/turboshake) | [![Documentation](https://docs.rs/turboshake/badge.svg)](https://docs.rs/turboshake) | 1.85 | :green_heart: |
 | [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | 1.85 | :green_heart: |
 
 NOTE: the [`blake3`] crate implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
@@ -118,7 +118,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`sm3`]: ./sm3
 [`streebog`]: ./streebog
 [`tiger`]: ./tiger
-[`turbo-shake`]: ./turbo-shake
+[`turboshake`]: ./turboshake
 [`whirlpool`]: ./whirlpool
 
 [//]: # (footnotes)

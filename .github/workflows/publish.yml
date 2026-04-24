@@ -27,7 +27,7 @@ on:
       'sm3-v*',
       'streebog-v*',
       'tiger-v*',
-      'turbo-shake-v*',
+      'turboshake-v*',
       'whirlpool-v*',
     ]
 
