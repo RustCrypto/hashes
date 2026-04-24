@@ -10,7 +10,7 @@ checksum = "f5a0543d9a0a29ecb1d2046beb7547e97941de03228a3f31e15addfc78836049"
 
 [[package]]
 name = "ascon-hash256"
-version = "0.5.0-rc.2"
+version = "0.1.0"
 dependencies = [
  "ascon",
  "digest",
@@ -19,7 +19,7 @@ dependencies = [
 
 [[package]]
 name = "ascon-xof128"
-version = "0.5.0-rc.2"
+version = "0.1.0"
 dependencies = [
  "ascon",
  "digest",
@@ -226,9 +226,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.185"
+version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52ff2c0fe9bc6cb6b14a0592c2ff4fa9ceb83eea9db979b0487cd054946a2b8f"
+checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "md-5"
