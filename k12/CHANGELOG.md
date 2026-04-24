@@ -8,18 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.4.0 (2026-04-24)
 ### Added
 - `alloc` crate feature ([#678])
+- `Kt`, `Kt128` and `Kt256` non-customizable types ([#839])
+- `custom` module with customizable variants ([#839])
 
 ### Changed
 - Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
 - Relax MSRV policy and allow MSRV bumps in patch releases
 - Update to `digest` v0.11
-- Replace type aliases with newtypes ([#678])
+- New implementation with parallel processing support ([#839])
 
 ### Removed
 - `std` crate feature ([#678])
+- `KangarooTwelve*` types ([#839])
 
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
+[#839]: https://github.com/RustCrypto/hashes/pull/839
 
 ## 0.3.0 (2023-06-10)
 ### Added
