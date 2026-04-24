@@ -10,7 +10,7 @@ repository = "https://github.com/RustCrypto/hashes"
 license = "Apache-2.0 OR MIT"
 keywords = ["hash", "ascon"]
 categories = ["cryptography", "no-std"]
-description = "Implementation of Ascon-XOF128"
+description = "Implementation of Ascon-XOF128 and Ascon-СXOF128"
 
 [dependencies]
 digest = "0.11"

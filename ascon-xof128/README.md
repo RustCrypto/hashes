@@ -7,7 +7,8 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the [Ascon-XOF128] extendable output function (XOF).
+Pure Rust implementation of the Ascon-XOF128 and Ascon-СXOF128 extendable output functions (XOF)
+specified in [NIST SP 800-232].
 
 ## Examples
 
@@ -23,7 +24,21 @@ xof.update(b"some bytes");
 let mut reader = xof.finalize_xof();
 let mut dst = [0u8; 5];
 reader.read(&mut dst);
-assert_eq!(dst, hex!("8c7dd114a0"));
+assert_eq!(dst, hex!("8C7DD114A0"));
+```
+
+Ascon-CXOF128 works similarly, but you must specify a customization string to initialize it:
+
+```rust
+use ascon_xof128::{AsconCxof128, CustomizedInit, ExtendableOutput, Update, XofReader};
+use hex_literal::hex;
+
+let mut xof = AsconCxof128::new_customized(b"some customization string");
+xof.update(b"some bytes");
+let mut reader = xof.finalize_xof();
+let mut dst = [0u8; 5];
+reader.read(&mut dst);
+assert_eq!(dst, hex!("7824810FF7"));
 ```
 
 See the [`digest`] crate docs for additional examples.
@@ -58,5 +73,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[Ascon-XOF128]: https://doi.org/10.6028/NIST.SP.800-232.ipd
+[NIST SP 800-232]: https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-232.ipd.pdf
 [`digest`]: https://docs.rs/digest
