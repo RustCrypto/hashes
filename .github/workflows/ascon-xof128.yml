@@ -1,17 +1,17 @@
-name: ascon-hash256
+name: ascon-xof128
 
 on:
   pull_request:
     paths:
-      - ".github/workflows/ascon-hash256.yml"
-      - "ascon-hash256/**"
+      - ".github/workflows/ascon-xof128.yml"
+      - "ascon-xof128/**"
       - "Cargo.*"
   push:
     branches: master
 
 defaults:
   run:
-    working-directory: ascon-hash256
+    working-directory: ascon-xof128
 
 env:
   RUSTFLAGS: "-Dwarnings"
