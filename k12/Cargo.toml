@@ -10,11 +10,11 @@ repository = "https://github.com/RustCrypto/hashes"
 license = "Apache-2.0 OR MIT"
 keywords = ["hash", "digest"]
 categories = ["cryptography", "no-std"]
-description = "Pure Rust implementation of the KangarooTwelve hash function"
+description = "Implementation of the KangarooTwelve family of extendable-output functions"
 
 [dependencies]
 digest = "0.11"
-turbo-shake = { version = "0.1.0", default-features = false }
+keccak = { version = "0.2", features = ["parallel"] }
 
 [dev-dependencies]
 digest = { version = "0.11", features = ["alloc", "dev"] }
@@ -23,7 +23,7 @@ hex-literal = "1"
 [features]
 default = ["alloc"]
 alloc = ["digest/alloc"]
-zeroize = ["digest/zeroize", "turbo-shake/zeroize"]
+zeroize = ["digest/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true

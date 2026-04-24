@@ -203,7 +203,7 @@ version = "0.4.0-rc.1"
 dependencies = [
  "digest",
  "hex-literal",
- "turbo-shake",
+ "keccak",
 ]
 
 [[package]]
@@ -214,6 +214,7 @@ checksum = "9e24a010dd405bd7ed803e5253182815b41bf2e6a80cc3bfc066658e03a198aa"
 dependencies = [
  "cfg-if",
  "cpufeatures",
+ "hybrid-array",
 ]
 
 [[package]]
