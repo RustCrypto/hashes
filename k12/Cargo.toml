@@ -1,6 +1,6 @@
 [package]
 name = "k12"
-version = "0.4.0-rc.1"
+version = "0.4.0"
 authors = ["RustCrypto Developers"]
 edition = "2024"
 rust-version = "1.85"
