@@ -392,8 +392,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "turbo-shake"
-version = "0.1.0"
+name = "turboshake"
+version = "0.6.0"
 dependencies = [
  "digest",
  "hex-literal",

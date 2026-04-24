@@ -26,7 +26,7 @@ members = [
     "sm3",
     "streebog",
     "tiger",
-    "turbo-shake",
+    "turboshake",
     "whirlpool",
 ]
 

@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - `std` crate feature ([#678])
 - `CShake128/256` and `TurboShake128/256` types by moving them to
-  `cshake` and `turbo-shake` crates respectively ([#815])
+  `cshake` and `turboshake` crates respectively ([#815])
 
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
