@@ -3,6 +3,7 @@ on:
   push:
     tags: [
       'ascon-hash256-v*',
+      'ascon-xof128-v*',
       'bash-hash-v*',
       'belt-hash-v*',
       'blake2-v*',

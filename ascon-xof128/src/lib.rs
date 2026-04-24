@@ -8,13 +8,13 @@
 #![warn(missing_docs, unreachable_pub)]
 #![forbid(unsafe_code)]
 
-pub use digest::{self, Digest};
+pub use digest::{self, CustomizedInit, ExtendableOutput, Update, XofReader};
 
-/// Block-level types
-pub mod block_api;
+mod consts;
+mod cxof;
+mod reader;
+mod xof;
 
-digest::buffer_fixed!(
-    /// Ascon-Hash256 hasher
-    pub struct AsconHash256(block_api::AsconHash256Core);
-    impl: FixedHashTraits;
-);
+pub use cxof::AsconCxof128;
+pub use reader::AsconXof128Reader;
+pub use xof::AsconXof128;

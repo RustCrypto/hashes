@@ -1,5 +1,5 @@
 [package]
-name = "ascon-hash256"
+name = "ascon-xof128"
 version = "0.5.0-rc.2"
 authors = ["RustCrypto Developers"]
 edition = "2024"
@@ -10,7 +10,7 @@ repository = "https://github.com/RustCrypto/hashes"
 license = "Apache-2.0 OR MIT"
 keywords = ["hash", "ascon"]
 categories = ["cryptography", "no-std"]
-description = "Implementation of Ascon-Hash256 and Ascon-XOF256"
+description = "Implementation of Ascon-XOF128 and Ascon-СXOF128"
 
 [dependencies]
 digest = "0.11"

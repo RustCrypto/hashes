@@ -1,4 +1,4 @@
-# RustCrypto: Ascon-Hash256 and Ascon-XOF128
+# RustCrypto: Ascon-Hash256
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
@@ -7,17 +7,10 @@
 ![Rust Version][rustc-image]
 [![Project Chat][chat-image]][chat-link]
 
-Pure Rust implementation of the lightweight cryptographic hash function [Ascon-Hash256][1] and the
-extendable output functions (XOF) Ascon-XOF128.
-
-## Security Notes
-
-No security audits of this crate have ever been performed.
-
-USE AT YOUR OWN RISK!
+Pure Rust implementation of the [Ascon-Hash256] cryptographic hash function.
 
 ## Examples
-Fixed output size hashing:
+
 ```rust
 use ascon_hash256::{AsconHash256, Digest};
 use hex_literal::hex;
@@ -27,19 +20,6 @@ hasher.update(b"some bytes");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("e909c2f6da9cb3028423265c8f23fc2d26bfc0f3db704683ef16b787a945ed68"));
-```
-
-XOF hashing:
-```rust
-use ascon_hash256::{AsconXof128, ExtendableOutput, Update, XofReader};
-use hex_literal::hex;
-
-let mut xof = AsconXof128::default();
-xof.update(b"some bytes");
-let mut reader = xof.finalize_xof();
-let mut dst = [0u8; 5];
-reader.read(&mut dst);
-assert_eq!(dst, hex!("8c7dd114a0"));
 ```
 
 See the [`digest`] crate docs for additional examples.
@@ -74,5 +54,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[1]: https://doi.org/10.6028/NIST.SP.800-232.ipd
+[Ascon-Hash256]: https://doi.org/10.6028/NIST.SP.800-232.ipd
 [`digest`]: https://docs.rs/digest
