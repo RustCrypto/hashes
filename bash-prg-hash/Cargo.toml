@@ -13,7 +13,7 @@ keywords = ["belt", "stb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.3"
+digest = "0.11"
 bash-f = "0.1"
 
 [dev-dependencies]
