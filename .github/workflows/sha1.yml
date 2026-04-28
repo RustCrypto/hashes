@@ -42,7 +42,7 @@ jobs:
           - wasm32-unknown-unknown
           - loongarch64-unknown-linux-gnu
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -78,7 +78,7 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -87,6 +87,9 @@ jobs:
       - uses: RustCrypto/actions/cargo-hack-install@master
       - run: ${{ matrix.deps }}
       - run: cargo hack test --feature-powerset
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha1_backend="soft"
 
   # macOS tests
   macos:
@@ -99,7 +102,7 @@ jobs:
 
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -108,6 +111,9 @@ jobs:
       - run: cargo test --no-default-features
       - run: cargo test
       - run: cargo test --all-features
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha1_backend="aarch64-sha2"
 
   # Windows tests
   windows:
@@ -123,7 +129,7 @@ jobs:
 
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:

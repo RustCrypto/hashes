@@ -5,7 +5,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser,
         TruncSide, UpdateCore, VariableOutputCore,
     },
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{Sum, U8, U32, U64, U128, Unsigned},
 };
 

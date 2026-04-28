@@ -1,24 +1,23 @@
 [package]
 name = "whirlpool"
-version = "0.11.0-rc.2"
-description = "Whirlpool hash function"
+version = "0.11.0"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/whirlpool"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["whirlpool", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Whirlpool hash function"
 
 [dependencies]
-digest = "0.11.0-rc.3"
+digest = "0.11"
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.3", features = ["dev"] }
+digest = { version = "0.11", features = ["dev"] }
 hex-literal = "1"
-base16ct = { version = "0.3", features = ["alloc"] }
 
 [features]
 default = ["alloc"]

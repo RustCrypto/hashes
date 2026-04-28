@@ -6,8 +6,8 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     consts::{U16, U48, U64},
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
 };
 
 use crate::consts::S;

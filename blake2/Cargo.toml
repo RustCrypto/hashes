@@ -1,24 +1,23 @@
 [package]
 name = "blake2"
-version = "0.11.0-rc.2"
-description = "BLAKE2 hash functions"
+version = "0.11.0-rc.6"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/blake2"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["blake2", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "BLAKE2 hash functions"
 
 [dependencies]
-digest = { version = "0.11.0-rc.3", features = ["mac"] }
+digest = { version = "0.11", features = ["mac"] }
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.3", features = ["dev"] }
+digest = { version = "0.11", features = ["dev"] }
 hex-literal = "1"
-base16ct = { version = "0.3", features = ["alloc"] }
 
 [features]
 default = ["alloc"]

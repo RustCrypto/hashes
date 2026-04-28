@@ -1,29 +1,29 @@
 [package]
 name = "k12"
-version = "0.4.0-pre"
-description = "Pure Rust implementation of the KangarooTwelve hash function"
-authors = ["RustCrypto Developers", "Diggory Hardy <github1@dhardy.name>"]
-license = "Apache-2.0 OR MIT"
-readme = "README.md"
+version = "0.4.0"
+authors = ["RustCrypto Developers"]
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/k12"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "Apache-2.0 OR MIT"
 keywords = ["hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Implementation of the KangarooTwelve family of extendable-output functions"
 
 [dependencies]
-digest = "0.11.0-rc.3"
-sha3 = { version = "0.11.0-rc.1", default-features = false }
+digest = "0.11"
+keccak = { version = "0.2", features = ["parallel"] }
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.3", features = ["alloc", "dev"] }
+digest = { version = "0.11", features = ["alloc", "dev"] }
 hex-literal = "1"
 
 [features]
 default = ["alloc"]
 alloc = ["digest/alloc"]
-zeroize = ["digest/zeroize", "sha3/zeroize"]
+zeroize = ["digest/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true

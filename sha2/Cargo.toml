@@ -1,31 +1,30 @@
 [package]
 name = "sha2"
-version = "0.11.0-rc.2"
+version = "0.11.0"
+authors = ["RustCrypto Developers"]
+edition = "2024"
+rust-version = "1.85"
+documentation = "https://docs.rs/sha2"
+readme = "README.md"
+repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
+keywords = ["sha2", "hash", "digest"]
+categories = ["cryptography", "no-std"]
 description = """
 Pure Rust implementation of the SHA-2 hash function family
 including SHA-224, SHA-256, SHA-384, and SHA-512.
 """
-authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
-edition = "2024"
-rust-version = "1.85"
-documentation = "https://docs.rs/sha2"
-repository = "https://github.com/RustCrypto/hashes"
-keywords = ["sha2", "hash", "digest"]
-categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11.0-rc.3"
+digest = "0.11"
 cfg-if = "1"
 
 [target.'cfg(any(target_arch = "aarch64", target_arch = "x86_64", target_arch = "x86"))'.dependencies]
-cpufeatures = "0.2"
+cpufeatures = "0.3"
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.3", features = ["dev"] }
+digest = { version = "0.11", features = ["dev"] }
 hex-literal = "1"
-base16ct = { version = "0.3", features = ["alloc"] }
 
 [features]
 default = ["alloc", "oid"]
@@ -36,7 +35,11 @@ oid = ["digest/oid"]
 [lints.rust.unexpected_cfgs]
 level = "warn"
 check-cfg = [
-    'cfg(sha2_backend, values("soft", "soft-compact", "riscv-zknh", "riscv-zknh-compact"))',
+    'cfg(sha2_backend, values("soft", "riscv-zknh"))',
+    'cfg(sha2_256_backend, values("aarch64-sha2", "soft", "riscv-zknh", "x86-sha"))',
+    'cfg(sha2_512_backend, values("aarch64-sha3", "soft", "riscv-zknh", "x86-avx2"))',
+    'cfg(sha2_backend_soft, values("compact"))',
+    'cfg(sha2_backend_riscv_zknh, values("compact"))',
 ]
 
 [package.metadata.docs.rs]

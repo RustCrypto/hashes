@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.11.0 (UNRELEASED)
+## 0.11.0 (2026-03-27)
 ### Added
 - `alloc` crate feature ([#678])
+- `sha1_backend` configuration flag ([#808])
 
 ### Changed
 - Edition changed to 2024 and MSRV bumped to 1.85 ([#652])
@@ -17,13 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implementation of the `SerializableState` trait ([#716])
 
 ### Removed
-- `asm`, `loongarch64_asm`, and `compress` crate features [#542]
-- `std` crate feature ([#678])
+- `asm`, `loongarch64_asm`, `force-soft`, `std`, and `compress` crate features
+  ([#542], [#678], [#808])
 
 [#542]: https://github.com/RustCrypto/hashes/pull/542
 [#652]: https://github.com/RustCrypto/hashes/pull/652
 [#678]: https://github.com/RustCrypto/hashes/pull/678
 [#716]: https://github.com/RustCrypto/hashes/pull/716
+[#808]: https://github.com/RustCrypto/hashes/pull/808
 
 ## 0.10.6 (2023-09-21)
 ### Added

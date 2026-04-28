@@ -1,5 +1,5 @@
 cfg_if::cfg_if! {
-    if #[cfg(feature = "force-soft")] {
+    if #[cfg(md5_backend = "soft")] {
         mod soft;
         use soft::compress as compress_inner;
     } else if #[cfg(target_arch = "loongarch64")] {

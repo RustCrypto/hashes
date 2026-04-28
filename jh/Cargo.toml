@@ -1,25 +1,24 @@
 [package]
 name = "jh"
-version = "0.2.0-pre"
-description = "Pure Rust implementation of the JH cryptographic hash function"
+version = "0.2.0"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/jh"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
 keywords = ["jh", "hash", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Pure Rust implementation of the JH cryptographic hash function"
 
 [dependencies]
-digest = "0.11.0-rc.3"
+digest = "0.11"
 hex-literal = "1"
 simd = { package = "ppv-lite86", version = "0.2.6" }
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.3", features = ["dev"] }
-base16ct = { version = "0.3", features = ["alloc"] }
+digest = { version = "0.11", features = ["dev"] }
 
 [features]
 default = ["alloc"]

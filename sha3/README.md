@@ -7,7 +7,7 @@
 [![Project Chat][chat-image]][chat-link]
 [![Build Status][build-image]][build-link]
 
-Pure Rust implementation of the [SHA-3] cryptographic hash algorithms.
+Implementation of the [SHA-3] family of cryptographic hash algorithms.
 
 There are 6 standard algorithms specified in the SHA-3 standard:
 
@@ -15,10 +15,8 @@ There are 6 standard algorithms specified in the SHA-3 standard:
 - `SHAKE128` and `SHAKE256` (an extendable output function (XOF))
 
 Additionally, this crate supports:
-- `cSHAKE128` and `cSHAKE256` the customizable XOFs as defined in the NIST [SHA-3 Derived Functions]
-- `TurboSHAKE` XOF variant
-- CryptoNight variant of SHA-3
-- `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512` (NIST submission without padding changes)
+- `KeccakFull`: CryptoNight variant of SHA-3
+- `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512`: NIST submission without padding changes
 
 ## Examples
 
@@ -34,10 +32,6 @@ hasher.update(b"abc");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532");
 ```
 
 SHAKE functions have an extendable output, so finalization method returns
@@ -55,9 +49,11 @@ let mut reader = hasher.finalize_xof();
 let mut buf = [0u8; 10];
 reader.read(&mut buf);
 assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
+reader.read(&mut buf);
+assert_eq!(buf, hex!("ddb793fbcba74097d5c5"));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -89,6 +85,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (general links)
 
-[examples section]: https://github.com/RustCrypto/hashes#Examples
 [SHA-3]: https://en.wikipedia.org/wiki/SHA-3
-[SHA-3 Derived Functions]: https://csrc.nist.gov/pubs/sp/800/185/final
+[`digest`]: https://docs.rs/digest

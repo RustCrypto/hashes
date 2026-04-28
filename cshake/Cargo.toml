@@ -1,0 +1,29 @@
+[package]
+name = "cshake"
+version = "0.1.1"
+authors = ["RustCrypto Developers"]
+edition = "2024"
+rust-version = "1.85"
+documentation = "https://docs.rs/sha3"
+readme = "README.md"
+repository = "https://github.com/RustCrypto/hashes"
+license = "MIT OR Apache-2.0"
+keywords = ["sha3", "keccak", "hash", "xof", "digest"]
+categories = ["cryptography", "no-std"]
+description = "Implementation of the cSHAKE family of extendable-output functions (XOFs)"
+
+[dependencies]
+digest = "0.11"
+keccak = "0.2"
+
+[dev-dependencies]
+digest = { version = "0.11", features = ["dev"] }
+hex-literal = "1"
+
+[features]
+default = ["alloc"]
+alloc = ["digest/alloc"]
+zeroize = ["digest/zeroize"]
+
+[package.metadata.docs.rs]
+all-features = true

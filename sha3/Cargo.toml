@@ -1,36 +1,30 @@
 [package]
 name = "sha3"
-version = "0.11.0-rc.3"
-description = """
-Pure Rust implementation of SHA-3, a family of Keccak-based hash functions
-including the SHAKE family of eXtendable-Output Functions (XOFs), as well as
-the accelerated variant TurboSHAKE
-"""
+version = "0.11.0"
 authors = ["RustCrypto Developers"]
-license = "MIT OR Apache-2.0"
-readme = "README.md"
 edition = "2024"
 rust-version = "1.85"
 documentation = "https://docs.rs/sha3"
+readme = "README.md"
 repository = "https://github.com/RustCrypto/hashes"
-keywords = ["sha3", "keccak", "hash", "digest"]
+license = "MIT OR Apache-2.0"
+keywords = ["keccak", "hash", "xof", "digest"]
 categories = ["cryptography", "no-std"]
+description = "Implementation of the SHA-3 family of cryptographic hash algorithms"
 
 [dependencies]
-digest = "0.11.0-rc.3"
-keccak = "0.2.0-rc.0"
+digest = "0.11"
+keccak = "0.2"
 
 [dev-dependencies]
-digest = { version = "0.11.0-rc.3", features = ["dev"] }
+digest = { version = "0.11", features = ["dev"] }
 hex-literal = "1"
-base16ct = { version = "0.3", features = ["alloc"] }
 
 [features]
 default = ["alloc", "oid"]
 alloc = ["digest/alloc"]
 oid = ["digest/oid"] # Enable OID support.
 zeroize = ["digest/zeroize"]
-asm = ["keccak/asm"] # Enable ASM (currently ARMv8 only).
 
 [package.metadata.docs.rs]
 all-features = true

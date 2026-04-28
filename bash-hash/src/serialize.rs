@@ -3,7 +3,7 @@ use core::ops::Add;
 use digest::{
     array::ArraySize,
     block_buffer::BlockBuffer,
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::{Sum, U0, U192},
 };
 

@@ -5,7 +5,7 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, FixedOutputCore,
         OutputSizeUser, Reset, UpdateCore,
     },
-    crypto_common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
     typenum::U192,
 };
 
@@ -113,7 +113,7 @@ impl<OS: OutputSize> Reset for BashHashCore<OS> {
 
 impl<OS: OutputSize> AlgorithmName for BashHashCore<OS> {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "BashHash{}", OS::USIZE)
+        write!(f, "BashHash{}", OS::USIZE * 8)
     }
 }
 

@@ -1,11 +1,13 @@
 [workspace]
 resolver = "3"
 members = [
-    "ascon-hash",
+    "ascon-hash256",
+    "ascon-xof128",
     "bash-hash",
     "bash-prg-hash",
     "belt-hash",
     "blake2",
+    "cshake",
     "fsb",
     "gost94",
     "groestl",
@@ -25,6 +27,7 @@ members = [
     "sm3",
     "streebog",
     "tiger",
+    "turboshake",
     "whirlpool",
 ]
 
@@ -33,7 +36,4 @@ opt-level = 2
 
 [patch.crates-io]
 sha1 = { path = "sha1" }
-sha3 = { path = "sha3" }
 whirlpool = { path = "whirlpool" }
-
-digest = { git = "https://github.com/RustCrypto/traits" }

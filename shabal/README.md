@@ -9,7 +9,8 @@
 
 Pure Rust implementation of the [Shabal] cryptographic hash algorithm.
 
-There are 5 standard algorithms specified in the Shabal standard: [`Shabal192`], [`Shabal224`], [`Shabal256`], [`Shabal384`], [`Shabal512`].
+There are 5 standard algorithms specified in the Shabal standard:
+`Shabal192`, `Shabal224`, `Shabal256`, `Shabal384`, `Shabal512`.
 
 ## Examples
 
@@ -22,13 +23,9 @@ hasher.update(b"helloworld");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("d945dee21ffca23ac232763aa9cac6c15805f144db9d6c97395437e01c8595a8"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "d945dee21ffca23ac232763aa9cac6c15805f144db9d6c97395437e01c8595a8");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -61,4 +58,4 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [Shabal]: https://www.cs.rit.edu/~ark/20090927/Round2Candidates/Shabal.pdf
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

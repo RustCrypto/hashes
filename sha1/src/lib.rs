@@ -12,6 +12,7 @@ pub use digest::{self, Digest};
 /// Block-level types
 pub mod block_api;
 mod compress;
+mod consts;
 
 digest::buffer_fixed!(
     /// SHA-1 hasher.

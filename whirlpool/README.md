@@ -34,17 +34,9 @@ assert_eq!(hash, hex!(
     "8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c"
     "a373816495e63db0fff2ff25f75aa7162f332c9f518c3036456502a8414d300a"
 ));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(
-    hex_hash,
-    "8eaccdc136903c458ea0b1376be2a5fc9dc5b8ce8892a3b4f43366e2610c206c\
-     a373816495e63db0fff2ff25f75aa7162f332c9f518c3036456502a8414d300a",
-);
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
@@ -78,4 +70,4 @@ dual licensed as above, without any additional terms or conditions.
 
 [Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(hash_function)
 [1]: https://web.archive.org/web/20171129084214/http://www.larc.usp.br/~pbarreto/WhirlpoolPage.html
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest

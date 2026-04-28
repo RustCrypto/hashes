@@ -20,18 +20,17 @@ hasher.update("The quick brown fox jumps over the lazy dog");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76"));
-
-// Hex-encode hash using https://docs.rs/base16ct
-let hex_hash = base16ct::lower::encode_string(&hash);
-assert_eq!(hex_hash, "9004294a361a508c586fe53d1f1b02746765e71b765472786e4770d565830a76");
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## Associated OIDs.
+
 There can be a confusion regarding OIDs associated with declared types.
-According to the [RFC 4357], the OIDs 1.2.643.2.2.30.1 and 1.2.643.2.2.30.0 are used to identify the hash function parameter sets (CryptoPro vs Test ones).
-According to [RFC 4490] the OID 1.2.643.2.2.9 identifies the GOST 34.311-95 (former GOST R 34.11-94) function, but then it continues that this function MUST be used only with the CryptoPro parameter set.
+According to the [RFC 4357], the OIDs 1.2.643.2.2.30.1 and 1.2.643.2.2.30.0 are used to identify
+the hash function parameter sets (CryptoPro vs Test ones). According to [RFC 4490]
+OID 1.2.643.2.2.9 identifies the GOST 34.311-95 (former GOST R 34.11-94) function,
+but then it continues that this function MUST be used only with the CryptoPro parameter set.
 
 ## License
 
@@ -66,4 +65,4 @@ dual licensed as above, without any additional terms or conditions.
 [GOST R 34.11-94]: https://en.wikipedia.org/wiki/GOST_(hash_function)
 [RFC 4357]: https://www.rfc-editor.org/rfc/rfc4357
 [RFC 4490]: https://www.rfc-editor.org/rfc/rfc4490
-[examples section]: https://github.com/RustCrypto/hashes#Examples
+[`digest`]: https://docs.rs/digest
