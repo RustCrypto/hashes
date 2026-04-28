@@ -1,30 +1,30 @@
 use digest::const_oid::{AssociatedOid, ObjectIdentifier};
 
 use crate::{
-    block_api::BashPrgHashCore,
-    variants::{Cap1, Cap2, Level128, Level192, Level256},
+    BashPrgHash1281, BashPrgHash1282, BashPrgHash1921, BashPrgHash1922, BashPrgHash2561,
+    BashPrgHash2562,
 };
 
-impl AssociatedOid for BashPrgHashCore<Level128, Cap1> {
+impl AssociatedOid for BashPrgHash1281 {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.112.0.2.0.34.101.77.21");
 }
 
-impl AssociatedOid for BashPrgHashCore<Level128, Cap2> {
+impl AssociatedOid for BashPrgHash1282 {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.112.0.2.0.34.101.77.22");
 }
 
-impl AssociatedOid for BashPrgHashCore<Level192, Cap1> {
+impl AssociatedOid for BashPrgHash1921 {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.112.0.2.0.34.101.77.23");
 }
 
-impl AssociatedOid for BashPrgHashCore<Level192, Cap2> {
+impl AssociatedOid for BashPrgHash1922 {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.112.0.2.0.34.101.77.24");
 }
 
-impl AssociatedOid for BashPrgHashCore<Level256, Cap1> {
+impl AssociatedOid for BashPrgHash2561 {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.112.0.2.0.34.101.77.25");
 }
 
-impl AssociatedOid for BashPrgHashCore<Level256, Cap2> {
+impl AssociatedOid for BashPrgHash2562 {
     const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("1.2.112.0.2.0.34.101.77.26");
 }

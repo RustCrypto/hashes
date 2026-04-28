@@ -1,38 +1,35 @@
+use crate::variants::{Capacity, SecurityLevel};
 use bash_f::{STATE_WORDS, bash_f};
 use core::{fmt, marker::PhantomData};
-use digest::block_api::BlockSizeUser;
-use digest::core_api::AlgorithmName;
-
-use crate::variants::{Cap1, Cap2, Capacity, Level128, Level192, Level256, SecurityLevel};
-
-/// A constant representing the maximum size of a header in bytes.
-pub const MAX_HEADER_LEN: usize = 60;
+use digest::{
+    CustomizedInit, block_api::BlockSizeUser, core_api::AlgorithmName, typenum::Unsigned,
+};
 
 /// Data type codes from Table 3 of STB 34.101.77-2020
 const DATA: u8 = 0b000010;
 /// Data type codes from Table 3 of STB 34.101.77-2020
 const OUT: u8 = 0b000100;
 
-/// Core bash-prg-hash hasher state generic over security level and capacity.
+/// bash-prg-hash hasher state generic over security level and capacity.
 ///
 /// Specified in Section 8.12 of STB 34.101.77-2020.
-pub struct BashPrgHashCore<L: SecurityLevel, D: Capacity> {
+pub struct BashPrgHashState<L: SecurityLevel, D: Capacity> {
     state: [u64; STATE_WORDS],
-    rate_bytes: usize,            // r/8 - buffer size in bytes
-    offset: usize,                // current offset in bytes
-    header: [u8; MAX_HEADER_LEN], // max header size (480 bits = 60 bytes)
-    header_len: usize,            // header length in bytes
-    data_committed: bool,         // whether commit(DATA) was called in
-    _level: PhantomData<L>,
-    _capacity: PhantomData<D>,
+    /// r/8 - buffer size in bytes
+    rate_bytes: usize,
+    /// current offset in bytes
+    offset: usize,
+    /// whether commit(DATA) was called
+    data_committed: bool,
+    _pd: PhantomData<(L, D)>,
 }
 
 macro_rules! impl_block_sizes {
     ($($level:ty, $cap:ty),* $(,)?) => {
         $(
-            impl BlockSizeUser for BashPrgHashCore<$level, $cap> {
+            impl BlockSizeUser for BashPrgHashState<$level, $cap> {
                 type BlockSize = digest::typenum::U<{
-                    (1536 - 2 * <$cap as Capacity>::CAPACITY * <$level as SecurityLevel>::LEVEL) / 8
+                    (1536 - 2 * <$cap as Unsigned>::USIZE * <$level as Unsigned>::USIZE) / 8
                 }>;
             }
         )*
@@ -40,22 +37,18 @@ macro_rules! impl_block_sizes {
 }
 
 impl_block_sizes! {
-    Level128, Cap1,
-    Level192, Cap1,
-    Level256, Cap1,
-    Level128, Cap2,
-    Level192, Cap2,
-    Level256, Cap2,
+    digest::typenum::U128, digest::typenum::U1,
+    digest::typenum::U192, digest::typenum::U1,
+    digest::typenum::U256, digest::typenum::U1,
+    digest::typenum::U128, digest::typenum::U2,
+    digest::typenum::U192, digest::typenum::U2,
+    digest::typenum::U256, digest::typenum::U2,
 }
 
-impl<L: SecurityLevel, D: Capacity> BashPrgHashCore<L, D> {
-    /// Calculate buffer size r = 1536 - 2dℓ (in bytes)
-    const fn calculate_rate_bytes() -> usize {
-        (1536 - 2 * D::CAPACITY * L::LEVEL) / 8
-    }
+impl<L: SecurityLevel, D: Capacity> CustomizedInit for BashPrgHashState<L, D> {
+    fn new_customized(header: &[u8]) -> Self {
+        const MAX_HEADER_LEN: usize = 60; // 480 bits = 60 bytes
 
-    /// Create a new hasher with an announcement (header).
-    pub fn new(header: &[u8]) -> Self {
         assert!(
             header.len() <= MAX_HEADER_LEN,
             "Header length must not exceed 480 bits (60 bytes)"
@@ -66,19 +59,24 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashCore<L, D> {
             "Header length must be multiple of 32 bits (4 bytes)"
         );
 
-        let mut header_buf = [0u8; 60];
-        header_buf[..header.len()].copy_from_slice(header);
-
-        Self {
+        let mut state = Self {
             state: [0u64; STATE_WORDS],
             rate_bytes: Self::calculate_rate_bytes(),
             offset: 0,
-            header: header_buf,
-            header_len: header.len(),
             data_committed: false,
-            _level: PhantomData,
-            _capacity: PhantomData,
-        }
+            _pd: PhantomData,
+        };
+
+        // Immediately consume header during initialization
+        state.start(header);
+        state
+    }
+}
+
+impl<L: SecurityLevel, D: Capacity> BashPrgHashState<L, D> {
+    /// Calculate buffer size r = 1536 - 2dℓ (in bytes)
+    const fn calculate_rate_bytes() -> usize {
+        (1536 - 2 * D::USIZE * L::USIZE) / 8
     }
 
     /// Helper: modify byte at position in state
@@ -114,9 +112,10 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashCore<L, D> {
     }
 
     /// Execute start command (Section 8.3)
-    fn start(&mut self) {
+    fn start(&mut self, header: &[u8]) {
+        let header_len = header.len();
+
         // Step 3: pos ← 8 + |A| + |K| (in bits) = 1 + header_len (in bytes)
-        let header_len = self.header_len;
         self.offset = 1 + header_len;
 
         // Step 4: S[...pos) ← ⟨|A|/2 + |K|/32⟩_8 || A || K
@@ -125,13 +124,12 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashCore<L, D> {
         self.modify_byte(0, |b| *b = first_byte);
 
         // Copy header bytes
-        for i in 0..header_len {
-            let byte = self.header[i];
+        for (i, &byte) in header.iter().enumerate() {
             self.modify_byte(1 + i, |b| *b = byte);
         }
 
         // Step 6: S[1472...) ← ⟨ℓ/4 + d⟩_64
-        self.state[23] = (L::LEVEL / 4 + D::CAPACITY) as u64;
+        self.state[23] = (L::USIZE / 4 + D::USIZE) as u64;
     }
 
     /// Execute commit command (Section 8.4)
@@ -154,17 +152,7 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashCore<L, D> {
 
     /// Execute absorb command (Section 8.6)
     pub(crate) fn absorb(&mut self, data: &[u8]) {
-        // Check if initialized: state[23] == 0 means not initialized
-        if self.state[23] == 0 {
-            self.start();
-        }
-
         // Step 1: commit(DATA) - only once per absorption session
-        // We need data_committed because offset == 0 can happen multiple times:
-        // - After finalize() (need commit(DATA))
-        // - After commit(DATA) but before absorbing (already did commit)
-        // - After full block during absorption (offset resets to 0)
-        // - After empty data calls (offset stays 0)
         if !self.data_committed {
             self.commit(DATA);
             self.data_committed = true;
@@ -188,10 +176,6 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashCore<L, D> {
 
     /// Prepare for reading output (squeeze)
     pub(crate) fn finalize(&mut self) {
-        if self.state[23] == 0 {
-            self.start();
-        }
-
         self.commit(OUT);
         self.data_committed = false; // Reset for next absorption session
     }
@@ -213,40 +197,37 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashCore<L, D> {
     }
 }
 
-impl<L: SecurityLevel, D: Capacity> Clone for BashPrgHashCore<L, D> {
+impl<L: SecurityLevel, D: Capacity> Clone for BashPrgHashState<L, D> {
     fn clone(&self) -> Self {
         Self {
             state: self.state,
             rate_bytes: self.rate_bytes,
             offset: self.offset,
-            header: self.header,
-            header_len: self.header_len,
             data_committed: self.data_committed,
-            _level: PhantomData,
-            _capacity: PhantomData,
+            _pd: PhantomData,
         }
     }
 }
 
-impl<L: SecurityLevel, D: Capacity> Default for BashPrgHashCore<L, D> {
+impl<L: SecurityLevel, D: Capacity> Default for BashPrgHashState<L, D> {
     fn default() -> Self {
-        Self::new(&[])
+        Self::new_customized(&[])
     }
 }
 
-impl<L: SecurityLevel, D: Capacity> AlgorithmName for BashPrgHashCore<L, D> {
+impl<L: SecurityLevel, D: Capacity> AlgorithmName for BashPrgHashState<L, D> {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "BashPrgHash{}-{}", L::LEVEL, D::CAPACITY)
+        write!(f, "BashPrgHash{}-{}", L::USIZE, D::USIZE)
     }
 }
 
-impl<L: SecurityLevel, D: Capacity> fmt::Debug for BashPrgHashCore<L, D> {
+impl<L: SecurityLevel, D: Capacity> fmt::Debug for BashPrgHashState<L, D> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("BashPrgHashCore { ... }")
+        f.write_str("BashPrgHashState { ... }")
     }
 }
 
-impl<L: SecurityLevel, D: Capacity> Drop for BashPrgHashCore<L, D> {
+impl<L: SecurityLevel, D: Capacity> Drop for BashPrgHashState<L, D> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
@@ -257,4 +238,4 @@ impl<L: SecurityLevel, D: Capacity> Drop for BashPrgHashCore<L, D> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<L: SecurityLevel, D: Capacity> digest::zeroize::ZeroizeOnDrop for BashPrgHashCore<L, D> {}
+impl<L: SecurityLevel, D: Capacity> digest::zeroize::ZeroizeOnDrop for BashPrgHashState<L, D> {}
