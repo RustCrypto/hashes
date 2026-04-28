@@ -2,7 +2,7 @@ use crate::variants::{Capacity, SecurityLevel};
 use bash_f::{STATE_WORDS, bash_f};
 use core::{fmt, marker::PhantomData};
 use digest::{
-    CustomizedInit, block_api::BlockSizeUser, core_api::AlgorithmName, typenum::Unsigned,
+    CustomizedInit, block_api::AlgorithmName, block_api::BlockSizeUser, typenum::Unsigned,
 };
 
 /// Data type codes from Table 3 of STB 34.101.77-2020
