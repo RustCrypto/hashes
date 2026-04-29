@@ -8,6 +8,21 @@
 [![Project Chat][chat-image]][chat-link]
 
 Pure Rust implementation of the `bash-prg-hash` function specified in [STB 34.101.77-2020].
+## Examples
+```rust
+use hex_literal::hex;
+use bash_prg_hash::{BashPrgHash2561, Digest};
+use digest::{Update, ExtendableOutput};
+let mut hasher = BashPrgHash2561::default();
+hasher.update(b"hello world!");
+
+let mut hash = [0u8; 32];
+hasher.finalize_xof_into(&mut hash);
+
+assert_eq!(hash, hex!("0C6B82907AE77386DDF0BA2D7CFDDD99F79A9B0094E545AEF8968A99440F5185"));
+```
+
+Also, see the [examples section] in the RustCrypto/hashes readme.
 
 ## License
 
