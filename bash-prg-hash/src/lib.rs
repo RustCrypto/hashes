@@ -15,9 +15,8 @@ mod oids;
 mod variants;
 
 use bash_f::{STATE_WORDS, bash_f};
-use core::ops::Div;
 use core::{fmt, marker::PhantomData};
-use digest::typenum::Unsigned;
+use digest::consts::{U16, U24, U32};
 use digest::{
     ExtendableOutput, ExtendableOutputReset, Reset, Update, XofReader,
     typenum::{U1, U2, U128, U192, U256},
@@ -105,12 +104,16 @@ impl<L: SecurityLevel, D: Capacity> fmt::Debug for BashPrgHash<L, D> {
     }
 }
 
-impl<L: SecurityLevel, D: Capacity> digest::CollisionResistance for BashPrgHash<L, D>
-where
-    L: Div<digest::typenum::U8>,
-    <L as Div<digest::typenum::U8>>::Output: Unsigned,
-{
-    type CollisionResistance = <L as Div<digest::typenum::U8>>::Output;
+impl<D: Capacity> digest::CollisionResistance for BashPrgHash<U128, D> {
+    type CollisionResistance = U16;
+}
+
+impl<D: Capacity> digest::CollisionResistance for BashPrgHash<U192, D> {
+    type CollisionResistance = U24;
+}
+
+impl<D: Capacity> digest::CollisionResistance for BashPrgHash<U256, D> {
+    type CollisionResistance = U32;
 }
 
 #[cfg(feature = "zeroize")]
