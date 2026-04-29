@@ -50,13 +50,13 @@ const OUT: u8 = 0b000100;
 pub struct BashPrgHash<L: SecurityLevel, D: Capacity> {
     state: [u64; STATE_WORDS],
     /// current offset in bytes
-    offset: usize,
+    offset: u8,
     _pd: PhantomData<(L, D)>,
 }
 
 impl<L: SecurityLevel, D: Capacity> Default for BashPrgHash<L, D> {
     fn default() -> Self {
-        Self::new_customized(&[])
+        Self::new_customized(&[][..])
     }
 }
 
@@ -123,7 +123,7 @@ impl<L: SecurityLevel, D: Capacity> digest::zeroize::ZeroizeOnDrop for BashPrgHa
 #[derive(Clone)]
 pub struct BashPrgHashReader<L: SecurityLevel, D: Capacity> {
     state: [u64; STATE_WORDS],
-    offset: usize,
+    offset: u8,
     _pd: PhantomData<(L, D)>,
 }
 
@@ -183,26 +183,42 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHash<L, D> {
     }
 
     /// XOR input bytes into state at current offset
-    fn xor_in(state: &mut [u64; STATE_WORDS], offset: &mut usize, input: &[u8]) {
+    fn xor_in(state: &mut [u64; STATE_WORDS], offset: &mut u8, input: &[u8]) {
+        let offset_usize = usize::from(*offset);
         for (i, &byte) in input.iter().enumerate() {
-            Self::modify_byte(state, *offset + i, |b| *b ^= byte);
+            Self::modify_byte(state, offset_usize + i, |b| *b ^= byte);
         }
-        *offset += input.len();
+        let input_len: u8 = input
+            .len()
+            .try_into()
+            .expect("chunk length keeps pos within u8 range");
+        *offset = (*offset)
+            .checked_add(input_len)
+            .expect("offset increment overflow");
     }
 
     /// Extract bytes from state at current offset
-    fn extract_bytes(state: &[u64; STATE_WORDS], offset: &mut usize, output: &mut [u8]) {
+    fn extract_bytes(state: &[u64; STATE_WORDS], offset: &mut u8, output: &mut [u8]) {
+        let offset_usize = usize::from(*offset);
         for (i, out_byte) in output.iter_mut().enumerate() {
-            *out_byte = Self::get_byte(state, *offset + i);
+            *out_byte = Self::get_byte(state, offset_usize + i);
         }
-        *offset += output.len();
+        let output_len: u8 = output
+            .len()
+            .try_into()
+            .expect("chunk length keeps pos within u8 range");
+        *offset = (*offset)
+            .checked_add(output_len)
+            .expect("offset increment overflow");
     }
 
     /// `start[ℓ, 𝑑](𝐴, 𝐾)` (Section 8.3.2)
     fn start(&mut self, header: &[u8]) {
         let header_len = header.len();
         // Step 3: pos <- 8 + |A| + |K| (in bits), i.e. 1 + |A| + |K| (in bytes).
-        self.offset = 1 + header_len;
+        self.offset = (1 + header_len)
+            .try_into()
+            .expect("header length keeps pos within u8 range");
         // Step 4: S[...pos) <- <|A|/2 + |K|/32>_8 || A || K.
         let first_byte = ((header_len * 8) / 2) as u8;
         Self::modify_byte(&mut self.state, 0, |b| *b = first_byte);
@@ -217,7 +233,7 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHash<L, D> {
     fn commit(&mut self, t: u8) {
         // Step 1: S[pos...pos+8) <- S[pos...pos+8) xor (t || 01).
         let tag = (t << 2) | 0x01;
-        Self::modify_byte(&mut self.state, self.offset, |b| *b ^= tag);
+        Self::modify_byte(&mut self.state, usize::from(self.offset), |b| *b ^= tag);
         // Step 2: S[r] <- S[r] xor 1, where r = 1536 - 2 d ℓ (bit index).
         let r_bit_in_byte = (Self::rate_bytes() * 8) % 8;
         Self::modify_byte(&mut self.state, Self::rate_bytes(), |b| {
@@ -234,11 +250,13 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHash<L, D> {
         // Steps 2-3: process X in blocks of length up to r - pos.
         let mut input = data;
         while !input.is_empty() {
-            let to_absorb = input.len().min(Self::rate_bytes() - self.offset);
+            let to_absorb = input
+                .len()
+                .min(Self::rate_bytes() - usize::from(self.offset));
             // S[pos...pos+|X_i|) <- S[pos...pos+|X_i|) xor X_i, pos <- pos + |X_i|.
             Self::xor_in(&mut self.state, &mut self.offset, &input[..to_absorb]);
             input = &input[to_absorb..];
-            if self.offset == Self::rate_bytes() {
+            if usize::from(self.offset) == Self::rate_bytes() {
                 // If pos = r, then S <- bash-f(S), pos <- 0.
                 bash_f(&mut self.state);
                 self.offset = 0;
@@ -257,14 +275,14 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashReader<L, D> {
     fn squeeze(&mut self, output: &mut [u8]) {
         let mut remaining = output;
         while !remaining.is_empty() {
-            if self.offset == BashPrgHash::<L, D>::rate_bytes() {
+            if usize::from(self.offset) == BashPrgHash::<L, D>::rate_bytes() {
                 // If pos = r, then S <- bash-f(S), pos <- 0.
                 bash_f(&mut self.state);
                 self.offset = 0;
             }
             let to_squeeze = remaining
                 .len()
-                .min(BashPrgHash::<L, D>::rate_bytes() - self.offset);
+                .min(BashPrgHash::<L, D>::rate_bytes() - usize::from(self.offset));
             // Y_i <- S[pos...pos+|Y_i|), pos <- pos + |Y_i|.
             BashPrgHash::<L, D>::extract_bytes(
                 &self.state,
