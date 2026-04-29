@@ -15,12 +15,8 @@ const OUT: u8 = 0b000100;
 /// Specified in Section 8.12 of STB 34.101.77-2020.
 pub struct BashPrgHashState<L: SecurityLevel, D: Capacity> {
     state: [u64; STATE_WORDS],
-    /// r/8 - buffer size in bytes
-    rate_bytes: usize,
     /// current offset in bytes
     offset: usize,
-    /// whether commit(DATA) was called
-    data_committed: bool,
     _pd: PhantomData<(L, D)>,
 }
 
@@ -61,21 +57,20 @@ impl<L: SecurityLevel, D: Capacity> CustomizedInit for BashPrgHashState<L, D> {
 
         let mut state = Self {
             state: [0u64; STATE_WORDS],
-            rate_bytes: Self::calculate_rate_bytes(),
             offset: 0,
-            data_committed: false,
             _pd: PhantomData,
         };
 
         // Immediately consume header during initialization
         state.start(header);
+        state.commit(DATA);
         state
     }
 }
 
 impl<L: SecurityLevel, D: Capacity> BashPrgHashState<L, D> {
     /// Calculate buffer size r = 1536 - 2dℓ (in bytes)
-    const fn calculate_rate_bytes() -> usize {
+    const fn rate_bytes() -> usize {
         (1536 - 2 * D::USIZE * L::USIZE) / 8
     }
 
@@ -139,9 +134,9 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashState<L, D> {
         self.modify_byte(self.offset, |b| *b ^= tag);
 
         // Step 2: S[r] ← S[r] ⊕ 1 (flip bit at position r in bits)
-        let r_bit_in_byte = (self.rate_bytes * 8) % 8;
+        let r_bit_in_byte = (Self::rate_bytes() * 8) % 8;
         // MSB-first within a byte: bit index i maps to (7 - i)
-        self.modify_byte(self.rate_bytes, |b| *b ^= 1u8 << (7 - r_bit_in_byte));
+        self.modify_byte(Self::rate_bytes(), |b| *b ^= 1u8 << (7 - r_bit_in_byte));
 
         // Step 3: S ← bash-f(S)
         bash_f(&mut self.state);
@@ -152,22 +147,16 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashState<L, D> {
 
     /// Execute absorb command (Section 8.6)
     pub(crate) fn absorb(&mut self, data: &[u8]) {
-        // Step 1: commit(DATA) - only once per absorption session
-        if !self.data_committed {
-            self.commit(DATA);
-            self.data_committed = true;
-        }
-
         // Steps 2-3: Process blocks
         let mut input = data;
 
         while !input.is_empty() {
-            let to_absorb = input.len().min(self.rate_bytes - self.offset);
+            let to_absorb = input.len().min(Self::rate_bytes() - self.offset);
 
             self.xor_in(&input[..to_absorb]);
             input = &input[to_absorb..];
 
-            if self.offset == self.rate_bytes {
+            if self.offset == Self::rate_bytes() {
                 bash_f(&mut self.state);
                 self.offset = 0;
             }
@@ -177,7 +166,6 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashState<L, D> {
     /// Prepare for reading output (squeeze)
     pub(crate) fn finalize(&mut self) {
         self.commit(OUT);
-        self.data_committed = false; // Reset for next absorption session
     }
 
     /// Execute squeeze command (Section 8.7)
@@ -185,12 +173,12 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashState<L, D> {
         let mut remaining = output;
 
         while !remaining.is_empty() {
-            if self.offset == self.rate_bytes {
+            if self.offset == Self::rate_bytes() {
                 bash_f(&mut self.state);
                 self.offset = 0;
             }
 
-            let to_squeeze = remaining.len().min(self.rate_bytes - self.offset);
+            let to_squeeze = remaining.len().min(Self::rate_bytes() - self.offset);
             self.extract_bytes(&mut remaining[..to_squeeze]);
             remaining = &mut remaining[to_squeeze..];
         }
@@ -201,9 +189,7 @@ impl<L: SecurityLevel, D: Capacity> Clone for BashPrgHashState<L, D> {
     fn clone(&self) -> Self {
         Self {
             state: self.state,
-            rate_bytes: self.rate_bytes,
             offset: self.offset,
-            data_committed: self.data_committed,
             _pd: PhantomData,
         }
     }

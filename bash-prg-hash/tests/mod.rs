@@ -24,7 +24,7 @@ macro_rules! test_bash_prg_rand {
         }
     };
 }
-//
+
 test_bash_prg_rand!(
     bashprg1282_rand,
     BashPrgHash1282,
