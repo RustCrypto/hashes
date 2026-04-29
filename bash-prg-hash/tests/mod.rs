@@ -17,11 +17,8 @@ macro_rules! test_bash_prg_rand {
             use digest::typenum::Unsigned;
             let mut h = <$hasher>::default();
             digest::dev::feed_rand_16mib(&mut h);
-            let mut output = [
-                0u8;
-                <<$hasher as CollisionResistance>::CollisionResistance as Unsigned>::USIZE
-                    * 2
-            ];
+            let mut output = [0u8;
+                <<$hasher as CollisionResistance>::CollisionResistance as Unsigned>::USIZE * 2];
             h.finalize_xof_into(&mut output);
             assert_eq!(&output[..], $expected);
         }
