@@ -1,4 +1,5 @@
-use digest::typenum::{U1, U2, U128, U192, U256, Unsigned};
+use digest::consts::U24;
+use digest::typenum::{U1, U2, U16, U32, Unsigned};
 
 mod sealed {
     /// Sealed trait to prevent external implementations of SecurityLevel.
@@ -27,14 +28,14 @@ pub trait SecurityLevel: sealed::SecurityLevel + Unsigned {}
 pub trait Capacity: sealed::Capacity + Unsigned {}
 
 // Security level implementations
-impl sealed::SecurityLevel for U128 {}
-impl SecurityLevel for U128 {}
+impl sealed::SecurityLevel for U16 {}
+impl SecurityLevel for U16 {}
 
-impl sealed::SecurityLevel for U192 {}
-impl SecurityLevel for U192 {}
+impl sealed::SecurityLevel for U24 {}
+impl SecurityLevel for U24 {}
 
-impl sealed::SecurityLevel for U256 {}
-impl SecurityLevel for U256 {}
+impl sealed::SecurityLevel for U32 {}
+impl SecurityLevel for U32 {}
 
 // Capacity implementations
 impl sealed::Capacity for U1 {}

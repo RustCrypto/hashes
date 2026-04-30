@@ -16,10 +16,9 @@ mod variants;
 
 use bash_f::{STATE_WORDS, bash_f};
 use core::{fmt, marker::PhantomData};
-use digest::consts::{U16, U24, U32};
 use digest::{
     ExtendableOutput, ExtendableOutputReset, Reset, Update, XofReader,
-    typenum::{U1, U2, U128, U192, U256},
+    typenum::{U1, U2, U16, U24, U32},
 };
 pub use variants::{Capacity, SecurityLevel};
 
@@ -28,11 +27,11 @@ const DATA: u8 = 0b000010;
 /// Data type codes from Table 3 of STB 34.101.77-2020
 const OUT: u8 = 0b000100;
 
-/// bash-prg-hash hasher generic over security level and capacity.
+/// `bash-prg-hash` hasher generic over security level and capacity.
 ///
 /// # Generic Parameters
 ///
-/// - `L`: Security level ℓ ∈ {128, 192, 256}. Use `U128`, `U192`, or `U256` from `digest::typenum`.
+/// - `L`: Security level ℓ ∈ {128, 192, 256}. Use `U16`, `U24`, or `U32` from `digest::typenum`.
 /// - `D`: Capacity d ∈ {1, 2}. Use `U1` or `U2` from `digest::typenum`.
 ///
 /// # Examples
@@ -104,16 +103,8 @@ impl<L: SecurityLevel, D: Capacity> fmt::Debug for BashPrgHash<L, D> {
     }
 }
 
-impl<D: Capacity> digest::CollisionResistance for BashPrgHash<U128, D> {
-    type CollisionResistance = U16;
-}
-
-impl<D: Capacity> digest::CollisionResistance for BashPrgHash<U192, D> {
-    type CollisionResistance = U24;
-}
-
-impl<D: Capacity> digest::CollisionResistance for BashPrgHash<U256, D> {
-    type CollisionResistance = U32;
+impl<L: SecurityLevel, D: Capacity> digest::CollisionResistance for BashPrgHash<L, D> {
+    type CollisionResistance = L;
 }
 
 #[cfg(feature = "zeroize")]
@@ -138,8 +129,8 @@ impl<L: SecurityLevel, D: Capacity> digest::zeroize::ZeroizeOnDrop for BashPrgHa
 
 impl<L: SecurityLevel, D: Capacity> BashPrgHash<L, D> {
     /// Calculate buffer size r = 1536 - 2dℓ (in bytes)
-    const fn rate_bytes() -> usize {
-        (1536 - 2 * D::USIZE * L::USIZE) / 8
+    const fn rate() -> usize {
+        192 - 2 * D::USIZE * L::USIZE
     }
 
     fn new_customized(header: &[u8]) -> Self {
@@ -225,8 +216,8 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHash<L, D> {
         for (i, &byte) in header.iter().enumerate() {
             Self::modify_byte(&mut self.state, 1 + i, |b| *b = byte);
         }
-        // Step 6: S[1472...) <- <ℓ/4 + d>_64.
-        self.state[23] = (L::USIZE / 4 + D::USIZE) as u64;
+        // Step 6: S[1472...) <- <ℓ/4 + d>_64, where ℓ in bits = L*8
+        self.state[23] = (L::USIZE * 2 + D::USIZE) as u64;
     }
 
     /// `commit[ℓ, d](t)` (Section 8.4.2)
@@ -235,8 +226,8 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHash<L, D> {
         let tag = (t << 2) | 0x01;
         Self::modify_byte(&mut self.state, usize::from(self.offset), |b| *b ^= tag);
         // Step 2: S[r] <- S[r] xor 1, where r = 1536 - 2 d ℓ (bit index).
-        let r_bit_in_byte = (Self::rate_bytes() * 8) % 8;
-        Self::modify_byte(&mut self.state, Self::rate_bytes(), |b| {
+        let r_bit_in_byte = (Self::rate() * 8) % 8;
+        Self::modify_byte(&mut self.state, Self::rate(), |b| {
             *b ^= 1u8 << (7 - r_bit_in_byte)
         });
         // Step 3: S <- bash-f(S).
@@ -250,13 +241,11 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHash<L, D> {
         // Steps 2-3: process X in blocks of length up to r - pos.
         let mut input = data;
         while !input.is_empty() {
-            let to_absorb = input
-                .len()
-                .min(Self::rate_bytes() - usize::from(self.offset));
+            let to_absorb = input.len().min(Self::rate() - usize::from(self.offset));
             // S[pos...pos+|X_i|) <- S[pos...pos+|X_i|) xor X_i, pos <- pos + |X_i|.
             Self::xor_in(&mut self.state, &mut self.offset, &input[..to_absorb]);
             input = &input[to_absorb..];
-            if usize::from(self.offset) == Self::rate_bytes() {
+            if usize::from(self.offset) == Self::rate() {
                 // If pos = r, then S <- bash-f(S), pos <- 0.
                 bash_f(&mut self.state);
                 self.offset = 0;
@@ -275,14 +264,14 @@ impl<L: SecurityLevel, D: Capacity> BashPrgHashReader<L, D> {
     fn squeeze(&mut self, output: &mut [u8]) {
         let mut remaining = output;
         while !remaining.is_empty() {
-            if usize::from(self.offset) == BashPrgHash::<L, D>::rate_bytes() {
+            if usize::from(self.offset) == BashPrgHash::<L, D>::rate() {
                 // If pos = r, then S <- bash-f(S), pos <- 0.
                 bash_f(&mut self.state);
                 self.offset = 0;
             }
             let to_squeeze = remaining
                 .len()
-                .min(BashPrgHash::<L, D>::rate_bytes() - usize::from(self.offset));
+                .min(BashPrgHash::<L, D>::rate() - usize::from(self.offset));
             // Y_i <- S[pos...pos+|Y_i|), pos <- pos + |Y_i|.
             BashPrgHash::<L, D>::extract_bytes(
                 &self.state,
@@ -315,14 +304,14 @@ impl<L: SecurityLevel, D: Capacity> Drop for BashPrgHashReader<L, D> {
 }
 
 /// bash-prg-hash with ℓ = 128 and d = 1
-pub type BashPrgHash1281 = BashPrgHash<U128, U1>;
+pub type BashPrgHash1281 = BashPrgHash<U16, U1>;
 /// bash-prg-hash with ℓ = 128 and d = 2
-pub type BashPrgHash1282 = BashPrgHash<U128, U2>;
+pub type BashPrgHash1282 = BashPrgHash<U16, U2>;
 /// bash-prg-hash with ℓ = 192 and d = 1
-pub type BashPrgHash1921 = BashPrgHash<U192, U1>;
+pub type BashPrgHash1921 = BashPrgHash<U24, U1>;
 /// bash-prg-hash with ℓ = 192 and d = 2
-pub type BashPrgHash1922 = BashPrgHash<U192, U2>;
+pub type BashPrgHash1922 = BashPrgHash<U24, U2>;
 /// bash-prg-hash with ℓ = 256 and d = 1
-pub type BashPrgHash2561 = BashPrgHash<U256, U1>;
+pub type BashPrgHash2561 = BashPrgHash<U32, U1>;
 /// bash-prg-hash with ℓ = 256 and d = 2
-pub type BashPrgHash2562 = BashPrgHash<U256, U2>;
+pub type BashPrgHash2562 = BashPrgHash<U32, U2>;
