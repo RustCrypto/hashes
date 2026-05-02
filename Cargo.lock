@@ -123,6 +123,7 @@ dependencies = [
  "digest",
  "hex-literal",
  "keccak",
+ "sponge-cursor",
 ]
 
 [[package]]
@@ -353,6 +354,15 @@ version = "0.5.0"
 dependencies = [
  "digest",
  "hex-literal",
+]
+
+[[package]]
+name = "sponge-cursor"
+version = "0.1.0"
+source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#8ff587ce452a552ce7730338972b78a098079ed9"
+dependencies = [
+ "hybrid-array",
+ "zeroize",
 ]
 
 [[package]]

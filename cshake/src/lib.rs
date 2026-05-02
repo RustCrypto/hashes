@@ -11,15 +11,15 @@
 
 pub use digest;
 
-use core::fmt;
+use core::{fmt, marker::PhantomData};
 use digest::{
     CollisionResistance, CustomizedInit, ExtendableOutput, HashMarker, Update, XofReader,
-    array::Array,
+    array::ArraySize,
     block_api::{AlgorithmName, BlockSizeUser},
-    block_buffer::{BlockSizes, EagerBuffer, LazyBuffer, ReadBuffer},
     consts::{U16, U32, U136, U168},
 };
 use keccak::{Keccak, State1600};
+use sponge_cursor::SpongeCursor;
 
 const SHAKE_PAD: u8 = 0x1F;
 const CSHAKE_PAD: u8 = 0x04;
@@ -33,21 +33,22 @@ pub type CShake256 = CShake<U136>;
 ///
 /// Rate MUST be either [`U168`] or [`U136`] for cSHAKE128 and cSHAKE256 respectively.
 #[derive(Clone)]
-pub struct CShake<Rate: BlockSizes> {
+pub struct CShake<Rate: ArraySize> {
     state: State1600,
-    buffer: EagerBuffer<Rate>,
+    cursor: SpongeCursor<Rate>,
     pad: u8,
     keccak: Keccak,
+    _pd: PhantomData<Rate>,
 }
 
-impl<Rate: BlockSizes> Default for CShake<Rate> {
+impl<Rate: ArraySize> Default for CShake<Rate> {
     #[inline]
     fn default() -> Self {
         Self::new_with_function_name(b"", b"")
     }
 }
 
-impl<Rate: BlockSizes> CShake<Rate> {
+impl<Rate: ArraySize> CShake<Rate> {
     /// Creates a new cSHAKE instance with the given function name and customization.
     ///
     /// Note that the function name is intended for use by NIST and should only be set to
@@ -57,16 +58,16 @@ impl<Rate: BlockSizes> CShake<Rate> {
             assert!(Rate::USIZE == 168 || Rate::USIZE == 136, "unsupported rate");
         }
 
-        let buffer = Default::default();
         let keccak = Keccak::new();
         let mut state = State1600::default();
 
         if function_name.is_empty() && customization.is_empty() {
             return Self {
                 state,
-                buffer,
-                keccak,
+                cursor: Default::default(),
                 pad: SHAKE_PAD,
+                keccak,
+                _pd: PhantomData,
             };
         }
 
@@ -79,102 +80,83 @@ impl<Rate: BlockSizes> CShake<Rate> {
         }
 
         keccak.with_f1600(|f1600| {
-            let mut buffer: LazyBuffer<Rate> = Default::default();
+            let mut cursor: SpongeCursor<Rate> = Default::default();
             let state = &mut state;
             let mut b = [0u8; 9];
 
-            buffer.digest_blocks(left_encode(Rate::U64, &mut b), |blocks| {
-                update_blocks(f1600, state, blocks)
-            });
+            cursor.absorb_u64_le(state, f1600, left_encode(Rate::U64, &mut b));
 
             let mut encode_str = |str: &[u8]| {
                 let str_bits_len = 8 * u64::try_from(str.len())
                     .expect("in practice strings can not be longer than u64::MAX");
                 let encoded_len = left_encode(str_bits_len, &mut b);
-                buffer.digest_blocks(encoded_len, |blocks| update_blocks(f1600, state, blocks));
-                buffer.digest_blocks(str, |blocks| update_blocks(f1600, state, blocks));
+                cursor.absorb_u64_le(state, f1600, encoded_len);
+                cursor.absorb_u64_le(state, f1600, str);
             };
 
             encode_str(function_name);
             encode_str(customization);
 
-            update_blocks(f1600, state, &[buffer.pad_with_zeros()])
+            if cursor.pos() != 0 {
+                f1600(state);
+            }
         });
 
         Self {
             state,
-            buffer,
-            keccak,
+            cursor: Default::default(),
             pad: CSHAKE_PAD,
+            keccak,
+            _pd: PhantomData,
         }
     }
 }
 
-impl<Rate: BlockSizes> CustomizedInit for CShake<Rate> {
+impl<Rate: ArraySize> CustomizedInit for CShake<Rate> {
     #[inline]
     fn new_customized(customization: &[u8]) -> Self {
         Self::new_with_function_name(&[], customization)
     }
 }
 
-impl<Rate: BlockSizes> HashMarker for CShake<Rate> {}
+impl<Rate: ArraySize> HashMarker for CShake<Rate> {}
 
-impl<Rate: BlockSizes> BlockSizeUser for CShake<Rate> {
+impl<Rate: ArraySize> BlockSizeUser for CShake<Rate> {
     type BlockSize = Rate;
 }
 
-impl<Rate: BlockSizes> Update for CShake<Rate> {
+impl<Rate: ArraySize> Update for CShake<Rate> {
     fn update(&mut self, data: &[u8]) {
-        let Self {
-            state,
-            buffer,
-            keccak,
-            ..
-        } = self;
-
-        keccak.with_f1600(|f1600| {
-            buffer.digest_blocks(data, |blocks| update_blocks(f1600, state, blocks));
+        self.keccak.with_f1600(|f1600| {
+            self.cursor.absorb_u64_le(&mut self.state, f1600, data);
         });
     }
 }
 
-impl<Rate: BlockSizes> CShake<Rate> {
-    fn finalize_dirty(&mut self) {
-        let Self {
-            state,
-            buffer,
-            pad,
-            keccak,
-        } = self;
-
-        let pos = buffer.get_pos();
-        let mut block = buffer.pad_with_zeros();
-        block[pos] = *pad;
-        let n = block.len();
-        block[n - 1] |= 0x80;
-
-        keccak.with_f1600(|f1600| {
-            xor_block(state, &block);
-            f1600(state);
-        });
-    }
-}
-
-impl<Rate: BlockSizes> ExtendableOutput for CShake<Rate> {
+impl<Rate: ArraySize> ExtendableOutput for CShake<Rate> {
     type Reader = CShakeReader<Rate>;
 
     #[inline]
     fn finalize_xof(mut self) -> Self::Reader {
-        self.finalize_dirty();
+        let pos = self.cursor.pos();
+        let word_offset = pos / 8;
+        let byte_offset = pos % 8;
+
+        let pad = u64::from(self.pad) << (8 * byte_offset);
+        self.state[word_offset] ^= pad;
+        self.state[Rate::USIZE / 8 - 1] ^= 1 << 63;
+
+        // Note that `CShakeReader` applies the permutation to the state before reading from it
+
         Self::Reader {
             state: self.state,
+            cursor: Default::default(),
             keccak: self.keccak,
-            buffer: Default::default(),
         }
     }
 }
 
-impl<Rate: BlockSizes> AlgorithmName for CShake<Rate> {
+impl<Rate: ArraySize> AlgorithmName for CShake<Rate> {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let alg_name = match Rate::USIZE {
             168 => "cSHAKE128",
@@ -185,7 +167,7 @@ impl<Rate: BlockSizes> AlgorithmName for CShake<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> fmt::Debug for CShake<Rate> {
+impl<Rate: ArraySize> fmt::Debug for CShake<Rate> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let debug_str = match Rate::USIZE {
             168 => "CShake128 { ... }",
@@ -196,53 +178,39 @@ impl<Rate: BlockSizes> fmt::Debug for CShake<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Drop for CShake<Rate> {
+impl<Rate: ArraySize> Drop for CShake<Rate> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
             use digest::zeroize::Zeroize;
             self.state.zeroize();
+            self.cursor.zeroize();
             self.pad.zeroize();
-            // self.buffer is zeroized by its `Drop`
         }
     }
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: BlockSizes> digest::zeroize::ZeroizeOnDrop for CShake<Rate> {}
+impl<Rate: ArraySize> digest::zeroize::ZeroizeOnDrop for CShake<Rate> {}
 
 /// Generic cSHAKE XOF reader
 #[derive(Clone)]
-pub struct CShakeReader<Rate: BlockSizes> {
+pub struct CShakeReader<Rate: ArraySize> {
     state: State1600,
+    cursor: SpongeCursor<Rate>,
     keccak: Keccak,
-    buffer: ReadBuffer<Rate>,
 }
 
-impl<Rate: BlockSizes> XofReader for CShakeReader<Rate> {
+impl<Rate: ArraySize> XofReader for CShakeReader<Rate> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) {
-        let Self {
-            state,
-            keccak,
-            buffer,
-        } = self;
-
-        buffer.read(buf, |block| {
-            let mut chunks = block.chunks_exact_mut(8);
-            for (src, dst) in state.iter().zip(&mut chunks) {
-                dst.copy_from_slice(&src.to_le_bytes());
-            }
-            assert!(
-                chunks.into_remainder().is_empty(),
-                "rate is either 136 or 168",
-            );
-            keccak.with_f1600(|f1600| f1600(state));
+        self.keccak.with_f1600(|f1600| {
+            self.cursor.squeeze_u64_le(&mut self.state, f1600, buf);
         });
     }
 }
 
-impl<Rate: BlockSizes> fmt::Debug for CShakeReader<Rate> {
+impl<Rate: ArraySize> fmt::Debug for CShakeReader<Rate> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let debug_str = match Rate::USIZE {
             168 => "TurboShakeReader128 { ... }",
@@ -253,44 +221,22 @@ impl<Rate: BlockSizes> fmt::Debug for CShakeReader<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Drop for CShakeReader<Rate> {
+impl<Rate: ArraySize> Drop for CShakeReader<Rate> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
             use digest::zeroize::Zeroize;
             self.state.zeroize();
-            // self.buffer is zeroized by its `Drop`
+            self.cursor.zeroize();
         }
     }
 }
 
-// https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf#[{"num":68,"gen":0},{"name":"XYZ"},108,440,null]
+// See Section 8.3 of NIST SP 800-185:
+// https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-185.pdf
 impl CollisionResistance for CShake128 {
     type CollisionResistance = U16;
 }
 impl CollisionResistance for CShake256 {
     type CollisionResistance = U32;
-}
-
-fn xor_block(state: &mut State1600, block: &[u8]) {
-    assert!(size_of_val(block) < size_of_val(state));
-
-    let mut chunks = block.chunks_exact(8);
-    for (s, chunk) in state.iter_mut().zip(&mut chunks) {
-        *s ^= u64::from_le_bytes(chunk.try_into().unwrap());
-    }
-
-    let rem = chunks.remainder();
-    assert!(rem.is_empty(), "block size is equal to 136 or 168");
-}
-
-fn update_blocks<N: BlockSizes>(
-    f1600: keccak::Fn1600,
-    state: &mut State1600,
-    blocks: &[Array<u8, N>],
-) {
-    for block in blocks {
-        xor_block(state, block);
-        f1600(state);
-    }
 }

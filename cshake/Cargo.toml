@@ -13,8 +13,9 @@ categories = ["cryptography", "no-std"]
 description = "Implementation of the cSHAKE family of extendable-output functions (XOFs)"
 
 [dependencies]
-digest = "0.11"
+digest = { version = "0.11", default-features = false }
 keccak = "0.2"
+sponge-cursor = { git = "https://github.com/RustCrypto/utils", branch = "add-sponge-cursor" }
 
 [dev-dependencies]
 digest = { version = "0.11", features = ["dev"] }
@@ -23,7 +24,7 @@ hex-literal = "1"
 [features]
 default = ["alloc"]
 alloc = ["digest/alloc"]
-zeroize = ["digest/zeroize"]
+zeroize = ["digest/zeroize", "sponge-cursor/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true
