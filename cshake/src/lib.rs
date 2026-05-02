@@ -15,7 +15,7 @@ use core::{fmt, marker::PhantomData};
 use digest::{
     CollisionResistance, CustomizedInit, ExtendableOutput, HashMarker, Update, XofReader,
     array::ArraySize,
-    block_api::{AlgorithmName, BlockSizeUser},
+    common::{AlgorithmName, BlockSizeUser},
     consts::{U16, U32, U136, U168},
 };
 use keccak::{Keccak, State1600};
