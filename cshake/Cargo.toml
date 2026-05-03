@@ -15,10 +15,10 @@ description = "Implementation of the cSHAKE family of extendable-output function
 [dependencies]
 digest = { version = "0.11", default-features = false }
 keccak = "0.2"
-sponge-cursor = { git = "https://github.com/RustCrypto/utils", branch = "add-sponge-cursor" }
+sponge-cursor = "0.1"
 
 [dev-dependencies]
-digest = { version = "0.11", features = ["dev"] }
+digest = { version = "0.11", default-features = false, features = ["dev"] }
 hex-literal = "1"
 
 [features]

@@ -408,6 +408,7 @@ dependencies = [
  "digest",
  "hex-literal",
  "keccak",
+ "sponge-cursor",
 ]
 
 [[package]]
