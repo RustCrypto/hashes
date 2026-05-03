@@ -24,6 +24,7 @@ dependencies = [
  "ascon",
  "digest",
  "hex-literal",
+ "sponge-cursor",
 ]
 
 [[package]]
@@ -359,7 +360,7 @@ dependencies = [
 [[package]]
 name = "sponge-cursor"
 version = "0.1.0"
-source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#8ff587ce452a552ce7730338972b78a098079ed9"
+source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#d5900bf4ff1953757ad2a0a63d427c3e28ef6b26"
 dependencies = [
  "hybrid-array",
  "zeroize",
