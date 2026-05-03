@@ -5,7 +5,7 @@ use core::fmt;
 use digest::{
     CollisionResistance, CustomizedInit, ExtendableOutput, ExtendableOutputReset, HashMarker,
     Reset, Update,
-    block_buffer::BlockSizes,
+    array::ArraySize,
     common::{AlgorithmName, BlockSizeUser},
     consts::{U16, U32, U136, U168},
 };
@@ -14,12 +14,12 @@ use crate::{Kt, KtReader, utils::length_encode};
 
 /// Customized KangarooTwelve hasher generic over rate with owned customization string.
 #[derive(Clone)]
-pub struct CustomKt<Rate: BlockSizes> {
+pub struct CustomKt<Rate: ArraySize> {
     customization: Vec<u8>,
     inner: Kt<Rate>,
 }
 
-impl<Rate: BlockSizes> CustomizedInit for CustomKt<Rate> {
+impl<Rate: ArraySize> CustomizedInit for CustomKt<Rate> {
     #[inline]
     fn new_customized(customization: &[u8]) -> Self {
         let len = u64::try_from(customization.len()).expect("length should always fit into `u64`");
@@ -37,48 +37,48 @@ impl<Rate: BlockSizes> CustomizedInit for CustomKt<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Default for CustomKt<Rate> {
+impl<Rate: ArraySize> Default for CustomKt<Rate> {
     #[inline]
     fn default() -> Self {
         Self::new_customized(&[])
     }
 }
 
-impl<Rate: BlockSizes> fmt::Debug for CustomKt<Rate> {
+impl<Rate: ArraySize> fmt::Debug for CustomKt<Rate> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "CustomKt{} {{ ... }}", 4 * (200 - Rate::USIZE))
     }
 }
 
-impl<Rate: BlockSizes> AlgorithmName for CustomKt<Rate> {
+impl<Rate: ArraySize> AlgorithmName for CustomKt<Rate> {
     #[inline]
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Kt::<Rate>::write_alg_name(f)
     }
 }
 
-impl<Rate: BlockSizes> HashMarker for CustomKt<Rate> {}
+impl<Rate: ArraySize> HashMarker for CustomKt<Rate> {}
 
-impl<Rate: BlockSizes> BlockSizeUser for CustomKt<Rate> {
+impl<Rate: ArraySize> BlockSizeUser for CustomKt<Rate> {
     type BlockSize = Rate;
 }
 
-impl<Rate: BlockSizes> Update for CustomKt<Rate> {
+impl<Rate: ArraySize> Update for CustomKt<Rate> {
     #[inline]
     fn update(&mut self, data: &[u8]) {
         self.inner.update(data);
     }
 }
 
-impl<Rate: BlockSizes> Reset for CustomKt<Rate> {
+impl<Rate: ArraySize> Reset for CustomKt<Rate> {
     #[inline]
     fn reset(&mut self) {
         self.inner.reset();
     }
 }
 
-impl<Rate: BlockSizes> ExtendableOutput for CustomKt<Rate> {
+impl<Rate: ArraySize> ExtendableOutput for CustomKt<Rate> {
     type Reader = KtReader<Rate>;
 
     #[inline]
@@ -88,7 +88,7 @@ impl<Rate: BlockSizes> ExtendableOutput for CustomKt<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> ExtendableOutputReset for CustomKt<Rate> {
+impl<Rate: ArraySize> ExtendableOutputReset for CustomKt<Rate> {
     #[inline]
     fn finalize_xof_reset(&mut self) -> Self::Reader {
         self.inner.update(&self.customization);
@@ -98,7 +98,7 @@ impl<Rate: BlockSizes> ExtendableOutputReset for CustomKt<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Drop for CustomKt<Rate> {
+impl<Rate: ArraySize> Drop for CustomKt<Rate> {
     #[inline]
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
@@ -111,7 +111,7 @@ impl<Rate: BlockSizes> Drop for CustomKt<Rate> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: BlockSizes> digest::zeroize::ZeroizeOnDrop for CustomKt<Rate> {}
+impl<Rate: ArraySize> digest::zeroize::ZeroizeOnDrop for CustomKt<Rate> {}
 
 /// Customized KT128 hasher with owned customization string.
 pub type CustomKt128 = CustomKt<U168>;

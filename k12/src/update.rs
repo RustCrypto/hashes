@@ -3,7 +3,7 @@ use crate::{
     consts::{CHUNK_SIZE, CHUNK_SIZE_U64, ROUNDS, S0_DELIM},
     node_turbo_shake,
 };
-use digest::{block_buffer::BlockSizes, typenum::Unsigned};
+use digest::{array::ArraySize, typenum::Unsigned};
 use keccak::{Backend, BackendClosure};
 
 /// Buffer size used by the update closure.
@@ -11,12 +11,12 @@ use keccak::{Backend, BackendClosure};
 /// 512 byte buffer is sufficient for 16x and 8x parallel KT128 and KT256 respectively.
 const BUFFER_LEN: usize = 512;
 
-pub(crate) struct Closure<'a, Rate: BlockSizes> {
+pub(crate) struct Closure<'a, Rate: ArraySize> {
     pub(crate) data: &'a [u8],
     pub(crate) kt: &'a mut Kt<Rate>,
 }
 
-impl<Rate: BlockSizes> BackendClosure for Closure<'_, Rate> {
+impl<Rate: ArraySize> BackendClosure for Closure<'_, Rate> {
     #[inline(always)]
     fn call_once<B: Backend>(self) {
         let Kt {
@@ -69,7 +69,7 @@ impl<Rate: BlockSizes> BackendClosure for Closure<'_, Rate> {
             node_tshk.absorb(p1600, part_data);
 
             let cv_dst = &mut cv_buf[..cv_len];
-            node_tshk.full_node_finalize(p1600, cv_dst);
+            node_tshk.finalize_node(p1600, cv_dst);
             accum_tshk.absorb(p1600, cv_dst);
 
             *node_tshk = Default::default();

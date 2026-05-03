@@ -13,8 +13,8 @@ pub use digest;
 use core::fmt;
 use digest::{
     CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
-    block_api::{AlgorithmName, BlockSizeUser},
-    block_buffer::BlockSizes,
+    array::ArraySize,
+    common::{AlgorithmName, BlockSizeUser},
     consts::{U16, U32, U136, U168},
 };
 
@@ -35,23 +35,23 @@ mod utils;
 pub use custom::*;
 pub use reader::KtReader;
 
-use consts::{CHUNK_SIZE_U64, FINAL_NODE_DS, INTERMEDIATE_NODE_DS, ROUNDS, SINGLE_NODE_DS};
+use consts::{CHUNK_SIZE_U64, FINAL_NODE_DS, ROUNDS, SINGLE_NODE_DS};
 use turbo_shake::TurboShake;
-use utils::{copy_cv, length_encode};
+use utils::length_encode;
 
 /// KangarooTwelve hasher generic over rate.
 ///
 /// Only `U136` and `U168` rates are supported which correspond to KT256 and KT128 respectively.
 /// Using other rates will result in a compilation error.
 #[derive(Clone)]
-pub struct Kt<Rate: BlockSizes> {
+pub struct Kt<Rate: ArraySize> {
     accum_tshk: TurboShake<Rate>,
     node_tshk: TurboShake<Rate>,
     consumed_len: u64,
     keccak: keccak::Keccak,
 }
 
-impl<Rate: BlockSizes> Default for Kt<Rate> {
+impl<Rate: ArraySize> Default for Kt<Rate> {
     #[inline]
     fn default() -> Self {
         const { assert!(matches!(Rate::USIZE, 136 | 168)) }
@@ -64,27 +64,27 @@ impl<Rate: BlockSizes> Default for Kt<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> fmt::Debug for Kt<Rate> {
+impl<Rate: ArraySize> fmt::Debug for Kt<Rate> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "Kt{} {{ ... }}", 4 * (200 - Rate::USIZE))
     }
 }
 
-impl<Rate: BlockSizes> AlgorithmName for Kt<Rate> {
+impl<Rate: ArraySize> AlgorithmName for Kt<Rate> {
     #[inline]
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "KT{}", 4 * (200 - Rate::USIZE))
     }
 }
 
-impl<Rate: BlockSizes> HashMarker for Kt<Rate> {}
+impl<Rate: ArraySize> HashMarker for Kt<Rate> {}
 
-impl<Rate: BlockSizes> BlockSizeUser for Kt<Rate> {
+impl<Rate: ArraySize> BlockSizeUser for Kt<Rate> {
     type BlockSize = Rate;
 }
 
-impl<Rate: BlockSizes> Update for Kt<Rate> {
+impl<Rate: ArraySize> Update for Kt<Rate> {
     #[inline]
     fn update(&mut self, data: &[u8]) {
         let keccak = self.keccak;
@@ -93,7 +93,7 @@ impl<Rate: BlockSizes> Update for Kt<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Reset for Kt<Rate> {
+impl<Rate: ArraySize> Reset for Kt<Rate> {
     #[inline]
     fn reset(&mut self) {
         self.accum_tshk.reset();
@@ -102,41 +102,36 @@ impl<Rate: BlockSizes> Reset for Kt<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Kt<Rate> {
+impl<Rate: ArraySize> Kt<Rate> {
     #[inline]
     fn raw_finalize(&mut self) -> KtReader<Rate> {
         let keccak = self.keccak;
 
-        keccak.with_p1600::<ROUNDS>(|p1600| {
-            if self.consumed_len <= CHUNK_SIZE_U64 {
-                self.accum_tshk.finalize::<SINGLE_NODE_DS>(p1600);
-            } else {
+        if self.consumed_len <= CHUNK_SIZE_U64 {
+            self.accum_tshk.pad::<SINGLE_NODE_DS>();
+        } else {
+            keccak.with_p1600::<ROUNDS>(|p1600| {
                 let nodes_len = (self.consumed_len - 1) / CHUNK_SIZE_U64;
                 let partial_node_len = self.consumed_len % CHUNK_SIZE_U64;
 
                 if partial_node_len != 0 {
-                    self.node_tshk.finalize::<INTERMEDIATE_NODE_DS>(p1600);
                     // TODO: this should be [0u8; {200 - Rate}]
                     let cv_dst = &mut [0u8; 200][..200 - Rate::USIZE];
-                    copy_cv(self.node_tshk.state(), cv_dst);
+                    self.node_tshk.finalize_node(p1600, cv_dst);
                     self.accum_tshk.absorb(p1600, cv_dst);
                 }
 
                 length_encode(nodes_len, |enc_len| self.accum_tshk.absorb(p1600, enc_len));
                 self.accum_tshk.absorb(p1600, b"\xFF\xFF");
-                self.accum_tshk.finalize::<FINAL_NODE_DS>(p1600);
-            };
-        });
+                self.accum_tshk.pad::<FINAL_NODE_DS>();
+            });
+        };
 
-        KtReader {
-            state: *self.accum_tshk.state(),
-            buffer: Default::default(),
-            keccak,
-        }
+        KtReader::new(self.accum_tshk.state(), keccak)
     }
 }
 
-impl<Rate: BlockSizes> ExtendableOutput for Kt<Rate> {
+impl<Rate: ArraySize> ExtendableOutput for Kt<Rate> {
     type Reader = KtReader<Rate>;
 
     #[inline]
@@ -146,7 +141,7 @@ impl<Rate: BlockSizes> ExtendableOutput for Kt<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> ExtendableOutputReset for Kt<Rate> {
+impl<Rate: ArraySize> ExtendableOutputReset for Kt<Rate> {
     #[inline]
     fn finalize_xof_reset(&mut self) -> Self::Reader {
         self.update(&[0x00]);
@@ -156,7 +151,7 @@ impl<Rate: BlockSizes> ExtendableOutputReset for Kt<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Drop for Kt<Rate> {
+impl<Rate: ArraySize> Drop for Kt<Rate> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
@@ -168,7 +163,7 @@ impl<Rate: BlockSizes> Drop for Kt<Rate> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: BlockSizes> digest::zeroize::ZeroizeOnDrop for Kt<Rate> {}
+impl<Rate: ArraySize> digest::zeroize::ZeroizeOnDrop for Kt<Rate> {}
 
 /// KT128 hasher.
 pub type Kt128 = Kt<U168>;

@@ -2,10 +2,7 @@ use crate::{
     consts::{CHUNK_SIZE, INTERMEDIATE_NODE_DS, PAD},
     utils::{copy_cv, xor_block},
 };
-use digest::{
-    array::{Array, ArraySize},
-    block_buffer::BlockSizes,
-};
+use digest::array::{Array, ArraySize};
 use keccak::{Fn1600, State1600};
 
 /// Parallel version of TurboSHAKE specialized for computation of chaining values.
@@ -15,13 +12,13 @@ use keccak::{Fn1600, State1600};
 /// fn par_turbo_shake<B: Backend, const RATE: usize>(
 ///     p1600: ParFn1600<B>,
 ///     data: &[u8; CHUNK_SIZE * B::PAR_SIZE_1600],
-/// ) -> [[u8; {200 - RATE}]; B::PAR_SIZE_1600] { ... }
+/// ) -> [[u64; {200 - RATE} / 8]; B::PAR_SIZE_1600] { ... }
 /// ```
 /// But it requires advanced const generics or to deal with annoying `typenum`-based trait bounds,
 /// so instead we use "runtime" asserts which should be optimized out by the compiler, see:
 /// https://rust.godbolt.org/z/4Y7ervTd7
 // TODO(MSRV-1.88): use `as_chunks::<CHUNK_SIZE>()`
-pub(crate) fn parallel<ParSize: ArraySize, Rate: BlockSizes>(
+pub(crate) fn parallel<ParSize: ArraySize, Rate: ArraySize>(
     par_p1600: fn(&mut Array<State1600, ParSize>),
     data: &[u8],
     par_cv_dst: &mut [u8],
@@ -75,9 +72,9 @@ pub(crate) fn parallel<ParSize: ArraySize, Rate: BlockSizes>(
 /// fn turbo_shake-cv<const RATE: usize>(
 ///     p1600: Fn1600,
 ///     data: &[u8; CHUNK_SIZE],
-/// ) -> [u8; {200 - RATE}] { ... }
+/// ) -> [u64; {200 - RATE} / 8] { ... }
 /// ```
-pub(crate) fn scalar<Rate: BlockSizes>(p1600: Fn1600, data: &[u8], cv_dst: &mut [u8]) {
+pub(crate) fn scalar<Rate: ArraySize>(p1600: Fn1600, data: &[u8], cv_dst: &mut [u8]) {
     assert_eq!(data.len(), CHUNK_SIZE);
     let cv_size = 200 - Rate::USIZE;
     assert_eq!(cv_dst.len(), cv_size);
@@ -98,7 +95,7 @@ pub(crate) fn scalar<Rate: BlockSizes>(p1600: Fn1600, data: &[u8], cv_dst: &mut 
     finalize::<Rate>(p1600, &mut state, tail_data, cv_dst);
 }
 
-pub(crate) fn finalize<Rate: BlockSizes>(
+fn finalize<Rate: ArraySize>(
     p1600: Fn1600,
     state: &mut State1600,
     tail_data: &[u8],
@@ -109,7 +106,7 @@ pub(crate) fn finalize<Rate: BlockSizes>(
     copy_cv(state, cv_dst);
 }
 
-fn process_tail_data<Rate: BlockSizes>(state: &mut State1600, tail_data: &[u8]) {
+fn process_tail_data<Rate: ArraySize>(state: &mut State1600, tail_data: &[u8]) {
     let block_size = Rate::USIZE;
 
     debug_assert_eq!(
