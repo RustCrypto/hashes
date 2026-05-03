@@ -1,4 +1,4 @@
-use crate::consts::INTERMEDIATE_NODE_DS;
+use crate::consts::{INTERMEDIATE_NODE_DS, PAD};
 use digest::array::ArraySize;
 use keccak::{Fn1600, State1600};
 use sponge_cursor::SpongeCursor;
@@ -23,10 +23,10 @@ impl<Rate: ArraySize> TurboShake<Rate> {
 
         let pad = u64::from(DS) << (8 * byte_offset);
         self.state[word_offset] ^= pad;
-        self.state[Rate::USIZE / 8 - 1] ^= 1 << 63;
+        self.state[Rate::USIZE / 8 - 1] ^= PAD;
     }
 
-    pub(crate) fn finalize_node(&mut self, p1600: Fn1600, cv_dst: &mut [u8]) {
+    pub(crate) fn finalize_intermediate_node(&mut self, p1600: Fn1600, cv_dst: &mut [u8]) {
         self.pad::<INTERMEDIATE_NODE_DS>();
         p1600(&mut self.state);
         copy_cv(self.state(), cv_dst);

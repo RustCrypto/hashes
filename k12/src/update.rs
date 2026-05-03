@@ -59,9 +59,8 @@ impl<Rate: ArraySize> BackendClosure for Closure<'_, Rate> {
         // Handle partially absorbed chunk
         if partial_chunk_len != 0 {
             let rem_len = CHUNK_SIZE - partial_chunk_len;
-            let split = data.split_at_checked(rem_len);
 
-            let Some((part_data, rem_data)) = split else {
+            let Some((part_data, rem_data)) = data.split_at_checked(rem_len) else {
                 node_tshk.absorb(p1600, data);
                 return;
             };
@@ -69,10 +68,10 @@ impl<Rate: ArraySize> BackendClosure for Closure<'_, Rate> {
             node_tshk.absorb(p1600, part_data);
 
             let cv_dst = &mut cv_buf[..cv_len];
-            node_tshk.finalize_node(p1600, cv_dst);
+            node_tshk.finalize_intermediate_node(p1600, cv_dst);
             accum_tshk.absorb(p1600, cv_dst);
 
-            *node_tshk = Default::default();
+            node_tshk.reset();
             data = rem_data;
         }
 

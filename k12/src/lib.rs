@@ -107,6 +107,8 @@ impl<Rate: ArraySize> Kt<Rate> {
     fn raw_finalize(&mut self) -> KtReader<Rate> {
         let keccak = self.keccak;
 
+        // Note that the reader applies permutation before reading from the state,
+        // so we only need to absorb the remaining data and pad the state
         if self.consumed_len <= CHUNK_SIZE_U64 {
             self.accum_tshk.pad::<SINGLE_NODE_DS>();
         } else {
@@ -117,7 +119,7 @@ impl<Rate: ArraySize> Kt<Rate> {
                 if partial_node_len != 0 {
                     // TODO: this should be [0u8; {200 - Rate}]
                     let cv_dst = &mut [0u8; 200][..200 - Rate::USIZE];
-                    self.node_tshk.finalize_node(p1600, cv_dst);
+                    self.node_tshk.finalize_intermediate_node(p1600, cv_dst);
                     self.accum_tshk.absorb(p1600, cv_dst);
                 }
 
@@ -175,12 +177,12 @@ pub type Kt128Reader = KtReader<U168>;
 /// KT256 XOF reader.
 pub type Kt256Reader = KtReader<U136>;
 
+// https://www.rfc-editor.org/rfc/rfc9861.html#section-7-7
 impl CollisionResistance for Kt128 {
-    // https://www.rfc-editor.org/rfc/rfc9861.html#section-7-7
     type CollisionResistance = U16;
 }
 
+// https://www.rfc-editor.org/rfc/rfc9861.html#section-7-8
 impl CollisionResistance for Kt256 {
-    // https://www.rfc-editor.org/rfc/rfc9861.html#section-7-8
     type CollisionResistance = U32;
 }
