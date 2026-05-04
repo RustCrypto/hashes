@@ -48,6 +48,7 @@ dependencies = [
  "bash-f",
  "digest",
  "hex-literal",
+ "sponge-cursor",
 ]
 
 [[package]]
@@ -145,9 +146,9 @@ dependencies = [
 
 [[package]]
 name = "digest"
-version = "0.11.2"
+version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4850db49bf08e663084f7fb5c87d202ef91a3907271aff24a94eb97ff039153c"
+checksum = "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2"
 dependencies = [
  "blobby",
  "block-buffer",
@@ -362,6 +363,14 @@ version = "0.5.0"
 dependencies = [
  "digest",
  "hex-literal",
+]
+
+[[package]]
+name = "sponge-cursor"
+version = "0.1.0"
+source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#e6eb9fcd55cd4016aa7e9bbb3704b3da5e3c12b4"
+dependencies = [
+ "hybrid-array",
 ]
 
 [[package]]

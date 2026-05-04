@@ -15,6 +15,7 @@ categories = ["cryptography", "no-std"]
 [dependencies]
 digest = "0.11"
 bash-f = "0.1"
+sponge-cursor = "0.1"
 
 [dev-dependencies]
 digest = { version = "0.11", features = ["dev"] }
