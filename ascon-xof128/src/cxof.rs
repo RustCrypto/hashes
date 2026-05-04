@@ -3,7 +3,7 @@ use digest::{
     CollisionResistance, CustomizedInit, ExtendableOutput, HashMarker, OutputSizeUser, Update,
     common::AlgorithmName,
     common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    consts::{U8, U16, U32, U41},
+    consts::{U16, U32, U41},
 };
 use sponge_cursor::SpongeCursor;
 
@@ -20,7 +20,7 @@ use crate::{AsconXof128Reader, consts::CXOF_INIT_STATE};
 #[derive(Clone, Debug)]
 pub struct AsconCxof128 {
     state: State,
-    cursor: SpongeCursor<U8>,
+    cursor: SpongeCursor<8>,
 }
 
 impl CustomizedInit for AsconCxof128 {

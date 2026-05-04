@@ -17,7 +17,6 @@ use core::fmt;
 use digest::{
     CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
     XofReader,
-    array::ArraySize,
     common::{AlgorithmName, BlockSizeUser},
     consts::{U16, U32, U136, U168},
 };
@@ -33,20 +32,20 @@ pub const DEFAULT_DS: u8 = 0x1F;
 /// Domain separator `DS` MUST be in the range `0x01..=0x7f`.
 /// Use [`DEFAULT_DS`] if you want the default value.
 ///
-/// Rate MUST be either [`U168`] or [`U136`] for TurboSHAKE128 and TurboSHAKE256 respectively.
+/// Rate MUST be either 168 or 136 for TurboSHAKE128 and TurboSHAKE256 respectively.
 #[derive(Clone)]
-pub struct TurboShake<Rate: ArraySize, const DS: u8> {
+pub struct TurboShake<const RATE: usize, const DS: u8> {
     state: State1600,
-    cursor: SpongeCursor<Rate>,
+    cursor: SpongeCursor<RATE>,
     keccak: Keccak,
 }
 
-impl<Rate: ArraySize, const DS: u8> Default for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> Default for TurboShake<RATE, DS> {
     #[inline]
     fn default() -> Self {
         const {
             assert!(DS >= 0x01 && DS <= 0x7F, "invalid domain separator");
-            assert!(Rate::USIZE == 168 || Rate::USIZE == 136, "unsupported rate");
+            assert!(RATE == 168 || RATE == 136, "unsupported rate");
         }
         Self {
             state: Default::default(),
@@ -56,13 +55,9 @@ impl<Rate: ArraySize, const DS: u8> Default for TurboShake<Rate, DS> {
     }
 }
 
-impl<Rate: ArraySize, const DS: u8> HashMarker for TurboShake<Rate, DS> {}
+impl<const RATE: usize, const DS: u8> HashMarker for TurboShake<RATE, DS> {}
 
-impl<Rate: ArraySize, const DS: u8> BlockSizeUser for TurboShake<Rate, DS> {
-    type BlockSize = Rate;
-}
-
-impl<Rate: ArraySize, const DS: u8> Update for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> Update for TurboShake<RATE, DS> {
     #[inline]
     fn update(&mut self, data: &[u8]) {
         self.keccak.with_p1600::<ROUNDS>(|p1600| {
@@ -71,7 +66,7 @@ impl<Rate: ArraySize, const DS: u8> Update for TurboShake<Rate, DS> {
     }
 }
 
-impl<Rate: ArraySize, const DS: u8> TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> TurboShake<RATE, DS> {
     fn pad(&mut self) {
         let pos = self.cursor.pos();
         let word_offset = pos / 8;
@@ -79,12 +74,12 @@ impl<Rate: ArraySize, const DS: u8> TurboShake<Rate, DS> {
 
         let pad = u64::from(DS) << (8 * byte_offset);
         self.state[word_offset] ^= pad;
-        self.state[Rate::USIZE / 8 - 1] ^= 1 << 63;
+        self.state[RATE / 8 - 1] ^= 1 << 63;
     }
 }
 
-impl<Rate: ArraySize, const DS: u8> ExtendableOutput for TurboShake<Rate, DS> {
-    type Reader = TurboShakeReader<Rate>;
+impl<const RATE: usize, const DS: u8> ExtendableOutput for TurboShake<RATE, DS> {
+    type Reader = TurboShakeReader<RATE>;
 
     #[inline]
     fn finalize_xof(mut self) -> Self::Reader {
@@ -97,7 +92,7 @@ impl<Rate: ArraySize, const DS: u8> ExtendableOutput for TurboShake<Rate, DS> {
     }
 }
 
-impl<Rate: ArraySize, const DS: u8> ExtendableOutputReset for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> ExtendableOutputReset for TurboShake<RATE, DS> {
     #[inline]
     fn finalize_xof_reset(&mut self) -> Self::Reader {
         self.pad();
@@ -111,7 +106,7 @@ impl<Rate: ArraySize, const DS: u8> ExtendableOutputReset for TurboShake<Rate, D
     }
 }
 
-impl<Rate: ArraySize, const DS: u8> Reset for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> Reset for TurboShake<RATE, DS> {
     #[inline]
     fn reset(&mut self) {
         self.state = Default::default();
@@ -119,9 +114,9 @@ impl<Rate: ArraySize, const DS: u8> Reset for TurboShake<Rate, DS> {
     }
 }
 
-impl<Rate: ArraySize, const DS: u8> AlgorithmName for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> AlgorithmName for TurboShake<RATE, DS> {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let alg_name = match Rate::USIZE {
+        let alg_name = match RATE {
             168 => "TurboSHAKE128",
             136 => "TurboSHAKE256",
             _ => unreachable!(),
@@ -130,9 +125,9 @@ impl<Rate: ArraySize, const DS: u8> AlgorithmName for TurboShake<Rate, DS> {
     }
 }
 
-impl<Rate: ArraySize, const DS: u8> fmt::Debug for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> fmt::Debug for TurboShake<RATE, DS> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let debug_str = match Rate::USIZE {
+        let debug_str = match RATE {
             168 => "TurboShake128 { ... }",
             136 => "TurboShake256 { ... }",
             _ => unreachable!(),
@@ -141,7 +136,7 @@ impl<Rate: ArraySize, const DS: u8> fmt::Debug for TurboShake<Rate, DS> {
     }
 }
 
-impl<Rate: ArraySize, const DS: u8> Drop for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> Drop for TurboShake<RATE, DS> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
@@ -153,28 +148,28 @@ impl<Rate: ArraySize, const DS: u8> Drop for TurboShake<Rate, DS> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: ArraySize, const DS: u8> digest::zeroize::ZeroizeOnDrop for TurboShake<Rate, DS> {}
+impl<const RATE: usize, const DS: u8> digest::zeroize::ZeroizeOnDrop for TurboShake<RATE, DS> {}
 
 /// Generic TurboSHAKE XOF reader
 #[derive(Clone)]
-pub struct TurboShakeReader<Rate: ArraySize> {
+pub struct TurboShakeReader<const RATE: usize> {
     state: State1600,
-    cursor: SpongeCursor<Rate>,
+    cursor: SpongeCursor<RATE>,
     keccak: Keccak,
 }
 
-impl<Rate: ArraySize> XofReader for TurboShakeReader<Rate> {
+impl<const RATE: usize> XofReader for TurboShakeReader<RATE> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) {
         self.keccak.with_p1600::<ROUNDS>(|p1600| {
-            self.cursor.squeeze_u64_le(&mut self.state, p1600, buf);
+            self.cursor.squeeze_read_u64_le(&mut self.state, p1600, buf);
         });
     }
 }
 
-impl<Rate: ArraySize> fmt::Debug for TurboShakeReader<Rate> {
+impl<const RATE: usize> fmt::Debug for TurboShakeReader<RATE> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let debug_str = match Rate::USIZE {
+        let debug_str = match RATE {
             168 => "TurboShakeReader128 { ... }",
             136 => "TurboShakeReader256 { ... }",
             _ => unreachable!(),
@@ -183,7 +178,7 @@ impl<Rate: ArraySize> fmt::Debug for TurboShakeReader<Rate> {
     }
 }
 
-impl<Rate: ArraySize> Drop for TurboShakeReader<Rate> {
+impl<const RATE: usize> Drop for TurboShakeReader<RATE> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
@@ -195,17 +190,17 @@ impl<Rate: ArraySize> Drop for TurboShakeReader<Rate> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: ArraySize> digest::zeroize::ZeroizeOnDrop for TurboShakeReader<Rate> {}
+impl<const RATE: usize> digest::zeroize::ZeroizeOnDrop for TurboShakeReader<RATE> {}
 
 /// TurboSHAKE128 hasher with domain separator.
-pub type TurboShake128<const DS: u8 = DEFAULT_DS> = TurboShake<U168, DS>;
+pub type TurboShake128<const DS: u8 = DEFAULT_DS> = TurboShake<168, DS>;
 /// TurboSHAKE256 hasher with domain separator.
-pub type TurboShake256<const DS: u8 = DEFAULT_DS> = TurboShake<U136, DS>;
+pub type TurboShake256<const DS: u8 = DEFAULT_DS> = TurboShake<136, DS>;
 
 /// TurboSHAKE128 XOF reader.
-pub type TurboShake128Reader = TurboShakeReader<U168>;
+pub type TurboShake128Reader = TurboShakeReader<168>;
 /// TurboSHAKE256 XOF reader.
-pub type TurboShake256Reader = TurboShakeReader<U136>;
+pub type TurboShake256Reader = TurboShakeReader<136>;
 
 impl<const DS: u8> CollisionResistance for TurboShake128<DS> {
     // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-7
@@ -215,4 +210,12 @@ impl<const DS: u8> CollisionResistance for TurboShake128<DS> {
 impl<const DS: u8> CollisionResistance for TurboShake256<DS> {
     // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-8
     type CollisionResistance = U32;
+}
+
+impl<const DS: u8> BlockSizeUser for TurboShake128<DS> {
+    type BlockSize = U168;
+}
+
+impl<const DS: u8> BlockSizeUser for TurboShake256<DS> {
+    type BlockSize = U136;
 }

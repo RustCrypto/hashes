@@ -13,7 +13,6 @@ pub use digest;
 use core::fmt;
 use digest::{
     CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
-    array::ArraySize,
     common::{AlgorithmName, BlockSizeUser},
     consts::{U16, U32, U136, U168},
 };
@@ -44,17 +43,17 @@ use utils::length_encode;
 /// Only `U136` and `U168` rates are supported which correspond to KT256 and KT128 respectively.
 /// Using other rates will result in a compilation error.
 #[derive(Clone)]
-pub struct Kt<Rate: ArraySize> {
-    accum_tshk: TurboShake<Rate>,
-    node_tshk: TurboShake<Rate>,
+pub struct Kt<const RATE: usize> {
+    accum_tshk: TurboShake<RATE>,
+    node_tshk: TurboShake<RATE>,
     consumed_len: u64,
     keccak: keccak::Keccak,
 }
 
-impl<Rate: ArraySize> Default for Kt<Rate> {
+impl<const RATE: usize> Default for Kt<RATE> {
     #[inline]
     fn default() -> Self {
-        const { assert!(matches!(Rate::USIZE, 136 | 168)) }
+        const { assert!(matches!(RATE, 136 | 168)) }
         Self {
             accum_tshk: Default::default(),
             node_tshk: Default::default(),
@@ -64,36 +63,32 @@ impl<Rate: ArraySize> Default for Kt<Rate> {
     }
 }
 
-impl<Rate: ArraySize> fmt::Debug for Kt<Rate> {
+impl<const RATE: usize> fmt::Debug for Kt<RATE> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "Kt{} {{ ... }}", 4 * (200 - Rate::USIZE))
+        write!(f, "Kt{} {{ ... }}", 4 * (200 - RATE))
     }
 }
 
-impl<Rate: ArraySize> AlgorithmName for Kt<Rate> {
+impl<const RATE: usize> AlgorithmName for Kt<RATE> {
     #[inline]
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "KT{}", 4 * (200 - Rate::USIZE))
+        write!(f, "KT{}", 4 * (200 - RATE))
     }
 }
 
-impl<Rate: ArraySize> HashMarker for Kt<Rate> {}
+impl<const RATE: usize> HashMarker for Kt<RATE> {}
 
-impl<Rate: ArraySize> BlockSizeUser for Kt<Rate> {
-    type BlockSize = Rate;
-}
-
-impl<Rate: ArraySize> Update for Kt<Rate> {
+impl<const RATE: usize> Update for Kt<RATE> {
     #[inline]
     fn update(&mut self, data: &[u8]) {
         let keccak = self.keccak;
-        let closure = update::Closure::<'_, Rate> { data, kt: self };
+        let closure = update::Closure::<'_, RATE> { data, kt: self };
         keccak.with_backend(closure);
     }
 }
 
-impl<Rate: ArraySize> Reset for Kt<Rate> {
+impl<const RATE: usize> Reset for Kt<RATE> {
     #[inline]
     fn reset(&mut self) {
         self.accum_tshk.reset();
@@ -102,9 +97,9 @@ impl<Rate: ArraySize> Reset for Kt<Rate> {
     }
 }
 
-impl<Rate: ArraySize> Kt<Rate> {
+impl<const RATE: usize> Kt<RATE> {
     #[inline]
-    fn raw_finalize(&mut self) -> KtReader<Rate> {
+    fn raw_finalize(&mut self) -> KtReader<RATE> {
         let keccak = self.keccak;
 
         // Note that the reader applies permutation before reading from the state,
@@ -117,8 +112,8 @@ impl<Rate: ArraySize> Kt<Rate> {
                 let partial_node_len = self.consumed_len % CHUNK_SIZE_U64;
 
                 if partial_node_len != 0 {
-                    // TODO: this should be [0u8; {200 - Rate}]
-                    let cv_dst = &mut [0u8; 200][..200 - Rate::USIZE];
+                    // TODO: this should be [0u8; {200 - RATE}]
+                    let cv_dst = &mut [0u8; 200][..200 - RATE];
                     self.node_tshk.finalize_intermediate_node(p1600, cv_dst);
                     self.accum_tshk.absorb(p1600, cv_dst);
                 }
@@ -133,8 +128,8 @@ impl<Rate: ArraySize> Kt<Rate> {
     }
 }
 
-impl<Rate: ArraySize> ExtendableOutput for Kt<Rate> {
-    type Reader = KtReader<Rate>;
+impl<const RATE: usize> ExtendableOutput for Kt<RATE> {
+    type Reader = KtReader<RATE>;
 
     #[inline]
     fn finalize_xof(mut self) -> Self::Reader {
@@ -143,7 +138,7 @@ impl<Rate: ArraySize> ExtendableOutput for Kt<Rate> {
     }
 }
 
-impl<Rate: ArraySize> ExtendableOutputReset for Kt<Rate> {
+impl<const RATE: usize> ExtendableOutputReset for Kt<RATE> {
     #[inline]
     fn finalize_xof_reset(&mut self) -> Self::Reader {
         self.update(&[0x00]);
@@ -153,7 +148,7 @@ impl<Rate: ArraySize> ExtendableOutputReset for Kt<Rate> {
     }
 }
 
-impl<Rate: ArraySize> Drop for Kt<Rate> {
+impl<const RATE: usize> Drop for Kt<RATE> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
@@ -165,17 +160,17 @@ impl<Rate: ArraySize> Drop for Kt<Rate> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: ArraySize> digest::zeroize::ZeroizeOnDrop for Kt<Rate> {}
+impl<const RATE: usize> digest::zeroize::ZeroizeOnDrop for Kt<RATE> {}
 
 /// KT128 hasher.
-pub type Kt128 = Kt<U168>;
+pub type Kt128 = Kt<168>;
 /// KT256 hasher.
-pub type Kt256 = Kt<U136>;
+pub type Kt256 = Kt<136>;
 
 /// KT128 XOF reader.
-pub type Kt128Reader = KtReader<U168>;
+pub type Kt128Reader = KtReader<168>;
 /// KT256 XOF reader.
-pub type Kt256Reader = KtReader<U136>;
+pub type Kt256Reader = KtReader<136>;
 
 // https://www.rfc-editor.org/rfc/rfc9861.html#section-7-7
 impl CollisionResistance for Kt128 {
@@ -185,4 +180,12 @@ impl CollisionResistance for Kt128 {
 // https://www.rfc-editor.org/rfc/rfc9861.html#section-7-8
 impl CollisionResistance for Kt256 {
     type CollisionResistance = U32;
+}
+
+impl BlockSizeUser for Kt128 {
+    type BlockSize = U168;
+}
+
+impl BlockSizeUser for Kt256 {
+    type BlockSize = U136;
 }

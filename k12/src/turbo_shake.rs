@@ -1,17 +1,16 @@
 use crate::consts::{INTERMEDIATE_NODE_DS, PAD};
-use digest::array::ArraySize;
 use keccak::{Fn1600, State1600};
 use sponge_cursor::SpongeCursor;
 
 use crate::utils::copy_cv;
 
 #[derive(Default, Clone)]
-pub(crate) struct TurboShake<Rate: ArraySize> {
+pub(crate) struct TurboShake<const RATE: usize> {
     state: State1600,
-    cursor: SpongeCursor<Rate>,
+    cursor: SpongeCursor<RATE>,
 }
 
-impl<Rate: ArraySize> TurboShake<Rate> {
+impl<const RATE: usize> TurboShake<RATE> {
     pub(crate) fn absorb(&mut self, p1600: Fn1600, data: &[u8]) {
         self.cursor.absorb_u64_le(&mut self.state, p1600, data);
     }
@@ -23,7 +22,7 @@ impl<Rate: ArraySize> TurboShake<Rate> {
 
         let pad = u64::from(DS) << (8 * byte_offset);
         self.state[word_offset] ^= pad;
-        self.state[Rate::USIZE / 8 - 1] ^= PAD;
+        self.state[RATE / 8 - 1] ^= PAD;
     }
 
     pub(crate) fn finalize_intermediate_node(&mut self, p1600: Fn1600, cv_dst: &mut [u8]) {
@@ -42,7 +41,7 @@ impl<Rate: ArraySize> TurboShake<Rate> {
     }
 }
 
-impl<Rate: ArraySize> Drop for TurboShake<Rate> {
+impl<const RATE: usize> Drop for TurboShake<RATE> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {

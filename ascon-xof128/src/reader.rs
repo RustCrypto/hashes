@@ -1,12 +1,12 @@
 use ascon::State;
-use digest::{XofReader, consts::U8};
+use digest::XofReader;
 use sponge_cursor::SpongeCursor;
 
 /// XOF reader used by Ascon-XOF128 and Ascon-CXOF128
 #[derive(Clone, Debug)]
 pub struct AsconXof128Reader {
     state: State,
-    cursor: SpongeCursor<U8>,
+    cursor: SpongeCursor<8>,
 }
 
 impl AsconXof128Reader {
@@ -22,7 +22,7 @@ impl XofReader for AsconXof128Reader {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) {
         self.cursor
-            .squeeze_u64_le(&mut self.state, ascon::permute12, buf);
+            .squeeze_read_u64_le(&mut self.state, ascon::permute12, buf);
     }
 }
 

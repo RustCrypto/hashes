@@ -361,9 +361,8 @@ dependencies = [
 [[package]]
 name = "sponge-cursor"
 version = "0.1.0"
-source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#d5900bf4ff1953757ad2a0a63d427c3e28ef6b26"
+source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#9b92270c2948906bc2ce687e4a080f59210c2808"
 dependencies = [
- "hybrid-array",
  "zeroize",
 ]
 

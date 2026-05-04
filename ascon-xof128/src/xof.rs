@@ -5,7 +5,7 @@ use digest::{
     Reset, Update,
     common::AlgorithmName,
     common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    consts::{U8, U16, U32, U41},
+    consts::{U16, U32, U41},
 };
 use sponge_cursor::SpongeCursor;
 
@@ -15,7 +15,7 @@ use crate::{AsconXof128Reader, consts::XOF_INIT_STATE};
 #[derive(Clone)]
 pub struct AsconXof128 {
     state: State,
-    cursor: SpongeCursor<U8>,
+    cursor: SpongeCursor<8>,
 }
 
 impl Default for AsconXof128 {

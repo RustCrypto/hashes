@@ -18,19 +18,19 @@ use keccak::{Fn1600, State1600};
 /// so instead we use "runtime" asserts which should be optimized out by the compiler, see:
 /// https://rust.godbolt.org/z/4Y7ervTd7
 // TODO(MSRV-1.88): use `as_chunks::<CHUNK_SIZE>()`
-pub(crate) fn parallel<ParSize: ArraySize, Rate: ArraySize>(
+pub(crate) fn parallel<ParSize: ArraySize, const RATE: usize>(
     par_p1600: fn(&mut Array<State1600, ParSize>),
     data: &[u8],
     par_cv_dst: &mut [u8],
 ) {
     let par_size = ParSize::USIZE;
     assert_eq!(data.len(), CHUNK_SIZE * par_size);
-    let cv_size = 200 - Rate::USIZE;
+    let cv_size = 200 - RATE;
     assert_eq!(par_cv_dst.len(), cv_size * par_size);
 
     let mut par_state: Array<State1600, ParSize> = Default::default();
 
-    let block_size = Rate::USIZE;
+    let block_size = RATE;
     let full_blocks = CHUNK_SIZE / block_size;
 
     // Process full blocks
@@ -53,7 +53,7 @@ pub(crate) fn parallel<ParSize: ArraySize, Rate: ArraySize>(
         let block_offset = chunk_offset + full_blocks * block_size;
 
         let tail_data = &data[block_offset..][..tail_block_size];
-        process_tail_data::<Rate>(state, tail_data);
+        process_tail_data::<RATE>(state, tail_data);
     }
     par_p1600(&mut par_state);
 
@@ -74,14 +74,14 @@ pub(crate) fn parallel<ParSize: ArraySize, Rate: ArraySize>(
 ///     data: &[u8; CHUNK_SIZE],
 /// ) -> [u64; {200 - RATE} / 8] { ... }
 /// ```
-pub(crate) fn scalar<Rate: ArraySize>(p1600: Fn1600, data: &[u8], cv_dst: &mut [u8]) {
+pub(crate) fn scalar<const RATE: usize>(p1600: Fn1600, data: &[u8], cv_dst: &mut [u8]) {
     assert_eq!(data.len(), CHUNK_SIZE);
-    let cv_size = 200 - Rate::USIZE;
+    let cv_size = 200 - RATE;
     assert_eq!(cv_dst.len(), cv_size);
 
     let mut state = State1600::default();
 
-    let block_size = Rate::USIZE;
+    let block_size = RATE;
     let mut blocks = data.chunks_exact(block_size);
 
     // Process full blocks
@@ -92,13 +92,13 @@ pub(crate) fn scalar<Rate: ArraySize>(p1600: Fn1600, data: &[u8], cv_dst: &mut [
 
     // Process the incomplete tail block
     let tail_data = blocks.remainder();
-    process_tail_data::<Rate>(&mut state, tail_data);
+    process_tail_data::<RATE>(&mut state, tail_data);
     p1600(&mut state);
     copy_cv(&state, cv_dst);
 }
 
-fn process_tail_data<Rate: ArraySize>(state: &mut State1600, tail_data: &[u8]) {
-    debug_assert_eq!(tail_data.len(), CHUNK_SIZE % Rate::USIZE);
+fn process_tail_data<const RATE: usize>(state: &mut State1600, tail_data: &[u8]) {
+    debug_assert_eq!(tail_data.len(), CHUNK_SIZE % RATE);
     debug_assert_eq!(tail_data.len() % size_of::<u64>(), 0);
 
     xor_block(state, tail_data);
@@ -106,7 +106,7 @@ fn process_tail_data<Rate: ArraySize>(state: &mut State1600, tail_data: &[u8]) {
     // Apply padding by XORing the state.
     // Note that we use little endian byte order.
     let pos = tail_data.len() / size_of::<u64>();
-    let pad_pos = Rate::USIZE / size_of::<u64>() - 1;
+    let pad_pos = RATE / size_of::<u64>() - 1;
     state[pos] ^= u64::from(INTERMEDIATE_NODE_DS);
     state[pad_pos] ^= PAD;
 }
@@ -116,7 +116,7 @@ fn process_tail_data<Rate: ArraySize>(state: &mut State1600, tail_data: &[u8]) {
 mod tests {
     use super::{parallel, scalar};
     use crate::consts::{CHUNK_SIZE, ROUNDS};
-    use digest::array::typenum::{U136, U168, Unsigned};
+    use digest::array::typenum::Unsigned;
     use keccak::{Backend, BackendClosure};
 
     const CHUNKS: usize = 32;
@@ -150,7 +150,7 @@ mod tests {
             let mut cvs_chunks = cvs.chunks_exact_mut(KT128_CV_LEN);
 
             for (data_chunk, par_cv) in (&mut data_chunks).zip(&mut cvs_chunks) {
-                scalar::<U168>(p1600, data_chunk, par_cv);
+                scalar::<168>(p1600, data_chunk, par_cv);
             }
 
             assert!(data_chunks.remainder().is_empty());
@@ -167,7 +167,7 @@ mod tests {
             let mut cvs_chunks = cvs.chunks_exact_mut(KT256_CV_LEN);
 
             for (data_chunk, par_cv) in (&mut data_chunks).zip(&mut cvs_chunks) {
-                scalar::<U136>(p1600, data_chunk, par_cv);
+                scalar::<136>(p1600, data_chunk, par_cv);
             }
 
             assert!(data_chunks.remainder().is_empty());
@@ -194,14 +194,14 @@ mod tests {
                 let mut par_cvs = cvs.chunks_exact_mut(par_cv_size);
 
                 for (data_chunk, par_cv) in (&mut data_chunks).zip(&mut par_cvs) {
-                    parallel::<_, U168>(par_p1600, data_chunk, par_cv);
+                    parallel::<_, 168>(par_p1600, data_chunk, par_cv);
                 }
 
                 let mut data_chunks = data_chunks.remainder().chunks_exact(CHUNK_SIZE);
                 let mut cvs_chunks = par_cvs.into_remainder().chunks_exact_mut(KT128_CV_LEN);
 
                 for (data_chunk, par_cv) in (&mut data_chunks).zip(&mut cvs_chunks) {
-                    scalar::<U168>(p1600, data_chunk, par_cv);
+                    scalar::<168>(p1600, data_chunk, par_cv);
                 }
 
                 assert!(data_chunks.remainder().is_empty());
@@ -231,14 +231,14 @@ mod tests {
                 let mut par_cvs = cvs.chunks_exact_mut(par_cv_size);
 
                 for (data_chunk, par_cv) in (&mut data_chunks).zip(&mut par_cvs) {
-                    parallel::<_, U136>(par_p1600, data_chunk, par_cv);
+                    parallel::<_, 136>(par_p1600, data_chunk, par_cv);
                 }
 
                 let mut data_chunks = data_chunks.remainder().chunks_exact(CHUNK_SIZE);
                 let mut cvs_chunks = par_cvs.into_remainder().chunks_exact_mut(KT256_CV_LEN);
 
                 for (data_chunk, par_cv) in (&mut data_chunks).zip(&mut cvs_chunks) {
-                    scalar::<U136>(p1600, data_chunk, par_cv);
+                    scalar::<136>(p1600, data_chunk, par_cv);
                 }
 
                 assert!(data_chunks.remainder().is_empty());
