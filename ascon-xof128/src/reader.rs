@@ -1,27 +1,42 @@
 use ascon::State;
-use digest::{XofReader, block_buffer::ReadBuffer, consts::U8};
+use digest::XofReader;
+use sponge_cursor::SpongeCursor;
 
 /// XOF reader used by Ascon-XOF128 and Ascon-CXOF128
 #[derive(Clone, Debug)]
 pub struct AsconXof128Reader {
     state: State,
-    buffer: ReadBuffer<U8>,
+    cursor: SpongeCursor<8>,
 }
 
 impl AsconXof128Reader {
     pub(super) fn new(state: &State) -> Self {
         Self {
             state: *state,
-            buffer: Default::default(),
+            cursor: Default::default(),
         }
     }
 }
 
 impl XofReader for AsconXof128Reader {
+    #[inline]
     fn read(&mut self, buf: &mut [u8]) {
-        self.buffer.read(buf, |dst| {
-            ascon::permute12(&mut self.state);
-            *dst = self.state[0].to_le_bytes().into();
-        });
+        self.cursor
+            .squeeze_read_u64_le(&mut self.state, ascon::permute12, buf);
     }
 }
+
+impl Drop for AsconXof128Reader {
+    #[inline]
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            use digest::zeroize::Zeroize;
+            self.state.zeroize();
+            self.cursor.zeroize();
+        }
+    }
+}
+
+#[cfg(feature = "zeroize")]
+impl digest::zeroize::ZeroizeOnDrop for AsconXof128Reader {}

@@ -1,11 +1,11 @@
 use ascon::State;
 use digest::{
     CollisionResistance, CustomizedInit, ExtendableOutput, HashMarker, OutputSizeUser, Update,
-    block_api::AlgorithmName,
-    block_buffer::EagerBuffer,
+    common::AlgorithmName,
     common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    consts::{U8, U16, U32, U48},
+    consts::{U16, U32, U41},
 };
+use sponge_cursor::SpongeCursor;
 
 use crate::{AsconXof128Reader, consts::CXOF_INIT_STATE};
 
@@ -20,7 +20,7 @@ use crate::{AsconXof128Reader, consts::CXOF_INIT_STATE};
 #[derive(Clone, Debug)]
 pub struct AsconCxof128 {
     state: State,
-    buffer: EagerBuffer<U8>,
+    cursor: SpongeCursor<8>,
 }
 
 impl CustomizedInit for AsconCxof128 {
@@ -52,8 +52,8 @@ impl CustomizedInit for AsconCxof128 {
 
         ascon::permute12(&mut state);
 
-        let buffer = Default::default();
-        Self { state, buffer }
+        let cursor = Default::default();
+        Self { state, cursor }
     }
 }
 
@@ -71,12 +71,8 @@ impl CollisionResistance for AsconCxof128 {
 impl Update for AsconCxof128 {
     #[inline]
     fn update(&mut self, data: &[u8]) {
-        self.buffer.digest_blocks(data, |blocks| {
-            for block in blocks {
-                self.state[0] ^= u64::from_le_bytes(block.0);
-                ascon::permute12(&mut self.state);
-            }
-        });
+        self.cursor
+            .absorb_u64_le(&mut self.state, ascon::permute12, data);
     }
 }
 
@@ -84,13 +80,9 @@ impl ExtendableOutput for AsconCxof128 {
     type Reader = AsconXof128Reader;
 
     fn finalize_xof(mut self) -> Self::Reader {
-        let Self { state, buffer } = &mut self;
-        let len = buffer.get_pos();
-        let last_block = buffer.pad_with_zeros();
-        let pad = 1u64 << (8 * len);
-        state[0] ^= u64::from_le_bytes(last_block.0) ^ pad;
-
-        AsconXof128Reader::new(state)
+        let pos = self.cursor.pos();
+        self.state[0] ^= 1u64 << (8 * pos);
+        AsconXof128Reader::new(&self.state)
     }
 }
 
@@ -102,18 +94,19 @@ impl AlgorithmName for AsconCxof128 {
 }
 
 impl SerializableState for AsconCxof128 {
-    type SerializedStateSize = U48;
+    type SerializedStateSize = U41;
 
     #[inline]
     fn serialize(&self) -> SerializedState<Self> {
         let mut res = SerializedState::<Self>::default();
-        let (state_dst, buffer_dst) = res.split_at_mut(size_of::<State>());
+        let (state_dst, cursor_dst) = res.split_at_mut(size_of::<State>());
         let mut chunks = state_dst.chunks_exact_mut(size_of::<u64>());
         for (src, dst) in self.state.iter().zip(&mut chunks) {
             dst.copy_from_slice(&src.to_le_bytes());
         }
         assert!(chunks.into_remainder().is_empty());
-        buffer_dst.copy_from_slice(&self.buffer.serialize());
+        assert_eq!(cursor_dst.len(), 1);
+        cursor_dst[0] = self.cursor.raw_pos();
         res
     }
 
@@ -121,18 +114,16 @@ impl SerializableState for AsconCxof128 {
     fn deserialize(
         serialized_state: &SerializedState<Self>,
     ) -> Result<Self, DeserializeStateError> {
-        let (state_src, buffer_src) = serialized_state.split_at(size_of::<State>());
+        let (state_src, cursor_src) = serialized_state.split_at(size_of::<State>());
         let state = core::array::from_fn(|i| {
             let n = size_of::<u64>();
             let chunk = &state_src[n * i..][..n];
             u64::from_le_bytes(chunk.try_into().expect("chunk has correct length"))
         });
-        let buffer_src = buffer_src
-            .try_into()
-            .expect("buffer_src has correct length");
-        EagerBuffer::deserialize(buffer_src)
-            .map_err(|_| DeserializeStateError)
-            .map(|buffer| Self { state, buffer })
+        assert_eq!(cursor_src.len(), 1);
+        SpongeCursor::new(cursor_src[0])
+            .ok_or(DeserializeStateError)
+            .map(|cursor| Self { state, cursor })
     }
 }
 
@@ -141,10 +132,9 @@ impl Drop for AsconCxof128 {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
-            use digest::zeroize::{Zeroize, ZeroizeOnDrop};
-            fn assert_zeroize_on_drop<T: ZeroizeOnDrop>(_: &mut T) {}
+            use digest::zeroize::Zeroize;
             self.state.zeroize();
-            assert_zeroize_on_drop(&mut self.buffer);
+            self.cursor.zeroize();
         }
     }
 }

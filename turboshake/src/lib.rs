@@ -11,12 +11,13 @@
 
 pub use digest;
 use keccak::{Keccak, State1600};
+use sponge_cursor::SpongeCursor;
 
 use core::fmt;
 use digest::{
-    CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Update, XofReader,
-    block_api::{AlgorithmName, BlockSizeUser, Reset},
-    block_buffer::{BlockSizes, EagerBuffer, ReadBuffer},
+    CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
+    XofReader,
+    common::{AlgorithmName, BlockSizeUser},
     consts::{U16, U32, U136, U168},
 };
 
@@ -31,115 +32,91 @@ pub const DEFAULT_DS: u8 = 0x1F;
 /// Domain separator `DS` MUST be in the range `0x01..=0x7f`.
 /// Use [`DEFAULT_DS`] if you want the default value.
 ///
-/// Rate MUST be either [`U168`] or [`U136`] for TurboSHAKE128 and TurboSHAKE256 respectively.
+/// Rate MUST be either 168 or 136 for TurboSHAKE128 and TurboSHAKE256 respectively.
 #[derive(Clone)]
-pub struct TurboShake<Rate: BlockSizes, const DS: u8> {
+pub struct TurboShake<const RATE: usize, const DS: u8> {
     state: State1600,
+    cursor: SpongeCursor<RATE>,
     keccak: Keccak,
-    buffer: EagerBuffer<Rate>,
 }
 
-impl<Rate: BlockSizes, const DS: u8> Default for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> Default for TurboShake<RATE, DS> {
     #[inline]
     fn default() -> Self {
         const {
             assert!(DS >= 0x01 && DS <= 0x7F, "invalid domain separator");
-            assert!(Rate::USIZE == 168 || Rate::USIZE == 136, "unsupported rate");
+            assert!(RATE == 168 || RATE == 136, "unsupported rate");
         }
         Self {
             state: Default::default(),
+            cursor: Default::default(),
             keccak: Keccak::new(),
-            buffer: Default::default(),
         }
     }
 }
 
-impl<Rate: BlockSizes, const DS: u8> HashMarker for TurboShake<Rate, DS> {}
+impl<const RATE: usize, const DS: u8> HashMarker for TurboShake<RATE, DS> {}
 
-impl<Rate: BlockSizes, const DS: u8> BlockSizeUser for TurboShake<Rate, DS> {
-    type BlockSize = Rate;
-}
-
-impl<Rate: BlockSizes, const DS: u8> Update for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> Update for TurboShake<RATE, DS> {
     #[inline]
     fn update(&mut self, data: &[u8]) {
-        let Self {
-            state,
-            keccak,
-            buffer,
-        } = self;
-
-        keccak.with_p1600::<ROUNDS>(|p1600| {
-            buffer.digest_blocks(data, |blocks| {
-                for block in blocks {
-                    xor_block(state, block);
-                    p1600(state);
-                }
-            });
+        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+            self.cursor.absorb_u64_le(&mut self.state, p1600, data);
         });
     }
 }
 
-impl<Rate: BlockSizes, const DS: u8> TurboShake<Rate, DS> {
-    fn finalize_dirty(&mut self) {
-        let Self {
-            state,
-            keccak,
-            buffer,
-        } = self;
+impl<const RATE: usize, const DS: u8> TurboShake<RATE, DS> {
+    fn pad(&mut self) {
+        let pos = self.cursor.pos();
+        let word_offset = pos / 8;
+        let byte_offset = pos % 8;
 
-        let pos = buffer.get_pos();
-        let mut block = buffer.pad_with_zeros();
-        block[pos] = DS;
-        let n = block.len();
-        block[n - 1] |= 0x80;
-
-        keccak.with_p1600::<ROUNDS>(|p1600| {
-            xor_block(state, &block);
-            p1600(state);
-        });
+        let pad = u64::from(DS) << (8 * byte_offset);
+        self.state[word_offset] ^= pad;
+        self.state[RATE / 8 - 1] ^= 1 << 63;
     }
 }
 
-impl<Rate: BlockSizes, const DS: u8> ExtendableOutput for TurboShake<Rate, DS> {
-    type Reader = TurboShakeReader<Rate>;
+impl<const RATE: usize, const DS: u8> ExtendableOutput for TurboShake<RATE, DS> {
+    type Reader = TurboShakeReader<RATE>;
 
     #[inline]
     fn finalize_xof(mut self) -> Self::Reader {
-        self.finalize_dirty();
+        self.pad();
         Self::Reader {
             state: self.state,
+            cursor: Default::default(),
             keccak: self.keccak,
-            buffer: Default::default(),
         }
     }
 }
 
-impl<Rate: BlockSizes, const DS: u8> ExtendableOutputReset for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> ExtendableOutputReset for TurboShake<RATE, DS> {
     #[inline]
     fn finalize_xof_reset(&mut self) -> Self::Reader {
-        self.finalize_dirty();
+        self.pad();
         let reader = Self::Reader {
             state: self.state,
+            cursor: Default::default(),
             keccak: self.keccak,
-            buffer: Default::default(),
         };
         self.reset();
         reader
     }
 }
 
-impl<Rate: BlockSizes, const DS: u8> Reset for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> Reset for TurboShake<RATE, DS> {
     #[inline]
     fn reset(&mut self) {
         self.state = Default::default();
-        self.buffer.reset();
+        self.cursor = Default::default();
     }
 }
 
-impl<Rate: BlockSizes, const DS: u8> AlgorithmName for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> AlgorithmName for TurboShake<RATE, DS> {
     fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let alg_name = match Rate::USIZE {
+        let alg_name = match RATE {
             168 => "TurboSHAKE128",
             136 => "TurboSHAKE256",
             _ => unreachable!(),
@@ -148,9 +125,9 @@ impl<Rate: BlockSizes, const DS: u8> AlgorithmName for TurboShake<Rate, DS> {
     }
 }
 
-impl<Rate: BlockSizes, const DS: u8> fmt::Debug for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> fmt::Debug for TurboShake<RATE, DS> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let debug_str = match Rate::USIZE {
+        let debug_str = match RATE {
             168 => "TurboShake128 { ... }",
             136 => "TurboShake256 { ... }",
             _ => unreachable!(),
@@ -159,7 +136,7 @@ impl<Rate: BlockSizes, const DS: u8> fmt::Debug for TurboShake<Rate, DS> {
     }
 }
 
-impl<Rate: BlockSizes, const DS: u8> Drop for TurboShake<Rate, DS> {
+impl<const RATE: usize, const DS: u8> Drop for TurboShake<RATE, DS> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
@@ -171,42 +148,28 @@ impl<Rate: BlockSizes, const DS: u8> Drop for TurboShake<Rate, DS> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: BlockSizes, const DS: u8> digest::zeroize::ZeroizeOnDrop for TurboShake<Rate, DS> {}
+impl<const RATE: usize, const DS: u8> digest::zeroize::ZeroizeOnDrop for TurboShake<RATE, DS> {}
 
 /// Generic TurboSHAKE XOF reader
 #[derive(Clone)]
-pub struct TurboShakeReader<Rate: BlockSizes> {
+pub struct TurboShakeReader<const RATE: usize> {
     state: State1600,
+    cursor: SpongeCursor<RATE>,
     keccak: Keccak,
-    buffer: ReadBuffer<Rate>,
 }
 
-impl<Rate: BlockSizes> XofReader for TurboShakeReader<Rate> {
+impl<const RATE: usize> XofReader for TurboShakeReader<RATE> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) {
-        let Self {
-            state,
-            keccak,
-            buffer,
-        } = self;
-
-        buffer.read(buf, |block| {
-            let mut chunks = block.chunks_exact_mut(8);
-            for (src, dst) in state.iter().zip(&mut chunks) {
-                dst.copy_from_slice(&src.to_le_bytes());
-            }
-            assert!(
-                chunks.into_remainder().is_empty(),
-                "rate is either 136 or 168",
-            );
-            keccak.with_p1600::<ROUNDS>(|p1600| p1600(state));
+        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+            self.cursor.squeeze_read_u64_le(&mut self.state, p1600, buf);
         });
     }
 }
 
-impl<Rate: BlockSizes> fmt::Debug for TurboShakeReader<Rate> {
+impl<const RATE: usize> fmt::Debug for TurboShakeReader<RATE> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let debug_str = match Rate::USIZE {
+        let debug_str = match RATE {
             168 => "TurboShakeReader128 { ... }",
             136 => "TurboShakeReader256 { ... }",
             _ => unreachable!(),
@@ -215,29 +178,29 @@ impl<Rate: BlockSizes> fmt::Debug for TurboShakeReader<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Drop for TurboShakeReader<Rate> {
+impl<const RATE: usize> Drop for TurboShakeReader<RATE> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
             use digest::zeroize::Zeroize;
             self.state.zeroize();
-            // self.buffer is zeroized by its `Drop`
+            self.cursor.zeroize();
         }
     }
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: BlockSizes> digest::zeroize::ZeroizeOnDrop for TurboShakeReader<Rate> {}
+impl<const RATE: usize> digest::zeroize::ZeroizeOnDrop for TurboShakeReader<RATE> {}
 
 /// TurboSHAKE128 hasher with domain separator.
-pub type TurboShake128<const DS: u8 = DEFAULT_DS> = TurboShake<U168, DS>;
+pub type TurboShake128<const DS: u8 = DEFAULT_DS> = TurboShake<168, DS>;
 /// TurboSHAKE256 hasher with domain separator.
-pub type TurboShake256<const DS: u8 = DEFAULT_DS> = TurboShake<U136, DS>;
+pub type TurboShake256<const DS: u8 = DEFAULT_DS> = TurboShake<136, DS>;
 
 /// TurboSHAKE128 XOF reader.
-pub type TurboShake128Reader = TurboShakeReader<U168>;
+pub type TurboShake128Reader = TurboShakeReader<168>;
 /// TurboSHAKE256 XOF reader.
-pub type TurboShake256Reader = TurboShakeReader<U136>;
+pub type TurboShake256Reader = TurboShakeReader<136>;
 
 impl<const DS: u8> CollisionResistance for TurboShake128<DS> {
     // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-7
@@ -249,14 +212,10 @@ impl<const DS: u8> CollisionResistance for TurboShake256<DS> {
     type CollisionResistance = U32;
 }
 
-fn xor_block(state: &mut State1600, block: &[u8]) {
-    assert!(size_of_val(block) < size_of_val(state));
+impl<const DS: u8> BlockSizeUser for TurboShake128<DS> {
+    type BlockSize = U168;
+}
 
-    let mut chunks = block.chunks_exact(8);
-    for (s, chunk) in state.iter_mut().zip(&mut chunks) {
-        *s ^= u64::from_le_bytes(chunk.try_into().unwrap());
-    }
-
-    let rem = chunks.remainder();
-    assert!(rem.is_empty(), "block size is equal to 136 or 168");
+impl<const DS: u8> BlockSizeUser for TurboShake256<DS> {
+    type BlockSize = U136;
 }

@@ -3,7 +3,7 @@ use crate::{
     consts::{CHUNK_SIZE, CHUNK_SIZE_U64, ROUNDS, S0_DELIM},
     node_turbo_shake,
 };
-use digest::{block_buffer::BlockSizes, typenum::Unsigned};
+use digest::typenum::Unsigned;
 use keccak::{Backend, BackendClosure};
 
 /// Buffer size used by the update closure.
@@ -11,12 +11,12 @@ use keccak::{Backend, BackendClosure};
 /// 512 byte buffer is sufficient for 16x and 8x parallel KT128 and KT256 respectively.
 const BUFFER_LEN: usize = 512;
 
-pub(crate) struct Closure<'a, Rate: BlockSizes> {
+pub(crate) struct Closure<'a, const RATE: usize> {
     pub(crate) data: &'a [u8],
-    pub(crate) kt: &'a mut Kt<Rate>,
+    pub(crate) kt: &'a mut Kt<RATE>,
 }
 
-impl<Rate: BlockSizes> BackendClosure for Closure<'_, Rate> {
+impl<const RATE: usize> BackendClosure for Closure<'_, RATE> {
     #[inline(always)]
     fn call_once<B: Backend>(self) {
         let Kt {
@@ -30,7 +30,7 @@ impl<Rate: BlockSizes> BackendClosure for Closure<'_, Rate> {
         let par_p1600 = B::get_par_p1600::<ROUNDS>();
         let p1600 = B::get_p1600::<ROUNDS>();
         let par_size = B::ParSize1600::USIZE;
-        let cv_len = 200 - Rate::USIZE;
+        let cv_len = 200 - RATE;
         // TODO: this should be [0u8; par_size * cv_len]`
         let mut cv_buf = [0u8; BUFFER_LEN];
 
@@ -59,9 +59,8 @@ impl<Rate: BlockSizes> BackendClosure for Closure<'_, Rate> {
         // Handle partially absorbed chunk
         if partial_chunk_len != 0 {
             let rem_len = CHUNK_SIZE - partial_chunk_len;
-            let split = data.split_at_checked(rem_len);
 
-            let Some((part_data, rem_data)) = split else {
+            let Some((part_data, rem_data)) = data.split_at_checked(rem_len) else {
                 node_tshk.absorb(p1600, data);
                 return;
             };
@@ -69,10 +68,10 @@ impl<Rate: BlockSizes> BackendClosure for Closure<'_, Rate> {
             node_tshk.absorb(p1600, part_data);
 
             let cv_dst = &mut cv_buf[..cv_len];
-            node_tshk.full_node_finalize(p1600, cv_dst);
+            node_tshk.finalize_intermediate_node(p1600, cv_dst);
             accum_tshk.absorb(p1600, cv_dst);
 
-            *node_tshk = Default::default();
+            node_tshk.reset();
             data = rem_data;
         }
 
@@ -86,7 +85,7 @@ impl<Rate: BlockSizes> BackendClosure for Closure<'_, Rate> {
             let mut par_data_chunks = data.chunks_exact(par_size * CHUNK_SIZE);
 
             for par_data_chunk in &mut par_data_chunks {
-                node_turbo_shake::parallel::<_, Rate>(par_p1600, par_data_chunk, cvs_dst);
+                node_turbo_shake::parallel::<_, RATE>(par_p1600, par_data_chunk, cvs_dst);
                 accum_tshk.absorb(p1600, cvs_dst);
             }
             data = par_data_chunks.remainder();
@@ -96,7 +95,7 @@ impl<Rate: BlockSizes> BackendClosure for Closure<'_, Rate> {
         let cv_dst = &mut cv_buf[..cv_len];
         let mut data_chunks = data.chunks_exact(CHUNK_SIZE);
         for data_chunk in &mut data_chunks {
-            node_turbo_shake::scalar::<Rate>(p1600, data_chunk, cv_dst);
+            node_turbo_shake::scalar::<RATE>(p1600, data_chunk, cv_dst);
             accum_tshk.absorb(p1600, cv_dst);
         }
         data = data_chunks.remainder();
