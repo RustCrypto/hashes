@@ -46,12 +46,9 @@ macro_rules! test_bash_prg_rand {
     ($name:ident, $hasher:ty, $expected:expr) => {
         #[test]
         fn $name() {
-            use digest::CollisionResistance;
-            use digest::typenum::Unsigned;
             let mut h = <$hasher>::default();
             digest::dev::feed_rand_16mib(&mut h);
-            let mut output = [0u8;
-                <<$hasher as CollisionResistance>::CollisionResistance as Unsigned>::USIZE * 2];
+            let mut output = [0u8; 64];
             h.finalize_xof_into(&mut output);
             assert_eq!(&output[..], $expected);
         }
@@ -61,7 +58,10 @@ macro_rules! test_bash_prg_rand {
 test_bash_prg_rand!(
     bashprg1282_rand,
     BashPrgHash1282,
-    hex!("BF15805CDEAE220A9DD50C325A4A0BDF326C6ED853CFA89592A9E2BEB4D0585C")
+    hex!(
+        "BF15805CDEAE220A9DD50C325A4A0BDF326C6ED853CFA89592A9E2BEB4D0585C"
+        "891AF66C1CA514390311FDFB51D467FC11439AE4907863A5C3861CDCF7F360EC"
+    )
 );
 
 test_bash_prg_rand!(
@@ -69,7 +69,7 @@ test_bash_prg_rand!(
     BashPrgHash1921,
     hex!(
         "82176D6DAF4F631E251CA41A7688FEB643B954383186C7902AB09D80EB5AB17C"
-        "BA286D16912EBBACEC3D8143966107F6"
+        "BA286D16912EBBACEC3D8143966107F6DFB5F4AC4F88B64F20AB49CEAD817E45"
     )
 );
 
