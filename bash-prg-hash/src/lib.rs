@@ -90,7 +90,7 @@ impl<const RATE: usize, const CAPACITY: usize> TryCustomizedInit for BashPrgHash
         // Step 5: S[pos...1472) <- 0^{1472-pos}
 
         let mut buf = [0u8; 8 * STATE_WORDS];
-        buf[0] = u8::try_from(header_len / 4).expect("header_len fits into u8");
+        buf[0] = u8::try_from(header_len * 4).expect("header_len fits into u8");
         buf[1..][..header_len].copy_from_slice(header);
 
         let mut state = [0u64; STATE_WORDS];
