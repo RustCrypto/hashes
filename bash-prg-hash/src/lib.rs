@@ -132,6 +132,18 @@ impl<const RATE: usize, const CAPACITY: usize> fmt::Debug for BashPrgHash<RATE, 
     }
 }
 
+impl<const RATE: usize, const CAPACITY: usize> Drop for BashPrgHash<RATE, CAPACITY> {
+    #[inline]
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            use digest::zeroize::Zeroize;
+            self.state.zeroize();
+            self.cursor.zeroize();
+        }
+    }
+}
+
 #[cfg(feature = "zeroize")]
 impl<const RATE: usize, const CAPACITY: usize> digest::zeroize::ZeroizeOnDrop
     for BashPrgHash<RATE, CAPACITY>
@@ -150,6 +162,18 @@ impl<const RATE: usize, const CAPACITY: usize> XofReader for BashPrgHashReader<R
     fn read(&mut self, buf: &mut [u8]) {
         self.cursor
             .squeeze_read_u64_le(&mut self.state, bash_f, buf);
+    }
+}
+
+impl<const RATE: usize, const CAPACITY: usize> Drop for BashPrgHashReader<RATE, CAPACITY> {
+    #[inline]
+    fn drop(&mut self) {
+        #[cfg(feature = "zeroize")]
+        {
+            use digest::zeroize::Zeroize;
+            self.state.zeroize();
+            self.cursor.zeroize();
+        }
     }
 }
 
@@ -205,28 +229,6 @@ impl<const RATE: usize, const CAPACITY: usize> BashPrgHash<RATE, CAPACITY> {
         bash_f(&mut self.state);
         // Step 4: pos <- 0.
         self.cursor = SpongeCursor::default();
-    }
-}
-
-impl<const RATE: usize, const CAPACITY: usize> Drop for BashPrgHash<RATE, CAPACITY> {
-    #[inline]
-    fn drop(&mut self) {
-        #[cfg(feature = "zeroize")]
-        {
-            use digest::zeroize::Zeroize;
-            self.state.zeroize();
-        }
-    }
-}
-
-impl<const RATE: usize, const CAPACITY: usize> Drop for BashPrgHashReader<RATE, CAPACITY> {
-    #[inline]
-    fn drop(&mut self) {
-        #[cfg(feature = "zeroize")]
-        {
-            use digest::zeroize::Zeroize;
-            self.state.zeroize();
-        }
     }
 }
 

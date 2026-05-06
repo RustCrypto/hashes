@@ -369,6 +369,9 @@ dependencies = [
 name = "sponge-cursor"
 version = "0.1.0"
 source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#075f14c368b39ecd3207c0b93c853993751bebd5"
+dependencies = [
+ "zeroize",
+]
 
 [[package]]
 name = "streebog"

@@ -25,7 +25,7 @@ hex-literal = "1"
 default = ["alloc", "oid"]
 alloc = ["digest/alloc"]
 oid = ["digest/oid"]
-zeroize = ["digest/zeroize"]
+zeroize = ["digest/zeroize", "sponge-cursor/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true
