@@ -107,11 +107,20 @@ impl<const RATE: usize, const CAPACITY: usize> ExtendableOutput for BashPrgHash<
 
     #[inline]
     fn finalize_xof(mut self) -> Self::Reader {
-        // `squeezePrep[ℓ, d]()` / output preparation: `commit(OUT)` (Section 8.7).
-        self.commit(OUT);
+        let pos = self.cursor.pos();
+        let word_pos = pos / 8;
+        let byte_pos = pos % 8;
+
+        // Step 1: S[pos...pos+8) <- S[pos...pos+8) ⊕ (t || 01).
+        const OUT_PAD: u8 = (OUT << 2) | 0x01;
+        self.state[word_pos] ^= u64::from(OUT_PAD) << (8 * byte_pos);
+
+        // Step 2: S[r] <- S[r] ⊕ 1, where r = 1536 - 2 d ℓ (bit index).
+        self.state[RATE / 8] ^= 1u64 << 7;
+
         BashPrgHashReader {
             state: self.state,
-            cursor: self.cursor.clone(),
+            cursor: Default::default(),
         }
     }
 }
@@ -138,8 +147,9 @@ pub struct BashPrgHashReader<const RATE: usize, const CAPACITY: usize> {
 
 impl<const RATE: usize, const CAPACITY: usize> XofReader for BashPrgHashReader<RATE, CAPACITY> {
     #[inline]
-    fn read(&mut self, buffer: &mut [u8]) {
-        self.squeeze(buffer);
+    fn read(&mut self, buf: &mut [u8]) {
+        self.cursor
+            .squeeze_read_u64_le(&mut self.state, bash_f, buf);
     }
 }
 
@@ -179,18 +189,6 @@ impl<const RATE: usize, const CAPACITY: usize> BashPrgHash<RATE, CAPACITY> {
         self.state[23] = (level * 2 + CAPACITY) as u64;
     }
 
-    fn get_byte(state: &[u64; STATE_WORDS], pos: usize) -> u8 {
-        let word_idx = pos / 8;
-        let byte_in_word = pos % 8;
-        state[word_idx].to_le_bytes()[byte_in_word]
-    }
-
-    fn extract_bytes(state: &[u64; STATE_WORDS], offset: usize, output: &mut [u8]) {
-        for (i, out_byte) in output.iter_mut().enumerate() {
-            *out_byte = Self::get_byte(state, offset + i);
-        }
-    }
-
     /// `commit[ℓ, d](t)` (Section 8.4.2)
     fn commit(&mut self, t: u8) {
         let pos = self.cursor.pos();
@@ -207,36 +205,6 @@ impl<const RATE: usize, const CAPACITY: usize> BashPrgHash<RATE, CAPACITY> {
         bash_f(&mut self.state);
         // Step 4: pos <- 0.
         self.cursor = SpongeCursor::default();
-    }
-}
-
-impl<const RATE: usize, const CAPACITY: usize> BashPrgHashReader<RATE, CAPACITY> {
-    /// `squeeze[ℓ, d](Y)` (Section 8.7.2)
-    fn squeeze(&mut self, output: &mut [u8]) {
-        let mut remaining = output;
-
-        while !remaining.is_empty() {
-            // Step 1: Split Y into the next chunk Yi with |Yi| <= r - pos.
-            let pos = self.cursor.pos();
-            let to_squeeze = remaining.len().min(RATE - pos);
-
-            // Step 2: Yi <- S[pos..pos+|Yi|), pos <- pos + |Yi|.
-            BashPrgHash::<RATE, CAPACITY>::extract_bytes(
-                &self.state,
-                pos,
-                &mut remaining[..to_squeeze],
-            );
-            remaining = &mut remaining[to_squeeze..];
-
-            if pos + to_squeeze == RATE {
-                // Step 3: If pos = r then S <- bash-f(S), pos <- 0.
-                bash_f(&mut self.state);
-                self.cursor = SpongeCursor::default();
-            } else {
-                let new_pos = u8::try_from(pos + to_squeeze).expect("position is within rate");
-                self.cursor = SpongeCursor::new(new_pos).expect("position is within rate");
-            }
-        }
     }
 }
 
