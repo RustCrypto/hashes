@@ -5,14 +5,13 @@ use hex_literal::hex;
 
 fn xof_test<D>(&TestVector { input, output }: &TestVector) -> Result<(), &'static str>
 where
-    D: Default + ExtendableOutput + Clone,
+    D: Default + ExtendableOutput,
 {
     let mut hasher = D::default();
     let mut buf = [0u8; 1024];
     let buf = &mut buf[..output.len()];
     // Test that it works when accepting the message all at once
     hasher.update(input);
-    let mut hasher2 = hasher.clone();
     hasher.finalize_xof_into(buf);
     if buf != output {
         return Err("whole message");
@@ -24,7 +23,6 @@ where
         let mut hasher = D::default();
         for chunk in input.chunks(n) {
             hasher.update(chunk);
-            hasher2.update(chunk);
         }
         hasher.finalize_xof_into(buf);
         if buf != output {
