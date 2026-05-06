@@ -15,9 +15,7 @@ pub use variants::*;
 
 use bash_f::{STATE_WORDS, bash_f};
 use core::fmt;
-use digest::{
-    ExtendableOutput, ExtendableOutputReset, Reset, TryCustomizedInit, Update, XofReader,
-};
+use digest::{ExtendableOutput, TryCustomizedInit, Update, XofReader};
 use sponge_cursor::SpongeCursor;
 
 /// Data type codes from Table 3 of STB 34.101.77-2020
@@ -115,28 +113,6 @@ impl<const RATE: usize, const CAPACITY: usize> ExtendableOutput for BashPrgHash<
             state: self.state,
             cursor: self.cursor.clone(),
         }
-    }
-}
-
-impl<const RATE: usize, const CAPACITY: usize> ExtendableOutputReset
-    for BashPrgHash<RATE, CAPACITY>
-{
-    #[inline]
-    fn finalize_xof_reset(&mut self) -> Self::Reader {
-        let mut hasher_clone = self.clone();
-        hasher_clone.commit(OUT);
-        self.reset();
-        BashPrgHashReader {
-            state: hasher_clone.state,
-            cursor: hasher_clone.cursor.clone(),
-        }
-    }
-}
-
-impl<const RATE: usize, const CAPACITY: usize> Reset for BashPrgHash<RATE, CAPACITY> {
-    #[inline]
-    fn reset(&mut self) {
-        *self = Self::default();
     }
 }
 

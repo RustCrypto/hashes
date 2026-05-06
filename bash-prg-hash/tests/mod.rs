@@ -1,13 +1,62 @@
 use bash_prg_hash::{BashPrgHash1282, BashPrgHash1921, BashPrgHash2562};
-use digest::ExtendableOutput;
-use digest::dev::xof_reset_test;
+use digest::dev::TestVector;
+use digest::{ExtendableOutput, XofReader};
 use hex_literal::hex;
+use std::fmt::Debug;
+
+pub fn xof_test<D: ExtendableOutput + Default + Debug + Clone>(
+    &TestVector { input, output }: &TestVector,
+) -> Result<(), &'static str> {
+    let mut hasher = D::default();
+    let mut buf = [0u8; 1024];
+    let buf = &mut buf[..output.len()];
+
+    // Test that it works when accepting the message all at once
+    hasher.update(input);
+    hasher.finalize_xof().read(buf);
+    if buf != output {
+        return Err("whole message");
+    }
+    buf.iter_mut().for_each(|b| *b = 0);
+
+    // Test with fresh hasher
+    let mut hasher = D::default();
+    hasher.update(input);
+    hasher.finalize_xof().read(buf);
+    if buf != output {
+        return Err("whole message after reset");
+    }
+    buf.iter_mut().for_each(|b| *b = 0);
+
+    // Test that it works when accepting the message in chunks
+    for n in 1..core::cmp::min(17, input.len()) {
+        let mut hasher = D::default();
+        let mut hasher2 = D::default();
+        for chunk in input.chunks(n) {
+            hasher.update(chunk);
+            hasher2.update(chunk);
+        }
+        hasher.finalize_xof().read(buf);
+        if buf != output {
+            return Err("message in chunks");
+        }
+        buf.iter_mut().for_each(|b| *b = 0);
+
+        hasher2.finalize_xof().read(buf);
+        if buf != output {
+            return Err("message in chunks");
+        }
+        buf.iter_mut().for_each(|b| *b = 0);
+    }
+
+    Ok(())
+}
 
 // Test vectors from STB 34.101.77-2020 (Appendix A, Table A.5)
-digest::new_test!(bashprg1282, BashPrgHash1282, xof_reset_test);
-digest::new_test!(bashprg1921, BashPrgHash1921, xof_reset_test);
+digest::new_test!(bashprg1282, BashPrgHash1282, xof_test);
+digest::new_test!(bashprg1921, BashPrgHash1921, xof_test);
 // Not in STB 34.101.77-2020, but included for completeness
-digest::new_test!(bashprg2562, BashPrgHash2562, xof_reset_test);
+digest::new_test!(bashprg2562, BashPrgHash2562, xof_test);
 
 macro_rules! test_bash_prg_rand {
     ($name:ident, $hasher:ty, $expected:expr) => {
