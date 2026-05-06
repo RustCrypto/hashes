@@ -66,6 +66,16 @@ impl<const RATE: usize, const CAPACITY: usize> TryCustomizedInit for BashPrgHash
 
     #[inline]
     fn try_new_customized(header: &[u8]) -> Result<Self, Self::Error> {
+        const {
+            assert!(
+                matches!(
+                    (RATE, CAPACITY),
+                    (160, 1) | (128, 2) | (144, 1) | (96, 2) | (128, 1) | (64, 2)
+                ),
+                "invalid combination of RATE and CAPACITY"
+            )
+        }
+
         const MAX_HEADER_LEN: usize = 60;
 
         if header.len() > MAX_HEADER_LEN || header.len() % 4 != 0 {
