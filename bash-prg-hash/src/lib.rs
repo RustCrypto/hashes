@@ -116,6 +116,7 @@ impl<const RATE: usize, const CAPACITY: usize> ExtendableOutput for BashPrgHash<
         self.state[word_pos] ^= u64::from(OUT_PAD) << (8 * byte_pos);
 
         // Step 2: S[r] <- S[r] ⊕ 1, where r = 1536 - 2 d ℓ (bit index).
+        const { assert!(RATE % 8 == 0) }
         self.state[RATE / 8] ^= 1u64 << 7;
 
         BashPrgHashReader {
