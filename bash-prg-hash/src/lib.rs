@@ -10,10 +10,7 @@
 
 pub use digest::{self, Digest};
 
-#[cfg(feature = "oid")]
-mod oids;
 mod variants;
-
 pub use variants::*;
 
 use bash_f::{STATE_WORDS, bash_f};
