@@ -368,10 +368,7 @@ dependencies = [
 [[package]]
 name = "sponge-cursor"
 version = "0.1.0"
-source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#e6eb9fcd55cd4016aa7e9bbb3704b3da5e3c12b4"
-dependencies = [
- "hybrid-array",
-]
+source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#075f14c368b39ecd3207c0b93c853993751bebd5"
 
 [[package]]
 name = "streebog"
