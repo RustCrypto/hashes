@@ -2,7 +2,7 @@ use bash_prg_hash::{
     BashPrgHash1281, BashPrgHash1282, BashPrgHash1921, BashPrgHash1922, BashPrgHash2561,
     BashPrgHash2562,
 };
-use digest::{ExtendableOutput, TryCustomizedInit};
+use digest::{ExtendableOutput, TryCustomizedInit, Update};
 use hex_literal::hex;
 use std::fmt::Debug;
 
@@ -100,6 +100,23 @@ macro_rules! test_bash_prg_rand {
     };
 }
 
+// Test from the https://apmi.bsu.by/assets/files/std/met-v10.zip
+macro_rules! test_bash_prg_million {
+    ($name:ident, $hasher:ty, $expected:expr) => {
+        #[test]
+        fn $name() {
+            let mut h = <$hasher>::default();
+            let block = [0x61u8; 1000];
+            for _ in 0..1000 {
+                h.update(&block);
+            }
+            let mut output = [0u8; 64];
+            h.finalize_xof_into(&mut output);
+            assert_eq!(&output[..$expected.len()], $expected);
+        }
+    };
+}
+
 test_bash_prg_rand!(
     bashprg1282_rand,
     BashPrgHash1282,
@@ -124,5 +141,32 @@ test_bash_prg_rand!(
     hex!(
         "AD07A8D61928296F4115F9E51AAA5FA986899BFDA8443F139D969600064EBCE2"
         "D591F583FA27F6B0F7E73DA2B29AF382AC2374C04463B91A27F1C48FEE8AAB2C"
+    )
+);
+
+// BASH.PRG.HASH128.5
+test_bash_prg_million!(
+    bashprg1282_million,
+    BashPrgHash1282,
+    hex!("F84CA85F610711674BB8ADDB87B747C6000A6B6735664687854052C60CE0F7B0")
+);
+
+// BASH.PRG.HASH192.5
+test_bash_prg_million!(
+    bashprg1922_million,
+    BashPrgHash1922,
+    hex!(
+        "C9B4ABF055F1A2ED025385AA5480BA9ADFB1608409D3102BCC557C41B22C2866"
+        "233212327DF735BE22D85DE44CB48C2E"
+    )
+);
+
+// BASH.PRG.HASH256.5
+test_bash_prg_million!(
+    bashprg2562_million,
+    BashPrgHash2562,
+    hex!(
+        "45911D1B40F84E5D53C3B27FBB91D696E96924C5F3BD61CC589F26FA9502F3F5"
+        "847DF96A5D6B44D17388DFF413D0B8AE0D81073D010F1637A20892E06DAB1AF0"
     )
 );
