@@ -15,7 +15,7 @@ pub use variants::*;
 
 use bash_f::{STATE_WORDS, bash_f};
 use core::fmt;
-use digest::{ExtendableOutput, TryCustomizedInit, Update, XofReader};
+use digest::{ExtendableOutput, TryCustomizedInit, Update, XofReader, common::AlgorithmName};
 use sponge_cursor::SpongeCursor;
 
 /// Data type codes from Table 3 of STB 34.101.77-2020
@@ -166,7 +166,16 @@ impl<const RATE: usize, const CAPACITY: usize> ExtendableOutput for BashPrgHash<
 impl<const RATE: usize, const CAPACITY: usize> fmt::Debug for BashPrgHash<RATE, CAPACITY> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("BashPrgHash { ... }")
+        let level = 8 * (192 - RATE) / (2 * CAPACITY);
+        write!(f, "BashPrgHash{level}{CAPACITY} {{ ... }}")
+    }
+}
+
+impl<const RATE: usize, const CAPACITY: usize> AlgorithmName for BashPrgHash<RATE, CAPACITY> {
+    #[inline]
+    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let level = 8 * (192 - RATE) / (2 * CAPACITY);
+        write!(f, "BashPrgHash{level}{CAPACITY}")
     }
 }
 
