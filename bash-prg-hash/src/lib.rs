@@ -30,19 +30,19 @@ const OUT: u8 = 0b000100;
 /// Only the following combinations of rate and capacity with
 /// the resulting security level are supported:
 ///
-/// | Rate, bytes | Capacity | Security level, bits |
-/// |:-----------:|:--------:|:--------------------:|
-/// |     160     |     1    |          128         |
-/// |     128     |     2    |          128         |
-/// |     144     |     1    |          192         |
-/// |      96     |     2    |          192         |
-/// |     128     |     1    |          256         |
-/// |      64     |     2    |          256         |
+/// | Rate, bytes | Capacity | Security level, bits |       Variant       |
+/// |:-----------:|:--------:|:--------------------:|:-------------------:|
+/// |     160     |     1    |          128         | [`BashPrgHash1281`] |
+/// |     128     |     2    |          128         | [`BashPrgHash1282`] |
+/// |     144     |     1    |          192         | [`BashPrgHash1921`] |
+/// |      96     |     2    |          192         | [`BashPrgHash1922`] |
+/// |     128     |     1    |          256         | [`BashPrgHash2561`] |
+/// |      64     |     2    |          256         | [`BashPrgHash2562`] |
 ///
 /// Trying to initialize hasher state with a different pair of parameters will
 /// result in a compilation error.
 ///
-/// Users are recommended to use type aliases (e.g. [`BashPrgHash1281`]) instead of using
+/// Users are recommended to use type aliases referenced in the last column instead of using
 /// this type directly.
 // Note: Ideally, we would use `LEVEL` instead of `RATE` and define the `cursor` field as
 // `SpongeCursor<{192-2*CAPACITY*LEVEL}>`, but it requires stabilized `generic_const_exprs`.
