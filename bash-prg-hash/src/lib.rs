@@ -76,19 +76,56 @@ impl<const RATE: usize, const CAPACITY: usize> TryCustomizedInit for BashPrgHash
 
         const MAX_HEADER_LEN: usize = 60;
 
-        if header.len() > MAX_HEADER_LEN || header.len() % 4 != 0 {
+        let header_len = header.len();
+        if header_len > MAX_HEADER_LEN || header_len % 4 != 0 {
             return Err(InvalidHeaderError);
         }
 
-        let mut s = Self {
-            state: [0u64; STATE_WORDS],
-            cursor: SpongeCursor::default(),
-        };
+        // `start[ℓ, 𝑑](𝐴, 𝐾)` (Section 8.3.2)
 
-        s.start(header);
-        s.commit(DATA);
+        // Step 3: pos <- 8 + |A| + |K| (in bits), i.e. 1 + |A| + |K| (in bytes).
+        let pos = 1 + header_len;
 
-        Ok(s)
+        // Step 4: S[...pos) <- <|A|/2 + |K|/32>_8 || A || K.
+        // Step 5: S[pos...1472) <- 0^{1472-pos}
+
+        let mut buf = [0u8; 8 * STATE_WORDS];
+        buf[0] = u8::try_from(header_len / 4).expect("header_len fits into u8");
+        buf[1..][..header_len].copy_from_slice(header);
+
+        let mut state = [0u64; STATE_WORDS];
+        let chunks = buf.chunks_exact(8);
+        assert!(chunks.remainder().is_empty());
+        for (dst, chunk) in state.iter_mut().zip(chunks) {
+            let chunk = chunk.try_into().expect("chunk has correct size");
+            *dst = u64::from_le_bytes(chunk);
+        }
+
+        // Step 6: S[1472...) <- <ℓ/4 + d>_64
+        let level = (192 - RATE) / (2 * CAPACITY);
+        state[23] = u64::try_from(level * 2 + CAPACITY).expect("the value always fits into u64");
+
+        // `commit[ℓ, d](DATA)` (Section 8.4.2)
+
+        let word_pos = pos / 8;
+        let byte_pos = pos % 8;
+
+        // Step 1: S[pos...pos+8) <- S[pos...pos+8) ⊕ (t || 01).
+        const DATA_PAD: u8 = (DATA << 2) | 0x01;
+        state[word_pos] ^= u64::from(DATA_PAD) << (8 * byte_pos);
+
+        // Step 2: S[r] <- S[r] ⊕ 1, where r = 1536 - 2 d ℓ (bit index).
+        const { assert!(RATE % 8 == 0) }
+        state[RATE / 8] ^= 1u64 << 7;
+
+        // Step 3: S <- bash-f(S).
+        bash_f(&mut state);
+
+        Ok(Self {
+            state,
+            // Step 4: pos <- 0.
+            cursor: Default::default(),
+        })
     }
 }
 
@@ -182,55 +219,6 @@ impl<const RATE: usize, const CAPACITY: usize> Drop for BashPrgHashReader<RATE, 
 impl<const RATE: usize, const CAPACITY: usize> digest::zeroize::ZeroizeOnDrop
     for BashPrgHashReader<RATE, CAPACITY>
 {
-}
-
-impl<const RATE: usize, const CAPACITY: usize> BashPrgHash<RATE, CAPACITY> {
-    /// Modify byte at position in state
-    fn modify_byte(state: &mut [u64; STATE_WORDS], pos: usize, f: impl FnOnce(&mut u8)) {
-        let word_idx = pos / 8;
-        let byte_in_word = pos % 8;
-        let mut bytes = state[word_idx].to_le_bytes();
-        f(&mut bytes[byte_in_word]);
-        state[word_idx] = u64::from_le_bytes(bytes);
-    }
-
-    /// `start[ℓ, 𝑑](𝐴, 𝐾)` (Section 8.3.2)
-    fn start(&mut self, header: &[u8]) {
-        let header_len = header.len();
-
-        // Step 4: S[...pos) <- <|A|/2 + |K|/32>_8 || A || K.
-        let first_byte = ((header_len * 8) / 2) as u8;
-        Self::modify_byte(&mut self.state, 0, |b| *b = first_byte);
-        for (i, &byte) in header.iter().enumerate() {
-            Self::modify_byte(&mut self.state, 1 + i, |b| *b = byte);
-        }
-
-        // Step 3: pos <- 8 + |A| + |K| (in bits), i.e. 1 + |A| + |K| (in bytes).
-        let pos = (1 + header_len) as u8;
-        self.cursor = SpongeCursor::new(pos).expect("pos within bounds");
-
-        // Step 6: S[1472...) <- <ℓ/4 + d>_64
-        let level = (192 - RATE) / (2 * CAPACITY);
-        self.state[23] = (level * 2 + CAPACITY) as u64;
-    }
-
-    /// `commit[ℓ, d](t)` (Section 8.4.2)
-    fn commit(&mut self, t: u8) {
-        let pos = self.cursor.pos();
-
-        // Step 1: S[pos...pos+8) <- S[pos...pos+8) ⊕ (t || 01).
-        let tag = (t << 2) | 0x01;
-        Self::modify_byte(&mut self.state, pos, |b| *b ^= tag);
-
-        // Step 2: S[r] <- S[r] ⊕ 1, where r = 1536 - 2 d ℓ (bit index).
-        let r_bit_in_byte = (RATE * 8) % 8;
-        Self::modify_byte(&mut self.state, RATE, |b| *b ^= 1u8 << (7 - r_bit_in_byte));
-
-        // Step 3: S <- bash-f(S).
-        bash_f(&mut self.state);
-        // Step 4: pos <- 0.
-        self.cursor = SpongeCursor::default();
-    }
 }
 
 /// Invalid `bash-prg-hash` header error.
