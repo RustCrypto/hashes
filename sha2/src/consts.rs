@@ -68,25 +68,3 @@ pub(crate) const K64: [u64; 80] = [
     0x28db77f523047d84, 0x32caab7b40c72493, 0x3c9ebe0a15c9bebc, 0x431d67c49c100d4c,
     0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817,
 ];
-
-/// Swapped round constants for SHA-256 family of digests
-pub(crate) static K32X4: [[u32; 4]; 16] = {
-    let mut res = [[0u32; 4]; 16];
-    let mut i = 0;
-    while i < 16 {
-        res[i] = [K32[4 * i + 3], K32[4 * i + 2], K32[4 * i + 1], K32[4 * i]];
-        i += 1;
-    }
-    res
-};
-
-/// Swapped round constants for SHA-512 family of digests
-pub(crate) const K64X2: [[u64; 2]; 40] = {
-    let mut res = [[0u64; 2]; 40];
-    let mut i = 0;
-    while i < 16 {
-        res[i] = [K64[4 * i + 1], K64[4 * i]];
-        i += 1;
-    }
-    res
-};
