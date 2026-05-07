@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 pub(crate) type State256 = [u32; 8];
 pub(crate) type State512 = [u64; 8];
 
