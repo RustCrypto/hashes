@@ -18,26 +18,28 @@ unsafe fn schedule(v0: __m128i, v1: __m128i, v2: __m128i, v3: __m128i) -> __m128
     _mm_sha256msg2_epu32(t3, v3)
 }
 
-macro_rules! rounds4 {
-    ($abef:ident, $cdgh:ident, $rest:expr, $i:expr) => {{
-        let k = crate::consts::K32X4[$i];
-        let kv = _mm_set_epi32(k[0] as i32, k[1] as i32, k[2] as i32, k[3] as i32);
-        let t1 = _mm_add_epi32($rest, kv);
-        $cdgh = _mm_sha256rnds2_epu32($cdgh, $abef, t1);
-        let t2 = _mm_shuffle_epi32(t1, 0x0E);
-        $abef = _mm_sha256rnds2_epu32($abef, $cdgh, t2);
-    }};
+#[inline(always)]
+unsafe fn rounds4<const I: usize>(abef: &mut __m128i, cdgh: &mut __m128i, rest: __m128i) {
+    let k = crate::consts::K32X4[I];
+    let kv = _mm_set_epi32(k[0] as i32, k[1] as i32, k[2] as i32, k[3] as i32);
+    let t1 = _mm_add_epi32(rest, kv);
+    *cdgh = _mm_sha256rnds2_epu32(*cdgh, *abef, t1);
+    let t2 = _mm_shuffle_epi32(t1, 0x0E);
+    *abef = _mm_sha256rnds2_epu32(*abef, *cdgh, t2);
 }
 
-macro_rules! schedule_rounds4 {
-    (
-        $abef:ident, $cdgh:ident,
-        $w0:expr, $w1:expr, $w2:expr, $w3:expr, $w4:expr,
-        $i: expr
-    ) => {{
-        $w4 = schedule($w0, $w1, $w2, $w3);
-        rounds4!($abef, $cdgh, $w4, $i);
-    }};
+#[inline(always)]
+unsafe fn schedule_rounds4<const I: usize>(
+    abef: &mut __m128i,
+    cdgh: &mut __m128i,
+    w0: __m128i,
+    w1: __m128i,
+    w2: __m128i,
+    w3: __m128i,
+) -> __m128i {
+    let w4 = schedule(w0, w1, w2, w3);
+    rounds4::<I>(abef, cdgh, w4);
+    w4
 }
 
 // we use unaligned loads with `__m128i` pointers
@@ -70,22 +72,22 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         let mut w3 = _mm_shuffle_epi8(_mm_loadu_si128(block_ptr.add(3)), MASK);
         let mut w4;
 
-        rounds4!(abef, cdgh, w0, 0);
-        rounds4!(abef, cdgh, w1, 1);
-        rounds4!(abef, cdgh, w2, 2);
-        rounds4!(abef, cdgh, w3, 3);
-        schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 4);
-        schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 5);
-        schedule_rounds4!(abef, cdgh, w2, w3, w4, w0, w1, 6);
-        schedule_rounds4!(abef, cdgh, w3, w4, w0, w1, w2, 7);
-        schedule_rounds4!(abef, cdgh, w4, w0, w1, w2, w3, 8);
-        schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 9);
-        schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 10);
-        schedule_rounds4!(abef, cdgh, w2, w3, w4, w0, w1, 11);
-        schedule_rounds4!(abef, cdgh, w3, w4, w0, w1, w2, 12);
-        schedule_rounds4!(abef, cdgh, w4, w0, w1, w2, w3, 13);
-        schedule_rounds4!(abef, cdgh, w0, w1, w2, w3, w4, 14);
-        schedule_rounds4!(abef, cdgh, w1, w2, w3, w4, w0, 15);
+        rounds4::<0>(&mut abef, &mut cdgh, w0);
+        rounds4::<1>(&mut abef, &mut cdgh, w1);
+        rounds4::<2>(&mut abef, &mut cdgh, w2);
+        rounds4::<3>(&mut abef, &mut cdgh, w3);
+        w4 = schedule_rounds4::<4>(&mut abef, &mut cdgh, w0, w1, w2, w3);
+        w0 = schedule_rounds4::<5>(&mut abef, &mut cdgh, w1, w2, w3, w4);
+        w1 = schedule_rounds4::<6>(&mut abef, &mut cdgh, w2, w3, w4, w0);
+        w2 = schedule_rounds4::<7>(&mut abef, &mut cdgh, w3, w4, w0, w1);
+        w3 = schedule_rounds4::<8>(&mut abef, &mut cdgh, w4, w0, w1, w2);
+        w4 = schedule_rounds4::<9>(&mut abef, &mut cdgh, w0, w1, w2, w3);
+        w0 = schedule_rounds4::<10>(&mut abef, &mut cdgh, w1, w2, w3, w4);
+        w1 = schedule_rounds4::<11>(&mut abef, &mut cdgh, w2, w3, w4, w0);
+        w2 = schedule_rounds4::<12>(&mut abef, &mut cdgh, w3, w4, w0, w1);
+        w3 = schedule_rounds4::<13>(&mut abef, &mut cdgh, w4, w0, w1, w2);
+        w4 = schedule_rounds4::<14>(&mut abef, &mut cdgh, w0, w1, w2, w3);
+        let _ = schedule_rounds4::<15>(&mut abef, &mut cdgh, w1, w2, w3, w4);
 
         abef = _mm_add_epi32(abef, abef_save);
         cdgh = _mm_add_epi32(cdgh, cdgh_save);
