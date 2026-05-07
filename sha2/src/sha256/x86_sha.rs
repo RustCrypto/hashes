@@ -58,10 +58,6 @@ unsafe fn read_block(block: &[u8; 64]) -> [__m128i; 4] {
     })
 }
 
-#[allow(
-    clippy::cast_ptr_alignment,
-    reason = "we use unaligned loads with `__m128i` pointers"
-)]
 #[target_feature(enable = "sha,sse4.1")]
 pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     let state_ptr: *mut __m128i = state.as_mut_ptr().cast();
