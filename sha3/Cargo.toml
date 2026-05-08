@@ -13,8 +13,9 @@ categories = ["cryptography", "no-std"]
 description = "Implementation of the SHA-3 family of cryptographic hash algorithms"
 
 [dependencies]
-digest = "0.11"
+digest = { version = "0.11", default-features = false }
 keccak = "0.2"
+sponge-cursor = "0.1"
 
 [dev-dependencies]
 digest = { version = "0.11", features = ["dev"] }
@@ -24,7 +25,7 @@ hex-literal = "1"
 default = ["alloc", "oid"]
 alloc = ["digest/alloc"]
 oid = ["digest/oid"] # Enable OID support.
-zeroize = ["digest/zeroize"]
+zeroize = ["digest/zeroize", "sponge-cursor/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true
