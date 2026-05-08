@@ -24,6 +24,7 @@ dependencies = [
  "ascon",
  "digest",
  "hex-literal",
+ "sponge-cursor",
 ]
 
 [[package]]
@@ -133,6 +134,7 @@ dependencies = [
  "digest",
  "hex-literal",
  "keccak",
+ "sponge-cursor",
 ]
 
 [[package]]
@@ -214,6 +216,7 @@ dependencies = [
  "digest",
  "hex-literal",
  "keccak",
+ "sponge-cursor",
 ]
 
 [[package]]
@@ -338,6 +341,7 @@ dependencies = [
  "digest",
  "hex-literal",
  "keccak",
+ "sponge-cursor",
 ]
 
 [[package]]
@@ -368,7 +372,8 @@ dependencies = [
 [[package]]
 name = "sponge-cursor"
 version = "0.1.0"
-source = "git+https://github.com/RustCrypto/utils?branch=add-sponge-cursor#075f14c368b39ecd3207c0b93c853993751bebd5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a0219bd7d979d58245a4f41f695e1ac9f8befdffadd7f61f1bae9e39abc6620"
 dependencies = [
  "zeroize",
 ]

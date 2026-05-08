@@ -13,17 +13,18 @@ categories = ["cryptography", "no-std"]
 description = "Implementation of the KangarooTwelve family of extendable-output functions"
 
 [dependencies]
-digest = "0.11"
+digest = { version = "0.11", default-features = false }
 keccak = { version = "0.2", features = ["parallel"] }
+sponge-cursor = "0.1"
 
 [dev-dependencies]
-digest = { version = "0.11", features = ["alloc", "dev"] }
+digest = { version = "0.11", default-features = false, features = ["alloc", "dev"] }
 hex-literal = "1"
 
 [features]
 default = ["alloc"]
 alloc = ["digest/alloc"]
-zeroize = ["digest/zeroize"]
+zeroize = ["digest/zeroize", "sponge-cursor/zeroize"]
 
 [package.metadata.docs.rs]
 all-features = true

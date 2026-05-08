@@ -1,45 +1,39 @@
 use crate::consts::ROUNDS;
 use core::fmt;
-use digest::{
-    XofReader,
-    block_buffer::{BlockSizes, ReadBuffer},
-};
+use digest::XofReader;
 use keccak::{Keccak, State1600};
+use sponge_cursor::SpongeCursor;
 
 /// KangarooTwelve XOF reader generic over rate.
 #[derive(Clone)]
-pub struct KtReader<Rate: BlockSizes> {
-    pub(crate) state: State1600,
-    pub(crate) buffer: ReadBuffer<Rate>,
-    pub(crate) keccak: Keccak,
+pub struct KtReader<const RATE: usize> {
+    state: State1600,
+    cursor: SpongeCursor<RATE>,
+    keccak: Keccak,
 }
 
-impl<Rate: BlockSizes> XofReader for KtReader<Rate> {
+impl<const RATE: usize> KtReader<RATE> {
+    pub(crate) fn new(state: &State1600, keccak: Keccak) -> Self {
+        Self {
+            state: *state,
+            cursor: Default::default(),
+            keccak,
+        }
+    }
+}
+
+impl<const RATE: usize> XofReader for KtReader<RATE> {
     #[inline]
     fn read(&mut self, buf: &mut [u8]) {
-        let Self {
-            state,
-            buffer,
-            keccak,
-        } = self;
-
-        buffer.read(buf, |block| {
-            let mut chunks = block.chunks_exact_mut(8);
-            for (src, dst) in state.iter().zip(&mut chunks) {
-                dst.copy_from_slice(&src.to_le_bytes());
-            }
-            assert!(
-                chunks.into_remainder().is_empty(),
-                "rate is either 136 or 168",
-            );
-            keccak.with_p1600::<ROUNDS>(|p1600| p1600(state));
+        self.keccak.with_p1600::<ROUNDS>(|p1600| {
+            self.cursor.squeeze_read_u64_le(&mut self.state, p1600, buf);
         });
     }
 }
 
-impl<Rate: BlockSizes> fmt::Debug for KtReader<Rate> {
+impl<const RATE: usize> fmt::Debug for KtReader<RATE> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let debug_str = match Rate::USIZE {
+        let debug_str = match RATE {
             168 => "Kt128Reader { ... }",
             136 => "Kt256Reader { ... }",
             _ => unreachable!(),
@@ -48,7 +42,7 @@ impl<Rate: BlockSizes> fmt::Debug for KtReader<Rate> {
     }
 }
 
-impl<Rate: BlockSizes> Drop for KtReader<Rate> {
+impl<const RATE: usize> Drop for KtReader<RATE> {
     fn drop(&mut self) {
         #[cfg(feature = "zeroize")]
         {
@@ -60,4 +54,4 @@ impl<Rate: BlockSizes> Drop for KtReader<Rate> {
 }
 
 #[cfg(feature = "zeroize")]
-impl<Rate: BlockSizes> digest::zeroize::ZeroizeOnDrop for KtReader<Rate> {}
+impl<const RATE: usize> digest::zeroize::ZeroizeOnDrop for KtReader<RATE> {}

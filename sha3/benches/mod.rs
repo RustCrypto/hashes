@@ -2,7 +2,10 @@
 extern crate test;
 
 use digest::bench_update;
-use sha3::{Sha3_224, Sha3_256, Sha3_384, Sha3_512, Shake128, Shake256};
+use sha3::{
+    Sha3_224, Sha3_256, Sha3_384, Sha3_512,
+    shake::{Shake128, Shake256},
+};
 use test::Bencher;
 
 bench_update!(

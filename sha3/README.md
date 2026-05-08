@@ -40,7 +40,7 @@ these functions do not implement `Digest`, so lower-level traits have to
 be imported:
 
 ```rust
-use sha3::{Shake128, digest::{Update, ExtendableOutput, XofReader}};
+use sha3::{shake::Shake128, digest::{Update, ExtendableOutput, XofReader}};
 use hex_literal::hex;
 
 let mut hasher = Shake128::default();

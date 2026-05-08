@@ -1,7 +1,7 @@
 use ascon_xof128::{AsconCxof128, AsconXof128};
 use core::fmt::Debug;
 use digest::{
-    CustomizedInit, ExtendableOutput,
+    CustomizedInit, ExtendableOutput, Update,
     common::hazmat::SerializableState,
     dev::{feed_rand_16mib, xof_reset_test},
 };
@@ -35,6 +35,7 @@ fn ascon_cxof128_kat() {
 #[test]
 fn ascon_xof128_rand() {
     let mut h = AsconXof128::default();
+    h.update(b"hello");
     feed_rand_16mib(&mut h);
 
     let ser_state = h.serialize();
@@ -42,8 +43,8 @@ fn ascon_xof128_rand() {
     assert_eq!(ser_state[..], ser_expected[..]);
 
     let expected_hash = hex!(
-        "E06CA16A362949DE5D05743B663445BE6AD39CD22C2CED839FD937E31E58B1CC"
-        "85E67F131C61AB55EEE4B8B90C060E078B9CAE1299394498C799C310C66286C8"
+        "DC7B123723BE1FB8E5D57EDE65BE3C7847674ED1E3DB6E65E1237CD23B8E1B3E"
+        "B49BC9A253E44A8132A560EB99C7321A947B0152DA5096A45CE7D2F23E03D68A"
     );
 
     let mut buf = [0u8; 64];
@@ -59,6 +60,7 @@ fn ascon_xof128_rand() {
 #[test]
 fn ascon_cxof128_rand() {
     let mut h = AsconCxof128::new_customized(b"randomized cxof test");
+    h.update(b"hello");
     feed_rand_16mib(&mut h);
 
     let ser_state = h.serialize();
@@ -66,8 +68,8 @@ fn ascon_cxof128_rand() {
     assert_eq!(ser_state[..], ser_expected[..]);
 
     let expected_hash = hex!(
-        "3E797ECD4EB7373C7283078BFCC53E5B0645B083AF703146A527FEC3AE209E85"
-        "DAA663270B7687540A221F87C44433906931BFE43BE3BA0333ADFAC62BC8EC1F"
+        "09922AD2B2ADD3774EC8BF20C720BD5C41AC82142E406B059CA99E77A233CB12"
+        "727D5246486D93A1419185332E1A2721ED61F538435E152CB23DE2E81BDA804F"
     );
 
     let mut buf = [0u8; 64];

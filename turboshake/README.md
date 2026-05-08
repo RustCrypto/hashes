@@ -1,4 +1,4 @@
-# RustCrypto: SHA-3
+# RustCrypto: TurboSHAKE
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
