@@ -13,7 +13,7 @@ keywords = ["belt", "stb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = "0.11"
+digest = { version = "0.11", default-features = false }
 bash-f = "0.1"
 sponge-cursor = "0.1"
 
