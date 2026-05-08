@@ -22,7 +22,7 @@ hasher.finalize_xof_into(&mut hash);
 assert_eq!(hash, hex!("0C6B82907AE77386DDF0BA2D7CFDDD99F79A9B0094E545AEF8968A99440F5185"));
 ```
 
-Also, see the [examples section] in the RustCrypto/hashes readme.
+See the [`digest`] crate docs for additional examples.
 
 ## License
 
