@@ -9,6 +9,4 @@ pub(crate) const INTERMEDIATE_NODE_DS: u8 = 0x0B;
 pub(crate) const FINAL_NODE_DS: u8 = 0x06;
 
 pub(crate) const S0_DELIM: u64 = 0x03;
-
-/// Padding byte
-pub(crate) const PAD: u8 = 0x80;
+pub(crate) const PAD: u64 = 1 << 63;
