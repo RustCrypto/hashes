@@ -14,7 +14,7 @@ pub type BashPrgHash1921 = BashPrgHash<144, 1>;
 pub type BashPrgHash1922 = BashPrgHash<96, 2>;
 /// `bash-prg-hash` with ℓ = 256 and d = 1
 pub type BashPrgHash2561 = BashPrgHash<128, 1>;
-/// `bash-prg-hash`` with ℓ = 256 and d = 2
+/// `bash-prg-hash` with ℓ = 256 and d = 2
 pub type BashPrgHash2562 = BashPrgHash<64, 2>;
 
 impl CollisionResistance for BashPrgHash1281 {
