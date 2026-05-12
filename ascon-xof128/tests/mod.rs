@@ -1,7 +1,7 @@
 use ascon_xof128::{AsconCxof128, AsconXof128};
 use core::fmt::Debug;
 use digest::{
-    CustomizedInit, ExtendableOutput, Update,
+    ExtendableOutput, TryCustomizedInit, Update,
     common::hazmat::SerializableState,
     dev::{feed_rand_16mib, xof_reset_test},
 };
@@ -59,7 +59,7 @@ fn ascon_xof128_rand() {
 
 #[test]
 fn ascon_cxof128_rand() {
-    let mut h = AsconCxof128::new_customized(b"randomized cxof test");
+    let mut h = AsconCxof128::try_new_customized(b"randomized cxof test").unwrap();
     h.update(b"hello");
     feed_rand_16mib(&mut h);
 
@@ -90,14 +90,16 @@ struct CxofTestVector {
 }
 
 /// Customized XOF test.
-fn cxof_reset_test<D: ExtendableOutput + CustomizedInit + Debug + Clone>(
+fn cxof_reset_test<D: ExtendableOutput + TryCustomizedInit + Debug + Clone>(
     &CxofTestVector {
         customization,
         input,
         output,
     }: &CxofTestVector,
 ) -> Result<(), &'static str> {
-    let mut hasher = D::new_customized(customization);
+    let Ok(mut hasher) = D::try_new_customized(customization) else {
+        return Err("initialization error");
+    };
     let mut buf = [0u8; 1024];
     let buf = &mut buf[..output.len()];
     // Test that it works when accepting the message all at once
@@ -110,7 +112,9 @@ fn cxof_reset_test<D: ExtendableOutput + CustomizedInit + Debug + Clone>(
 
     // Test that it works when accepting the message in chunks
     for n in 1..core::cmp::min(17, input.len()) {
-        let mut hasher = D::new_customized(customization);
+        let Ok(mut hasher) = D::try_new_customized(customization) else {
+            return Err("initialization error");
+        };
         for chunk in input.chunks(n) {
             hasher.update(chunk);
         }
