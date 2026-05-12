@@ -13,12 +13,12 @@ keywords = ["belt", "stb", "hash", "digest"]
 categories = ["cryptography", "no-std"]
 
 [dependencies]
-digest = { version = "0.11", default-features = false }
+digest = { version = "0.11.3", default-features = false }
 bash-f = "0.1"
 sponge-cursor = "0.1"
 
 [dev-dependencies]
-digest = { version = "0.11", default-features = false, features = ["dev"] }
+digest = { version = "0.11.3", default-features = false, features = ["dev"] }
 hex-literal = "1"
 
 [features]
