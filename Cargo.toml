@@ -4,6 +4,7 @@ members = [
     "ascon-hash256",
     "ascon-xof128",
     "bash-hash",
+    "bash-prg-hash",
     "belt-hash",
     "blake2",
     "cshake",

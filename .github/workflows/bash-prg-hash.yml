@@ -1,0 +1,72 @@
+name: bash-prg-hash
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/bash-prg-hash.yml"
+      - "bash-prg-hash/**"
+      - "Cargo.*"
+  push:
+    branches: master
+
+defaults:
+  run:
+    working-directory: bash-prg-hash
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: "-Dwarnings"
+
+# Cancels CI jobs when new commits are pushed to a PR branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  set-msrv:
+    uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
+    with:
+        msrv: 1.85.0
+
+  build:
+    needs: set-msrv
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - ${{needs.set-msrv.outputs.msrv}}
+          - stable
+        target:
+          - thumbv7em-none-eabi
+          - wasm32-unknown-unknown
+    steps:
+      - uses: actions/checkout@v5
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          targets: ${{ matrix.target }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
+
+  test:
+    needs: set-msrv
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - ${{needs.set-msrv.outputs.msrv}}
+          - stable
+    steps:
+      - uses: actions/checkout@v5
+      - uses: RustCrypto/actions/cargo-cache@master
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: RustCrypto/actions/cargo-hack-install@master
+      - run: cargo hack test --feature-powerset
+
+  minimal-versions:
+    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
+    with:
+        working-directory: ${{ github.workflow }}
