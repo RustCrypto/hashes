@@ -7,24 +7,22 @@ use hex_literal::hex;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone, Copy)]
-pub struct TestVector {
-    pub customization: &'static [u8],
-    pub input: &'static [u8],
-    pub output: &'static [u8],
+struct TestVector {
+    customization: &'static [u8],
+    input: &'static [u8],
+    output: &'static [u8],
 }
 
-pub(crate) fn bash_prg_hash_test<D>(
+fn bash_prg_hash_test<D: TryCustomizedInit + ExtendableOutput + Clone>(
     &TestVector {
         customization,
         input,
         output,
     }: &TestVector,
-) -> Result<(), &'static str>
-where
-    D: TryCustomizedInit + ExtendableOutput + Clone,
-    <D as TryCustomizedInit>::Error: Debug,
-{
-    let mut hasher = D::try_new_customized(customization).unwrap();
+) -> Result<(), &'static str> {
+    let Ok(mut hasher) = D::try_new_customized(customization) else {
+        return Err("initialization error");
+    };
     let mut buf = [0u8; 1024];
     let buf = &mut buf[..output.len()];
     // Test that it works when accepting the message all at once
@@ -37,7 +35,9 @@ where
 
     // Test that it works when accepting the message in chunks
     for n in 1..core::cmp::min(17, input.len()) {
-        let mut hasher = D::try_new_customized(customization).unwrap();
+        let Ok(mut hasher) = D::try_new_customized(customization) else {
+            return Err("initialization error");
+        };
         for chunk in input.chunks(n) {
             hasher.update(chunk);
         }
@@ -100,23 +100,6 @@ macro_rules! test_bash_prg_rand {
     };
 }
 
-// Test from the https://apmi.bsu.by/assets/files/std/met-v10.zip
-macro_rules! test_bash_prg_million {
-    ($name:ident, $hasher:ty, $expected:expr) => {
-        #[test]
-        fn $name() {
-            let mut h = <$hasher>::default();
-            let block = [0x61u8; 1000];
-            for _ in 0..1000 {
-                h.update(&block);
-            }
-            let mut output = [0u8; 64];
-            h.finalize_xof_into(&mut output);
-            assert_eq!(&output[..$expected.len()], $expected);
-        }
-    };
-}
-
 test_bash_prg_rand!(
     bashprg1282_rand,
     BashPrgHash1282,
@@ -143,6 +126,23 @@ test_bash_prg_rand!(
         "D591F583FA27F6B0F7E73DA2B29AF382AC2374C04463B91A27F1C48FEE8AAB2C"
     )
 );
+
+// Test from the https://apmi.bsu.by/assets/files/std/met-v10.zip
+macro_rules! test_bash_prg_million {
+    ($name:ident, $hasher:ty, $expected:expr) => {
+        #[test]
+        fn $name() {
+            let mut h = <$hasher>::default();
+            let block = [0x61u8; 1000];
+            for _ in 0..1000 {
+                h.update(&block);
+            }
+            let mut output = [0u8; 64];
+            h.finalize_xof_into(&mut output);
+            assert_eq!(&output[..$expected.len()], $expected);
+        }
+    };
+}
 
 // BASH.PRG.HASH128.5
 test_bash_prg_million!(
