@@ -1,4 +1,4 @@
-# RustCrypto: bash prg hash
+# RustCrypto: bash-prg-hash
 
 [![crate][crate-image]][crate-link]
 [![Docs][docs-image]][docs-link]
