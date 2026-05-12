@@ -9,4 +9,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.1.0 (2026-05-12)
 - Initial release ([#751])
 
-[#745]: https://github.com/RustCrypto/hashes/pull/751
+[#751]: https://github.com/RustCrypto/hashes/pull/751
