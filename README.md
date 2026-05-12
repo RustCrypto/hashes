@@ -97,7 +97,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`ascon‑hash256`]: ./ascon-hash256
 [`ascon‑xof128`]: ./ascon-xof128
 [`bash‑hash`]: ./bash-hash
-[`bash‑prg-hash`]: ./bash-prg-hash
+[`bash-prg‑hash`]: ./bash-prg-hash
 [`belt‑hash`]: ./belt-hash
 [`blake2`]: ./blake2
 [`cshake`]: ./cshake
