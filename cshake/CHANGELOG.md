@@ -13,8 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Internal implementation by removing unnecessary buffering ([#849])
 - `Rate: BlockSizes` generic parameter to `const RATE: usize` ([#849])
 
+### Removed
+- Implementations of `BlockSizeUser` ([#856])
+
 [#849]: https://github.com/RustCrypto/hashes/pull/849
 [#855]: https://github.com/RustCrypto/hashes/pull/855
+[#856]: https://github.com/RustCrypto/hashes/pull/856
 
 ## 0.1.1 (2026-04-19)
 ### Fixed
