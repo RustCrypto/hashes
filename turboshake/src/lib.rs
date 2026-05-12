@@ -25,7 +25,7 @@ use digest::{
 const ROUNDS: usize = 12;
 
 /// Default domain separator value.
-const DEFAULT_DS: u8 = 0x1F;
+pub const DEFAULT_DS: u8 = 0x1F;
 
 /// TurboSHAKE hasher generic over rate and domain separator.
 ///

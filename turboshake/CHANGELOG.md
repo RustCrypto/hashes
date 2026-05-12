@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Internal implementation by removing unnecessary buffering ([#849])
 - `Rate: BlockSizes` generic parameter to `const RATE: usize` ([#849])
 - `TurboShake128` and `TurboShake256` type aliases are no longer generic over the domain separator
-  and use the default value instead. ([#866])
+  and use the default value instead ([#866])
 
 ### Removed
 - Implementations of `BlockSizeUser` ([#856])
