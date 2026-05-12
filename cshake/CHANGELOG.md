@@ -6,11 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 0.2.0 (UNRELEASED)
+### Added
+- `CShake128Reader` and `CShake256Reader` type aliases ([#855])
+
 ### Changed
 - Internal implementation by removing unnecessary buffering ([#849])
 - `Rate: BlockSizes` generic parameter to `const RATE: usize` ([#849])
 
 [#849]: https://github.com/RustCrypto/hashes/pull/849
+[#855]: https://github.com/RustCrypto/hashes/pull/855
 
 ## 0.1.1 (2026-04-19)
 ### Fixed
