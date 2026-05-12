@@ -13,12 +13,12 @@ categories = ["cryptography", "no-std"]
 description = "Implementation of Ascon-XOF128 and Ascon-СXOF128"
 
 [dependencies]
-digest = { version = "0.11", default-features = false }
+digest = { version = "0.11.3", default-features = false }
 ascon = "0.5"
 sponge-cursor = "0.1"
 
 [dev-dependencies]
-digest = { version = "0.11", default-features = false, features = ["dev"] }
+digest = { version = "0.11.3", default-features = false, features = ["dev"] }
 hex-literal = "1"
 
 [features]

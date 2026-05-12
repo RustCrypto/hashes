@@ -8,7 +8,7 @@
 #![warn(missing_docs, unreachable_pub)]
 #![forbid(unsafe_code)]
 
-pub use digest::{self, CustomizedInit, ExtendableOutput, Update, XofReader};
+pub use digest::{self, ExtendableOutput, TryCustomizedInit, Update, XofReader};
 
 mod consts;
 mod cxof;

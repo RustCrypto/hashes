@@ -1,13 +1,18 @@
 use ascon::State;
+use core::fmt;
 use digest::{
-    CollisionResistance, CustomizedInit, ExtendableOutput, HashMarker, OutputSizeUser, Update,
-    common::AlgorithmName,
-    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    CollisionResistance, ExtendableOutput, HashMarker, OutputSizeUser, TryCustomizedInit, Update,
+    common::{
+        AlgorithmName,
+        hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    },
     consts::{U16, U32, U41},
 };
 use sponge_cursor::SpongeCursor;
 
 use crate::{AsconXof128Reader, consts::CXOF_INIT_STATE};
+
+const MAX_CUSTOMIZATION_LEN: usize = 256;
 
 /// Ascon-CXOF128 hasher.
 ///
@@ -15,22 +20,26 @@ use crate::{AsconXof128Reader, consts::CXOF_INIT_STATE};
 ///
 /// >The length of the customization string **shall** be at most 2048 bits (i.e., 256 bytes).
 ///
-/// We do not check this condition as part of [`CustomizedInit::new_customized`] and
-/// consider it the user's responsibility to use appropriately sized customization strings.
+/// Implementation of the [`TryCustomizedInit`] trait for this type returns
+/// [`InvalidCustomizationError`] for longer customization strings.
 #[derive(Clone, Debug)]
 pub struct AsconCxof128 {
     state: State,
     cursor: SpongeCursor<8>,
 }
 
-impl CustomizedInit for AsconCxof128 {
+impl TryCustomizedInit for AsconCxof128 {
+    type Error = InvalidCustomizationError;
     #[inline]
-    fn new_customized(customization: &[u8]) -> Self {
-        // We assume that in practice customization strings are always smaller than 2^61 bytes.
+    fn try_new_customized(customization: &[u8]) -> Result<Self, InvalidCustomizationError> {
+        if customization.len() > MAX_CUSTOMIZATION_LEN {
+            return Err(InvalidCustomizationError);
+        }
+
         let bit_len = 8 * customization.len();
         let mut state = CXOF_INIT_STATE;
 
-        state[0] ^= u64::try_from(bit_len).expect("`usize` always fits into `u64` in practice");
+        state[0] ^= u64::try_from(bit_len).expect("`bit_len` can not be greater than 2048");
 
         ascon::permute12(&mut state);
 
@@ -53,7 +62,7 @@ impl CustomizedInit for AsconCxof128 {
         ascon::permute12(&mut state);
 
         let cursor = Default::default();
-        Self { state, cursor }
+        Ok(Self { state, cursor })
     }
 }
 
@@ -141,3 +150,18 @@ impl Drop for AsconCxof128 {
 
 #[cfg(feature = "zeroize")]
 impl digest::zeroize::ZeroizeOnDrop for AsconCxof128 {}
+
+/// Invalid Ascon-CXOF128 customization string error.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct InvalidCustomizationError;
+
+impl fmt::Display for InvalidCustomizationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(
+            "Invalid Ascon-CXOF128 customization string. \
+            The length of the customization string shall be at most 256 bytes.",
+        )
+    }
+}
+
+impl core::error::Error for InvalidCustomizationError {}
