@@ -5,6 +5,7 @@ on:
       'ascon-hash256-v*',
       'ascon-xof128-v*',
       'bash-hash-v*',
+      'bash-prg-hash-v*',
       'belt-hash-v*',
       'blake2-v*',
       'cshake-v*',
