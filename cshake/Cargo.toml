@@ -1,6 +1,6 @@
 [package]
 name = "cshake"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["RustCrypto Developers"]
 edition = "2024"
 rust-version = "1.85"
