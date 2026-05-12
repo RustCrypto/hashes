@@ -28,6 +28,11 @@ pub type CShake128 = CShake<168>;
 /// cSHAKE256 hasher.
 pub type CShake256 = CShake<136>;
 
+/// cSHAKE128 XOF reader.
+pub type CShake128Reader = CShakeReader<168>;
+/// cSHAKE256 XOF reader.
+pub type CShake256Reader = CShakeReader<136>;
+
 /// cSHAKE hasher generic over rate.
 ///
 /// Rate MUST be either 168 or 136 for cSHAKE128 and cSHAKE256 respectively.
@@ -186,7 +191,7 @@ impl<const RATE: usize> Drop for CShake<RATE> {
 #[cfg(feature = "zeroize")]
 impl<const RATE: usize> digest::zeroize::ZeroizeOnDrop for CShake<RATE> {}
 
-/// Generic cSHAKE XOF reader
+/// cSHAKE XOF reader generic over rate.
 #[derive(Clone)]
 pub struct CShakeReader<const RATE: usize> {
     state: State1600,
