@@ -13,8 +13,8 @@ pub use digest;
 use core::fmt;
 use digest::{
     CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
-    common::{AlgorithmName, BlockSizeUser},
-    consts::{U16, U32, U136, U168},
+    common::AlgorithmName,
+    consts::{U16, U32},
 };
 
 mod consts;
@@ -180,12 +180,4 @@ impl CollisionResistance for Kt128 {
 // https://www.rfc-editor.org/rfc/rfc9861.html#section-7-8
 impl CollisionResistance for Kt256 {
     type CollisionResistance = U32;
-}
-
-impl BlockSizeUser for Kt128 {
-    type BlockSize = U168;
-}
-
-impl BlockSizeUser for Kt256 {
-    type BlockSize = U136;
 }

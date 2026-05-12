@@ -17,8 +17,8 @@ use core::fmt;
 use digest::{
     CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
     XofReader,
-    common::{AlgorithmName, BlockSizeUser},
-    consts::{U16, U32, U136, U168},
+    common::AlgorithmName,
+    consts::{U16, U32},
 };
 
 /// Number of Keccak rounds used by TurboSHAKE.
@@ -210,12 +210,4 @@ impl<const DS: u8> CollisionResistance for TurboShake128<DS> {
 impl<const DS: u8> CollisionResistance for TurboShake256<DS> {
     // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-8
     type CollisionResistance = U32;
-}
-
-impl<const DS: u8> BlockSizeUser for TurboShake128<DS> {
-    type BlockSize = U168;
-}
-
-impl<const DS: u8> BlockSizeUser for TurboShake256<DS> {
-    type BlockSize = U136;
 }

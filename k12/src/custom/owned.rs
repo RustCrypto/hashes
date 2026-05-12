@@ -5,8 +5,8 @@ use core::fmt;
 use digest::{
     CollisionResistance, CustomizedInit, ExtendableOutput, ExtendableOutputReset, HashMarker,
     Reset, Update,
-    common::{AlgorithmName, BlockSizeUser},
-    consts::{U16, U32, U136, U168},
+    common::AlgorithmName,
+    consts::{U16, U32},
 };
 
 use crate::{Kt, KtReader, utils::length_encode};
@@ -121,12 +121,4 @@ impl CollisionResistance for CustomKt128 {
 impl CollisionResistance for CustomKt256 {
     // https://www.rfc-editor.org/rfc/rfc9861.html#section-7-8
     type CollisionResistance = U32;
-}
-
-impl BlockSizeUser for CustomKt128 {
-    type BlockSize = U168;
-}
-
-impl BlockSizeUser for CustomKt256 {
-    type BlockSize = U136;
 }

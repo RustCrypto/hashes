@@ -3,10 +3,10 @@ use digest::{
     CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
     XofReader,
     common::{
-        AlgorithmName, BlockSizeUser,
+        AlgorithmName,
         hazmat::{DeserializeStateError, SerializableState, SerializedState},
     },
-    consts::{U16, U32, U136, U168, U201},
+    consts::{U16, U32, U201},
 };
 use keccak::{Keccak, State1600};
 use sponge_cursor::SpongeCursor;
@@ -222,14 +222,7 @@ impl<const RATE: usize> Drop for ShakeReader<RATE> {
 impl CollisionResistance for Shake128 {
     type CollisionResistance = U16;
 }
+
 impl CollisionResistance for Shake256 {
     type CollisionResistance = U32;
-}
-
-impl BlockSizeUser for Shake128 {
-    type BlockSize = U168;
-}
-
-impl BlockSizeUser for Shake256 {
-    type BlockSize = U136;
 }

@@ -14,8 +14,8 @@ pub use digest;
 use core::fmt;
 use digest::{
     CollisionResistance, CustomizedInit, ExtendableOutput, HashMarker, Update, XofReader,
-    common::{AlgorithmName, BlockSizeUser},
-    consts::{U16, U32, U136, U168},
+    common::AlgorithmName,
+    consts::{U16, U32},
 };
 use keccak::{Keccak, State1600};
 use sponge_cursor::SpongeCursor;
@@ -237,12 +237,4 @@ impl CollisionResistance for CShake128 {
 }
 impl CollisionResistance for CShake256 {
     type CollisionResistance = U32;
-}
-
-impl BlockSizeUser for CShake128 {
-    type BlockSize = U168;
-}
-
-impl BlockSizeUser for CShake256 {
-    type BlockSize = U136;
 }
