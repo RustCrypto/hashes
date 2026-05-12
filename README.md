@@ -19,7 +19,8 @@ easily used for bare-metal or WebAssembly programming by disabling default crate
 |-----------|-------|:---------:|:-------------:|:----:|:----------:|
 | [Ascon-Hash256] | [`ascon‑hash256`] | [![crates.io](https://img.shields.io/crates/v/ascon-hash256.svg)](https://crates.io/crates/ascon-hash256) | [![Documentation](https://docs.rs/ascon-hash256/badge.svg)](https://docs.rs/ascon-hash256) | 1.85 | :green_heart: |
 | [Ascon-XOF128] | [`ascon‑xof128`] | [![crates.io](https://img.shields.io/crates/v/ascon-xof128.svg)](https://crates.io/crates/ascon-xof128) | [![Documentation](https://docs.rs/ascon-xof128/badge.svg)](https://docs.rs/ascon-xof128) | 1.85 | :green_heart: |
-| [Bash] hash | [`bash‑hash`] | [![crates.io](https://img.shields.io/crates/v/bash-hash.svg)](https://crates.io/crates/bash-hash) | [![Documentation](https://docs.rs/bash-hash/badge.svg)](https://docs.rs/bash-hash) | 1.85 | :green_heart: |
+| [`bash-hash`][STB 34.101.77-2020] | [`bash‑hash`] | [![crates.io](https://img.shields.io/crates/v/bash-hash.svg)](https://crates.io/crates/bash-hash) | [![Documentation](https://docs.rs/bash-hash/badge.svg)](https://docs.rs/bash-hash) | 1.85 | :green_heart: |
+| [`bash-prg-hash`][STB 34.101.77-2020] | [`bash-prg‑hash`] | [![crates.io](https://img.shields.io/crates/v/bash-prg-hash.svg)](https://crates.io/crates/bash-prg-hash) | [![Documentation](https://docs.rs/bash-prg-hash/badge.svg)](https://docs.rs/bash-prg-hash) | 1.85 | :green_heart: |
 | [BelT] hash | [`belt‑hash`] | [![crates.io](https://img.shields.io/crates/v/belt-hash.svg)](https://crates.io/crates/belt-hash) | [![Documentation](https://docs.rs/belt-hash/badge.svg)](https://docs.rs/belt-hash) | 1.85 | :green_heart: |
 | [BLAKE2] | [`blake2`] | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | 1.85 | :green_heart: |
 | [cSHAKE] | [`cshake`] | [![crates.io](https://img.shields.io/crates/v/cshake.svg)](https://crates.io/crates/cshake) | [![Documentation](https://docs.rs/cshake/badge.svg)](https://docs.rs/cshake) | 1.85 | :green_heart: |
@@ -96,6 +97,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`ascon‑hash256`]: ./ascon-hash256
 [`ascon‑xof128`]: ./ascon-xof128
 [`bash‑hash`]: ./bash-hash
+[`bash‑prg-hash`]: ./bash-prg-hash
 [`belt‑hash`]: ./belt-hash
 [`blake2`]: ./blake2
 [`cshake`]: ./cshake
@@ -142,7 +144,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 
 [Ascon-Hash256]: https://doi.org/10.6028/NIST.SP.800-232.ipd
 [Ascon-Xof128]: https://doi.org/10.6028/NIST.SP.800-232.ipd
-[Bash]: https://apmi.bsu.by/assets/files/std/bash-spec241.pdf
+[STB 34.101.77-2020]: http://apmi.bsu.by/assets/files/std/bash-spec241.pdf
 [BelT]: https://ru.wikipedia.org/wiki/BelT
 [BLAKE2]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
 [cSHAKE]: https://csrc.nist.gov/pubs/sp/800/185/final
