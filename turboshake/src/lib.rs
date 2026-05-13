@@ -142,7 +142,7 @@ impl<const RATE: usize, const DS: u8> Drop for TurboShake<RATE, DS> {
         {
             use digest::zeroize::Zeroize;
             self.state.zeroize();
-            // self.buffer is zeroized by its `Drop`
+            self.cursor.zeroize();
         }
     }
 }
@@ -192,22 +192,31 @@ impl<const RATE: usize> Drop for TurboShakeReader<RATE> {
 #[cfg(feature = "zeroize")]
 impl<const RATE: usize> digest::zeroize::ZeroizeOnDrop for TurboShakeReader<RATE> {}
 
-/// TurboSHAKE128 hasher with domain separator.
-pub type TurboShake128<const DS: u8 = DEFAULT_DS> = TurboShake<168, DS>;
-/// TurboSHAKE256 hasher with domain separator.
-pub type TurboShake256<const DS: u8 = DEFAULT_DS> = TurboShake<136, DS>;
+/// TurboSHAKE128 hasher with a custom domain separator.
+///
+/// Domain separator `DS` MUST be in the range `0x01..=0x7f`.
+pub type CTurboShake128<const DS: u8> = TurboShake<168, DS>;
+/// TurboSHAKE256 hasher with a custom domain separator.
+///
+/// Domain separator `DS` MUST be in the range `0x01..=0x7f`.
+pub type CTurboShake256<const DS: u8> = TurboShake<136, DS>;
+
+/// TurboSHAKE128 hasher with the default domain separator.
+pub type TurboShake128 = CTurboShake128<DEFAULT_DS>;
+/// TurboSHAKE256 hasher with the default domain separator.
+pub type TurboShake256 = CTurboShake256<DEFAULT_DS>;
 
 /// TurboSHAKE128 XOF reader.
 pub type TurboShake128Reader = TurboShakeReader<168>;
 /// TurboSHAKE256 XOF reader.
 pub type TurboShake256Reader = TurboShakeReader<136>;
 
-impl<const DS: u8> CollisionResistance for TurboShake128<DS> {
+impl<const DS: u8> CollisionResistance for CTurboShake128<DS> {
     // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-7
     type CollisionResistance = U16;
 }
 
-impl<const DS: u8> CollisionResistance for TurboShake256<DS> {
+impl<const DS: u8> CollisionResistance for CTurboShake256<DS> {
     // https://www.ietf.org/archive/id/draft-irtf-cfrg-kangarootwelve-17.html#section-7-8
     type CollisionResistance = U32;
 }

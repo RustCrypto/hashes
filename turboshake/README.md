@@ -16,18 +16,16 @@ XOF reader from which results of arbitrary length can be read. Note that
 these functions do not implement `Digest`, so lower-level traits have to
 be imported:
 
+TurboSHAKE supports limited customization using "domain separator" value.
+This implementation handles it using the const generic parameter `DS`.
+
+With the default domain separator:
 ```rust
 use turboshake::TurboShake128;
 use turboshake::digest::{Update, ExtendableOutput, XofReader};
 use hex_literal::hex;
 
-// With the default domain separator.
-// 
-// Note that we have to use `<TurboShake128>` because of
-// the inadequate handling of defaults in Rust.
-// Alternatively, you could use `let mut hasher: TurboShake128 = Default::default();`
-// or `TurboShake128::<DEFAULT_DS>::default()`.
-let mut hasher = <TurboShake128>::default();
+let mut hasher = TurboShake128::default();
 hasher.update(b"abc");
 let mut reader = hasher.finalize_xof();
 let mut buf = [0u8; 10];
@@ -35,9 +33,15 @@ reader.read(&mut buf);
 assert_eq!(buf, hex!("dcf1646dfe993a8eb6b7"));
 reader.read(&mut buf);
 assert_eq!(buf, hex!("82d1faaca6d82416a5dc"));
+```
 
-// With a custom domain separator
-let mut hasher = TurboShake128::<0x10>::default();
+With a custom domain separator:
+```rust
+use turboshake::CTurboShake128;
+use turboshake::digest::{Update, ExtendableOutput, XofReader};
+use hex_literal::hex;
+
+let mut hasher = CTurboShake128::<0x10>::default();
 hasher.update(b"abc");
 let mut reader = hasher.finalize_xof();
 let mut buf = [0u8; 10];

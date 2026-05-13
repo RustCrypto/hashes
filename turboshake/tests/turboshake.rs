@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 use digest::ExtendableOutput;
-use turboshake::{TurboShake128, TurboShake256};
+use turboshake::{CTurboShake128, CTurboShake256};
 
 #[derive(Debug, Clone, Copy)]
 pub struct TestVector {
@@ -104,25 +104,25 @@ macro_rules! new_test {
 new_test!(
     turboshake128_6,
     "turboshake128_6",
-    TurboShake128<6>,
+    CTurboShake128<6>,
     turbo_shake_test,
 );
 new_test!(
     turboshake128_7,
     "turboshake128_7",
-    TurboShake128<7>,
+    CTurboShake128<7>,
     turbo_shake_test,
 );
 new_test!(
     turboshake256_6,
     "turboshake256_6",
-    TurboShake256<6>,
+    CTurboShake256<6>,
     turbo_shake_test,
 );
 
 new_test!(
     turboshake256_7,
     "turboshake256_7",
-    TurboShake256<7>,
+    CTurboShake256<7>,
     turbo_shake_test,
 );
