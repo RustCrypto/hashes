@@ -20,12 +20,10 @@ use digest::{
     },
     consts::{U28, U32, U48, U64, U72, U104, U136, U144, U200, U201},
 };
+
 #[cfg(feature = "oid")]
 mod oids;
 mod utils;
-
-/// Implementation of the SHAKE function.
-pub mod shake;
 
 macro_rules! impl_fixed {
     ($(

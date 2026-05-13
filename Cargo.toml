@@ -23,6 +23,7 @@ members = [
     "sha2",
     "sha3",
     "shabal",
+    "shake",
     "skein",
     "sm3",
     "streebog",
