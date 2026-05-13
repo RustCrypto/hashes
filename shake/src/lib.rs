@@ -21,8 +21,6 @@ use digest::{
 use keccak::{Keccak, State1600};
 use sponge_cursor::SpongeCursor;
 
-const SHAKE_PAD: u8 = 0x1F;
-
 /// SHAKE128 hasher.
 pub type Shake128 = Shake<168>;
 /// SHAKE256 hasher.
@@ -77,6 +75,8 @@ impl<const RATE: usize> Reset for Shake<RATE> {
 
 impl<const RATE: usize> Shake<RATE> {
     fn pad(&mut self) {
+        const SHAKE_PAD: u8 = 0x1F;
+
         let pos = self.cursor.pos();
         let word_offset = pos / 8;
         let byte_offset = pos % 8;
