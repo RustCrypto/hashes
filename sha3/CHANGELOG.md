@@ -10,7 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Internal implementation by removing unnecessary buffering ([#849])
 - Serialization format used by `SerializableState` trait implementations ([#849])
 
+### Removed
+- `Shake`, `Shake128`, and `Shake256` types (moved to the `shake` crate) ([#869])
+
 [#849]: https://github.com/RustCrypto/hashes/pull/849
+[#869]: https://github.com/RustCrypto/hashes/pull/869
 
 ## 0.11.0 (2026-04-02)
 ### Added
