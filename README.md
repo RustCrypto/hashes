@@ -18,17 +18,13 @@ easily used for bare-metal or WebAssembly programming by disabling default crate
 | Algorithm | Crate | Crates.io | Documentation | MSRV | [Security] |
 |-----------|-------|:---------:|:-------------:|:----:|:----------:|
 | [Ascon-Hash256] | [`ascon‑hash256`] | [![crates.io](https://img.shields.io/crates/v/ascon-hash256.svg)](https://crates.io/crates/ascon-hash256) | [![Documentation](https://docs.rs/ascon-hash256/badge.svg)](https://docs.rs/ascon-hash256) | 1.85 | :green_heart: |
-| [Ascon-XOF128] | [`ascon‑xof128`] | [![crates.io](https://img.shields.io/crates/v/ascon-xof128.svg)](https://crates.io/crates/ascon-xof128) | [![Documentation](https://docs.rs/ascon-xof128/badge.svg)](https://docs.rs/ascon-xof128) | 1.85 | :green_heart: |
 | [bash-hash][STB 34.101.77-2020] | [`bash‑hash`] | [![crates.io](https://img.shields.io/crates/v/bash-hash.svg)](https://crates.io/crates/bash-hash) | [![Documentation](https://docs.rs/bash-hash/badge.svg)](https://docs.rs/bash-hash) | 1.85 | :green_heart: |
-| [bash-prg-hash][STB 34.101.77-2020] | [`bash-prg‑hash`] | [![crates.io](https://img.shields.io/crates/v/bash-prg-hash.svg)](https://crates.io/crates/bash-prg-hash) | [![Documentation](https://docs.rs/bash-prg-hash/badge.svg)](https://docs.rs/bash-prg-hash) | 1.85 | :green_heart: |
 | [BelT] hash | [`belt‑hash`] | [![crates.io](https://img.shields.io/crates/v/belt-hash.svg)](https://crates.io/crates/belt-hash) | [![Documentation](https://docs.rs/belt-hash/badge.svg)](https://docs.rs/belt-hash) | 1.85 | :green_heart: |
 | [BLAKE2] | [`blake2`] | [![crates.io](https://img.shields.io/crates/v/blake2.svg)](https://crates.io/crates/blake2) | [![Documentation](https://docs.rs/blake2/badge.svg)](https://docs.rs/blake2) | 1.85 | :green_heart: |
-| [cSHAKE] | [`cshake`] | [![crates.io](https://img.shields.io/crates/v/cshake.svg)](https://crates.io/crates/cshake) | [![Documentation](https://docs.rs/cshake/badge.svg)](https://docs.rs/cshake) | 1.85 | :green_heart: |
 | [FSB] | [`fsb`] | [![crates.io](https://img.shields.io/crates/v/fsb.svg)](https://crates.io/crates/fsb) | [![Documentation](https://docs.rs/fsb/badge.svg)](https://docs.rs/fsb) | 1.85 | :green_heart: |
 | [GOST R 34.11-94][GOST94] | [`gost94`] | [![crates.io](https://img.shields.io/crates/v/gost94.svg)](https://crates.io/crates/gost94) | [![Documentation](https://docs.rs/gost94/badge.svg)](https://docs.rs/gost94) | 1.85 | :yellow_heart: |
 | [Grøstl] (Groestl) | [`groestl`] | [![crates.io](https://img.shields.io/crates/v/groestl.svg)](https://crates.io/crates/groestl) | [![Documentation](https://docs.rs/groestl/badge.svg)](https://docs.rs/groestl) | 1.85 | :green_heart: |
 | [JH] | [`jh`] | [![crates.io](https://img.shields.io/crates/v/jh.svg)](https://crates.io/crates/jh) | [![Documentation](https://docs.rs/jh/badge.svg)](https://docs.rs/jh) | 1.85 | :green_heart: |
-| [KangarooTwelve] | [`k12`] | [![crates.io](https://img.shields.io/crates/v/k12.svg)](https://crates.io/crates/k12) | [![Documentation](https://docs.rs/k12/badge.svg)](https://docs.rs/k12) | 1.85 | :green_heart: |
 | [Kupyna] | [`kupyna`] | [![crates.io](https://img.shields.io/crates/v/kupyna.svg)](https://crates.io/crates/kupyna) | [![Documentation](https://docs.rs/kupyna/badge.svg)](https://docs.rs/kupyna) | 1.85 | :green_heart: |
 | [MD2] | [`md2`] | [![crates.io](https://img.shields.io/crates/v/md2.svg)](https://crates.io/crates/md2) | [![Documentation](https://docs.rs/md2/badge.svg)](https://docs.rs/md2) | 1.85 | :broken_heart: |
 | [MD4] | [`md4`] | [![crates.io](https://img.shields.io/crates/v/md4.svg)](https://crates.io/crates/md4) | [![Documentation](https://docs.rs/md4/badge.svg)](https://docs.rs/md4) | 1.85 | :broken_heart: |
@@ -43,7 +39,6 @@ easily used for bare-metal or WebAssembly programming by disabling default crate
 | [SM3] (OSCCA GM/T 0004-2012) | [`sm3`] | [![crates.io](https://img.shields.io/crates/v/sm3.svg)](https://crates.io/crates/sm3) | [![Documentation](https://docs.rs/sm3/badge.svg)](https://docs.rs/sm3) | 1.85 | :green_heart: |
 | [Streebog] (GOST R 34.11-2012) | [`streebog`] | [![crates.io](https://img.shields.io/crates/v/streebog.svg)](https://crates.io/crates/streebog) | [![Documentation](https://docs.rs/streebog/badge.svg)](https://docs.rs/streebog) | 1.85 | :yellow_heart: |
 | [Tiger] | [`tiger`] | [![crates.io](https://img.shields.io/crates/v/tiger.svg)](https://crates.io/crates/tiger) | [![Documentation](https://docs.rs/tiger/badge.svg)](https://docs.rs/tiger) | 1.85 | :yellow_heart: |
-| [TurboSHAKE] | [`turboshake`] | [![crates.io](https://img.shields.io/crates/v/turboshake.svg)](https://crates.io/crates/turboshake) | [![Documentation](https://docs.rs/turboshake/badge.svg)](https://docs.rs/turboshake) | 1.85 | :green_heart: |
 | [Whirlpool] | [`whirlpool`] | [![crates.io](https://img.shields.io/crates/v/whirlpool.svg)](https://crates.io/crates/whirlpool) | [![Documentation](https://docs.rs/whirlpool/badge.svg)](https://docs.rs/whirlpool) | 1.85 | :green_heart: |
 
 NOTE: the [`blake3`] crate implements the `digest` traits used by the rest of the hashes in this repository, but is maintained by the BLAKE3 team.
@@ -95,17 +90,13 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [//]: # (crates)
 
 [`ascon‑hash256`]: ./ascon-hash256
-[`ascon‑xof128`]: ./ascon-xof128
 [`bash‑hash`]: ./bash-hash
-[`bash-prg‑hash`]: ./bash-prg-hash
 [`belt‑hash`]: ./belt-hash
 [`blake2`]: ./blake2
-[`cshake`]: ./cshake
 [`fsb`]: ./fsb
 [`gost94`]: ./gost94
 [`groestl`]: ./groestl
 [`jh`]: ./jh
-[`k12`]: ./k12
 [`kupyna`]: ./kupyna
 [`md2`]: ./md2
 [`md4`]: ./md4
@@ -120,39 +111,24 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [`sm3`]: ./sm3
 [`streebog`]: ./streebog
 [`tiger`]: ./tiger
-[`turboshake`]: ./turboshake
 [`whirlpool`]: ./whirlpool
 
 [//]: # (footnotes)
 
 [1]: https://en.wikipedia.org/wiki/Cryptographic_hash_function
 [`blake3`]: https://github.com/BLAKE3-team/BLAKE3
-[`base16ct`]: https://docs.rs/base16ct
-[`base64ct`]: https://docs.rs/base64ct
 [`digest`]: https://docs.rs/digest
-[`Digest`]: https://docs.rs/digest/0.10.0/digest/trait.Digest.html
-[`Digest::digest`]: https://docs.rs/digest/0.10.0/digest/trait.Digest.html#tymethod.digest
-[`DynDigest`]: https://docs.rs/digest/0.10.0/digest/trait.DynDigest.html
-[`generic-array`]: https://docs.rs/generic-array
-[HMAC]: https://en.wikipedia.org/wiki/Hash-based_message_authentication_code
-[`Read`]: https://doc.rust-lang.org/std/io/trait.Read.html
-[`Write`]: https://doc.rust-lang.org/std/io/trait.Write.html
-[`hmac`]: https://docs.rs/hmac
-[RustCrypto/MACs]: https://github.com/RustCrypto/MACs
 
 [//]: # (algorithms)
 
 [Ascon-Hash256]: https://doi.org/10.6028/NIST.SP.800-232.ipd
-[Ascon-Xof128]: https://doi.org/10.6028/NIST.SP.800-232.ipd
 [STB 34.101.77-2020]: http://apmi.bsu.by/assets/files/std/bash-spec241.pdf
 [BelT]: https://ru.wikipedia.org/wiki/BelT
 [BLAKE2]: https://en.wikipedia.org/wiki/BLAKE_(hash_function)#BLAKE2
-[cSHAKE]: https://csrc.nist.gov/pubs/sp/800/185/final
 [FSB]: https://en.wikipedia.org/wiki/Fast_syndrome-based_hash
 [GOST94]: https://en.wikipedia.org/wiki/GOST_(hash_function)
 [Grøstl]: https://en.wikipedia.org/wiki/Grøstl
 [JH]: https://www3.ntu.edu.sg/home/wuhj/research/jh
-[KangarooTwelve]: https://keccak.team/kangarootwelve.html
 [Kupyna]: https://eprint.iacr.org/2015/885.pdf
 [MD2]: https://en.wikipedia.org/wiki/MD2_(cryptography)
 [MD4]: https://en.wikipedia.org/wiki/MD4
@@ -168,4 +144,3 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [Streebog]: https://en.wikipedia.org/wiki/Streebog
 [Whirlpool]: https://en.wikipedia.org/wiki/Whirlpool_(cryptography)
 [Tiger]: http://www.cs.technion.ac.il/~biham/Reports/Tiger/tiger/tiger.html
-[TurboSHAKE]: https://keccak.team/turboshake.html
