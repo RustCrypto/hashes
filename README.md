@@ -11,6 +11,8 @@ Usage examples are provided in `digest` and hash implementation crate docs.
 Additionally all crates do not require the standard library (i.e. `no_std` capable) and can be
 easily used for bare-metal or WebAssembly programming by disabling default crate features.
 
+For a collection of [extendable output functions (XOFs)][XOF], refer to the [RustCrypto/XOFs] repository.
+
 ## Supported Algorithms
 
 **Note:** For new applications, or where compatibility with other existing standards is not a primary concern, we strongly recommend to use either [BLAKE3][`blake3`], SHA-2 or SHA-3.
@@ -116,6 +118,8 @@ Unless you explicitly state otherwise, any contribution intentionally submitted 
 [//]: # (footnotes)
 
 [1]: https://en.wikipedia.org/wiki/Cryptographic_hash_function
+[XOF]: https://en.wikipedia.org/wiki/Extendable-output_function
+[RustCrypto/XOFs]: https://github.com/RustCrypto/XOFs
 [`blake3`]: https://github.com/BLAKE3-team/BLAKE3
 [`digest`]: https://docs.rs/digest
 
