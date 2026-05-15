@@ -9,14 +9,14 @@
 
 Implementation of the [SHA-3] family of cryptographic hash algorithms.
 
-There are 6 standard algorithms specified in the SHA-3 standard:
+There are 4 standard fixed-size algorithms specified in the SHA-3 standard:
+`SHA3-224`, `SHA3-256`, `SHA3-384`, `SHA3-512`.
 
-- `SHA3-224`, `SHA3-256`, `SHA3-384`, `SHA3-512`
-- `SHAKE128` and `SHAKE256` (an extendable output function (XOF))
+`SHAKE128` and `SHAKE256` extendable output functions (XOF) are defined in the [`shake`] crate
 
 Additionally, this crate supports:
-- `KeccakFull`: CryptoNight variant of SHA-3
 - `Keccak224`, `Keccak256`, `Keccak384`, `Keccak512`: NIST submission without padding changes
+- `Keccak256Full`: CryptoNight variant of SHA-3
 
 ## Examples
 
@@ -32,25 +32,6 @@ hasher.update(b"abc");
 let hash = hasher.finalize();
 
 assert_eq!(hash, hex!("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532"));
-```
-
-SHAKE functions have an extendable output, so finalization method returns
-XOF reader from which results of arbitrary length can be read. Note that
-these functions do not implement `Digest`, so lower-level traits have to
-be imported:
-
-```rust
-use sha3::{shake::Shake128, digest::{Update, ExtendableOutput, XofReader}};
-use hex_literal::hex;
-
-let mut hasher = Shake128::default();
-hasher.update(b"abc");
-let mut reader = hasher.finalize_xof();
-let mut buf = [0u8; 10];
-reader.read(&mut buf);
-assert_eq!(buf, hex!("5881092dd818bf5cf8a3"));
-reader.read(&mut buf);
-assert_eq!(buf, hex!("ddb793fbcba74097d5c5"));
 ```
 
 See the [`digest`] crate docs for additional examples.
@@ -86,4 +67,5 @@ dual licensed as above, without any additional terms or conditions.
 [//]: # (general links)
 
 [SHA-3]: https://en.wikipedia.org/wiki/SHA-3
+[`shake`]: http://docs.rs/shake
 [`digest`]: https://docs.rs/digest

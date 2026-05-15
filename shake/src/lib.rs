@@ -1,19 +1,25 @@
+#![no_std]
+#![doc = include_str!("../README.md")]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
+)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![forbid(unsafe_code)]
+#![warn(missing_docs, missing_debug_implementations)]
+#![warn(unreachable_pub)]
+
+pub use digest;
+pub use digest::{ExtendableOutput, Update, XofReader};
+
 use core::fmt;
 use digest::{
-    CollisionResistance, ExtendableOutput, ExtendableOutputReset, HashMarker, Reset, Update,
-    XofReader,
-    common::{
-        AlgorithmName,
-        hazmat::{DeserializeStateError, SerializableState, SerializedState},
-    },
-    consts::{U16, U32, U201},
+    CollisionResistance, ExtendableOutputReset, HashMarker, Reset,
+    common::AlgorithmName,
+    consts::{U16, U32},
 };
 use keccak::{Keccak, State1600};
 use sponge_cursor::SpongeCursor;
-
-use crate::utils;
-
-const SHAKE_PAD: u8 = 0x1F;
 
 /// SHAKE128 hasher.
 pub type Shake128 = Shake<168>;
@@ -67,12 +73,26 @@ impl<const RATE: usize> Reset for Shake<RATE> {
     }
 }
 
+impl<const RATE: usize> Shake<RATE> {
+    fn pad(&mut self) {
+        const SHAKE_PAD: u8 = 0x1F;
+
+        let pos = self.cursor.pos();
+        let word_offset = pos / 8;
+        let byte_offset = pos % 8;
+
+        let pad = u64::from(SHAKE_PAD) << (8 * byte_offset);
+        self.state[word_offset] ^= pad;
+        self.state[RATE / 8 - 1] ^= 1 << 63;
+    }
+}
+
 impl<const RATE: usize> ExtendableOutput for Shake<RATE> {
     type Reader = ShakeReader<RATE>;
 
     #[inline]
     fn finalize_xof(mut self) -> Self::Reader {
-        utils::pad::<SHAKE_PAD, RATE>(&mut self.state, &self.cursor);
+        self.pad();
         // Note that `ShakeReader` applies the permutation to the state before reading from it
         Self::Reader {
             state: self.state,
@@ -85,7 +105,7 @@ impl<const RATE: usize> ExtendableOutput for Shake<RATE> {
 impl<const RATE: usize> ExtendableOutputReset for Shake<RATE> {
     #[inline]
     fn finalize_xof_reset(&mut self) -> Self::Reader {
-        utils::pad::<SHAKE_PAD, RATE>(&mut self.state, &self.cursor);
+        self.pad();
         let state = self.state;
         self.reset();
         // Note that `ShakeReader` applies the permutation to the state before reading from it
@@ -121,26 +141,6 @@ impl<const RATE: usize> fmt::Debug for Shake<RATE> {
     }
 }
 
-impl<const RATE: usize> SerializableState for Shake<RATE> {
-    type SerializedStateSize = U201;
-
-    fn serialize(&self) -> SerializedState<Self> {
-        utils::serialize(&self.state, &self.cursor).into()
-    }
-
-    fn deserialize(
-        serialized_state: &SerializedState<Self>,
-    ) -> Result<Self, DeserializeStateError> {
-        utils::deserialize(serialized_state.into())
-            .ok_or(DeserializeStateError)
-            .map(|(state, cursor)| Self {
-                state,
-                cursor,
-                keccak: Default::default(),
-            })
-    }
-}
-
 impl<const RATE: usize> Drop for Shake<RATE> {
     #[inline]
     fn drop(&mut self) {
@@ -170,26 +170,6 @@ impl<const RATE: usize> XofReader for ShakeReader<RATE> {
         self.keccak.with_f1600(|f1600| {
             self.cursor.squeeze_read_u64_le(&mut self.state, f1600, buf);
         });
-    }
-}
-
-impl<const RATE: usize> SerializableState for ShakeReader<RATE> {
-    type SerializedStateSize = U201;
-
-    fn serialize(&self) -> SerializedState<Self> {
-        utils::serialize(&self.state, &self.cursor).into()
-    }
-
-    fn deserialize(
-        serialized_state: &SerializedState<Self>,
-    ) -> Result<Self, DeserializeStateError> {
-        utils::deserialize(serialized_state.into())
-            .ok_or(DeserializeStateError)
-            .map(|(state, cursor)| Self {
-                state,
-                cursor,
-                keccak: Default::default(),
-            })
     }
 }
 
