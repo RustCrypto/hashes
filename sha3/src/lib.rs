@@ -19,23 +19,25 @@ use digest::{
         hazmat::{DeserializeStateError, SerializableState, SerializedState},
     },
     consts::{U28, U32, U48, U64, U72, U104, U136, U144, U200, U201},
+    typenum::Unsigned,
 };
+use keccak::{Keccak, State1600};
 
 #[cfg(feature = "oid")]
 mod oids;
 mod utils;
 
-macro_rules! impl_fixed {
+macro_rules! impl_sha3_variants {
     ($(
         $(#[$attr:meta])*
-        $name:ident($rate:literal, $rate_ty:ty, $out_len:ty, $pad:expr);
+        $name:ident($rate_ty:ty, $out_len:ty, $pad:expr);
     )*) => {$(
         $(#[$attr])*
         #[derive(Clone, Default)]
         pub struct $name {
-            state: keccak::State1600,
-            cursor: sponge_cursor::SpongeCursor<$rate>,
-            keccak: keccak::Keccak,
+            state: State1600,
+            cursor: sponge_cursor::SpongeCursor<{ <$rate_ty>::USIZE }>,
+            keccak: Keccak,
         }
 
         impl Reset for $name {
@@ -67,7 +69,7 @@ macro_rules! impl_fixed {
 
         impl FixedOutput for $name {
             fn finalize_into(mut self, dst: &mut Output<Self>) {
-                utils::pad::<$pad, $rate>(&mut self.state, &self.cursor);
+                utils::pad::<$pad, { <$rate_ty>::USIZE }>(&mut self.state, &self.cursor);
                 self.keccak.with_f1600(|f1600| {
                     f1600(&mut self.state);
                     utils::read_state(&mut self.state, dst);
@@ -77,7 +79,7 @@ macro_rules! impl_fixed {
 
         impl FixedOutputReset for $name {
             fn finalize_into_reset(&mut self, dst: &mut Output<Self>) {
-                utils::pad::<$pad, $rate>(&mut self.state, &self.cursor);
+                utils::pad::<$pad, { <$rate_ty>::USIZE }>(&mut self.state, &self.cursor);
                 self.keccak.with_f1600(|f1600| {
                     f1600(&mut self.state);
                     utils::read_state(&mut self.state, dst);
@@ -108,7 +110,7 @@ macro_rules! impl_fixed {
                     .map(|(state, cursor)| Self {
                         state,
                         cursor,
-                        keccak: Default::default(),
+                        keccak: Keccak::new(),
                     })
             }
         }
@@ -140,25 +142,25 @@ macro_rules! impl_fixed {
 const KECCAK_PAD: u8 = 0x01;
 const SHA3_PAD: u8 = 0x06;
 
-impl_fixed!(
+impl_sha3_variants!(
     /// SHA-3-224 hasher.
-    Sha3_224(144, U144, U28, SHA3_PAD);
+    Sha3_224(U144, U28, SHA3_PAD);
     /// SHA-3-256 hasher.
-    Sha3_256(136, U136, U32, SHA3_PAD);
+    Sha3_256(U136, U32, SHA3_PAD);
     /// SHA-3-384 hasher.
-    Sha3_384(104, U104, U48, SHA3_PAD);
+    Sha3_384(U104, U48, SHA3_PAD);
     /// SHA-3-256 hasher.
-    Sha3_512(72, U72, U64, SHA3_PAD);
+    Sha3_512(U72, U64, SHA3_PAD);
 
     /// Keccak-224 hasher.
-    Keccak224(144, U144, U28, KECCAK_PAD);
+    Keccak224(U144, U28, KECCAK_PAD);
     /// Keccak-256 hasher.
-    Keccak256(136, U136, U32, KECCAK_PAD);
+    Keccak256(U136, U32, KECCAK_PAD);
     /// Keccak-384 hasher.
-    Keccak384(104, U104, U48, KECCAK_PAD);
+    Keccak384(U104, U48, KECCAK_PAD);
     /// Keccak-512 hasher.
-    Keccak512(72, U72, U64, KECCAK_PAD);
+    Keccak512(U72, U64, KECCAK_PAD);
 
     /// CryptoNight variant of SHA-3.
-    Keccak256Full(136, U136, U200, KECCAK_PAD);
+    Keccak256Full(U136, U200, KECCAK_PAD);
 );
