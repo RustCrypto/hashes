@@ -3,17 +3,13 @@ on:
   push:
     tags: [
       'ascon-hash256-v*',
-      'ascon-xof128-v*',
       'bash-hash-v*',
-      'bash-prg-hash-v*',
       'belt-hash-v*',
       'blake2-v*',
-      'cshake-v*',
       'fsb-v*',
       'gost94-v*',
       'groestl-v*',
       'jh-v*',
-      'k12-v*',
       'kupyna-v*',
       'md2-v*',
       'md4-v*',
@@ -28,7 +24,6 @@ on:
       'sm3-v*',
       'streebog-v*',
       'tiger-v*',
-      'turboshake-v*',
       'whirlpool-v*',
     ]
 
