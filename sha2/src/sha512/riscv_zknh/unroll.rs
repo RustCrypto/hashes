@@ -75,7 +75,7 @@ fn round<const R: usize>(state: &mut [u64; 8], block: &[u64; 16], k: &[u64]) {
     state[h] = state[h]
         .wrapping_add(sha512sum1(state[e]))
         .wrapping_add(ch(state[e], state[f], state[g]))
-        .wrapping_add(super::utils::opaque_load::<R>(k))
+        .wrapping_add(opaque_load::<R>(k))
         .wrapping_add(block[R]);
     state[d] = state[d].wrapping_add(state[h]);
     state[h] = state[h]
@@ -91,4 +91,35 @@ fn ch(x: u64, y: u64, z: u64) -> u64 {
 #[inline(always)]
 fn maj(x: u64, y: u64, z: u64) -> u64 {
     (x & y) ^ (x & z) ^ (y & z)
+}
+
+/// This function returns `k[R]`, but prevents compiler from inlining the indexed value
+fn opaque_load<const R: usize>(k: &[u64]) -> u64 {
+    assert!(R < k.len());
+    #[cfg(target_arch = "riscv64")]
+    unsafe {
+        let dst;
+        core::arch::asm!(
+            "ld {dst}, 8 * {R}({k})",
+            R = const R,
+            k = in(reg) k.as_ptr(),
+            dst = out(reg) dst,
+            options(pure, readonly, nostack, preserves_flags),
+        );
+        dst
+    }
+    #[cfg(target_arch = "riscv32")]
+    unsafe {
+        let [hi, lo]: [u32; 2];
+        core::arch::asm!(
+            "lw {lo}, 8 * {R}({k})",
+            "lw {hi}, 8 * {R} + 4({k})",
+            R = const R,
+            k = in(reg) k.as_ptr(),
+            lo = out(reg) lo,
+            hi = out(reg) hi,
+            options(pure, readonly, nostack, preserves_flags),
+        );
+        ((hi as u64) << 32) | (lo as u64)
+    }
 }
