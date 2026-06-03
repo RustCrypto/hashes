@@ -112,7 +112,7 @@ fn opaque_load<const R: usize>(k: &[u32]) -> u32 {
     #[cfg(target_arch = "riscv32")]
     unsafe {
         core::arch::asm!(
-            "lwu {dst}, 4*{R}({k})",
+            "lw {dst}, 4*{R}({k})",
             R = const R,
             k = in(reg) k.as_ptr(),
             dst = out(reg) dst,
