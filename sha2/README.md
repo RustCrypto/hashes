@@ -62,9 +62,8 @@ This crate supports a number of different backends.
 SHA-256 and SHA-512 backends:
 - `soft`: portable software implementation
 - `loongarch64-asm`: `asm!`-based implementation for LoongArch64 targets
-- `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension. See the section below. Experimental,
-  requires Nightly compiler and to enable `Zknh` and `Zbkb` (or `Zbb`)
-  target features at compile time.
+- `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension. Experimental,
+  see the [section below](#about-the-risc-v-zknh-backend) for more information.
 - `wasm32-simd128`: uses the WASM `simd128` extension.
 
 SHA-256 only backends:
@@ -103,7 +102,7 @@ performance at the cost of a bigger resulting binary. You can disable unrolling 
 by using `sha2_backend_soft = "compact"` and `sha2_backend_riscv_zknh = "compact"` configuration
 flags respectively.
 
-### About RISC-V Zknh backend
+### About the RISC-V Zknh backend
 
 This is an experimental backend which requires a Nightly compiler and to enable the `Zknh`
 target feature at compile time. For much better code generation, it's recommended
