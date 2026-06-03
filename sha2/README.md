@@ -62,7 +62,7 @@ This crate supports a number of different backends.
 SHA-256 and SHA-512 backends:
 - `soft`: portable software implementation
 - `loongarch64-asm`: `asm!`-based implementation for LoongArch64 targets
-- `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension. Experimental,
+- `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension. See the section below. Experimental,
   requires Nightly compiler and to enable `Zknh` and `Zbkb` (or `Zbb`)
   target features at compile time.
 - `wasm32-simd128`: uses the WASM `simd128` extension.
@@ -102,6 +102,16 @@ By default `soft` and `riscv-zknh` backends unroll round loops, which results in
 performance at the cost of a bigger resulting binary. You can disable unrolling in the backends
 by using `sha2_backend_soft = "compact"` and `sha2_backend_riscv_zknh = "compact"` configuration
 flags respectively.
+
+### About RISC-V Zknh backend
+
+This is an experimental backend which requires a Nightly compiler and to enable the `Zknh`
+target feature at compile time. For much better code generation, it's recommended
+to enable the `Zbkb` (or `Zbb`) and `unaligned-scalar-mem` target features
+(see [this LLVM issue][Zicclsm] for more information). For example,
+you can do it by using `RUSTFLAGS="-C target-feature=+zicclsm,+zbkb,+unaligned-scalar-mem"`.
+
+[Zicclsm]: https://github.com/llvm/llvm-project/issues/110454
 
 ## License
 
