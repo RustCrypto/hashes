@@ -2,14 +2,7 @@ use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
 use crate::consts::K32;
 
 #[target_feature(enable = "zknh")]
-pub(in super::super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks.iter().map(super::utils::load_block) {
-        compress_block(state, block);
-    }
-}
-
-#[target_feature(enable = "zknh")]
-fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
+pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     let mut s = *state;
 
     for r in 0..64 {
@@ -64,4 +57,34 @@ fn ch(x: u32, y: u32, z: u32) -> u32 {
 #[inline(always)]
 fn maj(x: u32, y: u32, z: u32) -> u32 {
     (x & y) ^ (x & z) ^ (y & z)
+}
+
+/// This function returns `k[R]`, but prevents the compiler from inlining the indexed value
+pub(super) fn opaque_load<const R: usize>(k: &[u32]) -> u32 {
+    assert!(R < k.len());
+    let dst;
+
+    #[cfg(target_arch = "riscv64")]
+    unsafe {
+        core::arch::asm!(
+            "lwu {dst}, 4*{R}({k})",
+            R = const R,
+            k = in(reg) k.as_ptr(),
+            dst = out(reg) dst,
+            options(pure, readonly, nostack, preserves_flags),
+        );
+    }
+
+    #[cfg(target_arch = "riscv32")]
+    unsafe {
+        core::arch::asm!(
+            "lwu {dst}, 4*{R}({k})",
+            R = const R,
+            k = in(reg) k.as_ptr(),
+            dst = out(reg) dst,
+            options(pure, readonly, nostack, preserves_flags),
+        );
+    }
+
+    dst
 }

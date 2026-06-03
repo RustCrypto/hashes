@@ -2,14 +2,7 @@ use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
 use crate::consts::K64;
 
 #[target_feature(enable = "zknh")]
-pub(in super::super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    for block in blocks.iter().map(super::utils::load_block) {
-        compress_block(state, block);
-    }
-}
-
-#[target_feature(enable = "zknh")]
-fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
+pub(super) fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
     let s = &mut state.clone();
     let b = &mut block;
 
