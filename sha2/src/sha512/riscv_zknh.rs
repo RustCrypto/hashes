@@ -26,7 +26,9 @@ cfg_if::cfg_if! {
     if #[cfg(target_arch = "riscv64")] {
         use core::arch::riscv64::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
     } else {
-        use core::arch::riscv32::*;
+        use core::arch::riscv32::{
+            sha512sig0h, sha512sig0l, sha512sig1h, sha512sig1l, sha512sum0r, sha512sum1r,
+        };
 
         #[target_feature(enable = "zknh")]
         fn sha512sum0(x: u64) -> u64 {
