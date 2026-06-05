@@ -5,11 +5,8 @@ cfg_if::cfg_if! {
     } else if #[cfg(any(sha2_backend = "riscv-zknh", sha2_256_backend = "riscv-zknh"))] {
         mod riscv_zknh;
 
-        #[cfg(not(all(
-            target_feature = "zknh",
-            any(target_feature = "zbb", target_feature = "zbkb")
-        )))]
-        compile_error!("riscv-zknh backend requires zknh and zbkb (or zbb) target features");
+        #[cfg(not(target_feature = "zknh"))]
+        compile_error!("riscv-zknh backend requires `zknh` target features");
 
         fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
             // SAFETY: we checked above that the required target features are enabled
@@ -19,7 +16,7 @@ cfg_if::cfg_if! {
         mod x86_avx2;
 
         #[cfg(not(target_feature = "avx2"))]
-        compile_error!("x86-avx2 backend requires avx2 target feature");
+        compile_error!("x86-avx2 backend requires `avx2` target feature");
 
         fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
             // SAFETY: we checked above that the required target features are enabled
@@ -29,7 +26,7 @@ cfg_if::cfg_if! {
         mod aarch64_sha3;
 
         #[cfg(not(target_feature = "sha3"))]
-        compile_error!("aarch64-sha3 backend requires sha3 target feature");
+        compile_error!("aarch64-sha3 backend requires `sha3` target feature");
 
         fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
             // SAFETY: we checked above that the required target features are enabled
