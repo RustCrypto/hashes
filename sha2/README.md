@@ -63,7 +63,7 @@ SHA-256 and SHA-512 backends:
 - `soft`: portable software implementation
 - `loongarch64-asm`: `asm!`-based implementation for LoongArch64 targets
 - `riscv-zknh`: uses the RISC-V `Zknh` scalar crypto extension. Experimental,
-  see the [section below](#about-the-risc-v-zknh-backend) for more information.
+  see the [section below](#about-riscv-zknh) for more information.
 - `wasm32-simd128`: uses the WASM `simd128` extension.
 
 SHA-256 only backends:
@@ -90,10 +90,10 @@ You can force backend selection using the following configuration flags:
 - `sha2_512_backend`: select SHA-512 backend. Supported values: `aarch64-sha3`, `soft`,
   `riscv-zknh`, `x86-avx2`.
 
-They can be enabled using either the `RUSTFLAGS` environment variable
+They can be enabled using either a `RUSTFLAGS` environment variable
 (e.g. `RUSTFLAGS='--cfg sha2_backend="soft"'`), or by modifying your `.cargo/config.toml` file.
 
-Note that `sha2_backend` has higher priority than `sha2_256_backend` and `sha2_512_backend`.
+Note that `sha2_backend` has a higher priority than `sha2_256_backend` and `sha2_512_backend`.
 In other words, using `--cfg sha2_backend="soft" --cfg sha2_256_backend="x86_sha"` will result
 in selection of the software backend for SHA-256.
 
@@ -102,13 +102,13 @@ performance at the cost of a bigger resulting binary. You can disable unrolling 
 by using `sha2_backend_soft = "compact"` and `sha2_backend_riscv_zknh = "compact"` configuration
 flags respectively.
 
-### About the RISC-V Zknh backend
+### About `riscv-zknh`
 
-This is an experimental backend which requires a Nightly compiler and to enable the `Zknh`
-target feature at compile time. For much better code generation, it's recommended
-to enable the `Zbkb` (or `Zbb`) and `unaligned-scalar-mem` target features
-(see [this LLVM issue][Zicclsm] for more information). For example,
-you can do it by using `RUSTFLAGS="-C target-feature=+zicclsm,+zbkb,+unaligned-scalar-mem"`.
+This is an experimental RISC-V-only backend which requires a Nightly compiler and
+to enable the `Zknh` target feature at compile time. For a more efficient code generation,
+it's recommended to enable the `Zbkb` (or `Zbb`) and `unaligned-scalar-mem` target features
+(see [this LLVM issue][Zicclsm] for more information). For example, you can do it by using
+`RUSTFLAGS="-C target-feature=+zknh,+zbkb,+unaligned-scalar-mem"`.
 
 [Zicclsm]: https://github.com/llvm/llvm-project/issues/110454
 
