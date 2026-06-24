@@ -40,16 +40,16 @@ dual licensed as above, without any additional terms or conditions.
 
 [//]: # (badges)
 
-[crate-image]: https://img.shields.io/crates/v/belt-hash.svg
-[crate-link]: https://crates.io/crates/belt-hash
-[docs-image]: https://docs.rs/belt-hash/badge.svg
-[docs-link]: https://docs.rs/belt-hash
+[crate-image]: https://img.shields.io/crates/v/bash-hash.svg
+[crate-link]: https://crates.io/crates/bash-hash
+[docs-image]: https://docs.rs/bash-hash/badge.svg
+[docs-link]: https://docs.rs/bash-hash
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
 [rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
-[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/belt-hash.yml/badge.svg?branch=master
-[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/belt-hash.yml?query=branch:master
+[build-image]: https://github.com/RustCrypto/hashes/actions/workflows/bash-hash.yml/badge.svg?branch=master
+[build-link]: https://github.com/RustCrypto/hashes/actions/workflows/bash-hash.yml?query=branch:master
 
 [//]: # (general links)
 
