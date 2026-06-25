@@ -26,7 +26,7 @@ including HMAC-MD5.
 
 Note that this crate is named as `md-5` (the `md5` crate is not part of the RustCrypto project),
 but it renames the library to `md5`. In other words, in your Cargo.toml you should use
-`md_5 = "0.11"`, but in you source code imports from this crate will look like `use md5::Md5;`.
+`md_5 = "0.11"`, but imports from this crate in your source code will look like `use md5::Md5;`.
 
 ## Examples
 
