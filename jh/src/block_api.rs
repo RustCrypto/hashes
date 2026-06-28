@@ -6,7 +6,8 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, Eager, OutputSizeUser,
         TruncSide, UpdateCore, VariableOutputCore,
     },
-    typenum::{U64, Unsigned},
+    common::hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    typenum::{U64, U128, U136, Unsigned},
 };
 
 use crate::consts;
@@ -86,6 +87,33 @@ impl AlgorithmName for JhCore {
 impl fmt::Debug for JhCore {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("JhCore { ... }")
+    }
+}
+
+impl SerializableState for JhCore {
+    type SerializedStateSize = U136;
+
+    #[inline]
+    fn serialize(&self) -> SerializedState<Self> {
+        let mut serialized_state = SerializedState::<Self>::default();
+        let (state_dst, block_len_dst) = serialized_state.split_at_mut(128);
+
+        state_dst.copy_from_slice(self.state.finalize());
+        block_len_dst.copy_from_slice(&self.block_len.to_le_bytes());
+
+        serialized_state
+    }
+
+    #[inline]
+    fn deserialize(
+        serialized_state: &SerializedState<Self>,
+    ) -> Result<Self, DeserializeStateError> {
+        let (serialized_state, serialized_block_len) = serialized_state.split::<U128>();
+
+        Ok(Self {
+            state: Compressor::new(serialized_state.0),
+            block_len: u64::from_le_bytes(serialized_block_len.0),
+        })
     }
 }
 
