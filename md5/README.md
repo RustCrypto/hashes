@@ -32,7 +32,7 @@ In other words, if you use this crate, your Cargo.toml should look like this:
 [dependencies]
 md_5 = "0.11"
 ```
-But in your Rust code you should use `md5` instead of `md_5` as shown in the examples below.
+However, in your Rust code you should import and use `md5` (not `md_5`).
 
 ## Examples
 
