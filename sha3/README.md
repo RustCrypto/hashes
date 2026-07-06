@@ -21,17 +21,25 @@ Additionally, this crate supports:
 ## Examples
 
 Output size of SHA3-256 is fixed, so its functionality is usually
-accessed via the `Digest` trait:
+accessed via the [`Digest`] trait, which provides both one-shot and
+incremental interfaces:
 
 ```rust
 use hex_literal::hex;
 use sha3::{Digest, Sha3_256};
 
-let mut hasher = Sha3_256::new();
-hasher.update(b"abc");
-let hash = hasher.finalize();
+let expected = hex!("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532");
 
-assert_eq!(hash, hex!("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532"));
+// One-shot interface
+let hash = Sha3_256::digest(b"abc");
+assert_eq!(hash, expected);
+
+// Incremental interface
+let mut hasher = Sha3_256::new();
+hasher.update(b"a");
+hasher.update(b"bc");
+let hash = hasher.finalize();
+assert_eq!(hash, expected);
 ```
 
 See the [`digest`] crate docs for additional examples.
@@ -68,4 +76,5 @@ dual licensed as above, without any additional terms or conditions.
 
 [SHA-3]: https://en.wikipedia.org/wiki/SHA-3
 [`shake`]: http://docs.rs/shake
+[`Digest`]: https://docs.rs/digest/latest/digest/trait.Digest.html
 [`digest`]: https://docs.rs/digest
