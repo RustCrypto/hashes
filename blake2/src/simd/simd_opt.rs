@@ -5,29 +5,6 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-#[allow(unused_macros)]
-#[cfg(feature = "simd")]
-macro_rules! transmute_shuffle {
-    ($tmp:ident, $shuffle:ident, $vec:expr, $idx_n:expr, $idx:expr) => {
-        unsafe {
-            use crate::simd::simdint::$shuffle;
-            use crate::simd::simdty::$tmp;
-            use core::mem::transmute;
-
-            const IDX: [u32; $idx_n] = $idx;
-            let tmp_i: $tmp = transmute($vec);
-            let tmp_o: $tmp = $shuffle(tmp_i, tmp_i, IDX);
-            transmute(tmp_o)
-        }
-    };
-}
-
-#[cfg(feature = "simd")]
-pub mod u32x4;
-#[cfg(feature = "simd")]
-pub mod u64x4;
-
-#[cfg(not(feature = "simd"))]
 macro_rules! simd_opt {
     ($vec:ident) => {
         pub mod $vec {
@@ -46,7 +23,5 @@ macro_rules! simd_opt {
     };
 }
 
-#[cfg(not(feature = "simd"))]
 simd_opt!(u32x4);
-#[cfg(not(feature = "simd"))]
 simd_opt!(u64x4);

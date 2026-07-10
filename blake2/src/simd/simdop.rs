@@ -5,8 +5,6 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-#[cfg(feature = "simd")]
-use crate::simd::simdint;
 use crate::simd::simdty::{u32x4, u64x4};
 
 use core::ops::{Add, BitXor, Shl, Shr};
@@ -16,13 +14,6 @@ macro_rules! impl_ops {
         impl Add for $vec {
             type Output = Self;
 
-            #[cfg(feature = "simd")]
-            #[inline(always)]
-            fn add(self, rhs: Self) -> Self::Output {
-                unsafe { simdint::simd_add(self, rhs) }
-            }
-
-            #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn add(self, rhs: Self) -> Self::Output {
                 $vec::new(
@@ -37,13 +28,6 @@ macro_rules! impl_ops {
         impl BitXor for $vec {
             type Output = Self;
 
-            #[cfg(feature = "simd")]
-            #[inline(always)]
-            fn bitxor(self, rhs: Self) -> Self::Output {
-                unsafe { simdint::simd_xor(self, rhs) }
-            }
-
-            #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn bitxor(self, rhs: Self) -> Self::Output {
                 $vec::new(
@@ -58,13 +42,6 @@ macro_rules! impl_ops {
         impl Shl<$vec> for $vec {
             type Output = Self;
 
-            #[cfg(feature = "simd")]
-            #[inline(always)]
-            fn shl(self, rhs: Self) -> Self::Output {
-                unsafe { simdint::simd_shl(self, rhs) }
-            }
-
-            #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn shl(self, rhs: Self) -> Self::Output {
                 $vec::new(
@@ -79,13 +56,6 @@ macro_rules! impl_ops {
         impl Shr<$vec> for $vec {
             type Output = Self;
 
-            #[cfg(feature = "simd")]
-            #[inline(always)]
-            fn shr(self, rhs: Self) -> Self::Output {
-                unsafe { simdint::simd_shr(self, rhs) }
-            }
-
-            #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn shr(self, rhs: Self) -> Self::Output {
                 $vec::new(
