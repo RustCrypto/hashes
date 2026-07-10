@@ -21,9 +21,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-        # Crate supports MSRV 1.41 without `oid` feature. We test true MSRV
-        # in the `test-msrv` job.
-        msrv: 1.57.0
+        msrv: 1.85.0
 
   # Builds for no_std platforms
   build:
@@ -140,7 +138,7 @@ jobs:
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.72
+          toolchain: 1.85
           targets: loongarch64-unknown-linux-gnu
       - run: cargo build --target loongarch64-unknown-linux-gnu --features loongarch64_asm
 
@@ -149,7 +147,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.56.0
+          - 1.85.0
           - stable
         target:
           - aarch64-unknown-linux-gnu

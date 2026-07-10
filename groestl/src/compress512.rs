@@ -1,6 +1,6 @@
 #![allow(clippy::needless_range_loop)]
 use crate::table::TABLE;
-use core::{convert::TryInto, u64};
+use core::convert::TryInto;
 
 pub(crate) const COLS: usize = 8;
 const ROUNDS: u64 = 10;

@@ -6,7 +6,6 @@
 // copied, modified, or distributed except according to those terms.
 
 mod simd_opt;
-mod simdint;
 mod simdop;
 mod simdty;
 
@@ -93,43 +92,16 @@ macro_rules! impl_vector4 {
                 simd_opt::$vec::rotate_right_const(self, n)
             }
 
-            #[cfg(feature = "simd")]
-            #[inline(always)]
-            fn shuffle_left_1(self) -> Self {
-                use crate::simd::simdint::simd_shuffle4;
-                const IDX: [u32; 4] = [1, 2, 3, 0];
-                unsafe { simd_shuffle4(self, self, IDX) }
-            }
-
-            #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn shuffle_left_1(self) -> Self {
                 $vec::new(self.1, self.2, self.3, self.0)
             }
 
-            #[cfg(feature = "simd")]
-            #[inline(always)]
-            fn shuffle_left_2(self) -> Self {
-                use crate::simd::simdint::simd_shuffle4;
-                const IDX: [u32; 4] = [2, 3, 0, 1];
-                unsafe { simd_shuffle4(self, self, IDX) }
-            }
-
-            #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn shuffle_left_2(self) -> Self {
                 $vec::new(self.2, self.3, self.0, self.1)
             }
 
-            #[cfg(feature = "simd")]
-            #[inline(always)]
-            fn shuffle_left_3(self) -> Self {
-                use crate::simd::simdint::simd_shuffle4;
-                const IDX: [u32; 4] = [3, 0, 1, 2];
-                unsafe { simd_shuffle4(self, self, IDX) }
-            }
-
-            #[cfg(not(feature = "simd"))]
             #[inline(always)]
             fn shuffle_left_3(self) -> Self {
                 $vec::new(self.3, self.0, self.1, self.2)

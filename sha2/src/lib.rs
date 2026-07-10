@@ -65,6 +65,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![warn(missing_docs, rust_2018_idioms)]
+#![allow(clippy::manual_rotate)]
 
 pub use digest::{self, Digest};
 

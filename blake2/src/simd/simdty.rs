@@ -9,18 +9,6 @@
 
 use crate::as_bytes::Safe;
 
-#[cfg(feature = "simd")]
-macro_rules! decl_simd {
-    ($($decl:item)*) => {
-        $(
-            #[derive(Clone, Copy, Debug)]
-            #[repr(simd)]
-            $decl
-        )*
-    }
-}
-
-#[cfg(not(feature = "simd"))]
 macro_rules! decl_simd {
     ($($decl:item)*) => {
         $(
