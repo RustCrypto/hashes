@@ -1,63 +1,46 @@
-// Copyright 2015 blake2-rfc Developers
-//
-// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
-// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
-// http://opensource.org/licenses/MIT>, at your option. This file may not be
-// copied, modified, or distributed except according to those terms.
+use core::ops::{Add, BitXor, Shl, Shr};
 
-mod simd_opt;
-mod simdint;
-mod simdop;
-mod simdty;
-
-pub(crate) use self::simdty::{u32x4, u64x4};
-
-pub(crate) trait Vector4<T>: Copy {
-    fn gather(src: &[T], i0: usize, i1: usize, i2: usize, i3: usize) -> Self;
-
-    #[allow(clippy::wrong_self_convention)]
-    fn from_le(self) -> Self;
-    fn to_le(self) -> Self;
-
-    fn wrapping_add(self, rhs: Self) -> Self;
-
-    fn rotate_right_const(self, n: u32) -> Self;
-
-    fn shuffle_left_1(self) -> Self;
-    fn shuffle_left_2(self) -> Self;
-    fn shuffle_left_3(self) -> Self;
-
-    #[inline(always)]
-    fn shuffle_right_1(self) -> Self {
-        self.shuffle_left_3()
-    }
-    #[inline(always)]
-    fn shuffle_right_2(self) -> Self {
-        self.shuffle_left_2()
-    }
-    #[inline(always)]
-    fn shuffle_right_3(self) -> Self {
-        self.shuffle_left_1()
-    }
-}
+#[cfg(feature = "zeroize")]
+use digest::zeroize::Zeroize;
 
 macro_rules! impl_vector4 {
     ($vec:ident, $word:ident) => {
-        impl Vector4<$word> for $vec {
+        #[derive(Clone, Copy, Debug)]
+        #[repr(C)]
+        pub(crate) struct $vec(
+            pub(crate) $word,
+            pub(crate) $word,
+            pub(crate) $word,
+            pub(crate) $word,
+        );
+
+        impl $vec {
             #[inline(always)]
-            fn gather(src: &[$word], i0: usize, i1: usize, i2: usize, i3: usize) -> Self {
+            pub(crate) fn new(e0: $word, e1: $word, e2: $word, e3: $word) -> Self {
+                Self(e0, e1, e2, e3)
+            }
+
+            #[inline(always)]
+            pub(crate) fn gather(
+                src: &[$word],
+                i0: usize,
+                i1: usize,
+                i2: usize,
+                i3: usize,
+            ) -> Self {
                 $vec::new(src[i0], src[i1], src[i2], src[i3])
             }
 
             #[cfg(target_endian = "little")]
             #[inline(always)]
-            fn from_le(self) -> Self {
+            #[allow(clippy::wrong_self_convention)]
+            pub(crate) fn from_le(self) -> Self {
                 self
             }
 
             #[cfg(not(target_endian = "little"))]
             #[inline(always)]
-            fn from_le(self) -> Self {
+            pub(crate) fn from_le(self) -> Self {
                 $vec::new(
                     $word::from_le(self.0),
                     $word::from_le(self.1),
@@ -68,13 +51,13 @@ macro_rules! impl_vector4 {
 
             #[cfg(target_endian = "little")]
             #[inline(always)]
-            fn to_le(self) -> Self {
+            pub(crate) fn to_le(self) -> Self {
                 self
             }
 
             #[cfg(not(target_endian = "little"))]
             #[inline(always)]
-            fn to_le(self) -> Self {
+            pub(crate) fn to_le(self) -> Self {
                 $vec::new(
                     self.0.to_le(),
                     self.1.to_le(),
@@ -84,55 +67,118 @@ macro_rules! impl_vector4 {
             }
 
             #[inline(always)]
-            fn wrapping_add(self, rhs: Self) -> Self {
+            pub(crate) fn wrapping_add(self, rhs: Self) -> Self {
                 self + rhs
             }
 
             #[inline(always)]
-            fn rotate_right_const(self, n: u32) -> Self {
-                simd_opt::$vec::rotate_right_const(self, n)
+            pub(crate) fn rotate_right_const(self, n: u32) -> Self {
+                $vec::new(
+                    self.0.rotate_right(n),
+                    self.1.rotate_right(n),
+                    self.2.rotate_right(n),
+                    self.3.rotate_right(n),
+                )
             }
 
-            #[cfg(feature = "simd")]
             #[inline(always)]
-            fn shuffle_left_1(self) -> Self {
-                use crate::simd::simdint::simd_shuffle4;
-                const IDX: [u32; 4] = [1, 2, 3, 0];
-                unsafe { simd_shuffle4(self, self, IDX) }
-            }
-
-            #[cfg(not(feature = "simd"))]
-            #[inline(always)]
-            fn shuffle_left_1(self) -> Self {
+            pub(crate) fn shuffle_left_1(self) -> Self {
                 $vec::new(self.1, self.2, self.3, self.0)
             }
 
-            #[cfg(feature = "simd")]
             #[inline(always)]
-            fn shuffle_left_2(self) -> Self {
-                use crate::simd::simdint::simd_shuffle4;
-                const IDX: [u32; 4] = [2, 3, 0, 1];
-                unsafe { simd_shuffle4(self, self, IDX) }
-            }
-
-            #[cfg(not(feature = "simd"))]
-            #[inline(always)]
-            fn shuffle_left_2(self) -> Self {
+            pub(crate) fn shuffle_left_2(self) -> Self {
                 $vec::new(self.2, self.3, self.0, self.1)
             }
 
-            #[cfg(feature = "simd")]
             #[inline(always)]
-            fn shuffle_left_3(self) -> Self {
-                use crate::simd::simdint::simd_shuffle4;
-                const IDX: [u32; 4] = [3, 0, 1, 2];
-                unsafe { simd_shuffle4(self, self, IDX) }
+            pub(crate) fn shuffle_left_3(self) -> Self {
+                $vec::new(self.3, self.0, self.1, self.2)
             }
 
-            #[cfg(not(feature = "simd"))]
             #[inline(always)]
-            fn shuffle_left_3(self) -> Self {
-                $vec::new(self.3, self.0, self.1, self.2)
+            pub(crate) fn shuffle_right_1(self) -> Self {
+                self.shuffle_left_3()
+            }
+            #[inline(always)]
+            pub(crate) fn shuffle_right_2(self) -> Self {
+                self.shuffle_left_2()
+            }
+            #[inline(always)]
+            pub(crate) fn shuffle_right_3(self) -> Self {
+                self.shuffle_left_1()
+            }
+
+            #[inline(always)]
+            pub(crate) fn as_bytes(&self) -> &[u8] {
+                let p = self as *const Self as *const u8;
+                unsafe { core::slice::from_raw_parts(p, core::mem::size_of::<Self>()) }
+            }
+        }
+
+        impl Add for $vec {
+            type Output = Self;
+
+            #[inline(always)]
+            fn add(self, rhs: Self) -> Self::Output {
+                $vec::new(
+                    self.0.wrapping_add(rhs.0),
+                    self.1.wrapping_add(rhs.1),
+                    self.2.wrapping_add(rhs.2),
+                    self.3.wrapping_add(rhs.3),
+                )
+            }
+        }
+
+        impl BitXor for $vec {
+            type Output = Self;
+
+            #[inline(always)]
+            fn bitxor(self, rhs: Self) -> Self::Output {
+                $vec::new(
+                    self.0 ^ rhs.0,
+                    self.1 ^ rhs.1,
+                    self.2 ^ rhs.2,
+                    self.3 ^ rhs.3,
+                )
+            }
+        }
+
+        impl Shl<$vec> for $vec {
+            type Output = Self;
+
+            #[inline(always)]
+            fn shl(self, rhs: Self) -> Self::Output {
+                $vec::new(
+                    self.0 << rhs.0,
+                    self.1 << rhs.1,
+                    self.2 << rhs.2,
+                    self.3 << rhs.3,
+                )
+            }
+        }
+
+        impl Shr<$vec> for $vec {
+            type Output = Self;
+
+            #[inline(always)]
+            fn shr(self, rhs: Self) -> Self::Output {
+                $vec::new(
+                    self.0 >> rhs.0,
+                    self.1 >> rhs.1,
+                    self.2 >> rhs.2,
+                    self.3 >> rhs.3,
+                )
+            }
+        }
+
+        #[cfg(feature = "zeroize")]
+        impl Zeroize for $vec {
+            fn zeroize(&mut self) {
+                self.0.zeroize();
+                self.1.zeroize();
+                self.2.zeroize();
+                self.3.zeroize();
             }
         }
     };
