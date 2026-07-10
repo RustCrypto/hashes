@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#716]: https://github.com/RustCrypto/hashes/pull/716
 [#808]: https://github.com/RustCrypto/hashes/pull/808
 
+## 0.10.7 (2026-07-10)
+### Changed
+- Ignore `asm` crate feature ([#897])
+
+[#897]: https://github.com/RustCrypto/hashes/pull/897
+
 ## 0.10.6 (2023-09-21)
 ### Added
 - `asm!`-based backend for LoongArch64 targets gated behind `loongarch64_asm` feature [#504]
