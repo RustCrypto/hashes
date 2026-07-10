@@ -5,10 +5,6 @@
     html_favicon_url = "https://raw.githubusercontent.com/RustCrypto/media/6ee8e381/logo.svg"
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-#![allow(unexpected_cfgs)] // `simd` feature is broken
-#![warn(missing_docs, unreachable_pub)]
-#![cfg_attr(feature = "simd", feature(platform_intrinsics, repr_simd))]
-#![cfg_attr(feature = "simd", allow(incomplete_features))]
 
 pub use digest::{self, Digest};
 
@@ -31,7 +27,6 @@ use digest::{FixedOutputReset, Reset};
 #[cfg(feature = "zeroize")]
 use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
-mod as_bytes;
 mod consts;
 
 mod simd;
@@ -39,9 +34,8 @@ mod simd;
 #[macro_use]
 mod macros;
 
-use as_bytes::AsBytes;
 use consts::{BLAKE2B_IV, BLAKE2S_IV};
-use simd::{Vector4, u32x4, u64x4};
+use simd::{u32x4, u64x4};
 
 blake2_impl!(
     Blake2bVarCore,

@@ -98,8 +98,9 @@ macro_rules! blake2_impl {
                 out: &mut Output<Self>,
             ) {
                 self.compress(final_block, !0, flag);
-                let buf = [self.h[0].to_le(), self.h[1].to_le()];
-                out.copy_from_slice(buf.as_bytes())
+                let n = size_of::<$vec>();
+                out[..n].copy_from_slice(self.h[0].to_le().as_bytes());
+                out[n..].copy_from_slice(self.h[1].to_le().as_bytes());
             }
 
             fn compress(&mut self, block: &Block<Self>, f0: $word, f1: $word) {
