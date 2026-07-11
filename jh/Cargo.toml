@@ -15,7 +15,6 @@ description = "Pure Rust implementation of the JH cryptographic hash function"
 [dependencies]
 digest = "0.11"
 hex-literal = "1"
-simd = { package = "ppv-lite86", version = "0.2.6" }
 
 [dev-dependencies]
 digest = { version = "0.11", features = ["dev"] }

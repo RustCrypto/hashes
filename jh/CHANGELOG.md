@@ -8,7 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.2.1 (UNRELEASED)
 ### Changed
 - Implementation of the `SerializableState` trait ([#889])
+- Replace the `ppv-lite86` compressor with portable and SSE2 backends ([#546])
 
+[#546]: https://github.com/RustCrypto/hashes/issues/546
 [#889]: https://github.com/RustCrypto/hashes/pull/889
 
 ## 0.2.0 (2026-03-27)

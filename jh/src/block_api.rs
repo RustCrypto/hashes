@@ -74,7 +74,7 @@ impl VariableOutputCore for JhCore {
             buffer.digest_pad(0x80, &[], |b| self.state.update(b));
             buffer.digest_pad(0, &bit_len.to_be_bytes(), |b| self.state.update(b));
         }
-        out.copy_from_slice(&self.state.finalize()[64..]);
+        self.state.write_digest(out);
     }
 }
 
@@ -98,7 +98,7 @@ impl SerializableState for JhCore {
         let mut serialized_state = SerializedState::<Self>::default();
         let (state_dst, block_len_dst) = serialized_state.split_at_mut(128);
 
-        state_dst.copy_from_slice(self.state.finalize());
+        self.state.write_state(state_dst);
         block_len_dst.copy_from_slice(&self.block_len.to_le_bytes());
 
         serialized_state
@@ -122,12 +122,7 @@ impl Drop for JhCore {
         #[cfg(feature = "zeroize")]
         {
             use digest::zeroize::Zeroize;
-            const N: usize = core::mem::size_of::<Compressor>();
-            // TODO: remove this unsafe after migration from `ppv-lite86`
-            unsafe {
-                let p: *mut [u8; N] = (&mut self.state as *mut Compressor).cast();
-                core::ptr::write_volatile(p, [0u8; N]);
-            }
+            self.state.zeroize();
             self.block_len.zeroize();
         }
     }
