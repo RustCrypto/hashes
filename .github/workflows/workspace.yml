@@ -45,4 +45,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: crate-ci/typos@v1
+      - uses: crate-ci/typos@v1.48.0
