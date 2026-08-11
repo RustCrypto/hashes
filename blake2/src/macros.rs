@@ -282,26 +282,51 @@ macro_rules! blake2_impl {
                 let vecsz = <$vec as SerializableState>::SerializedStateSize::USIZE;
                 let tsz = U8::USIZE;
                 serialized_state[..vecsz].copy_from_slice(&self.h[0].serialize());
-                serialized_state[vecsz..(2*vecsz)].copy_from_slice(&self.h[1].serialize());
-                serialized_state[(2*vecsz)..(2*vecsz+tsz)].copy_from_slice(&self.t.serialize());
+                serialized_state[vecsz..(2 * vecsz)].copy_from_slice(&self.h[1].serialize());
+                serialized_state[(2 * vecsz)..(2 * vecsz + tsz)]
+                    .copy_from_slice(&self.t.serialize());
                 #[cfg(feature = "reset")]
-                serialized_state[(2*vecsz+tsz)..(3*vecsz+tsz)].copy_from_slice(&self.h0[0].serialize());
+                serialized_state[(2 * vecsz + tsz)..(3 * vecsz + tsz)]
+                    .copy_from_slice(&self.h0[0].serialize());
                 #[cfg(feature = "reset")]
-                serialized_state[(3*vecsz+tsz)..(4*vecsz+tsz)].copy_from_slice(&self.h0[1].serialize());
+                serialized_state[(3 * vecsz + tsz)..(4 * vecsz + tsz)]
+                    .copy_from_slice(&self.h0[1].serialize());
                 serialized_state
             }
 
-            fn deserialize(serialized_state: &SerializedState<Self>) -> Result<Self, DeserializeStateError> {
+            fn deserialize(
+                serialized_state: &SerializedState<Self>,
+            ) -> Result<Self, DeserializeStateError> {
                 let vecsz = <$vec as SerializableState>::SerializedStateSize::USIZE;
                 let tsz = U8::USIZE;
-                let h_0 = SerializableState::deserialize(&serialized_state[..vecsz].try_into().unwrap())?;
-                let h_1 = SerializableState::deserialize(&serialized_state[vecsz..(2*vecsz)].try_into().unwrap())?;
-                let t = SerializableState::deserialize(&serialized_state[(2*vecsz)..(2*vecsz+tsz)].try_into().unwrap())?;
+                let h_0 =
+                    SerializableState::deserialize(&serialized_state[..vecsz].try_into().unwrap())?;
+                let h_1 = SerializableState::deserialize(
+                    &serialized_state[vecsz..(2 * vecsz)].try_into().unwrap(),
+                )?;
+                let t = SerializableState::deserialize(
+                    &serialized_state[(2 * vecsz)..(2 * vecsz + tsz)]
+                        .try_into()
+                        .unwrap(),
+                )?;
                 #[cfg(feature = "reset")]
-                let h0_0 = SerializableState::deserialize(&serialized_state[(2*vecsz+tsz)..(3*vecsz+tsz)].try_into().unwrap())?;
+                let h0_0 = SerializableState::deserialize(
+                    &serialized_state[(2 * vecsz + tsz)..(3 * vecsz + tsz)]
+                        .try_into()
+                        .unwrap(),
+                )?;
                 #[cfg(feature = "reset")]
-                let h0_1 = SerializableState::deserialize(&serialized_state[(3*vecsz+tsz)..(4*vecsz+tsz)].try_into().unwrap())?;
-                Ok(Self { h: [h_0, h_1], t, #[cfg(feature = "reset")] h0: [h0_0, h0_1] })
+                let h0_1 = SerializableState::deserialize(
+                    &serialized_state[(3 * vecsz + tsz)..(4 * vecsz + tsz)]
+                        .try_into()
+                        .unwrap(),
+                )?;
+                Ok(Self {
+                    h: [h_0, h_1],
+                    t,
+                    #[cfg(feature = "reset")]
+                    h0: [h0_0, h0_1],
+                })
             }
         }
     };
@@ -509,58 +534,98 @@ macro_rules! blake2_mac_impl {
         {
         }
 
-        impl<OutSize> SerializableState for $name<OutSize> where
-            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True> {
+        impl<OutSize> SerializableState for $name<OutSize>
+        where
+            OutSize: ArraySize + IsLessOrEqual<$max_size, Output = True>,
+        {
             #[cfg(not(feature = "reset"))]
-            type SerializedStateSize = Sum<<$hash as SerializableState>::SerializedStateSize, SerializedBufferSize<<$hash as BlockSizeUser>::BlockSize, Lazy>>;
+            type SerializedStateSize = Sum<
+                <$hash as SerializableState>::SerializedStateSize,
+                SerializedBufferSize<<$hash as BlockSizeUser>::BlockSize, Lazy>,
+            >;
             #[cfg(feature = "reset")]
-            type SerializedStateSize = Sum<Sum<<$hash as SerializableState>::SerializedStateSize, SerializedBufferSize<<$hash as BlockSizeUser>::BlockSize, Lazy>>, Sum<<Self as KeySizeUser>::KeySize, digest::consts::U1>>;
+            type SerializedStateSize = Sum<
+                Sum<
+                    <$hash as SerializableState>::SerializedStateSize,
+                    SerializedBufferSize<<$hash as BlockSizeUser>::BlockSize, Lazy>,
+                >,
+                Sum<<Self as KeySizeUser>::KeySize, digest::consts::U1>,
+            >;
 
             fn serialize(&self) -> SerializedState<Self> {
                 let mut serialized_state = SerializedState::<Self>::default();
                 let coresz = <$hash as SerializableState>::SerializedStateSize::USIZE;
-                let buffersz = <SerializedBufferSize<<$hash as BlockSizeUser>::BlockSize, Lazy>>::USIZE;
+                let buffersz =
+                    <SerializedBufferSize<<$hash as BlockSizeUser>::BlockSize, Lazy>>::USIZE;
 
                 serialized_state[..coresz].copy_from_slice(&self.core.serialize());
-                serialized_state[coresz..(coresz + buffersz)].copy_from_slice(&self.buffer.serialize());
+                serialized_state[coresz..(coresz + buffersz)]
+                    .copy_from_slice(&self.buffer.serialize());
 
                 #[cfg(feature = "reset")]
                 {
                     let boolsz = digest::consts::U1::USIZE;
                     let keyblocksz = <Self as KeySizeUser>::KeySize::USIZE;
                     if let Some(key_block) = self.key_block {
-                        serialized_state[(coresz + buffersz)..(coresz + buffersz + boolsz)].copy_from_slice(&1u8.serialize());
-                        serialized_state[(coresz + buffersz + boolsz)..(coresz + buffersz + boolsz + keyblocksz)].copy_from_slice(&key_block);
+                        serialized_state[(coresz + buffersz)..(coresz + buffersz + boolsz)]
+                            .copy_from_slice(&1u8.serialize());
+                        serialized_state[(coresz + buffersz + boolsz)
+                            ..(coresz + buffersz + boolsz + keyblocksz)]
+                            .copy_from_slice(&key_block);
                     } else {
-                        serialized_state[(coresz + buffersz)..(coresz + buffersz + boolsz)].copy_from_slice(&0u8.serialize());
+                        serialized_state[(coresz + buffersz)..(coresz + buffersz + boolsz)]
+                            .copy_from_slice(&0u8.serialize());
                     }
                 }
 
                 serialized_state
             }
 
-            fn deserialize(serialized_state: &SerializedState<Self>) -> Result<Self, DeserializeStateError> {
+            fn deserialize(
+                serialized_state: &SerializedState<Self>,
+            ) -> Result<Self, DeserializeStateError> {
                 let coresz = <$hash as SerializableState>::SerializedStateSize::USIZE;
-                let buffersz = <SerializedBufferSize<<$hash as BlockSizeUser>::BlockSize, Lazy>>::USIZE;
+                let buffersz =
+                    <SerializedBufferSize<<$hash as BlockSizeUser>::BlockSize, Lazy>>::USIZE;
 
-                let core = SerializableState::deserialize(&serialized_state[..coresz].try_into().unwrap())?;
+                let core = SerializableState::deserialize(
+                    &serialized_state[..coresz].try_into().unwrap(),
+                )?;
                 let buffer = LazyBuffer::<<$hash as BlockSizeUser>::BlockSize>::deserialize(
-                    &serialized_state[coresz..(coresz + buffersz)].try_into().unwrap()
-                ).map_err(|_| DeserializeStateError)?;
+                    &serialized_state[coresz..(coresz + buffersz)]
+                        .try_into()
+                        .unwrap(),
+                )
+                .map_err(|_| DeserializeStateError)?;
 
                 #[cfg(feature = "reset")]
                 let key_block = {
                     let boolsz = digest::consts::U1::USIZE;
                     let keyblocksz = <Self as KeySizeUser>::KeySize::USIZE;
-                    let present: u8 = SerializableState::deserialize(&serialized_state[(coresz + buffersz)..(coresz + buffersz + boolsz)].try_into().unwrap())?;
+                    let present: u8 = SerializableState::deserialize(
+                        &serialized_state[(coresz + buffersz)..(coresz + buffersz + boolsz)]
+                            .try_into()
+                            .unwrap(),
+                    )?;
                     if present != 0 {
-                        Some(serialized_state[(coresz + buffersz + boolsz)..(coresz + buffersz + boolsz + keyblocksz)].try_into().unwrap())
+                        Some(
+                            serialized_state[(coresz + buffersz + boolsz)
+                                ..(coresz + buffersz + boolsz + keyblocksz)]
+                                .try_into()
+                                .unwrap(),
+                        )
                     } else {
                         None
                     }
                 };
 
-                Ok(Self { core, buffer, #[cfg(feature = "reset")] key_block, _out: Default::default() })
+                Ok(Self {
+                    core,
+                    buffer,
+                    #[cfg(feature = "reset")]
+                    key_block,
+                    _out: Default::default(),
+                })
             }
         }
     };

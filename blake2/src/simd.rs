@@ -1,6 +1,6 @@
 use core::ops::{Add, BitXor, Shl, Shr};
 
-use digest::{common::hazmat::{DeserializeStateError, SerializableState, SerializedState}};
+use digest::common::hazmat::{DeserializeStateError, SerializableState, SerializedState};
 
 #[cfg(feature = "zeroize")]
 use digest::zeroize::Zeroize;
@@ -191,9 +191,17 @@ macro_rules! impl_vector4 {
                 [self.0, self.1, self.2, self.3].serialize()
             }
 
-            fn deserialize(serialized_state: &SerializedState<Self>) -> Result<Self, DeserializeStateError> {
-                let deserialized: [$word; 4] = <[$word; 4] as SerializableState>::deserialize(serialized_state)?;
-                Ok($vec(deserialized[0], deserialized[1], deserialized[2], deserialized[3]))
+            fn deserialize(
+                serialized_state: &SerializedState<Self>,
+            ) -> Result<Self, DeserializeStateError> {
+                let deserialized: [$word; 4] =
+                    <[$word; 4] as SerializableState>::deserialize(serialized_state)?;
+                Ok($vec(
+                    deserialized[0],
+                    deserialized[1],
+                    deserialized[2],
+                    deserialized[3],
+                ))
             }
         }
     };
