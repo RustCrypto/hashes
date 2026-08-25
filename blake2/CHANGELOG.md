@@ -5,8 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.11.0 (UNRELEASED)
+## 0.11.0 (2026-08-26)
 ### Added
+- `zeroize` support ([#545])
+- `Blake2b128`, `Blake2b256`, `Blake2s128` type aliases ([#564])
+- `CustomizedInit` support ([#664])
 - `alloc` crate feature ([#678])
 
 ### Changed
@@ -18,10 +21,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - `std` crate feature ([#678])
 - `Blake2bVar` and `Blake2sVar` types ([#744])
+- SIMD support ([#898])
 
+### Fixed
+- Handling of unkeyed hashes in keyed mode ([#510], [#612])
+
+[#510]: https://github.com/RustCrypto/hashes/pull/510
+[#545]: https://github.com/RustCrypto/hashes/pull/545
+[#564]: https://github.com/RustCrypto/hashes/pull/564
+[#612]: https://github.com/RustCrypto/hashes/pull/612
 [#652]: https://github.com/RustCrypto/hashes/pull/652
+[#664]: https://github.com/RustCrypto/hashes/pull/664
 [#678]: https://github.com/RustCrypto/hashes/pull/678
 [#744]: https://github.com/RustCrypto/hashes/pull/744
+[#898]: https://github.com/RustCrypto/hashes/pull/898
 
 ## 0.10.6 (2022-12-16)
 ### Added
