@@ -31,9 +31,9 @@ impl Md2Core {
 
         let mut t = 0u8;
         for j in 0..18u8 {
-            for k in 0..STATE_LEN {
-                self.x[k] ^= S[t as usize];
-                t = self.x[k];
+            for v in self.x.iter_mut() {
+                *v ^= S[t as usize];
+                t = *v;
             }
             t = t.wrapping_add(j);
         }
