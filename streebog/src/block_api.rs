@@ -1,3 +1,4 @@
+use crate::U512;
 use core::fmt;
 use digest::{
     HashMarker, InvalidOutputSize, Output,
@@ -15,38 +16,32 @@ use digest::zeroize::{Zeroize, ZeroizeOnDrop};
 
 use crate::consts::{BLOCK_SIZE, C64, SHUFFLED_LIN_TABLE};
 
-type Block = [u8; 64];
-
 /// Core block-level Streebog hasher with variable output size.
 ///
 /// Supports initialization only for 32 and 64 byte output sizes,
 /// i.e. 256 and 512 bits respectively.
 #[derive(Clone)]
 pub struct StreebogVarCore {
-    h: [u64; 8],
-    n: [u64; 8],
-    sigma: [u64; 8],
+    h: U512,
+    n: U512,
+    sigma: U512,
 }
 
 #[inline(always)]
-fn lps(h: &mut [u64; 8], n: &[u64; 8]) {
-    for i in 0..8 {
-        h[i] ^= n[i];
-    }
+fn lps(h: &mut U512, n: &U512) {
+    let t = *h ^ n;
 
-    let mut buf = [0u64; 8];
+    *h = U512::ZERO;
     #[allow(clippy::needless_range_loop)]
     for i in 0..8 {
         for j in 0..8 {
-            let idx = ((h[j] >> (8 * i)) & 0xff) as usize;
-            buf[i] ^= SHUFFLED_LIN_TABLE[j][idx];
+            let idx = ((t.0[j] >> (8 * i)) & 0xff) as usize;
+            h.0[i] ^= SHUFFLED_LIN_TABLE[j][idx];
         }
     }
-
-    *h = buf;
 }
 
-fn g(h: &mut [u64; 8], n: &[u64; 8], m: &[u64; 8]) {
+fn g(h: &mut U512, n: &U512, m: &U512) {
     let mut key = *h;
     let mut block = *m;
 
@@ -57,37 +52,19 @@ fn g(h: &mut [u64; 8], n: &[u64; 8], m: &[u64; 8]) {
         lps(&mut key, c);
     }
 
-    for i in 0..8 {
-        h[i] ^= block[i] ^ key[i] ^ m[i];
-    }
+    *h ^= block;
+    *h ^= key;
+    *h ^= m;
 }
 
 impl StreebogVarCore {
     #[inline(always)]
-    fn update_sigma(&mut self, m: &[u64; 8]) {
-        let mut carry = false;
-        #[allow(clippy::needless_range_loop)]
-        for i in 0..8 {
-            adc(&mut self.sigma[i], m[i], &mut carry);
-        }
-    }
-
-    #[inline(always)]
-    fn update_n(&mut self, len: u64) {
-        let mut carry = false;
-        // Note: `len` can not be bigger than block size, so `8 * len` never overflows
-        adc(&mut self.n[0], 8 * len, &mut carry);
-        for i in 1..8 {
-            adc(&mut self.n[i], 0, &mut carry);
-        }
-    }
-
-    #[inline(always)]
     fn compress(&mut self, block: &[u8; 64], msg_len: u64) {
-        let block = from_bytes(block);
+        let block = U512::from_bytes(block);
         g(&mut self.h, &self.n, &block);
-        self.update_n(msg_len);
-        self.update_sigma(&block);
+        // `msg_len` can not be bigger than block size, so `8 * len` never overflows
+        self.n += 8 * msg_len;
+        self.sigma += block;
     }
 }
 
@@ -120,8 +97,8 @@ impl VariableOutputCore for StreebogVarCore {
     #[inline]
     fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
         let h = match output_size {
-            32 => [0x0101_0101_0101_0101; 8],
-            64 => [0; 8],
+            32 => U512([0x0101_0101_0101_0101; 8]),
+            64 => U512::ZERO,
             _ => return Err(InvalidOutputSize),
         };
         let (n, sigma) = Default::default();
@@ -134,9 +111,10 @@ impl VariableOutputCore for StreebogVarCore {
         let mut block = buffer.pad_with_zeros();
         block[pos] = 1;
         self.compress(block.as_ref(), pos as u64);
-        g(&mut self.h, &[0u64; 8], &self.n);
-        g(&mut self.h, &[0u64; 8], &self.sigma);
-        out.copy_from_slice(&to_bytes(&self.h));
+        g(&mut self.h, &U512::ZERO, &self.n);
+        g(&mut self.h, &U512::ZERO, &self.sigma);
+
+        out.0 = self.h.to_bytes();
     }
 }
 
@@ -172,9 +150,9 @@ impl SerializableState for StreebogVarCore {
     type SerializedStateSize = U192;
 
     fn serialize(&self) -> SerializedState<Self> {
-        let ser_h: Array<u8, U64> = to_bytes(&self.h).into();
-        let ser_n: Array<u8, U64> = to_bytes(&self.n).into();
-        let ser_sigma: Array<u8, U64> = to_bytes(&self.sigma).into();
+        let ser_h: Array<u8, U64> = self.h.to_bytes().into();
+        let ser_n: Array<u8, U64> = self.n.to_bytes().into();
+        let ser_sigma: Array<u8, U64> = self.sigma.to_bytes().into();
         ser_h.concat(ser_n).concat(ser_sigma)
     }
 
@@ -183,73 +161,9 @@ impl SerializableState for StreebogVarCore {
         let (ser_n, ser_sigma) = rem.split::<U64>();
 
         Ok(Self {
-            h: from_bytes(&ser_h.into()),
-            n: from_bytes(&ser_n.into()),
-            sigma: from_bytes(&ser_sigma.into()),
+            h: U512::from_bytes(&ser_h.into()),
+            n: U512::from_bytes(&ser_n.into()),
+            sigma: U512::from_bytes(&ser_sigma.into()),
         })
-    }
-}
-
-// This function mirrors implementation of the `carrying_add` method:
-// https://github.com/rust-lang/rust/blob/9cdfe28/library/core/src/num/uint_macros.rs#L2060-L2066
-#[inline(always)]
-fn adc(v1: &mut u64, v2: u64, carry: &mut bool) {
-    let (a, b) = v1.overflowing_add(v2);
-    let (c, d) = a.overflowing_add(*carry as u64);
-    *v1 = c;
-    *carry = b || d;
-}
-
-#[inline(always)]
-fn to_bytes(b: &[u64; 8]) -> Block {
-    let mut t = [0; 64];
-    for (chunk, v) in t.chunks_exact_mut(8).zip(b.iter()) {
-        chunk.copy_from_slice(&v.to_le_bytes());
-    }
-    t
-}
-
-#[inline(always)]
-fn from_bytes(b: &Block) -> [u64; 8] {
-    let mut t = [0u64; 8];
-    for (v, chunk) in t.iter_mut().zip(b.chunks_exact(8)) {
-        *v = u64::from_le_bytes(chunk.try_into().unwrap());
-    }
-    t
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn counter_carry_propagates_to_top_limb() {
-        let mut core = StreebogVarCore {
-            h: [0u64; 8],
-            n: [0u64; 8],
-            sigma: [0u64; 8],
-        };
-        core.n[0] = u64::MAX - 511;
-        for i in 1..=6 {
-            core.n[i] = u64::MAX;
-        }
-        core.n[7] = 0;
-        core.update_n(64);
-        for i in 0..=6 {
-            assert_eq!(core.n[i], 0);
-        }
-        assert_eq!(core.n[7], 1);
-    }
-
-    #[test]
-    fn counter_zero_len_no_change() {
-        let mut core = StreebogVarCore {
-            h: [0u64; 8],
-            n: [1, 2, 3, 4, 5, 6, 7, 8],
-            sigma: [0u64; 8],
-        };
-        let before = core.n;
-        core.update_n(0);
-        assert_eq!(core.n, before);
     }
 }

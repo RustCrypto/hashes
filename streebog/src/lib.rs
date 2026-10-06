@@ -13,12 +13,14 @@ pub use digest::{self, Digest};
 /// Block-level types
 pub mod block_api;
 mod consts;
+mod u512;
 
 use block_api::StreebogVarCore;
 use digest::{
     block_api::CtOutWrapper,
     consts::{U32, U64},
 };
+use u512::U512;
 
 digest::buffer_fixed!(
     /// Streebog256 hasher.
