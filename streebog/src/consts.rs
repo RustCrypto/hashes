@@ -3,6 +3,8 @@
 //! In the code for optimization purposes `table::SHUFFLED_LIN_TABLE` is used
 //! instead of `A` and `P`
 
+use crate::u512::U512;
+
 pub(crate) const BLOCK_SIZE: usize = 64;
 
 /// Linear transformation matrix
@@ -179,8 +181,8 @@ pub(crate) const C: [[u8; BLOCK_SIZE]; 12] = [
 ];
 
 /// Iteration constants represented as `[u64; 8]`
-pub(crate) const C64: [[u64; 8]; 12] = {
-    let mut res = [[0u64; 8]; 12];
+pub(crate) const C64: [U512; 12] = {
+    let mut res = [U512::ZERO; 12];
     let mut i = 0;
     let mut buf = [0u8; 8];
     while i < 12 {
@@ -191,7 +193,7 @@ pub(crate) const C64: [[u64; 8]; 12] = {
                 buf[k] = C[i][8 * j + k];
                 k += 1;
             }
-            res[i][j] = u64::from_le_bytes(buf);
+            res[i].0[j] = u64::from_le_bytes(buf);
             j += 1;
         }
         i += 1;
