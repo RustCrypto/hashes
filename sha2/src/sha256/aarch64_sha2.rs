@@ -2,17 +2,13 @@
 //!
 //! Implementation adapted from mbedtls.
 #![allow(unsafe_op_in_unsafe_fn)]
+use core::arch::aarch64::*;
 
 #[cfg(not(target_arch = "aarch64"))]
 compile_error!("aarch64-sha2 backend can be used only aarch64 target arches");
 
-use crate::consts::K32;
-use core::arch::aarch64::*;
-
 #[target_feature(enable = "sha2")]
 pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    // SAFETY: Requires the sha2 feature.
-
     // Load state into vectors.
     let mut abcd = vld1q_u32(state[0..4].as_ptr());
     let mut efgh = vld1q_u32(state[4..8].as_ptr());
@@ -30,25 +26,25 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         let mut s3 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(block[48..64].as_ptr())));
 
         // Rounds 0 to 3
-        let mut tmp = vaddq_u32(s0, vld1q_u32(&K32[0]));
+        let mut tmp = vaddq_u32(s0, rk(0));
         let mut abcd_prev = abcd;
         abcd = vsha256hq_u32(abcd_prev, efgh, tmp);
         efgh = vsha256h2q_u32(efgh, abcd_prev, tmp);
 
         // Rounds 4 to 7
-        tmp = vaddq_u32(s1, vld1q_u32(&K32[4]));
+        tmp = vaddq_u32(s1, rk(4));
         abcd_prev = abcd;
         abcd = vsha256hq_u32(abcd_prev, efgh, tmp);
         efgh = vsha256h2q_u32(efgh, abcd_prev, tmp);
 
         // Rounds 8 to 11
-        tmp = vaddq_u32(s2, vld1q_u32(&K32[8]));
+        tmp = vaddq_u32(s2, rk(8));
         abcd_prev = abcd;
         abcd = vsha256hq_u32(abcd_prev, efgh, tmp);
         efgh = vsha256h2q_u32(efgh, abcd_prev, tmp);
 
         // Rounds 12 to 15
-        tmp = vaddq_u32(s3, vld1q_u32(&K32[12]));
+        tmp = vaddq_u32(s3, rk(12));
         abcd_prev = abcd;
         abcd = vsha256hq_u32(abcd_prev, efgh, tmp);
         efgh = vsha256h2q_u32(efgh, abcd_prev, tmp);
@@ -56,28 +52,28 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         for t in (16..64).step_by(16) {
             // Rounds t to t + 3
             s0 = vsha256su1q_u32(vsha256su0q_u32(s0, s1), s2, s3);
-            tmp = vaddq_u32(s0, vld1q_u32(&K32[t]));
+            tmp = vaddq_u32(s0, rk(t));
             abcd_prev = abcd;
             abcd = vsha256hq_u32(abcd_prev, efgh, tmp);
             efgh = vsha256h2q_u32(efgh, abcd_prev, tmp);
 
             // Rounds t + 4 to t + 7
             s1 = vsha256su1q_u32(vsha256su0q_u32(s1, s2), s3, s0);
-            tmp = vaddq_u32(s1, vld1q_u32(&K32[t + 4]));
+            tmp = vaddq_u32(s1, rk(t + 4));
             abcd_prev = abcd;
             abcd = vsha256hq_u32(abcd_prev, efgh, tmp);
             efgh = vsha256h2q_u32(efgh, abcd_prev, tmp);
 
             // Rounds t + 8 to t + 11
             s2 = vsha256su1q_u32(vsha256su0q_u32(s2, s3), s0, s1);
-            tmp = vaddq_u32(s2, vld1q_u32(&K32[t + 8]));
+            tmp = vaddq_u32(s2, rk(t + 8));
             abcd_prev = abcd;
             abcd = vsha256hq_u32(abcd_prev, efgh, tmp);
             efgh = vsha256h2q_u32(efgh, abcd_prev, tmp);
 
             // Rounds t + 12 to t + 15
             s3 = vsha256su1q_u32(vsha256su0q_u32(s3, s0), s1, s2);
-            tmp = vaddq_u32(s3, vld1q_u32(&K32[t + 12]));
+            tmp = vaddq_u32(s3, rk(t + 12));
             abcd_prev = abcd;
             abcd = vsha256hq_u32(abcd_prev, efgh, tmp);
             efgh = vsha256h2q_u32(efgh, abcd_prev, tmp);
@@ -91,4 +87,11 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // Store vectors into state.
     vst1q_u32(state[0..4].as_mut_ptr(), abcd);
     vst1q_u32(state[4..8].as_mut_ptr(), efgh);
+}
+
+#[target_feature(enable = "neon")]
+unsafe fn rk(i: usize) -> uint32x4_t {
+    use crate::consts::K32;
+    assert!(i + 4 <= K32.len());
+    vld1q_u32(K32.as_ptr().add(i))
 }
