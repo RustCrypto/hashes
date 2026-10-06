@@ -92,6 +92,6 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
 #[target_feature(enable = "neon")]
 unsafe fn rk(i: usize) -> uint32x4_t {
     use crate::consts::K32;
-    assert_eq!(i + 4 <= K32.len());
+    assert!(i + 4 <= K32.len());
     vld1q_u32(K32.as_ptr().add(i))
 }

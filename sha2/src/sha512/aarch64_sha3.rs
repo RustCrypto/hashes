@@ -170,6 +170,6 @@ pub(super) unsafe fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
 #[target_feature(enable = "neon")]
 unsafe fn rk(i: usize) -> uint64x2_t {
     use crate::consts::K64;
-    assert_eq!(i + 2 <= K64.len());
+    assert!(i + 2 <= K64.len());
     vld1q_u64(K64.as_ptr().add(i))
 }
