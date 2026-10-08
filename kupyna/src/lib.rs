@@ -19,6 +19,12 @@ mod table;
 pub(crate) mod utils;
 
 use digest::consts::{U28, U32, U48, U64};
+#[cfg(feature = "zeroize")]
+use digest::{
+    array::ArraySize,
+    typenum::{IsLessOrEqual, True},
+    zeroize::ZeroizeOnDrop,
+};
 
 digest::buffer_ct_variable!(
     /// Short Kupyna variant generic over output size.
@@ -31,6 +37,20 @@ digest::buffer_ct_variable!(
     max_size: U64;
 );
 
+// TODO: impl in the `buffer_ct_variable!` macro (as `buffer_fixed!` already does)
+#[cfg(feature = "zeroize")]
+impl<OutSize> ZeroizeOnDrop for KupynaShort<OutSize> where
+    OutSize: ArraySize + IsLessOrEqual<U32, Output = True>
+{
+}
+
+// TODO: impl in the `buffer_ct_variable!` macro (as `buffer_fixed!` already does)
+#[cfg(feature = "zeroize")]
+impl<OutSize> ZeroizeOnDrop for KupynaLong<OutSize> where
+    OutSize: ArraySize + IsLessOrEqual<U64, Output = True>
+{
+}
+
 /// Kupyna-224 hasher.
 pub type Kupyna224 = KupynaShort<U28>;
 /// Kupyna-256 hasher.
@@ -39,3 +59,18 @@ pub type Kupyna256 = KupynaShort<U32>;
 pub type Kupyna384 = KupynaLong<U48>;
 /// Kupyna-512 hasher.
 pub type Kupyna512 = KupynaLong<U64>;
+
+#[cfg(all(test, feature = "zeroize"))]
+mod zeroize_on_drop {
+    use super::*;
+
+    fn assert_zeroize_on_drop<T: ZeroizeOnDrop>() {}
+
+    #[test]
+    fn wrappers_impl_zeroize_on_drop() {
+        assert_zeroize_on_drop::<Kupyna224>();
+        assert_zeroize_on_drop::<Kupyna256>();
+        assert_zeroize_on_drop::<Kupyna384>();
+        assert_zeroize_on_drop::<Kupyna512>();
+    }
+}
