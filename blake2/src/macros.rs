@@ -353,7 +353,7 @@ macro_rules! blake2_mac_impl {
             #[inline]
             fn new_from_slice(key: &[u8]) -> Result<Self, InvalidLength> {
                 let kl = key.len();
-                if kl > <Self as KeySizeUser>::KeySize::USIZE {
+                if kl == 0 || kl > <Self as KeySizeUser>::KeySize::USIZE {
                     return Err(InvalidLength);
                 }
                 let mut padded_key = Block::<$hash>::default();
