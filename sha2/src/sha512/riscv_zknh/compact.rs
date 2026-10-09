@@ -28,15 +28,7 @@ fn schedule(block: &mut [u64; 16], r: usize) {
 #[target_feature(enable = "zknh")]
 fn round(state: &mut [u64; 8], block: &[u64; 16], r: usize) {
     let n = K64.len() - r;
-    #[allow(clippy::identity_op)]
-    let a = (n + 0) % 8;
-    let b = (n + 1) % 8;
-    let c = (n + 2) % 8;
-    let d = (n + 3) % 8;
-    let e = (n + 4) % 8;
-    let f = (n + 5) % 8;
-    let g = (n + 6) % 8;
-    let h = (n + 7) % 8;
+    let [a, b, c, d, e, f, g, h] = core::array::from_fn(|i| (n + i) % 8);
 
     state[h] = state[h]
         .wrapping_add(sha512sum1(state[e]))
