@@ -9,11 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Removed workaround for unaligned loads in `riscv-zknh` backend ([#879])
 - `riscv-zknh` no longer requires `zbkb` (or `zbb`) target feature ([#879])
-- Bump MSRV to 1.87 ([#926])
+- Bump MSRV to 1.88 ([#926])
 
 ### Fixed
 - Loading of round constants in AArch64 backends to satisfy the Stacked Borrows model ([#922])
-- `unsafe_op_in_unsafe_fn` lint in backend implementations ([#926])
 
 [#879]: https://github.com/RustCrypto/hashes/pull/879
 [#922]: https://github.com/RustCrypto/hashes/pull/922
