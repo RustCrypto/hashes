@@ -8,8 +8,6 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
-use crate::consts::K64;
-
 #[target_feature(enable = "avx2")]
 pub(super) fn compress(state: &mut [u64; 8], mut blocks: &[[u8; 128]]) {
     if !blocks.len().is_multiple_of(2) {
@@ -24,8 +22,11 @@ pub(super) fn compress(state: &mut [u64; 8], mut blocks: &[[u8; 128]]) {
     let mut t2: RoundStates = [_mm_setzero_si128(); 40];
     let mut x = [_mm256_setzero_si256(); 8];
 
-    for chunk in blocks.chunks_exact(2) {
-        load_data_avx2(&mut x, &mut ms, &mut t2, chunk.as_ptr().cast());
+    let (blocks2, tail) = blocks.as_chunks::<2>();
+    assert!(tail.is_empty());
+
+    for block2 in blocks2 {
+        load_data_avx2(&mut x, &mut ms, &mut t2, block2);
 
         // First block
         let mut current_state = *state;
@@ -65,8 +66,7 @@ fn load_data_avx(x: &mut [__m128i; 8], ms: &mut MsgSchedule, data: *const __m128
             x[$i] = unsafe { _mm_loadu_si128(data.add($i).cast()) };
             x[$i] = _mm_shuffle_epi8(x[$i], MASK);
 
-            let k = unsafe { _mm_loadu_si128(K64.as_ptr().add(2 * $i).cast()) };
-            let y = _mm_add_epi64(x[$i], k);
+            let y = _mm_add_epi64(x[$i], rk(2 * $i));
 
             ms[$i] = y;
         )*};
@@ -81,7 +81,7 @@ fn load_data_avx2(
     x: &mut [__m256i; 8],
     ms: &mut MsgSchedule,
     t2: &mut RoundStates,
-    data: *const __m128i,
+    block: &[[u8; 128]; 2],
 ) {
     #[allow(non_snake_case)]
     let MASK = _mm256_set_epi64x(
@@ -91,16 +91,18 @@ fn load_data_avx2(
         0x0001_0203_0405_0607_i64,
     );
 
+    let block_ptr: *const __m128i = block.as_ptr().cast();
+
     macro_rules! unrolled_iterations {
         ($($i:literal),*) => {$(
-            let d0 = unsafe { _mm_loadu_si128(data.add($i).cast()) };
-            let d1 = unsafe { _mm_loadu_si128(data.add(8 + $i).cast()) };
+            let d0 = unsafe { _mm_loadu_si128(block_ptr.add($i)) };
+            let d1 = unsafe { _mm_loadu_si128(block_ptr.add(8 + $i)) };
             x[$i] = _mm256_insertf128_si256(x[$i], d1, 1);
             x[$i] = _mm256_insertf128_si256(x[$i], d0, 0);
 
             x[$i] = _mm256_shuffle_epi8(x[$i], MASK);
 
-            let t = unsafe { _mm_loadu_si128(K64.as_ptr().add($i * 2).cast()) };
+            let t = rk(2 * $i);
             let y = _mm256_add_epi64(x[$i], _mm256_set_m128i(t, t));
 
             ms[$i] = _mm256_extracti128_si256(y, 0);
@@ -118,8 +120,7 @@ fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &mut Msg
 
     for _ in 0..4 {
         for j in 0..8 {
-            let k64 = unsafe { _mm_loadu_si128(K64.as_ptr().add(k64_idx).cast()) };
-            let y = sha512_update_x_avx(x, k64);
+            let y = sha512_update_x_avx(x, rk(k64_idx));
 
             {
                 let ms = cast_ms(ms);
@@ -145,7 +146,7 @@ fn rounds_0_63_avx2(
 
     for i in 1..5 {
         for j in 0..8 {
-            let t = unsafe { _mm_loadu_si128(K64.as_ptr().add(k64x4_idx).cast()) };
+            let t = rk(k64x4_idx);
             let y = sha512_update_x_avx2(x, _mm256_set_m128i(t, t));
 
             {
@@ -337,6 +338,12 @@ fn cast_ms(ms: &MsgSchedule) -> &[u64; SHA512_BLOCK_WORDS_NUM] {
 #[inline(always)]
 fn cast_rs(rs: &RoundStates) -> &[u64; SHA512_ROUNDS_NUM] {
     unsafe { &*(rs.as_ptr().cast()) }
+}
+
+#[inline(always)]
+fn rk(i: usize) -> __m128i {
+    let chunk = &crate::consts::K64[i..][..2];
+    unsafe { _mm_loadu_si128(chunk.as_ptr().cast()) }
 }
 
 type State = [u64; SHA512_HASH_WORDS_NUM];
