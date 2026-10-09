@@ -1,7 +1,5 @@
 //! SHA-256 `x86`/`x86_64` backend
 
-#![allow(clippy::many_single_char_names, unsafe_op_in_unsafe_fn)]
-
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 compile_error!("x86-sha backend can be used only on x86 and x86_64 target arches");
 
@@ -10,8 +8,9 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
+#[inline]
 #[target_feature(enable = "sha")]
-unsafe fn rounds4(r: usize, abef: &mut __m128i, cdgh: &mut __m128i, rest: __m128i) {
+fn rounds4(r: usize, abef: &mut __m128i, cdgh: &mut __m128i, rest: __m128i) {
     use crate::consts::K32;
     let rk = _mm_set_epi32(
         K32[4 * r + 3] as i32,
@@ -25,13 +24,9 @@ unsafe fn rounds4(r: usize, abef: &mut __m128i, cdgh: &mut __m128i, rest: __m128
     *abef = _mm_sha256rnds2_epu32(*abef, *cdgh, t2);
 }
 
+#[inline]
 #[target_feature(enable = "sha,ssse3")]
-unsafe fn schedule_rounds16(
-    r: usize,
-    abef: &mut __m128i,
-    cdgh: &mut __m128i,
-    w: &mut [__m128i; 4],
-) {
+fn schedule_rounds16(r: usize, abef: &mut __m128i, cdgh: &mut __m128i, w: &mut [__m128i; 4]) {
     for i in 0..4 {
         let w0 = w[i];
         let w1 = w[(i + 1) % 4];
@@ -48,21 +43,37 @@ unsafe fn schedule_rounds16(
     }
 }
 
+#[inline]
 #[target_feature(enable = "ssse3")]
-unsafe fn read_block(block: &[u8; 64]) -> [__m128i; 4] {
+fn load_block(block: &[u8; 64]) -> [__m128i; 4] {
     let block_ptr: *const __m128i = block.as_ptr().cast();
     let mask = _mm_set_epi64x(0x0C0D_0E0F_0809_0A0B, 0x0405_0607_0001_0203);
     core::array::from_fn(|i| {
-        let w = _mm_loadu_si128(block_ptr.add(i));
+        let w = unsafe { _mm_loadu_si128(block_ptr.add(i)) };
         _mm_shuffle_epi8(w, mask)
     })
 }
 
-#[target_feature(enable = "sha,sse4.1")]
-pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+#[inline]
+#[target_feature(enable = "sse2")]
+fn load_state(state: &[u32; 8]) -> [__m128i; 2] {
+    let state_ptr: *const __m128i = state.as_ptr().cast();
+    core::array::from_fn(|i| unsafe { _mm_loadu_si128(state_ptr.add(i)) })
+}
+
+#[inline]
+#[target_feature(enable = "sse2")]
+fn store_state(state: &mut [u32; 8], [dcba, hgef]: [__m128i; 2]) {
     let state_ptr: *mut __m128i = state.as_mut_ptr().cast();
-    let dcba = _mm_loadu_si128(state_ptr.add(0));
-    let hgfe = _mm_loadu_si128(state_ptr.add(1));
+    unsafe {
+        _mm_storeu_si128(state_ptr.add(0), dcba);
+        _mm_storeu_si128(state_ptr.add(1), hgef);
+    }
+}
+
+#[target_feature(enable = "sha,sse4.1")]
+pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+    let [dcba, hgfe] = load_state(state);
 
     let cdab = _mm_shuffle_epi32(dcba, 0xB1);
     let efgh = _mm_shuffle_epi32(hgfe, 0x1B);
@@ -73,7 +84,7 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         let abef_save = abef;
         let cdgh_save = cdgh;
 
-        let mut w = read_block(block);
+        let mut w = load_block(block);
 
         rounds4(0, &mut abef, &mut cdgh, w[0]);
         rounds4(1, &mut abef, &mut cdgh, w[1]);
@@ -93,6 +104,5 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     let dcba = _mm_blend_epi16(feba, dchg, 0xF0);
     let hgef = _mm_alignr_epi8(dchg, feba, 8);
 
-    _mm_storeu_si128(state_ptr.add(0), dcba);
-    _mm_storeu_si128(state_ptr.add(1), hgef);
+    store_state(state, [dcba, hgef]);
 }

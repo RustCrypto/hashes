@@ -18,11 +18,13 @@ cfg_if::cfg_if! {
 
 #[target_feature(enable = "zknh")]
 pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks {
-        let block: [u32; 16] = core::array::from_fn(|i| {
-            let chunk = block[4 * i..][..4].try_into().unwrap();
-            u32::from_be_bytes(chunk)
-        });
+    for block in blocks.iter().map(load_block) {
         compress_block(state, block);
     }
+}
+
+fn load_block(block: &[u8; 64]) -> [u32; 16] {
+    let (chunks, tail) = block.as_chunks();
+    assert!(tail.is_empty());
+    core::array::from_fn(|i| u32::from_be_bytes(chunks[i]))
 }

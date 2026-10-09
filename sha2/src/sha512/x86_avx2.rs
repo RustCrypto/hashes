@@ -1,11 +1,7 @@
 //! SHA-512 `x86`/`x86_64` backend
 
-#![allow(clippy::many_single_char_names, unsafe_op_in_unsafe_fn)]
-
 #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
 compile_error!("x86-avx2 backend can be used only on x86 and x86_64 target arches");
-
-use core::mem::size_of;
 
 #[cfg(target_arch = "x86")]
 use core::arch::x86::*;
@@ -15,20 +11,21 @@ use core::arch::x86_64::*;
 use crate::consts::K64;
 
 #[target_feature(enable = "avx2")]
-pub(super) unsafe fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    let mut start_block = 0;
-
-    if blocks.len() & 0b1 != 0 {
-        sha512_compress_x86_64_avx(state, &blocks[0]);
-        start_block += 1;
+pub(super) fn compress(state: &mut [u64; 8], mut blocks: &[[u8; 128]]) {
+    if !blocks.len().is_multiple_of(2) {
+        let Some((block, tail)) = blocks.split_first() else {
+            return;
+        };
+        blocks = tail;
+        sha512_compress_x86_64_avx(state, block);
     }
 
     let mut ms: MsgSchedule = [_mm_setzero_si128(); 8];
     let mut t2: RoundStates = [_mm_setzero_si128(); 40];
     let mut x = [_mm256_setzero_si256(); 8];
 
-    for i in (start_block..blocks.len()).step_by(2) {
-        load_data_avx2(&mut x, &mut ms, &mut t2, blocks.as_ptr().add(i).cast());
+    for chunk in blocks.chunks_exact(2) {
+        load_data_avx2(&mut x, &mut ms, &mut t2, chunk.as_ptr().cast());
 
         // First block
         let mut current_state = *state;
@@ -43,8 +40,9 @@ pub(super) unsafe fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     }
 }
 
-#[inline(always)]
-unsafe fn sha512_compress_x86_64_avx(state: &mut [u64; 8], block: &[u8; 128]) {
+#[inline]
+#[target_feature(enable = "avx")]
+fn sha512_compress_x86_64_avx(state: &mut [u64; 8], block: &[u8; 128]) {
     let mut ms = [_mm_setzero_si128(); 8];
     let mut x = [_mm_setzero_si128(); 8];
 
@@ -56,20 +54,19 @@ unsafe fn sha512_compress_x86_64_avx(state: &mut [u64; 8], block: &[u8; 128]) {
     accumulate_state(state, &current_state);
 }
 
-#[inline(always)]
-unsafe fn load_data_avx(x: &mut [__m128i; 8], ms: &mut MsgSchedule, data: *const __m128i) {
+#[inline]
+#[target_feature(enable = "avx")]
+fn load_data_avx(x: &mut [__m128i; 8], ms: &mut MsgSchedule, data: *const __m128i) {
     #[allow(non_snake_case)]
     let MASK = _mm_setr_epi32(0x04050607, 0x00010203, 0x0c0d0e0f, 0x08090a0b);
 
     macro_rules! unrolled_iterations {
         ($($i:literal),*) => {$(
-            x[$i] = _mm_loadu_si128(data.add($i).cast());
+            x[$i] = unsafe { _mm_loadu_si128(data.add($i).cast()) };
             x[$i] = _mm_shuffle_epi8(x[$i], MASK);
 
-            let y = _mm_add_epi64(
-                x[$i],
-                _mm_loadu_si128(K64.as_ptr().add(2 * $i).cast()),
-            );
+            let k = unsafe { _mm_loadu_si128(K64.as_ptr().add(2 * $i).cast()) };
+            let y = _mm_add_epi64(x[$i], k);
 
             ms[$i] = y;
         )*};
@@ -78,8 +75,9 @@ unsafe fn load_data_avx(x: &mut [__m128i; 8], ms: &mut MsgSchedule, data: *const
     unrolled_iterations!(0, 1, 2, 3, 4, 5, 6, 7);
 }
 
-#[inline(always)]
-unsafe fn load_data_avx2(
+#[inline]
+#[target_feature(enable = "avx2")]
+fn load_data_avx2(
     x: &mut [__m256i; 8],
     ms: &mut MsgSchedule,
     t2: &mut RoundStates,
@@ -95,12 +93,14 @@ unsafe fn load_data_avx2(
 
     macro_rules! unrolled_iterations {
         ($($i:literal),*) => {$(
-            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add(8 + $i).cast()), 1);
-            x[$i] = _mm256_insertf128_si256(x[$i], _mm_loadu_si128(data.add($i).cast()), 0);
+            let d0 = unsafe { _mm_loadu_si128(data.add($i).cast()) };
+            let d1 = unsafe { _mm_loadu_si128(data.add(8 + $i).cast()) };
+            x[$i] = _mm256_insertf128_si256(x[$i], d1, 1);
+            x[$i] = _mm256_insertf128_si256(x[$i], d0, 0);
 
             x[$i] = _mm256_shuffle_epi8(x[$i], MASK);
 
-            let t = _mm_loadu_si128(K64.as_ptr().add($i * 2).cast());
+            let t = unsafe { _mm_loadu_si128(K64.as_ptr().add($i * 2).cast()) };
             let y = _mm256_add_epi64(x[$i], _mm256_set_m128i(t, t));
 
             ms[$i] = _mm256_extracti128_si256(y, 0);
@@ -111,13 +111,14 @@ unsafe fn load_data_avx2(
     unrolled_iterations!(0, 1, 2, 3, 4, 5, 6, 7);
 }
 
-#[inline(always)]
-unsafe fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &mut MsgSchedule) {
+#[inline]
+#[target_feature(enable = "avx")]
+fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &mut MsgSchedule) {
     let mut k64_idx: usize = SHA512_BLOCK_WORDS_NUM;
 
     for _ in 0..4 {
         for j in 0..8 {
-            let k64 = _mm_loadu_si128(K64.as_ptr().add(k64_idx).cast());
+            let k64 = unsafe { _mm_loadu_si128(K64.as_ptr().add(k64_idx).cast()) };
             let y = sha512_update_x_avx(x, k64);
 
             {
@@ -132,8 +133,9 @@ unsafe fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &
     }
 }
 
-#[inline(always)]
-unsafe fn rounds_0_63_avx2(
+#[inline]
+#[target_feature(enable = "avx2")]
+fn rounds_0_63_avx2(
     current_state: &mut State,
     x: &mut [__m256i; 8],
     ms: &mut MsgSchedule,
@@ -143,7 +145,7 @@ unsafe fn rounds_0_63_avx2(
 
     for i in 1..5 {
         for j in 0..8 {
-            let t = _mm_loadu_si128(K64.as_ptr().add(k64x4_idx).cast());
+            let t = unsafe { _mm_loadu_si128(K64.as_ptr().add(k64x4_idx).cast()) };
             let y = sha512_update_x_avx2(x, _mm256_set_m128i(t, t));
 
             {
@@ -233,14 +235,16 @@ fn accumulate_state(dst: &mut State, src: &State) {
 }
 
 macro_rules! fn_sha512_update_x {
-    ($name:ident, $ty:ident, {
+    ($name:ident, $tf:literal, $ty:ident, {
         ADD64 = $ADD64:ident,
         ALIGNR8 = $ALIGNR8:ident,
         SRL64 = $SRL64:ident,
         SLL64 = $SLL64:ident,
         XOR = $XOR:ident,
     }) => {
-        unsafe fn $name(x: &mut [$ty; 8], k64: $ty) -> $ty {
+        #[inline]
+        #[target_feature(enable = $tf)]
+        fn $name(x: &mut [$ty; 8], k64: $ty) -> $ty {
             // q[2:1]
             let mut t0 = $ALIGNR8(x[1], x[0], 8);
             // q[10:9]
@@ -309,7 +313,7 @@ macro_rules! fn_sha512_update_x {
     };
 }
 
-fn_sha512_update_x!(sha512_update_x_avx, __m128i, {
+fn_sha512_update_x!(sha512_update_x_avx, "avx", __m128i, {
         ADD64 = _mm_add_epi64,
         ALIGNR8 = _mm_alignr_epi8,
         SRL64 = _mm_srli_epi64,
@@ -317,7 +321,7 @@ fn_sha512_update_x!(sha512_update_x_avx, __m128i, {
         XOR = _mm_xor_si128,
 });
 
-fn_sha512_update_x!(sha512_update_x_avx2, __m256i, {
+fn_sha512_update_x!(sha512_update_x_avx2, "avx2", __m256i, {
         ADD64 = _mm256_add_epi64,
         ALIGNR8 = _mm256_alignr_epi8,
         SRL64 = _mm256_srli_epi64,

@@ -26,7 +26,7 @@ jobs:
   set-msrv:
     uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
     with:
-      msrv: 1.85.0
+      msrv: 1.87.0
 
   # Builds for no_std platforms
   build:

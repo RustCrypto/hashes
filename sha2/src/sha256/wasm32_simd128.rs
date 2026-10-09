@@ -1,15 +1,11 @@
-#![allow(clippy::many_single_char_names, unsafe_op_in_unsafe_fn)]
-
 #[cfg(not(target_arch = "wasm32"))]
 compile_error!("wasm32-simd128 backend can be used only on wasm32 target arches");
 #[cfg(not(target_feature = "simd128"))]
 compile_error!("wasm32-simd128 backend requires simd128 target feature");
 
 use core::arch::wasm32::*;
-use core::mem::size_of;
 
-use crate::consts::K32;
-
+#[target_feature(enable = "simd128")]
 pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     assert_eq!(SHA256_HASH_WORDS_NUM, 8);
     assert_eq!(SHA256_BLOCK_WORDS_NUM, 16);
@@ -17,27 +13,23 @@ pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     let mut x = [u64x2(0, 0); 4];
 
     for block in blocks {
-        unsafe {
-            let mut current_state = *state;
-            load_data(&mut x, &mut ms, block.as_ptr().cast());
-            rounds_0_47(&mut current_state, &mut x, &mut ms);
-            rounds_48_63(&mut current_state, &ms);
-            accumulate_state(state, &current_state);
-        }
+        let mut current_state = *state;
+        load_data(&mut x, &mut ms, block);
+        rounds_0_47(&mut current_state, &mut x, &mut ms);
+        rounds_48_63(&mut current_state, &ms);
+        accumulate_state(state, &current_state);
     }
 }
 
-#[inline(always)]
-unsafe fn load_data(x: &mut [v128; 4], ms: &mut MsgSchedule, data: *const v128) {
+#[inline]
+#[target_feature(enable = "simd128")]
+fn load_data(x: &mut [v128; 4], ms: &mut MsgSchedule, block: &[u8; 64]) {
     macro_rules! unrolled_iterations {
         ($($i:literal),*) => {$(
-            x[$i] = v128_load(data.add($i).cast());
+            x[$i] = unsafe { v128_load(block.as_ptr().add(16 * $i).cast()) };
             x[$i] = i8x16_shuffle::<3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12>(x[$i], x[$i]);
 
-            let y = i32x4_add(
-                x[$i],
-                v128_load(K32.as_ptr().add(4 * $i).cast()),
-            );
+            let y = i32x4_add(x[$i], rk(4 * $i));
 
             ms[$i] = y;
         )*};
@@ -46,14 +38,14 @@ unsafe fn load_data(x: &mut [v128; 4], ms: &mut MsgSchedule, data: *const v128) 
     unrolled_iterations!(0, 1, 2, 3);
 }
 
-#[inline(always)]
-unsafe fn rounds_0_47(current_state: &mut State, x: &mut [v128; 4], ms: &mut MsgSchedule) {
+#[inline]
+#[target_feature(enable = "simd128")]
+fn rounds_0_47(current_state: &mut State, x: &mut [v128; 4], ms: &mut MsgSchedule) {
     let mut k32_idx: usize = SHA256_BLOCK_WORDS_NUM;
 
     for _ in 0..3 {
         for j in 0..4 {
-            let k32 = v128_load(K32.as_ptr().add(k32_idx).cast());
-            let y = sha256_update_x(x, k32);
+            let y = sha256_update_x(x, rk(k32_idx));
 
             {
                 let ms = ms[j];
@@ -137,8 +129,9 @@ fn accumulate_state(dst: &mut State, src: &State) {
     }
 }
 
-#[inline(always)]
-unsafe fn sha256_update_x(x: &mut [v128; 4], k32: v128) -> v128 {
+#[inline]
+#[target_feature(enable = "simd128")]
+fn sha256_update_x(x: &mut [v128; 4], k32: v128) -> v128 {
     const SIGMA0_0: u32 = 7;
     const SIGMA0_1: u32 = 18;
     const SIGMA0_2: u32 = 3;
@@ -185,6 +178,12 @@ unsafe fn sha256_update_x(x: &mut [v128; 4], k32: v128) -> v128 {
     x[3] = tmp;
 
     u32x4_add(x[3], k32)
+}
+
+#[inline(always)]
+fn rk(i: usize) -> v128 {
+    let chunk = &crate::consts::K32[i..][..4];
+    unsafe { v128_load(chunk.as_ptr().cast()) }
 }
 
 type State = [u32; SHA256_HASH_WORDS_NUM];

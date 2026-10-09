@@ -1,17 +1,15 @@
 //! SHA-256 `aarch64` backend.
 //!
 //! Implementation adapted from mbedtls.
-#![allow(unsafe_op_in_unsafe_fn)]
 use core::arch::aarch64::*;
 
 #[cfg(not(target_arch = "aarch64"))]
-compile_error!("aarch64-sha2 backend can be used only aarch64 target arches");
+compile_error!("aarch64-sha2 backend can be used only on aarch64 target arches");
 
 #[target_feature(enable = "sha2")]
-pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // Load state into vectors.
-    let mut abcd = vld1q_u32(state[0..4].as_ptr());
-    let mut efgh = vld1q_u32(state[4..8].as_ptr());
+    let [mut abcd, mut efgh] = load_state(state);
 
     // Iterate through the message blocks.
     for block in blocks {
@@ -20,10 +18,7 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         let efgh_orig = efgh;
 
         // Load the message block into vectors, assuming little endianness.
-        let mut s0 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(block[0..16].as_ptr())));
-        let mut s1 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(block[16..32].as_ptr())));
-        let mut s2 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(block[32..48].as_ptr())));
-        let mut s3 = vreinterpretq_u32_u8(vrev32q_u8(vld1q_u8(block[48..64].as_ptr())));
+        let [mut s0, mut s1, mut s2, mut s3] = load_block(block);
 
         // Rounds 0 to 3
         let mut tmp = vaddq_u32(s0, rk(0));
@@ -85,13 +80,40 @@ pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     }
 
     // Store vectors into state.
-    vst1q_u32(state[0..4].as_mut_ptr(), abcd);
-    vst1q_u32(state[4..8].as_mut_ptr(), efgh);
+    store_state(state, [abcd, efgh]);
 }
 
+#[inline]
 #[target_feature(enable = "neon")]
-unsafe fn rk(i: usize) -> uint32x4_t {
-    use crate::consts::K32;
-    assert!(i + 4 <= K32.len());
-    vld1q_u32(K32.as_ptr().add(i))
+fn rk(i: usize) -> uint32x4_t {
+    let chunk = &crate::consts::K32[i..][..4];
+    unsafe { vld1q_u32(chunk.as_ptr()) }
+}
+
+#[inline]
+#[target_feature(enable = "neon")]
+fn load_block(block: &[u8; 64]) -> [uint32x4_t; 4] {
+    core::array::from_fn(|i| {
+        let chunk = &block[16 * i..][..16];
+        let c = unsafe { vld1q_u8(chunk.as_ptr()) };
+        vreinterpretq_u32_u8(vrev32q_u8(c))
+    })
+}
+
+#[inline]
+#[target_feature(enable = "neon")]
+fn load_state(state: &[u32; 8]) -> [uint32x4_t; 2] {
+    core::array::from_fn(|i| {
+        let chunk = &state[4 * i..][..4];
+        unsafe { vld1q_u32(chunk.as_ptr()) }
+    })
+}
+
+#[inline]
+#[target_feature(enable = "neon")]
+fn store_state(state_dst: &mut [u32; 8], [abcd, efgh]: [uint32x4_t; 2]) {
+    unsafe {
+        vst1q_u32(state_dst[0..4].as_mut_ptr(), abcd);
+        vst1q_u32(state_dst[4..8].as_mut_ptr(), efgh);
+    }
 }
