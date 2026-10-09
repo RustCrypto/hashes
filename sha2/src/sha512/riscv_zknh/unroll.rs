@@ -1,6 +1,7 @@
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
 use crate::consts::K64;
 
+#[inline]
 #[target_feature(enable = "zknh")]
 pub(super) fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
     let s = &mut state.clone();
@@ -49,6 +50,7 @@ pub(super) fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
     }
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn round_schedule<const R: usize>(state: &mut [u64; 8], block: &mut [u64; 16], k: &[u64]) {
     round::<R>(state, block, k);
@@ -59,6 +61,7 @@ fn round_schedule<const R: usize>(state: &mut [u64; 8], block: &mut [u64; 16], k
         .wrapping_add(sha512sig0(block[(R + 1) % 16]));
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn round<const R: usize>(state: &mut [u64; 8], block: &[u64; 16], k: &[u64]) {
     let n = K64.len() - R;
@@ -86,6 +89,7 @@ fn maj(x: u64, y: u64, z: u64) -> u64 {
 }
 
 /// This function returns `k[R]`, but prevents compiler from inlining the indexed value
+#[inline(always)]
 fn opaque_load<const R: usize>(k: &[u64]) -> u64 {
     assert!(R < k.len());
     #[cfg(target_arch = "riscv64")]

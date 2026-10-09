@@ -1,6 +1,7 @@
 use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
 use crate::consts::K32;
 
+#[inline]
 #[target_feature(enable = "zknh")]
 pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     let s = &mut state.clone();
@@ -49,6 +50,7 @@ pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     }
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn round_schedule<const R: usize>(state: &mut [u32; 8], block: &mut [u32; 16], k: &[u32]) {
     round::<R>(state, block, k);
@@ -59,6 +61,7 @@ fn round_schedule<const R: usize>(state: &mut [u32; 8], block: &mut [u32; 16], k
         .wrapping_add(sha256sig0(block[(R + 1) % 16]));
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn round<const R: usize>(state: &mut [u32; 8], block: &[u32; 16], k: &[u32]) {
     let n = K32.len() - R;
@@ -86,6 +89,7 @@ fn maj(x: u32, y: u32, z: u32) -> u32 {
 }
 
 /// This function returns `k[R]`, but prevents the compiler from inlining the indexed value
+#[inline(always)]
 fn opaque_load<const R: usize>(k: &[u32]) -> u32 {
     assert!(R < k.len());
     let dst;

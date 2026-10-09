@@ -1,6 +1,7 @@
 use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
 use crate::consts::K32;
 
+#[inline]
 #[target_feature(enable = "zknh")]
 pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     let mut s = *state;
@@ -17,6 +18,7 @@ pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     }
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn schedule(block: &mut [u32; 16], r: usize) {
     block[r % 16] = block[r % 16]
@@ -25,6 +27,7 @@ fn schedule(block: &mut [u32; 16], r: usize) {
         .wrapping_add(sha256sig0(block[(r + 1) % 16]));
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn round(state: &mut [u32; 8], block: &[u32; 16], r: usize) {
     let n = K32.len() - r;
