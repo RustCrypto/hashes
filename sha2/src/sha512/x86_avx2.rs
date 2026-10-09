@@ -9,24 +9,19 @@ use core::arch::x86::*;
 use core::arch::x86_64::*;
 
 #[target_feature(enable = "avx2")]
-pub(super) fn compress(state: &mut [u64; 8], mut blocks: &[[u8; 128]]) {
-    if !blocks.len().is_multiple_of(2) {
-        let Some((block, tail)) = blocks.split_first() else {
-            return;
-        };
-        blocks = tail;
-        sha512_compress_x86_64_avx(state, block);
-    }
-
+pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     let mut ms: MsgSchedule = [_mm_setzero_si128(); 8];
     let mut t2: RoundStates = [_mm_setzero_si128(); 40];
     let mut x = [_mm256_setzero_si256(); 8];
 
-    let (blocks2, tail) = blocks.as_chunks::<2>();
-    assert!(tail.is_empty());
+    let (head, block_chunks) = blocks.as_rchunks::<2>();
 
-    for block2 in blocks2 {
-        load_data_avx2(&mut x, &mut ms, &mut t2, block2);
+    if let [block] = head {
+        sha512_compress_x86_64_avx(state, block);
+    }
+
+    for block_chunk in block_chunks {
+        load_data_avx2(&mut x, &mut ms, &mut t2, block_chunk);
 
         // First block
         let mut current_state = *state;
