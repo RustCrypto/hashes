@@ -1,6 +1,7 @@
 use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
 use crate::consts::K32;
 
+#[inline]
 #[target_feature(enable = "zknh")]
 pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     let s = &mut state.clone();
@@ -49,6 +50,7 @@ pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
     }
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn round_schedule<const R: usize>(state: &mut [u32; 8], block: &mut [u32; 16], k: &[u32]) {
     round::<R>(state, block, k);
@@ -59,18 +61,11 @@ fn round_schedule<const R: usize>(state: &mut [u32; 8], block: &mut [u32; 16], k
         .wrapping_add(sha256sig0(block[(R + 1) % 16]));
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn round<const R: usize>(state: &mut [u32; 8], block: &[u32; 16], k: &[u32]) {
     let n = K32.len() - R;
-    #[allow(clippy::identity_op)]
-    let a = (n + 0) % 8;
-    let b = (n + 1) % 8;
-    let c = (n + 2) % 8;
-    let d = (n + 3) % 8;
-    let e = (n + 4) % 8;
-    let f = (n + 5) % 8;
-    let g = (n + 6) % 8;
-    let h = (n + 7) % 8;
+    let [a, b, c, d, e, f, g, h] = core::array::from_fn(|i| (n + i) % 8);
 
     state[h] = state[h]
         .wrapping_add(sha256sum1(state[e]))
@@ -94,6 +89,7 @@ fn maj(x: u32, y: u32, z: u32) -> u32 {
 }
 
 /// This function returns `k[R]`, but prevents the compiler from inlining the indexed value
+#[inline(always)]
 fn opaque_load<const R: usize>(k: &[u32]) -> u32 {
     assert!(R < k.len());
     let dst;

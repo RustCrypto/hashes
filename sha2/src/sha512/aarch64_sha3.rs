@@ -1,17 +1,13 @@
 // Implementation adapted from mbedtls.
-#![allow(unsafe_op_in_unsafe_fn)]
 use core::arch::aarch64::*;
 
 #[cfg(not(target_arch = "aarch64"))]
-compile_error!("aarch64-sha3 backend can be used only aarch64 target arches");
+compile_error!("aarch64-sha3 backend can be used only on aarch64 target arches");
 
 #[target_feature(enable = "sha3")]
-pub(super) unsafe fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     // Load state into vectors.
-    let mut ab = vld1q_u64(state[0..2].as_ptr());
-    let mut cd = vld1q_u64(state[2..4].as_ptr());
-    let mut ef = vld1q_u64(state[4..6].as_ptr());
-    let mut gh = vld1q_u64(state[6..8].as_ptr());
+    let [mut ab, mut cd, mut ef, mut gh] = load_state(state);
 
     // Iterate through the message blocks.
     for block in blocks {
@@ -22,14 +18,16 @@ pub(super) unsafe fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
         let gh_orig = gh;
 
         // Load the message block into vectors, assuming little endianness.
-        let mut s0 = vreinterpretq_u64_u8(vrev64q_u8(vld1q_u8(block[0..16].as_ptr())));
-        let mut s1 = vreinterpretq_u64_u8(vrev64q_u8(vld1q_u8(block[16..32].as_ptr())));
-        let mut s2 = vreinterpretq_u64_u8(vrev64q_u8(vld1q_u8(block[32..48].as_ptr())));
-        let mut s3 = vreinterpretq_u64_u8(vrev64q_u8(vld1q_u8(block[48..64].as_ptr())));
-        let mut s4 = vreinterpretq_u64_u8(vrev64q_u8(vld1q_u8(block[64..80].as_ptr())));
-        let mut s5 = vreinterpretq_u64_u8(vrev64q_u8(vld1q_u8(block[80..96].as_ptr())));
-        let mut s6 = vreinterpretq_u64_u8(vrev64q_u8(vld1q_u8(block[96..112].as_ptr())));
-        let mut s7 = vreinterpretq_u64_u8(vrev64q_u8(vld1q_u8(block[112..128].as_ptr())));
+        let [
+            mut s0,
+            mut s1,
+            mut s2,
+            mut s3,
+            mut s4,
+            mut s5,
+            mut s6,
+            mut s7,
+        ] = load_block(block);
 
         // Rounds 0 and 1
         let mut initial_sum = vaddq_u64(s0, rk(0));
@@ -161,15 +159,40 @@ pub(super) unsafe fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     }
 
     // Store vectors into state.
-    vst1q_u64(state[0..2].as_mut_ptr(), ab);
-    vst1q_u64(state[2..4].as_mut_ptr(), cd);
-    vst1q_u64(state[4..6].as_mut_ptr(), ef);
-    vst1q_u64(state[6..8].as_mut_ptr(), gh);
+    store_state(state, [ab, cd, ef, gh]);
 }
 
+#[inline]
 #[target_feature(enable = "neon")]
-unsafe fn rk(i: usize) -> uint64x2_t {
-    use crate::consts::K64;
-    assert!(i + 2 <= K64.len());
-    vld1q_u64(K64.as_ptr().add(i))
+fn rk(i: usize) -> uint64x2_t {
+    let chunk = &crate::consts::K64[i..][..2];
+    unsafe { vld1q_u64(chunk.as_ptr()) }
+}
+
+#[inline]
+#[target_feature(enable = "neon")]
+fn load_block(block: &[u8; 128]) -> [uint64x2_t; 8] {
+    core::array::from_fn(|i| {
+        let chunk = &block[16 * i..][..16];
+        let b = unsafe { vld1q_u8(chunk.as_ptr()) };
+        vreinterpretq_u64_u8(vrev64q_u8(b))
+    })
+}
+
+#[inline]
+#[target_feature(enable = "neon")]
+fn load_state(state: &[u64; 8]) -> [uint64x2_t; 4] {
+    core::array::from_fn(|i| {
+        let chunk = &state[2 * i..][..2];
+        unsafe { vld1q_u64(chunk.as_ptr()) }
+    })
+}
+
+#[inline]
+#[target_feature(enable = "neon")]
+fn store_state(state_dst: &mut [u64; 8], state: [uint64x2_t; 4]) {
+    for i in 0..4 {
+        let chunk = &mut state_dst[2 * i..][..2];
+        unsafe { vst1q_u64(chunk.as_mut_ptr(), state[i]) };
+    }
 }

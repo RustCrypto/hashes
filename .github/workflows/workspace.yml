@@ -22,7 +22,7 @@ jobs:
       - uses: RustCrypto/actions/cargo-cache@master
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.85.0
+          toolchain: 1.99.0
           components: clippy
       - run: cargo clippy --all -- -D warnings
 

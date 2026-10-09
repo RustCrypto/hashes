@@ -1,6 +1,7 @@
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
 use crate::consts::K64;
 
+#[inline]
 #[target_feature(enable = "zknh")]
 pub(super) fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
     let mut s = *state;
@@ -17,6 +18,7 @@ pub(super) fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
     }
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn schedule(block: &mut [u64; 16], r: usize) {
     block[r % 16] = block[r % 16]
@@ -25,18 +27,11 @@ fn schedule(block: &mut [u64; 16], r: usize) {
         .wrapping_add(sha512sig0(block[(r + 1) % 16]));
 }
 
+#[inline]
 #[target_feature(enable = "zknh")]
 fn round(state: &mut [u64; 8], block: &[u64; 16], r: usize) {
     let n = K64.len() - r;
-    #[allow(clippy::identity_op)]
-    let a = (n + 0) % 8;
-    let b = (n + 1) % 8;
-    let c = (n + 2) % 8;
-    let d = (n + 3) % 8;
-    let e = (n + 4) % 8;
-    let f = (n + 5) % 8;
-    let g = (n + 6) % 8;
-    let h = (n + 7) % 8;
+    let [a, b, c, d, e, f, g, h] = core::array::from_fn(|i| (n + i) % 8);
 
     state[h] = state[h]
         .wrapping_add(sha512sum1(state[e]))

@@ -66,8 +66,11 @@ impl VariableOutputCore for Sha256VarCore {
         let bit_len = 8 * (buffer.get_pos() as u64 + bs * self.block_len);
         buffer.len64_padding_be(bit_len, |b| compress256(&mut self.state, &[b.0]));
 
-        for (chunk, v) in out.chunks_exact_mut(4).zip(self.state.iter()) {
-            chunk.copy_from_slice(&v.to_be_bytes());
+        let (chunks, tail) = out.as_chunks_mut();
+        assert!(tail.is_empty());
+
+        for (chunk, val) in chunks.iter_mut().zip(self.state.iter()) {
+            *chunk = val.to_be_bytes();
         }
     }
 }
@@ -104,14 +107,18 @@ impl SerializableState for Sha256VarCore {
     type SerializedStateSize = U40;
 
     fn serialize(&self) -> SerializedState<Self> {
-        let mut serialized_state = SerializedState::<Self>::default();
+        let mut res = SerializedState::<Self>::default();
+        let (state_dst, len_dst) = res.split_at_mut(32);
 
-        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(4)) {
-            chunk.copy_from_slice(&val.to_le_bytes());
+        let (chunks, tail) = state_dst.as_chunks_mut();
+        assert!(tail.is_empty());
+        for (val, chunk) in self.state.iter().zip(chunks.iter_mut()) {
+            *chunk = val.to_le_bytes();
         }
 
-        serialized_state[32..].copy_from_slice(&self.block_len.to_le_bytes());
-        serialized_state
+        len_dst.copy_from_slice(&self.block_len.to_le_bytes());
+
+        res
     }
 
     fn deserialize(
@@ -119,10 +126,9 @@ impl SerializableState for Sha256VarCore {
     ) -> Result<Self, DeserializeStateError> {
         let (serialized_state, serialized_block_len) = serialized_state.split::<U32>();
 
-        let mut state = consts::State256::default();
-        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(4)) {
-            *val = u32::from_le_bytes(chunk.try_into().unwrap());
-        }
+        let (chunks, tail) = serialized_state.as_chunks();
+        assert!(tail.is_empty());
+        let state = core::array::from_fn(|i| u32::from_le_bytes(chunks[i]));
 
         let block_len = u64::from_le_bytes(*serialized_block_len.as_ref());
 
@@ -185,8 +191,11 @@ impl VariableOutputCore for Sha512VarCore {
         let bit_len = 8 * (buffer.get_pos() as u128 + bs * self.block_len);
         buffer.len128_padding_be(bit_len, |b| compress512(&mut self.state, &[b.0]));
 
-        for (chunk, v) in out.chunks_exact_mut(8).zip(self.state.iter()) {
-            chunk.copy_from_slice(&v.to_be_bytes());
+        let (chunks, tail) = out.as_chunks_mut();
+        assert!(tail.is_empty());
+
+        for (chunk, val) in chunks.iter_mut().zip(self.state.iter()) {
+            *chunk = val.to_be_bytes();
         }
     }
 }
@@ -222,15 +231,18 @@ impl SerializableState for Sha512VarCore {
     type SerializedStateSize = U80;
 
     fn serialize(&self) -> SerializedState<Self> {
-        let mut serialized_state = SerializedState::<Self>::default();
+        let mut res = SerializedState::<Self>::default();
+        let (state_dst, len_dst) = res.split_at_mut(64);
 
-        for (val, chunk) in self.state.iter().zip(serialized_state.chunks_exact_mut(8)) {
-            chunk.copy_from_slice(&val.to_le_bytes());
+        let (chunks, tail) = state_dst.as_chunks_mut();
+        assert!(tail.is_empty());
+        for (val, chunk) in self.state.iter().zip(chunks.iter_mut()) {
+            *chunk = val.to_le_bytes();
         }
 
-        serialized_state[64..].copy_from_slice(&self.block_len.to_le_bytes());
+        len_dst.copy_from_slice(&self.block_len.to_le_bytes());
 
-        serialized_state
+        res
     }
 
     fn deserialize(
@@ -238,10 +250,9 @@ impl SerializableState for Sha512VarCore {
     ) -> Result<Self, DeserializeStateError> {
         let (serialized_state, serialized_block_len) = serialized_state.split::<U64>();
 
-        let mut state = consts::State512::default();
-        for (val, chunk) in state.iter_mut().zip(serialized_state.chunks_exact(8)) {
-            *val = u64::from_le_bytes(chunk.try_into().unwrap());
-        }
+        let (chunks, tail) = serialized_state.as_chunks();
+        assert!(tail.is_empty());
+        let state = core::array::from_fn(|i| u64::from_le_bytes(chunks[i]));
 
         let block_len = u128::from_le_bytes(*serialized_block_len.as_ref());
 
