@@ -10,6 +10,8 @@ pub(super) fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
         core::array::from_fn(|i| u32::from_be_bytes(chunks[i]))
     };
 
+    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
+
     for i in 0..64 {
         let w = if i < 16 {
             block[i]
