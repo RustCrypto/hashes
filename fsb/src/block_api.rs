@@ -12,7 +12,7 @@ use digest::{
 
 macro_rules! fsb_impl {
     (
-        $state:ident, $block_size:ident, $output_size:ident, $state_size:ident,
+        $full_state:ident, $state:ident, $block_size:ident, $output_size:ident, $state_size:ident,
         $n:expr, $w:expr, $r:expr, $p:expr, $s:expr, $doc:expr,
     ) => {
         use digest::consts::{$block_size, $output_size, $state_size};
@@ -333,6 +333,7 @@ macro_rules! fsb_impl {
 }
 
 fsb_impl!(
+    Fsb160,
     Fsb160Core,
     U60,
     U20,
@@ -345,6 +346,7 @@ fsb_impl!(
     "Core FSB-160 hasher state",
 );
 fsb_impl!(
+    Fsb224,
     Fsb224Core,
     U84,
     U28,
@@ -357,6 +359,7 @@ fsb_impl!(
     "Core FSB-224 hasher state",
 );
 fsb_impl!(
+    Fsb256,
     Fsb256Core,
     U96,
     U32,
@@ -369,6 +372,7 @@ fsb_impl!(
     "Core FSB-256 hasher state",
 );
 fsb_impl!(
+    Fsb384,
     Fsb384Core,
     U115,
     U48,
@@ -381,6 +385,7 @@ fsb_impl!(
     "Core FSB-384 hasher state",
 );
 fsb_impl!(
+    Fsb512,
     Fsb512Core,
     U155,
     U64,
