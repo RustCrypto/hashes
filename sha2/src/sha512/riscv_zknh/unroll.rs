@@ -3,7 +3,13 @@ use crate::consts::K64;
 
 #[inline]
 #[target_feature(enable = "zknh")]
-pub(super) fn compress_block(state: &mut [u64; 8], mut block: [u64; 16]) {
+pub(super) fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
+    let mut block: [u64; 16] = {
+        let (chunks, tail) = block.as_chunks();
+        assert!(tail.is_empty());
+        core::array::from_fn(|i| u64::from_be_bytes(chunks[i]))
+    };
+
     let s = &mut state.clone();
     let b = &mut block;
 

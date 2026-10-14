@@ -3,8 +3,12 @@ use crate::consts::K32;
 
 #[inline]
 #[target_feature(enable = "zknh")]
-pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
-    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
+pub(super) fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
+    let mut block: [u32; 16] = {
+        let (chunks, tail) = block.as_chunks();
+        assert!(tail.is_empty());
+        core::array::from_fn(|i| u32::from_be_bytes(chunks[i]))
+    };
 
     for i in 0..64 {
         let w = if i < 16 {
@@ -20,7 +24,7 @@ pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
             new_w
         };
 
-        let s1 = sha256sum1(e); // e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
+        let s1 = sha256sum1(e);
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
