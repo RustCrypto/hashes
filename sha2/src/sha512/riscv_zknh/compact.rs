@@ -41,18 +41,18 @@ fn schedule(block: &[u8; 128], msg: &mut [u64; ROUNDS]) {
 
 #[inline]
 #[target_feature(enable = "zknh")]
-fn rounds(state: &mut [u32; 8], msg: &[u32; ROUNDS]) {
+fn rounds(state: &mut [u64; 8], msg: &[u64; ROUNDS]) {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
     for i in 0..ROUNDS {
-        let s1 = sha256sum1(e);
+        let s1 = sha512sum1(e);
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
-            .wrapping_add(K32[i])
+            .wrapping_add(K64[i])
             .wrapping_add(msg[i])
             .wrapping_add(h);
-        let s0 = sha256sum0(a);
+        let s0 = sha512sum0(a);
         let maj = (a & b) ^ (a & c) ^ (b & c);
         let t2 = s0.wrapping_add(maj);
 
