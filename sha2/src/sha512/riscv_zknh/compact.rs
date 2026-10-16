@@ -1,39 +1,58 @@
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
 use crate::consts::K64;
 
+const ROUNDS: usize = K64.len();
+
+#[target_feature(enable = "zknh")]
+pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+    // Unforuntately, LLVM is unable to remove `memset` for
+    // `fn message_schedule(block: &[u8; 128]) -> [u64; ROUNDS] { ... }`
+    // See: https://rust.godbolt.org/z/ncxzYrMPh
+    // So to prevent unnecessary `memset` call for each block we reuse the buffer.
+    let mut msg = [0u64; ROUNDS];
+
+    for block in blocks {
+        // Pre-computing the whole message schedule instead of doing it during each round
+        // with a ring buffer results in a smaller binary with less branching
+        // at the cost of using additional stack space
+        schedule(block, &mut msg);
+        rounds(state, &msg);
+    }
+}
+
 #[inline]
 #[target_feature(enable = "zknh")]
-pub(super) fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
-    let mut block: [u64; 16] = {
-        let (chunks, tail) = block.as_chunks();
-        assert!(tail.is_empty());
-        core::array::from_fn(|i| u64::from_be_bytes(chunks[i]))
-    };
+fn schedule(block: &[u8; 128], msg: &mut [u64; ROUNDS]) {
+    let (block_chunks, tail) = block.as_chunks();
+    assert!(tail.is_empty());
 
+    let n = block_chunks.len();
+    for i in 0..n {
+        msg[i] = u64::from_be_bytes(block_chunks[i]);
+    }
+
+    for i in n..ROUNDS {
+        msg[i] = msg[i - 16]
+            .wrapping_add(sha512sig0(msg[i - 15]))
+            .wrapping_add(msg[i - 7])
+            .wrapping_add(sha512sig1(msg[i - 2]));
+    }
+}
+
+#[inline]
+#[target_feature(enable = "zknh")]
+fn rounds(state: &mut [u32; 8], msg: &[u32; ROUNDS]) {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
-    for i in 0..80 {
-        let w = if i < 16 {
-            block[i]
-        } else {
-            let s0 = sha512sig0(block[(i - 15) % 16]);
-            let s1 = sha512sig1(block[(i - 2) % 16]);
-            let new_w = block[i % 16]
-                .wrapping_add(s0)
-                .wrapping_add(block[(i - 7) % 16])
-                .wrapping_add(s1);
-            block[i % 16] = new_w;
-            new_w
-        };
-
-        let s1 = sha512sum1(e);
+    for i in 0..ROUNDS {
+        let s1 = sha256sum1(e);
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
-            .wrapping_add(K64[i])
-            .wrapping_add(w)
+            .wrapping_add(K32[i])
+            .wrapping_add(msg[i])
             .wrapping_add(h);
-        let s0 = sha512sum0(a);
+        let s0 = sha256sum0(a);
         let maj = (a & b) ^ (a & c) ^ (b & c);
         let t2 = s0.wrapping_add(maj);
 

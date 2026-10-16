@@ -4,25 +4,25 @@ use crate::consts::K32;
 const ROUNDS: usize = K32.len();
 
 #[target_feature(enable = "zknh")]
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // Unforuntately, LLVM is unable to remove `memset` for
     // `fn message_schedule(block: &[u8; 64]) -> [u32; ROUNDS] { ... }`
     // See: https://rust.godbolt.org/z/s61sP3GKj
     // So to prevent unnecessary `memset` call for each block we reuse the buffer.
-    let mut msg = [0u32; 64];
+    let mut msg = [0u32; ROUNDS];
 
     for block in blocks {
         // Pre-computing the whole message schedule instead of doing it during each round
         // with a ring buffer results in a smaller binary with less branching
         // at the cost of using additional stack space
-        message_schedule(block, &mut msg);
+        schedule(block, &mut msg);
         rounds(state, &msg);
     }
 }
 
 #[inline]
 #[target_feature(enable = "zknh")]
-fn message_schedule(block: &[u8; 64], msg: &mut [u32; ROUNDS]) {
+fn schedule(block: &[u8; 64], msg: &mut [u32; ROUNDS]) {
     let (block_chunks, tail) = block.as_chunks();
     assert!(tail.is_empty());
 
@@ -33,9 +33,9 @@ fn message_schedule(block: &[u8; 64], msg: &mut [u32; ROUNDS]) {
 
     for i in n..ROUNDS {
         msg[i] = msg[i - 16]
-            .wrapping_add(sha256sig1(msg[i - 2]))
+            .wrapping_add(sha256sig0(msg[i - 15]))
             .wrapping_add(msg[i - 7])
-            .wrapping_add(sha256sig0(msg[i - 15]));
+            .wrapping_add(sha256sig1(msg[i - 2]));
     }
 }
 

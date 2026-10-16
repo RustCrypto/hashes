@@ -1,9 +1,16 @@
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
 use crate::consts::K64;
 
+#[target_feature(enable = "zknh")]
+pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+    for block in blocks {
+        compress_block(state, block);
+    }
+}
+
 #[inline]
 #[target_feature(enable = "zknh")]
-pub(super) fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
+fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
     let mut block: [u64; 16] = {
         let (chunks, tail) = block.as_chunks();
         assert!(tail.is_empty());

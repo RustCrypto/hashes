@@ -2,7 +2,7 @@ use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
 use crate::consts::K32;
 
 #[target_feature(enable = "zknh")]
-pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     for block in blocks {
         compress_block(state, block);
     }

@@ -4,17 +4,10 @@ compile_error!("riscv-zknh backend can be used only on riscv32 and riscv64 targe
 cfg_if::cfg_if! {
     if #[cfg(sha2_backend_riscv_zknh = "compact")] {
         mod compact;
-        use compact::compress_block;
+        pub(super) use compact::compress;
     } else {
         mod unroll;
-        use unroll::compress_block;
-    }
-}
-
-#[target_feature(enable = "zknh")]
-pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    for block in blocks {
-        compress_block(state, block);
+        pub(super) use unroll::compress;
     }
 }
 
