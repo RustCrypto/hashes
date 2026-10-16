@@ -9,16 +9,9 @@ use core::arch::riscv64::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
 cfg_if::cfg_if! {
     if #[cfg(sha2_backend_riscv_zknh = "compact")] {
         mod compact;
-        use compact::compress_block;
+        pub(super) use compact::compress;
     } else {
         mod unroll;
-        use unroll::compress_block;
-    }
-}
-
-#[target_feature(enable = "zknh")]
-pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks {
-        compress_block(state, block);
+        pub(super) use unroll::compress;
     }
 }
