@@ -73,6 +73,13 @@ where
     }
 }
 
+// TODO: impl in the `buffer_ct_variable!` macro (as `buffer_fixed!` already does)
+#[cfg(feature = "zeroize")]
+impl<OutSize> ZeroizeOnDrop for Blake2b<OutSize> where
+    OutSize: ArraySize + IsLessOrEqual<U64, Output = True>
+{
+}
+
 /// BLAKE2b-128 hasher state.
 pub type Blake2b128 = Blake2b<U16>;
 /// BLAKE2b-256 hasher state.
@@ -121,6 +128,13 @@ where
     }
 }
 
+// TODO: impl in the `buffer_ct_variable!` macro (as `buffer_fixed!` already does)
+#[cfg(feature = "zeroize")]
+impl<OutSize> ZeroizeOnDrop for Blake2s<OutSize> where
+    OutSize: ArraySize + IsLessOrEqual<U32, Output = True>
+{
+}
+
 /// BLAKE2s-128 hasher state.
 pub type Blake2s128 = Blake2s<U16>;
 /// BLAKE2s-256 hasher state.
@@ -130,3 +144,21 @@ blake2_mac_impl!(Blake2sMac, Blake2sVarCore, U32, "Blake2s MAC function");
 
 /// BLAKE2s-256 MAC state.
 pub type Blake2sMac256 = Blake2sMac<U32>;
+
+#[cfg(all(test, feature = "zeroize"))]
+mod zeroize_on_drop {
+    use super::*;
+
+    fn assert_zeroize_on_drop<T: ZeroizeOnDrop>() {}
+
+    #[test]
+    fn wrappers_impl_zeroize_on_drop() {
+        assert_zeroize_on_drop::<Blake2b128>();
+        assert_zeroize_on_drop::<Blake2b256>();
+        assert_zeroize_on_drop::<Blake2b512>();
+        assert_zeroize_on_drop::<Blake2s128>();
+        assert_zeroize_on_drop::<Blake2s256>();
+        assert_zeroize_on_drop::<Blake2bMac512>();
+        assert_zeroize_on_drop::<Blake2sMac256>();
+    }
+}
