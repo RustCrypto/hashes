@@ -56,7 +56,7 @@ macro_rules! process_block(
                   $data[$data_index4], $bits4, 0x8f1b_bcdc,
                   (bb[$i1] & bb[$i3]) | (bb[$i2] & !bb[$i3])); )*
 
-        // Parallel rounds: these are the same as the previous five
+        // Parallel rounds: these are the same as the previous four
         // rounds except that the constants have changed, we work
         // with the other buffer, and they are applied in reverse
         // order.
