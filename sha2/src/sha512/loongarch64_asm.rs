@@ -102,7 +102,7 @@ pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
 
             "42:",
 
-            // Do 64 rounds of hashing
+            // Do 80 rounds of hashing
             rounda!( 0, "$t0" , "$t1" , "$t2", "$t3", "$t4", "$t5", "$t6", "$t7"),
             rounda!( 1, "$t7", "$t0" , "$t1" , "$t2", "$t3", "$t4", "$t5", "$t6"),
             rounda!( 2, "$t6", "$t7", "$t0" , "$t1" , "$t2", "$t3", "$t4", "$t5"),
