@@ -16,10 +16,13 @@ use digest::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, OutputSizeUser, TruncSide,
         UpdateCore, VariableOutputCore, VariableOutputCoreCustomized,
     },
-    block_buffer::{Lazy, LazyBuffer},
-    common::{InvalidLength, Key, KeyInit, KeySizeUser},
-    consts::{U4, U16, U32, U64, U128},
-    typenum::{IsLessOrEqual, True, Unsigned},
+    block_buffer::{Lazy, LazyBuffer, SerializedBufferSize},
+    common::{
+        InvalidLength, Key, KeyInit, KeySizeUser,
+        hazmat::{DeserializeStateError, SerializableState, SerializedState},
+    },
+    consts::{U4, U8, U16, U32, U64, U128},
+    typenum::{IsLessOrEqual, Sum, True, Unsigned},
 };
 #[cfg(feature = "reset")]
 use digest::{FixedOutputReset, Reset};
@@ -56,7 +59,6 @@ blake2_impl!(
 digest::buffer_ct_variable!(
     /// BLAKE2b generic over output size.
     pub struct Blake2b<OutSize>(Blake2bVarCore);
-    exclude: SerializableState;
     max_size: U64;
 );
 
@@ -104,7 +106,6 @@ blake2_impl!(
 digest::buffer_ct_variable!(
     /// BLAKE2s generic over output size.
     pub struct Blake2s<OutSize>(Blake2sVarCore);
-    exclude: SerializableState;
     max_size: U32;
 );
 
