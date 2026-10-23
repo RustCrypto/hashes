@@ -206,16 +206,16 @@ jobs:
         with:
           toolchain: nightly
           components: rust-src
-      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
+      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std=core,alloc
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
-      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
+      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std=core,alloc
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft" --cfg sha2_backend_soft="compact"
-      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
+      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std=core,alloc
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" -C target-feature=+zknh,+zbkb
-      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std
+      - run: cargo build --all-features --target riscv32gc-unknown-linux-gnu -Z build-std=core,alloc
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" --cfg sha2_backend_riscv_zknh="compact" -C target-feature=+zknh,+zbkb
 
