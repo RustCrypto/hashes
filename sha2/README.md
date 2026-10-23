@@ -134,7 +134,7 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/sha2/badge.svg
 [docs-link]: https://docs.rs/sha2/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.88+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
 [build-image]: https://github.com/RustCrypto/hashes/actions/workflows/sha2.yml/badge.svg?branch=master
