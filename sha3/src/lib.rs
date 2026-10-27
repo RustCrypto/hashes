@@ -149,7 +149,7 @@ impl_sha3_variants!(
     Sha3_256(U136, U32, SHA3_PAD);
     /// SHA-3-384 hasher.
     Sha3_384(U104, U48, SHA3_PAD);
-    /// SHA-3-256 hasher.
+    /// SHA-3-512 hasher.
     Sha3_512(U72, U64, SHA3_PAD);
 
     /// Keccak-224 hasher.
