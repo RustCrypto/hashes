@@ -15,10 +15,10 @@ cfg_if::cfg_if! {
     } else if #[cfg(sha2_512_backend = "x86-avx2")] {
         mod x86_avx2;
 
-        #[cfg(not(target_feature = "avx2"))]
-        compile_error!("x86-avx2 backend requires `avx2` target feature");
+        #[cfg(not(all(target_feature = "avx2", target_feature = "bmi1", target_feature = "bmi2")))]
+        compile_error!("x86-avx2 backend requires `avx2`, `bmi1` and `bmi2` target features");
 
-        fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+        fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
             // SAFETY: we checked above that the required target features are enabled
             unsafe { x86_avx2::compress(state, blocks) }
         }
@@ -44,7 +44,7 @@ cfg_if::cfg_if! {
         cfg_if::cfg_if! {
             if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
                 mod x86_avx2;
-                cpufeatures::new!(avx2_cpuid, "avx2");
+                cpufeatures::new!(avx2_cpuid, "avx2", "bmi1", "bmi2");
             } else if #[cfg(target_arch = "aarch64")] {
                 mod aarch64_sha3;
                 cpufeatures::new!(sha3_hwcap, "sha3");

@@ -8,7 +8,8 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
-#[target_feature(enable = "avx2")]
+// BMI1 and BMI2 let the scalar rounds use `andn` and `rorx` (a rotation that leaves the flags alone)
+#[target_feature(enable = "avx2,bmi1,bmi2")]
 pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     let mut ms: MsgSchedule = [_mm_setzero_si128(); 8];
     let mut t2: RoundStates = [_mm_setzero_si128(); 40];
