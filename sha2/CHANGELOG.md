@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.11.2 (UNRELEASED)
 ### Fixed
 - SHA-512 `riscv-zknh` backend selection ([#935])
+- Require BMI1 and BMI2 target features for SHA-512 `x86-avx2` backend ([#940])
 
 [#935]: https://github.com/RustCrypto/hashes/pull/935
+[#940]: https://github.com/RustCrypto/hashes/pull/940
 
 ## 0.11.1 (2026-10-12)
 ### Changed
