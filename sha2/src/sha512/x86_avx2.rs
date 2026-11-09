@@ -158,7 +158,8 @@ fn rounds_0_63_avx2(
     }
 }
 
-#[inline(always)]
+#[inline]
+#[target_feature(enable = "bmi1,bmi2")]
 fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
     let ms = cast_ms(ms);
     for i in 64..80 {
