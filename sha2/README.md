@@ -72,7 +72,7 @@ SHA-256 only backends:
 
 SHA-512 only backends:
 - `aarch64-sha3`: uses the AArch64 `sha3` extension.
-- `x86-avx2`: uses the x86 AVX2 extension.
+- `x86-avx2`: uses the x86 AVX2, BMI1 and BMI2 extensions.
 
 By default the following backends are used:
 - `target_arch = "aarch64"`: use `aarch64-sha2` and `aarch64-sha3` when the required

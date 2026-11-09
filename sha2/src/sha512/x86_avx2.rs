@@ -8,7 +8,7 @@ use core::arch::x86::*;
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::*;
 
-#[target_feature(enable = "avx2")]
+#[target_feature(enable = "avx2,bmi1,bmi2")]
 pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     let mut ms: MsgSchedule = [_mm_setzero_si128(); 8];
     let mut t2: RoundStates = [_mm_setzero_si128(); 40];
@@ -37,7 +37,7 @@ pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
 }
 
 #[inline]
-#[target_feature(enable = "avx")]
+#[target_feature(enable = "avx,bmi1,bmi2")]
 fn sha512_compress_x86_64_avx(state: &mut [u64; 8], block: &[u8; 128]) {
     let mut ms = [_mm_setzero_si128(); 8];
     let mut x = [_mm_setzero_si128(); 8];
@@ -109,7 +109,7 @@ fn load_data_avx2(
 }
 
 #[inline]
-#[target_feature(enable = "avx")]
+#[target_feature(enable = "avx,bmi1,bmi2")]
 fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &mut MsgSchedule) {
     let mut k64_idx: usize = SHA512_BLOCK_WORDS_NUM;
 
@@ -130,7 +130,7 @@ fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &mut Msg
 }
 
 #[inline]
-#[target_feature(enable = "avx2")]
+#[target_feature(enable = "avx2,bmi1,bmi2")]
 fn rounds_0_63_avx2(
     current_state: &mut State,
     x: &mut [__m256i; 8],
@@ -166,14 +166,17 @@ fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
     }
 }
 
-#[inline(always)]
+#[inline]
+#[target_feature(enable = "bmi1,bmi2")]
 fn process_second_block(current_state: &mut State, t2: &RoundStates) {
     for t2 in cast_rs(t2).iter() {
         sha_round(current_state, *t2);
     }
 }
 
-#[inline(always)]
+// BMI1 and BMI2 let the scalar rounds use `andn` and `rorx` (a rotation that leaves the flags alone)
+#[inline]
+#[target_feature(enable = "bmi1,bmi2")]
 fn sha_round(s: &mut State, x: u64) {
     macro_rules! big_sigma0 {
         ($a:expr) => {
