@@ -48,6 +48,7 @@ const S_R: [u32; 80] = [
     8, 5, 12, 9, 12, 5, 14, 6, 8, 13, 6, 5, 15, 13, 11, 11,
 ];
 
+/// Round constant of each group of 16 steps, left line.
 const K_L: [u32; 5] = [
     0x0000_0000,
     0x5a82_7999,
@@ -55,6 +56,7 @@ const K_L: [u32; 5] = [
     0x8f1b_bcdc,
     0xa953_fd4e,
 ];
+/// Round constant of each group of 16 steps, right line.
 const K_R: [u32; 5] = [
     0x50a2_8be6,
     0x5c4d_d124,
