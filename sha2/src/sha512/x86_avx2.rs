@@ -111,21 +111,16 @@ fn load_data_avx2(
 #[inline]
 #[target_feature(enable = "avx,bmi1,bmi2")]
 fn rounds_0_63_avx(current_state: &mut State, x: &mut [__m128i; 8], ms: &mut MsgSchedule) {
-    let mut k64_idx: usize = SHA512_BLOCK_WORDS_NUM;
+    for i in (16..80).step_by(2) {
+        let y = sha512_update_x_avx(x, rk(i));
 
-    for _ in 0..4 {
-        for j in 0..8 {
-            let y = sha512_update_x_avx(x, rk(k64_idx));
+        let j = (i / 2) % 8;
 
-            {
-                let ms = cast_ms(ms);
-                sha_round(current_state, ms[2 * j]);
-                sha_round(current_state, ms[2 * j + 1]);
-            }
+        let [m0, m1] = extract_u64(ms[j]);
+        sha_round(current_state, m0);
+        sha_round(current_state, m1);
 
-            ms[j] = y;
-            k64_idx += 2;
-        }
+        ms[j] = y;
     }
 }
 
@@ -137,44 +132,41 @@ fn rounds_0_63_avx2(
     ms: &mut MsgSchedule,
     t2: &mut RoundStates,
 ) {
-    let mut k64x4_idx: usize = SHA512_BLOCK_WORDS_NUM;
+    for i in (16..80).step_by(2) {
+        let t = rk(i);
+        let y = sha512_update_x_avx2(x, _mm256_set_m128i(t, t));
 
-    for i in 1..5 {
-        for j in 0..8 {
-            let t = rk(k64x4_idx);
-            let y = sha512_update_x_avx2(x, _mm256_set_m128i(t, t));
+        let j = (i / 2) % 8;
+        let [m0, m1] = extract_u64(ms[j]);
+        sha_round(current_state, m0);
+        sha_round(current_state, m1);
 
-            {
-                let ms = cast_ms(ms);
-                sha_round(current_state, ms[2 * j]);
-                sha_round(current_state, ms[2 * j + 1]);
-            }
-
-            ms[j] = _mm256_extracti128_si256(y, 0);
-            t2[8 * i + j] = _mm256_extracti128_si256(y, 1);
-
-            k64x4_idx += 2;
-        }
-    }
-}
-
-#[inline(always)]
-fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
-    let ms = cast_ms(ms);
-    for i in 64..80 {
-        sha_round(current_state, ms[i & 0xf]);
+        ms[j] = _mm256_extracti128_si256(y, 0);
+        t2[i / 2] = _mm256_extracti128_si256(y, 1);
     }
 }
 
 #[inline]
-#[target_feature(enable = "bmi1,bmi2")]
-fn process_second_block(current_state: &mut State, t2: &RoundStates) {
-    for t2 in cast_rs(t2).iter() {
-        sha_round(current_state, *t2);
+#[target_feature(enable = "sse4.1,bmi1,bmi2")]
+fn rounds_64_79(current_state: &mut State, ms: &MsgSchedule) {
+    for m in ms {
+        let [m0, m1] = extract_u64(*m);
+        sha_round(current_state, m0);
+        sha_round(current_state, m1);
     }
 }
 
-// BMI1 and BMI2 let the scalar rounds use `andn` and `rorx` (a rotation that leaves the flags alone)
+#[inline]
+#[target_feature(enable = "sse4.1,bmi1,bmi2")]
+fn process_second_block(current_state: &mut State, t2: &RoundStates) {
+    for m in t2 {
+        let [m0, m1] = extract_u64(*m);
+        sha_round(current_state, m0);
+        sha_round(current_state, m1);
+    }
+}
+
+// BMI1/2 let the scalar rounds use `andn` and `rorx` (a rotation that leaves the flags alone)
 #[inline]
 #[target_feature(enable = "bmi1,bmi2")]
 fn sha_round(s: &mut State, x: u64) {
@@ -328,14 +320,13 @@ fn_sha512_update_x!(sha512_update_x_avx2, "avx2", __m256i, {
         XOR = _mm256_xor_si256,
 });
 
-#[inline(always)]
-fn cast_ms(ms: &MsgSchedule) -> &[u64; SHA512_BLOCK_WORDS_NUM] {
-    unsafe { &*(ms.as_ptr().cast()) }
-}
-
-#[inline(always)]
-fn cast_rs(rs: &RoundStates) -> &[u64; SHA512_ROUNDS_NUM] {
-    unsafe { &*(rs.as_ptr().cast()) }
+#[inline]
+#[target_feature(enable = "sse4.1")]
+fn extract_u64(a: __m128i) -> [u64; 2] {
+    [
+        _mm_extract_epi64::<0>(a).cast_unsigned(),
+        _mm_extract_epi64::<1>(a).cast_unsigned(),
+    ]
 }
 
 #[inline(always)]
