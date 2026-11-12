@@ -1,9 +1,22 @@
 use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
 use crate::consts::K32;
 
+#[target_feature(enable = "zknh")]
+pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+    for block in blocks {
+        compress_block(state, block);
+    }
+}
+
 #[inline]
 #[target_feature(enable = "zknh")]
-pub(super) fn compress_block(state: &mut [u32; 8], mut block: [u32; 16]) {
+fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
+    let mut block: [u32; 16] = {
+        let (chunks, tail) = block.as_chunks();
+        assert!(tail.is_empty());
+        core::array::from_fn(|i| u32::from_be_bytes(chunks[i]))
+    };
+
     let s = &mut state.clone();
     let b = &mut block;
 
