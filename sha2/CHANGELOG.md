@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.11.2 (UNRELEASED)
 ### Fixed
 - SHA-512 `riscv-zknh` backend selection ([#935])
+- Global `sha2_backend` priority over per-algorithm `soft` overrides
 
 ### Changed
 - Improved performance of the SHA-512 `x86-avx2` backend ([#940], [#943])

@@ -184,6 +184,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
+          targets: riscv64gc-unknown-linux-gnu
+      - name: Check global RISC-V backend precedence
+        run: |
+          cargo rustc --package sha2 --lib --all-features --target riscv64gc-unknown-linux-gnu -- --emit=asm="$RUNNER_TEMP/sha2-backend.s"
+          grep -Eq '^[[:space:]]+sha256sum0[[:space:]]' "$RUNNER_TEMP/sha2-backend.s"
+          grep -Eq '^[[:space:]]+sha512sum0[[:space:]]' "$RUNNER_TEMP/sha2-backend.s"
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_backend="riscv-zknh" --cfg sha2_256_backend="soft" --cfg sha2_512_backend="soft" -C target-feature=+zknh,+zbkb
       - run: cross test --package sha2 --all-features --target riscv64gc-unknown-linux-gnu
         env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
