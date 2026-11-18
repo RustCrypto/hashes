@@ -1,3 +1,4 @@
+use super::{ch, maj, sig0, sig1, sum0, sum1};
 use crate::consts::K32;
 
 #[rustfmt::skip]
@@ -42,9 +43,17 @@ fn rk(i: usize) -> u32 {
     }
 }
 
+#[inline(always)]
+fn to_u32s(block: &[u8; 64]) -> [u32; 16] {
+    core::array::from_fn(|i| {
+        let chunk = block[4 * i..][..4].try_into().unwrap();
+        u32::from_be_bytes(chunk)
+    })
+}
+
 /// Process a block with the SHA-256 algorithm.
 fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
-    let mut block = super::to_u32s(block);
+    let mut block = to_u32s(block);
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
     repeat64!(i, {
@@ -52,9 +61,9 @@ fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
             block[i]
         } else {
             let w15 = block[(i - 15) % 16];
-            let s0 = (w15.rotate_right(7)) ^ (w15.rotate_right(18)) ^ (w15 >> 3);
+            let s0 = sig0(w15);
             let w2 = block[(i - 2) % 16];
-            let s1 = (w2.rotate_right(17)) ^ (w2.rotate_right(19)) ^ (w2 >> 10);
+            let s1 = sig1(w2);
             block[i % 16] = block[i % 16]
                 .wrapping_add(s0)
                 .wrapping_add(block[(i - 7) % 16])
@@ -62,16 +71,12 @@ fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
             block[i % 16]
         };
 
-        let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
-        let ch = (e & f) ^ ((!e) & g);
-        let t1 = s1
-            .wrapping_add(ch)
+        let t1 = sum1(e)
+            .wrapping_add(ch(e, f, g))
             .wrapping_add(rk(i))
             .wrapping_add(w)
             .wrapping_add(h);
-        let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
-        let maj = (a & b) ^ (a & c) ^ (b & c);
-        let t2 = s0.wrapping_add(maj);
+        let t2 = sum0(a).wrapping_add(maj(a, b, c));
 
         h = g;
         g = f;
@@ -93,7 +98,7 @@ fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
     state[7] = state[7].wrapping_add(h);
 }
 
-pub(in super::super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     for block in blocks {
         compress_block(state, block);
     }
