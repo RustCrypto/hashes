@@ -1,8 +1,21 @@
 cfg_if::cfg_if! {
-    if #[cfg(any(sha2_backend = "soft", sha2_256_backend = "soft"))] {
+    if #[cfg(sha2_backend = "soft")] {
         mod soft;
         use soft::compress;
-    } else if #[cfg(any(sha2_backend = "riscv-zknh", sha2_256_backend = "riscv-zknh"))] {
+    } else if #[cfg(sha2_backend = "riscv-zknh")] {
+        mod riscv_zknh;
+
+        #[cfg(not(target_feature = "zknh"))]
+        compile_error!("riscv-zknh backend requires `zknh` target feature");
+
+        fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+            // SAFETY: we checked above that the required target features are enabled
+            unsafe { riscv_zknh::compress(state, blocks) }
+        }
+    } else if #[cfg(sha2_256_backend = "soft")] {
+        mod soft;
+        use soft::compress;
+    } else if #[cfg(sha2_256_backend = "riscv-zknh")] {
         mod riscv_zknh;
 
         #[cfg(not(target_feature = "zknh"))]
