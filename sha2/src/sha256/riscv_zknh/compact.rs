@@ -1,6 +1,8 @@
 //! RISC-V backend which uses the Zknh extension and does not perform manual loop unrolling.
 //!
-//! Generated assembly: https://rust.godbolt.org/z/Ys95fvMWq
+//! Generated assembly (for `opt-level=s`):
+//! RV32: https://rust.godbolt.org/z/MabKT4ssW
+//! RV64: https://rust.godbolt.org/z/bf7sf1zEe
 use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
 use crate::consts::K32;
 

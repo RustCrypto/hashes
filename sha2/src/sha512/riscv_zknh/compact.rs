@@ -1,6 +1,8 @@
 //! RISC-V backend which uses the Zknh extension and does not perform manual loop unrolling.
 //!
-//! Generated assembly: https://rust.godbolt.org/z/K3cnd1ece
+//! Generated assembly (for `opt-level=s`):
+//! RV32: https://rust.godbolt.org/z/8axxnoYds
+//! RV64: https://rust.godbolt.org/z/T14dovc6s
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
 use crate::consts::K64;
 
