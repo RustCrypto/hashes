@@ -10,7 +10,7 @@
     any(
         sha2_backend = "riscv-zknh",
         sha2_256_backend = "riscv-zknh",
-        sha2_256_backend = "riscv-zknh",
+        sha2_512_backend = "riscv-zknh",
     ),
     feature(riscv_ext_intrinsics)
 )]

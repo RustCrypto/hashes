@@ -72,7 +72,7 @@ SHA-256 only backends:
 
 SHA-512 only backends:
 - `aarch64-sha3`: uses the AArch64 `sha3` extension.
-- `x86-avx2`: uses the x86 AVX2 extension.
+- `x86-avx2`: uses the x86 AVX2, BMI1 and BMI2 extensions.
 
 By default the following backends are used:
 - `target_arch = "aarch64"`: use `aarch64-sha2` and `aarch64-sha3` when the required
@@ -134,7 +134,7 @@ dual licensed as above, without any additional terms or conditions.
 [docs-image]: https://docs.rs/sha2/badge.svg
 [docs-link]: https://docs.rs/sha2/
 [license-image]: https://img.shields.io/badge/license-Apache2.0/MIT-blue.svg
-[rustc-image]: https://img.shields.io/badge/rustc-1.85+-blue.svg
+[rustc-image]: https://img.shields.io/badge/rustc-1.88+-blue.svg
 [chat-image]: https://img.shields.io/badge/zulip-join_chat-blue.svg
 [chat-link]: https://rustcrypto.zulipchat.com/#narrow/stream/260041-hashes
 [build-image]: https://github.com/RustCrypto/hashes/actions/workflows/sha2.yml/badge.svg?branch=master
