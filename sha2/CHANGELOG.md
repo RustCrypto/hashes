@@ -11,8 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Respect precedence of the `sha2_backend` configuration flag over `sha2_256/512_backend` ([#948])
 
 ### Changed
+- Refactored `riscv_zknh` backends ([#929])
 - Improved performance of the SHA-512 `x86-avx2` backend ([#940], [#943])
 
+[#929]: https://github.com/RustCrypto/hashes/pull/929
 [#935]: https://github.com/RustCrypto/hashes/pull/935
 [#940]: https://github.com/RustCrypto/hashes/pull/940
 [#943]: https://github.com/RustCrypto/hashes/pull/943
