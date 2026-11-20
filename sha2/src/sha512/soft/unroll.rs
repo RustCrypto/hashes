@@ -1,94 +1,159 @@
+//! Portable software backend.
+//!
+//! Generated assembly: https://rust.godbolt.org/z/9aP1xEvP4
+use super::{ch, maj, sig0, sig1, sum0, sum1};
 use crate::consts::K64;
 
-#[rustfmt::skip]
-macro_rules! repeat80 {
-    ($i:ident, $b:block) => {
-        let $i = 0; $b; let $i = 1; $b; let $i = 2; $b; let $i = 3; $b;
-        let $i = 4; $b; let $i = 5; $b; let $i = 6; $b; let $i = 7; $b;
-        let $i = 8; $b; let $i = 9; $b; let $i = 10; $b; let $i = 11; $b;
-        let $i = 12; $b; let $i = 13; $b; let $i = 14; $b; let $i = 15; $b;
-        let $i = 16; $b; let $i = 17; $b; let $i = 18; $b; let $i = 19; $b;
-        let $i = 20; $b; let $i = 21; $b; let $i = 22; $b; let $i = 23; $b;
-        let $i = 24; $b; let $i = 25; $b; let $i = 26; $b; let $i = 27; $b;
-        let $i = 28; $b; let $i = 29; $b; let $i = 30; $b; let $i = 31; $b;
-        let $i = 32; $b; let $i = 33; $b; let $i = 34; $b; let $i = 35; $b;
-        let $i = 36; $b; let $i = 37; $b; let $i = 38; $b; let $i = 39; $b;
-        let $i = 40; $b; let $i = 41; $b; let $i = 42; $b; let $i = 43; $b;
-        let $i = 44; $b; let $i = 45; $b; let $i = 46; $b; let $i = 47; $b;
-        let $i = 48; $b; let $i = 49; $b; let $i = 50; $b; let $i = 51; $b;
-        let $i = 52; $b; let $i = 53; $b; let $i = 54; $b; let $i = 55; $b;
-        let $i = 56; $b; let $i = 57; $b; let $i = 58; $b; let $i = 59; $b;
-        let $i = 60; $b; let $i = 61; $b; let $i = 62; $b; let $i = 63; $b;
-        let $i = 64; $b; let $i = 65; $b; let $i = 66; $b; let $i = 67; $b;
-        let $i = 68; $b; let $i = 69; $b; let $i = 70; $b; let $i = 71; $b;
-        let $i = 72; $b; let $i = 73; $b; let $i = 74; $b; let $i = 75; $b;
-        let $i = 76; $b; let $i = 77; $b; let $i = 78; $b; let $i = 79; $b;
-    };
-}
-
-/// Read round constant
-fn rk(i: usize) -> u64 {
-    // `read_volatile` forces the compiler to read round constants from the static
-    // instead of inlining them, which improves codegen and performance
-    unsafe {
-        let p = K64.as_ptr().add(i);
-        core::ptr::read_volatile(p)
-    }
-}
-
-/// Process a block with the SHA-512 algorithm.
-fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
-    let mut block = super::to_u64s(block);
-    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
-
-    repeat80!(i, {
-        let w = if i < 16 {
-            block[i]
-        } else {
-            let w15 = block[(i - 15) % 16];
-            let s0 = (w15.rotate_right(1)) ^ (w15.rotate_right(8)) ^ (w15 >> 7);
-            let w2 = block[(i - 2) % 16];
-            let s1 = (w2.rotate_right(19)) ^ (w2.rotate_right(61)) ^ (w2 >> 6);
-            block[i % 16] = block[i % 16]
-                .wrapping_add(s0)
-                .wrapping_add(block[(i - 7) % 16])
-                .wrapping_add(s1);
-            block[i % 16]
-        };
-
-        let s1 = e.rotate_right(14) ^ e.rotate_right(18) ^ e.rotate_right(41);
-        let ch = (e & f) ^ ((!e) & g);
-        let t1 = s1
-            .wrapping_add(ch)
-            .wrapping_add(rk(i))
-            .wrapping_add(w)
-            .wrapping_add(h);
-        let s0 = a.rotate_right(28) ^ a.rotate_right(34) ^ a.rotate_right(39);
-        let maj = (a & b) ^ (a & c) ^ (b & c);
-        let t2 = s0.wrapping_add(maj);
-
-        h = g;
-        g = f;
-        f = e;
-        e = d.wrapping_add(t1);
-        d = c;
-        c = b;
-        b = a;
-        a = t1.wrapping_add(t2);
-    });
-
-    state[0] = state[0].wrapping_add(a);
-    state[1] = state[1].wrapping_add(b);
-    state[2] = state[2].wrapping_add(c);
-    state[3] = state[3].wrapping_add(d);
-    state[4] = state[4].wrapping_add(e);
-    state[5] = state[5].wrapping_add(f);
-    state[6] = state[6].wrapping_add(g);
-    state[7] = state[7].wrapping_add(h);
-}
-
-pub(in super::super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     for block in blocks {
         compress_block(state, block);
     }
+}
+
+#[inline(always)]
+fn compress_block(state: &mut [u64; 8], block: &[u8; 128]) {
+    let s = &mut state.clone();
+    let msg = &mut [0u64; 16];
+
+    load_round::<0x00>(s, block, msg);
+    load_round::<0x01>(s, block, msg);
+    load_round::<0x02>(s, block, msg);
+    load_round::<0x03>(s, block, msg);
+    load_round::<0x04>(s, block, msg);
+    load_round::<0x05>(s, block, msg);
+    load_round::<0x06>(s, block, msg);
+    load_round::<0x07>(s, block, msg);
+    load_round::<0x08>(s, block, msg);
+    load_round::<0x09>(s, block, msg);
+    load_round::<0x0a>(s, block, msg);
+    load_round::<0x0b>(s, block, msg);
+    load_round::<0x0c>(s, block, msg);
+    load_round::<0x0d>(s, block, msg);
+    load_round::<0x0e>(s, block, msg);
+    load_round::<0x0f>(s, block, msg);
+
+    schedule_round::<0x10>(s, msg);
+    schedule_round::<0x11>(s, msg);
+    schedule_round::<0x12>(s, msg);
+    schedule_round::<0x13>(s, msg);
+    schedule_round::<0x14>(s, msg);
+    schedule_round::<0x15>(s, msg);
+    schedule_round::<0x16>(s, msg);
+    schedule_round::<0x17>(s, msg);
+    schedule_round::<0x18>(s, msg);
+    schedule_round::<0x19>(s, msg);
+    schedule_round::<0x1a>(s, msg);
+    schedule_round::<0x1b>(s, msg);
+    schedule_round::<0x1c>(s, msg);
+    schedule_round::<0x1d>(s, msg);
+    schedule_round::<0x1e>(s, msg);
+    schedule_round::<0x1f>(s, msg);
+
+    schedule_round::<0x20>(s, msg);
+    schedule_round::<0x21>(s, msg);
+    schedule_round::<0x22>(s, msg);
+    schedule_round::<0x23>(s, msg);
+    schedule_round::<0x24>(s, msg);
+    schedule_round::<0x25>(s, msg);
+    schedule_round::<0x26>(s, msg);
+    schedule_round::<0x27>(s, msg);
+    schedule_round::<0x28>(s, msg);
+    schedule_round::<0x29>(s, msg);
+    schedule_round::<0x2a>(s, msg);
+    schedule_round::<0x2b>(s, msg);
+    schedule_round::<0x2c>(s, msg);
+    schedule_round::<0x2d>(s, msg);
+    schedule_round::<0x2e>(s, msg);
+    schedule_round::<0x2f>(s, msg);
+
+    schedule_round::<0x30>(s, msg);
+    schedule_round::<0x31>(s, msg);
+    schedule_round::<0x32>(s, msg);
+    schedule_round::<0x33>(s, msg);
+    schedule_round::<0x34>(s, msg);
+    schedule_round::<0x35>(s, msg);
+    schedule_round::<0x36>(s, msg);
+    schedule_round::<0x37>(s, msg);
+    schedule_round::<0x38>(s, msg);
+    schedule_round::<0x39>(s, msg);
+    schedule_round::<0x3a>(s, msg);
+    schedule_round::<0x3b>(s, msg);
+    schedule_round::<0x3c>(s, msg);
+    schedule_round::<0x3d>(s, msg);
+    schedule_round::<0x3e>(s, msg);
+    schedule_round::<0x3f>(s, msg);
+
+    schedule_round::<0x40>(s, msg);
+    schedule_round::<0x41>(s, msg);
+    schedule_round::<0x42>(s, msg);
+    schedule_round::<0x43>(s, msg);
+    schedule_round::<0x44>(s, msg);
+    schedule_round::<0x45>(s, msg);
+    schedule_round::<0x46>(s, msg);
+    schedule_round::<0x47>(s, msg);
+    schedule_round::<0x48>(s, msg);
+    schedule_round::<0x49>(s, msg);
+    schedule_round::<0x4a>(s, msg);
+    schedule_round::<0x4b>(s, msg);
+    schedule_round::<0x4c>(s, msg);
+    schedule_round::<0x4d>(s, msg);
+    schedule_round::<0x4e>(s, msg);
+    schedule_round::<0x4f>(s, msg);
+
+    state[0] = state[0].wrapping_add(s[0]);
+    state[1] = state[1].wrapping_add(s[1]);
+    state[2] = state[2].wrapping_add(s[2]);
+    state[3] = state[3].wrapping_add(s[3]);
+    state[4] = state[4].wrapping_add(s[4]);
+    state[5] = state[5].wrapping_add(s[5]);
+    state[6] = state[6].wrapping_add(s[6]);
+    state[7] = state[7].wrapping_add(s[7]);
+}
+
+#[inline]
+fn load_round<const R: usize>(state: &mut [u64; 8], block: &[u8; 128], msg: &mut [u64; 16]) {
+    let chunk = block.as_chunks().0[R];
+    let w = u64::from_be_bytes(chunk);
+    msg[R] = w;
+    round::<R>(state, w);
+}
+
+#[inline]
+fn schedule_round<const R: usize>(state: &mut [u64; 8], msg: &mut [u64; 16]) {
+    let w = msg[R % 16]
+        .wrapping_add(sig1(msg[(R + 14) % 16]))
+        .wrapping_add(msg[(R + 9) % 16])
+        .wrapping_add(sig0(msg[(R + 1) % 16]));
+    msg[R % 16] = w;
+    round::<R>(state, w);
+}
+
+#[inline]
+fn round<const R: usize>(state: &mut [u64; 8], w: u64) {
+    let [a, b, c, d, e, f, g, h] = *state;
+
+    let t1 = sum1(e)
+        .wrapping_add(load_rk::<R>())
+        .wrapping_add(ch(e, f, g))
+        .wrapping_add(w)
+        .wrapping_add(h);
+    let t2 = sum0(a).wrapping_add(maj(a, b, c));
+
+    state[7] = g;
+    state[6] = f;
+    state[5] = e;
+    state[4] = d.wrapping_add(t1);
+    state[3] = c;
+    state[2] = b;
+    state[1] = a;
+    state[0] = t1.wrapping_add(t2);
+}
+
+#[inline(always)]
+fn load_rk<const R: usize>() -> u64 {
+    // `read_volatile` forces the compiler to read round constants from the static
+    // instead of unnecessarily inlining values or materializaing them on the stack.
+    // It generally results in a smaller binary and improves performance.
+    const { assert!(R < K64.len()) };
+    unsafe { core::ptr::read_volatile(K64.as_ptr().add(R)) }
 }
