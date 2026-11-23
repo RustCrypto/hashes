@@ -71,6 +71,8 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             rust: stable
     runs-on: ubuntu-latest
+    env:
+      CARGO_BUILD_TARGET: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v7
       - uses: RustCrypto/actions/cargo-cache@master
