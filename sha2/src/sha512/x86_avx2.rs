@@ -323,6 +323,18 @@ fn_sha512_update_x!(sha512_update_x_avx2, "avx2", __m256i, {
 #[inline]
 #[target_feature(enable = "sse4.1")]
 fn extract_u64(a: __m128i) -> [u64; 2] {
+    #[cfg(target_arch = "x86")]
+    {
+        let [lo0, hi0, lo1, hi1] = [
+            _mm_extract_epi32::<0>(a),
+            _mm_extract_epi32::<1>(a),
+            _mm_extract_epi32::<2>(a),
+            _mm_extract_epi32::<3>(a),
+        ]
+        .map(|word| u64::from(word.cast_unsigned()));
+        [lo0 | (hi0 << 32), lo1 | (hi1 << 32)]
+    }
+    #[cfg(target_arch = "x86_64")]
     [
         _mm_extract_epi64::<0>(a).cast_unsigned(),
         _mm_extract_epi64::<1>(a).cast_unsigned(),
