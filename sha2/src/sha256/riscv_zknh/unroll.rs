@@ -1,10 +1,9 @@
 //! RISC-V backend which uses the Zknh extension and fully unrolls round loop.
 //!
 //! Generated assembly:
-//! RV32: https://rust.godbolt.org/z/1ccjaeEYE
-//! RV64: https://rust.godbolt.org/z/Y71ovfh8P
+//! RV32: https://rust.godbolt.org/z/jv9jxqs9n
+//! RV64: https://rust.godbolt.org/z/E6M7b9zWx
 use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
-use crate::consts::K32;
 
 #[target_feature(enable = "zknh")]
 pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
@@ -132,21 +131,16 @@ fn round<const R: usize>(state: &mut [u32; 8], w: u32) {
     let maj = (a & b) ^ (a & c) ^ (b & c);
     let t2 = s0.wrapping_add(maj);
 
-    state[7] = g;
-    state[6] = f;
-    state[5] = e;
-    state[4] = d.wrapping_add(t1);
-    state[3] = c;
-    state[2] = b;
-    state[1] = a;
-    state[0] = t1.wrapping_add(t2);
+    *state = [t1.wrapping_add(t2), a, b, c, d.wrapping_add(t1), e, f, g];
 }
 
 // We intentionally add round constant instead of simply loading it
 // to prevent the compiler from applying unnecessary optimizations
 #[inline(always)]
 fn add_rk<const R: usize>(mut w: u32) -> u32 {
-    const { assert!(R < K32.len()) };
+    use crate::consts::SHA256_RK;
+
+    const { assert!(R < SHA256_RK.len()) };
 
     #[cfg(target_arch = "riscv64")]
     unsafe {
@@ -154,7 +148,7 @@ fn add_rk<const R: usize>(mut w: u32) -> u32 {
             "lwu {rk}, 4*{R}({rk_ptr})",
             "addw {w}, {w}, {rk}",
             R = const R,
-            rk_ptr = in(reg) K32.as_ptr(),
+            rk_ptr = in(reg) SHA256_RK.as_ptr(),
             rk = out(reg) _,
             w = inout(reg) w,
             options(pure, readonly, nostack, preserves_flags),
@@ -167,7 +161,7 @@ fn add_rk<const R: usize>(mut w: u32) -> u32 {
             "lw {rk}, 4*{R}({rk_ptr})",
             "add {w}, {w}, {rk}",
             R = const R,
-            rk_ptr = in(reg) K32.as_ptr(),
+            rk_ptr = in(reg) SHA256_RK.as_ptr(),
             rk = out(reg) _,
             w = inout(reg) w,
             options(pure, readonly, nostack, preserves_flags),

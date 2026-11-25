@@ -1,33 +1,54 @@
-use crate::consts::K64;
+//! Software backend without manual loop unrolling
+//!
+//! Generated assembly: https://rust.godbolt.org/z/8E6ME87bh
+use super::{ch, maj, sig0, sig1, sum0, sum1};
+use crate::consts::{SHA512_RK, SHA512_ROUNDS};
 
-fn compress_u64(state: &mut [u64; 8], block: [u64; 16]) {
-    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
+pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+    // Unforuntately, LLVM is unable to remove `memset` for
+    // `fn message_schedule(block: &[u8; 128]) -> [u64; ROUNDS] { ... }`
+    // See: https://rust.godbolt.org/z/ncxzYrMPh
+    // So to prevent unnecessary `memset` call for each block we reuse the buffer.
+    let mut msg = [0u64; SHA512_ROUNDS];
 
-    let mut w = [0; 80];
-    w[..16].copy_from_slice(&block);
+    for block in blocks {
+        // Pre-computing the whole message schedule instead of doing it during each round
+        // with a ring buffer results in a smaller binary with less branching
+        // at the cost of using additional stack space
+        schedule(block, &mut msg);
+        rounds(state, &msg);
+    }
+}
 
-    for i in 16..80 {
-        let w15 = w[i - 15];
-        let s0 = (w15.rotate_right(1)) ^ (w15.rotate_right(8)) ^ (w15 >> 7);
-        let w2 = w[i - 2];
-        let s1 = (w2.rotate_right(19)) ^ (w2.rotate_right(61)) ^ (w2 >> 6);
-        w[i] = w[i - 16]
-            .wrapping_add(s0)
-            .wrapping_add(w[i - 7])
-            .wrapping_add(s1);
+#[inline]
+fn schedule(block: &[u8; 128], msg: &mut [u64; SHA512_ROUNDS]) {
+    let (block_chunks, tail) = block.as_chunks();
+    assert!(tail.is_empty());
+
+    let n = block_chunks.len();
+    for i in 0..n {
+        msg[i] = u64::from_be_bytes(block_chunks[i]);
     }
 
-    for i in 0..80 {
-        let s1 = e.rotate_right(14) ^ e.rotate_right(18) ^ e.rotate_right(41);
-        let ch = (e & f) ^ ((!e) & g);
-        let t1 = s1
-            .wrapping_add(ch)
-            .wrapping_add(K64[i])
-            .wrapping_add(w[i])
+    for i in n..SHA512_ROUNDS {
+        msg[i] = msg[i - 16]
+            .wrapping_add(sig0(msg[i - 15]))
+            .wrapping_add(msg[i - 7])
+            .wrapping_add(sig1(msg[i - 2]));
+    }
+}
+
+#[inline]
+fn rounds(state: &mut [u64; 8], msg: &[u64; SHA512_ROUNDS]) {
+    let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
+
+    for i in 0..SHA512_ROUNDS {
+        let t1 = sum1(e)
+            .wrapping_add(ch(e, f, g))
+            .wrapping_add(SHA512_RK[i])
+            .wrapping_add(msg[i])
             .wrapping_add(h);
-        let s0 = a.rotate_right(28) ^ a.rotate_right(34) ^ a.rotate_right(39);
-        let maj = (a & b) ^ (a & c) ^ (b & c);
-        let t2 = s0.wrapping_add(maj);
+        let t2 = sum0(a).wrapping_add(maj(a, b, c));
 
         h = g;
         g = f;
@@ -47,10 +68,4 @@ fn compress_u64(state: &mut [u64; 8], block: [u64; 16]) {
     state[5] = state[5].wrapping_add(f);
     state[6] = state[6].wrapping_add(g);
     state[7] = state[7].wrapping_add(h);
-}
-
-pub(in super::super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
-    for block in blocks.iter() {
-        compress_u64(state, super::to_u64s(block));
-    }
 }

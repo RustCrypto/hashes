@@ -4,9 +4,7 @@
 //! RV32: https://rust.godbolt.org/z/8axxnoYds
 //! RV64: https://rust.godbolt.org/z/T14dovc6s
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
-use crate::consts::K64;
-
-const ROUNDS: usize = K64.len();
+use crate::consts::{SHA512_RK, SHA512_ROUNDS};
 
 #[target_feature(enable = "zknh")]
 pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
@@ -14,7 +12,7 @@ pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     // `fn message_schedule(block: &[u8; 128]) -> [u64; ROUNDS] { ... }`
     // See: https://rust.godbolt.org/z/ncxzYrMPh
     // So to prevent unnecessary `memset` call for each block we reuse the buffer.
-    let mut msg = [0u64; ROUNDS];
+    let mut msg = [0u64; SHA512_ROUNDS];
 
     for block in blocks {
         // Pre-computing the whole message schedule instead of doing it during each round
@@ -27,7 +25,7 @@ pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
 
 #[inline]
 #[target_feature(enable = "zknh")]
-fn schedule(block: &[u8; 128], msg: &mut [u64; ROUNDS]) {
+fn schedule(block: &[u8; 128], msg: &mut [u64; SHA512_ROUNDS]) {
     let (block_chunks, tail) = block.as_chunks();
     assert!(tail.is_empty());
 
@@ -36,7 +34,7 @@ fn schedule(block: &[u8; 128], msg: &mut [u64; ROUNDS]) {
         msg[i] = u64::from_be_bytes(block_chunks[i]);
     }
 
-    for i in n..ROUNDS {
+    for i in n..SHA512_ROUNDS {
         msg[i] = msg[i - 16]
             .wrapping_add(sha512sig0(msg[i - 15]))
             .wrapping_add(msg[i - 7])
@@ -46,15 +44,15 @@ fn schedule(block: &[u8; 128], msg: &mut [u64; ROUNDS]) {
 
 #[inline]
 #[target_feature(enable = "zknh")]
-fn rounds(state: &mut [u64; 8], msg: &[u64; ROUNDS]) {
+fn rounds(state: &mut [u64; 8], msg: &[u64; SHA512_ROUNDS]) {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
-    for i in 0..ROUNDS {
+    for i in 0..SHA512_ROUNDS {
         let s1 = sha512sum1(e);
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
-            .wrapping_add(K64[i])
+            .wrapping_add(SHA512_RK[i])
             .wrapping_add(msg[i])
             .wrapping_add(h);
         let s0 = sha512sum0(a);

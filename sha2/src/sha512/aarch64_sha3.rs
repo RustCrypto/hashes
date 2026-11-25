@@ -165,7 +165,7 @@ pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
 #[inline]
 #[target_feature(enable = "neon")]
 fn rk(i: usize) -> uint64x2_t {
-    let chunk = &crate::consts::K64[i..][..2];
+    let chunk = &crate::consts::SHA512_RK[i..][..2];
     unsafe { vld1q_u64(chunk.as_ptr()) }
 }
 

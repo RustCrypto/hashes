@@ -1,34 +1,54 @@
-use crate::consts::K32;
+//! Software backend without manual loop unrolling
+//!
+//! Generated assembly: https://rust.godbolt.org/z/fno5qd6sK
+use super::{ch, maj, sig0, sig1, sum0, sum1};
+use crate::consts::{SHA256_RK, SHA256_ROUNDS};
 
-fn compress_u32(state: &mut [u32; 8], mut block: [u32; 16]) {
+pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+    // Unforuntately, LLVM is unable to remove `memset` for
+    // `fn message_schedule(block: &[u8; 64]) -> [u32; ROUNDS] { ... }`
+    // See: https://rust.godbolt.org/z/s61sP3GKj
+    // So to prevent unnecessary `memset` call for each block we reuse the buffer.
+    let mut msg = [0u32; SHA256_ROUNDS];
+
+    for block in blocks {
+        // Pre-computing the whole message schedule instead of doing it during each round
+        // with a ring buffer results in a smaller binary with less branching
+        // at the cost of using additional stack space
+        schedule(block, &mut msg);
+        rounds(state, &msg);
+    }
+}
+
+#[inline]
+fn schedule(block: &[u8; 64], msg: &mut [u32; SHA256_ROUNDS]) {
+    let (block_chunks, tail) = block.as_chunks();
+    assert!(tail.is_empty());
+
+    let n = block_chunks.len();
+    for i in 0..n {
+        msg[i] = u32::from_be_bytes(block_chunks[i]);
+    }
+
+    for i in n..SHA256_ROUNDS {
+        msg[i] = msg[i - 16]
+            .wrapping_add(sig0(msg[i - 15]))
+            .wrapping_add(msg[i - 7])
+            .wrapping_add(sig1(msg[i - 2]));
+    }
+}
+
+#[inline]
+fn rounds(state: &mut [u32; 8], msg: &[u32; SHA256_ROUNDS]) {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
-    for i in 0..64 {
-        let w = if i < 16 {
-            block[i]
-        } else {
-            let w15 = block[(i - 15) % 16];
-            let s0 = (w15.rotate_right(7)) ^ (w15.rotate_right(18)) ^ (w15 >> 3);
-            let w2 = block[(i - 2) % 16];
-            let s1 = (w2.rotate_right(17)) ^ (w2.rotate_right(19)) ^ (w2 >> 10);
-            let new_w = block[(i - 16) % 16]
-                .wrapping_add(s0)
-                .wrapping_add(block[(i - 7) % 16])
-                .wrapping_add(s1);
-            block[i % 16] = new_w;
-            new_w
-        };
-
-        let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
-        let ch = (e & f) ^ ((!e) & g);
-        let t1 = s1
-            .wrapping_add(ch)
-            .wrapping_add(K32[i])
-            .wrapping_add(w)
+    for i in 0..SHA256_ROUNDS {
+        let t1 = sum1(e)
+            .wrapping_add(ch(e, f, g))
+            .wrapping_add(SHA256_RK[i])
+            .wrapping_add(msg[i])
             .wrapping_add(h);
-        let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
-        let maj = (a & b) ^ (a & c) ^ (b & c);
-        let t2 = s0.wrapping_add(maj);
+        let t2 = sum0(a).wrapping_add(maj(a, b, c));
 
         h = g;
         g = f;
@@ -48,10 +68,4 @@ fn compress_u32(state: &mut [u32; 8], mut block: [u32; 16]) {
     state[5] = state[5].wrapping_add(f);
     state[6] = state[6].wrapping_add(g);
     state[7] = state[7].wrapping_add(h);
-}
-
-pub(in super::super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
-    for block in blocks.iter() {
-        compress_u32(state, super::to_u32s(block));
-    }
 }

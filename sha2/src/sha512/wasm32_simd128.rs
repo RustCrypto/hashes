@@ -6,8 +6,6 @@ compile_error!("wasm32-simd128 backend requires simd128 target feature");
 use core::arch::wasm32::*;
 use core::mem::size_of;
 
-use crate::consts::K64;
-
 #[target_feature(enable = "simd128")]
 pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     let mut ms = [u64x2(0, 0); 8];
@@ -166,7 +164,7 @@ fn sha512_update_x(x: &mut [v128; 8], k64: v128) -> v128 {
 
 #[inline(always)]
 fn rk(i: usize) -> v128 {
-    let chunk = &crate::consts::K64[i..][..2];
+    let chunk = &crate::consts::SHA512_RK[i..][..2];
     unsafe { v128_load(chunk.as_ptr().cast()) }
 }
 

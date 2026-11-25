@@ -4,9 +4,7 @@
 //! RV32: https://rust.godbolt.org/z/MabKT4ssW
 //! RV64: https://rust.godbolt.org/z/bf7sf1zEe
 use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
-use crate::consts::K32;
-
-const ROUNDS: usize = K32.len();
+use crate::consts::{SHA256_RK, SHA256_ROUNDS};
 
 #[target_feature(enable = "zknh")]
 pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
@@ -14,7 +12,7 @@ pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // `fn message_schedule(block: &[u8; 64]) -> [u32; ROUNDS] { ... }`
     // See: https://rust.godbolt.org/z/s61sP3GKj
     // So to prevent unnecessary `memset` call for each block we reuse the buffer.
-    let mut msg = [0u32; ROUNDS];
+    let mut msg = [0u32; SHA256_ROUNDS];
 
     for block in blocks {
         // Pre-computing the whole message schedule instead of doing it during each round
@@ -27,7 +25,7 @@ pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
 
 #[inline]
 #[target_feature(enable = "zknh")]
-fn schedule(block: &[u8; 64], msg: &mut [u32; ROUNDS]) {
+fn schedule(block: &[u8; 64], msg: &mut [u32; SHA256_ROUNDS]) {
     let (block_chunks, tail) = block.as_chunks();
     assert!(tail.is_empty());
 
@@ -36,7 +34,7 @@ fn schedule(block: &[u8; 64], msg: &mut [u32; ROUNDS]) {
         msg[i] = u32::from_be_bytes(block_chunks[i]);
     }
 
-    for i in n..ROUNDS {
+    for i in n..SHA256_ROUNDS {
         msg[i] = msg[i - 16]
             .wrapping_add(sha256sig0(msg[i - 15]))
             .wrapping_add(msg[i - 7])
@@ -46,15 +44,15 @@ fn schedule(block: &[u8; 64], msg: &mut [u32; ROUNDS]) {
 
 #[inline]
 #[target_feature(enable = "zknh")]
-fn rounds(state: &mut [u32; 8], msg: &[u32; ROUNDS]) {
+fn rounds(state: &mut [u32; 8], msg: &[u32; SHA256_ROUNDS]) {
     let [mut a, mut b, mut c, mut d, mut e, mut f, mut g, mut h] = *state;
 
-    for i in 0..ROUNDS {
+    for i in 0..SHA256_ROUNDS {
         let s1 = sha256sum1(e);
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
-            .wrapping_add(K32[i])
+            .wrapping_add(SHA256_RK[i])
             .wrapping_add(msg[i])
             .wrapping_add(h);
         let s0 = sha256sum0(a);

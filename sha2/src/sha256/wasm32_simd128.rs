@@ -182,7 +182,7 @@ fn sha256_update_x(x: &mut [v128; 4], k32: v128) -> v128 {
 
 #[inline(always)]
 fn rk(i: usize) -> v128 {
-    let chunk = &crate::consts::K32[i..][..4];
+    let chunk = &crate::consts::SHA256_RK[i..][..4];
     unsafe { v128_load(chunk.as_ptr().cast()) }
 }
 

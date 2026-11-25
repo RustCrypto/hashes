@@ -223,7 +223,7 @@ pub(super) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
             in("$a0") state,
             inout("$a1") blocks.as_ptr() => _,
             inout("$a2") blocks.len() => _,
-            in("$a3") crate::consts::K64.as_ptr(),
+            in("$a3") crate::consts::SHA512_RK.as_ptr(),
 
             // Clobbers
             out("$a4") _,
