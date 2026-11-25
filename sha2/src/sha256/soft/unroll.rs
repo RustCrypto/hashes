@@ -1,6 +1,6 @@
 //! Portable software backend.
 //!
-//! Generated assembly: https://rust.godbolt.org/z/3zs3Gfar6
+//! Generated assembly: https://rust.godbolt.org/z/GsGc67oYh
 use super::{ch, maj, sig0, sig1, sum0, sum1};
 use crate::consts::K32;
 
@@ -122,14 +122,7 @@ fn round<const R: usize>(state: &mut [u32; 8], w: u32) {
         .wrapping_add(h);
     let t2 = sum0(a).wrapping_add(maj(a, b, c));
 
-    state[7] = g;
-    state[6] = f;
-    state[5] = e;
-    state[4] = d.wrapping_add(t1);
-    state[3] = c;
-    state[2] = b;
-    state[1] = a;
-    state[0] = t1.wrapping_add(t2);
+    *state = [t1.wrapping_add(t2), a, b, c, d.wrapping_add(t1), e, f, g];
 }
 
 #[inline(always)]

@@ -1,8 +1,8 @@
 //! RISC-V backend which uses the Zknh extension and fully unrolls round loop.
 //!
 //! Generated assembly:
-//! RV32: https://rust.godbolt.org/z/8v9x5fo8q
-//! RV64: https://rust.godbolt.org/z/3nffnb15T
+//! RV32: https://rust.godbolt.org/z/cdMbTWanT
+//! RV64: https://rust.godbolt.org/z/q898v4f1K
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
 use crate::consts::K64;
 
@@ -149,14 +149,7 @@ fn round<const R: usize>(state: &mut [u64; 8], w: u64) {
     let maj = (a & b) ^ (a & c) ^ (b & c);
     let t2 = s0.wrapping_add(maj);
 
-    state[7] = g;
-    state[6] = f;
-    state[5] = e;
-    state[4] = d.wrapping_add(t1);
-    state[3] = c;
-    state[2] = b;
-    state[1] = a;
-    state[0] = t1.wrapping_add(t2);
+    *state = [t1.wrapping_add(t2), a, b, c, d.wrapping_add(t1), e, f, g];
 }
 
 // We intentionally add round constant instead of simply loading it
