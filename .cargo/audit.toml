@@ -1,0 +1,5 @@
+[advisories]
+ignore = [
+    # Patched versions require Rust 1.87 which is higher than MSRV for majority of the crates
+    "RUSTSEC-2026-0385",
+]
