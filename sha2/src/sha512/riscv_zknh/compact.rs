@@ -4,7 +4,7 @@
 //! RV32: https://rust.godbolt.org/z/8axxnoYds
 //! RV64: https://rust.godbolt.org/z/T14dovc6s
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
-use crate::consts::{K64, SHA512_ROUNDS};
+use crate::consts::{SHA512_RK, SHA512_ROUNDS};
 
 #[target_feature(enable = "zknh")]
 pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
@@ -52,7 +52,7 @@ fn rounds(state: &mut [u64; 8], msg: &[u64; SHA512_ROUNDS]) {
         let ch = (e & f) ^ ((!e) & g);
         let t1 = s1
             .wrapping_add(ch)
-            .wrapping_add(K64[i])
+            .wrapping_add(SHA512_RK[i])
             .wrapping_add(msg[i])
             .wrapping_add(h);
         let s0 = sha512sum0(a);

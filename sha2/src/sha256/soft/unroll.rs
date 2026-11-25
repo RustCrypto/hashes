@@ -2,7 +2,6 @@
 //!
 //! Generated assembly: https://rust.godbolt.org/z/GsGc67oYh
 use super::{ch, maj, sig0, sig1, sum0, sum1};
-use crate::consts::K32;
 
 pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     for block in blocks {
@@ -127,20 +126,21 @@ fn round<const R: usize>(state: &mut [u32; 8], w: u32) {
 
 #[inline(always)]
 fn load_rk<const R: usize>() -> u32 {
-    const { assert!(R < K32.len()) };
+    use crate::consts::SHA256_RK;
+    const { assert!(R < SHA256_RK.len()) };
 
     // `read_volatile` forces the compiler to read round constants from the static
     // instead of unnecessarily inlining values or materializaing them on the stack.
     // It generally results in a smaller binary and improves performance.
     #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
     unsafe {
-        core::ptr::read_volatile(K32.as_ptr().add(R))
+        core::ptr::read_volatile(SHA256_RK.as_ptr().add(R))
     }
 
     // On x86 targets 32-bit constants can be encoded using immediate argument on the `add`
     // instruction, so it's more efficient to inline them.
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     unsafe {
-        core::ptr::read(K32.as_ptr().add(R))
+        core::ptr::read(SHA256_RK.as_ptr().add(R))
     }
 }

@@ -11,12 +11,12 @@ use core::arch::x86_64::*;
 #[inline]
 #[target_feature(enable = "sha")]
 fn rounds4(r: usize, abef: &mut __m128i, cdgh: &mut __m128i, rest: __m128i) {
-    use crate::consts::K32;
+    use crate::consts::SHA256_RK;
     let rk = _mm_set_epi32(
-        K32[4 * r + 3] as i32,
-        K32[4 * r + 2] as i32,
-        K32[4 * r + 1] as i32,
-        K32[4 * r] as i32,
+        SHA256_RK[4 * r + 3] as i32,
+        SHA256_RK[4 * r + 2] as i32,
+        SHA256_RK[4 * r + 1] as i32,
+        SHA256_RK[4 * r] as i32,
     );
     let t1 = _mm_add_epi32(rest, rk);
     *cdgh = _mm_sha256rnds2_epu32(*cdgh, *abef, t1);

@@ -4,7 +4,6 @@
 //! RV32: https://rust.godbolt.org/z/jv9jxqs9n
 //! RV64: https://rust.godbolt.org/z/E6M7b9zWx
 use super::{sha256sig0, sha256sig1, sha256sum0, sha256sum1};
-use crate::consts::K32;
 
 #[target_feature(enable = "zknh")]
 pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
@@ -139,7 +138,9 @@ fn round<const R: usize>(state: &mut [u32; 8], w: u32) {
 // to prevent the compiler from applying unnecessary optimizations
 #[inline(always)]
 fn add_rk<const R: usize>(mut w: u32) -> u32 {
-    const { assert!(R < K32.len()) };
+    use crate::consts::SHA256_RK;
+
+    const { assert!(R < SHA256_RK.len()) };
 
     #[cfg(target_arch = "riscv64")]
     unsafe {
@@ -147,7 +148,7 @@ fn add_rk<const R: usize>(mut w: u32) -> u32 {
             "lwu {rk}, 4*{R}({rk_ptr})",
             "addw {w}, {w}, {rk}",
             R = const R,
-            rk_ptr = in(reg) K32.as_ptr(),
+            rk_ptr = in(reg) SHA256_RK.as_ptr(),
             rk = out(reg) _,
             w = inout(reg) w,
             options(pure, readonly, nostack, preserves_flags),
@@ -160,7 +161,7 @@ fn add_rk<const R: usize>(mut w: u32) -> u32 {
             "lw {rk}, 4*{R}({rk_ptr})",
             "add {w}, {w}, {rk}",
             R = const R,
-            rk_ptr = in(reg) K32.as_ptr(),
+            rk_ptr = in(reg) SHA256_RK.as_ptr(),
             rk = out(reg) _,
             w = inout(reg) w,
             options(pure, readonly, nostack, preserves_flags),

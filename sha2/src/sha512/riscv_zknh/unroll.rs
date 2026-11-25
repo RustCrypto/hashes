@@ -4,7 +4,6 @@
 //! RV32: https://rust.godbolt.org/z/cdMbTWanT
 //! RV64: https://rust.godbolt.org/z/q898v4f1K
 use super::{sha512sig0, sha512sig1, sha512sum0, sha512sum1};
-use crate::consts::K64;
 
 #[target_feature(enable = "zknh")]
 pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
@@ -156,7 +155,9 @@ fn round<const R: usize>(state: &mut [u64; 8], w: u64) {
 // to prevent the compiler from applying unnecessary optimizations
 #[inline(always)]
 fn add_rk<const R: usize>(mut w: u64) -> u64 {
-    const { assert!(R < K64.len()) };
+    use crate::consts::SHA512_RK;
+
+    const { assert!(R < SHA512_RK.len()) };
 
     #[cfg(target_arch = "riscv64")]
     unsafe {
@@ -164,7 +165,7 @@ fn add_rk<const R: usize>(mut w: u64) -> u64 {
             "ld {rk}, 8*{R}({rk_ptr})",
             "add {w}, {w}, {rk}",
             R = const R,
-            rk_ptr = in(reg) K64.as_ptr(),
+            rk_ptr = in(reg) SHA512_RK.as_ptr(),
             rk = out(reg) _,
             w = inout(reg) w,
             options(pure, readonly, nostack, preserves_flags),
@@ -185,7 +186,7 @@ fn add_rk<const R: usize>(mut w: u64) -> u64 {
             "add {w_hi}, {w_hi}, {rk_hi}",
             "add {w_hi}, {w_hi}, {rk_lo}",
             R = const R,
-            rk_ptr = in(reg) K64.as_ptr(),
+            rk_ptr = in(reg) SHA512_RK.as_ptr(),
             rk_lo = out(reg) _,
             rk_hi = out(reg) _,
             w_lo = out(reg) w_lo,

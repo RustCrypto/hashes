@@ -343,7 +343,7 @@ fn extract_u64(a: __m128i) -> [u64; 2] {
 
 #[inline(always)]
 fn rk(i: usize) -> __m128i {
-    let chunk = &crate::consts::K64[i..][..2];
+    let chunk = &crate::consts::SHA512_RK[i..][..2];
     unsafe { _mm_loadu_si128(chunk.as_ptr().cast()) }
 }
 

@@ -2,7 +2,7 @@
 //!
 //! Generated assembly: https://rust.godbolt.org/z/fno5qd6sK
 use super::{ch, maj, sig0, sig1, sum0, sum1};
-use crate::consts::{K32, SHA256_ROUNDS};
+use crate::consts::{SHA256_RK, SHA256_ROUNDS};
 
 pub(crate) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
     // Unforuntately, LLVM is unable to remove `memset` for
@@ -45,7 +45,7 @@ fn rounds(state: &mut [u32; 8], msg: &[u32; SHA256_ROUNDS]) {
     for i in 0..SHA256_ROUNDS {
         let t1 = sum1(e)
             .wrapping_add(ch(e, f, g))
-            .wrapping_add(K32[i])
+            .wrapping_add(SHA256_RK[i])
             .wrapping_add(msg[i])
             .wrapping_add(h);
         let t2 = sum0(a).wrapping_add(maj(a, b, c));

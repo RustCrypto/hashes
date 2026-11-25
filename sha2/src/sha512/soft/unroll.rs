@@ -2,7 +2,6 @@
 //!
 //! Generated assembly: https://rust.godbolt.org/z/6vdsq538T
 use super::{ch, maj, sig0, sig1, sum0, sum1};
-use crate::consts::K64;
 
 pub(crate) fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
     for block in blocks {
@@ -144,9 +143,11 @@ fn round<const R: usize>(state: &mut [u64; 8], w: u64) {
 
 #[inline(always)]
 fn load_rk<const R: usize>() -> u64 {
+    use crate::consts::SHA512_RK;
+
     // `read_volatile` forces the compiler to read round constants from the static
     // instead of unnecessarily inlining values or materializaing them on the stack.
     // It generally results in a smaller binary and improves performance.
-    const { assert!(R < K64.len()) };
-    unsafe { core::ptr::read_volatile(K64.as_ptr().add(R)) }
+    const { assert!(R < SHA512_RK.len()) };
+    unsafe { core::ptr::read_volatile(SHA512_RK.as_ptr().add(R)) }
 }
