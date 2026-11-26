@@ -85,7 +85,7 @@ macro_rules! blake2_impl {
                 ];
                 $name {
                     #[cfg(feature = "reset")]
-                    h0: h.clone(),
+                    h0: h,
                     h,
                     t: 0,
                 }
