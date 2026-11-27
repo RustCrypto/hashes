@@ -17,7 +17,7 @@ pub(super) fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
         let abcd_orig = abcd;
         let efgh_orig = efgh;
 
-        // Load the message block into vectors, assuming little endianness.
+        // Load the message block into vectors as big-endian 32-bit words.
         let [mut s0, mut s1, mut s2, mut s3] = load_block(block);
 
         // Rounds 0 to 3
@@ -94,9 +94,10 @@ fn rk(i: usize) -> uint32x4_t {
 #[target_feature(enable = "neon")]
 fn load_block(block: &[u8; 64]) -> [uint32x4_t; 4] {
     core::array::from_fn(|i| {
-        let chunk = &block[16 * i..][..16];
-        let c = unsafe { vld1q_u8(chunk.as_ptr()) };
-        vreinterpretq_u32_u8(vrev32q_u8(c))
+        let words: [u32; 4] = core::array::from_fn(|j| {
+            u32::from_be_bytes(core::array::from_fn(|k| block[16 * i + 4 * j + k]))
+        });
+        unsafe { vld1q_u32(words.as_ptr()) }
     })
 }
 
