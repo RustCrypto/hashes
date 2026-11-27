@@ -44,7 +44,7 @@ cfg_if::cfg_if! {
         #[cfg(not(target_feature = "sha2"))]
         compile_error!("aarch64-sha2 backend requires `sha2` target feature");
 
-        fn compress(state: &mut [u64; 8], blocks: &[[u8; 128]]) {
+        fn compress(state: &mut [u32; 8], blocks: &[[u8; 128]]) {
             // SAFETY: we checked above that the required target features are enabled
             unsafe { aarch64_sha2::compress(state, blocks) }
         }
