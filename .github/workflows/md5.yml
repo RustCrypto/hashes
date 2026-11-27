@@ -26,51 +26,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  set-msrv:
-    uses: RustCrypto/actions/.github/workflows/set-msrv.yml@master
-    with:
-        msrv: 1.85.0
-
   build:
-    needs: set-msrv
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust:
-          - ${{needs.set-msrv.outputs.msrv}}
+        prepare:
+          - msrv
           - stable
         target:
           - thumbv7em-none-eabi
           - wasm32-unknown-unknown
-          - loongarch64-unknown-linux-gnu
     steps:
       - uses: actions/checkout@v7
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
+      - uses: RustCrypto/actions/prepare-lock-toolchain@prepare-lock-toolchain
         with:
-          toolchain: ${{ matrix.rust }}
+          prepare: ${{ matrix.prepare }}
+          package: ${{ github.workflow }}
           targets: ${{ matrix.target }}
       - uses: RustCrypto/actions/cargo-hack-install@master
-      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default,std
+      - run: cargo hack build --target ${{ matrix.target }} --each-feature --exclude-features default
 
   test:
-    needs: set-msrv
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust:
-          - ${{needs.set-msrv.outputs.msrv}}
+        prepare:
           - stable
+          - msrv
+          - minimal-versions
     steps:
       - uses: actions/checkout@v7
       - uses: RustCrypto/actions/cargo-cache@master
-      - uses: dtolnay/rust-toolchain@master
+      - uses: RustCrypto/actions/prepare-lock-toolchain@prepare-lock-toolchain
         with:
-          toolchain: ${{ matrix.rust }}
+          prepare: ${{ matrix.prepare }}
+          package: ${{ github.workflow }}
       - uses: RustCrypto/actions/cargo-hack-install@master
       - run: cargo hack test --feature-powerset
-
-  minimal-versions:
-    uses: RustCrypto/actions/.github/workflows/minimal-versions.yml@master
-    with:
-        working-directory: ${{ github.workflow }}
