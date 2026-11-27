@@ -109,6 +109,12 @@ jobs:
       - run: cargo test --all-features
       - run: cargo test --all-features
         env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_256_backend="aarch64-sha2"
+      - run: cargo test --all-features
+        env:
+          RUSTFLAGS: -Dwarnings --cfg sha2_512_backend="aarch64-sha3"
+      - run: cargo test --all-features
+        env:
           RUSTFLAGS: -Dwarnings --cfg sha2_backend="soft"
       - run: cargo test --all-features
         env:
